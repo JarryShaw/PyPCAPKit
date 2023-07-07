@@ -32,7 +32,6 @@ from pcapkit.protocols.schema.internet.ipv6_route import MAP_IPV6_ROUTE_DATA
 from pcapkit.protocols.schema.internet.mh import MAP_MH_DATA
 from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_MH_CGAParameter
 from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
-from pcapkit.protocols.schema.misc.pcapng import MAP_DSB_SECRETS, MAP_PCAPNG_BLOCK
 from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_PCAPNG_BlockType
 from pcapkit.protocols.schema.misc.pcapng import \
     NameResolutionBlock as Schema_PCAPNG_NameResolutionBlock
@@ -42,7 +41,11 @@ from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import logger
+from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSBSecrets
+from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
 
+from pcapkit.protocols.schema.misc.pcapng import \
+    NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
 if TYPE_CHECKING:
     from typing import Optional, Type
 
@@ -103,10 +106,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.internet.mh import CGAExtension as Schema_MH_CGAExtension
     from pcapkit.protocols.schema.internet.mh import Option as Schema_MH_Option
     from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
-    from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSBSecrets
-    from pcapkit.protocols.schema.misc.pcapng import \
-        NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
-    from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
     from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
     from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
     from pcapkit.protocols.transport.tcp import MPOptionConstructor as TCP_MPOptionConstructor
@@ -729,7 +728,7 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
 
     PCAPNG.register_block(code, meth)
     if schema is not None:
-        MAP_PCAPNG_BLOCK[code] = schema
+        Schema_PCAPNG_BlockType.register(code, schema)
     logger.info('registered PCAP-NG block parser: %s', code.name)
 
 
@@ -754,10 +753,7 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
 
     PCAPNG.register_option(code, meth)
     if schema is not None:
-        for subclass in Schema_PCAPNG_BlockType.__subclasses__():
-            if not hasattr(subclass, 'options'):
-                continue
-            cast('OptionField[Schema_PCAPNG_Option]', subclass.options).registry[code] = schema
+        Schema_PCAPNG_Option.register(code, schema)
     logger.info('registered PCAP-NG option parser: %s', code.name)
 
 
@@ -783,7 +779,7 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
 
     PCAPNG.register_record(code, meth)
     if schema is not None:
-        cast('OptionField[Schema_PCAPNG_NameResolutionRecord]', Schema_PCAPNG_NameResolutionBlock.records).registry[code] = schema
+        Schema_PCAPNG_NameResolutionRecord.register(code, schema)
     logger.info('registered PCAP-NG name resolution record parser: %s', code.name)
 
 
@@ -808,5 +804,5 @@ def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPN
 
     PCAPNG.register_secrets(code, meth)
     if schema is not None:
-        MAP_DSB_SECRETS[code] = schema
+        Schema_PCAPNG_DSBSecrets.register(code, schema)
     logger.info('registered PCAP-NG decryption secrets parser: %s', code.name)

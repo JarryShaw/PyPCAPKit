@@ -4,6 +4,7 @@
 
 import base64
 import collections
+import collections.abc
 import io
 import struct
 import sys
@@ -25,7 +26,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, Int32Field, Int64Field, N
                                             UInt8Field, UInt16Field, UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
-from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, warn
@@ -60,7 +61,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import Any, Callable, DefaultDict, Optional, Type
+    from typing import Any, Callable, DefaultDict, Optional, Type, Iterable
 
     from typing_extensions import Literal, Self
 
@@ -192,11 +193,11 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
 
     See Also:
         * :class:`pcapkit.const.pcapng.block_type.BlockType`
-        * :data:`pcapkit.protocols.schema.misc.pcapng.MAP_PCAPNG_BLOCK`
+        * :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`
 
     """
     block_type = packet['type']  # type: Enum_BlockType
-    schema = MAP_PCAPNG_BLOCK[block_type]
+    schema = BlockType.registry[block_type]
     return SchemaField(length=packet['__length__'], schema=schema)
 
 
@@ -216,17 +217,14 @@ def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
           wrapped :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets`
           subclass instance.
 
+    See Also:
+        * :class:`pcapkit.const.pcapng.secrets_type.Secrets_Type`
+        * :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`
+
     """
     secrets_type = packet['secrets_type']  # type: int
-    if secrets_type == Enum_SecretsType.TLS_Key_Log:
-        return SchemaField(length=packet['secrets_length'], schema=TLSKeyLog)
-    if secrets_type == Enum_SecretsType.WireGuard_Key_Log:
-        return SchemaField(length=packet['secrets_length'], schema=WireGuardKeyLog)
-    if secrets_type == Enum_SecretsType.ZigBee_NWK_Key:
-        return SchemaField(length=packet['secrets_length'], schema=ZigBeeNWKKey)
-    if secrets_type == Enum_SecretsType.ZigBee_APS_Key:
-        return SchemaField(length=packet['secrets_length'], schema=ZigBeeAPSKey)
-    return SchemaField(length=packet['secrets_length'], schema=UnknownSecrets)
+    schema = DSBSecrets.registry[secrets_type]
+    return SchemaField(length=packet['secrets_length'], schema=schema)
 
 
 class OptionEnumField(EnumField):
@@ -306,8 +304,10 @@ class PCAPNG(Schema):
         def __init__(self, type: 'Enum_BlockType', block: 'BlockType | bytes') -> 'None': ...
 
 
-class BlockType(Schema):
+class BlockType(EnumSchema[Enum_BlockType]):
     """Header schema for PCAP-NG file blocks."""
+
+    __enum__ = collections.defaultdict(lambda: UnknownBlock)
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
@@ -350,8 +350,91 @@ class UnknownBlock(BlockType):
         def __init__(self, length: 'int', body: 'bytes', length2: 'int') -> 'None': ...
 
 
-class Option(Schema):
+class Option(EnumSchema[Enum_OptionType]):
     """Header schema for PCAP-NG file options."""
+
+    __additional__ = ['__enum__', '__namespace__']
+    __excluded__ = ['__enum__', '__namespace__']
+
+    #: Namespace of PCAP-NG option type numbers.
+    __namespace__: 'str' = None  # type: ignore[assignment]
+    #: Mapping of PCAP-NG option type numbers to schemas.
+    __enum__: 'DefaultDict[str, DefaultDict[Enum_OptionType, Type[Option]]]' = collections.defaultdict(
+        lambda: Option.registry['opt'], {
+            'opt': collections.defaultdict(lambda: UnknownOption),
+            'if': collections.defaultdict(lambda: UnknownOption),
+            'epb': collections.defaultdict(lambda: UnknownOption),
+            'ns': collections.defaultdict(lambda: UnknownOption),
+            'isb': collections.defaultdict(lambda: UnknownOption),
+            'dsb': collections.defaultdict(lambda: UnknownOption),
+            'pack': collections.defaultdict(lambda: UnknownOption),
+        },
+    )
+
+    def __init_subclass__(cls, *, namespace: 'Optional[str]' = None,
+                          code: 'Optional[Enum_OptionType | Iterable[Enum_OptionType]]' = None) -> 'None':
+        """Register option type to :attr:`__enum__` mapping.
+
+        Args:
+            namespace: Namespace of option type enumeration. If not given, the value
+                will be inferred from the option type code.
+            code: Option type code. It can be either a single option type enumeration
+                or a list of option type enumerations.
+
+        If ``code`` is provided, the subclass will be registered to the
+        :attr:`__enum__` mapping with the given ``code``. If ``code`` is
+        not given, the subclass will not be registered.
+
+        Examples:
+
+            .. code-block:: python
+
+               from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
+               from pcapkit.protocols.schema.misc.pcapng improt Option
+
+               class NewOption(Option, namespace='opt', code=Enum_OptionType.opt_new):
+                   ...
+
+        See Also:
+            - :class:`pcapkit.const.pcapng.option_type.OptionType`
+
+        """
+        if namespace is not None:
+            cls.__namespace__ = namespace
+
+        if code is not None:
+            if namespace is None:
+                namespace = cast('Optional[str]', cls.__namespace__)
+
+            if not isinstance(code, Enum_OptionType):
+                for _code in code:
+                    Option.register(_code, cls, namespace)
+            else:
+                Option.register(code, cls, namespace)
+        super().__init_subclass__()
+
+    @staticmethod
+    def register(code: 'Enum_OptionType', cls: 'Type[Option]', ns: 'Optional[str]' = None) -> 'None':
+        """Register option type to :attr:`__enum__` mapping.
+
+        Args:
+            code: Option type code.
+            cls: Option type schema.
+            ns: Namespace of option type enumeration. If not given, the value
+                will be inferred from the option type code.
+
+        """
+        if ns is None:
+            ns = code.name.split('_')[0]
+
+        if ns == 'opt':
+            for key in Option.registry:
+                Option.registry[key][code] = cls
+        elif ns in Option.registry:
+            Option.registry[ns][code] = cls
+        else:
+            Option.registry[ns] = Option.registry['opt'].copy()
+            Option.registry[ns][code] = cls
 
     if TYPE_CHECKING:
         #: Option type.
@@ -360,7 +443,7 @@ class Option(Schema):
         length: 'int'
 
 
-class _OPT_Option(Option):
+class _OPT_Option(Option, namespace='opt'):
     """Header schema for ``opt_*`` options."""
 
     #: Option type.
@@ -383,7 +466,7 @@ class UnknownOption(_OPT_Option):
 
 
 @schema_final
-class EndOfOption(_OPT_Option):
+class EndOfOption(_OPT_Option, code=Enum_OptionType.opt_endofopt):
     """Header schema for PCAP-NG file ``opt_endofopt`` options."""
 
     if TYPE_CHECKING:
@@ -391,7 +474,7 @@ class EndOfOption(_OPT_Option):
 
 
 @schema_final
-class CommentOption(_OPT_Option):
+class CommentOption(_OPT_Option, code=Enum_OptionType.opt_comment):
     """Header schema for PCAP-NG file ``opt_comment`` options."""
 
     #: Comment text.
@@ -404,7 +487,10 @@ class CommentOption(_OPT_Option):
 
 
 @schema_final
-class CustomOption(_OPT_Option):
+class CustomOption(_OPT_Option, code=[Enum_OptionType.opt_custom_2988,
+                                      Enum_OptionType.opt_custom_2989,
+                                      Enum_OptionType.opt_custom_19372,
+                                      Enum_OptionType.opt_custom_19373]):
     """Header schema for PCAP-NG file ``opt_custom`` options."""
 
     #: Private enterprise number (PEN).
@@ -419,7 +505,7 @@ class CustomOption(_OPT_Option):
 
 
 @schema_final
-class SectionHeaderBlock(BlockType):
+class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
     """Header schema for PCAP-NG Section Header Block (SHB)."""
 
     #: Fast forward field to test the byteorder.
@@ -441,14 +527,7 @@ class SectionHeaderBlock(BlockType):
         length=lambda pkt: pkt['length'] - 28,
         base_schema=_OPT_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
-            Enum_OptionType.opt_endofopt: EndOfOption,
-            Enum_OptionType.opt_comment: CommentOption,
-            Enum_OptionType.opt_custom_2988: CustomOption,
-            Enum_OptionType.opt_custom_2989: CustomOption,
-            Enum_OptionType.opt_custom_19372: CustomOption,
-            Enum_OptionType.opt_custom_19373: CustomOption,
-        }),
+        registry=Option.registry['opt'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding.
@@ -510,7 +589,7 @@ class SectionHeaderBlock(BlockType):
                      length2: 'int') -> 'None': ...
 
 
-class _IF_Option(Option):
+class _IF_Option(Option, namespace='if'):
     """Header schema for ``if_*`` options."""
 
     #: Option type.
@@ -520,7 +599,7 @@ class _IF_Option(Option):
 
 
 @schema_final
-class IF_NameOption(_IF_Option):
+class IF_NameOption(_IF_Option, code=Enum_OptionType.if_name):
     """Header schema for PCAP-NG file ``if_name`` options."""
 
     #: Interface name.
@@ -533,7 +612,7 @@ class IF_NameOption(_IF_Option):
 
 
 @schema_final
-class IF_DescriptionOption(_IF_Option):
+class IF_DescriptionOption(_IF_Option, code=Enum_OptionType.if_description):
     """Header schema for PCAP-NG file ``if_description`` options."""
 
     #: Interface description.
@@ -546,7 +625,7 @@ class IF_DescriptionOption(_IF_Option):
 
 
 @schema_final
-class IF_IPv4AddrOption(_IF_Option):
+class IF_IPv4AddrOption(_IF_Option, code=Enum_OptionType.if_IPv4addr):
     """Header schema for PCAP-NG file ``if_IPv4addr`` options."""
 
     #: IPv4 interface.
@@ -559,7 +638,7 @@ class IF_IPv4AddrOption(_IF_Option):
 
 
 @schema_final
-class IF_IPv6AddrOption(_IF_Option):
+class IF_IPv6AddrOption(_IF_Option, code=Enum_OptionType.if_IPv6addr):
     """Header schema for PCAP-NG file ``if_IPv6addr`` options."""
 
     #: IPv6 interface.
@@ -572,7 +651,7 @@ class IF_IPv6AddrOption(_IF_Option):
 
 
 @schema_final
-class IF_MACAddrOption(_IF_Option):
+class IF_MACAddrOption(_IF_Option, code=Enum_OptionType.if_MACaddr):
     """Header schema for PCAP-NG file ``if_MACaddr`` options."""
 
     #: MAC interface.
@@ -585,7 +664,7 @@ class IF_MACAddrOption(_IF_Option):
 
 
 @schema_final
-class IF_EUIAddrOption(_IF_Option):
+class IF_EUIAddrOption(_IF_Option, code=Enum_OptionType.if_EUIaddr):
     """Header schema for PCAP-NG file ``if_EUIaddr`` options."""
 
     #: EUI interface.
@@ -598,7 +677,7 @@ class IF_EUIAddrOption(_IF_Option):
 
 
 @schema_final
-class IF_SpeedOption(_IF_Option):
+class IF_SpeedOption(_IF_Option, code=Enum_OptionType.if_speed):
     """Header schema for PCAP-NG file ``if_speed`` options."""
 
     #: Interface speed, in bits per second.
@@ -611,7 +690,7 @@ class IF_SpeedOption(_IF_Option):
 
 
 @schema_final
-class IF_TSResolOption(_IF_Option):
+class IF_TSResolOption(_IF_Option, code=Enum_OptionType.if_tsresol):
     """Header schema for PCAP-NG file ``if_tsresol`` options."""
 
     #: Interface timestamp resolution, in units per second.
@@ -644,7 +723,7 @@ class IF_TSResolOption(_IF_Option):
 
 
 @schema_final
-class IF_TZoneOption(_IF_Option):
+class IF_TZoneOption(_IF_Option, code=Enum_OptionType.if_tzone):
     """Header schema for PCAP-NG file ``if_tzone`` options."""
 
     #: Interface time zone (as in seconds difference from GMT).
@@ -657,7 +736,7 @@ class IF_TZoneOption(_IF_Option):
 
 
 @schema_final
-class IF_FilterOption(_IF_Option):
+class IF_FilterOption(_IF_Option, code=Enum_OptionType.if_filter):
     """Header schema for PCAP-NG file ``if_filter`` options."""
 
     #: Filter code.
@@ -672,7 +751,7 @@ class IF_FilterOption(_IF_Option):
 
 
 @schema_final
-class IF_OSOption(_IF_Option):
+class IF_OSOption(_IF_Option, code=Enum_OptionType.if_os):
     """Header schema for PCAP-NG file ``if_os`` options."""
 
     #: OS information.
@@ -685,7 +764,7 @@ class IF_OSOption(_IF_Option):
 
 
 @schema_final
-class IF_FCSLenOption(_IF_Option):
+class IF_FCSLenOption(_IF_Option, code=Enum_OptionType.if_fcslen):
     """Header schema for PCAP-NG file ``if_fcslen`` options."""
 
     #: FCS length.
@@ -698,7 +777,7 @@ class IF_FCSLenOption(_IF_Option):
 
 
 @schema_final
-class IF_TSOffsetOption(_IF_Option):
+class IF_TSOffsetOption(_IF_Option, code=Enum_OptionType.if_tsoffset):
     """Header schema for PCAP-NG file ``if_tsoffset`` options."""
 
     #: Timestamp offset (in seconds).
@@ -711,7 +790,7 @@ class IF_TSOffsetOption(_IF_Option):
 
 
 @schema_final
-class IF_HardwareOption(_IF_Option):
+class IF_HardwareOption(_IF_Option, code=Enum_OptionType.if_hardware):
     """Header schema for PCAP-NG file ``if_hardware`` options."""
 
     #: Hardware information.
@@ -724,7 +803,7 @@ class IF_HardwareOption(_IF_Option):
 
 
 @schema_final
-class IF_TxSpeedOption(_IF_Option):
+class IF_TxSpeedOption(_IF_Option, code=Enum_OptionType.if_txspeed):
     """Header schema for PCAP-NG file ``if_txspeed`` options."""
 
     #: Interface transmit speed, in bits per second.
@@ -737,7 +816,7 @@ class IF_TxSpeedOption(_IF_Option):
 
 
 @schema_final
-class IF_RxSpeedOption(_IF_Option):
+class IF_RxSpeedOption(_IF_Option, code=Enum_OptionType.if_rxspeed):
     """Header schema for PCAP-NG file ``if_rxspeed`` options."""
 
     #: Interface receive speed, in bits per second.
@@ -750,7 +829,7 @@ class IF_RxSpeedOption(_IF_Option):
 
 
 @schema_final
-class InterfaceDescriptionBlock(BlockType):
+class InterfaceDescriptionBlock(BlockType, code=Enum_BlockType.Interface_Description_Block):
     """Header schema for PCAP-NG Interface Description Block (IDB)."""
 
     #: Block total length.
@@ -766,30 +845,7 @@ class InterfaceDescriptionBlock(BlockType):
         length=lambda pkt: pkt['length'] - 20,
         base_schema=_IF_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
-            Enum_OptionType.opt_endofopt: EndOfOption,
-            Enum_OptionType.opt_comment: CommentOption,
-            Enum_OptionType.opt_custom_2988: CustomOption,
-            Enum_OptionType.opt_custom_2989: CustomOption,
-            Enum_OptionType.opt_custom_19372: CustomOption,
-            Enum_OptionType.opt_custom_19373: CustomOption,
-            Enum_OptionType.if_name: IF_NameOption,
-            Enum_OptionType.if_description: IF_DescriptionOption,
-            Enum_OptionType.if_IPv4addr: IF_IPv4AddrOption,
-            Enum_OptionType.if_IPv6addr: IF_IPv6AddrOption,
-            Enum_OptionType.if_MACaddr: IF_MACAddrOption,
-            Enum_OptionType.if_EUIaddr: IF_EUIAddrOption,
-            Enum_OptionType.if_speed: IF_SpeedOption,
-            Enum_OptionType.if_tsresol: IF_TSResolOption,
-            Enum_OptionType.if_tzone: IF_TZoneOption,
-            Enum_OptionType.if_filter: IF_FilterOption,
-            Enum_OptionType.if_os: IF_OSOption,
-            Enum_OptionType.if_fcslen: IF_FCSLenOption,
-            Enum_OptionType.if_tsoffset: IF_TSOffsetOption,
-            Enum_OptionType.if_hardware: IF_HardwareOption,
-            Enum_OptionType.if_txspeed: IF_TxSpeedOption,
-            Enum_OptionType.if_rxspeed: IF_RxSpeedOption,
-        }),
+        registry=Option.registry['if'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding.
@@ -802,7 +858,7 @@ class InterfaceDescriptionBlock(BlockType):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
-class _EPB_Option(Option):
+class _EPB_Option(Option, namespace='epb'):
     """Header schema for ``epb_*`` options."""
 
     #: Option type.
@@ -812,7 +868,7 @@ class _EPB_Option(Option):
 
 
 @schema_final
-class EPB_FlagsOption(_EPB_Option):
+class EPB_FlagsOption(_EPB_Option, code=Enum_OptionType.epb_flags):
     """Header schema for PCAP-NG ``epb_flags`` options."""
 
     #: Flags.
@@ -837,7 +893,7 @@ class EPB_FlagsOption(_EPB_Option):
 
 
 @schema_final
-class EPB_HashOption(_EPB_Option):
+class EPB_HashOption(_EPB_Option, code=Enum_OptionType.epb_hash):
     """Header schema for PCAP-NG ``epb_hash`` options."""
 
     #: Hash algorithm.
@@ -852,7 +908,7 @@ class EPB_HashOption(_EPB_Option):
 
 
 @schema_final
-class EPB_DropCountOption(_EPB_Option):
+class EPB_DropCountOption(_EPB_Option, code=Enum_OptionType.epb_dropcount):
     """Header schema for PCAP-NG ``epb_dropcount`` options."""
 
     #: Number of packets dropped by the interface.
@@ -865,7 +921,7 @@ class EPB_DropCountOption(_EPB_Option):
 
 
 @schema_final
-class EPB_PacketIDOption(_EPB_Option):
+class EPB_PacketIDOption(_EPB_Option, code=Enum_OptionType.epb_packetid):
     """Header schema for PCAP-NG ``epb_packetid`` options."""
 
     #: Packet ID.
@@ -878,7 +934,7 @@ class EPB_PacketIDOption(_EPB_Option):
 
 
 @schema_final
-class EPB_QueueOption(_EPB_Option):
+class EPB_QueueOption(_EPB_Option, code=Enum_OptionType.epb_queue):
     """Header schema for PCAP-NG ``epb_queue`` options."""
 
     #: Queue ID.
@@ -891,7 +947,7 @@ class EPB_QueueOption(_EPB_Option):
 
 
 @schema_final
-class EPB_VerdictOption(_EPB_Option):
+class EPB_VerdictOption(_EPB_Option, code=Enum_OptionType.epb_verdict):
     """Header schema for PCAP-NG ``epb_verdict`` options."""
 
     #: Verdict type.
@@ -906,7 +962,7 @@ class EPB_VerdictOption(_EPB_Option):
 
 
 @schema_final
-class EnhancedPacketBlock(BlockType):
+class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     """Header schema for PCAP-NG Enhanced Packet Block (EPB)."""
 
     __payload__ = 'packet_data'
@@ -932,20 +988,7 @@ class EnhancedPacketBlock(BlockType):
         length=lambda pkt: pkt['length'] - 32 - pkt['captured_len'] - len(pkt['padding_data']),
         base_schema=_EPB_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
-            Enum_OptionType.opt_endofopt: EndOfOption,
-            Enum_OptionType.opt_comment: CommentOption,
-            Enum_OptionType.opt_custom_2988: CustomOption,
-            Enum_OptionType.opt_custom_2989: CustomOption,
-            Enum_OptionType.opt_custom_19372: CustomOption,
-            Enum_OptionType.opt_custom_19373: CustomOption,
-            Enum_OptionType.epb_flags: EPB_FlagsOption,
-            Enum_OptionType.epb_hash: EPB_HashOption,
-            Enum_OptionType.epb_dropcount: EPB_DropCountOption,
-            Enum_OptionType.epb_packetid: EPB_PacketIDOption,
-            Enum_OptionType.epb_queue: EPB_QueueOption,
-            Enum_OptionType.epb_verdict: EPB_VerdictOption,
-        }),
+        registry=Option.registry['epb'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding.
@@ -961,7 +1004,7 @@ class EnhancedPacketBlock(BlockType):
 
 
 @schema_final
-class SimplePacketBlock(BlockType):
+class SimplePacketBlock(BlockType, code=Enum_BlockType.Simple_Packet_Block):
     """Header schema for PCAP-NG Simple Packet Block (SPB)."""
 
     __payload__ = 'packet_data'
@@ -984,8 +1027,10 @@ class SimplePacketBlock(BlockType):
                      length2: 'int') -> 'None': ...
 
 
-class NameResolutionRecord(Schema):
+class NameResolutionRecord(EnumSchema[Enum_RecordType]):
     """Header schema for PCAP-NG NRB records."""
+
+    __enum__ = collections.defaultdict(lambda: UnknownRecord)
 
     #: Record type.
     type: 'Enum_RecordType' = EnumField(length=2, namespace=Enum_RecordType, callback=byteorder_callback)
@@ -1007,7 +1052,7 @@ class UnknownRecord(NameResolutionRecord):
 
 
 @schema_final
-class EndRecord(NameResolutionRecord):
+class EndRecord(NameResolutionRecord, code=Enum_RecordType.nrb_record_end):
     """Header schema for PCAP-NG ``nrb_record_end`` records."""
 
     if TYPE_CHECKING:
@@ -1015,7 +1060,7 @@ class EndRecord(NameResolutionRecord):
 
 
 @schema_final
-class IPv4Record(NameResolutionRecord):
+class IPv4Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv4):
     """Header schema for PCAP-NG NRB ``nrb_record_ipv4`` records."""
 
     #: IPv4 address.
@@ -1046,7 +1091,7 @@ class IPv4Record(NameResolutionRecord):
 
 
 @schema_final
-class IPv6Record(NameResolutionRecord):
+class IPv6Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv6):
     """Header schema for PCAP-NG NRB ``nrb_record_ipv4`` records."""
 
     #: IPv4 address.
@@ -1076,7 +1121,7 @@ class IPv6Record(NameResolutionRecord):
         def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv6Address | str | bytes | int', resol: 'str') -> 'None': ...
 
 
-class _NS_Option(Option):
+class _NS_Option(Option, namespace='ns'):
     """Header schema for ``ns_*`` options."""
 
     #: Option type.
@@ -1086,7 +1131,7 @@ class _NS_Option(Option):
 
 
 @schema_final
-class NS_DNSNameOption(_NS_Option):
+class NS_DNSNameOption(_NS_Option, code=Enum_OptionType.ns_dnsname):
     """Header schema for PCAP-NG ``ns_dnsname`` option."""
 
     #: DNS name.
@@ -1097,7 +1142,7 @@ class NS_DNSNameOption(_NS_Option):
 
 
 @schema_final
-class NS_DNSIP4AddrOption(_NS_Option):
+class NS_DNSIP4AddrOption(_NS_Option, code=Enum_OptionType.ns_dnsIP4addr):
     """Header schema for PCAP-NG ``ns_dnsIP4addr`` option."""
 
     #: IPv4 address.
@@ -1108,7 +1153,7 @@ class NS_DNSIP4AddrOption(_NS_Option):
 
 
 @schema_final
-class NS_DNSIP6AddrOption(_NS_Option):
+class NS_DNSIP6AddrOption(_NS_Option, code=Enum_OptionType.ns_dnsIP6addr):
     """Header schema for PCAP-NG ``ns_dnsIP6addr`` option."""
 
     #: IPv6 address.
@@ -1119,7 +1164,7 @@ class NS_DNSIP6AddrOption(_NS_Option):
 
 
 @schema_final
-class NameResolutionBlock(BlockType):
+class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
     """Header schema for PCAP-NG Name Resolution Block (NRB)."""
 
     #: Record total length.
@@ -1129,11 +1174,7 @@ class NameResolutionBlock(BlockType):
         length=lambda pkt: pkt['length'] - 12,
         base_schema=NameResolutionRecord,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownRecord, {  # type: ignore[arg-type]
-            Enum_RecordType.nrb_record_end: EndRecord,
-            Enum_RecordType.nrb_record_ipv4: IPv4Record,
-            Enum_RecordType.nrb_record_ipv6: IPv6Record,
-        }),
+        registry=NameResolutionRecord.registry,
         eool=Enum_RecordType.nrb_record_end,
     )
     #: Options.
@@ -1141,17 +1182,7 @@ class NameResolutionBlock(BlockType):
         length=lambda pkt: pkt['__option_padding__'] - 4 if pkt['__option_padding__'] else 0,
         base_schema=_NS_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
-            Enum_OptionType.opt_endofopt: EndOfOption,
-            Enum_OptionType.opt_comment: CommentOption,
-            Enum_OptionType.opt_custom_2988: CustomOption,
-            Enum_OptionType.opt_custom_2989: CustomOption,
-            Enum_OptionType.opt_custom_19372: CustomOption,
-            Enum_OptionType.opt_custom_19373: CustomOption,
-            Enum_OptionType.ns_dnsname: NS_DNSNameOption,
-            Enum_OptionType.ns_dnsIP4addr: NS_DNSIP4AddrOption,
-            Enum_OptionType.ns_dnsIP6addr: NS_DNSIP6AddrOption,
-        }),
+        registry=Option.registry['ns'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding.
@@ -1195,7 +1226,7 @@ class NameResolutionBlock(BlockType):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
-class _ISB_Option(Option):
+class _ISB_Option(Option, namespace='isb'):
     """Header schema for ``isb_*`` options."""
 
     #: Option type.
@@ -1205,7 +1236,7 @@ class _ISB_Option(Option):
 
 
 @schema_final
-class ISB_StartTimeOption(_ISB_Option):
+class ISB_StartTimeOption(_ISB_Option, code=Enum_OptionType.isb_starttime):
     """Header schema for PCAP-NG ``isb_starttime`` option."""
 
     #: Timestamp (higher 32 bits).
@@ -1218,7 +1249,7 @@ class ISB_StartTimeOption(_ISB_Option):
 
 
 @schema_final
-class ISB_EndTimeOption(_ISB_Option):
+class ISB_EndTimeOption(_ISB_Option, code=Enum_OptionType.isb_endtime):
     """Header schema for PCAP-NG ``isb_endtime`` option."""
 
     #: Timestamp (higher 32 bits).
@@ -1231,7 +1262,7 @@ class ISB_EndTimeOption(_ISB_Option):
 
 
 @schema_final
-class ISB_IFRecvOption(_ISB_Option):
+class ISB_IFRecvOption(_ISB_Option, code=Enum_OptionType.isb_ifrecv):
     """Header schema for PCAP-NG ``isb_ifrecv`` option."""
 
     #: Number of packets received.
@@ -1242,7 +1273,7 @@ class ISB_IFRecvOption(_ISB_Option):
 
 
 @schema_final
-class ISB_IFDropOption(_ISB_Option):
+class ISB_IFDropOption(_ISB_Option, code=Enum_OptionType.isb_ifdrop):
     """Header schema for PCAP-NG ``isb_ifdrop`` option."""
 
     #: Number of packets dropped.
@@ -1253,7 +1284,7 @@ class ISB_IFDropOption(_ISB_Option):
 
 
 @schema_final
-class ISB_FilterAcceptOption(_ISB_Option):
+class ISB_FilterAcceptOption(_ISB_Option, code=Enum_OptionType.isb_filteraccept):
     """Header schema for PCAP-NG ``isb_filteraccept`` option."""
 
     #: Number of packets accepted by filter.
@@ -1264,7 +1295,7 @@ class ISB_FilterAcceptOption(_ISB_Option):
 
 
 @schema_final
-class ISB_OSDropOption(_ISB_Option):
+class ISB_OSDropOption(_ISB_Option, code=Enum_OptionType.isb_osdrop):
     """Header schema for PCAP-NG ``isb_osdrop`` option."""
 
     #: Number of packets dropped by OS.
@@ -1275,7 +1306,7 @@ class ISB_OSDropOption(_ISB_Option):
 
 
 @schema_final
-class ISB_UsrDelivOption(_ISB_Option):
+class ISB_UsrDelivOption(_ISB_Option, code=Enum_OptionType.isb_usrdeliv):
     """Header schema for PCAP-NG ``isb_usrdeliv`` option."""
 
     #: Number of packets delivered to user.
@@ -1302,21 +1333,7 @@ class InterfaceStatisticsBlock(BlockType):
         length=lambda pkt: pkt['length'] - 20,
         base_schema=_ISB_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
-            Enum_OptionType.opt_endofopt: EndOfOption,
-            Enum_OptionType.opt_comment: CommentOption,
-            Enum_OptionType.opt_custom_2988: CustomOption,
-            Enum_OptionType.opt_custom_2989: CustomOption,
-            Enum_OptionType.opt_custom_19372: CustomOption,
-            Enum_OptionType.opt_custom_19373: CustomOption,
-            Enum_OptionType.isb_starttime: ISB_StartTimeOption,
-            Enum_OptionType.isb_endtime: ISB_EndTimeOption,
-            Enum_OptionType.isb_ifrecv: ISB_IFRecvOption,
-            Enum_OptionType.isb_ifdrop: ISB_IFDropOption,
-            Enum_OptionType.isb_filteraccept: ISB_FilterAcceptOption,
-            Enum_OptionType.isb_osdrop: ISB_OSDropOption,
-            Enum_OptionType.isb_usrdeliv: ISB_UsrDelivOption,
-        }),
+        registry=Option.registry['isb'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding.
@@ -1331,7 +1348,7 @@ class InterfaceStatisticsBlock(BlockType):
 
 
 @schema_final
-class SystemdJournalExportBlock(BlockType):
+class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_Export_Block):
     """Header schema for PCAP-NG :manpage:`systemd(1)` Journal Export Block."""
 
     #: Block total length.
@@ -1383,8 +1400,10 @@ class SystemdJournalExportBlock(BlockType):
         def __init__(self, length: 'int', entry: 'bytes', length2: 'int') -> 'None': ...
 
 
-class DSBSecrets(Schema):
+class DSBSecrets(EnumSchema[Enum_SecretsType]):
     """Header schema for DSB secrets data."""
+
+    __enum__ = collections.defaultdict(lambda: UnknownSecrets)
 
 
 @schema_final
@@ -1399,7 +1418,7 @@ class UnknownSecrets(DSBSecrets):
 
 
 @schema_final
-class TLSKeyLog(DSBSecrets):
+class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
     """Header schema for TLS Key Log secrets data."""
 
     #: TLS key log data.
@@ -1438,7 +1457,7 @@ class TLSKeyLog(DSBSecrets):
 
 
 @schema_final
-class WireGuardKeyLog(DSBSecrets):
+class WireGuardKeyLog(DSBSecrets, code=Enum_SecretsType.WireGuard_Key_Log):
     """Header schema for WireGuard Key Log secrets data."""
 
     #: WireGuard key log data.
@@ -1478,7 +1497,7 @@ class WireGuardKeyLog(DSBSecrets):
 
 
 @schema_final
-class ZigBeeNWKKey(DSBSecrets):
+class ZigBeeNWKKey(DSBSecrets, code=Enum_SecretsType.ZigBee_NWK_Key):
     """Header schema for ZigBee NWK Key and ZigBee PANID secrets data."""
 
     #: AES-128 NKW key.
@@ -1493,7 +1512,7 @@ class ZigBeeNWKKey(DSBSecrets):
 
 
 @schema_final
-class ZigBeeAPSKey(DSBSecrets):
+class ZigBeeAPSKey(DSBSecrets, code=Enum_SecretsType.ZigBee_APS_Key):
     """Header schema for ZigBee APS Key secrets data."""
 
     #: AES-128 APS key.
@@ -1511,7 +1530,7 @@ class ZigBeeAPSKey(DSBSecrets):
         def __init__(self, key: 'bytes', panid: 'int', addr_low: 'int', addr_high: 'int') -> 'None': ...
 
 
-class _DSB_Option(Option):
+class _DSB_Option(Option, namespace='dsb'):
     """Header schema for ``dsb_*`` options."""
 
     #: Option type.
@@ -1521,7 +1540,7 @@ class _DSB_Option(Option):
 
 
 @schema_final
-class DecryptionSecretsBlock(BlockType):
+class DecryptionSecretsBlock(BlockType, code=Enum_BlockType.Decryption_Secrets_Block):
     """Header schema for PCAP-NG Decryption Secrets Block (DSB)."""
 
     #: Block total length.
@@ -1541,14 +1560,7 @@ class DecryptionSecretsBlock(BlockType):
         length=lambda pkt: pkt['length'] - 20 - pkt['secrets_length'] - len(pkt['padding_data']),
         base_schema=_DSB_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
-            Enum_OptionType.opt_endofopt: EndOfOption,
-            Enum_OptionType.opt_comment: CommentOption,
-            Enum_OptionType.opt_custom_2988: CustomOption,
-            Enum_OptionType.opt_custom_2989: CustomOption,
-            Enum_OptionType.opt_custom_19372: CustomOption,
-            Enum_OptionType.opt_custom_19373: CustomOption,
-        }),
+        registry=Option.registry['dsb'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding.
@@ -1563,7 +1575,8 @@ class DecryptionSecretsBlock(BlockType):
 
 
 @schema_final
-class CustomBlock(BlockType):
+class CustomBlock(BlockType, code=[Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files,
+                                   Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files]):
     """Header schema for PCAP-NG Custom Block (CB)."""
 
     #: Block total length.
@@ -1581,7 +1594,7 @@ class CustomBlock(BlockType):
         def __init__(self, length: 'int', pen: 'int', data: 'bytes', length2: 'int') -> 'None': ...
 
 
-class _PACK_Option(Option):
+class _PACK_Option(Option, namespace='pack'):
     """Header schema for ``pack_*`` options."""
 
     #: Option type.
@@ -1591,7 +1604,7 @@ class _PACK_Option(Option):
 
 
 @schema_final
-class PACK_FlagsOption(_PACK_Option):
+class PACK_FlagsOption(_PACK_Option, code=Enum_OptionType.pack_flags):
     """Header schema for PCAP-NG ``pack_flags`` options."""
 
     #: Flags.
@@ -1616,7 +1629,7 @@ class PACK_FlagsOption(_PACK_Option):
 
 
 @schema_final
-class PACK_HashOption(_PACK_Option):
+class PACK_HashOption(_PACK_Option, code=Enum_OptionType.pack_hash):
     """Header schema for PCAP-NG ``pack_hash`` options."""
 
     #: Hash algorithm.
@@ -1631,7 +1644,7 @@ class PACK_HashOption(_PACK_Option):
 
 
 @schema_final
-class PacketBlock(BlockType):
+class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     """Header schema for PCAP-NG Packet Block (obsolete)."""
 
     __payload__ = 'packet_data'
@@ -1659,16 +1672,7 @@ class PacketBlock(BlockType):
         length=lambda pkt: pkt['length'] - 32 - pkt['captured_length'] - len(pkt['padding_data']),
         base_schema=_PACK_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
-            Enum_OptionType.opt_endofopt: EndOfOption,
-            Enum_OptionType.opt_comment: CommentOption,
-            Enum_OptionType.opt_custom_2988: CustomOption,
-            Enum_OptionType.opt_custom_2989: CustomOption,
-            Enum_OptionType.opt_custom_19372: CustomOption,
-            Enum_OptionType.opt_custom_19373: CustomOption,
-            Enum_OptionType.pack_flags: EPB_FlagsOption,
-            Enum_OptionType.pack_hash: EPB_HashOption,
-        }),
+        registry=Option.registry['pack'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding.
@@ -1681,26 +1685,3 @@ class PacketBlock(BlockType):
                      timestamp_high: 'int', timestamp_low: 'int', captured_length: 'int',
                      original_length: 'int', packet_data: 'bytes | Protocol | Schema',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
-
-
-#: DefaultDict[Enum_BlockType, Type[BlockType]]: Mapping of PCAP-NG block type numbers to schemas.
-MAP_PCAPNG_BLOCK = collections.defaultdict(lambda: UnknownBlock, {
-    Enum_BlockType.Section_Header_Block: SectionHeaderBlock,
-    Enum_BlockType.Interface_Description_Block: InterfaceDescriptionBlock,
-    Enum_BlockType.Enhanced_Packet_Block: EnhancedPacketBlock,
-    Enum_BlockType.Simple_Packet_Block: SimplePacketBlock,
-    Enum_BlockType.Name_Resolution_Block: NameResolutionBlock,
-    Enum_BlockType.systemd_Journal_Export_Block: SystemdJournalExportBlock,
-    Enum_BlockType.Decryption_Secrets_Block: DecryptionSecretsBlock,
-    Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: CustomBlock,
-    Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: CustomBlock,
-    Enum_BlockType.Packet_Block: PacketBlock,
-})  # type: DefaultDict[Enum_BlockType | int, Type[BlockType]]
-
-#: DefaultDict[Enum_SecretsType, Type[DSBSecrets]]: Mapping of PCAP-NG description secrets type numbers to schemas.
-MAP_DSB_SECRETS = collections.defaultdict(lambda: UnknownSecrets, {
-    Enum_SecretsType.TLS_Key_Log: TLSKeyLog,
-    Enum_SecretsType.WireGuard_Key_Log: WireGuardKeyLog,
-    Enum_SecretsType.ZigBee_NWK_Key: ZigBeeNWKKey,
-    Enum_SecretsType.ZigBee_APS_Key: ZigBeeAPSKey,
-})  # type: DefaultDict[Enum_SecretsType | int, Type[DSBSecrets]]
