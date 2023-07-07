@@ -6,6 +6,7 @@ import collections
 import collections.abc
 import io
 import itertools
+import sys
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast, final
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
@@ -182,6 +183,9 @@ class SchemaMeta(abc.ABCMeta):
                 attrs['__additional__'].extend(name for name in base.__additional__ if name not in attrs['__additional__'])
             if hasattr(base, '__excluded__'):
                 attrs['__excluded__'].extend(name for name in base.__excluded__ if name not in attrs['__excluded__'])
+
+        if sys.version_info < (3, 11):
+            return type.__new__(cls, name, bases, attrs, **kwargs)
         return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
 
 
@@ -689,12 +693,14 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
         #: Mapping of enumeration numbers to schemas.
         registry: 'DefaultDict[ET, Type[Self]]'
 
-    def __init_subclass__(cls, *, code: 'Optional[ET | Iterable[ET]]' = None) -> 'None':
+    def __init_subclass__(cls, /, code: 'Optional[ET | Iterable[ET]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Register enumeration to :attr:`registry` mapping.
 
         Args:
             code: Enumeration code. It can be either a single enumeration
                 or a list of enumerations.
+            *args: Arbitrary positional arguments.
+            **kwargs: Arbitrary keyword arguments.
 
         If ``code`` is provided, the subclass will be registered to the
         :attr:`registry` mapping with the given ``code``. If ``code`` is

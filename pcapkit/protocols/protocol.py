@@ -528,12 +528,13 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         self._info = self.unpack(length, **kwargs)
 
     def __init_subclass__(cls, /, schema: 'Optional[Type[ST]]' = None,
-                          data: 'Optional[Type[PT]]' = None, **kwargs: 'Any') -> 'None':
+                          data: 'Optional[Type[PT]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialisation for subclasses.
 
         Args:
             schema: Schema class.
             data: Data class.
+            *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
         This method is called when a subclass of :class:`Protocol` is defined.
@@ -549,7 +550,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             :class:`~pcapkit.protocols.data.data.Data_Raw` classes will be used.
 
         """
-        super().__init_subclass__(**kwargs)
+        super().__init_subclass__()
 
         if schema is None:
             schema = cast('Type[ST]', getattr(schema_module, cls.__name__, Schema_Raw))

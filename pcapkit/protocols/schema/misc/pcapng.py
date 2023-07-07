@@ -371,15 +371,17 @@ class Option(EnumSchema[Enum_OptionType]):
         },
     )
 
-    def __init_subclass__(cls, *, namespace: 'Optional[str]' = None,
-                          code: 'Optional[Enum_OptionType | Iterable[Enum_OptionType]]' = None) -> 'None':
+    def __init_subclass__(cls, /, code: 'Optional[Enum_OptionType | Iterable[Enum_OptionType]]' = None,
+                          namespace: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Register option type to :attr:`__enum__` mapping.
 
         Args:
-            namespace: Namespace of option type enumeration. If not given, the value
-                will be inferred from the option type code.
             code: Option type code. It can be either a single option type enumeration
                 or a list of option type enumerations.
+            namespace: Namespace of option type enumeration. If not given, the value
+                will be inferred from the option type code.
+            *args: Arbitrary positional arguments.
+            **kwargs: Arbitrary keyword arguments.
 
         If ``code`` is provided, the subclass will be registered to the
         :attr:`__enum__` mapping with the given ``code``. If ``code`` is
