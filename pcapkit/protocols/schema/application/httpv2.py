@@ -13,7 +13,7 @@ from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, NumberField, UInt8Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema, EnumSchema, schema_final
+from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -26,7 +26,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, Optional, Type
+    from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import _Field as Field
 
