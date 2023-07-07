@@ -22,7 +22,7 @@ from pcapkit.utilities.warnings import SchemaWarning, UnknownFieldWarning, warn
 if TYPE_CHECKING:
     from collections import OrderedDict
     from enum import Enum
-    from typing import Callable, IO, Any, DefaultDict, Iterable, Iterator, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Iterator, Optional, Type
 
     from typing_extensions import Self
 
