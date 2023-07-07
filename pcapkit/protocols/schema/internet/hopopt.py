@@ -20,7 +20,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, No
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
@@ -38,7 +38,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Optional
+    from typing import Any, DefaultDict, Optional, Type
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol
@@ -157,11 +157,10 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     """
     mode = Enum_SMFDPDMode.get(pkt['test']['mode'])
-    if mode == Enum_SMFDPDMode.I_DPD:
-        return SchemaField(length=pkt['test']['len'], schema=SMFIdentificationBasedDPDOption)
-    if mode == Enum_SMFDPDMode.H_DPD:
-        return SchemaField(length=pkt['test']['len'], schema=SMFHashBasedDPDOption)
-    raise FieldValueError(f'HOPOPT: invalid SMF DPD mode: {mode}')
+    schema = SMFDPDOption.registry[mode]
+    if schema is None:
+        raise FieldValueError(f'HOPOPT: invalid SMF DPD mode: {mode}')
+    return SchemaField(length=pkt['test']['len'], schema=schema)
 
 
 def smf_i_dpd_tid_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -219,15 +218,16 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     func = Enum_QSFunction.get(pkt['flags']['func'])
     pkt['flags']['func'] = func
 
-    if func == Enum_QSFunction.Quick_Start_Request:
-        return SchemaField(length=5, schema=QuickStartRequestOption)
-    if func == Enum_QSFunction.Report_of_Approved_Rate:
-        return SchemaField(length=5, schema=QuickStartReportOption)
-    raise FieldValueError(f'HOPOPT: invalid QS function: {func}')
+    schema = QuickStartOption.registry[func]
+    if schema is None:
+        raise FieldValueError(f'HOPOPT: invalid QS function: {func}')
+    return SchemaField(length=5, schema=schema)
 
 
-class Option(Schema):
+class Option(EnumSchema[Enum_Option]):
     """Header schema for HOPOPT options."""
+
+    __default__ = lambda: UnassignedOption
 
     #: Option type.
     type: 'Enum_Option' = EnumField(length=1, namespace=Enum_Option)
@@ -265,7 +265,8 @@ class UnassignedOption(Option):
 
 
 @schema_final
-class PadOption(Option):
+class PadOption(Option, code=[Enum_Option.Pad1,
+                              Enum_Option.PadN]):
     """Header schema for HOPOPT padding options."""
 
     #: Padding.
@@ -276,7 +277,7 @@ class PadOption(Option):
 
 
 @schema_final
-class TunnelEncapsulationLimitOption(Option):
+class TunnelEncapsulationLimitOption(Option, code=Enum_Option.Tunnel_Encapsulation_Limit):
     """Header schema for HOPOPT tunnel encapsulation limit options."""
 
     #: Tunnel encapsulation limit.
@@ -287,7 +288,7 @@ class TunnelEncapsulationLimitOption(Option):
 
 
 @schema_final
-class RouterAlertOption(Option):
+class RouterAlertOption(Option, code=Enum_Option.Router_Alert):
     """Header schema for HOPOPT router alert options."""
 
     #: Router alert.
@@ -298,7 +299,7 @@ class RouterAlertOption(Option):
 
 
 @schema_final
-class CALIPSOOption(Option):
+class CALIPSOOption(Option, code=Enum_Option.CALIPSO):
     """Header schema for HOPOPT common architecture label IPv6 security options."""
 
     #: CALIPSO domain of interpretation.
@@ -350,16 +351,22 @@ class _SMFDPDOption(Schema):
         return ret
 
 
-class SMFDPDOption(Option):
+# register ``_SMFDPDOption`` as ``SMF_DPD`` option
+Option.register(Enum_Option.SMF_DPD, _SMFDPDOption)
+
+
+class SMFDPDOption(Option, EnumSchema[Enum_SMFDPDMode]):
     """Header schema for HOPOPT simplified multicast forwarding duplicate packet
     detection (``SMF_DPD``) options."""
+
+    __enum__: 'DefaultDict[Enum_SMFDPDMode, Type[SMFDPDOption]]' = collections.defaultdict(lambda: None)  # type: ignore[arg-type,return-value]
 
     if TYPE_CHECKING:
         mode: 'Enum_SMFDPDMode'
 
 
 @schema_final
-class SMFIdentificationBasedDPDOption(SMFDPDOption):
+class SMFIdentificationBasedDPDOption(SMFDPDOption, code=Enum_SMFDPDMode.I_DPD):
     """Header schema for HOPOPT SMF identification-based DPD options."""
 
     #: TaggerID information.
@@ -398,7 +405,7 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption):
 
 
 @schema_final
-class SMFHashBasedDPDOption(SMFDPDOption):
+class SMFHashBasedDPDOption(SMFDPDOption, code=Enum_SMFDPDMode.H_DPD):
     """Header schema for HOPOPT SMF hash-based DPD options."""
 
     #: Hash assist value (HAV).
@@ -423,7 +430,7 @@ class SMFHashBasedDPDOption(SMFDPDOption):
 
 
 @schema_final
-class PDMOption(Option):
+class PDMOption(Option, code=Enum_Option.PDM):
     """Header schema for HOPOPT performance and diagnostic metrics (PDM) options."""
 
     #: Scale delta time last received (DTLR).
@@ -472,8 +479,14 @@ class _QuickStartOption(Schema):
         return ret
 
 
-class QuickStartOption(Option):
+# register ``_QuickStartOption`` as ``Quick_Start`` option
+Option.register(Enum_Option.Quick_Start, _QuickStartOption)
+
+
+class QuickStartOption(Option, EnumSchema[Enum_QSFunction]):
     """Header schema for HOPOPT quick start options."""
+
+    __enum__: 'DefaultDict[Enum_QSFunction, Type[QuickStartOption]]' = collections.defaultdict(lambda: None)  # type: ignore[arg-type,return-value]
 
     #: Flags.
     flags: 'QuickStartFlags' = BitField(length=1, namespace={
@@ -486,7 +499,7 @@ class QuickStartOption(Option):
 
 
 @schema_final
-class QuickStartRequestOption(QuickStartOption):
+class QuickStartRequestOption(QuickStartOption, code=Enum_QSFunction.Quick_Start_Request):
     """Header schema for HOPOPT quick start request options."""
 
     #: QS time-to-live (TTL).
@@ -502,7 +515,7 @@ class QuickStartRequestOption(QuickStartOption):
 
 
 @schema_final
-class QuickStartReportOption(QuickStartOption):
+class QuickStartReportOption(QuickStartOption, code=Enum_QSFunction.Report_of_Approved_Rate):
     """Header schema for HOPOPT quick start report of approved rate options."""
 
     #: Reserved.
@@ -518,7 +531,8 @@ class QuickStartReportOption(QuickStartOption):
 
 
 @schema_final
-class RPLOption(Option):
+class RPLOption(Option, code=[Enum_Option.RPL_Option_0x23,
+                              Enum_Option.RPL_Option_0x63]):
     """Header schema for HOPOPT routing protocol for low-power and lossy networks (RPL) options."""
 
     #: Flags.
@@ -538,7 +552,7 @@ class RPLOption(Option):
 
 
 @schema_final
-class MPLOption(Option):
+class MPLOption(Option, code=Enum_Option.MPL_Option):
     """Header schema for HOPOPT multicast protocol for low-power and lossy networks (MPL) options."""
 
     #: Flags.
@@ -579,7 +593,7 @@ class MPLOption(Option):
 
 
 @schema_final
-class ILNPOption(Option):
+class ILNPOption(Option, code=Enum_Option.ILNP_Nonce):
     """Header schema for HOPOPT identifier-locator network protocol (ILNP) options."""
 
     #: Nonce value.
@@ -590,7 +604,7 @@ class ILNPOption(Option):
 
 
 @schema_final
-class LineIdentificationOption(Option):
+class LineIdentificationOption(Option, code=Enum_Option.Line_Identification_Option):
     """Header schema for HOPOPT line-identification options."""
 
     #: Line ID length.
@@ -603,7 +617,7 @@ class LineIdentificationOption(Option):
 
 
 @schema_final
-class JumboPayloadOption(Option):
+class JumboPayloadOption(Option, code=Enum_Option.Jumbo_Payload):
     """Header schema for HOPOPT jumbo payload options."""
 
     #: Jumbo payload length.
@@ -614,7 +628,7 @@ class JumboPayloadOption(Option):
 
 
 @schema_final
-class HomeAddressOption(Option):
+class HomeAddressOption(Option, code=Enum_Option.Home_Address):
     """Header schema for HOPOPT home address options."""
 
     #: Home address.
@@ -625,7 +639,7 @@ class HomeAddressOption(Option):
 
 
 @schema_final
-class IPDFFOption(Option):
+class IPDFFOption(Option, code=Enum_Option.IP_DFF):
     """Header schema for HOPOPT depth-first forwarding (``IP_DFF``) options."""
 
     #: Flags.
@@ -654,23 +668,7 @@ class HOPOPT(Schema):
         length=lambda pkt: pkt['len'] * 8 + 6,
         base_schema=Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnassignedOption, {
-            Enum_Option.Pad1: PadOption,
-            Enum_Option.PadN: PadOption,
-            Enum_Option.Tunnel_Encapsulation_Limit: TunnelEncapsulationLimitOption,
-            Enum_Option.Router_Alert: RouterAlertOption,
-            Enum_Option.CALIPSO: CALIPSOOption,
-            Enum_Option.SMF_DPD: _SMFDPDOption,
-            Enum_Option.PDM: PDMOption,
-            Enum_Option.Quick_Start: _QuickStartOption,
-            Enum_Option.RPL_Option_0x63: RPLOption,
-            Enum_Option.MPL_Option: MPLOption,
-            Enum_Option.ILNP_Nonce: ILNPOption,
-            Enum_Option.Line_Identification_Option: LineIdentificationOption,
-            Enum_Option.Jumbo_Payload: JumboPayloadOption,
-            Enum_Option.Home_Address: HomeAddressOption,
-            Enum_Option.IP_DFF: IPDFFOption,
-        })
+        registry=Option.registry,
     )
     #: Payload.
     payload: 'bytes' = PayloadField()
