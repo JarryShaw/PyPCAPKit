@@ -13,7 +13,7 @@ from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, NumberField, UInt8Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.protocols.schema.schema import Schema, EnumSchema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -79,7 +79,7 @@ def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     """
     type = cast('Enum_Frame', pkt['type'])
-    schema = MAP_HTTP_FRAME[type]
+    schema = FrameType.registry[type]
     return SchemaField(length=pkt['__length__'], schema=schema)
 
 
@@ -115,11 +115,13 @@ class HTTP(Schema):
         def __init__(self, length: 'int', type: 'Enum_Frame', flags: 'FrameFlags', stream: 'StreamID', frame: 'FrameType | bytes') -> 'None': ...
 
 
-class FrameType(Schema):
+class FrameType(EnumSchema[Enum_Frame]):
     """Header schema for HTTP/2 frame payload."""
 
     if TYPE_CHECKING:
         __flags__: 'Flags'
+
+    __enum__ = collections.defaultdict(lambda: UnassignedFrame)
 
     class Flags(enum.IntFlag):
         """Flags enumeration for HTTP/2 frames."""
@@ -158,7 +160,7 @@ class UnassignedFrame(FrameType):
 
 
 @schema_final
-class DataFrame(FrameType):
+class DataFrame(FrameType, code=Enum_Frame.DATA):
     """Header schema for HTTP/2 ``DATA`` frames."""
 
     class Flags(FrameType.Flags):
@@ -185,7 +187,7 @@ class DataFrame(FrameType):
 
 
 @schema_final
-class HeadersFrame(FrameType):
+class HeadersFrame(FrameType, code=Enum_Frame.HEADERS):
     """Header schema for HTTP/2 ``HEADERS`` frames."""
 
     class Flags(FrameType.Flags):
@@ -229,7 +231,7 @@ class HeadersFrame(FrameType):
 
 
 @schema_final
-class PriorityFrame(FrameType):
+class PriorityFrame(FrameType, code=Enum_Frame.PRIORITY):
     """Header schema for HTTP/2 ``PRIORITY`` frames."""
 
     #: Stream dependency (exclusive, stream ID).
@@ -245,7 +247,7 @@ class PriorityFrame(FrameType):
 
 
 @schema_final
-class RSTStreamFrame(FrameType):
+class RSTStreamFrame(FrameType, code=Enum_Frame.RST_STREAM):
     """Header schema for HTTP/2 ``RST_STREAM`` frames."""
 
     #: Error code.
@@ -269,7 +271,7 @@ class SettingPair(Schema):
 
 
 @schema_final
-class SettingsFrame(FrameType):
+class SettingsFrame(FrameType, code=Enum_Frame.SETTINGS):
     """Header schema for HTTP/2 ``SETTINGS`` frames."""
 
     class Flags(FrameType.Flags):
@@ -288,7 +290,7 @@ class SettingsFrame(FrameType):
 
 
 @schema_final
-class PushPromiseFrame(FrameType):
+class PushPromiseFrame(FrameType, code=Enum_Frame.PUSH_PROMISE):
     """Header schema for HTTP/2 ``PUSH_PROMISE`` frames."""
 
     class Flags(FrameType.Flags):
@@ -321,7 +323,7 @@ class PushPromiseFrame(FrameType):
 
 
 @schema_final
-class PingFrame(FrameType):
+class PingFrame(FrameType, code=Enum_Frame.PING):
     """Header schema for HTTP/2 ``PING`` frames."""
 
     class Flags(FrameType.Flags):
@@ -337,7 +339,7 @@ class PingFrame(FrameType):
 
 
 @schema_final
-class GoawayFrame(FrameType):
+class GoawayFrame(FrameType, code=Enum_Frame.GOAWAY):
     """Header schema for HTTP/2 ``GOAWAY`` frames."""
 
     #: Last stream ID.
@@ -354,7 +356,7 @@ class GoawayFrame(FrameType):
 
 
 @schema_final
-class WindowUpdateFrame(FrameType):
+class WindowUpdateFrame(FrameType, code=Enum_Frame.WINDOW_UPDATE):
     """Header schema for HTTP/2 ``WINDOW_UPDATE`` frames."""
 
     #: Window size increment.
@@ -367,7 +369,7 @@ class WindowUpdateFrame(FrameType):
 
 
 @schema_final
-class ContinuationFrame(FrameType):
+class ContinuationFrame(FrameType, code=Enum_Frame.CONTINUATION):
     """Header schema for HTTP/2 ``CONTINUATION`` frames."""
 
     class Flags(FrameType.Flags):
@@ -380,18 +382,3 @@ class ContinuationFrame(FrameType):
 
     if TYPE_CHECKING:
         def __init__(self, fragment: 'bytes') -> 'None': ...
-
-
-#: DefaultDict[Enum_Frame, Type[FrameType]]: Mapping of HTTP/2 frame type numbers to schemas.
-MAP_HTTP_FRAME = collections.defaultdict(lambda: UnassignedFrame, {
-    Enum_Frame.DATA: DataFrame,
-    Enum_Frame.HEADERS: HeadersFrame,
-    Enum_Frame.PRIORITY: PriorityFrame,
-    Enum_Frame.RST_STREAM: RSTStreamFrame,
-    Enum_Frame.SETTINGS: SettingsFrame,
-    Enum_Frame.PUSH_PROMISE: PushPromiseFrame,
-    Enum_Frame.PING: PingFrame,
-    Enum_Frame.GOAWAY: GoawayFrame,
-    Enum_Frame.WINDOW_UPDATE: WindowUpdateFrame,
-    Enum_Frame.CONTINUATION: ContinuationFrame,
-})  # type: DefaultDict[Enum_Frame | int, Type[FrameType]]
