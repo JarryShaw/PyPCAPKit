@@ -7,7 +7,6 @@ import collections.abc
 import io
 import itertools
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast, final
-import weakref
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.field import NoValue, _Field
@@ -645,6 +644,10 @@ class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
 
 class EnumMeta(SchemaMeta):
     """Meta class to add dynamic support for :class:`EnumSchema`.
+
+    This meta class is used to generate necessary attributes for the
+    :class:`SchemaMeta` class. It can be useful to reduce runtime generation
+    cost as well as caching already generated attributes.
 
     * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*
       proxy (similar to :class:`property`, but on class variables) to the

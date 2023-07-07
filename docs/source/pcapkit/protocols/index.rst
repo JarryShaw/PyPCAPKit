@@ -47,6 +47,20 @@ Header Schema
    .. autoattribute:: __excluded__
       :no-value:
 
+   .. automethod:: from_dict
+   .. automethod:: to_dict
+
+   .. automethod:: to_bytes
+   .. automethod:: get_payload
+
+   .. automethod:: pack
+   .. automethod:: pre_pack
+
+   .. automethod:: unpack
+   .. automethod:: pre_unpack
+
+   .. automethod:: post_process
+
 .. autoclass:: pcapkit.protocols.schema.schema.EnumSchema
    :members:
    :show-inheritance:
