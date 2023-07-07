@@ -244,7 +244,7 @@
 					<key>srcport</key>
 					<dict>
 						<key>enum</key>
-						<string>AppType::www_http [tcp|udp_80_www-http]</string>
+						<string>AppType::www_http [www-http [80 - tcp|udp]]</string>
 						<key>svc</key>
 						<string>www-http</string>
 						<key>port</key>
@@ -255,7 +255,7 @@
 					<key>dstport</key>
 					<dict>
 						<key>enum</key>
-						<string>AppType::PORT_55232_tcp [tcp_55232_unknown]</string>
+						<string>AppType::PORT_55232_tcp [unknown [55232 - tcp]]</string>
 						<key>svc</key>
 						<string>unknown</string>
 						<key>port</key>
@@ -383,7 +383,7 @@
 					<key>srcport</key>
 					<dict>
 						<key>enum</key>
-						<string>AppType::PORT_55232_tcp [tcp_55232_unknown]</string>
+						<string>AppType::PORT_55232_tcp [unknown [55232 - tcp]]</string>
 						<key>svc</key>
 						<string>unknown</string>
 						<key>port</key>
@@ -394,7 +394,7 @@
 					<key>dstport</key>
 					<dict>
 						<key>enum</key>
-						<string>AppType::www_http [tcp|udp_80_www-http]</string>
+						<string>AppType::www_http [www-http [80 - tcp|udp]]</string>
 						<key>svc</key>
 						<string>www-http</string>
 						<key>port</key>
@@ -522,7 +522,7 @@
 					<key>srcport</key>
 					<dict>
 						<key>enum</key>
-						<string>AppType::PORT_55216_tcp [tcp_55216_unknown]</string>
+						<string>AppType::PORT_55216_tcp [unknown [55216 - tcp]]</string>
 						<key>svc</key>
 						<string>unknown</string>
 						<key>port</key>
@@ -533,7 +533,7 @@
 					<key>dstport</key>
 					<dict>
 						<key>enum</key>
-						<string>AppType::www_http [tcp|udp_80_www-http]</string>
+						<string>AppType::www_http [www-http [80 - tcp|udp]]</string>
 						<key>svc</key>
 						<string>www-http</string>
 						<key>port</key>
@@ -661,7 +661,7 @@
 					<key>srcport</key>
 					<dict>
 						<key>enum</key>
-						<string>AppType::unassigned_37444 [undefined_37444_unassigned]</string>
+						<string>AppType::unassigned_37444 [unassigned [37444 - undefined]]</string>
 						<key>svc</key>
 						<string>unassigned</string>
 						<key>port</key>
@@ -672,7 +672,7 @@
 					<key>dstport</key>
 					<dict>
 						<key>enum</key>
-						<string>AppType::commplex_link [tcp|udp_5001_commplex-link]</string>
+						<string>AppType::commplex_link [commplex-link [5001 - tcp|udp]]</string>
 						<key>svc</key>
 						<string>commplex-link</string>
 						<key>port</key>

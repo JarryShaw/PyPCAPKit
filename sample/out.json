@@ -144,13 +144,13 @@
 				"dst": "192.168.1.100",
 				"tcp": {
 					"srcport": {
-						"enum": "AppType::www_http [tcp|udp_80_www-http]",
+						"enum": "AppType::www_http [www-http [80 - tcp|udp]]",
 						"svc": "www-http",
 						"port": 80,
 						"proto": "TransportProtocol::tcp|udp [3]"
 					},
 					"dstport": {
-						"enum": "AppType::PORT_55232_tcp [tcp_55232_unknown]",
+						"enum": "AppType::PORT_55232_tcp [unknown [55232 - tcp]]",
 						"svc": "unknown",
 						"port": 55232,
 						"proto": "TransportProtocol::tcp [1]"
@@ -227,13 +227,13 @@
 				"dst": "123.129.210.135",
 				"tcp": {
 					"srcport": {
-						"enum": "AppType::PORT_55232_tcp [tcp_55232_unknown]",
+						"enum": "AppType::PORT_55232_tcp [unknown [55232 - tcp]]",
 						"svc": "unknown",
 						"port": 55232,
 						"proto": "TransportProtocol::tcp [1]"
 					},
 					"dstport": {
-						"enum": "AppType::www_http [tcp|udp_80_www-http]",
+						"enum": "AppType::www_http [www-http [80 - tcp|udp]]",
 						"svc": "www-http",
 						"port": 80,
 						"proto": "TransportProtocol::tcp|udp [3]"
@@ -310,13 +310,13 @@
 				"dst": "123.129.210.135",
 				"tcp": {
 					"srcport": {
-						"enum": "AppType::PORT_55216_tcp [tcp_55216_unknown]",
+						"enum": "AppType::PORT_55216_tcp [unknown [55216 - tcp]]",
 						"svc": "unknown",
 						"port": 55216,
 						"proto": "TransportProtocol::tcp [1]"
 					},
 					"dstport": {
-						"enum": "AppType::www_http [tcp|udp_80_www-http]",
+						"enum": "AppType::www_http [www-http [80 - tcp|udp]]",
 						"svc": "www-http",
 						"port": 80,
 						"proto": "TransportProtocol::tcp|udp [3]"
@@ -393,13 +393,13 @@
 				"dst": "255.255.255.255",
 				"udp": {
 					"srcport": {
-						"enum": "AppType::unassigned_37444 [undefined_37444_unassigned]",
+						"enum": "AppType::unassigned_37444 [unassigned [37444 - undefined]]",
 						"svc": "unassigned",
 						"port": 37444,
 						"proto": "TransportProtocol::undefined [0]"
 					},
 					"dstport": {
-						"enum": "AppType::commplex_link [tcp|udp_5001_commplex-link]",
+						"enum": "AppType::commplex_link [commplex-link [5001 - tcp|udp]]",
 						"svc": "commplex-link",
 						"port": 5001,
 						"proto": "TransportProtocol::tcp|udp [3]"
