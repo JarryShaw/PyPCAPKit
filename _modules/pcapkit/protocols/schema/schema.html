@@ -349,6 +349,7 @@
 <span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">final</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.collections</span> <span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
@@ -525,6 +526,9 @@
                 <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__additional__&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__additional__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__additional__&#39;</span><span class="p">])</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__excluded__&#39;</span><span class="p">):</span>
                 <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__excluded__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
@@ -1032,12 +1036,14 @@
         <span class="c1">#: Mapping of enumeration numbers to schemas.</span>
         <span class="n">registry</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span>
 
-<div class="viewcode-block" id="EnumSchema.__init_subclass__"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__">[docs]</a>    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[ET | Iterable[ET]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="EnumSchema.__init_subclass__"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__">[docs]</a>    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[ET | Iterable[ET]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register enumeration to :attr:`registry` mapping.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: Enumeration code. It can be either a single enumeration</span>
 <span class="sd">                or a list of enumerations.</span>
+<span class="sd">            *args: Arbitrary positional arguments.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        If ``code`` is provided, the subclass will be registered to the</span>
 <span class="sd">        :attr:`registry` mapping with the given ``code``. If ``code`` is</span>
