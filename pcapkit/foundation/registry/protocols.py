@@ -28,7 +28,8 @@ from pcapkit.protocols.schema.internet.hip import Parameter as Schema_HIP_Parame
 from pcapkit.protocols.schema.internet.hopopt import Option as Schema_HOPOPT_Option
 from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_IPv4_Option
 from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_IPv6_Opts_Option
-from pcapkit.protocols.schema.internet.ipv6_route import MAP_IPV6_ROUTE_DATA
+from pcapkit.protocols.schema.internet.ipv6_route import \
+    RoutingType as Schema_IPv6_Route_RoutingType
 from pcapkit.protocols.schema.internet.mh import MAP_MH_DATA
 from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_MH_CGAParameter
 from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
@@ -94,8 +95,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
     from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
     from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
-    from pcapkit.protocols.schema.internet.ipv6_route import \
-        RoutingType as Schema_IPv6_Route_RoutingType
     from pcapkit.protocols.schema.internet.mh import CGAExtension as Schema_MH_CGAExtension
     from pcapkit.protocols.schema.internet.mh import Option as Schema_MH_Option
     from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
@@ -432,7 +431,7 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
 
     IPv6_Route.register_routing(code, meth)
     if schema is not None:
-        MAP_IPV6_ROUTE_DATA[code] = schema
+        Schema_IPv6_Route_RoutingType.register(code, schema)
     logger.info('registered IPv6-Route routing data parser: %s', code.name)
 
 

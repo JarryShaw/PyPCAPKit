@@ -2,7 +2,6 @@
 # mypy: disable-error-code=assignment
 """header schema for IPv6 Routing Header"""
 
-import collections
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
@@ -13,7 +12,7 @@ from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -25,7 +24,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any, DefaultDict, Optional, Type
+    from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol
@@ -50,13 +49,9 @@ def ipv6_route_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         :class:`~pcapkit.protocols.schema.internet.ipv6_route.RoutingType`
         instance based on :attr:`IPv6_Route.type <pcapkit.protocols.schema.internet.ipv6_route.IPv6_Route.type>`.
 
-    See Also:
-        * :class:`pcapkit.const.ipv6.routing.Routing`
-        * :data:`pcapkit.protocols.schema.internet.ipv6_route.MAP_IPV6_ROUTE_DATA`
-
     """
     type = cast('Enum_Routing', pkt['type'])
-    schema = MAP_IPV6_ROUTE_DATA[type]
+    schema = RoutingType.registry[type]
     return SchemaField(length=pkt['length'] * 8 - 4, schema=schema)
 
 
@@ -84,8 +79,10 @@ class IPv6_Route(Schema):
                      seg_left: 'int', data: 'bytes | RoutingType', payload: 'Protocol | Schema | bytes') -> 'None': ...
 
 
-class RoutingType(Schema):
+class RoutingType(EnumSchema[Enum_Routing]):
     """Header schema for IPv6-Route type-specific routing data."""
+
+    __default__ = lambda: UnknownType
 
 
 @schema_final
@@ -100,7 +97,7 @@ class UnknownType(RoutingType):
 
 
 @schema_final
-class SourceRoute(RoutingType):
+class SourceRoute(RoutingType, code=Enum_Routing.Source_Route):
     """Header schema for IPv6-Route source route routing data."""
 
     #: Reserved.
@@ -116,7 +113,7 @@ class SourceRoute(RoutingType):
 
 
 @schema_final
-class Type2(RoutingType):
+class Type2(RoutingType, code=Enum_Routing.Type_2_Routing_Header):
     """Header schema for IPv6-Route type 2 routing data."""
 
     #: Reserved.
@@ -129,7 +126,7 @@ class Type2(RoutingType):
 
 
 @schema_final
-class RPL(RoutingType):
+class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
     """Header schema for IPv6-Route RPL routing data."""
 
     #: CmprI.
@@ -199,11 +196,3 @@ class RPL(RoutingType):
 
         def __init__(self, cmpr_i: 'int', cmpr_e: 'int', pad: 'PadInfo',
                      addresses: 'list[bytes]') -> 'None': ...
-
-
-#: DefaultDict[Enum_Routing, Type[RoutingType]]: Mapping of IPv6-Route routing type numbers to schemas.
-MAP_IPV6_ROUTE_DATA = collections.defaultdict(lambda: UnknownType, {
-    Enum_Routing.Source_Route: SourceRoute,
-    Enum_Routing.Type_2_Routing_Header: Type2,
-    Enum_Routing.RPL_Source_Route_Header: RPL,
-})  # type: DefaultDict[Enum_Routing | int, Type[RoutingType]]
