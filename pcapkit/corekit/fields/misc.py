@@ -141,9 +141,8 @@ class ConditionalField(_Field[_TC]):
         Returns:
             Updated field instance.
 
-        Notes:
-            This method will return a new instance of :class:`ConditionalField`
-            instead of updating the current instance.
+        This method will return a new instance of :class:`ConditionalField`
+        instead of updating the current instance.
 
         """
         new_self = copy.copy(self)
@@ -293,9 +292,8 @@ class PayloadField(_Field[_TP]):
         Returns:
             Updated field instance.
 
-        Notes:
-            This method will return a new instance of :class:`PayloadField`
-            instead of updating the current instance.
+        This method will return a new instance of :class:`PayloadField`
+        instead of updating the current instance.
 
         """
         new_self = copy.copy(self)
@@ -422,9 +420,8 @@ class SwitchField(_Field[_TC]):
         Returns:
             New field instance.
 
-        Notes:
-            This method will return a new instance of :class:`SwitchField`
-            instead of updating the current instance.
+        This method will return a new instance of :class:`SwitchField`
+        instead of updating the current instance.
 
         """
         new_self = copy.copy(self)
@@ -557,9 +554,8 @@ class SchemaField(_Field[_TS]):
         Returns:
             New field instance.
 
-        Notes:
-            This method will return a new instance of :class:`SchemaField`
-            instead of updating the current instance.
+        This method will return a new instance of :class:`SchemaField`
+        instead of updating the current instance.
 
         """
         new_self = copy.copy(self)
@@ -691,9 +687,8 @@ class ForwardMatchField(_Field[_TC]):
         Returns:
             Updated field instance.
 
-        Notes:
-            This method will return a new instance of :class:`ConditionalField`
-            instead of updating the current instance.
+        This method will return a new instance of :class:`ConditionalField`
+        instead of updating the current instance.
 
         """
         new_self = copy.copy(self)

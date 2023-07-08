@@ -75,9 +75,8 @@ class ListField(_Field[List[_TL]], Generic[_TL]):
         Returns:
             Updated field instance.
 
-        Notes:
-            This method will return a new instance of :class:`ListField`
-            instead of updating the current instance.
+        This method will return a new instance of :class:`ListField`
+        instead of updating the current instance.
 
         """
         new_self = copy.copy(self)

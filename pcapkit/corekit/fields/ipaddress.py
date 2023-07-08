@@ -3,7 +3,6 @@
 
 import abc
 import ipaddress
-from sys import prefix
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.field import _T, Field, NoValue

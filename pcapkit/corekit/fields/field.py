@@ -43,6 +43,10 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         :meth:`~_Field.pack` should be considerate of the template format
         and the actual value provided for packing.
 
+    Args:
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
+
     """
 
     if TYPE_CHECKING:
@@ -100,9 +104,8 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         Returns:
             Updated field instance.
 
-        Notes:
-            This method will return a new instance of :class:`_Field` instead of
-            updating the current instance.
+        This method will return a new instance of :class:`_Field` instead of
+        updating the current instance.
 
         """
         new_self = copy.copy(self)
@@ -124,6 +127,14 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         return f'<{self.__class__.__name__} {self.name}>'
 
     def __set_name__(self, owner: 'Schema', name: 'str') -> 'None':
+        """Set field name and update field list (if applicable).
+
+        This method is to be called by the metaclass during class creation.
+        It is used to set the field name and update the field list, i.e.,
+        :attr:`Schema.__fields__ <pcapkit.protocols.schema.schema.Schema.__fields__>`
+        mapping dictionary.
+
+        """
         # Update field list (if applicable)
         if hasattr(owner, '__fields__'):
             owner.__fields__[name] = self
@@ -237,9 +248,8 @@ class Field(_Field[_T], Generic[_T]):
         Returns:
             New instance of :class:`Field`.
 
-        Notes:
-            This method will return a new instance of :class:`Field` instead of
-            updating the current instance.
+        This method will return a new instance of :class:`Field` instead of
+        updating the current instance.
 
         """
         new_self = copy.copy(self)

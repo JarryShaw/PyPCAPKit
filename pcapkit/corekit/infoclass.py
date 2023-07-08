@@ -50,17 +50,17 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     class. It can be useful to reduce runtime generation
     time as well as caching already generated attributes.
 
+    Notes:
+        The decorator should only be used on the *final*
+        class, otherwise, any subclasses derived from a
+        finalised info class will not be re-finalised.
+
     Args:
         cls: Info class.
         _finalised: Whether to make the info class as finalised.
 
     Returns:
         Finalised info class.
-
-    Notes:
-        The decorator should only be used on the *final*
-        class, otherwise, any subclasses derived from a
-        finalised info class will not be re-finalised.
 
     :meta decorator:
     """

@@ -41,17 +41,17 @@ def schema_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     class. It can be useful to reduce runtime generation
     time as well as caching already generated attributes.
 
+    Notes:
+        The decorator should only be used on the *final*
+        class, otherwise, any subclasses derived from a
+        finalised schema class will not be re-finalised.
+
     Args:
         cls: Schema class.
         _finalised: Whether to make the schema class finalised.
 
     Returns:
         Finalised schema class.
-
-    Notes:
-        The decorator should only be used on the *final*
-        class, otherwise, any subclasses derived from a
-        finalised schema class will not be re-finalised.
 
     :meta decorator:
     """
@@ -162,10 +162,27 @@ class SchemaMeta(abc.ABCMeta):
             print(B.__additional__)  # ['a', 'b', 'c', 'd']
             print(C.__additional__)  # ['a', 'b', 'c', 'd', 'e', 'f']
 
+    Args:
+        name: Schema class name.
+        bases: Schema class bases.
+        attrs: Schema class attributes.
+        **kwargs: Arbitrary keyword arguments in class definition.
+
     """
 
     @classmethod
     def __prepare__(cls, name: 'str', bases: 'tuple[type, ...]', /, **kwds: 'Any') -> 'Mapping[str, object]':
+        """Prepare the namespace for the schema class.
+
+        Args:
+            name: Name of the schema class.
+            bases: Base classes of the schema class.
+            **kwds: Additional keyword arguments at class definition.
+
+        This method is used to create the initial field dictionary
+        :attr:`~Schema.__fields__` for the schema class.
+
+        """
         fields = collections.OrderedDict()
         for base in bases:
             if hasattr(base, '__fields__'):
@@ -173,6 +190,19 @@ class SchemaMeta(abc.ABCMeta):
         return collections.OrderedDict(__fields__=fields)
 
     def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', **kwargs: 'Any') -> 'Type[Schema]':
+        """Create the schema class.
+
+        Args:
+            name: Schema class name.
+            bases: Schema class bases.
+            attrs: Schema class attributes.
+            **kwargs: Arbitrary keyword arguments in class definition.
+
+        This method is used to inherit the :attr:`~Schema.__additional__` and
+        :attr:`~Schema.__excluded__` fields from the base classes, as well as
+        populating both fields from the subclass attributes.
+
+        """
         if '__additional__' not in attrs:
             attrs['__additional__'] = []
         if '__excluded__' not in attrs:
@@ -184,6 +214,8 @@ class SchemaMeta(abc.ABCMeta):
             if hasattr(base, '__excluded__'):
                 attrs['__excluded__'].extend(name for name in base.__excluded__ if name not in attrs['__excluded__'])
 
+        # NOTE: for unknown reason, the following code will cause an error
+        # for duplicated keyword arguments in class definition.
         if sys.version_info < (3, 11):
             return type.__new__(cls, name, bases, attrs, **kwargs)
         return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
@@ -656,6 +688,12 @@ class EnumMeta(SchemaMeta):
     * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*
       proxy (similar to :class:`property`, but on class variables) to the
       :attr:`~EnumSchema.__enum__` mapping.
+
+    Args:
+        name: Schema class name.
+        bases: Schema class bases.
+        attrs: Schema class attributes.
+        **kwargs: Arbitrary keyword arguments in class definition.
 
     """
 

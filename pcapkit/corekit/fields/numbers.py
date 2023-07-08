@@ -92,9 +92,8 @@ class NumberField(Field[int], Generic[_T]):
         Returns:
             New instance of :class:`NumberField`.
 
-        Notes:
-            This method will return a new instance of :class:`NumberField` instead of
-            updating the current instance.
+        This method will return a new instance of :class:`NumberField` instead of
+        updating the current instance.
 
         """
         new_self = super().__call__(packet)

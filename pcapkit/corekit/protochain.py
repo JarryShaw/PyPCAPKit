@@ -26,7 +26,14 @@ __all__ = ['ProtoChain']
 
 
 class ProtoChain(collections.abc.Sequence):
-    """Protocols chain."""
+    """Protocols chain.
+
+    Args:
+        proto: New protocol class on the top stack.
+        alias: New protocol alias on the top stack.
+        basis: Original protocol chain as base stacks.
+
+    """
 
     #: Internal data storage for protocol chain.
     __data__: 'tuple[tuple[str, Type[Protocol]], ...]'

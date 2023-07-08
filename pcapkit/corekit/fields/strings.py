@@ -56,9 +56,8 @@ class _TextField(Field[_T], Generic[_T]):
         Returns:
             New instance of :class:`_TextField`.
 
-        Notes:
-            This method will return a new instance of :class:`_TextField` instead of
-            updating the current instance.
+        This method will return a new instance of :class:`_TextField` instead of
+        updating the current instance.
 
         """
         new_self = super().__call__(packet)
