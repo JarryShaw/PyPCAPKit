@@ -19,7 +19,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, Pa
                                          SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, warn
@@ -39,7 +39,7 @@ __all__ = [
 if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv4Address
-    from typing import Any, Optional
+    from typing import Any, DefaultDict, Optional, Type
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.corekit.multidict import OrderedMultiDict
@@ -112,25 +112,26 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     Returns:
         * If ``func`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
-          wrapped :class:`~pcapkit.protocols.schema.internet.hopopt.QuickStartRequestOption`
+          wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption`
           instance.
         * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
-          wrapped :class:`~pcapkit.protocols.schema.internet.hopopt.QuickStartReportOption`
+          wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption`
           instance.
 
     """
     func = Enum_QSFunction.get(pkt['flags']['func'])
     pkt['flags']['func'] = func
 
-    if func == Enum_QSFunction.Quick_Start_Request:
-        return SchemaField(length=5, schema=QuickStartRequestOption)
-    if func == Enum_QSFunction.Report_of_Approved_Rate:
-        return SchemaField(length=5, schema=QuickStartReportOption)
-    raise FieldValueError(f'HOPOPT: invalid QS function: {func}')
+    schema = QSOption.registry[func]
+    if schema is None:
+        raise FieldValueError(f'IPv4: invalid QS function: {func}')
+    return SchemaField(length=5, schema=schema)
 
 
-class Option(Schema):
+class Option(EnumSchema[Enum_OptionNumber]):
     """Header schema for IPv4 options."""
+
+    __default__ = lambda: UnassignedOption
 
     #: Option type.
     type: 'Enum_OptionNumber' = EnumField(length=1, namespace=Enum_OptionNumber)
@@ -168,7 +169,7 @@ class UnassignedOption(Option):
 
 
 @schema_final
-class EOOLOption(Option):
+class EOOLOption(Option, code=Enum_OptionNumber.EOOL):
     """Header schema for IPv4 end of option list (``EOOL``) option."""
 
     if TYPE_CHECKING:
@@ -176,7 +177,7 @@ class EOOLOption(Option):
 
 
 @schema_final
-class NOPOption(Option):
+class NOPOption(Option, code=Enum_OptionNumber.NOP):
     """Header schema for IPv4 no operation (``NOP``) option."""
 
     if TYPE_CHECKING:
@@ -184,7 +185,7 @@ class NOPOption(Option):
 
 
 @schema_final
-class SECOption(Option):
+class SECOption(Option, code=Enum_OptionNumber.SEC):
     """Header schema for IPv4 security (``SEC``) option."""
 
     #: Classification level.
@@ -200,7 +201,7 @@ class SECOption(Option):
 
 
 @schema_final
-class LSROption(Option):
+class LSROption(Option, code=Enum_OptionNumber.LSR):
     """Header schema for IPv4 loose source route (``LSR``) option."""
 
     #: Pointer.
@@ -221,7 +222,7 @@ class LSROption(Option):
 
 
 @schema_final
-class TSOption(Option):
+class TSOption(Option, code=Enum_OptionNumber.TS):
     """Header schema for IPv4 timestamp (``TS``) option."""
 
     #: Pointer.
@@ -323,7 +324,7 @@ class TSOption(Option):
 
 
 @schema_final
-class ESECOption(Option):
+class ESECOption(Option, code=Enum_OptionNumber.E_SEC):
     """Header schema for IPv4 extended security (``ESEC``) option."""
 
     #: Additional security information format code.
@@ -339,7 +340,7 @@ class ESECOption(Option):
 
 
 @schema_final
-class RROption(Option):
+class RROption(Option, code=Enum_OptionNumber.RR):
     """Header schema for IPv4 record route (``RR``) option."""
 
     #: Pointer.
@@ -360,7 +361,7 @@ class RROption(Option):
 
 
 @schema_final
-class SIDOption(Option):
+class SIDOption(Option, code=Enum_OptionNumber.SID):
     """Header schema for IPv4 stream identifier (``SID``) option."""
 
     #: Stream identifier.
@@ -371,7 +372,7 @@ class SIDOption(Option):
 
 
 @schema_final
-class SSROption(Option):
+class SSROption(Option, code=Enum_OptionNumber.SSR):
     """Header schema for IPv4 strict source route (``SSR``) option."""
 
     #: Pointer.
@@ -392,7 +393,7 @@ class SSROption(Option):
 
 
 @schema_final
-class MTUPOption(Option):
+class MTUPOption(Option, code=Enum_OptionNumber.MTUP):
     """Header schema for IPv4 MTU probe (``MTUP``) option."""
 
     #: MTU.
@@ -403,7 +404,7 @@ class MTUPOption(Option):
 
 
 @schema_final
-class MTUROption(Option):
+class MTUROption(Option, code=Enum_OptionNumber.MTUR):
     """Header schema for IPv4 MTU reply (``MTUR``) option."""
 
     #: MTU.
@@ -414,7 +415,7 @@ class MTUROption(Option):
 
 
 @schema_final
-class TROption(Option):
+class TROption(Option, code=Enum_OptionNumber.TR):
     """Header schema for IPv4 traceroute (``TR``) option."""
 
     #: ID number.
@@ -431,7 +432,7 @@ class TROption(Option):
 
 
 @schema_final
-class RTRALTOption(Option):
+class RTRALTOption(Option, code=Enum_OptionNumber.RTRALT):
     """Header schema for IPv4 router alert (``RTRALT``) option."""
 
     #: Router alert value.
@@ -469,8 +470,14 @@ class _QSOption(Schema):
         return ret
 
 
-class QSOption(Option):
+# register ``_QSOption`` as ``QS`` option
+Option.register(Enum_OptionNumber.QS, _QSOption)
+
+
+class QSOption(Option, EnumSchema[Enum_QSFunction]):
     """Header schema for IPV4 quick start (``QS``) options."""
+
+    __enum__: 'DefaultDict[Enum_QSFunction, Type[QSOption]]' = collections.defaultdict(lambda: None)  # type: ignore[return-value,arg-type]
 
     #: Flags.
     flags: 'QuickStartFlags' = BitField(length=1, namespace={
@@ -483,7 +490,7 @@ class QSOption(Option):
 
 
 @schema_final
-class QuickStartRequestOption(QSOption):
+class QuickStartRequestOption(QSOption, code=Enum_QSFunction.Quick_Start_Request):
     """Header schema for IPV4 quick start request options."""
 
     #: QS time-to-live (TTL).
@@ -499,7 +506,7 @@ class QuickStartRequestOption(QSOption):
 
 
 @schema_final
-class QuickStartReportOption(QSOption):
+class QuickStartReportOption(QSOption, code=Enum_QSFunction.Report_of_Approved_Rate):
     """Header schema for IPV4 quick start report of approved rate options."""
 
     #: QS nonce.
@@ -554,21 +561,9 @@ class IPv4(Schema):
         length=lambda pkt: pkt['vihl']['ihl'] * 4 - 20,
         base_schema=Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnassignedOption, {
-            Enum_OptionNumber.EOOL: EOOLOption,
-            Enum_OptionNumber.NOP: NOPOption,
-            Enum_OptionNumber.SEC: SECOption,
-            Enum_OptionNumber.LSR: LSROption,
-            Enum_OptionNumber.E_SEC: ESECOption,
-            Enum_OptionNumber.RR: RROption,
-            Enum_OptionNumber.SID: SIDOption,
-            Enum_OptionNumber.SSR: SSROption,
-            Enum_OptionNumber.MTUP: MTUPOption,
-            Enum_OptionNumber.MTUR: MTUROption,
-            Enum_OptionNumber.TR: TROption,
-            Enum_OptionNumber.RTRALT: RTRALTOption,
-            Enum_OptionNumber.QS: _QSOption,
-        }))
+        registry=Option.registry,
+        eool=Enum_OptionNumber.EOOL,
+    )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
     #: Payload.
