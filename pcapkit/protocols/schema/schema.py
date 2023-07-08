@@ -748,7 +748,8 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
     __additional__ = ['__enum__', '__default__']
     __excluded__ = ['__enum__', '__default__']
 
-    #: Callback to return the default schema for enumeration mapping.
+    #: Callback to return the default schema for enumeration mapping,
+    #: by default is a ``lambda: None`` statement.
     __default__: 'Callable[[], Type[Self]]' = lambda: None  # type: ignore[assignment,return-value]
 
     if TYPE_CHECKING:
