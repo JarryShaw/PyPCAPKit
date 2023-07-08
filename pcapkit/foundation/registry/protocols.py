@@ -27,7 +27,7 @@ from pcapkit.protocols.schema.application.httpv2 import FrameType as Schema_HTTP
 from pcapkit.protocols.schema.internet.hip import Parameter as Schema_HIP_Parameter
 from pcapkit.protocols.schema.internet.hopopt import Option as Schema_HOPOPT_Option
 from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_IPv4_Option
-from pcapkit.protocols.schema.internet.ipv6_opts import IPv6_Opts as Schema_IPv6_Opts
+from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_IPv6_Opts_Option
 from pcapkit.protocols.schema.internet.ipv6_route import MAP_IPV6_ROUTE_DATA
 from pcapkit.protocols.schema.internet.mh import MAP_MH_DATA
 from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_MH_CGAParameter
@@ -94,7 +94,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
     from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
     from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
-    from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_IPv6_Opts_Option
     from pcapkit.protocols.schema.internet.ipv6_route import \
         RoutingType as Schema_IPv6_Route_RoutingType
     from pcapkit.protocols.schema.internet.mh import CGAExtension as Schema_MH_CGAExtension
@@ -408,7 +407,7 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
 
     IPv6_Opts.register_option(code, meth)
     if schema is not None:
-        cast('OptionField[Schema_IPv6_Opts_Option]', Schema_IPv6_Opts.options).registry[code] = schema
+        Schema_IPv6_Opts_Option.register(code, schema)
     logger.info('registered IPv6-Opts option parser: %s', code.name)
 
 
