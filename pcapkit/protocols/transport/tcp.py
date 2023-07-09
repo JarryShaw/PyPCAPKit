@@ -82,11 +82,11 @@ from pcapkit.protocols.data.transport.tcp import NoOperation as Data_NoOperation
 from pcapkit.protocols.data.transport.tcp import \
     PartialOrderConnectionPermitted as Data_PartialOrderConnectionPermitted
 from pcapkit.protocols.data.transport.tcp import \
-    PartialOrderConnectionProfile as Data_PartialOrderConnectionProfile
+    PartialOrderServiceProfile as Data_PartialOrderServiceProfile
 from pcapkit.protocols.data.transport.tcp import QuickStartResponse as Data_QuickStartResponse
 from pcapkit.protocols.data.transport.tcp import SACKBlock as Data_SACKBlock
 from pcapkit.protocols.data.transport.tcp import SACKPermitted as Data_SACKPermitted
-from pcapkit.protocols.data.transport.tcp import Timestamp as Data_Timestamp
+from pcapkit.protocols.data.transport.tcp import Timestamps as Data_Timestamps
 from pcapkit.protocols.data.transport.tcp import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.data.transport.tcp import UserTimeout as Data_UserTimeout
 from pcapkit.protocols.data.transport.tcp import WindowScale as Data_WindowScale
@@ -121,11 +121,11 @@ from pcapkit.protocols.schema.transport.tcp import NoOperation as Schema_NoOpera
 from pcapkit.protocols.schema.transport.tcp import \
     PartialOrderConnectionPermitted as Schema_PartialOrderConnectionPermitted
 from pcapkit.protocols.schema.transport.tcp import \
-    PartialOrderConnectionProfile as Schema_PartialOrderConnectionProfile
+    PartialOrderServiceProfile as Schema_PartialOrderServiceProfile
 from pcapkit.protocols.schema.transport.tcp import QuickStartResponse as Schema_QuickStartResponse
 from pcapkit.protocols.schema.transport.tcp import SACKBlock as Schema_SACKBlock
 from pcapkit.protocols.schema.transport.tcp import SACKPermitted as Schema_SACKPermitted
-from pcapkit.protocols.schema.transport.tcp import Timestamp as Schema_Timestamp
+from pcapkit.protocols.schema.transport.tcp import Timestamps as Schema_Timestamps
 from pcapkit.protocols.schema.transport.tcp import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.transport.tcp import UserTimeout as Schema_UserTimeout
 from pcapkit.protocols.schema.transport.tcp import WindowScale as Schema_WindowScale
@@ -960,7 +960,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         )
         return data
 
-    def _read_mode_ts(self, schema: 'Schema_Timestamp', *, options: 'Option') -> 'Data_Timestamp':  # pylint: disable=unused-argument
+    def _read_mode_ts(self, schema: 'Schema_Timestamps', *, options: 'Option') -> 'Data_Timestamps':  # pylint: disable=unused-argument
         """Read TCP timestamps option.
 
         Structure of TCP timestamp option [:rfc:`7323`]:
@@ -986,7 +986,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if schema.length != 10:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
-        data = Data_Timestamp(
+        data = Data_Timestamps(
             kind=schema.kind,
             length=schema.length,
             timestamp=schema.value,
@@ -1024,7 +1024,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=schema.length,
         )
 
-    def _read_mode_pocsp(self, schema: 'Schema_PartialOrderConnectionProfile', *, options: 'Option') -> 'Data_PartialOrderConnectionProfile':  # pylint: disable=unused-argument
+    def _read_mode_pocsp(self, schema: 'Schema_PartialOrderServiceProfile', *, options: 'Option') -> 'Data_PartialOrderServiceProfile':  # pylint: disable=unused-argument
         """Read TCP partial order connection service profile option.
 
         Structure of TCP ``POC-SP`` option [:rfc:`1693`][:rfc:`6247`]:
@@ -1050,7 +1050,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if schema.length != 3:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
-        data = Data_PartialOrderConnectionProfile(
+        data = Data_PartialOrderServiceProfile(
             kind=schema.kind,
             length=schema.length,
             start=bool(schema.profile['start']),
@@ -2206,10 +2206,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             data=data,
         )
 
-    def _make_mode_ts(self, code: 'Enum_Option', opt: 'Optional[Data_Timestamp]' = None, *,
+    def _make_mode_ts(self, code: 'Enum_Option', opt: 'Optional[Data_Timestamps]' = None, *,
                       tsval: 'int' = 0,
                       tsecr: 'int' = 0,
-                      **kwargs: 'Any') -> 'Schema_Timestamp':
+                      **kwargs: 'Any') -> 'Schema_Timestamps':
         """Make TCP timestamps option.
 
         Args:
@@ -2227,7 +2227,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             tsval = opt.timestamp
             tsecr = opt.echo
 
-        return Schema_Timestamp(
+        return Schema_Timestamps(
             kind=code,
             length=10,
             value=tsval,
@@ -2252,10 +2252,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=2,
         )
 
-    def _make_mode_pocsp(self, code: 'Enum_Option', opt: 'Optional[Data_PartialOrderConnectionProfile]' = None, *,
+    def _make_mode_pocsp(self, code: 'Enum_Option', opt: 'Optional[Data_PartialOrderServiceProfile]' = None, *,
                          start: 'bool' = False,
                          end: 'bool' = False,
-                         **kwargs: 'Any') -> 'Schema_PartialOrderConnectionProfile':
+                         **kwargs: 'Any') -> 'Schema_PartialOrderServiceProfile':
         """Make TCP partial order connection service profile option.
 
         Args:
@@ -2273,7 +2273,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             start = opt.start
             end = opt.end
 
-        return Schema_PartialOrderConnectionProfile(
+        return Schema_PartialOrderServiceProfile(
             kind=code,
             length=3,
             profile={

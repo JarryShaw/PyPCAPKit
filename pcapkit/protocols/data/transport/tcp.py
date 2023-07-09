@@ -27,8 +27,8 @@ __all__ = [
 
     'Option',
     'UnassignedOption', 'EndOfOptionList', 'NoOperation', 'MaximumSegmentSize', 'WindowScale',
-    'SACKPermitted', 'SACK', 'Echo', 'EchoReply', 'Timestamp', 'PartialOrderConnectionPermitted',
-    'PartialOrderConnectionProfile', 'CC', 'CCNew', 'CCEcho', 'AlternateChecksumRequest',
+    'SACKPermitted', 'SACK', 'Echo', 'EchoReply', 'Timestamps', 'PartialOrderConnectionPermitted',
+    'PartialOrderServiceProfile', 'CC', 'CCNew', 'CCEcho', 'AlternateChecksumRequest',
     'AlternateChecksumData', 'MD5Signature', 'QuickStartResponse', 'UserTimeout',
     'Authentication', 'FastOpenCookie',
 
@@ -215,7 +215,7 @@ class EchoReply(Option):
 
 
 @info_final
-class Timestamp(Option):
+class Timestamps(Option):
     """Data model for TCP timestamp option."""
 
     #: Timestamp .
@@ -236,7 +236,7 @@ class PartialOrderConnectionPermitted(Option):
 
 
 @info_final
-class PartialOrderConnectionProfile(Option):
+class PartialOrderServiceProfile(Option):
     """Data model for TCP partial order connection profile option."""
 
     #: Start flag.

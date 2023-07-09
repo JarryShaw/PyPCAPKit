@@ -37,11 +37,11 @@ from pcapkit.protocols.data.transport.tcp import Option as TCP_Option
 from pcapkit.protocols.data.transport.tcp import \
     PartialOrderConnectionPermitted as TCP_PartialOrderConnectionPermitted
 from pcapkit.protocols.data.transport.tcp import \
-    PartialOrderConnectionProfile as TCP_PartialOrderConnectionProfile
+    PartialOrderServiceProfile as TCP_PartialOrderServiceProfile
 from pcapkit.protocols.data.transport.tcp import QuickStartResponse as TCP_QuickStartResponse
 from pcapkit.protocols.data.transport.tcp import SACKBlock as TCP_SACKBlock
 from pcapkit.protocols.data.transport.tcp import SACKPermitted as TCP_SACKPermitted
-from pcapkit.protocols.data.transport.tcp import Timestamp as TCP_Timestamp
+from pcapkit.protocols.data.transport.tcp import Timestamps as TCP_Timestamps
 from pcapkit.protocols.data.transport.tcp import UnassignedOption as TCP_UnassignedOption
 from pcapkit.protocols.data.transport.tcp import UserTimeout as TCP_UserTimeout
 from pcapkit.protocols.data.transport.tcp import WindowScale as TCP_WindowScale
@@ -55,8 +55,8 @@ __all__ = [
     'TCP_Flags', 'TCP_SACKBlock',
     'TCP_Option',
     'TCP_UnassignedOption', 'TCP_EndOfOptionList', 'TCP_NoOperation', 'TCP_MaximumSegmentSize', 'TCP_WindowScale',
-    'TCP_SACKPermitted', 'TCP_SACK', 'TCP_Echo', 'TCP_EchoReply', 'TCP_Timestamp', 'TCP_PartialOrderConnectionPermitted',  # pylint: disable=line-too-long
-    'TCP_PartialOrderConnectionProfile', 'TCP_CC', 'TCP_CCNew', 'TCP_CCEcho', 'TCP_AlternateChecksumRequest',
+    'TCP_SACKPermitted', 'TCP_SACK', 'TCP_Echo', 'TCP_EchoReply', 'TCP_Timestamps', 'TCP_PartialOrderConnectionPermitted',  # pylint: disable=line-too-long
+    'TCP_PartialOrderServiceProfile', 'TCP_CC', 'TCP_CCNew', 'TCP_CCEcho', 'TCP_AlternateChecksumRequest',
     'TCP_AlternateChecksumData', 'TCP_MD5Signature', 'TCP_QuickStartResponse', 'TCP_UserTimeout',
     'TCP_Authentication', 'TCP_FastOpenCookie',
     'TCP_MPTCPCapableFlag',

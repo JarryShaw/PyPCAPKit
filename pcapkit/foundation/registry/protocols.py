@@ -39,12 +39,12 @@ from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSB
 from pcapkit.protocols.schema.misc.pcapng import \
     NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
 from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
-from pcapkit.protocols.schema.transport.tcp import MAP_MPTCP_DATA
-from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import logger
+from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
+from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
 
 if TYPE_CHECKING:
     from typing import Optional, Type
@@ -96,8 +96,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
     from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
     from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
-    from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
-    from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
     from pcapkit.protocols.transport.tcp import MPOptionConstructor as TCP_MPOptionConstructor
     from pcapkit.protocols.transport.tcp import MPOptionParser as TCP_MPOptionParser
     from pcapkit.protocols.transport.tcp import OptionConstructor as TCP_OptionConstructor
@@ -602,7 +600,7 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
 
     TCP.register_option(code, meth)
     if schema is not None:
-        cast('OptionField[Schema_TCP_Option]', Schema_TCP.options).registry[code] = schema
+        Schema_TCP_Option.register(code, schema)
     logger.info('registered TCP option parser: %s', code.name)
 
 
@@ -627,7 +625,7 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
 
     TCP.register_mp_option(code, meth)
     if schema is not None:
-        MAP_MPTCP_DATA[code] = schema
+        Schema_TCP_MPTCP.register(code, schema)
     logger.info('registered MPTCP option parser: %s', code.name)
 
 

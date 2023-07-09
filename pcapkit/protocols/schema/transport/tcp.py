@@ -17,7 +17,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, Pa
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
@@ -26,8 +26,8 @@ __all__ = [
 
     'Option',
     'UnassignedOption', 'EndOfOptionList', 'NoOperation', 'MaximumSegmentSize', 'WindowScale',
-    'SACKPermitted', 'SACK', 'Echo', 'EchoReply', 'Timestamp', 'PartialOrderConnectionPermitted',
-    'PartialOrderConnectionProfile', 'CC', 'CCNew', 'CCEcho', 'AlternateChecksumRequest',
+    'SACKPermitted', 'SACK', 'Echo', 'EchoReply', 'Timestamps', 'PartialOrderConnectionPermitted',
+    'PartialOrderServiceProfile', 'CC', 'CCNew', 'CCEcho', 'AlternateChecksumRequest',
     'AlternateChecksumData', 'MD5Signature', 'QuickStartResponse', 'UserTimeout',
     'Authentication', 'FastOpenCookie',
 
@@ -196,23 +196,20 @@ def mptcp_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP` subclass
         instance.
 
-    See Also:
-        * :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`
-        * :data:`pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA`
-
     """
     subtype = Enum_MPTCPOption.get(pkt['test']['subtype'])
     pkt['test']['subtype'] = subtype
-    schema = MAP_MPTCP_DATA[subtype]
+    schema = MPTCP.registry[subtype]
 
-    if subtype == Enum_MPTCPOption.MP_JOIN and schema is MPTCPUnknown:
+    if subtype == Enum_MPTCPOption.MP_JOIN and schema is MPTCPJoin:  # placeholder
         if pkt['flags']['syn'] == 1 and pkt['flags']['ack'] == 0:
-            return SchemaField(length=pkt['test']['length'], schema=MPTCPJoinSYN)
-        if pkt['flags']['syn'] == 1 and pkt['flags']['ack'] == 1:
-            return SchemaField(length=pkt['test']['length'], schema=MPTCPJoinSYNACK)
-        if pkt['flags']['syn'] == 0 and pkt['flags']['ack'] == 1:
-            return SchemaField(length=pkt['test']['length'], schema=MPTCPJoinACK)
-        raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.MP_JOIN} invalid flags')
+            schema = MPTCPJoinSYN
+        elif pkt['flags']['syn'] == 1 and pkt['flags']['ack'] == 1:
+            schema = MPTCPJoinSYNACK
+        elif pkt['flags']['syn'] == 0 and pkt['flags']['ack'] == 1:
+            schema = MPTCPJoinACK
+        else:
+            raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.MP_JOIN} invalid flags')
     return SchemaField(length=pkt['test']['length'], schema=schema)
 
 
@@ -287,8 +284,10 @@ class PortEnumField(EnumField):
         return self._namespace.get(value, proto=Enum_TransportProtocol.tcp)
 
 
-class Option(Schema):
+class Option(EnumSchema[Enum_Option]):
     """Header schema for TCP options."""
+
+    __default__ = lambda: UnassignedOption
 
     #: Option kind.
     kind: 'Enum_Option' = EnumField(length=1, namespace=Enum_Option)
@@ -326,7 +325,7 @@ class UnassignedOption(Option):
 
 
 @schema_final
-class EndOfOptionList(Option):
+class EndOfOptionList(Option, code=Enum_Option.End_of_Option_List):
     """Header schema for TCP end of option list."""
 
     if TYPE_CHECKING:
@@ -334,7 +333,7 @@ class EndOfOptionList(Option):
 
 
 @schema_final
-class NoOperation(Option):
+class NoOperation(Option, code=Enum_Option.No_Operation):
     """Header schema for TCP no operation."""
 
     if TYPE_CHECKING:
@@ -342,7 +341,7 @@ class NoOperation(Option):
 
 
 @schema_final
-class MaximumSegmentSize(Option):
+class MaximumSegmentSize(Option, code=Enum_Option.Maximum_Segment_Size):
     """Header schema for TCP max segment size option."""
 
     #: Maximum segment size.
@@ -353,7 +352,7 @@ class MaximumSegmentSize(Option):
 
 
 @schema_final
-class WindowScale(Option):
+class WindowScale(Option, code=Enum_Option.Window_Scale):
     """Header schema for TCP window scale option."""
 
     #: Window scale (shift count).
@@ -364,7 +363,7 @@ class WindowScale(Option):
 
 
 @schema_final
-class SACKPermitted(Option):
+class SACKPermitted(Option, code=Enum_Option.SACK_Permitted):
     """Header schema for TCP SACK permitted option."""
 
     if TYPE_CHECKING:
@@ -385,7 +384,7 @@ class SACKBlock(Schema):
 
 
 @schema_final
-class SACK(Option):
+class SACK(Option, code=Enum_Option.SACK):
     """Header schema for TCP SACK option."""
 
     #: Selected ACK data.
@@ -399,7 +398,7 @@ class SACK(Option):
 
 
 @schema_final
-class Echo(Option):
+class Echo(Option, code=Enum_Option.Echo):
     """Header schema for TCP echo option."""
 
     #: Info to be echoed.
@@ -410,7 +409,7 @@ class Echo(Option):
 
 
 @schema_final
-class EchoReply(Option):
+class EchoReply(Option, code=Enum_Option.Echo_Reply):
     """Header schema for TCP echo reply option."""
 
     #: Echoed info.
@@ -421,7 +420,7 @@ class EchoReply(Option):
 
 
 @schema_final
-class Timestamp(Option):
+class Timestamps(Option, code=Enum_Option.Timestamps):
     """Header schema for TCP timestamps option."""
 
     #: Timestamp value.
@@ -434,7 +433,7 @@ class Timestamp(Option):
 
 
 @schema_final
-class PartialOrderConnectionPermitted(Option):
+class PartialOrderConnectionPermitted(Option, code=Enum_Option.Partial_Order_Connection_Permitted):
     """Header schema for TCP partial order connection permitted option."""
 
     if TYPE_CHECKING:
@@ -442,7 +441,7 @@ class PartialOrderConnectionPermitted(Option):
 
 
 @schema_final
-class PartialOrderConnectionProfile(Option):
+class PartialOrderServiceProfile(Option, code=Enum_Option.Partial_Order_Service_Profile):
     """Header schema for TCP partial order connection service profile option."""
 
     #: Profile data.
@@ -456,7 +455,7 @@ class PartialOrderConnectionProfile(Option):
 
 
 @schema_final
-class CC(Option):
+class CC(Option, code=Enum_Option.CC):
     """Header schema for TCP CC option."""
 
     #: Connection count.
@@ -467,7 +466,7 @@ class CC(Option):
 
 
 @schema_final
-class CCNew(Option):
+class CCNew(Option, code=Enum_Option.CC_NEW):
     """Header schema for TCP connection count (new) option."""
 
     #: Connection count.
@@ -478,7 +477,7 @@ class CCNew(Option):
 
 
 @schema_final
-class CCEcho(Option):
+class CCEcho(Option, code=Enum_Option.CC_ECHO):
     """Header schema for TCP connection count (echo) option."""
 
     #: Connection count.
@@ -489,7 +488,7 @@ class CCEcho(Option):
 
 
 @schema_final
-class AlternateChecksumRequest(Option):
+class AlternateChecksumRequest(Option, code=Enum_Option.TCP_Alternate_Checksum_Request):
     """Header schema for TCP alternate checksum request option."""
 
     #: Checksum algorithm.
@@ -500,7 +499,7 @@ class AlternateChecksumRequest(Option):
 
 
 @schema_final
-class AlternateChecksumData(Option):
+class AlternateChecksumData(Option, code=Enum_Option.TCP_Alternate_Checksum_Data):
     """Header schema for TCP alternate checksum data option."""
 
     #: Checksum data.
@@ -511,7 +510,7 @@ class AlternateChecksumData(Option):
 
 
 @schema_final
-class MD5Signature(Option):
+class MD5Signature(Option, code=Enum_Option.MD5_Signature_Option):
     """Header schema for TCP MD5 signature option."""
 
     #: MD5 digest.
@@ -522,7 +521,7 @@ class MD5Signature(Option):
 
 
 @schema_final
-class QuickStartResponse(Option):
+class QuickStartResponse(Option, code=Enum_Option.Quick_Start_Response):
     """Header schema for TCP quick start response option."""
 
     #: Flags.
@@ -541,7 +540,7 @@ class QuickStartResponse(Option):
 
 
 @schema_final
-class UserTimeout(Option):
+class UserTimeout(Option, code=Enum_Option.User_Timeout_Option):
     """Header schema for TCP user timeout option."""
 
     #: Granularity and user timeout.
@@ -555,7 +554,7 @@ class UserTimeout(Option):
 
 
 @schema_final
-class Authentication(Option):
+class Authentication(Option, code=Enum_Option.TCP_Authentication_Option):
     """Header schema for TCP authentication option."""
 
     #: Key ID.
@@ -598,8 +597,14 @@ class _MPTCP(Schema):
         return ret
 
 
-class MPTCP(Option):
+# register ``_MPTCP`` as ``Multipath_TCP`` option
+Option.register(Enum_Option.Multipath_TCP, _MPTCP)
+
+
+class MPTCP(EnumSchema[Enum_MPTCPOption]):
     """Header schema for Multipath TCP options."""
+
+    __enum__: 'DefaultDict[Enum_MPTCPOption, Type[MPTCP]]' = collections.defaultdict(lambda: MPTCPUnknown)
 
     if TYPE_CHECKING:
         #: MPTCP subtype.
@@ -623,7 +628,7 @@ class MPTCPUnknown(MPTCP):
 
 
 @schema_final
-class MPTCPCapable(MPTCP):
+class MPTCPCapable(MPTCP, code=Enum_MPTCPOption.MP_CAPABLE):
     """Header schema for Multipath TCP capable option."""
 
     #: Subtype and version.
@@ -649,7 +654,7 @@ class MPTCPCapable(MPTCP):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeCapable', flags: 'MPTCPCapableFlags', skey: 'int', rkey: 'Optional[int]') -> 'None': ...
 
 
-class MPTCPJoin(MPTCP):
+class MPTCPJoin(MPTCP, code=Enum_MPTCPOption.MP_JOIN):  # register as a placeholder
     """Header schema for Multipath TCP join option."""
 
 
@@ -711,7 +716,7 @@ class MPTCPJoinACK(MPTCPJoin):
 
 
 @schema_final
-class MPTCPDSS(MPTCP):
+class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
     """Header schema for Multipath TCP DSS option."""
 
     #: Subtype and flags.
@@ -757,7 +762,7 @@ class MPTCPDSS(MPTCP):
 
 
 @schema_final
-class MPTCPAddAddress(MPTCP):
+class MPTCPAddAddress(MPTCP, code=Enum_MPTCPOption.ADD_ADDR):
     """Header schema for Multipath TCP add address option."""
 
     #: Subtype and IP version.
@@ -782,7 +787,7 @@ class MPTCPAddAddress(MPTCP):
 
 
 @schema_final
-class MPTCPRemoveAddress(MPTCP):
+class MPTCPRemoveAddress(MPTCP, code=Enum_MPTCPOption.REMOVE_ADDR):
     """Header schema for Multipath TCP remove address option."""
 
     #: Subtype.
@@ -800,7 +805,7 @@ class MPTCPRemoveAddress(MPTCP):
 
 
 @schema_final
-class MPTCPPriority(MPTCP):
+class MPTCPPriority(MPTCP, code=Enum_MPTCPOption.MP_PRIO):
     """Header schema for Multipath TCP priority option."""
 
     #: Subtype.
@@ -819,7 +824,7 @@ class MPTCPPriority(MPTCP):
 
 
 @schema_final
-class MPTCPFallback(MPTCP):
+class MPTCPFallback(MPTCP, code=Enum_MPTCPOption.MP_FAIL):
     """Header schema for Multipath TCP fallback option."""
 
     #: Subtype.
@@ -834,7 +839,7 @@ class MPTCPFallback(MPTCP):
 
 
 @schema_final
-class MPTCPFastclose(MPTCP):
+class MPTCPFastclose(MPTCP, code=Enum_MPTCPOption.MP_FASTCLOSE):
     """Header schema for Multipath TCP fastclose option."""
 
     #: Subtype.
@@ -849,7 +854,7 @@ class MPTCPFastclose(MPTCP):
 
 
 @schema_final
-class FastOpenCookie(Option):
+class FastOpenCookie(Option, code=Enum_Option.TCP_Fast_Open_Cookie):
     """"Header schema for TCP Fast Open option."""
 
     #: Cookie.
@@ -901,31 +906,8 @@ class TCP(Schema):
         length=lambda pkt: pkt['offset']['offset'] * 4 - 20,
         base_schema=Option,
         type_name='kind',
+        registry=Option.registry,
         eool=Enum_Option.End_of_Option_List,
-        registry=collections.defaultdict(lambda: UnassignedOption, {
-            Enum_Option.End_of_Option_List: EndOfOptionList,
-            Enum_Option.No_Operation: NoOperation,
-            Enum_Option.Maximum_Segment_Size: MaximumSegmentSize,
-            Enum_Option.Window_Scale: WindowScale,
-            Enum_Option.SACK_Permitted: SACKPermitted,
-            Enum_Option.SACK: SACK,
-            Enum_Option.Echo: Echo,
-            Enum_Option.Echo_Reply: EchoReply,
-            Enum_Option.Timestamps: Timestamp,
-            Enum_Option.Partial_Order_Connection_Permitted: PartialOrderConnectionPermitted,
-            Enum_Option.Partial_Order_Service_Profile: PartialOrderConnectionProfile,
-            Enum_Option.CC: CC,
-            Enum_Option.CC_NEW: CCNew,
-            Enum_Option.CC_ECHO: CCEcho,
-            Enum_Option.TCP_Alternate_Checksum_Request: AlternateChecksumRequest,
-            Enum_Option.TCP_Alternate_Checksum_Data: AlternateChecksumData,
-            Enum_Option.MD5_Signature_Option: MD5Signature,
-            Enum_Option.Quick_Start_Response: QuickStartResponse,
-            Enum_Option.User_Timeout_Option: UserTimeout,
-            Enum_Option.TCP_Authentication_Option: Authentication,
-            Enum_Option.Multipath_TCP: _MPTCP,
-            Enum_Option.TCP_Fast_Open_Cookie: FastOpenCookie,
-        }),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))  # key generated by OptionField
@@ -936,16 +918,3 @@ class TCP(Schema):
         def __init__(self, srcport: 'Enum_AppType | int', dstport: 'Enum_AppType | int', seq: 'int', ack: 'int',
                      offset: 'OffsetFlag', flags: 'Flags', window: 'int', checksum: 'bytes',
                      urgent: 'int', options: 'list[Option | bytes] | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
-
-
-#: DefaultDict[Enum_MPTCPOption, Type[MPTCP]]: Mapping of MPTCP type numbers to schemas.
-MAP_MPTCP_DATA = collections.defaultdict(lambda: MPTCPUnknown, {
-    Enum_MPTCPOption.MP_CAPABLE: MPTCPCapable,
-    #Enum_MPTCPOption.MP_JOIN: MPTCPJoin,
-    Enum_MPTCPOption.DSS: MPTCPDSS,
-    Enum_MPTCPOption.ADD_ADDR: MPTCPAddAddress,
-    Enum_MPTCPOption.REMOVE_ADDR: MPTCPRemoveAddress,
-    Enum_MPTCPOption.MP_PRIO: MPTCPPriority,
-    Enum_MPTCPOption.MP_FAIL: MPTCPFallback,
-    Enum_MPTCPOption.MP_FASTCLOSE: MPTCPFastclose,
-})  # type: DefaultDict[Enum_MPTCPOption | int, Type[MPTCP]]

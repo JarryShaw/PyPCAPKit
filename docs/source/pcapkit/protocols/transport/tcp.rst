@@ -230,7 +230,7 @@ Header Schemas
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.Timestamp
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.Timestamps
    :members:
    :show-inheritance:
 
@@ -244,7 +244,7 @@ Header Schemas
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile
    :members:
    :show-inheritance:
 
@@ -530,12 +530,6 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_data_selector
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector
 
-Miscellaneous Data
-~~~~~~~~~~~~~~~~~~
-
-.. autodata:: pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA
-   :no-value:
-
 Data Models
 -----------
 
@@ -625,7 +619,7 @@ Data Models
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Timestamp
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Timestamps
    :members:
    :show-inheritance:
 
@@ -639,7 +633,7 @@ Data Models
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile
+.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile
    :members:
    :show-inheritance:
 
