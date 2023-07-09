@@ -8,7 +8,7 @@ This module provides the protocol registries for :mod:`pcapkit`.
 
 """
 import importlib
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
@@ -33,18 +33,17 @@ from pcapkit.protocols.schema.internet.ipv6_route import \
 from pcapkit.protocols.schema.internet.mh import CGAExtension as Schema_MH_CGAExtension
 from pcapkit.protocols.schema.internet.mh import Option as Schema_MH_Option
 from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
-from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
 from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_PCAPNG_BlockType
 from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSBSecrets
 from pcapkit.protocols.schema.misc.pcapng import \
     NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
 from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
+from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
+from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import logger
-from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
-from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
 
 if TYPE_CHECKING:
     from typing import Optional, Type
@@ -68,7 +67,6 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
     from pcapkit.const.tcp.option import Option as TCP_Option
-    from pcapkit.corekit.fields.collections import OptionField
     from pcapkit.protocols.application.httpv2 import FrameConstructor as HTTP_FrameConstructor
     from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
     from pcapkit.protocols.internet.hip import ParameterConstructor as HIP_ParameterConstructor

@@ -78,15 +78,15 @@ from pcapkit.protocols.data.internet.mh import \
     AlternateCareofAddressOption as Data_AlternateCareofAddressOption
 from pcapkit.protocols.data.internet.mh import AuthOption as Data_AuthOption
 from pcapkit.protocols.data.internet.mh import \
-    BindingAcknowledgementMessage as Data_BindingAcknowledgementMessage
-from pcapkit.protocols.data.internet.mh import \
     AuthorizationDataOption as Data_AuthorizationDataOption
+from pcapkit.protocols.data.internet.mh import \
+    BindingAcknowledgementMessage as Data_BindingAcknowledgementMessage
 from pcapkit.protocols.data.internet.mh import BindingErrorMessage as Data_BindingErrorMessage
+from pcapkit.protocols.data.internet.mh import \
+    BindingRefreshAdviceOption as Data_BindingRefreshAdviceOption
 from pcapkit.protocols.data.internet.mh import \
     BindingRefreshRequestMessage as Data_BindingRefreshRequestMessage
 from pcapkit.protocols.data.internet.mh import BindingUpdateMessage as Data_BindingUpdateMessage
-from pcapkit.protocols.data.internet.mh import \
-    BindingRefreshAdviceOption as Data_BindingRefreshAdviceOption
 from pcapkit.protocols.data.internet.mh import CareofTestInitMessage as Data_CareofTestInitMessage
 from pcapkit.protocols.data.internet.mh import CareofTestInitOption as Data_CareofTestInitOption
 from pcapkit.protocols.data.internet.mh import CareofTestMessage as Data_CareofTestMessage
@@ -118,15 +118,15 @@ from pcapkit.protocols.schema.internet.mh import \
     AlternateCareofAddressOption as Schema_AlternateCareofAddressOption
 from pcapkit.protocols.schema.internet.mh import AuthOption as Schema_AuthOption
 from pcapkit.protocols.schema.internet.mh import \
-    BindingAcknowledgementMessage as Schema_BindingAcknowledgementMessage
-from pcapkit.protocols.schema.internet.mh import \
     AuthorizationDataOption as Schema_AuthorizationDataOption
+from pcapkit.protocols.schema.internet.mh import \
+    BindingAcknowledgementMessage as Schema_BindingAcknowledgementMessage
 from pcapkit.protocols.schema.internet.mh import BindingErrorMessage as Schema_BindingErrorMessage
+from pcapkit.protocols.schema.internet.mh import \
+    BindingRefreshAdviceOption as Schema_BindingRefreshAdviceOption
 from pcapkit.protocols.schema.internet.mh import \
     BindingRefreshRequestMessage as Schema_BindingRefreshRequestMessage
 from pcapkit.protocols.schema.internet.mh import BindingUpdateMessage as Schema_BindingUpdateMessage
-from pcapkit.protocols.schema.internet.mh import \
-    BindingRefreshAdviceOption as Schema_BindingRefreshAdviceOption
 from pcapkit.protocols.schema.internet.mh import \
     CareofTestInitMessage as Schema_CareofTestInitMessage
 from pcapkit.protocols.schema.internet.mh import CareofTestInitOption as Schema_CareofTestInitOption
