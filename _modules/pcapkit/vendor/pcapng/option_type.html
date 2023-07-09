@@ -389,7 +389,7 @@
 <span class="s1">__all__ = [&#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;]</span>
 
 <span class="s1">if TYPE_CHECKING:</span>
-<span class="s1">    from typing import DefaultDict, Optional, Type</span>
+<span class="s1">    from typing import Any, DefaultDict, Optional, Type</span>
 
 
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(StrEnum):</span>
@@ -423,6 +423,30 @@
 
 <span class="s1">    def __str__(self) -&gt; &#39;str&#39;:</span>
 <span class="s1">        return &#39;%s [%d]&#39; % (self.opt_name, self.opt_value)</span>
+
+<span class="s1">    def __int__(self) -&gt; &#39;int&#39;:</span>
+<span class="s1">        return self.opt_value</span>
+
+<span class="s1">    def __lt__(self, other: &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;) -&gt; &#39;bool&#39;:</span>
+<span class="s1">        return self.opt_value &lt; other</span>
+
+<span class="s1">    def __gt__(self, other: &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;) -&gt; &#39;bool&#39;:</span>
+<span class="s1">        return self.opt_value &gt; other</span>
+
+<span class="s1">    def __le__(self, other: &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;) -&gt; &#39;bool&#39;:</span>
+<span class="s1">        return self.opt_value &lt;= other</span>
+
+<span class="s1">    def __ge__(self, other: &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;) -&gt; &#39;bool&#39;:</span>
+<span class="s1">        return self.opt_value &gt;= other</span>
+
+<span class="s1">    def __eq__(self, other: &#39;Any&#39;) -&gt; &#39;bool&#39;:</span>
+<span class="s1">        return self.opt_value == other</span>
+
+<span class="s1">    def __ne__(self, other: &#39;Any&#39;) -&gt; &#39;bool&#39;:</span>
+<span class="s1">        return self.opt_value != other</span>
+
+<span class="s1">    def __hash__(self) -&gt; &#39;int&#39;:</span>
+<span class="s1">        return hash(self.opt_value)</span>
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
