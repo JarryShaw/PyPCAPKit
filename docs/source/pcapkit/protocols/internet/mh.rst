@@ -166,7 +166,7 @@ Header Schemas
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindRefreshAdviceOption
+.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingRefreshAdviceOption
    :members:
    :show-inheritance:
 
@@ -187,7 +187,7 @@ Header Schemas
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingAuthorizationDataOption
+.. autoclass:: pcapkit.protocols.schema.internet.mh.AuthorizationDataOption
    :members:
    :show-inheritance:
 
@@ -407,12 +407,6 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.schema.internet.mh.mh_data_selector
 .. autofunction:: pcapkit.protocols.schema.internet.mh.mn_id_selector
 
-Miscellaneous Data
-~~~~~~~~~~~~~~~~~~
-
-.. autodata:: pcapkit.protocols.schema.internet.mh.MAP_MH_DATA
-   :no-value:
-
 Data Models
 -----------
 
@@ -446,7 +440,7 @@ Data Models
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindRefreshAdviceOption
+.. autoclass:: pcapkit.protocols.data.internet.mh.BindingRefreshAdviceOption
    :members:
    :show-inheritance:
 
@@ -467,7 +461,7 @@ Data Models
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindingAuthorizationDataOption
+.. autoclass:: pcapkit.protocols.data.internet.mh.AuthorizationDataOption
    :members:
    :show-inheritance:
 

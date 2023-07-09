@@ -80,13 +80,13 @@ from pcapkit.protocols.data.internet.mh import AuthOption as Data_AuthOption
 from pcapkit.protocols.data.internet.mh import \
     BindingAcknowledgementMessage as Data_BindingAcknowledgementMessage
 from pcapkit.protocols.data.internet.mh import \
-    BindingAuthorizationDataOption as Data_BindingAuthorizationDataOption
+    AuthorizationDataOption as Data_AuthorizationDataOption
 from pcapkit.protocols.data.internet.mh import BindingErrorMessage as Data_BindingErrorMessage
 from pcapkit.protocols.data.internet.mh import \
     BindingRefreshRequestMessage as Data_BindingRefreshRequestMessage
 from pcapkit.protocols.data.internet.mh import BindingUpdateMessage as Data_BindingUpdateMessage
 from pcapkit.protocols.data.internet.mh import \
-    BindRefreshAdviceOption as Data_BindRefreshAdviceOption
+    BindingRefreshAdviceOption as Data_BindingRefreshAdviceOption
 from pcapkit.protocols.data.internet.mh import CareofTestInitMessage as Data_CareofTestInitMessage
 from pcapkit.protocols.data.internet.mh import CareofTestInitOption as Data_CareofTestInitOption
 from pcapkit.protocols.data.internet.mh import CareofTestMessage as Data_CareofTestMessage
@@ -120,13 +120,13 @@ from pcapkit.protocols.schema.internet.mh import AuthOption as Schema_AuthOption
 from pcapkit.protocols.schema.internet.mh import \
     BindingAcknowledgementMessage as Schema_BindingAcknowledgementMessage
 from pcapkit.protocols.schema.internet.mh import \
-    BindingAuthorizationDataOption as Schema_BindingAuthorizationDataOption
+    AuthorizationDataOption as Schema_AuthorizationDataOption
 from pcapkit.protocols.schema.internet.mh import BindingErrorMessage as Schema_BindingErrorMessage
 from pcapkit.protocols.schema.internet.mh import \
     BindingRefreshRequestMessage as Schema_BindingRefreshRequestMessage
 from pcapkit.protocols.schema.internet.mh import BindingUpdateMessage as Schema_BindingUpdateMessage
 from pcapkit.protocols.schema.internet.mh import \
-    BindRefreshAdviceOption as Schema_BindRefreshAdviceOption
+    BindingRefreshAdviceOption as Schema_BindingRefreshAdviceOption
 from pcapkit.protocols.schema.internet.mh import \
     CareofTestInitMessage as Schema_CareofTestInitMessage
 from pcapkit.protocols.schema.internet.mh import CareofTestInitOption as Schema_CareofTestInitOption
@@ -1125,8 +1125,8 @@ class MH(Internet[Data_MH, Schema_MH],
         )
         return data
 
-    def _read_opt_bra(self, schema: 'Schema_BindRefreshAdviceOption', *,
-                      options: 'Option') -> 'Data_BindRefreshAdviceOption':
+    def _read_opt_bra(self, schema: 'Schema_BindingRefreshAdviceOption', *,
+                      options: 'Option') -> 'Data_BindingRefreshAdviceOption':
         """Read MH binding refresh advice option.
 
         Structure of MH Binding Refresh Advice option [:rfc:`6275`]:
@@ -1152,7 +1152,7 @@ class MH(Internet[Data_MH, Schema_MH],
         if schema.length != 2:
             raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
 
-        data = Data_BindRefreshAdviceOption(
+        data = Data_BindingRefreshAdviceOption(
             type=schema.type,
             length=schema.length + 2,
             interval=schema.interval,
@@ -1234,8 +1234,8 @@ class MH(Internet[Data_MH, Schema_MH],
         )
         return data
 
-    def _read_opt_bad(self, schema: 'Schema_BindingAuthorizationDataOption', *,
-                      options: 'Option') -> 'Data_BindingAuthorizationDataOption':
+    def _read_opt_bad(self, schema: 'Schema_AuthorizationDataOption', *,
+                      options: 'Option') -> 'Data_AuthorizationDataOption':
         """Read MH binding authorization data option.
 
         Structure of MH Binding Authorization Data option [:rfc:`6275`]:
@@ -1265,7 +1265,7 @@ class MH(Internet[Data_MH, Schema_MH],
         if schema.length % 8 != 0:
             raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
 
-        data = Data_BindingAuthorizationDataOption(
+        data = Data_AuthorizationDataOption(
             type=schema.type,
             length=schema.length + 2,
             data=schema.data,
@@ -2196,9 +2196,9 @@ class MH(Internet[Data_MH, Schema_MH],
             length=length,
         )
 
-    def _make_opt_bra(self, type: 'Enum_Option', option: 'Optional[Data_BindRefreshAdviceOption]' = None, *,
+    def _make_opt_bra(self, type: 'Enum_Option', option: 'Optional[Data_BindingRefreshAdviceOption]' = None, *,
                       interval: 'int' = 0,
-                      **kwargs: 'Any') -> 'Schema_BindRefreshAdviceOption':
+                      **kwargs: 'Any') -> 'Schema_BindingRefreshAdviceOption':
         """Make MH binding refresh advice option.
 
         Args:
@@ -2214,7 +2214,7 @@ class MH(Internet[Data_MH, Schema_MH],
         if option is not None:
             interval = option.interval
 
-        return Schema_BindRefreshAdviceOption(
+        return Schema_BindingRefreshAdviceOption(
             type=type,
             length=2,
             interval=interval,
@@ -2272,9 +2272,9 @@ class MH(Internet[Data_MH, Schema_MH],
             careof=careof,
         )
 
-    def _make_opt_bad(self, type: 'Enum_Option', option: 'Optional[Data_BindingAuthorizationDataOption]' = None, *,
+    def _make_opt_bad(self, type: 'Enum_Option', option: 'Optional[Data_AuthorizationDataOption]' = None, *,
                       data: 'bytes' = b'',
-                      **kwargs: 'Any') -> 'Schema_BindingAuthorizationDataOption':
+                      **kwargs: 'Any') -> 'Schema_AuthorizationDataOption':
         """Make MH binding authorization data option.
 
         Args:
@@ -2293,7 +2293,7 @@ class MH(Internet[Data_MH, Schema_MH],
         if len(data) % 8 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
 
-        return Schema_BindingAuthorizationDataOption(
+        return Schema_AuthorizationDataOption(
             type=type,
             length=len(data),
             data=data,

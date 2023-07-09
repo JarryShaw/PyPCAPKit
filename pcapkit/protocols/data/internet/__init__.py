@@ -179,12 +179,12 @@ from pcapkit.protocols.data.internet.mh import AuthOption as MH_AuthOption
 from pcapkit.protocols.data.internet.mh import \
     BindingAcknowledgementMessage as MH_BindingAcknowledgementMessage
 from pcapkit.protocols.data.internet.mh import \
-    BindingAuthorizationDataOption as MH_BindingAuthorizationDataOption
+    AuthorizationDataOption as MH_AuthorizationDataOption
 from pcapkit.protocols.data.internet.mh import BindingErrorMessage as MH_BindingErrorMessage
 from pcapkit.protocols.data.internet.mh import \
     BindingRefreshRequestMessage as MH_BindingRefreshRequestMessage
 from pcapkit.protocols.data.internet.mh import BindingUpdateMessage as MH_BindingUpdateMessage
-from pcapkit.protocols.data.internet.mh import BindRefreshAdviceOption as MH_BindRefreshAdviceOption
+from pcapkit.protocols.data.internet.mh import BindingRefreshAdviceOption as MH_BindingRefreshAdviceOption
 from pcapkit.protocols.data.internet.mh import CareofTestInitMessage as MH_CareofTestInitMessage
 from pcapkit.protocols.data.internet.mh import CareofTestInitOption as MH_CareofTestInitOption
 from pcapkit.protocols.data.internet.mh import CareofTestMessage as MH_CareofTestMessage
@@ -287,8 +287,8 @@ __all__ = [
     'MH_HomeTestMessage', 'MH_CareofTestMessage', 'MH_BindingUpdateMessage', 'MH_BindingAcknowledgementMessage',
     'MH_BindingErrorMessage',
     'MH_Option',
-    'MH_UnassignedOption', 'MH_PadOption', 'MH_BindRefreshAdviceOption', 'MH_AlternateCareofAddressOption',
-    'MH_NonceIndicesOption', 'MH_BindingAuthorizationDataOption', 'MH_MobileNetworkPrefixOption',
+    'MH_UnassignedOption', 'MH_PadOption', 'MH_BindingRefreshAdviceOption', 'MH_AlternateCareofAddressOption',
+    'MH_NonceIndicesOption', 'MH_AuthorizationDataOption', 'MH_MobileNetworkPrefixOption',
     'MH_LinkLayerAddressOption', 'MH_MNIDOption', 'MH_AuthOption', 'MH_MesgIDOption', 'MH_CGAParametersRequestOption',
     'MH_CGAParametersOption', 'MH_SignatureOption', 'MH_PermanentHomeKeygenTokenOption', 'MH_CareofTestInitOption',
     'MH_CareofTestOption',

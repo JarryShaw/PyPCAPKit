@@ -2,7 +2,6 @@
 # mypy: disable-error-code=assignment
 """header schema for mobility header"""
 
-import collections
 import datetime
 import math
 from typing import TYPE_CHECKING
@@ -60,7 +59,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, Pa
 from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, UInt32Field,
                                             UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
-from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -72,8 +71,8 @@ __all__ = [
     'BindingErrorMessage',
 
     'Option',
-    'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
-    'NonceIndicesOption', 'BindingAuthorizationDataOption', 'MobileNetworkPrefixOption',
+    'UnassignedOption', 'PadOption', 'BindingRefreshAdviceOption', 'AlternateCareofAddressOption',
+    'NonceIndicesOption', 'AuthorizationDataOption', 'MobileNetworkPrefixOption',
     'LinkLayerAddressOption', 'MNIDOption', 'AuthOption', 'MesgIDOption', 'CGAParametersRequestOption',
     'CGAParametersOption', 'SignatureOption', 'PermanentHomeKeygenTokenOption', 'CareofTestInitOption',
     'CareofTestOption',
@@ -87,7 +86,7 @@ __all__ = [
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from ipaddress import IPv6Address
-    from typing import Any, DefaultDict, Type
+    from typing import Any
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol
@@ -120,29 +119,6 @@ if SPHINX_TYPE_CHECKING:
         K: 'int'
 
 
-def mh_opt_registry() -> 'DefaultDict[Enum_Option | int, Type[Option]]':
-    """Registry for MH type-specific message :attr:`~Packet.options`."""
-    return collections.defaultdict(lambda: UnassignedOption, {
-        Enum_Option.Pad1: PadOption,
-        Enum_Option.PadN: PadOption,
-        Enum_Option.Binding_Refresh_Advice: BindingAuthorizationDataOption,
-        Enum_Option.Alternate_Care_of_Address: AlternateCareofAddressOption,
-        Enum_Option.Nonce_Indices: NonceIndicesOption,
-        Enum_Option.Authorization_Data: BindingAuthorizationDataOption,
-        Enum_Option.Mobile_Network_Prefix_Option: MobileNetworkPrefixOption,
-        Enum_Option.Mobility_Header_Link_Layer_Address_option: LinkLayerAddressOption,
-        Enum_Option.MN_ID_OPTION_TYPE: MNIDOption,
-        Enum_Option.AUTH_OPTION_TYPE: AuthOption,
-        Enum_Option.MESG_ID_OPTION_TYPE: MesgIDOption,
-        Enum_Option.CGA_Parameters_Request: CGAParametersRequestOption,
-        Enum_Option.CGA_Parameters: CGAParametersOption,
-        Enum_Option.Signature: SignatureOption,
-        Enum_Option.Permanent_Home_Keygen_Token: PermanentHomeKeygenTokenOption,
-        Enum_Option.Care_of_Test_Init: CareofTestInitOption,
-        Enum_Option.Care_of_Test: CareofTestOption,
-    })
-
-
 def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`MH.data` field.
 
@@ -154,14 +130,10 @@ def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         wrapped :class:`~pcapkit.protocols.schema.internet.mh.Packet`
         subclass instance.
 
-    See Also:
-        * :class:`pcapkit.const.mh.packet.Packet`
-        * :data:`ppcapkit.protocols.schema.internet.mh.MAP_MH_DATA`
-
     """
     type = pkt['type']  # type: Enum_Packet
     length = pkt['length'] * 8 + 2
-    schema = MAP_MH_DATA[type]
+    schema = Packet.registry[type]
     return SchemaField(length=length, schema=schema)
 
 
@@ -208,8 +180,10 @@ class MH(Schema):
                      chksum: 'bytes', data: 'Packet | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
 
 
-class Option(Schema):
+class Option(EnumSchema[Enum_Option]):
     """Header schema for MH options."""
+
+    __default__ = lambda: UnassignedOption
 
     #: Option type.
     type: 'Enum_Option' = EnumField(length=1, namespace=Enum_Option)
@@ -248,7 +222,8 @@ class UnassignedOption(Option):
 
 
 @schema_final
-class PadOption(Option):
+class PadOption(Option, code=[Enum_Option.Pad1,
+                              Enum_Option.PadN]):
     """Header schema for MH padding options."""
 
     #: Option data.
@@ -259,7 +234,7 @@ class PadOption(Option):
 
 
 @schema_final
-class BindRefreshAdviceOption(Option):
+class BindingRefreshAdviceOption(Option, code=Enum_Option.Binding_Refresh_Advice):
     """Header schema for MH binding refresh advice options."""
 
     #: Refresh interval.
@@ -270,7 +245,7 @@ class BindRefreshAdviceOption(Option):
 
 
 @schema_final
-class AlternateCareofAddressOption(Option):
+class AlternateCareofAddressOption(Option, code=Enum_Option.Alternate_Care_of_Address):
     """Header schema for MH alternate care-of address options."""
 
     #: Alternate care-of address.
@@ -281,7 +256,7 @@ class AlternateCareofAddressOption(Option):
 
 
 @schema_final
-class NonceIndicesOption(Option):
+class NonceIndicesOption(Option, code=Enum_Option.Nonce_Indices):
     """Header schema for MH nonce indices options."""
 
     #: Home nonce index.
@@ -294,7 +269,7 @@ class NonceIndicesOption(Option):
 
 
 @schema_final
-class BindingAuthorizationDataOption(Option):
+class AuthorizationDataOption(Option, code=Enum_Option.Authorization_Data):
     """Header schema for MH binding authorization data options."""
 
     #: Authenticator.
@@ -305,7 +280,7 @@ class BindingAuthorizationDataOption(Option):
 
 
 @schema_final
-class MobileNetworkPrefixOption(Option):
+class MobileNetworkPrefixOption(Option, code=Enum_Option.Mobile_Network_Prefix_Option):
     """Header schema for MH mobile network prefix options."""
 
     #: Reserved.
@@ -320,7 +295,7 @@ class MobileNetworkPrefixOption(Option):
 
 
 @schema_final
-class LinkLayerAddressOption(Option):
+class LinkLayerAddressOption(Option, code=Enum_Option.Mobility_Header_Link_Layer_Address_option):
     """Header schema for MH link-layer address (MH-LLA) options."""
 
     #: Option code.
@@ -333,7 +308,7 @@ class LinkLayerAddressOption(Option):
 
 
 @schema_final
-class MNIDOption(Option):
+class MNIDOption(Option, code=Enum_Option.MN_ID_OPTION_TYPE):
     """Header schema for MH mobile node identifier (MNID) options."""
 
     #: Subtype.
@@ -346,7 +321,7 @@ class MNIDOption(Option):
 
 
 @schema_final
-class AuthOption(Option):
+class AuthOption(Option, code=Enum_Option.AUTH_OPTION_TYPE):
     """Header schema for Mobility Message Authentication options."""
 
     #: Subtype.
@@ -361,7 +336,7 @@ class AuthOption(Option):
 
 
 @schema_final
-class MesgIDOption(Option):
+class MesgIDOption(Option, code=Enum_Option.MESG_ID_OPTION_TYPE):
     """Header schema for Mobility Message Replay Protection options."""
 
     #: Timestamp (seconds since January 1st, 1970, c.f., :rfc:`1305`).
@@ -398,15 +373,17 @@ class MesgIDOption(Option):
 
 
 @schema_final
-class CGAParametersRequestOption(Option):
+class CGAParametersRequestOption(Option, code=Enum_Option.CGA_Parameters_Request):
     """Header schema for CGA Parameters Request options."""
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
 
 
-class CGAExtension(Schema):
+class CGAExtension(EnumSchema[Enum_CGAExtension]):
     """Header schema for CGA extensions."""
+
+    __default__ = lambda: UnknownExtension
 
     #: Extension type.
     type: 'Enum_CGAExtension' = EnumField(length=2, namespace=Enum_CGAExtension)
@@ -426,7 +403,7 @@ class UnknownExtension(CGAExtension):
 
 
 @schema_final
-class MultiPrefixExtension(CGAExtension):
+class MultiPrefixExtension(CGAExtension, code=Enum_CGAExtension.Multi_Prefix):
     """Header schema for Multi-Prefix CGA extensions."""
 
     #: Flags.
@@ -464,9 +441,7 @@ class CGAParameter(Schema):
         length=lambda pkt: pkt['length'] - 25 - len(pkt['public_key']),
         base_schema=CGAExtension,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownExtension, {  # type: ignore[arg-type,return-value]
-            Enum_CGAExtension.Multi_Prefix: MultiPrefixExtension,
-        }),
+        registry=CGAExtension.registry,
         eool=None,
     )
 
@@ -476,7 +451,7 @@ class CGAParameter(Schema):
 
 
 @schema_final
-class CGAParametersOption(Option):
+class CGAParametersOption(Option, code=Enum_Option.CGA_Parameters):
     """Header schema for CGA Parameters options."""
 
     #: CGA parameters, c.f., :rfc:`3972`.
@@ -490,7 +465,7 @@ class CGAParametersOption(Option):
 
 
 @schema_final
-class SignatureOption(Option):
+class SignatureOption(Option, code=Enum_Option.Signature):
     """Header schema for MH Signature options."""
 
     #: Signature.
@@ -501,7 +476,7 @@ class SignatureOption(Option):
 
 
 @schema_final
-class PermanentHomeKeygenTokenOption(Option):
+class PermanentHomeKeygenTokenOption(Option, code=Enum_Option.Permanent_Home_Keygen_Token):
     """Header schema for Permanent Home Keygen Token options."""
 
     #: Permanent home keygen token.
@@ -512,7 +487,7 @@ class PermanentHomeKeygenTokenOption(Option):
 
 
 @schema_final
-class CareofTestInitOption(Option):
+class CareofTestInitOption(Option, code=Enum_Option.Care_of_Test_Init):
     """Header schema for MH Care-of Test Init options."""
 
     if TYPE_CHECKING:
@@ -520,7 +495,7 @@ class CareofTestInitOption(Option):
 
 
 @schema_final
-class CareofTestOption(Option):
+class CareofTestOption(Option, code=Enum_Option.Care_of_Test):
     """Header schema for MH Care-of Test options."""
 
     #: Care-of keygen token.
@@ -533,8 +508,10 @@ class CareofTestOption(Option):
 # TODO: Implement other options.
 
 
-class Packet(Schema):
+class Packet(EnumSchema[Enum_Packet]):
     """Header schema for MH packet data."""
+
+    __default__ = lambda: UnknownMessage
 
 
 @schema_final
@@ -549,7 +526,7 @@ class UnknownMessage(Packet):
 
 
 @schema_final
-class BindingRefreshRequestMessage(Packet):
+class BindingRefreshRequestMessage(Packet, code=Enum_Packet.Binding_Refresh_Request):
     """Header schema for MH Binding Refresh Request (BRR) message."""
 
     #: Reserved.
@@ -559,7 +536,7 @@ class BindingRefreshRequestMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),
+        registry=Option.registry,
         eool=None,
     )
 
@@ -568,7 +545,7 @@ class BindingRefreshRequestMessage(Packet):
 
 
 @schema_final
-class HomeTestInitMessage(Packet):
+class HomeTestInitMessage(Packet, code=Enum_Packet.Home_Test_Init):
     """Header schema for MH Home Test Init (HoTI) message."""
 
     #: Reserved.
@@ -580,7 +557,7 @@ class HomeTestInitMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),
+        registry=Option.registry,
         eool=None,
     )
 
@@ -589,7 +566,7 @@ class HomeTestInitMessage(Packet):
 
 
 @schema_final
-class CareofTestInitMessage(Packet):
+class CareofTestInitMessage(Packet, code=Enum_Packet.Care_of_Test_Init):
     """Header schema for MH Care-of Test Init (CoTI) messages."""
 
     #: Reserved.
@@ -601,7 +578,7 @@ class CareofTestInitMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),
+        registry=Option.registry,
         eool=None,
     )
 
@@ -610,7 +587,7 @@ class CareofTestInitMessage(Packet):
 
 
 @schema_final
-class HomeTestMessage(Packet):
+class HomeTestMessage(Packet, code=Enum_Packet.Home_Test):
     """Header schema for MH Home Test (HoT) message."""
 
     #: Home nonce index.
@@ -624,7 +601,7 @@ class HomeTestMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),
+        registry=Option.registry,
         eool=None,
     )
 
@@ -634,7 +611,7 @@ class HomeTestMessage(Packet):
 
 
 @schema_final
-class CareofTestMessage(Packet):
+class CareofTestMessage(Packet, code=Enum_Packet.Care_of_Test):
     """Header schema for MH Care-of Test (CoT) message."""
 
     #: Care-of nonce index.
@@ -648,7 +625,7 @@ class CareofTestMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),
+        registry=Option.registry,
         eool=None,
     )
 
@@ -658,7 +635,7 @@ class CareofTestMessage(Packet):
 
 
 @schema_final
-class BindingUpdateMessage(Packet):
+class BindingUpdateMessage(Packet, code=Enum_Packet.Binding_Update):
     """Header schema for MH Binding Update (BU) messages."""
 
     #: Sequence number.
@@ -677,7 +654,7 @@ class BindingUpdateMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),
+        registry=Option.registry,
         eool=None,
     )
 
@@ -687,7 +664,7 @@ class BindingUpdateMessage(Packet):
 
 
 @schema_final
-class BindingAcknowledgementMessage(Packet):
+class BindingAcknowledgementMessage(Packet, code=Enum_Packet.Binding_Acknowledgement):
     """Header schema for MH Binding Acknowledgement (BA) messages."""
 
     #: Status.
@@ -705,7 +682,7 @@ class BindingAcknowledgementMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),
+        registry=Option.registry,
         eool=None,
     )
 
@@ -715,7 +692,7 @@ class BindingAcknowledgementMessage(Packet):
 
 
 @schema_final
-class BindingErrorMessage(Packet):
+class BindingErrorMessage(Packet, code=Enum_Packet.Binding_Error):
     """Header schema for MH Binding Error (BE) messages."""
 
     #: Status.
@@ -729,7 +706,7 @@ class BindingErrorMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),
+        registry=Option.registry,
         eool=None,
     )
 
@@ -739,15 +716,3 @@ class BindingErrorMessage(Packet):
 
 
 # TODO: Implement other message types.
-
-#: DefaultDict[Enum_Packet, Type[Packet]]: Mapping of MH message type numbers to schemas.
-MAP_MH_DATA = collections.defaultdict(lambda: UnknownMessage, {
-    Enum_Packet.Binding_Refresh_Request: BindingRefreshRequestMessage,
-    Enum_Packet.Home_Test_Init: HomeTestInitMessage,
-    Enum_Packet.Care_of_Test_Init: CareofTestInitMessage,
-    Enum_Packet.Home_Test: HomeTestMessage,
-    Enum_Packet.Care_of_Test: CareofTestMessage,
-    Enum_Packet.Binding_Update: BindingUpdateMessage,
-    Enum_Packet.Binding_Acknowledgement: BindingAcknowledgementMessage,
-    Enum_Packet.Binding_Error: BindingErrorMessage,
-})  # type: DefaultDict[Enum_Packet | int, Type[Packet]]

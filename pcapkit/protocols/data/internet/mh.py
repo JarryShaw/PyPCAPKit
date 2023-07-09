@@ -70,8 +70,8 @@ __all__ = [
     'BindingErrorMessage',
 
     'Option',
-    'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
-    'NonceIndicesOption', 'BindingAuthorizationDataOption', 'MobileNetworkPrefixOption',
+    'UnassignedOption', 'PadOption', 'BindingRefreshAdviceOption', 'AlternateCareofAddressOption',
+    'NonceIndicesOption', 'AuthorizationDataOption', 'MobileNetworkPrefixOption',
     'LinkLayerAddressOption', 'MNIDOption', 'AuthOption', 'MesgIDOption', 'CGAParametersRequestOption',
     'CGAParametersOption', 'SignatureOption', 'PermanentHomeKeygenTokenOption', 'CareofTestInitOption',
     'CareofTestOption',
@@ -281,7 +281,7 @@ class PadOption(Option):
 
 
 @info_final
-class BindRefreshAdviceOption(Option):
+class BindingRefreshAdviceOption(Option):
     """Data model for Binding Refresh Advice option."""
 
     #: Refresh interval.
@@ -316,7 +316,7 @@ class NonceIndicesOption(Option):
 
 
 @info_final
-class BindingAuthorizationDataOption(Option):
+class AuthorizationDataOption(Option):
     """Data model for Binding Authorization Data option."""
 
     #: Authenticator.

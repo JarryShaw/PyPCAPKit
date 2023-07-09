@@ -30,8 +30,9 @@ from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_IPv4_Option
 from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_IPv6_Opts_Option
 from pcapkit.protocols.schema.internet.ipv6_route import \
     RoutingType as Schema_IPv6_Route_RoutingType
-from pcapkit.protocols.schema.internet.mh import MAP_MH_DATA
-from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_MH_CGAParameter
+from pcapkit.protocols.schema.internet.mh import CGAExtension as Schema_MH_CGAExtension
+from pcapkit.protocols.schema.internet.mh import Option as Schema_MH_Option
+from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
 from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
 from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_PCAPNG_BlockType
 from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSBSecrets
@@ -95,9 +96,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
     from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
     from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
-    from pcapkit.protocols.schema.internet.mh import CGAExtension as Schema_MH_CGAExtension
-    from pcapkit.protocols.schema.internet.mh import Option as Schema_MH_Option
-    from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
     from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
     from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
     from pcapkit.protocols.transport.tcp import MPOptionConstructor as TCP_MPOptionConstructor
@@ -456,7 +454,7 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
 
     MH.register_message(code, meth)
     if schema is not None:
-        MAP_MH_DATA[code] = schema
+        Schema_MH_Packet.register(code, schema)
     logger.info('registered MH message type parser: %s', code.name)
 
 
@@ -481,10 +479,7 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
 
     MH.register_option(code, meth)
     if schema is not None:
-        for subclass in Schema_MH_Packet.__subclasses__():
-            if not hasattr(subclass, 'options'):
-                continue
-            cast('OptionField[Schema_MH_Option]', subclass.options).registry[code] = schema
+        Schema_MH_Option.register(code, schema)
     logger.info('registered MH option parser: %s', code.name)
 
 
@@ -509,7 +504,7 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
 
     MH.register_extension(code, meth)
     if schema is not None:
-        cast('OptionField[Schema_MH_CGAExtension]', Schema_MH_CGAParameter.extensions).registry[code] = schema
+        Schema_MH_CGAExtension.register(code, schema)
     logger.info('registered MH CGA extension: %s', code.name)
 
 
