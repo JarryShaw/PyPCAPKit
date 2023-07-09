@@ -18,7 +18,7 @@ from aenum import StrEnum, extend_enum
 __all__ = ['OptionType']
 
 if TYPE_CHECKING:
-    from typing import DefaultDict, Optional, Type
+    from typing import Any, DefaultDict, Optional, Type
 
 
 class OptionType(StrEnum):
@@ -52,6 +52,30 @@ class OptionType(StrEnum):
 
     def __str__(self) -> 'str':
         return '%s [%d]' % (self.opt_name, self.opt_value)
+
+    def __int__(self) -> 'int':
+        return self.opt_value
+
+    def __lt__(self, other: 'OptionType') -> 'bool':
+        return self.opt_value < other
+
+    def __gt__(self, other: 'OptionType') -> 'bool':
+        return self.opt_value > other
+
+    def __le__(self, other: 'OptionType') -> 'bool':
+        return self.opt_value <= other
+
+    def __ge__(self, other: 'OptionType') -> 'bool':
+        return self.opt_value >= other
+
+    def __eq__(self, other: 'Any') -> 'bool':
+        return self.opt_value == other
+
+    def __ne__(self, other: 'Any') -> 'bool':
+        return self.opt_value != other
+
+    def __hash__(self) -> 'int':
+        return hash(self.opt_value)
 
     #: opt_endofopt
     opt_endofopt: 'OptionType' = 0, 'opt_endofopt'
