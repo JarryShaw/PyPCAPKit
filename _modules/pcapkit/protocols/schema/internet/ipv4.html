@@ -362,7 +362,7 @@
                                          <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FieldValueError</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -382,7 +382,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_Field</span> <span class="k">as</span> <span class="n">Field</span>
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
@@ -455,25 +455,26 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        * If ``func`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.hopopt.QuickStartRequestOption`</span>
+<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption`</span>
 <span class="sd">          instance.</span>
 <span class="sd">        * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.hopopt.QuickStartReportOption`</span>
+<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption`</span>
 <span class="sd">          instance.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">])</span>
     <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
 
-    <span class="k">if</span> <span class="n">func</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">QuickStartRequestOption</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">func</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">QuickStartReportOption</span><span class="p">)</span>
-    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HOPOPT: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">QSOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv4: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_OptionNumber</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 options.&quot;&quot;&quot;</span>
+
+    <span class="n">__default__</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedOption</span>
 
     <span class="c1">#: Option type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="p">)</span>
@@ -511,7 +512,7 @@
 
 
 <div class="viewcode-block" id="EOOLOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.EOOLOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EOOLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EOOLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 end of option list (``EOOL``) option.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -519,7 +520,7 @@
 
 
 <div class="viewcode-block" id="NOPOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.NOPOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">NOPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">NOPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 no operation (``NOP``) option.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -527,7 +528,7 @@
 
 
 <div class="viewcode-block" id="SECOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.SECOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">SECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SEC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 security (``SEC``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Classification level.</span>
@@ -543,7 +544,7 @@
 
 
 <div class="viewcode-block" id="LSROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.LSROption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">LSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">LSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">LSR</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 loose source route (``LSR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Pointer.</span>
@@ -564,7 +565,7 @@
 
 
 <div class="viewcode-block" id="TSOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TSOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">TSOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">TSOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">TS</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 timestamp (``TS``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Pointer.</span>
@@ -666,7 +667,7 @@
 
 
 <div class="viewcode-block" id="ESECOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.ESECOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ESECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ESECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">E_SEC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 extended security (``ESEC``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Additional security information format code.</span>
@@ -682,7 +683,7 @@
 
 
 <div class="viewcode-block" id="RROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.RROption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">RROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">RROption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">RR</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 record route (``RR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Pointer.</span>
@@ -703,7 +704,7 @@
 
 
 <div class="viewcode-block" id="SIDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.SIDOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">SIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SID</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 stream identifier (``SID``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Stream identifier.</span>
@@ -714,7 +715,7 @@
 
 
 <div class="viewcode-block" id="SSROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.SSROption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">SSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SSR</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 strict source route (``SSR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Pointer.</span>
@@ -735,7 +736,7 @@
 
 
 <div class="viewcode-block" id="MTUPOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.MTUPOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">MTUPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MTUPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">MTUP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 MTU probe (``MTUP``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: MTU.</span>
@@ -746,7 +747,7 @@
 
 
 <div class="viewcode-block" id="MTUROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.MTUROption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">MTUROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MTUROption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">MTUR</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 MTU reply (``MTUR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: MTU.</span>
@@ -757,7 +758,7 @@
 
 
 <div class="viewcode-block" id="TROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TROption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">TROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">TROption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">TR</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 traceroute (``TR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ID number.</span>
@@ -774,7 +775,7 @@
 
 
 <div class="viewcode-block" id="RTRALTOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.RTRALTOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">RTRALTOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">RTRALTOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">RTRALT</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 router alert (``RTRALT``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Router alert value.</span>
@@ -812,8 +813,14 @@
         <span class="k">return</span> <span class="n">ret</span>
 
 
-<div class="viewcode-block" id="QSOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.QSOption">[docs]</a><span class="k">class</span> <span class="nc">QSOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="c1"># register ``_QSOption`` as ``QS`` option</span>
+<span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">QS</span><span class="p">,</span> <span class="n">_QSOption</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="QSOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.QSOption">[docs]</a><span class="k">class</span> <span class="nc">QSOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_QSFunction</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPV4 quick start (``QS``) options.&quot;&quot;&quot;</span>
+
+    <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[Enum_QSFunction, Type[QSOption]]&#39;</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value,arg-type]</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;QuickStartFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
@@ -826,7 +833,7 @@
 
 
 <span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">QuickStartRequestOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">QuickStartRequestOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPV4 quick start request options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: QS time-to-live (TTL).</span>
@@ -842,7 +849,7 @@
 
 
 <span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">QuickStartReportOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">QuickStartReportOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPV4 quick start report of approved rate options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: QS nonce.</span>
@@ -897,21 +904,9 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;vihl&#39;</span><span class="p">][</span><span class="s1">&#39;ihl&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">20</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedOption</span><span class="p">,</span> <span class="p">{</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">:</span> <span class="n">EOOLOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">:</span> <span class="n">NOPOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SEC</span><span class="p">:</span> <span class="n">SECOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">LSR</span><span class="p">:</span> <span class="n">LSROption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">E_SEC</span><span class="p">:</span> <span class="n">ESECOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">RR</span><span class="p">:</span> <span class="n">RROption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SID</span><span class="p">:</span> <span class="n">SIDOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SSR</span><span class="p">:</span> <span class="n">SSROption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">MTUP</span><span class="p">:</span> <span class="n">MTUPOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">MTUR</span><span class="p">:</span> <span class="n">MTUROption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">TR</span><span class="p">:</span> <span class="n">TROption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">RTRALT</span><span class="p">:</span> <span class="n">RTRALTOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">QS</span><span class="p">:</span> <span class="n">_QSOption</span><span class="p">,</span>
-        <span class="p">}))</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
+        <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__option_padding__&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="c1">#: Payload.</span>

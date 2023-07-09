@@ -1005,7 +1005,7 @@ attribute:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_route.RoutingType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">RoutingType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_route.html#RoutingType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_route.RoutingType" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>[<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.routing.Routing" title="pcapkit.const.ipv6.routing.Routing"><code class="xref py py-class docutils literal notranslate"><span class="pre">Routing</span></code></a>]</p>
 <p>Header schema for IPv6-Route type-specific routing data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1018,6 +1018,12 @@ attribute:</p>
 <dd class="field-even"><p>Self</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_route.RoutingType.registry">
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[ET,</span> <span class="pre">Type[Self]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{Routing.Source_Route:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.internet.ipv6_route.SourceRoute'&gt;,</span> <span class="pre">Routing.Type_2_Routing_Header:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.internet.ipv6_route.Type2'&gt;,</span> <span class="pre">Routing.RPL_Source_Route_Header:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.internet.ipv6_route.RPL'&gt;}</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_route.RoutingType.registry" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of enumeration numbers to schemas.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1292,27 +1298,6 @@ attribute:</p>
 instance based on <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.IPv6_Route.type" title="pcapkit.protocols.schema.internet.ipv6_route.IPv6_Route.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Route.type</span></code></a>.</p>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.routing.Routing" title="pcapkit.const.ipv6.routing.Routing"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv6.routing.Routing</span></code></a></p></li>
-<li><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.MAP_IPV6_ROUTE_DATA" title="pcapkit.protocols.schema.internet.ipv6_route.MAP_IPV6_ROUTE_DATA"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_route.MAP_IPV6_ROUTE_DATA</span></code></a></p></li>
-</ul>
-</div>
-</dd></dl>
-
-</section>
-<section id="miscellaneous-data">
-<h3>Miscellaneous Data<a class="headerlink" href="#miscellaneous-data" title="Permalink to this heading">#</a></h3>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_route.MAP_IPV6_ROUTE_DATA">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">MAP_IPV6_ROUTE_DATA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.11)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.routing.Routing" title="pcapkit.const.ipv6.routing.Routing"><span class="pre">Routing</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.RoutingType" title="pcapkit.protocols.schema.internet.ipv6_route.RoutingType"><span class="pre">RoutingType</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_route.MAP_IPV6_ROUTE_DATA" title="Permalink to this definition">#</a></dt>
-<dd><p>Mapping of IPv6-Route routing type numbers to schemas.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DefaultDict[Enum_Routing, <a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type">Type</a>[<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.RoutingType" title="pcapkit.protocols.schema.internet.ipv6_route.RoutingType">RoutingType</a>]]</p>
-</dd>
-</dl>
 </dd></dl>
 
 </section>
@@ -1531,7 +1516,6 @@ instance based on <a class="reference internal" href="#pcapkit.protocols.schema.
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema.internet.ipv6_route">Header Schemas</a><ul>
 <li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
 <li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
-<li><a class="reference internal" href="#miscellaneous-data">Miscellaneous Data</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.data.internet.ipv6_route">Data Models</a></li>

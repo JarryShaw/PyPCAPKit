@@ -382,8 +382,8 @@ and the actual value provided for packing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> (<em>Any</em>) – </p></li>
-<li><p><strong>kwargs</strong> (<em>Any</em>) – </p></li>
+<li><p><strong>*args</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
 </dl>
@@ -432,11 +432,29 @@ and the actual value provided for packing.</p>
 <dd class="field-odd"><p>Updated field instance.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.field._Field" title="pcapkit.corekit.fields.field._Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Field</span></code></a> instead of
 updating the current instance.</p>
-</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.field._Field.__set_name__">
+<span class="sig-name descname"><span class="pre">__set_name__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">owner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/field.html#_Field.__set_name__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field._Field.__set_name__" title="Permalink to this definition">#</a></dt>
+<dd><p>Set field name and update field list (if applicable).</p>
+<p>This method is to be called by the metaclass during class creation.
+It is used to set the field name and update the field list, i.e.,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema.__fields__</span></code>
+mapping dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>owner</strong> (<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><em>Schema</em></a>) – </p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -558,11 +576,8 @@ an integer value and accept the current packet as its only argument.</p></li>
 <dd class="field-odd"><p>New instance of <a class="reference internal" href="#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> instead of
 updating the current instance.</p>
-</div>
 </dd></dl>
 
 </dd></dl>
@@ -631,11 +646,8 @@ an integer value and accept the current packet as its only argument.</p></li>
 <dd class="field-odd"><p>New instance of <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a>.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a> instead of
 updating the current instance.</p>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -936,11 +948,8 @@ an integer value and accept the current packet as its only argument.</p></li>
 <dd class="field-odd"><p>New instance of <a class="reference internal" href="#pcapkit.corekit.fields.strings._TextField" title="pcapkit.corekit.fields.strings._TextField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_TextField</span></code></a>.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.strings._TextField" title="pcapkit.corekit.fields.strings._TextField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_TextField</span></code></a> instead of
 updating the current instance.</p>
-</div>
 </dd></dl>
 
 </dd></dl>
@@ -1452,11 +1461,8 @@ constrant-length-field items in a protocol.</p>
 <dd class="field-odd"><p>Updated field instance.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a>
 instead of updating the current instance.</p>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1652,11 +1658,8 @@ as its only argument).</p></li>
 <dd class="field-odd"><p>Updated field instance.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a>
 instead of updating the current instance.</p>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1814,11 +1817,8 @@ an integer value and accept the current packet as its only argument.</p></li>
 <dd class="field-odd"><p>Updated field instance.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.misc.PayloadField" title="pcapkit.corekit.fields.misc.PayloadField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadField</span></code></a>
 instead of updating the current instance.</p>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1925,11 +1925,8 @@ the current packet as its only argument and return a field instance.</p>
 <dd class="field-odd"><p>New field instance.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField" title="pcapkit.corekit.fields.misc.SwitchField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SwitchField</span></code></a>
 instead of updating the current instance.</p>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -2075,11 +2072,8 @@ instead of updating the current instance.</p>
 <dd class="field-odd"><p>Updated field instance.</p>
 </dd>
 </dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a>
 instead of updating the current instance.</p>
-</div>
 </dd></dl>
 
 <dl class="py method">

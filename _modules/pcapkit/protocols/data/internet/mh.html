@@ -413,8 +413,8 @@
     <span class="s1">&#39;BindingErrorMessage&#39;</span><span class="p">,</span>
 
     <span class="s1">&#39;Option&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;UnassignedOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PadOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindRefreshAdviceOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AlternateCareofAddressOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;NonceIndicesOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingAuthorizationDataOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MobileNetworkPrefixOption&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UnassignedOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PadOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingRefreshAdviceOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AlternateCareofAddressOption&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;NonceIndicesOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AuthorizationDataOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MobileNetworkPrefixOption&#39;</span><span class="p">,</span>
     <span class="s1">&#39;LinkLayerAddressOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MNIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AuthOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MesgIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CGAParametersRequestOption&#39;</span><span class="p">,</span>
     <span class="s1">&#39;CGAParametersOption&#39;</span><span class="p">,</span> <span class="s1">&#39;SignatureOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PermanentHomeKeygenTokenOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestInitOption&#39;</span><span class="p">,</span>
     <span class="s1">&#39;CareofTestOption&#39;</span><span class="p">,</span>
@@ -623,8 +623,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="BindRefreshAdviceOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.BindRefreshAdviceOption">[docs]</a><span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">BindRefreshAdviceOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="BindingRefreshAdviceOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.BindingRefreshAdviceOption">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">BindingRefreshAdviceOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Binding Refresh Advice option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Refresh interval.</span>
@@ -658,8 +658,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">careof</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="BindingAuthorizationDataOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.BindingAuthorizationDataOption">[docs]</a><span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">BindingAuthorizationDataOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="AuthorizationDataOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.AuthorizationDataOption">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">AuthorizationDataOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Binding Authorization Data option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Authenticator.</span>

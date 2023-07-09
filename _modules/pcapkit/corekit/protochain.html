@@ -369,7 +369,14 @@
 
 
 <div class="viewcode-block" id="ProtoChain"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain">[docs]</a><span class="k">class</span> <span class="nc">ProtoChain</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocols chain.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocols chain.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        proto: New protocol class on the top stack.</span>
+<span class="sd">        alias: New protocol alias on the top stack.</span>
+<span class="sd">        basis: Original protocol chain as base stacks.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">#: Internal data storage for protocol chain.</span>
     <span class="n">__data__</span><span class="p">:</span> <span class="s1">&#39;tuple[tuple[str, Type[Protocol]], ...]&#39;</span>

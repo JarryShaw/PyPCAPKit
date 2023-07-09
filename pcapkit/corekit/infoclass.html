@@ -399,51 +399,6 @@ used, i.e., such renaming is totally transparent to the user.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.from_dict">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#Info.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.from_dict" title="Permalink to this definition">#</a></dt>
-<dd><p>Create a new instance.</p>
-<ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is present and has a <code class="docutils literal notranslate"><span class="pre">.keys()</span></code> method, then does:
-<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k</span> <span class="pre">in</span> <span class="pre">dict_:</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">dict_[k]</span></code>.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is present and has no <code class="docutils literal notranslate"><span class="pre">.keys()</span></code> method, then does:
-<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k,</span> <span class="pre">v</span> <span class="pre">in</span> <span class="pre">dict_:</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">v</span></code>.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is not present, then does:
-<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k,</span> <span class="pre">v</span> <span class="pre">in</span> <span class="pre">kwargs.items():</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">v</span></code>.</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dict_</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">VT</span></code>)], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">VT</span></code>)]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Source data.</p></li>
-<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">VT</span></code>)) – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#Info.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.to_dict" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.
-:rtype: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">VT</span></code>)]</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>We only convert nested <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> objects into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> if
-they are the direct value of the <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> object’s attribute.
-Should such <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> objects be nested within other data,
-types, such as <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>, etc., we
-shall not convert them into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> and remain them intact.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, ~VT]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__post_init__">
 <span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#Info.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__post_init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Customisation method to be called after initialisation.</p>
@@ -498,8 +453,8 @@ which is inspired by <span class="target" id="index-2"></span><a class="pep refe
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id1">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#Info.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#Info.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.from_dict" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a new instance.</p>
 <ul class="simple">
 <li><p>If <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is present and has a <code class="docutils literal notranslate"><span class="pre">.keys()</span></code> method, then does:
@@ -523,8 +478,8 @@ which is inspired by <span class="target" id="index-2"></span><a class="pep refe
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#Info.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#Info.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.to_dict" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.
 :rtype: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">VT</span></code>)]</p>
 <div class="admonition important">
@@ -552,6 +507,12 @@ shall not convert them into <a class="reference external" href="https://docs.pyt
 attributes and methods for the decorated <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>
 class. It can be useful to reduce runtime generation
 time as well as caching already generated attributes.</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The decorator should only be used on the <em>final</em>
+class, otherwise, any subclasses derived from a
+finalised info class will not be re-finalised.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -564,23 +525,6 @@ time as well as caching already generated attributes.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Finalised info class.</p>
-</dd>
-</dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>The decorator should only be used on the <em>final</em>
-class, otherwise, any subclasses derived from a
-finalised info class will not be re-finalised.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cls</strong> (<em>ST</em>) – </p></li>
-<li><p><strong>_finalised</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>ST</em></p>
 </dd>
 </dl>
 </dd></dl>

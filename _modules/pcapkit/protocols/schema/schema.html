@@ -384,17 +384,17 @@
 <span class="sd">    class. It can be useful to reduce runtime generation</span>
 <span class="sd">    time as well as caching already generated attributes.</span>
 
+<span class="sd">    Notes:</span>
+<span class="sd">        The decorator should only be used on the *final*</span>
+<span class="sd">        class, otherwise, any subclasses derived from a</span>
+<span class="sd">        finalised schema class will not be re-finalised.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        cls: Schema class.</span>
 <span class="sd">        _finalised: Whether to make the schema class finalised.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Finalised schema class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The decorator should only be used on the *final*</span>
-<span class="sd">        class, otherwise, any subclasses derived from a</span>
-<span class="sd">        finalised schema class will not be re-finalised.</span>
 
 <span class="sd">    :meta decorator:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -505,17 +505,47 @@
 <span class="sd">            print(B.__additional__)  # [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;]</span>
 <span class="sd">            print(C.__additional__)  # [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;f&#39;]</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        name: Schema class name.</span>
+<span class="sd">        bases: Schema class bases.</span>
+<span class="sd">        attrs: Schema class attributes.</span>
+<span class="sd">        **kwargs: Arbitrary keyword arguments in class definition.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="SchemaMeta.__prepare__"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.SchemaMeta.__prepare__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__prepare__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">&#39;tuple[type, ...]&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Mapping[str, object]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the namespace for the schema class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Name of the schema class.</span>
+<span class="sd">            bases: Base classes of the schema class.</span>
+<span class="sd">            **kwds: Additional keyword arguments at class definition.</span>
+
+<span class="sd">        This method is used to create the initial field dictionary</span>
+<span class="sd">        :attr:`~Schema.__fields__` for the schema class.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__fields__&#39;</span><span class="p">):</span>
                 <span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">__fields__</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">__fields__</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">&#39;tuple[type, ...]&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Schema]&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="SchemaMeta.__new__"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.SchemaMeta.__new__">[docs]</a>    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">&#39;tuple[type, ...]&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Schema]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the schema class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Schema class name.</span>
+<span class="sd">            bases: Schema class bases.</span>
+<span class="sd">            attrs: Schema class attributes.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments in class definition.</span>
+
+<span class="sd">        This method is used to inherit the :attr:`~Schema.__additional__` and</span>
+<span class="sd">        :attr:`~Schema.__excluded__` fields from the base classes, as well as</span>
+<span class="sd">        populating both fields from the subclass attributes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s1">&#39;__additional__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
             <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__additional__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="s1">&#39;__excluded__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
@@ -527,9 +557,11 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__excluded__&#39;</span><span class="p">):</span>
                 <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__excluded__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">])</span>
 
+        <span class="c1"># NOTE: for unknown reason, the following code will cause an error</span>
+        <span class="c1"># for duplicated keyword arguments in class definition.</span>
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div></div>
 
 
 <div class="viewcode-block" id="Schema"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema">[docs]</a><span class="k">class</span> <span class="nc">Schema</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">VT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">SchemaMeta</span><span class="p">):</span>
@@ -1000,6 +1032,12 @@
 <span class="sd">      proxy (similar to :class:`property`, but on class variables) to the</span>
 <span class="sd">      :attr:`~EnumSchema.__enum__` mapping.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        name: Schema class name.</span>
+<span class="sd">        bases: Schema class bases.</span>
+<span class="sd">        attrs: Schema class attributes.</span>
+<span class="sd">        **kwargs: Arbitrary keyword arguments in class definition.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
@@ -1053,7 +1091,8 @@
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">,</span> <span class="s1">&#39;__default__&#39;</span><span class="p">]</span>
     <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">,</span> <span class="s1">&#39;__default__&#39;</span><span class="p">]</span>
 
-    <span class="c1">#: Callback to return the default schema for enumeration mapping.</span>
+    <span class="c1">#: Callback to return the default schema for enumeration mapping,</span>
+    <span class="c1">#: by default is a ``lambda: None`` statement.</span>
     <span class="n">__default__</span><span class="p">:</span> <span class="s1">&#39;Callable[[], Type[Self]]&#39;</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment,return-value]</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

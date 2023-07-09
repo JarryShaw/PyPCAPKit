@@ -393,17 +393,17 @@
 <span class="sd">    class. It can be useful to reduce runtime generation</span>
 <span class="sd">    time as well as caching already generated attributes.</span>
 
+<span class="sd">    Notes:</span>
+<span class="sd">        The decorator should only be used on the *final*</span>
+<span class="sd">        class, otherwise, any subclasses derived from a</span>
+<span class="sd">        finalised info class will not be re-finalised.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        cls: Info class.</span>
 <span class="sd">        _finalised: Whether to make the info class as finalised.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Finalised info class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The decorator should only be used on the *final*</span>
-<span class="sd">        class, otherwise, any subclasses derived from a</span>
-<span class="sd">        finalised info class will not be re-finalised.</span>
 
 <span class="sd">    :meta decorator:</span>
 <span class="sd">    &quot;&quot;&quot;</span>

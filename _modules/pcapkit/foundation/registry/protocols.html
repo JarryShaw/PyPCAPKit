@@ -351,7 +351,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.protocols</span> <span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv2</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>
@@ -369,19 +369,20 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">FrameType</span> <span class="k">as</span> <span class="n">Schema_HTTP_FrameType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.hip</span> <span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">Schema_HIP_Parameter</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.hopopt</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_HOPOPT_Option</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv4</span> <span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Schema_IPv4</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">IPv6_Opts</span> <span class="k">as</span> <span class="n">Schema_IPv6_Opts</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">MAP_IPV6_ROUTE_DATA</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">MAP_MH_DATA</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParameter</span> <span class="k">as</span> <span class="n">Schema_MH_CGAParameter</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv4</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_IPv4_Option</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_IPv6_Opts_Option</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> \
+    <span class="n">RoutingType</span> <span class="k">as</span> <span class="n">Schema_IPv6_Route_RoutingType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAExtension</span> <span class="k">as</span> <span class="n">Schema_MH_CGAExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_MH_Option</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Schema_MH_Packet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_BlockType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">DSBSecrets</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_DSBSecrets</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> \
     <span class="n">NameResolutionRecord</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_NameResolutionRecord</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_Option</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">MAP_MPTCP_DATA</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Schema_TCP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Schema_TCP_MPTCP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_TCP_Option</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">TCP</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.udp</span> <span class="kn">import</span> <span class="n">UDP</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">RegistryError</span>
@@ -409,7 +410,6 @@
     <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span>
     <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">TCP_MPTCPOption</span>
     <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">TCP_Option</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.collections</span> <span class="kn">import</span> <span class="n">OptionField</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv2</span> <span class="kn">import</span> <span class="n">FrameConstructor</span> <span class="k">as</span> <span class="n">HTTP_FrameConstructor</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv2</span> <span class="kn">import</span> <span class="n">FrameParser</span> <span class="k">as</span> <span class="n">HTTP_FrameParser</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.hip</span> <span class="kn">import</span> <span class="n">ParameterConstructor</span> <span class="k">as</span> <span class="n">HIP_ParameterConstructor</span>
@@ -437,15 +437,6 @@
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcapng</span> <span class="kn">import</span> <span class="n">RecordParser</span> <span class="k">as</span> <span class="n">PCAPNG_RecordParser</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcapng</span> <span class="kn">import</span> <span class="n">SecretsConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_SecretsConstructor</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcapng</span> <span class="kn">import</span> <span class="n">SecretsParser</span> <span class="k">as</span> <span class="n">PCAPNG_SecretsParser</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv4</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_IPv4_Option</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_IPv6_Opts_Option</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> \
-        <span class="n">RoutingType</span> <span class="k">as</span> <span class="n">Schema_IPv6_Route_RoutingType</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAExtension</span> <span class="k">as</span> <span class="n">Schema_MH_CGAExtension</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_MH_Option</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Schema_MH_Packet</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Schema_TCP_MPTCP</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_TCP_Option</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">MPOptionConstructor</span> <span class="k">as</span> <span class="n">TCP_MPOptionConstructor</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">MPOptionParser</span> <span class="k">as</span> <span class="n">TCP_MPOptionParser</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">OptionConstructor</span> <span class="k">as</span> <span class="n">TCP_OptionConstructor</span>
@@ -677,7 +668,7 @@
 
     <span class="n">IPv4</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionField[Schema_IPv4_Option]&#39;</span><span class="p">,</span> <span class="n">Schema_IPv4</span><span class="o">.</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_IPv4_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv4 option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -752,7 +743,7 @@
 
     <span class="n">IPv6_Opts</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionField[Schema_IPv6_Opts_Option]&#39;</span><span class="p">,</span> <span class="n">Schema_IPv6_Opts</span><span class="o">.</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_IPv6_Opts_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv6-Opts option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -777,7 +768,7 @@
 
     <span class="n">IPv6_Route</span><span class="o">.</span><span class="n">register_routing</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">MAP_IPV6_ROUTE_DATA</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_IPv6_Route_RoutingType</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv6-Route routing data parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -802,7 +793,7 @@
 
     <span class="n">MH</span><span class="o">.</span><span class="n">register_message</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">MAP_MH_DATA</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_MH_Packet</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MH message type parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -827,10 +818,7 @@
 
     <span class="n">MH</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">subclass</span> <span class="ow">in</span> <span class="n">Schema_MH_Packet</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">subclass</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">):</span>
-                <span class="k">continue</span>
-            <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionField[Schema_MH_Option]&#39;</span><span class="p">,</span> <span class="n">subclass</span><span class="o">.</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_MH_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MH option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -855,7 +843,7 @@
 
     <span class="n">MH</span><span class="o">.</span><span class="n">register_extension</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionField[Schema_MH_CGAExtension]&#39;</span><span class="p">,</span> <span class="n">Schema_MH_CGAParameter</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_MH_CGAExtension</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MH CGA extension: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -953,7 +941,7 @@
 
     <span class="n">TCP</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionField[Schema_TCP_Option]&#39;</span><span class="p">,</span> <span class="n">Schema_TCP</span><span class="o">.</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_TCP_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered TCP option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -978,7 +966,7 @@
 
     <span class="n">TCP</span><span class="o">.</span><span class="n">register_mp_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">MAP_MPTCP_DATA</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_TCP_MPTCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MPTCP option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 

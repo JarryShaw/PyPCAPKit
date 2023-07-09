@@ -1118,12 +1118,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.Timestamp" title="pcapkit.protocols.schema.transport.tcp.Timestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code></a>) – parsed option schema</p></li>
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.Timestamps" title="pcapkit.protocols.schema.transport.tcp.Timestamps"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamps</span></code></a>) – parsed option schema</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.option.Option" title="pcapkit.const.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Option" title="pcapkit.protocols.data.transport.tcp.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Timestamp" title="pcapkit.protocols.data.transport.tcp.Timestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code></a></p>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Timestamps" title="pcapkit.protocols.data.transport.tcp.Timestamps"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamps</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1177,12 +1177,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile" title="pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartialOrderConnectionProfile</span></code></a>) – parsed option schema</p></li>
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile" title="pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartialOrderServiceProfile</span></code></a>) – parsed option schema</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.option.Option" title="pcapkit.const.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Option" title="pcapkit.protocols.data.transport.tcp.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile" title="pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartialOrderConnectionProfile</span></code></a></p>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile" title="pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartialOrderServiceProfile</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -2158,14 +2158,14 @@ enumeration:</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>code</strong> (<a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.option.Option" title="pcapkit.const.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – option code</p></li>
-<li><p><strong>opt</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Timestamp" title="pcapkit.protocols.data.transport.tcp.Timestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code></a>]) – option data</p></li>
+<li><p><strong>opt</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Timestamps" title="pcapkit.protocols.data.transport.tcp.Timestamps"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamps</span></code></a>]) – option data</p></li>
 <li><p><strong>tsval</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – timestamp value</p></li>
 <li><p><strong>tsecr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – timestamp echo reply</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.Timestamp" title="pcapkit.protocols.schema.transport.tcp.Timestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code></a></p>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.Timestamps" title="pcapkit.protocols.schema.transport.tcp.Timestamps"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamps</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed option schema.</p>
@@ -2202,14 +2202,14 @@ enumeration:</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>code</strong> (<a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.option.Option" title="pcapkit.const.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – option code</p></li>
-<li><p><strong>opt</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile" title="pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartialOrderConnectionProfile</span></code></a>]) – option data</p></li>
+<li><p><strong>opt</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile" title="pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartialOrderServiceProfile</span></code></a>]) – option data</p></li>
 <li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – start partial order connection</p></li>
 <li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – end partial order connection</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile" title="pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartialOrderConnectionProfile</span></code></a></p>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile" title="pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartialOrderServiceProfile</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed option schema.</p>
@@ -3051,7 +3051,7 @@ then be a method that can parse the option by itself.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.Option">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.Option" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>[<a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.option.Option" title="pcapkit.const.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]</p>
 <p>Header schema for TCP options.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3159,6 +3159,12 @@ then be a method that can parse the option by itself.</p>
 <dd class="field-even"><p>Self</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.EndOfOptionList.registry">
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[ET,</span> <span class="pre">Type[Self]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{Option.End_of_Option_List:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.EndOfOptionList'&gt;,</span> <span class="pre">Option.No_Operation:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.NoOperation'&gt;,</span> <span class="pre">Option.Maximum_Segment_Size:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MaximumSegmentSize'&gt;,</span> <span class="pre">Option.Window_Scale:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.WindowScale'&gt;,</span> <span class="pre">Option.SACK_Permitted:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.SACKPermitted'&gt;,</span> <span class="pre">Option.SACK:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.SACK'&gt;,</span> <span class="pre">Option.Echo:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Echo'&gt;,</span> <span class="pre">Option.Echo_Reply:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.EchoReply'&gt;,</span> <span class="pre">Option.Timestamps:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Timestamps'&gt;,</span> <span class="pre">Option.Partial_Order_Connection_Permitted:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionPermitted'&gt;,</span> <span class="pre">Option.Partial_Order_Service_Profile:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile'&gt;,</span> <span class="pre">Option.CC:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CC'&gt;,</span> <span class="pre">Option.CC_NEW:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CCNew'&gt;,</span> <span class="pre">Option.CC_ECHO:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CCEcho'&gt;,</span> <span class="pre">Option.TCP_Alternate_Checksum_Request:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.AlternateChecksumRequest'&gt;,</span> <span class="pre">Option.TCP_Alternate_Checksum_Data:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.AlternateChecksumData'&gt;,</span> <span class="pre">Option.MD5_Signature_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MD5Signature'&gt;,</span> <span class="pre">Option.Quick_Start_Response:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.QuickStartResponse'&gt;,</span> <span class="pre">Option.User_Timeout_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.UserTimeout'&gt;,</span> <span class="pre">Option.TCP_Authentication_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Authentication'&gt;,</span> <span class="pre">Option.Multipath_TCP:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp._MPTCP'&gt;,</span> <span class="pre">Option.TCP_Fast_Open_Cookie:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.FastOpenCookie'&gt;}</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.EndOfOptionList.registry" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of enumeration numbers to schemas.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -3177,6 +3183,12 @@ then be a method that can parse the option by itself.</p>
 <dd class="field-even"><p>Self</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.NoOperation.registry">
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[ET,</span> <span class="pre">Type[Self]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{Option.End_of_Option_List:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.EndOfOptionList'&gt;,</span> <span class="pre">Option.No_Operation:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.NoOperation'&gt;,</span> <span class="pre">Option.Maximum_Segment_Size:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MaximumSegmentSize'&gt;,</span> <span class="pre">Option.Window_Scale:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.WindowScale'&gt;,</span> <span class="pre">Option.SACK_Permitted:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.SACKPermitted'&gt;,</span> <span class="pre">Option.SACK:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.SACK'&gt;,</span> <span class="pre">Option.Echo:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Echo'&gt;,</span> <span class="pre">Option.Echo_Reply:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.EchoReply'&gt;,</span> <span class="pre">Option.Timestamps:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Timestamps'&gt;,</span> <span class="pre">Option.Partial_Order_Connection_Permitted:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionPermitted'&gt;,</span> <span class="pre">Option.Partial_Order_Service_Profile:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile'&gt;,</span> <span class="pre">Option.CC:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CC'&gt;,</span> <span class="pre">Option.CC_NEW:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CCNew'&gt;,</span> <span class="pre">Option.CC_ECHO:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CCEcho'&gt;,</span> <span class="pre">Option.TCP_Alternate_Checksum_Request:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.AlternateChecksumRequest'&gt;,</span> <span class="pre">Option.TCP_Alternate_Checksum_Data:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.AlternateChecksumData'&gt;,</span> <span class="pre">Option.MD5_Signature_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MD5Signature'&gt;,</span> <span class="pre">Option.Quick_Start_Response:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.QuickStartResponse'&gt;,</span> <span class="pre">Option.User_Timeout_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.UserTimeout'&gt;,</span> <span class="pre">Option.TCP_Authentication_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Authentication'&gt;,</span> <span class="pre">Option.Multipath_TCP:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp._MPTCP'&gt;,</span> <span class="pre">Option.TCP_Fast_Open_Cookie:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.FastOpenCookie'&gt;}</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.NoOperation.registry" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of enumeration numbers to schemas.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -3259,6 +3271,12 @@ then be a method that can parse the option by itself.</p>
 <dd class="field-even"><p>Self</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.SACKPermitted.registry">
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[ET,</span> <span class="pre">Type[Self]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{Option.End_of_Option_List:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.EndOfOptionList'&gt;,</span> <span class="pre">Option.No_Operation:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.NoOperation'&gt;,</span> <span class="pre">Option.Maximum_Segment_Size:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MaximumSegmentSize'&gt;,</span> <span class="pre">Option.Window_Scale:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.WindowScale'&gt;,</span> <span class="pre">Option.SACK_Permitted:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.SACKPermitted'&gt;,</span> <span class="pre">Option.SACK:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.SACK'&gt;,</span> <span class="pre">Option.Echo:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Echo'&gt;,</span> <span class="pre">Option.Echo_Reply:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.EchoReply'&gt;,</span> <span class="pre">Option.Timestamps:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Timestamps'&gt;,</span> <span class="pre">Option.Partial_Order_Connection_Permitted:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionPermitted'&gt;,</span> <span class="pre">Option.Partial_Order_Service_Profile:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile'&gt;,</span> <span class="pre">Option.CC:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CC'&gt;,</span> <span class="pre">Option.CC_NEW:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CCNew'&gt;,</span> <span class="pre">Option.CC_ECHO:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CCEcho'&gt;,</span> <span class="pre">Option.TCP_Alternate_Checksum_Request:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.AlternateChecksumRequest'&gt;,</span> <span class="pre">Option.TCP_Alternate_Checksum_Data:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.AlternateChecksumData'&gt;,</span> <span class="pre">Option.MD5_Signature_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MD5Signature'&gt;,</span> <span class="pre">Option.Quick_Start_Response:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.QuickStartResponse'&gt;,</span> <span class="pre">Option.User_Timeout_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.UserTimeout'&gt;,</span> <span class="pre">Option.TCP_Authentication_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Authentication'&gt;,</span> <span class="pre">Option.Multipath_TCP:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp._MPTCP'&gt;,</span> <span class="pre">Option.TCP_Fast_Open_Cookie:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.FastOpenCookie'&gt;}</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.SACKPermitted.registry" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of enumeration numbers to schemas.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -3358,8 +3376,8 @@ then be a method that can parse the option by itself.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.Timestamp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">Timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#Timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.Timestamp" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.Timestamps">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">Timestamps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#Timestamps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.Timestamps" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.Option" title="pcapkit.protocols.schema.transport.tcp.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Header schema for TCP timestamps option.</p>
 <dl class="field-list simple">
@@ -3374,8 +3392,8 @@ then be a method that can parse the option by itself.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.Timestamp.value">
-<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">value&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.Timestamp.value" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.Timestamps.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">value&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.Timestamps.value" title="Permalink to this definition">#</a></dt>
 <dd><p>Timestamp value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3388,8 +3406,8 @@ then be a method that can parse the option by itself.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.Timestamp.reply">
-<span class="sig-name descname"><span class="pre">reply</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">reply&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.Timestamp.reply" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.Timestamps.reply">
+<span class="sig-name descname"><span class="pre">reply</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">reply&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.Timestamps.reply" title="Permalink to this definition">#</a></dt>
 <dd><p>Timestamp echo reply.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3419,11 +3437,17 @@ then be a method that can parse the option by itself.</p>
 <dd class="field-even"><p>Self</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionPermitted.registry">
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[ET,</span> <span class="pre">Type[Self]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{Option.End_of_Option_List:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.EndOfOptionList'&gt;,</span> <span class="pre">Option.No_Operation:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.NoOperation'&gt;,</span> <span class="pre">Option.Maximum_Segment_Size:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MaximumSegmentSize'&gt;,</span> <span class="pre">Option.Window_Scale:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.WindowScale'&gt;,</span> <span class="pre">Option.SACK_Permitted:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.SACKPermitted'&gt;,</span> <span class="pre">Option.SACK:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.SACK'&gt;,</span> <span class="pre">Option.Echo:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Echo'&gt;,</span> <span class="pre">Option.Echo_Reply:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.EchoReply'&gt;,</span> <span class="pre">Option.Timestamps:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Timestamps'&gt;,</span> <span class="pre">Option.Partial_Order_Connection_Permitted:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionPermitted'&gt;,</span> <span class="pre">Option.Partial_Order_Service_Profile:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile'&gt;,</span> <span class="pre">Option.CC:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CC'&gt;,</span> <span class="pre">Option.CC_NEW:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CCNew'&gt;,</span> <span class="pre">Option.CC_ECHO:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.CCEcho'&gt;,</span> <span class="pre">Option.TCP_Alternate_Checksum_Request:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.AlternateChecksumRequest'&gt;,</span> <span class="pre">Option.TCP_Alternate_Checksum_Data:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.AlternateChecksumData'&gt;,</span> <span class="pre">Option.MD5_Signature_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MD5Signature'&gt;,</span> <span class="pre">Option.Quick_Start_Response:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.QuickStartResponse'&gt;,</span> <span class="pre">Option.User_Timeout_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.UserTimeout'&gt;,</span> <span class="pre">Option.TCP_Authentication_Option:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.Authentication'&gt;,</span> <span class="pre">Option.Multipath_TCP:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp._MPTCP'&gt;,</span> <span class="pre">Option.TCP_Fast_Open_Cookie:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.FastOpenCookie'&gt;}</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionPermitted.registry" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of enumeration numbers to schemas.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">PartialOrderConnectionProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#PartialOrderConnectionProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">PartialOrderServiceProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#PartialOrderServiceProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.Option" title="pcapkit.protocols.schema.transport.tcp.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Header schema for TCP partial order connection service profile option.</p>
 <dl class="field-list simple">
@@ -3438,8 +3462,8 @@ then be a method that can parse the option by itself.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile.profile">
-<span class="sig-name descname"><span class="pre">profile</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">POCProfile</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">profile&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile.profile" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile.profile">
+<span class="sig-name descname"><span class="pre">profile</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">POCProfile</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">profile&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile.profile" title="Permalink to this definition">#</a></dt>
 <dd><p>Profile data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3832,7 +3856,7 @@ then be a method that can parse the option by itself.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCP">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">MPTCP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#MPTCP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCP" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.Option" title="pcapkit.protocols.schema.transport.tcp.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>[<a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a>]</p>
 <p>Header schema for Multipath TCP options.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3993,6 +4017,12 @@ then be a method that can parse the option by itself.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPJoin.subtype">
 <span class="sig-name descname"><span class="pre">subtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_MPTCPOption</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoin.subtype" title="Permalink to this definition">#</a></dt>
 <dd><p>MPTCP subtype.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPJoin.registry">
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[ET,</span> <span class="pre">Type[Self]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{MPTCPOption.MP_CAPABLE:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MPTCPCapable'&gt;,</span> <span class="pre">MPTCPOption.MP_JOIN:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MPTCPJoin'&gt;,</span> <span class="pre">MPTCPOption.DSS:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MPTCPDSS'&gt;,</span> <span class="pre">MPTCPOption.ADD_ADDR:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress'&gt;,</span> <span class="pre">MPTCPOption.REMOVE_ADDR:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress'&gt;,</span> <span class="pre">MPTCPOption.MP_PRIO:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MPTCPPriority'&gt;,</span> <span class="pre">MPTCPOption.MP_FAIL:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MPTCPFallback'&gt;,</span> <span class="pre">MPTCPOption.MP_FASTCLOSE:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.transport.tcp.MPTCPFastclose'&gt;}</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoin.registry" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of enumeration numbers to schemas.</p>
 </dd></dl>
 
 </dd></dl>
@@ -5049,13 +5079,6 @@ Length, and Checksum present.</p>
 instance.</p>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.mp_tcp_option.MPTCPOption</span></code></a></p></li>
-<li><p><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA" title="pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA</span></code></a></p></li>
-</ul>
-</div>
 </dd></dl>
 
 <dl class="py function">
@@ -5077,20 +5100,6 @@ instance.</p></li>
 instance.</p></li>
 </ul>
 </p>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
-<section id="miscellaneous-data">
-<h3>Miscellaneous Data<a class="headerlink" href="#miscellaneous-data" title="Permalink to this heading">#</a></h3>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">MAP_MPTCP_DATA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.11)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><span class="pre">MPTCPOption</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCP" title="pcapkit.protocols.schema.transport.tcp.MPTCP"><span class="pre">MPTCP</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA" title="Permalink to this definition">#</a></dt>
-<dd><p>Mapping of MPTCP type numbers to schemas.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DefaultDict[Enum_MPTCPOption, <a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type">Type</a>[<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCP" title="pcapkit.protocols.schema.transport.tcp.MPTCP">MPTCP</a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -5445,8 +5454,8 @@ instance.</p></li>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Timestamp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">Timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/transport/tcp.html#Timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamp" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Timestamps">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">Timestamps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/transport/tcp.html#Timestamps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamps" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Option" title="pcapkit.protocols.data.transport.tcp.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for TCP timestamp option.</p>
 <dl class="field-list simple">
@@ -5458,14 +5467,14 @@ instance.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Timestamp.timestamp">
-<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamp.timestamp" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Timestamps.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamps.timestamp" title="Permalink to this definition">#</a></dt>
 <dd><p>Timestamp .</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Timestamp.echo">
-<span class="sig-name descname"><span class="pre">echo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamp.echo" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Timestamps.echo">
+<span class="sig-name descname"><span class="pre">echo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamps.echo" title="Permalink to this definition">#</a></dt>
 <dd><p>Echo data.</p>
 </dd></dl>
 
@@ -5487,8 +5496,8 @@ instance.</p></li>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">PartialOrderConnectionProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/transport/tcp.html#PartialOrderConnectionProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">PartialOrderServiceProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/transport/tcp.html#PartialOrderServiceProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Option" title="pcapkit.protocols.data.transport.tcp.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for TCP partial order connection profile option.</p>
 <dl class="field-list simple">
@@ -5500,14 +5509,14 @@ instance.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.start">
-<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.start" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile.start" title="Permalink to this definition">#</a></dt>
 <dd><p>Start flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.end">
-<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.end" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile.end">
+<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile.end" title="Permalink to this definition">#</a></dt>
 <dd><p>End flag.</p>
 </dd></dl>
 
@@ -6202,7 +6211,6 @@ instance.</p></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema.transport.tcp">Header Schemas</a><ul>
 <li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
 <li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
-<li><a class="reference internal" href="#miscellaneous-data">Miscellaneous Data</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.data.transport.tcp">Data Models</a></li>
