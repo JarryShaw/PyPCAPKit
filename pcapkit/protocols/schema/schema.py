@@ -678,7 +678,7 @@ class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
         return self
 
 
-class EnumMeta(SchemaMeta):
+class EnumMeta(SchemaMeta, Generic[ET]):
     """Meta class to add dynamic support for :class:`EnumSchema`.
 
     This meta class is used to generate necessary attributes for the
@@ -687,7 +687,7 @@ class EnumMeta(SchemaMeta):
 
     * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*
       proxy (similar to :class:`property`, but on class variables) to the
-      :attr:`~EnumSchema.__enum__` mapping.
+      :attr:`__enum__` mapping.
 
     Args:
         name: Schema class name.
@@ -697,10 +697,14 @@ class EnumMeta(SchemaMeta):
 
     """
 
+    if TYPE_CHECKING:
+        #: Mapping of enumeration numbers to schemas (**internal use only**).
+        __enum__: 'DefaultDict[ET, Type[EnumSchema]]'
+
     @property
     def registry(cls) -> 'DefaultDict[ET, Type[EnumSchema]]':
         """Mapping of enumeration numbers to schemas."""
-        return cls.__enum__  # type: ignore[attr-defined]
+        return cls.__enum__
 
 
 class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
@@ -753,10 +757,9 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
     __default__: 'Callable[[], Type[Self]]' = lambda: None  # type: ignore[assignment,return-value]
 
     if TYPE_CHECKING:
-        #: Mapping of enumeration numbers to schemas (**internal use only**).
-        __enum__: 'DefaultDict[ET, Type[Self]]'
         #: Mapping of enumeration numbers to schemas.
         registry: 'DefaultDict[ET, Type[Self]]'
+        __enum__: 'DefaultDict[ET, Type[Self]]'
 
     def __init_subclass__(cls, /, code: 'Optional[ET | Iterable[ET]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Register enumeration to :attr:`registry` mapping.
@@ -772,13 +775,13 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
         not given, the subclass will not be registered.
 
         Notes:
-            If :attr:`__enum__` is not yet defined at function call, it will
-            automatically be defined as a :class:`collections.defaultdict`
+            If :attr:`~EnumMeta.__enum__` is not yet defined at function call,
+            it will automatically be defined as a :class:`collections.defaultdict`
             object, with the default value set to :attr:`__default__`.
 
-            If intended to customise the :attr:`__enum__` mapping, it is
-            possible to override the :meth:`__init_subclass__` method and
-            define :attr:`__enum__` manually.
+            If intended to customise the :attr:`~EnumMeta.__enum__` mapping,
+            it is possible to override the :meth:`__init_subclass__` method and
+            define :attr:`~EnumMeta.__enum__` manually.
 
         """
         if not hasattr(cls, '__enum__'):
@@ -787,9 +790,9 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
         if code is not None:
             if isinstance(code, collections.abc.Iterable):
                 for _code in code:
-                    cls.__enum__[_code] = cls
+                    cls.__enum__[_code] = (cls)
             else:
-                cls.__enum__[code] = cls
+                cls.__enum__[code] = (cls)
         super().__init_subclass__()
 
     @classmethod
