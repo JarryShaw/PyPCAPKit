@@ -1021,7 +1021,7 @@
         <span class="k">return</span> <span class="bp">self</span></div></div>
 
 
-<div class="viewcode-block" id="EnumMeta"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumMeta">[docs]</a><span class="k">class</span> <span class="nc">EnumMeta</span><span class="p">(</span><span class="n">SchemaMeta</span><span class="p">):</span>
+<div class="viewcode-block" id="EnumMeta"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumMeta">[docs]</a><span class="k">class</span> <span class="nc">EnumMeta</span><span class="p">(</span><span class="n">SchemaMeta</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">ET</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support for :class:`EnumSchema`.</span>
 
 <span class="sd">    This meta class is used to generate necessary attributes for the</span>
@@ -1030,7 +1030,7 @@
 
 <span class="sd">    * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*</span>
 <span class="sd">      proxy (similar to :class:`property`, but on class variables) to the</span>
-<span class="sd">      :attr:`~EnumSchema.__enum__` mapping.</span>
+<span class="sd">      :attr:`__enum__` mapping.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        name: Schema class name.</span>
@@ -1040,10 +1040,14 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Mapping of enumeration numbers to schemas (**internal use only**).</span>
+        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[EnumSchema]]&#39;</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[ET, Type[EnumSchema]]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapping of enumeration numbers to schemas.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span>  <span class="c1"># type: ignore[attr-defined]</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span></div>
 
 
 <div class="viewcode-block" id="EnumSchema"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema">[docs]</a><span class="k">class</span> <span class="nc">EnumSchema</span><span class="p">(</span><span class="n">Schema</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">ET</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">EnumMeta</span><span class="p">):</span>
@@ -1096,10 +1100,9 @@
     <span class="n">__default__</span><span class="p">:</span> <span class="s1">&#39;Callable[[], Type[Self]]&#39;</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment,return-value]</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Mapping of enumeration numbers to schemas (**internal use only**).</span>
-        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span>
         <span class="c1">#: Mapping of enumeration numbers to schemas.</span>
         <span class="n">registry</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span>
+        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span>
 
 <div class="viewcode-block" id="EnumSchema.__init_subclass__"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__">[docs]</a>    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[ET | Iterable[ET]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register enumeration to :attr:`registry` mapping.</span>
@@ -1115,13 +1118,13 @@
 <span class="sd">        not given, the subclass will not be registered.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            If :attr:`__enum__` is not yet defined at function call, it will</span>
-<span class="sd">            automatically be defined as a :class:`collections.defaultdict`</span>
+<span class="sd">            If :attr:`~EnumMeta.__enum__` is not yet defined at function call,</span>
+<span class="sd">            it will automatically be defined as a :class:`collections.defaultdict`</span>
 <span class="sd">            object, with the default value set to :attr:`__default__`.</span>
 
-<span class="sd">            If intended to customise the :attr:`__enum__` mapping, it is</span>
-<span class="sd">            possible to override the :meth:`__init_subclass__` method and</span>
-<span class="sd">            define :attr:`__enum__` manually.</span>
+<span class="sd">            If intended to customise the :attr:`~EnumMeta.__enum__` mapping,</span>
+<span class="sd">            it is possible to override the :meth:`__init_subclass__` method and</span>
+<span class="sd">            define :attr:`~EnumMeta.__enum__` manually.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__enum__&#39;</span><span class="p">):</span>
@@ -1130,9 +1133,9 @@
         <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
-                    <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+                    <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="EnumSchema.register"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.register">[docs]</a>    <span class="nd">@classmethod</span>
