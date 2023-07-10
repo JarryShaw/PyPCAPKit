@@ -113,7 +113,7 @@ Test Environment
 .. list-table::
 
    * - Operating System
-     - macOS Ventura 13.4 Beta (22F5037d)
+     - macOS Ventura 13.4.1
    * - Chip
      - Apple M2 Pro
    * - Memory
@@ -125,10 +125,10 @@ Test Results
 ============= ===========================
 Engine        Performance (ms per packet)
 ============= ===========================
-``dpkt``       0.010694_027361
-``scapy``      0.093399_399399
-``pcapkit``    0.199796_296296
-``pyshark``   25.066692_025359
+``dpkt``       0.010390_056723
+``scapy``      0.091690_233567
+``pcapkit``    0.200390_390390
+``pyshark``   24.682185_018351
 ============= ===========================
 
 Installation
