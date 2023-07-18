@@ -403,7 +403,6 @@ Type Stubs
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.mh.mh_opt_registry
 .. autofunction:: pcapkit.protocols.schema.internet.mh.mh_data_selector
 .. autofunction:: pcapkit.protocols.schema.internet.mh.mn_id_selector
 
