@@ -8,4 +8,4 @@ sphinx-copybutton==0.5.2
 
 # auxiliary
 typing-extensions==4.7.1
-mypy-extensions
+mypy-extensions==1.0.0
