@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 os.environ['PCAPKIT_SPHINX'] = '1'
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('pcapkit-sphinx')
 logger.setLevel(logging.INFO)
 
 # -- Path setup --------------------------------------------------------------

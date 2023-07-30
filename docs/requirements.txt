@@ -1,11 +1,11 @@
-Sphinx
+Sphinx==7.1.0
 
 # extentions
-sphinx-autodoc-typehints
-furo
-sphinxext-opengraph
-sphinx-copybutton
+sphinx-autodoc-typehints==1.24.0
+furo==2023.5.20
+sphinxext-opengraph==0.8.2
+sphinx-copybutton==0.5.2
 
 # auxiliary
-typing-extensions
-mypy-extensions
+typing-extensions==4.7.1
+mypy-extensions==1.0.0

@@ -30,6 +30,9 @@ release
 pcapkit/_extern
 conda/wheels/
 
+pcapkit/*.c
+pcapkit/**/*.c
+
 # Created by https://www.gitignore.io/api/macos,python,visualstudiocode
 
 ### macOS ###
