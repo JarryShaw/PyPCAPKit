@@ -356,6 +356,7 @@
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span> <span class="nn">dictdumper.dumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypeAlias</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
@@ -363,7 +364,7 @@
 <span class="n">IPAddress</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span>
 
 <span class="c1">#: Buffer ID.</span>
-<span class="n">BufferID</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="n">BufferID</span><span class="p">:</span> <span class="s1">&#39;TypeAlias&#39;</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Packet"><a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet">[docs]</a><span class="nd">@info_final</span>

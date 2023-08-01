@@ -936,7 +936,11 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">ret</span><span class="o">.</span><span class="n">option</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">subtype</span> <span class="o">=</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;subtype&#39;</span><span class="p">])</span>
+
         <span class="k">return</span> <span class="n">ret</span>
 
 
@@ -950,6 +954,10 @@
     <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[Enum_MPTCPOption, Type[MPTCP]]&#39;</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">MPTCPUnknown</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Option kind.</span>
+        <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span>
+        <span class="c1">#: MPTCP length.</span>
+        <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
         <span class="c1">#: MPTCP subtype.</span>
         <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span></div>
 
