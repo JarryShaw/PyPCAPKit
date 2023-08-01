@@ -96,7 +96,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
             if version == 1:
                 from pcapkit.protocols.application.httpv1 import HTTP as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
             elif version == 2:
-                from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+                from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
             else:
                 raise ProtocolError(f"invalid HTTP version: {version}")
 
@@ -123,7 +123,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
         if version == 1:
             from pcapkit.protocols.application.httpv1 import HTTP as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         elif version == 2:
-            from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+            from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         else:
             raise ProtocolError(f"invalid HTTP version: {version}")
         return protocol.make(**kwargs)  # type: ignore[return-value]
@@ -147,7 +147,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
         if version == 1:
             from pcapkit.protocols.application.httpv1 import HTTP as protocol
         elif version == 2:
-            from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[no-redef] # isort: skip
+            from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[assignment] # isort: skip
         else:
             raise ProtocolError(f"invalid HTTP version: {version}")
         return protocol._make_data(data)  # type: ignore[arg-type]

@@ -282,14 +282,14 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         match4 = re.match(_RE_STATUS, para2)
         if match1 and match2:
             header_line = Data_RequestHeader(
-                type=Type.REQUEST,  # type: ignore[arg-type]
+                type=Type.REQUEST,
                 method=Enum_Method.get(self.decode(para1)),
                 uri=self.decode(para2),
                 version=self.decode(match2.group('version')),
             )
         elif match3 and match4:
             header_line = Data_ResponseHeader(
-                type=Type.RESPONSE,  # type: ignore[arg-type]
+                type=Type.RESPONSE,
                 version=self.decode(match3.group('version')),
                 status=Enum_StatusCode.get(int(para2)),
                 message=self.decode(para3),

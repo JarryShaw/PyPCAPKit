@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from dictdumper.dumper import Dumper
+    from typing_extensions import TypeAlias
 
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
     from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
 IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
 
 #: Buffer ID.
-BufferID = Tuple[IPAddress, int, IPAddress, int]
+BufferID: 'TypeAlias' = Tuple[IPAddress, int, IPAddress, int]
 
 
 @info_final

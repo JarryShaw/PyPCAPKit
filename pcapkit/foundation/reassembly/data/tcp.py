@@ -15,14 +15,14 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional, overload
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, TypeAlias
 
     from pcapkit.protocols.protocol import Protocol
 
 IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
 
 #: Buffer ID.
-BufferID = Tuple[IPAddress, int, IPAddress, int]
+BufferID: 'TypeAlias' = Tuple[IPAddress, int, IPAddress, int]
 
 
 @info_final

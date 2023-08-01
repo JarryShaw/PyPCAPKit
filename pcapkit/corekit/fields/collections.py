@@ -115,7 +115,7 @@ class ListField(_Field[List[_TL]], Generic[_TL]):
                 raise FieldValueError(f'Field {self.name} has invalid value.')
         return b''.join(temp)
 
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'bytes | list[_TL]':  # type: ignore[override]
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'bytes | list[_TL]':
         """Unpack field value from :obj:`bytes`.
 
         Args:

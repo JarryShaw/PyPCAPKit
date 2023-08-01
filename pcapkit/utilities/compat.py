@@ -15,11 +15,13 @@ __all__ = [
 
     # classes
     'Collection', 'cached_property',
-    'Mapping', 'Tuple', 'List', 'Dict',
     'StrEnum',
 
     # modules
     'pathlib',
+
+    # typing
+    'Mapping', 'Tuple', 'List', 'Dict', 'TypeAlias',
 ]
 
 if sys.version_info < (3, 6):
@@ -125,9 +127,9 @@ if sys.version_info < (3, 9):
 else:
     from collections.abc import Mapping
 
-    Tuple = tuple
-    List = list
-    Dict = dict
+    Tuple: 'TypeAlias' = tuple
+    List: 'TypeAlias' = list
+    Dict: 'TypeAlias' = dict
 
 if sys.version_info < (3, 11):
     from aenum import StrEnum
@@ -187,3 +189,8 @@ if sys.version_info < (3, 11):
         return list(_iter_bits_lsb(value))
 else:
     from enum import show_flag_values  # type: ignore[attr-defined]
+
+if sys.version_info < (3, 9):
+    from typing_extensions import TypeAlias
+else:
+    from typing import TypeAlias

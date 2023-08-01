@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional, overload
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, TypeAlias
 
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.protocols.protocol import Protocol
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 AT = TypeVar('AT', 'IPv4Address', 'IPv6Address')
 
 #: Buffer ID.
-BufferID = Tuple[AT, AT, int, 'TransType']
+BufferID: 'TypeAlias' = Tuple[AT, AT, int, 'TransType']
 
 
 @info_final

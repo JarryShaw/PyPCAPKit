@@ -21,20 +21,13 @@ from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import FormatError
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional, Type, Union
+    from typing import Optional, Type
 
     from typing_extensions import Literal
 
+    from pcapkit.foundation.extraction import Engines, Formats, Layers, Protocols, VerboseHandler
     from pcapkit.foundation.reassembly.reassembly import Reassembly
     from pcapkit.foundation.traceflow.traceflow import TraceFlow
-    from pcapkit.protocols.misc.pcap.frame import Frame
-
-    Formats = Literal['pcap', 'json', 'tree', 'plist']
-    Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
-    Layers = Literal['link', 'internet', 'transport', 'application', 'none']
-
-    Protocols = Union[str, Protocol, Type[Protocol]]
-    VerboseHandler = Callable[['Extractor', Frame], Any]
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # interface functions

@@ -593,7 +593,11 @@ class _MPTCP(Schema):
 
         """
         ret = self.data
+
+        ret.option = Enum_Option.Multipath_TCP
+        ret.length = self.test['length']
         ret.subtype = Enum_MPTCPOption.get(packet['test']['subtype'])
+
         return ret
 
 
@@ -607,6 +611,10 @@ class MPTCP(EnumSchema[Enum_MPTCPOption]):
     __enum__: 'DefaultDict[Enum_MPTCPOption, Type[MPTCP]]' = collections.defaultdict(lambda: MPTCPUnknown)
 
     if TYPE_CHECKING:
+        #: Option kind.
+        kind: 'Enum_Option'
+        #: MPTCP length.
+        length: 'int'
         #: MPTCP subtype.
         subtype: 'Enum_MPTCPOption'
 
