@@ -63,7 +63,7 @@ dependencies = [
 
     # version compatibility
     "pathlib2>=2.3.2; python_version == '3.4'",
-    "typing-extensions; python_version < '3.8'",
+    "typing-extensions; python_version < '3.9'",
 ]
 
 [project.urls]
