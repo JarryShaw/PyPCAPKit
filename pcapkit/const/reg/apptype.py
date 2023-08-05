@@ -22916,6 +22916,15 @@ class AppType(StrEnum):
     #: [UDP] Port for copy discovery
     copy_disc: 'AppType' = 8445, 'copy-disc', TransportProtocol.get('udp')
 
+    #: [TCP] Matrix Federation Protocol
+    matrix_fed: 'AppType' = 8448, 'matrix-fed', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_8448: 'AppType' = 8448, 'reserved', TransportProtocol.get('udp')
+
+    #: [N/A] Unassigned
+    unassigned_8449: 'AppType' = 8449, 'unassigned', TransportProtocol.get('undefined')
+
     #: - [TCP] npmp
     #: - [UDP] npmp
     npmp: 'AppType' = 8450, 'npmp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -28866,6 +28875,9 @@ class AppType(StrEnum):
     #: [N/A] Mental Ray for Maya
     mi_raysat: 'AppType' = -1, 'mi-raysat', TransportProtocol.get('undefined')
 
+    #: [TCP] A protocol for controlling a microscope
+    microdeep: 'AppType' = -1, 'microdeep', TransportProtocol.get('tcp')
+
     #: [TCP] Protocol for connected accessories
     mieleacs: 'AppType' = -1, 'mieleacs', TransportProtocol.get('tcp')
 
@@ -31312,7 +31324,7 @@ class AppType(StrEnum):
         if 8434 <= value <= 8441:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 8446 <= value <= 8449:
+        if 8446 <= value <= 8447:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 8451 <= value <= 8456:

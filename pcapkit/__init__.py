@@ -123,4 +123,4 @@ __all__ = [
 ]
 
 #: version number
-__version__ = '1.1.0.post1'
+__version__ = '1.1.0.post2'
