@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.utilities.compat import NotRequired
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -33,9 +34,8 @@ __all__ = [
 class Flags(Data):
     """Data model for HTTP/2 flags."""
 
-    if TYPE_CHECKING:
-        #: Flags as in combination value.
-        __value__: 'FrameType.Flags'
+    #: Flags as in combination value.
+    __value__: 'FrameType.Flags' = NotRequired  # type: ignore[assignment]
 
 
 class HTTP(Data):
@@ -60,9 +60,6 @@ class UnassignedFrame(HTTP):
     #: Frame payload.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Literal[None]', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class DataFrameFlags(Flags):
@@ -72,9 +69,6 @@ class DataFrameFlags(Flags):
     END_STREAM: 'bool'  # bit 0
     #: ``PADDED`` flag.
     PADDED: 'bool'      # bit 3
-
-    if TYPE_CHECKING:
-        def __init__(self, END_STREAM: 'bool', PADDED: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -87,9 +81,6 @@ class DataFrame(HTTP):
     pad_len: 'int'
     #: Frame payload.
     data: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'DataFrameFlags', pad_len: 'int', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -104,9 +95,6 @@ class HeadersFrameFlags(Flags):
     PADDED: 'bool'       # bit 3
     #: ``PRIORITY`` flag.
     PRIORITY: 'bool'     # bit 5
-
-    if TYPE_CHECKING:
-        def __init__(self, END_STREAM: 'bool', END_HEADERS: 'bool', PADDED: 'bool', PRIORITY: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -126,9 +114,6 @@ class HeadersFrame(HTTP):
     #: Header block fragment.
     fragment: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'HeadersFrameFlags', pad_len: 'int', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class PriorityFrame(HTTP):
@@ -143,9 +128,6 @@ class PriorityFrame(HTTP):
     #: Weight.
     weight: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Literal[None]', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class RSTStreamFrame(HTTP):
@@ -156,9 +138,6 @@ class RSTStreamFrame(HTTP):
     #: Error code.
     error: 'ErrorCode'
 
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Literal[None]', sid: 'int', error: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class SettingsFrameFlags(Flags):
@@ -166,9 +145,6 @@ class SettingsFrameFlags(Flags):
 
     #: ``ACK`` flag.
     ACK: 'bool'  # bit 0
-
-    if TYPE_CHECKING:
-        def __init__(self, ACK: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -180,9 +156,6 @@ class SettingsFrame(HTTP):
     #: Settings.
     settings: 'OrderedMultiDict[Setting, int]'
 
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', settings: 'OrderedMultiDict[Setting, int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class PushPromiseFrameFlags(Flags):
@@ -192,9 +165,6 @@ class PushPromiseFrameFlags(Flags):
     END_HEADERS: 'bool'  # bit 2
     #: ``PADDED`` flag.
     PADDED: 'bool'       # bit 3
-
-    if TYPE_CHECKING:
-        def __init__(self, END_HEADERS: 'bool', PADDED: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -210,9 +180,6 @@ class PushPromiseFrame(HTTP):
     #: Header block fragment.
     fragment: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', pad_len: 'int', sid: 'int', promised_sid: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class PingFrameFlags(Flags):
@@ -220,9 +187,6 @@ class PingFrameFlags(Flags):
 
     #: ``ACK`` flag.
     ACK: 'bool'  # bit 0
-
-    if TYPE_CHECKING:
-        def __init__(self, ACK: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -233,9 +197,6 @@ class PingFrame(HTTP):
     flags: 'PingFrameFlags'
     #: Opaque data.
     data: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -251,9 +212,6 @@ class GoawayFrame(HTTP):
     #: Additional debug data.
     debug_data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', last_sid: 'int', error: 'int', debug_data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class WindowUpdateFrame(HTTP):
@@ -264,9 +222,6 @@ class WindowUpdateFrame(HTTP):
     #: Window size increment.
     increment: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', increment: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class ContinuationFrameFlags(Flags):
@@ -274,9 +229,6 @@ class ContinuationFrameFlags(Flags):
 
     #: ``END_HEADERS`` flag.
     END_HEADERS: 'bool'  # bit 2
-
-    if TYPE_CHECKING:
-        def __init__(self, END_HEADERS: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -287,6 +239,3 @@ class ContinuationFrame(HTTP):
     flags: 'ContinuationFrameFlags'
     #: Header block fragment.
     fragment: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

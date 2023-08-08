@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.utilities.compat import NotRequired
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
@@ -26,9 +27,6 @@ class CrytographicAuthentication(Data):
     #: Cryptographic sequence number.
     seq: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, key_id: 'int', len: 'int', seq: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
-
 
 @info_final
 class OSPF(Data):
@@ -49,8 +47,5 @@ class OSPF(Data):
     #: Authentication type.
     autype: 'Authentication'
 
-    if TYPE_CHECKING:
-        #: Authentication.
-        auth: 'bytes | CrytographicAuthentication'
-
-        def __init__(self, version: 'int', type: 'Packet', len: 'int', router_id: 'IPv4Address', area_id: 'IPv4Address', chksum: 'bytes', autype: 'Authentication') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin
+    #: Authentication.
+    auth: 'bytes | CrytographicAuthentication' = NotRequired  # type: ignore[assignment]

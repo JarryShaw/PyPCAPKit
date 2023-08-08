@@ -39,10 +39,6 @@ class UnknownType(IPv6_Route):
     #: Data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
-                     data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
-
 
 @info_final
 class SourceRoute(IPv6_Route):
@@ -51,10 +47,6 @@ class SourceRoute(IPv6_Route):
     #: Source addresses.
     ip: 'tuple[IPv6Address, ...]'
 
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
-                     ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
-
 
 @info_final
 class Type2(IPv6_Route):
@@ -62,10 +54,6 @@ class Type2(IPv6_Route):
 
     #: Address.
     ip: 'IPv6Address'
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
-                     ip: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 @info_final
@@ -80,7 +68,3 @@ class RPL(IPv6_Route):
     pad: 'int'
     #: Addresses.
     ip: 'tuple[IPv6Address | bytes, ...]'
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
-                     cmpr_i: 'int', cmpr_e: 'int', pad: 'int', ip: 'tuple[IPv6Address | bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long

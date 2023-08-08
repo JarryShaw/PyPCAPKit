@@ -1,6 +1,10 @@
 [build-system]
 requires = [
     "setuptools>=61.0.0",
+    "wheel",
+
+    #"Cython>=3.0.0",
+    "mypy",
 
     # version compatibility
     "bpc-f2format; python_version < '3.6'",
@@ -109,6 +113,8 @@ exclude = [
     "test*",
     "docs*",
     "sample*",
+    "util*",
+    "out*",
 ]
 
 [tool.setuptools.dynamic]

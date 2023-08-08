@@ -22,6 +22,7 @@ __all__ = [
 
     # typing
     'Mapping', 'Tuple', 'List', 'Dict', 'TypeAlias',
+    'NotRequired',
 ]
 
 if sys.version_info < (3, 6):
@@ -194,3 +195,8 @@ if sys.version_info < (3, 9):
     from typing_extensions import TypeAlias
 else:
     from typing import TypeAlias
+
+if sys.version_info < (3, 11):
+    from typing_extensions import NotRequired
+else:
+    from typing import NotRequired

@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import glob
 import logging
-import os
+import os.path
 import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Sequence
 
 if sys.version_info[0] <= 2:
     raise OSError("PyPCAPKit does not support Python 2!")
@@ -18,6 +19,7 @@ try:
     from setuptools.command.develop import develop
     from setuptools.command.install import install
     from setuptools.command.sdist import sdist
+    from setuptools.extension import Extension
 except:
     raise ImportError("setuptools is required to install PyPCAPKit!")
 
@@ -26,8 +28,18 @@ try:
 except ImportError:
     bdist_wheel = None
 
+try:
+    from Cython.Build import cythonize
+except ImportError:
+    cythonize = None
+
+try:
+    from mypyc.build import mypycify
+except ImportError:
+    mypycify = None
+
 # get logger
-logger = logging.getLogger('pcapkit.setup')
+logger = logging.getLogger('pcapkit-setup')
 formatter = logging.Formatter(fmt='[%(levelname)s] %(asctime)s - %(message)s',
                               datefmt='%m/%d/%Y %I:%M:%S %p')
 handler = logging.StreamHandler(sys.stderr)
@@ -74,6 +86,49 @@ def refactor(path: 'str') -> 'None':
             logger.error('Failed to perform assignment expression backport compiling. '
                          'Please consider manually install `bpc-poseur` and try again.')
             sys.exit(error.returncode)
+
+
+def with_mypycify() -> 'Sequence[Extension] | None':
+    """Find all python source files for :mod:`pcapkit` module."""
+    if mypycify is None:
+        return None
+    logger.info('running mypycify')
+
+    list_py = [
+        '--always-true=MYPY_TYPE_CHECKING',
+        '--disable-error-code=unused-ignore',
+        '--disable-error-code=assignment',
+        #'--disable-error-code=attr-defined',
+        #'--disable-error-code=union-attr',
+    ]  # type: list[Any]
+
+    for pth in glob.glob('pcapkit/**/data'):
+        for dirpath, _, filenames in os.walk(pth):
+            if os.path.split(dirpath)[1] == 'NotImplemented':
+                continue
+            list_py.extend(os.path.join(dirpath, fn) for fn in filenames
+                           if os.path.splitext(fn)[1] == '.py')
+
+    return mypycify(list_py, verbose=True)
+
+
+def with_cythonize() -> 'Sequence[Extension] | None':
+    """Find all python source files for :mod:`pcapkit` module."""
+    if cythonize is None:
+        return None
+    logger.info('running cythonize')
+
+    list_mod = []  # type: list[Extension]
+
+    for pth in glob.glob('pcapkit/**/data'):
+        for dirpath, _, filenames in os.walk(pth):
+            if os.path.split(dirpath)[1] == 'NotImplemented':
+                continue
+            list_mod.extend(Extension(f'{dirpath.replace(os.sep, "_")}_{os.path.splitext(fn)[0]}',
+                                    [os.path.join(dirpath, fn)])
+                            for fn in filenames if fn != '__init__.py')
+
+    return cythonize(list_mod)
 
 
 class pcapkit_sdist(sdist):
@@ -143,4 +198,5 @@ setup(
     },
     long_description=get_long_description(),
     long_description_content_type='text/x-rst',
+    ext_modules=with_mypycify(),  # type: ignore[arg-type]
 )

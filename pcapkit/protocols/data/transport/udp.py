@@ -24,6 +24,3 @@ class UDP(Data):
     len: 'int'
     #: Checksum.
     checksum: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, srcport: 'AppType', dstport: 'AppType', len: 'int', checksum: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin

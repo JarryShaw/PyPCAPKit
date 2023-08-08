@@ -24,9 +24,6 @@ class TCI(Data):
     #: VLAN identifier.
     vid: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, pcp: 'PriorityLevel', dei: 'bool', vid: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
-
 
 @info_final
 class VLAN(Data):
@@ -36,6 +33,3 @@ class VLAN(Data):
     tci: 'TCI'
     #: Protocol (Internet Layer).
     type: 'EtherType'
-
-    if TYPE_CHECKING:
-        def __init__(self, tci: 'TCI', type: 'EtherType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin

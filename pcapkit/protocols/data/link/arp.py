@@ -25,9 +25,6 @@ class Address(Data):
     #: Protocol address.
     protocol: 'str | IPv4Address | IPv6Address'
 
-    if TYPE_CHECKING:
-        def __init__(self, hardware: 'str', protocol: 'str | IPv4Address | IPv6Address') -> 'None': ...  # pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements
-
 
 @info_final
 class Type(Data):
@@ -37,9 +34,6 @@ class Type(Data):
     hardware: 'Hardware'
     #: Protocol type.
     protocol: 'EtherType | str'
-
-    if TYPE_CHECKING:
-        def __init__(self, hardware: 'Hardware', protocol: 'EtherType | str') -> 'None': ...  # pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements
 
 
 @info_final
@@ -66,8 +60,3 @@ class ARP(Data):
     tpa: 'str | IPv4Address | IPv6Address'
     #: Header length.
     len: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, htype: 'Hardware', ptype: 'EtherType', hlen: 'int', plen: 'int',  # pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements
-                     oper: 'Operation', sha: 'str', spa: 'str | IPv4Address | IPv6Address',  # pylint: disable=unused-argument
-                     tha: 'str', tpa: 'str | IPv4Address | IPv6Address', len: 'int') -> 'None': ...  # pylint: disable=unused-argument,redefined-builtin

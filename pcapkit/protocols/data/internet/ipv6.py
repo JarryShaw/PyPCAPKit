@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.utilities.compat import NotRequired
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
@@ -47,15 +48,14 @@ class IPv6(Data):
     #: Destination address.
     dst: 'IPv6Address'
 
-    if TYPE_CHECKING:
-        #: Fragmented packet header & payload (from IPv6-Frag header).
-        fragment: 'Packet'
-        #: Highest header protocol type (extension header excluded).
-        protocol: 'TransType'
-        #: Header length (including extension headers).
-        hdr_len: 'int'
-        #: Raw payload length (excluding extension headers).
-        raw_len: 'int'
+    #: Fragmented packet header & payload (from IPv6-Frag header).
+    fragment: 'Packet' = NotRequired  # type: ignore[assignment]
+    #: Highest header protocol type (extension header excluded).
+    protocol: 'TransType' = NotRequired  # type: ignore[assignment]
+    #: Header length (including extension headers).
+    hdr_len: 'int' = NotRequired  # type: ignore[assignment]
+    #: Raw payload length (excluding extension headers).
+    raw_len: 'int' = NotRequired  # type: ignore[assignment]
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':
         self = super().__new__(cls, *args, **kwargs)

@@ -33,9 +33,6 @@ class HTTP(Data):
     #: HTTP body.
     body: 'Any'
 
-    if TYPE_CHECKING:
-        def __init__(self, receipt: 'Header', header: 'OrderedMultiDict[str, str]', body: 'Any') -> None: ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 class Header(Data):
     """Data model for HTTP/1.* header line."""
@@ -57,9 +54,6 @@ class RequestHeader(Header):
     #: HTTP request version.
     version: 'str'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'HTTP_Type', method: 'Enum_Method', uri: 'str', version: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class ResponseHeader(Header):
@@ -73,6 +67,3 @@ class ResponseHeader(Header):
     status: 'Enum_StatusCode'
     #: HTTP response status message.
     message: 'str'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'HTTP_Type', version: 'str', status: 'Enum_StatusCode', message: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

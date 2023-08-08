@@ -30,9 +30,6 @@ class Address(Data):
     #: Full address (``:`` separated).
     addr: 'str'
 
-    if TYPE_CHECKING:
-        def __init__(self, network: 'str', node: 'str', socket: 'Socket', addr: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
-
 
 @info_final
 class IPX(Data):
@@ -50,6 +47,3 @@ class IPX(Data):
     dst: 'Address'
     #: Source Address.
     src: 'Address'
-
-    if TYPE_CHECKING:
-        def __init__(self, chksum: 'bytes', len: 'int', count: 'int', type: 'Packet', dst: 'Address', src: 'Address') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long

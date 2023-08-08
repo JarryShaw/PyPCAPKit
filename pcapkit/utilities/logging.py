@@ -38,6 +38,13 @@ VERBOSE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_VERBOSE', 'false').casefold
 SPHINX_TYPE_CHECKING = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_SPHINX', 'false').casefold(), False)
 
 ###############################################################################
+# MyPy Mode
+###############################################################################
+
+#: This is a wordaround for :data:`~typing.TYPE_CHECKING` in ``mypyc``.
+MYPY_TYPE_CHECKING = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_MYPY', 'false').casefold(), False)
+
+###############################################################################
 # Logger Setup
 ###############################################################################
 

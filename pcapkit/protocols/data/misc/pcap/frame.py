@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.utilities.compat import NotRequired
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -26,9 +27,6 @@ class FrameInfo(Data):
     #: Actual length of packet.
     orig_len: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, ts_sec: 'int', ts_usec: 'int', incl_len: 'int', orig_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called
-
 
 @info_final
 class Frame(Data):
@@ -47,8 +45,5 @@ class Frame(Data):
     #: Actual length of packet.
     cap_len: 'int'
 
-    if TYPE_CHECKING:
-        #: Protocol chain.
-        protocols: 'str'
-
-        def __init__(self, frame_info: 'FrameInfo', time: 'datetime', number: 'int', time_epoch: 'Decimal', len: 'int', cap_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,line-too-long,redefined-builtin
+    #: Protocol chain.
+    protocols: 'str' = NotRequired  # type: ignore[assignment]

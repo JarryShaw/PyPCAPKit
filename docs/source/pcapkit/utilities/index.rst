@@ -62,6 +62,14 @@ Environment Variables
       This variable can be configured through the environment variable
       :envvar:`PCAPKIT_SPHINX`.
 
+.. autodata:: pcapkit.utilities.logging.MYPY_TYPE_CHECKING
+   :no-value:
+
+   .. seealso::
+
+      This variable can be configured through the environment variable
+      :envvar:`PCAPKIT_MYPY`.
+
 Decorator Functions
 ===================
 
@@ -120,3 +128,5 @@ following objects and functions:
      - ≥ 3.11
    * - :data:`typing.TypeAlias`
      - ≥ 3.9
+   * - :data:`typing.NotRequired`
+     - ≥ 3.11

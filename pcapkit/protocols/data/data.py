@@ -4,6 +4,7 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.utilities.compat import NotRequired
 
 __all__ = ['Data']
 
@@ -18,8 +19,7 @@ class Data(Info):
 
     __excluded__ = ['__next_name__', '__next_type__']
 
-    if TYPE_CHECKING:
-        #: Next field name, i.e., the name of the payload field.
-        __next_name__: 'str'
-        #: Next field type, i.e., the type of the payload field.
-        __next_type__: 'Type[Protocol]'
+    #: Next field name, i.e., the name of the payload field.
+    __next_name__: 'str' = NotRequired  # type: ignore[assignment]
+    #: Next field type, i.e., the type of the payload field.
+    __next_type__: 'Type[Protocol]' = NotRequired  # type: ignore[assignment]

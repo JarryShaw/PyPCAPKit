@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.utilities.compat import NotRequired
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -29,9 +30,6 @@ class Flags(Data):
     #: Priority.
     prio: 'bool'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Type', len: 'bool', seq: 'bool', offset: 'bool', prio: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements
-
 
 @info_final
 class L2TP(Data):
@@ -54,8 +52,5 @@ class L2TP(Data):
     #: Offset Size.
     offset: 'Optional[int]'
 
-    if TYPE_CHECKING:
-        #: Header length.
-        hdr_len: 'int'
-
-        def __init__(self, flags: 'Flags', version: 'int', length: 'Optional[int]', tunnelid: 'int', sessionid: 'int', ns: 'Optional[int]', nr: 'Optional[int]', offset: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements,line-too-long
+    #: Header length.
+    hdr_len: 'int' = NotRequired  # type: ignore[assignment]

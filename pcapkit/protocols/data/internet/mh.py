@@ -104,9 +104,6 @@ class UnknownMessage(MH):
     #: Message data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
-
 
 @info_final
 class BindingRefreshRequestMessage(MH):
@@ -114,10 +111,6 @@ class BindingRefreshRequestMessage(MH):
 
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
 
 
 @info_final
@@ -129,10 +122,6 @@ class HomeTestInitMessage(MH):
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     cookie: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
-
 
 @info_final
 class CareofTestInitMessage(MH):
@@ -142,10 +131,6 @@ class CareofTestInitMessage(MH):
     cookie: 'bytes'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     cookie: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 @info_final
@@ -161,11 +146,6 @@ class HomeTestMessage(MH):
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     nonce_index: 'int', cookie: 'bytes', token: 'bytes',
-                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
-
 
 @info_final
 class CareofTestMessage(MH):
@@ -179,11 +159,6 @@ class CareofTestMessage(MH):
     token: 'bytes'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     nonce_index: 'int', cookie: 'bytes', token: 'bytes',
-                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 @info_final
@@ -205,11 +180,6 @@ class BindingUpdateMessage(MH):
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     seq: 'int', ack: 'bool', home: 'bool', lla_compat: 'bool', key_mngt: 'bool',
-                     lifetime: 'timedelta', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
-
 
 @info_final
 class BindingAcknowledgementMessage(MH):
@@ -226,11 +196,6 @@ class BindingAcknowledgementMessage(MH):
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     status: 'Enum_StatusCode', key_mngt: 'bool', seq: 'int', lifetime: 'timedelta',
-                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
-
 
 @info_final
 class BindingErrorMessage(MH):
@@ -242,11 +207,6 @@ class BindingErrorMessage(MH):
     home: 'IPv6Address'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     status: 'Enum_BindingError', home: 'IPv6Address',
-                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 # TODO: Implement other message types.
@@ -268,16 +228,10 @@ class UnassignedOption(Option):
     #: Option data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
-
 
 @info_final
 class PadOption(Option):
     """Data model for Pad option."""
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
 
 
 @info_final
@@ -287,9 +241,6 @@ class BindingRefreshAdviceOption(Option):
     #: Refresh interval.
     interval: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', interval: 'int') -> 'None': ...
-
 
 @info_final
 class AlternateCareofAddressOption(Option):
@@ -297,9 +248,6 @@ class AlternateCareofAddressOption(Option):
 
     #: Alternate care-of address.
     address: 'IPv6Address'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', address: 'IPv6Address') -> 'None': ...
 
 
 @info_final
@@ -311,9 +259,6 @@ class NonceIndicesOption(Option):
     #: Care-of nonce index.
     careof: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', home: 'int', careof: 'int') -> 'None': ...
-
 
 @info_final
 class AuthorizationDataOption(Option):
@@ -322,9 +267,6 @@ class AuthorizationDataOption(Option):
     #: Authenticator.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
-
 
 @info_final
 class MobileNetworkPrefixOption(Option):
@@ -332,9 +274,6 @@ class MobileNetworkPrefixOption(Option):
 
     #: Mobile Network Prefix.
     prefix: 'IPv6Network'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix: 'IPv6Network') -> 'None': ...
 
 
 @info_final
@@ -346,9 +285,6 @@ class LinkLayerAddressOption(Option):
     #: Link-layer address (LLA).
     lla: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', code: 'Enum_LLACode', lla: 'bytes') -> 'None': ...
-
 
 @info_final
 class MNIDOption(Option):
@@ -358,9 +294,6 @@ class MNIDOption(Option):
     subtype: 'Enum_MNIDSubtype'
     #: Identifier.
     identifier: 'bytes | str | IPv6Address'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNIDSubtype', identifier: 'bytes | str | IPv6Address') -> 'None': ...
 
 
 @info_final
@@ -374,9 +307,6 @@ class AuthOption(Option):
     #: Authentication data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_AuthSubtype', spi: 'int', data: 'bytes') -> 'None': ...
-
 
 @info_final
 class MesgIDOption(Option):
@@ -387,16 +317,10 @@ class MesgIDOption(Option):
     #: NTP timestamp, c.f., :rfc:`1305`.
     ntp_timestamp: 'NTPTimestamp'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', timestamp: 'dt_type', ntp_timestamp: 'NTPTimestamp') -> 'None': ...
-
 
 @info_final
 class CGAParametersRequestOption(Option):
     """Data model for CGA Parameters Request option."""
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
 
 
 class CGAExtension(Data):
@@ -415,9 +339,6 @@ class UnknownExtension(CGAExtension):
     #: Extension data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_CGAExtension', length: 'int', data: 'bytes') -> 'None': ...
-
 
 @info_final
 class MultiPrefixExtension(CGAExtension):
@@ -428,9 +349,6 @@ class MultiPrefixExtension(CGAExtension):
     flag: 'bool'
     #: Prefixes.
     prefixes: 'tuple[int, ...]'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_CGAExtension', length: 'int', flag: 'bool', prefixes: 'tuple[int, ...]') -> 'None': ...
 
 
 @info_final
@@ -448,10 +366,6 @@ class CGAParameter(Data):
     #: Extension fields.
     extensions: 'OrderedMultiDict[Enum_CGAExtension, CGAExtension]'
 
-    if TYPE_CHECKING:
-        def __init__(self, modifier: 'Enum_CGAType', prefix: 'int', collision_count: 'int', public_key: 'bytes',
-                     extensions: 'OrderedMultiDict[Enum_CGAExtension, CGAExtension]') -> 'None': ...
-
 
 @info_final
 class CGAParametersOption(Option):
@@ -459,9 +373,6 @@ class CGAParametersOption(Option):
 
     #: CGA parameters, c.f., :rfc:`3972`.
     parameters: 'tuple[CGAParameter, ...]'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', parameters: 'tuple[CGAParameter, ...]') -> 'None': ...
 
 
 @info_final
@@ -471,9 +382,6 @@ class SignatureOption(Option):
     #: Signature.
     signature: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', signature: 'bytes') -> 'None': ...
-
 
 @info_final
 class PermanentHomeKeygenTokenOption(Option):
@@ -482,16 +390,10 @@ class PermanentHomeKeygenTokenOption(Option):
     #: Permanent home keygen token.
     token: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...
-
 
 @info_final
 class CareofTestInitOption(Option):
     """Header schema for MH Care-of Test Init options."""
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
 
 
 @info_final
@@ -500,9 +402,6 @@ class CareofTestOption(Option):
 
     #: Care-of keygen token.
     token: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...
 
 
 # TODO: Implement other options.

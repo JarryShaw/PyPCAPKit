@@ -22,6 +22,3 @@ class Raw(Data):
     packet: 'bytes'
     #: error instance when parsing packet data
     error: 'Optional[Exception]'
-
-    if TYPE_CHECKING:
-        def __init__(self, protocol: 'Optional[int]', packet: 'bytes', error: 'Optional[Exception]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements

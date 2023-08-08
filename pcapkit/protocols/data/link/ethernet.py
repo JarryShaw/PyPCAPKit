@@ -22,6 +22,3 @@ class Ethernet(Data):
     src: 'str'
     #: Protocol (internet layer).
     type: 'EtherType'
-
-    if TYPE_CHECKING:
-        def __init__(self, dst: 'str', src: 'str', type: 'EtherType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements

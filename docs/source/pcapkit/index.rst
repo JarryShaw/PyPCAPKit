@@ -136,3 +136,12 @@ Environment Variables
    .. seealso::
 
       :data:`pcapkit.utilities.logging.SPHINX_TYPE_CHECKING`
+
+.. envvar:: PCAPKIT_MYPY
+
+   If set to ``1``, :mod:`pcapkit` will run with ``mypyc`` additional
+   typing hits and docstrings support.
+
+   .. seealso::
+
+      :data:`pcapkit.utilities.logging.MYPY_TYPE_CHECKING`

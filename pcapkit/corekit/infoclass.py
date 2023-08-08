@@ -16,7 +16,7 @@ import enum
 import itertools
 from typing import TYPE_CHECKING, Generic, TypeVar, final
 
-from pcapkit.utilities.compat import Mapping
+from pcapkit.utilities.compat import Mapping, NotRequired
 from pcapkit.utilities.exceptions import UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import InfoWarning, warn
 
@@ -95,6 +95,12 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
                 # NOTE: We skip duplicated annotations to avoid duplicate
                 # argument in function definition.
                 if key in args_:
+                    continue
+
+                # NOTE: We skip attributes that are assigned to the
+                # ``NotRequired`` value from generating the ``__init__``
+                # argument list.
+                if cls.__dict__.get(key) is NotRequired:
                     continue
 
                 args_.append(key)

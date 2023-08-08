@@ -38,9 +38,6 @@ class Request(FTP):
     #: Arguments.
     args: 'str'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Literal[FTP_Type.REQUEST]', cmmd: 'Command', args: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class Response(FTP):
@@ -54,6 +51,3 @@ class Response(FTP):
     args: 'str'
     #: More data flag.
     more: 'bool'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Literal[FTP_Type.RESPONSE]', code: 'ReturnCode', args: 'str', more: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

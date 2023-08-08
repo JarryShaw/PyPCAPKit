@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.corekit.multidict import MultiDict
 from pcapkit.protocols.data.data import Data
-from pcapkit.utilities.compat import localcontext
+from pcapkit.utilities.compat import localcontext, NotRequired
 
 __all__ = [
     'PCAPNG',
@@ -75,9 +75,6 @@ class UnknownBlock(PCAPNG):
     #: Block body.
     body: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', body: 'bytes') -> None: ...
-
 
 class Option(Data):
     """Data model for PCAP-NG file options."""
@@ -95,16 +92,10 @@ class UnknownOption(Option):
     #: Option data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', data: 'bytes') -> None: ...
-
 
 @info_final
 class EndOfOption(Option):
     """Data model for PCAP-NG file ``opt_endofopt`` options."""
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int') -> None: ...
 
 
 @info_final
@@ -113,9 +104,6 @@ class CommentOption(Option):
 
     #: Comment text.
     comment: 'str'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', comment: 'str') -> None: ...
 
 
 @info_final
@@ -126,9 +114,6 @@ class CustomOption(Option):
     pen: 'int'
     #: Custom data.
     data: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', pen: 'int', data: 'bytes') -> None: ...
 
 
 @info_final
@@ -144,10 +129,6 @@ class SectionHeaderBlock(PCAPNG):
     #: Options.
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', byteorder: 'Literal["big", "little"]', version: 'VersionInfo',  # pylint: disable=unused-argument
-                     section_length: 'int', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> None: ...
-
 
 @info_final
 class IF_NameOption(Option):
@@ -155,9 +136,6 @@ class IF_NameOption(Option):
 
     #: Interface name.
     name: 'str'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> None: ...
 
 
 @info_final
@@ -175,9 +153,6 @@ class IF_IPv4AddrOption(Option):
     #: IPv4 interface.
     interface: 'IPv4Interface'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv4Interface') -> None: ...
-
 
 @info_final
 class IF_IPv6AddrOption(Option):
@@ -185,9 +160,6 @@ class IF_IPv6AddrOption(Option):
 
     #: IPv6 interface.
     interface: 'IPv6Interface'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv6Interface') -> None: ...
 
 
 @info_final
@@ -197,9 +169,6 @@ class IF_MACAddrOption(Option):
     #: MAC address.
     interface: 'str'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'str') -> None: ...
-
 
 @info_final
 class IF_EUIAddrOption(Option):
@@ -207,9 +176,6 @@ class IF_EUIAddrOption(Option):
 
     #: EUI address.
     interface: 'str'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'str') -> None: ...
 
 
 @info_final
@@ -219,9 +185,6 @@ class IF_SpeedOption(Option):
     #: Interface speed, in bits per second.
     speed: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', speed: 'int') -> None: ...
-
 
 @info_final
 class IF_TSResolOption(Option):
@@ -230,9 +193,6 @@ class IF_TSResolOption(Option):
     #: Time stamp resolution, in units per second.
     resolution: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', resolution: 'int') -> None: ...
-
 
 @info_final
 class IF_TZoneOption(Option):
@@ -240,9 +200,6 @@ class IF_TZoneOption(Option):
 
     #: Time zone.
     timezone: 'dt_timezone'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', timezone: 'dt_timezone') -> None: ...
 
 
 @info_final
@@ -254,9 +211,6 @@ class IF_FilterOption(Option):
     #: Filter expression.
     expression: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', code: 'Enum_FilterType', expression: 'bytes') -> None: ...
-
 
 @info_final
 class IF_OSOption(Option):
@@ -264,9 +218,6 @@ class IF_OSOption(Option):
 
     #: Operating system.
     os: 'str'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', os: 'str') -> None: ...
 
 
 @info_final
@@ -276,9 +227,6 @@ class IF_FCSLenOption(Option):
     #: FCS length.
     fcs_length: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', fcs_length: 'int') -> None: ...
-
 
 @info_final
 class IF_TSOffsetOption(Option):
@@ -286,9 +234,6 @@ class IF_TSOffsetOption(Option):
 
     #: Timestamp offset (in seconds).
     offset: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', offset: 'int') -> None: ...
 
 
 @info_final
@@ -298,9 +243,6 @@ class IF_HardwareOption(Option):
     #: Hardware information.
     hardware: 'str'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', hardware: 'str') -> None: ...
-
 
 @info_final
 class IF_TxSpeedOption(Option):
@@ -309,9 +251,6 @@ class IF_TxSpeedOption(Option):
     #: Interface transmit speed (in bits per second).
     speed: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', speed: 'int') -> None: ...
-
 
 @info_final
 class IF_RxSpeedOption(Option):
@@ -319,9 +258,6 @@ class IF_RxSpeedOption(Option):
 
     #: Interface receive speed (in bits per second).
     speed: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', speed: 'int') -> None: ...
 
 
 @info_final
@@ -334,10 +270,6 @@ class InterfaceDescriptionBlock(PCAPNG):
     snaplen: 'int'
     #: Options.
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', linktype: 'Enum_LinkType',
-                     snaplen: 'int', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> None: ...
 
 
 @info_final
@@ -367,12 +299,6 @@ class EPB_FlagsOption(Option):
     #: Link-layer-dependent error - symbol error (bit 31).
     symbol_error: 'bool'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', direction: 'PacketDirection',
-                     reception: 'PacketReception', fcs_len: 'int', crc_error: 'bool',
-                     too_long: 'bool', too_short: 'bool', gap_error: 'bool', unaligned_error: 'bool',
-                     delimiter_error: 'bool', preamble_error: 'bool', symbol_error: 'bool') -> 'None': ...
-
 
 @info_final
 class EPB_HashOption(Option):
@@ -383,9 +309,6 @@ class EPB_HashOption(Option):
     #: Hash value.
     hash: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', algorithm: 'Enum_HashAlgorithm', hash: 'bytes') -> 'None': ...
-
 
 @info_final
 class EPB_DropCountOption(Option):
@@ -393,9 +316,6 @@ class EPB_DropCountOption(Option):
 
     #: Number of packets dropped by the interface.
     drop_count: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', drop_count: 'int') -> 'None': ...
 
 
 @info_final
@@ -405,9 +325,6 @@ class EPB_PacketIDOption(Option):
     #: Packet ID.
     packet_id: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', packet_id: 'int') -> 'None': ...
-
 
 @info_final
 class EPB_QueueOption(Option):
@@ -415,9 +332,6 @@ class EPB_QueueOption(Option):
 
     #: Queue ID.
     queue_id: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', queue_id: 'int') -> 'None': ...
 
 
 @info_final
@@ -428,9 +342,6 @@ class EPB_VerdictOption(Option):
     verdict: 'Enum_VerdictType'
     #: Verdict value.
     value: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', verdict: 'Enum_VerdictType', value: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -455,14 +366,8 @@ class EnhancedPacketBlock(PCAPNG):
     #: Options.
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
-    if TYPE_CHECKING:
-        #: Protocol chain.
-        protocols: 'str'
-
-        def __init__(self, type: 'Enum_BlockType', length: 'int', section_number: 'int',
-                     number: 'int', interface_id: 'int', timestamp: 'dt_type',
-                     timestamp_epoch: 'Decimal', captured_len: 'int', original_len: 'int',
-                     options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
+    #: Protocol chain.
+    protocols: 'str' = NotRequired  # type: ignore[assignment]
 
 
 @info_final
@@ -488,19 +393,15 @@ class SimplePacketBlock(PCAPNG):
                 timestamp_epoch=decimal.Decimal(0),
             )
 
-    if TYPE_CHECKING:
-        #: Protocol chain.
-        protocols: 'str'
+    #: Protocol chain.
+    protocols: 'str' = NotRequired  # type: ignore[assignment]
 
-        #: Interface ID.
-        interface_id: 'int'
-        #: Timestamp (in seconds).
-        timestamp: 'dt_type'
-        #: Timestamp as in UNIX epoch (in seconds).
-        timestamp_epoch: 'Decimal'
-
-        def __init__(self, section_number: 'int', number: 'int', type: 'Enum_BlockType',
-                     length: 'int', original_len: 'int', captured_len: 'int') -> 'None': ...
+    #: Interface ID.
+    interface_id: 'int' = NotRequired  # type: ignore[assignment]
+    #: Timestamp (in seconds).
+    timestamp: 'dt_type' = NotRequired  # type: ignore[assignment]
+    #: Timestamp as in UNIX epoch (in seconds).
+    timestamp_epoch: 'Decimal' = NotRequired  # type: ignore[assignment]
 
 
 class NameResolutionRecord(Data):
@@ -519,16 +420,10 @@ class UnknownRecord(NameResolutionRecord):
     #: Unknown record value.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_RecordType', length: 'int', data: 'bytes') -> 'None': ...
-
 
 @info_final
 class EndRecord(NameResolutionRecord):
     """Data model for PCAP-NG ``nrb_record_end`` records."""
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_RecordType', length: 'int') -> 'None': ...
 
 
 @info_final
@@ -540,10 +435,6 @@ class IPv4Record(NameResolutionRecord):
     #: Name resolution data.
     records: 'tuple[str, ...]'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address',
-                     records: 'tuple[str, ...]') -> 'None': ...
-
 
 @info_final
 class IPv6Record(NameResolutionRecord):
@@ -554,10 +445,6 @@ class IPv6Record(NameResolutionRecord):
     #: Name resolution data.
     records: 'tuple[str, ...]'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv6Address',
-                     records: 'tuple[str, ...]') -> 'None': ...
-
 
 @info_final
 class NS_DNSNameOption(Option):
@@ -565,9 +452,6 @@ class NS_DNSNameOption(Option):
 
     #: DNS name.
     name: 'str'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
 
 
 @info_final
@@ -577,9 +461,6 @@ class NS_DNSIP4AddrOption(Option):
     #: IPv4 address.
     ip: 'IPv4Address'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', ip: 'IPv4Address') -> 'None': ...
-
 
 @info_final
 class NS_DNSIP6AddrOption(Option):
@@ -587,9 +468,6 @@ class NS_DNSIP6AddrOption(Option):
 
     #: IPv6 address.
     ip: 'IPv6Address'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', ip: 'IPv6Address') -> 'None': ...
 
 
 @info_final
@@ -617,14 +495,10 @@ class NameResolutionBlock(PCAPNG):
             reverse_mapping=reverse_mapping,
         )
 
-    if TYPE_CHECKING:
-        #: Name resolution mapping (IP address -> name).
-        mapping: 'MultiDict[IPv4Address | IPv6Address, str]'
-        #: Name resolution mapping (name -> IP address).
-        reverse_mapping: 'MultiDict[str, IPv4Address | IPv6Address]'
-
-        def __init__(self, type: 'Enum_BlockType', length: 'int', records: 'OrderedMultiDict[Enum_RecordType, NameResolutionRecord]',
-                     options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
+    #: Name resolution mapping (IP address -> name).
+    mapping: 'MultiDict[IPv4Address | IPv6Address, str]' = NotRequired  # type: ignore[assignment]
+    #: Name resolution mapping (name -> IP address).
+    reverse_mapping: 'MultiDict[str, IPv4Address | IPv6Address]' = NotRequired  # type: ignore[assignment]
 
 
 @info_final
@@ -636,10 +510,6 @@ class ISB_StartTimeOption(Option):
     #: Start time as in UNIX epoch (in seconds).
     timestamp_epoch: 'Decimal'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', timestamp: 'dt_type',
-                     timestamp_epoch: 'Decimal') -> 'None': ...
-
 
 @info_final
 class ISB_EndTimeOption(Option):
@@ -650,10 +520,6 @@ class ISB_EndTimeOption(Option):
     #: End time as in UNIX epoch (in seconds).
     timestamp_epoch: 'Decimal'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', timestamp: 'dt_type',
-                     timestamp_epoch: 'Decimal') -> 'None': ...
-
 
 @info_final
 class ISB_IFRecvOption(Option):
@@ -661,9 +527,6 @@ class ISB_IFRecvOption(Option):
 
     #: Number of packets received.
     packets: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
 @info_final
@@ -673,9 +536,6 @@ class ISB_IFDropOption(Option):
     #: Number of packets dropped.
     packets: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
-
 
 @info_final
 class ISB_FilterAcceptOption(Option):
@@ -683,9 +543,6 @@ class ISB_FilterAcceptOption(Option):
 
     #: Number of packets accepted by the filter.
     packets: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
 @info_final
@@ -695,9 +552,6 @@ class ISB_OSDropOption(Option):
     #: Number of packets dropped by the operating system.
     packets: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
-
 
 @info_final
 class ISB_UsrDelivOption(Option):
@@ -705,9 +559,6 @@ class ISB_UsrDelivOption(Option):
 
     #: Number of packets delivered to the user.
     packets: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
 @info_final
@@ -723,10 +574,6 @@ class InterfaceStatisticsBlock(PCAPNG):
     #: Options.
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', timestamp: 'dt_type',
-                     timestamp_epoch: 'Decimal', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
-
 
 @info_final
 class SystemdJournalExportBlock(PCAPNG):
@@ -734,9 +581,6 @@ class SystemdJournalExportBlock(PCAPNG):
 
     #: Journal entry.
     data: 'tuple[OrderedMultiDict[str, str | bytes], ...]'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', data: 'tuple[OrderedMultiDict[str, str | bytes], ...]') -> 'None': ...
 
 
 class DSBSecrets(Data):
@@ -750,9 +594,6 @@ class UnknownSecrets(DSBSecrets):
     #: Secrets data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, data: 'bytes') -> 'None': ...
-
 
 @info_final
 class TLSKeyLog(DSBSecrets):
@@ -761,9 +602,6 @@ class TLSKeyLog(DSBSecrets):
     #: TLS key log entries.
     entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'
 
-    if TYPE_CHECKING:
-        def __init__(self, entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]') -> 'None': ...
-
 
 @info_final
 class WireGuardKeyLog(DSBSecrets):
@@ -771,9 +609,6 @@ class WireGuardKeyLog(DSBSecrets):
 
     #: WireGuard Key Log entries.
     entries: 'OrderedMultiDict[WireGuardKeyLabel, bytes]'
-
-    if TYPE_CHECKING:
-        def __init__(self, entries: 'OrderedMultiDict[WireGuardKeyLabel, bytes]') -> 'None': ...
 
 
 @info_final
@@ -784,9 +619,6 @@ class ZigBeeNWKKey(DSBSecrets):
     nwk_key: 'bytes'
     #: PAN ID.
     pan_id: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, nwk_key: 'bytes', pan_id: 'int') -> 'None': ...
 
 
 @info_final
@@ -799,9 +631,6 @@ class ZigBeeAPSKey(DSBSecrets):
     pan_id: 'int'
     #: Node short address.
     short_address: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, aps_key: 'bytes', pan_id: 'int', short_address: 'int') -> 'None': ...
 
 
 @info_final
@@ -817,11 +646,6 @@ class DecryptionSecretsBlock(PCAPNG):
     #: Options.
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', secrets_type: 'Enum_SecretsType',
-                     secrets_length: 'int', secrets_data: 'DSBSecrets',
-                     options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
-
 
 @info_final
 class CustomBlock(PCAPNG):
@@ -831,9 +655,6 @@ class CustomBlock(PCAPNG):
     pen: 'int'
     #: Custom block data (incl. data, options and padding).
     data: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', pen: 'int', data: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -863,12 +684,6 @@ class PACK_FlagsOption(Option):
     #: Link-layer-dependent error - symbol error (bit 31).
     symbol_error: 'bool'
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', direction: 'PacketDirection',
-                     reception: 'PacketReception', fcs_len: 'int', crc_error: 'bool',
-                     too_long: 'bool', too_short: 'bool', gap_error: 'bool', unaligned_error: 'bool',
-                     delimiter_error: 'bool', preamble_error: 'bool', symbol_error: 'bool') -> 'None': ...
-
 
 @info_final
 class PACK_HashOption(Option):
@@ -878,9 +693,6 @@ class PACK_HashOption(Option):
     algorithm: 'Enum_HashAlgorithm'
     #: Hash value.
     hash: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', algorithm: 'Enum_HashAlgorithm', hash: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -907,11 +719,5 @@ class PacketBlock(PCAPNG):
     #: Options.
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
-    if TYPE_CHECKING:
-        #: Protocol chain.
-        protocols: 'str'
-
-        def __init__(self, type: 'Enum_BlockType', length: 'int', section_number: 'int', number: 'int',
-                     interface_id: 'int', drop_count: 'int', timestamp: 'dt_type',
-                     timestamp_epoch: 'Decimal', captured_length: 'int', original_length: 'int',
-                     options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
+    #: Protocol chain.
+    protocols: 'str' = NotRequired  # type: ignore[assignment]

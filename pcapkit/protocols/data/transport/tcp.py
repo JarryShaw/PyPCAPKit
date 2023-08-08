@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.utilities.compat import NotRequired
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -66,9 +67,6 @@ class Flags(Data):
     #: Last packet from sender.
     fin: 'bool'
 
-    if TYPE_CHECKING:
-        def __init__(self, cwr: 'bool', ece: 'bool', urg: 'bool', ack: 'bool', psh: 'bool', rst: 'bool', syn: 'bool', fin: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class TCP(Data):
@@ -93,13 +91,10 @@ class TCP(Data):
     #: Urgent pointer.
     urgent_pointer: 'int'
 
-    if TYPE_CHECKING:
-        #: TCP options.
-        options: 'OrderedMultiDict[OptionNumber, Option]'
-        #: Connection control flags.
-        connection: 'TCP_Flags'
-
-        def __init__(self, srcport: 'AppType', dstport: 'AppType', seq: 'int', ack: 'int', hdr_len: 'int', flags: 'Flags', window_size: 'int', checksum: 'bytes', urgent_pointer: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+    #: TCP options.
+    options: 'OrderedMultiDict[OptionNumber, Option]' = NotRequired  # type: ignore[assignment]
+    #: Connection control flags.
+    connection: 'TCP_Flags' = NotRequired  # type: ignore[assignment]
 
 
 class Option(Data):
@@ -118,24 +113,15 @@ class UnassignedOption(Option):
     #: Option data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class EndOfOptionList(Option):
     """Data model for TCP end of option list option."""
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class NoOperation(Option):
     """Data model for TCP no operation option."""
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -145,9 +131,6 @@ class MaximumSegmentSize(Option):
     #: Maximum segment size.
     mss: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', mss: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class WindowScale(Option):
@@ -156,16 +139,10 @@ class WindowScale(Option):
     #: Window scale.
     shift: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', shift: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class SACKPermitted(Option):
     """Data model for TCP SACK permitted option."""
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -177,9 +154,6 @@ class SACKBlock(Data):
     #: Right edge.
     right: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, left: 'int', right: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class SACK(Option):
@@ -187,9 +161,6 @@ class SACK(Option):
 
     #: SACK blocks.
     sack: 'tuple[SACKBlock, ...]'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', sack: 'tuple[SACKBlock, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -199,9 +170,6 @@ class Echo(Option):
     #: Echo data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class EchoReply(Option):
@@ -209,9 +177,6 @@ class EchoReply(Option):
 
     #: Echo data.
     data: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -223,16 +188,10 @@ class Timestamps(Option):
     #: Echo data.
     echo: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', timestamp: 'int', echo: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class PartialOrderConnectionPermitted(Option):
     """Data model for TCP partial order connection permitted option."""
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -244,9 +203,6 @@ class PartialOrderServiceProfile(Option):
     #: End flag.
     end: 'bool'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', start: 'bool', end: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class CC(Option):
@@ -254,9 +210,6 @@ class CC(Option):
 
     #: Connection count.
     cc: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', cc: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -266,9 +219,6 @@ class CCNew(Option):
     #: Connection count.
     cc: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', cc: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class CCEcho(Option):
@@ -276,9 +226,6 @@ class CCEcho(Option):
 
     #: Connection count.
     cc: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', cc: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -288,9 +235,6 @@ class AlternateChecksumRequest(Option):
     #: Checksum algorithm.
     chksum: 'Checksum'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', chksum: 'Checksum') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class AlternateChecksumData(Option):
@@ -299,9 +243,6 @@ class AlternateChecksumData(Option):
     #: Checksum data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MD5Signature(Option):
@@ -309,9 +250,6 @@ class MD5Signature(Option):
 
     #: MD5 signature.
     digest: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', digest: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -325,9 +263,6 @@ class QuickStartResponse(Option):
     #: QS nonce.
     nonce: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', req_rate: 'int', ttl_diff: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class UserTimeout(Option):
@@ -335,9 +270,6 @@ class UserTimeout(Option):
 
     #: User timeout.
     timeout: 'timedelta'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', timeout: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -351,9 +283,6 @@ class Authentication(Option):
     #: MAC.
     mac: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', key_id: 'int', next_key_id: 'int', mac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class FastOpenCookie(Option):
@@ -361,9 +290,6 @@ class FastOpenCookie(Option):
 
     #: Cookie.
     cookie: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', cookie: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class MPTCP(Option):
@@ -380,9 +306,6 @@ class MPTCPUnknown(MPTCP):
     #: Data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MPTCPCapableFlag(Data):
@@ -394,9 +317,6 @@ class MPTCPCapableFlag(Data):
     ext: 'bool'
     #: HMAC-SHA1 flag.
     hsa: 'bool'
-
-    if TYPE_CHECKING:
-        def __init__(self, req: 'bool', ext: 'bool', hsa: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -411,9 +331,6 @@ class MPTCPCapable(MPTCP):
     skey: 'int'
     #: Option receiver's key.
     rkey: 'Optional[int]'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', version: 'int', flags: 'MPTCPCapableFlag', skey: 'int', rkey: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class MPTCPJoin(MPTCP):
@@ -436,9 +353,6 @@ class MPTCPJoinSYN(MPTCPJoin):
     #: Sendder's random number.
     nonce: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'TCP_Flags', backup: 'bool', addr_id: 'int', token: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MPTCPJoinSYNACK(MPTCPJoin):
@@ -453,9 +367,6 @@ class MPTCPJoinSYNACK(MPTCPJoin):
     #: Sendder's random number.
     nonce: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'TCP_Flags', backup: 'bool', addr_id: 'int', hmac: 'bytes', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MPTCPJoinACK(MPTCPJoin):
@@ -463,9 +374,6 @@ class MPTCPJoinACK(MPTCPJoin):
 
     #: HMAC value.
     hmac: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'TCP_Flags', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -485,9 +393,6 @@ class MPTCPDSS(MPTCP):
     #: Checksum.
     checksum: 'Optional[bytes]'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', data_fin: 'bool', ack: 'Optional[int]', dsn: 'Optional[int]', ssn: 'Optional[int]', dl_len: 'Optional[int]', checksum: 'Optional[bytes]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MPTCPAddAddress(MPTCP):
@@ -502,9 +407,6 @@ class MPTCPAddAddress(MPTCP):
     #: Port number.
     port: 'Optional[int]'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', version: 'int', addr_id: 'int', addr: 'IPAddress', port: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MPTCPRemoveAddress(MPTCP):
@@ -512,9 +414,6 @@ class MPTCPRemoveAddress(MPTCP):
 
     #: Address ID.
     addr_id: 'tuple[int, ...]'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', addr_id: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -526,9 +425,6 @@ class MPTCPPriority(MPTCP):
     #: Address ID.
     addr_id: 'Optional[int]'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', backup: 'bool', addr_id: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MPTCPFallback(MPTCP):
@@ -537,9 +433,6 @@ class MPTCPFallback(MPTCP):
     #: Data sequence number.
     dsn: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', dsn: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MPTCPFastclose(MPTCP):
@@ -547,6 +440,3 @@ class MPTCPFastclose(MPTCP):
 
     #: Option receiver's key.
     rkey: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', rkey: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

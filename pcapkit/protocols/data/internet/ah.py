@@ -26,6 +26,3 @@ class AH(Data):
     seq: 'int'
     #: Integrity check value.
     icv: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', spi: 'int', seq: 'int', icv: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin

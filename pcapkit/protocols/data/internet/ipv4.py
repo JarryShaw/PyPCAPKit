@@ -7,6 +7,7 @@ from pcapkit.const.ipv4.option_class import OptionClass
 from pcapkit.const.ipv4.tos_del import ToSDelay
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.utilities.compat import NotRequired
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -83,9 +84,6 @@ class Flags(Data):
     #: More fragments.
     mf: 'bool'
 
-    if TYPE_CHECKING:
-        def __init__(self, df: 'bool', mf: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class IPv4(Data):
@@ -116,10 +114,7 @@ class IPv4(Data):
     #: Destination address.
     dst: 'IPv4Address'
 
-    if TYPE_CHECKING:
-        options: 'OrderedMultiDict[OptionNumber, Option]'
-
-        def __init__(self, version: 'Literal[4]', hdr_len: 'int', tos: 'ToSField', len: 'int', id: 'int', flags: 'Flags', offset: 'int', ttl: 'timedelta', protocol: 'TransType', checksum: 'bytes', src: 'IPv4Address', dst: 'IPv4Address') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+    options: 'OrderedMultiDict[OptionNumber, Option]' = NotRequired  # type: ignore[assignment]
 
 
 @info_final
@@ -161,24 +156,15 @@ class UnassignedOption(Option):
     #: Option data.
     data: 'bytes'
 
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class EOOLOption(Option):
     """Data model for IPv4 End of Option List (``EOOL``) option."""
 
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class NOPOption(Option):
     """Data model for IPv4 No Operation (``NOP``) option."""
-
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -190,9 +176,6 @@ class SECOption(Option):
     #: Protection authority flags.
     flags: 'tuple[ProtectionAuthority, ...]'
 
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', level: 'ClassificationLevel', flags: 'tuple[ProtectionAuthority, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class LSROption(Option):
@@ -202,9 +185,6 @@ class LSROption(Option):
     pointer: 'int'
     #: Route.
     route: 'tuple[IPv4Address, ...]'
-
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -220,9 +200,6 @@ class TSOption(Option):
     #: Timestamp data.
     timestamp: 'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'
 
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', overflow: 'int', flag: 'TSFlag', timestamp: 'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class ESECOption(Option):
@@ -232,9 +209,6 @@ class ESECOption(Option):
     format: 'int'
     #: Additional security information.
     info: 'bytes'
-
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', format: 'int', info: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -246,9 +220,6 @@ class RROption(Option):
     #: Route.
     route: 'Optional[tuple[IPv4Address, ...]]'
 
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'Optional[tuple[IPv4Address, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class SIDOption(Option):
@@ -256,9 +227,6 @@ class SIDOption(Option):
 
     #: Stream ID.
     sid: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', sid: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -270,9 +238,6 @@ class SSROption(Option):
     #: Route.
     route: 'Optional[tuple[IPv4Address, ...]]'
 
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'Optional[tuple[IPv4Address, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MTUPOption(Option):
@@ -281,9 +246,6 @@ class MTUPOption(Option):
     #: MTU.
     mtu: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', mtu: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class MTUROption(Option):
@@ -291,9 +253,6 @@ class MTUROption(Option):
 
     #: MTU.
     mtu: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', mtu: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -331,9 +290,6 @@ class RTRALTOption(Option):
     #: Router alert.
     alert: 'RouterAlert'
 
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', alert: 'RouterAlert') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 class QSOption(Option):
     """Data model for IPv4 Quick Start (``QS``) option."""
@@ -353,9 +309,6 @@ class QuickStartRequestOption(QSOption):
     #: Nonce.
     nonce: 'int'
 
-    if TYPE_CHECKING:
-         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', ttl: 'timedelta', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class QuickStartReportOption(QSOption):
@@ -363,6 +316,3 @@ class QuickStartReportOption(QSOption):
 
     #: Nonce.
     nonce: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

@@ -12,9 +12,9 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Optional, overload
+    from typing import Optional
 
-    from typing_extensions import Literal, TypeAlias
+    from typing_extensions import TypeAlias
 
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.protocols.protocol import Protocol
@@ -46,9 +46,6 @@ class Packet(Info, Generic[AT]):
     #: Raw :obj:`bytearray` type payload.
     payload: 'bytearray'
 
-    if TYPE_CHECKING:
-        def __init__(self, bufid: 'tuple[AT, AT, int, TransType]', num: 'int', fo: 'int', ihl: 'int', mf: 'bool', tl: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class DatagramID(Info, Generic[AT]):
@@ -62,9 +59,6 @@ class DatagramID(Info, Generic[AT]):
     id: 'int'
     #: Payload protocol type.
     proto: 'TransType'
-
-    if TYPE_CHECKING:
-        def __init__(self, src: 'AT', dst: 'AT', id: 'int', proto: 'TransType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -84,15 +78,6 @@ class Datagram(Info, Generic[AT]):
     #: Parsed IP payload.
     packet: 'Optional[Protocol]'
 
-    if TYPE_CHECKING:
-        @overload  #pylint: disable=used-before-assignment
-        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes', packet: 'Protocol') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
-        @overload
-        def __init__(self, completed: 'Literal[False]', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]', packet: 'None') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
-        def __init__(self, completed: 'bool', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class Buffer(Info, Generic[AT]):
@@ -108,6 +93,3 @@ class Buffer(Info, Generic[AT]):
     header: 'bytes'
     #: Data buffer, holes set to ``b'\x00'``.
     datagram: 'bytearray'
-
-    if TYPE_CHECKING:
-        def __init__(self, TDL: 'int', RCVBT: 'bytearray', index: 'list[int]', header: 'bytes', datagram: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

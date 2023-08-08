@@ -13,9 +13,9 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Optional, overload
+    from typing import Optional
 
-    from typing_extensions import Literal, TypeAlias
+    from typing_extensions import TypeAlias
 
     from pcapkit.protocols.protocol import Protocol
 
@@ -54,9 +54,6 @@ class Packet(Info):
     #: Raw :obj:`bytearray` type payload.
     payload: 'bytearray'
 
-    if TYPE_CHECKING:
-        def __init__(self, bufid: 'BufferID', dsn: 'int', ack: 'int', num: 'int', syn: 'bool', fin: 'bool', rst: 'bool', len: 'int', first: 'int', last: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class DatagramID(Info, Generic[IPAddress]):
@@ -68,9 +65,6 @@ class DatagramID(Info, Generic[IPAddress]):
     dst: 'tuple[IPAddress, int]'
     #: Original packet ACK number.
     ack: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, src: 'tuple[IPAddress, int]', dst: 'tuple[IPAddress, int]', ack: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -90,15 +84,6 @@ class Datagram(Info, Generic[IPAddress]):
     #: Parsed reassembled payload.
     packet: 'Optional[Protocol]'
 
-    if TYPE_CHECKING:
-        @overload  # pylint: disable=used-before-assignment
-        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes', packet: 'Protocol') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
-        @overload
-        def __init__(self, completed: 'Literal[False]', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]', packet: 'None') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
-        def __init__(self, completed: 'bool', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class HoleDiscriptor(Info):
@@ -108,9 +93,6 @@ class HoleDiscriptor(Info):
     first: 'int'
     #: Stop of hole.
     last: 'int'
-
-    if TYPE_CHECKING:
-        def __init__(self, first: 'int', last: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -126,9 +108,6 @@ class Fragment(Info):
     #: Reassembled payload holes set to b'\x00'.
     raw: 'bytearray'
 
-    if TYPE_CHECKING:
-        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
 
 @info_final
 class Buffer(Info):
@@ -140,6 +119,3 @@ class Buffer(Info):
     hdr: 'bytes'
     #: ACK list.
     ack: 'dict[int, Fragment]'
-
-    if TYPE_CHECKING:
-        def __init__(self, hdl: 'list[HoleDiscriptor]', hdr: 'bytes', ack: 'dict[int, Fragment]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
