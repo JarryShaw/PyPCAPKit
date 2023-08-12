@@ -28688,8 +28688,9 @@ class AppType(StrEnum):
     #: [TCP] Topology Discovery
     kiwin: 'AppType' = -1, 'kiwin', TransportProtocol.get('tcp')
 
-    #: [UDP] Discovery in KNX IoT Point API
-    knx: 'AppType' = -1, 'knx', TransportProtocol.get('udp')
+    #: - [TCP] KNX Discovery Protocol
+    #: - [UDP] Discovery in KNX IoT Point API
+    knx: 'AppType' = -1, 'knx', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [N/A] Kabira Transaction Platform
     ktp: 'AppType' = -1, 'ktp', TransportProtocol.get('undefined')
