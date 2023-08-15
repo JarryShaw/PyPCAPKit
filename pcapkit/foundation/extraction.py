@@ -24,13 +24,13 @@ from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
+from pcapkit.foundation.reassembly.data import ReassemblyData
 from pcapkit.foundation.traceflow import TraceFlowManager
+from pcapkit.foundation.traceflow.data import TraceFlowData
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
-from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
-from pcapkit.foundation.reassembly.data import ReassemblyData
-from pcapkit.foundation.traceflow.data import TraceFlowData
 from pcapkit.utilities.logging import logger
+from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
