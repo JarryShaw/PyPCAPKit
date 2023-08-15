@@ -21,6 +21,7 @@ import aenum
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.logging import logger
 
 __all__ = ['make_dumper']
@@ -60,7 +61,7 @@ def make_dumper(output: 'Type[Dumper]') -> 'Type[Dumper]':
                 return str(o)
             if isinstance(o, datetime.timedelta):
                 return o.total_seconds()
-            if isinstance(o, Info):
+            if isinstance(o, (Info, Schema)):
                 return o.to_dict()
             if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
                 return str(o)
