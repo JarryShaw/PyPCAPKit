@@ -31,6 +31,9 @@ from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatErr
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import logger
 from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
+from pcapkit.foundation.reassembly.data import ReassemblyData
+from pcapkit.foundation.traceflow.data import TraceFlowData
+from pcapkit.utilities.logging import logger
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
