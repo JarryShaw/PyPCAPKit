@@ -790,9 +790,9 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
         if code is not None:
             if isinstance(code, collections.abc.Iterable):
                 for _code in code:
-                    cls.__enum__[_code] = (cls)
+                    cls.__enum__[_code] = (cls)  # type: ignore[index]
             else:
-                cls.__enum__[code] = (cls)
+                cls.__enum__[code] = (cls)  # type: ignore[index]
         super().__init_subclass__()
 
     @classmethod
@@ -804,4 +804,4 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
             schema: Enumetaion schema.
 
         """
-        cls.__enum__[code] = schema
+        cls.__enum__[code] = schema  # type: ignore[index]
