@@ -111,7 +111,10 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddre
 
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
-            label = f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
+            if packet.src.version == 4:
+                label = f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
+            else:
+                label = f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'.replace(':', '.')
             self._buffer[BUFID] = Buffer(
                 fpout=self._foutio(fname=f'{self._fproot}/{label}{self._fdpext or ""}', protocol=packet.protocol,
                                    byteorder=self._endian, nanosecond=self._nnsecd),
