@@ -501,9 +501,9 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">TCP_Packet</span><span class="p">(</span>
             <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
                 <span class="n">ip_info</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                        <span class="c1"># source IP address</span>
-                <span class="n">tcp_info</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>                   <span class="c1"># source port</span>
+                <span class="n">tcp_info</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>              <span class="c1"># source port</span>
                 <span class="n">ip_info</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                        <span class="c1"># destination IP address</span>
-                <span class="n">tcp_info</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>                   <span class="c1"># destination port</span>
+                <span class="n">tcp_info</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>              <span class="c1"># destination port</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">frame_info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>                  <span class="c1"># original packet range number</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                       <span class="c1"># acknowledgement</span>
@@ -556,8 +556,8 @@
             <span class="n">fin</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>                  <span class="c1"># TCP finish (FIN) flag</span>
             <span class="n">src</span><span class="o">=</span><span class="n">ip_info</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                         <span class="c1"># source IP</span>
             <span class="n">dst</span><span class="o">=</span><span class="n">ip_info</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                         <span class="c1"># destination IP</span>
-            <span class="n">srcport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>                <span class="c1"># TCP source port</span>
-            <span class="n">dstport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>                <span class="c1"># TCP destination port</span>
+            <span class="n">srcport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>           <span class="c1"># TCP source port</span>
+            <span class="n">dstport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>           <span class="c1"># TCP destination port</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">frame_info</span><span class="o">.</span><span class="n">timestamp_epoch</span><span class="p">),</span>  <span class="c1"># frame timestamp</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
@@ -624,7 +624,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=efc8ff61"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=fbf0d4b2"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>

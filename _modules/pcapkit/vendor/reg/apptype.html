@@ -463,28 +463,28 @@
 <span class="s1">        return &#39;%s [%d - %s]&#39; % (self.svc, self.port, self.proto.name)</span>
 
 <span class="s1">    def __int__(self) -&gt; &#39;int&#39;:</span>
-<span class="s1">        return self.opt_value</span>
+<span class="s1">        return self.port</span>
 
 <span class="s1">    def __lt__(self, other: &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;) -&gt; &#39;bool&#39;:</span>
-<span class="s1">        return self.opt_value &lt; other</span>
+<span class="s1">        return self.port &lt; other</span>
 
 <span class="s1">    def __gt__(self, other: &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;) -&gt; &#39;bool&#39;:</span>
-<span class="s1">        return self.opt_value &gt; other</span>
+<span class="s1">        return self.port &gt; other</span>
 
 <span class="s1">    def __le__(self, other: &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;) -&gt; &#39;bool&#39;:</span>
-<span class="s1">        return self.opt_value &lt;= other</span>
+<span class="s1">        return self.port &lt;= other</span>
 
 <span class="s1">    def __ge__(self, other: &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;) -&gt; &#39;bool&#39;:</span>
-<span class="s1">        return self.opt_value &gt;= other</span>
+<span class="s1">        return self.port &gt;= other</span>
 
 <span class="s1">    def __eq__(self, other: &#39;Any&#39;) -&gt; &#39;bool&#39;:</span>
-<span class="s1">        return self.opt_value == other</span>
+<span class="s1">        return self.port == other</span>
 
 <span class="s1">    def __ne__(self, other: &#39;Any&#39;) -&gt; &#39;bool&#39;:</span>
-<span class="s1">        return self.opt_value != other</span>
+<span class="s1">        return self.port != other</span>
 
 <span class="s1">    def __hash__(self) -&gt; &#39;int&#39;:</span>
-<span class="s1">        return hash(self.opt_value)</span>
+<span class="s1">        return hash(self.port)</span>
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
@@ -686,7 +686,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=efc8ff61"></script>
+</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=fbf0d4b2"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>

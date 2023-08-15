@@ -119,4 +119,4 @@ following objects and functions:
    * - :func:`enum.show_flag_values`
      - ≥ 3.11
    * - :data:`typing.TypeAlias`
-     - ≥ 3.9
+     - ≥ 3.10

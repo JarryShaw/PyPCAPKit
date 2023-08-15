@@ -454,7 +454,7 @@ extracts parametres from a PCAP file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_d" title="pcapkit.foundation.extraction.Extractor._flag_d"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_d</span></code></a>
-    is <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, as storing frame data is disabled.</p>
+    is <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>, as storing frame data is disabled.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -464,16 +464,31 @@ extracts parametres from a PCAP file.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reassembly</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="reassembly/index.html#pcapkit.foundation.reassembly.data.ReassemblyData" title="pcapkit.foundation.reassembly.data.ReassemblyData"><span class="pre">ReassemblyData</span></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.reassembly" title="Permalink to this definition">#</a></dt>
 <dd><p>Frame record for reassembly.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ipv4</span></code> – tuple of TCP payload fragment (<a class="reference internal" href="reassembly/ip/ipv4.html#term-reasm.ipv4.datagram"><span class="xref std std-term">reasm.ipv4.datagram</span></a>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ipv6</span></code> – tuple of TCP payload fragment (<a class="reference internal" href="reassembly/ip/ipv6.html#term-reasm.ipv6.datagram"><span class="xref std std-term">reasm.ipv6.datagram</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ipv4</span></code> – tuple of IPv4 payload fragment (<a class="reference internal" href="reassembly/ip/ipv4.html#term-reasm.ipv4.datagram"><span class="xref std std-term">reasm.ipv4.datagram</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ipv6</span></code> – tuple of IPv6 payload fragment (<a class="reference internal" href="reassembly/ip/ipv6.html#term-reasm.ipv6.datagram"><span class="xref std std-term">reasm.ipv6.datagram</span></a>)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tcp</span></code> – tuple of TCP payload fragment (<a class="reference internal" href="reassembly/tcp.html#term-reasm.tcp.datagram"><span class="xref std std-term">reasm.tcp.datagram</span></a>)</p></li>
 </ul>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_r</span></code>
+    is <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>, as reassembly is disabled.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.trace">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trace</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="traceflow/index.html#pcapkit.foundation.traceflow.data.TraceFlowData" title="pcapkit.foundation.traceflow.data.TraceFlowData"><span class="pre">TraceFlowData</span></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.trace" title="Permalink to this definition">#</a></dt>
 <dd><p>Index table for traced flow.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tcp</span></code> – tuple of TCP flows (<a class="reference internal" href="traceflow/tcp.html#term-trace.tcp.index"><span class="xref std std-term">trace.tcp.index</span></a>)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_t" title="pcapkit.foundation.extraction.Extractor._flag_t"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_t</span></code></a>
+    is <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>, as flow tracing is disabled.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -817,7 +832,7 @@ until the EOF reached; then it calls <code class="xref py py-meth docutils liter
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=efc8ff61"></script>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=fbf0d4b2"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>

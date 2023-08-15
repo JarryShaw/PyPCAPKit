@@ -364,6 +364,7 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">logger</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;make_dumper&#39;</span><span class="p">]</span>
@@ -403,7 +404,7 @@
                 <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)):</span>
                 <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
                 <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
@@ -502,7 +503,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=efc8ff61"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=fbf0d4b2"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
