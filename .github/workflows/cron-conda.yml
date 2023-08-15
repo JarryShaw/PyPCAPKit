@@ -184,6 +184,7 @@ jobs:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
           platform_osx-64: true
+          overwrite: true
           user: jarryshaw
           label: ${{ needs.conda-update.outputs.PCAPKIT_CONDA_LABEL }}
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
@@ -198,6 +199,7 @@ jobs:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
           platform_linux-64: true
+          overwrite: true
           user: jarryshaw
           label: ${{ needs.conda-update.outputs.PCAPKIT_CONDA_LABEL }}
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
@@ -212,6 +214,7 @@ jobs:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
           platform_win-64: true
+          overwrite: true
           user: jarryshaw
           label: ${{ needs.conda-update.outputs.PCAPKIT_CONDA_LABEL }}
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
