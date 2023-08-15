@@ -120,28 +120,28 @@ class {NAME}(StrEnum):
         return '%s [%d - %s]' % (self.svc, self.port, self.proto.name)
 
     def __int__(self) -> 'int':
-        return self.opt_value
+        return self.port
 
     def __lt__(self, other: '{NAME}') -> 'bool':
-        return self.opt_value < other
+        return self.port < other
 
     def __gt__(self, other: '{NAME}') -> 'bool':
-        return self.opt_value > other
+        return self.port > other
 
     def __le__(self, other: '{NAME}') -> 'bool':
-        return self.opt_value <= other
+        return self.port <= other
 
     def __ge__(self, other: '{NAME}') -> 'bool':
-        return self.opt_value >= other
+        return self.port >= other
 
     def __eq__(self, other: 'Any') -> 'bool':
-        return self.opt_value == other
+        return self.port == other
 
     def __ne__(self, other: 'Any') -> 'bool':
-        return self.opt_value != other
+        return self.port != other
 
     def __hash__(self) -> 'int':
-        return hash(self.opt_value)
+        return hash(self.port)
 
     {ENUM}
 
