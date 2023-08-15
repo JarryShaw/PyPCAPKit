@@ -158,9 +158,9 @@ def tcp_reassembly(frame: 'PCAPNG') -> 'TCP_Packet | None':
         data = TCP_Packet(
             bufid=(
                 ip_info.src,                        # source IP address
-                tcp_info.srcport,                   # source port
+                tcp_info.srcport.port,              # source port
                 ip_info.dst,                        # destination IP address
-                tcp_info.dstport,                   # destination port
+                tcp_info.dstport.port,              # destination port
             ),
             num=frame_info.number,                  # original packet range number
             ack=tcp_info.ack,                       # acknowledgement
@@ -213,8 +213,8 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
             fin=tcp_info.flags.fin,                  # TCP finish (FIN) flag
             src=ip_info.src,                         # source IP
             dst=ip_info.dst,                         # destination IP
-            srcport=tcp_info.srcport,                # TCP source port
-            dstport=tcp_info.dstport,                # TCP destination port
+            srcport=tcp_info.srcport.port,           # TCP source port
+            dstport=tcp_info.dstport.port,           # TCP destination port
             timestamp=float(frame_info.timestamp_epoch),  # frame timestamp
         )
         return data
