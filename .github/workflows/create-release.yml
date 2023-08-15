@@ -143,11 +143,11 @@ jobs:
   pypi:
     name: PyPI distribution for Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
-    # Specifying a GitHub environment is optional, but strongly encouraged
+    ## Specifying a GitHub environment is optional, but strongly encouraged
     #environment: release
-    permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
-      id-token: write
+    #permissions:
+    #  # IMPORTANT: this permission is mandatory for trusted publishing
+    #  id-token: write
     needs: [ github, version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     strategy:
