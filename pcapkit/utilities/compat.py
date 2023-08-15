@@ -190,7 +190,7 @@ if sys.version_info < (3, 11):
 else:
     from enum import show_flag_values  # type: ignore[attr-defined]
 
-if sys.version_info < (3, 9):
+if sys.version_info < (3, 10):
     from typing_extensions import TypeAlias
 else:
     from typing import TypeAlias
