@@ -28,6 +28,9 @@ from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
+from pcapkit.foundation.reassembly.data import ReassemblyData
+from pcapkit.foundation.traceflow.data import TraceFlowData
+from pcapkit.utilities.logging import logger
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
@@ -40,8 +43,6 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.foundation.engines.engine import Engine
-    from pcapkit.foundation.reassembly.data import ReassemblyData
-    from pcapkit.foundation.traceflow.data import TraceFlowData
     from pcapkit.protocols.misc.pcap.frame import Frame
     from pcapkit.protocols.misc.pcapng import PCAPNG
     from pcapkit.protocols.protocol import Protocol
@@ -208,7 +209,7 @@ class Extractor(Generic[P]):
 
         Raises:
             UnsupportedCall: If :attr:`self._flag_d <pcapkit.foundation.extraction.Extractor._flag_d>`
-                is :data:`True`, as storing frame data is disabled.
+                is :data:`False`, as storing frame data is disabled.
 
         """
         if self._flag_d:
@@ -219,25 +220,41 @@ class Extractor(Generic[P]):
     def reassembly(self) -> 'ReassemblyData':
         """Frame record for reassembly.
 
-        * ``ipv4`` -- tuple of TCP payload fragment (:term:`reasm.ipv4.datagram`)
-        * ``ipv6`` -- tuple of TCP payload fragment (:term:`reasm.ipv6.datagram`)
+        * ``ipv4`` -- tuple of IPv4 payload fragment (:term:`reasm.ipv4.datagram`)
+        * ``ipv6`` -- tuple of IPv6 payload fragment (:term:`reasm.ipv6.datagram`)
         * ``tcp`` -- tuple of TCP payload fragment (:term:`reasm.tcp.datagram`)
 
+        Raises:
+            UnsupportedCall: If :attr:`self._flag_r <pcapkit.foundation.extraction.Extractor._flag_r>`
+                is :data:`False`, as reassembly is disabled.
+
         """
-        data = ReassemblyData(
-            ipv4=tuple(self._reasm.ipv4.datagram) if self._ipv4 else None,
-            ipv6=tuple(self._reasm.ipv6.datagram) if self._ipv6 else None,
-            tcp=tuple(self._reasm.tcp.datagram) if self._tcp else None,
-        )
-        return data
+        if self._flag_r:
+            data = ReassemblyData(
+                ipv4=tuple(self._reasm.ipv4.datagram) if self._ipv4 else None,
+                ipv6=tuple(self._reasm.ipv6.datagram) if self._ipv6 else None,
+                tcp=tuple(self._reasm.tcp.datagram) if self._tcp else None,
+            )
+            return data
+        raise UnsupportedCall("'Extractor(reassembly=False)' object has no attribute 'reassembly'")
 
     @property
     def trace(self) -> 'TraceFlowData':
-        """Index table for traced flow."""
-        data = TraceFlowData(
-            tcp=tuple(self._trace.tcp.index) if self._tcp else None,
-        )
-        return data
+        """Index table for traced flow.
+
+        * ``tcp`` -- tuple of TCP flows (:term:`trace.tcp.index`)
+
+        Raises:
+            UnsupportedCall: If :attr:`self._flag_t <pcapkit.foundation.extraction.Extractor._flag_t>`
+                is :data:`False`, as flow tracing is disabled.
+
+        """
+        if self._flag_t:
+            data = TraceFlowData(
+                tcp=tuple(self._trace.tcp.index) if self._tcp else None,
+            )
+            return data
+        raise UnsupportedCall("'Extractor(trace=False)' object has no attribute 'trace'")
 
     @property
     def engine(self) -> 'Engine':
@@ -536,10 +553,11 @@ class Extractor(Generic[P]):
             trace_byteorder: output file byte order
             trace_nanosecond: output nanosecond-resolution file flag
 
-            ip: if record data for IPv4 & IPv6 reassembly
-            ipv4: if perform IPv4 reassembly
-            ipv6: if perform IPv6 reassembly
+            ip: if record data for IPv4 & IPv6 reassembly (must be used with ``reassembly=True``)
+            ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)
+            ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)
             tcp: if perform TCP reassembly and/or flow tracing
+                (must be used with ``reassembly=True`` or ``trace=True``)
 
         Warns:
             FormatWarning: Warns under following circumstances:
@@ -599,6 +617,13 @@ class Extractor(Generic[P]):
             from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
             from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 
+            if self._ipv4:
+                logger.info('IPv4 reassembly enabled')
+            if self._ipv6:
+                logger.info('IPv6 reassembly enabled')
+            if self._tcp:
+                logger.info('TCP reassembly enabled')
+
             self._reasm = ReassemblyManager(
                 ipv4=IPv4_Reassembly(strict=strict) if self._ipv4 else None,
                 ipv6=IPv6_Reassembly(strict=strict) if self._ipv6 else None,
@@ -612,6 +637,9 @@ class Extractor(Generic[P]):
                 warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
                      "using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = None
+
+            if self._tcp:
+                logger.info('TCP flow tracing enabled')
 
             self._trace = TraceFlowManager(
                 tcp=TCP_TraceFlow(fout=trace_fout, format=trace_format, byteorder=trace_byteorder,
