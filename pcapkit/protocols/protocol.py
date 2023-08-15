@@ -571,17 +571,8 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         if (cached := self.__cached__.get('__repr__')) is not None:
             return cached
 
-        name = type(self).__name__
-        temp = []  # type: list[str]
-        for (key, value) in self._info.items():
-            if isinstance(value, Info):
-                temp.append(f'{key}=...')
-            else:
-                temp.append(f'{key}={value!r}')
-        args = ', '.join(temp)
-
         # cache and return
-        repr_ = f'<{name} alias={self.alias!r} {self.info_name}=({args})>'
+        repr_ = f'<{self.alias} {self.info_name}={self._info!r}>'
 
         self.__cached__['__repr__'] = repr_
         return repr_

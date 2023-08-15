@@ -318,7 +318,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             else:
                 temp.append(f'{out_key}={value!r}')
         args = ', '.join(temp)
-        return f'{type(self).__name__}({args})'
+        return f'<{type(self).__name__} {args}>'
 
     def __len__(self) -> 'int':
         return len(self.__dict__)
