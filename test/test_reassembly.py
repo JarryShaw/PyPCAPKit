@@ -5,21 +5,32 @@ import os
 import textwrap
 
 import pcapkit
+from pcapkit.protocols import data
 
 os.system('> ../sample/out')  # nosec: B605 B607
 
 extraction = pcapkit.extract(
     fin='../sample/test.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
-    store=False, tcp=True, verbose=True, strict=True, nofile=True,
+    store=False, tcp=True, verbose=True, strict=True, nofile=True, reassembly=True,
 )
 # pprint.pprint(extraction.frame)
+print()
 
 with open('../sample/out', 'a') as file:  # pylint: disable=unspecified-encoding
     # pprint.pprint(extraction.reassembly.tcp)
-    for datagram in extraction.reassembly.tcp:  # type: ignore[union-attr]
+    for datagram in extraction.reassembly.tcp:
         print(f'completed = {datagram.completed}')
         file.write(f'completed = {datagram.completed}')
         file.write('\n')
+
+        if datagram.id.src[0].version == 4:
+            print(f'network = {datagram.id.src[0]}:{datagram.id.src[1]} -> {datagram.id.dst[0]}:{datagram.id.dst[1]}')
+            file.write(f'network = {datagram.id.src[0]}:{datagram.id.src[1]} -> {datagram.id.dst[0]}:{datagram.id.dst[1]}')
+            file.write('\n')
+        else:
+            print(f'network = [{datagram.id.src[0]}]:{datagram.id.src[1]} -> [{datagram.id.dst[0]}]:{datagram.id.dst[1]}')
+            file.write(f'network = [{datagram.id.src[0]}]:{datagram.id.src[1]} -> [{datagram.id.dst[0]}]:{datagram.id.dst[1]}')
+            file.write('\n')
 
         print(f'index = {datagram.index}')
         file.write(f'index = {datagram.index}')

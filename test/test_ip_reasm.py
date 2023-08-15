@@ -10,7 +10,7 @@ os.system('> ../sample/out')  # nosec: B605 B607
 extraction = pcapkit.extract(
     fin='../sample/ipv4.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
     store=False, ipv4=True, verbose=True, strict=True, #nofile=True,
-    fout='../sample/ip_out.txt', format='tree'
+    fout='../sample/ip_out.txt', format='tree', reassembly=True,
 )
 # pprint.pprint(extraction.frame)
 
