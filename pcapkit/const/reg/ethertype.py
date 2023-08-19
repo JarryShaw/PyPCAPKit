@@ -456,6 +456,9 @@ class EtherType(IntEnum):
     #: IEEE Std 802.1Q - Multiple Multicast Registration Protocol (MMRP) [IEEE]
     IEEE_Std_802_1Q_Multiple_Multicast_Registration_Protocol = 0x88F6
 
+    #: Precision Time Protocol [NIST: IEEE Std 1588][Kang Lee]
+    Precision_Time_Protocol = 0x88F7
+
     #: IEEE Std 802.11 - Fast Roaming Remote Request (802.11r) [IEEE]
     IEEE_Std_802_11_Fast_Roaming_Remote_Request = 0x890D
 
