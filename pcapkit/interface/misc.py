@@ -79,8 +79,8 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
 
     extraction = Extractor(fin=fin, fout=None, format=None, auto=True, extension=extension,
                            store=True, files=False, nofile=True, verbose=verbose, engine=engine,
-                           layer=None, protocol=None, ip=False, ipv4=False, ipv6=False, tcp=False,
-                           strict=False, trace=True, trace_fout=fout, trace_format=format,
+                           layer=None, protocol=None, ip=False, ipv4=False, ipv6=False, tcp=True,
+                           reassembly=False, trace=True, trace_fout=fout, trace_format=format,
                            trace_byteorder=byteorder, trace_nanosecond=nanosecond)  # type: ignore[var-annotated]
 
     fallback = False

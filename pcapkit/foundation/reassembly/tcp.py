@@ -70,7 +70,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
 
         """
         # clear cache
-        self._newflg = False
+        self._flag_n = False
         self.__cached__.clear()
 
         BUFID = info.bufid  # Buffer Identifier
@@ -201,7 +201,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
         for (ack, buffer) in buf.ack.items():
             # if this buffer is not implemented
             # go through every hole and extract received payload
-            if len(HDL) > 2 and self._strflg:
+            if len(HDL) > 2 and self._flag_s:
                 data = []  # type: list[bytes]
                 start = stop = 0
                 for hole in HDL:
@@ -246,4 +246,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                         packet=self.protocol.analyze((bufid[1], bufid[3]), bytes(payload)),
                     )
                     datagram.append(packet)
+
+        for callback in self.__callback_fn__:
+            callback(datagram)
         return datagram

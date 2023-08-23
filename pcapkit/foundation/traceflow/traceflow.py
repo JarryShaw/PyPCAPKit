@@ -23,13 +23,15 @@ from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
 __all__ = ['TraceFlow']
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, Optional, Type
+    from typing import Any, Callable, DefaultDict, Optional, Type
 
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal, Self
 
     from pcapkit.corekit.infoclass import Info
     from pcapkit.protocols.protocol import Protocol
+
+    CallbackFn = Callable[['Index'], None]
 
 BufferID = TypeVar('BufferID')
 Buffer = TypeVar('Buffer', bound='Info')
@@ -52,6 +54,9 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
+
+    #: List of callback functions upon reassembled datagram.
+    __callback_fn__: 'list[CallbackFn]' = []
 
     ##########################################################################
     # Defaults.
@@ -100,7 +105,7 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
     ##########################################################################
 
     @classmethod
-    def register(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+    def register_dumper(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
         r"""Register a new dumper class.
 
         Notes:
@@ -115,6 +120,22 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
 
         """
         cls.__output__[format] = (module, class_, ext)
+
+    @classmethod
+    def register_callback(cls, callback: 'CallbackFn', *, index: 'Optional[int]' = None) -> 'None':
+        """Register callback function.
+
+        Arguments:
+            callback: callback function, which will be called
+                when reassembled datagram is obtained, with the
+                list of reassembled datagrams as its only argument
+            index: index of datagram to be called
+
+        """
+        if index is not None:
+            cls.__callback_fn__.insert(index, callback)
+        else:
+            cls.__callback_fn__.append(callback)
 
     @classmethod
     def make_fout(cls, fout: 'str' = './tmp', fmt: 'str' = 'pcap') -> 'tuple[Type[Dumper], str | None]':

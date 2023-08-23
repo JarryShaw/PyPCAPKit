@@ -14,13 +14,17 @@ implements datagram reassembly of IP and TCP packets.
 import abc
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from pcapkit.utilities.exceptions import UnsupportedCall
+
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Callable, Optional, Type
 
     from typing_extensions import Self
 
     from pcapkit.corekit.infoclass import Info
     from pcapkit.protocols.protocol import Protocol
+
+    CallbackFn = Callable[[list['DT']], None]
 
 __all__ = ['Reassembly']
 
@@ -43,11 +47,15 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
 
     """
 
-    _strflg: 'bool'
-    _newflg: 'bool'
+    _flag_s: 'bool'
+    _flag_d: 'bool'
+    _flag_n: 'bool'
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
+
+    #: List of callback functions upon reassembled datagram.
+    __callback_fn__: 'list[CallbackFn]' = []
 
     ##########################################################################
     # Properties.
@@ -63,9 +71,9 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
     @property
     def count(self) -> 'int':
         """Total number of reassembled packets."""
-        if self._newflg:
+        if self._flag_n:
             self.__cached__.clear()
-            self._newflg = False
+            self._flag_n = False
 
         if (cached := self.__cached__.get('count')) is not None:
             return cached
@@ -77,7 +85,16 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
     # reassembled datagram
     @property
     def datagram(self) -> 'tuple[DT, ...]':
-        """Reassembled datagram."""
+        """Reassembled datagram.
+
+        Raises:
+            UnsupportedCall: If :attr:`self._flag_d <_flag_d>` is
+                set to :data:`False`.
+
+        """
+        if not self._flag_d:
+            raise UnsupportedCall(f'{self.__class__.__name__}(store=False) has no attribute "datagram"')
+
         if self._buffer:
             return self.fetch()
         return tuple(self._dtgram)
@@ -101,7 +118,7 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
 
         """
         # clear cache
-        self._newflg = False
+        self._flag_n = False
         self.__cached__['count'] = None
         self.__cached__['fetch'] = None
 
@@ -134,9 +151,9 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
         will be returned.
 
         """
-        if self._newflg:
+        if self._flag_n:
             self.__cached__.clear()
-            self._newflg = False
+            self._flag_n = False
 
         if (cached := self.__cached__.get('fetch')) is not None:
             return cached
@@ -180,6 +197,23 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
         for packet in packets:
             self.reassembly(packet)
 
+    # register callback function
+    @classmethod
+    def register(cls, callback: 'CallbackFn', *, index: 'Optional[int]' = None) -> 'None':
+        """Register callback function.
+
+        Arguments:
+            callback: callback function, which will be called
+                when reassembled datagram is obtained, with the
+                list of reassembled datagrams as its only argument
+            index: index of datagram to be called
+
+        """
+        if index is not None:
+            cls.__callback_fn__.insert(index, callback)
+        else:
+            cls.__callback_fn__.append(callback)
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -193,18 +227,23 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
 
         return self
 
-    def __init__(self, *, strict: 'bool' = True) -> 'None':
+    def __init__(self, *, strict: 'bool' = True, store: 'bool' = True) -> 'None':
         """Initialise packet reassembly.
 
         Args:
             strict: if return all datagrams (including those not
                 implemented) when submit
+            store: if store reassembled datagram in memory, i.e.,
+                :attr:`self._dtgram <_dtgram>` (if not, datagram
+                will be discarded after callback)
 
         """
         #: bool: Strict mode flag.
-        self._strflg = strict
+        self._flag_s = strict
+        #: bool: Store mode flag.
+        self._flag_d = store
         #: bool: New datagram flag.
-        self._newflg = False
+        self._flag_n = False
 
         #: dict[IT, BT]: Dict buffer field.
         self._buffer = {}  # type: dict[IT, BT]
@@ -219,5 +258,5 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
                 (detailed format described in corresponding protocol)
 
         """
-        self._newflg = True
+        self._flag_n = True
         self.reassembly(packet)

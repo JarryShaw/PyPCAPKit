@@ -26,15 +26,21 @@ implements datagram reassembly of IP and TCP packets.
    .. automethod:: fetch
    .. automethod:: index
    .. automethod:: run
+   .. automethod:: register
 
    .. autoattribute:: _buffer
       :no-value:
    .. autoattribute:: _dtgram
       :no-value:
 
-   .. autoattribute:: _strflg
+   .. autoattribute:: _flag_s
       :no-value:
-   .. autoattribute:: _newflg
+   .. autoattribute:: _flag_d
+      :no-value:
+   .. autoattribute:: _flag_n
+      :no-value:
+
+   .. autoattribute:: __callback_fn__
       :no-value:
 
    .. automethod:: __call__

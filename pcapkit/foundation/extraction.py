@@ -43,6 +43,10 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.foundation.engines.engine import Engine
+    from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
+    from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
+    from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
+    from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
     from pcapkit.protocols.misc.pcap.frame import Frame
     from pcapkit.protocols.misc.pcapng import PCAPNG
     from pcapkit.protocols.protocol import Protocol
@@ -161,6 +165,22 @@ class Extractor(Generic[P]):
         'scapy': ('pcapkit.foundation.engines.scapy', 'Scapy'),
         'dpkt': ('pcapkit.foundation.engines.dpkt', 'DPKT'),
         'pyshark': ('pcapkit.foundation.engines.pyshark', 'PyShark'),
+    }  # type: dict[str, tuple[str, str]]
+
+    #: dict[str, tuple[str, str]]: Reassembly support mapping for extracting
+    #: frames. The values should be a tuple representing the module name and
+    #: class name.
+    __reassembly__ = {
+        'ipv4': ('pcapkit.foundation.reassembly.ipv4', 'IPv4'),
+        'ipv6': ('pcapkit.foundation.reassembly.ipv6', 'IPv6'),
+        'tcp': ('pcapkit.foundation.reassembly.tcp', 'TCP'),
+    }  # type: dict[str, tuple[str, str]]
+
+    #: dict[str, tuple[str, str]]: Flow tracing support mapping for extracting
+    #: frames. The values should be a tuple representing the module name and
+    #: class name.
+    __traceflow__ = {
+        'tcp': ('pcapkit.foundation.traceflow.tcp', 'TCP'),
     }  # type: dict[str, tuple[str, str]]
 
     ##########################################################################
@@ -302,6 +322,39 @@ class Extractor(Generic[P]):
 
         """
         cls.__engine__[engine] = (module, class_)
+
+
+    @classmethod
+    def register_reassembly(cls, protocol: 'str', module: 'str', class_: 'str') -> 'None':
+        r"""Register a new reassembly engine.
+
+        Notes:
+            The full qualified class name of the new reassembly engine
+            should be as ``{module}.{class_}``.
+
+        Arguments:
+            protocol: protocol name
+            module: module name
+            class\_: class name
+
+        """
+        cls.__reassembly__[protocol] = (module, class_)
+
+    @classmethod
+    def register_traceflow(cls, protocol: 'str', module: 'str', class_: 'str') -> 'None':
+        r"""Register a new flow tracing engine.
+
+        Notes:
+            The full qualified class name of the new flow tracing engine
+            should be as ``{module}.{class_}``.
+
+        Arguments:
+            protocol: protocol name
+            module: module name
+            class\_: class name
+
+        """
+        cls.__traceflow__[protocol] = (module, class_)
 
     def run(self) -> 'None':  # pylint: disable=inconsistent-return-statements
         """Start extraction.
@@ -519,7 +572,7 @@ class Extractor(Generic[P]):
                  auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings # pylint: disable=line-too-long
                  files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
                  engine: 'Optional[Engines]' = None, layer: 'Optional[Layers]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings # pylint: disable=line-too-long
-                 reassembly: 'bool' = False, strict: 'bool' = True,                                                             # reassembly settings # pylint: disable=line-too-long
+                 reassembly: 'bool' = False, reasm_strict: 'bool' = True, reasm_store: 'bool' = True,                           # reassembly settings # pylint: disable=line-too-long
                  trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
                  trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
                  ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False) -> 'None':
@@ -545,7 +598,8 @@ class Extractor(Generic[P]):
             protocol: extract til which protocol
 
             reassembly: if perform reassembly
-            strict: if set strict flag for reassembly
+            reasm_strict: if set strict flag for reassembly
+            reasm_store: if store reassembled datagrams
 
             trace: if trace TCP traffic flows
             trace_fout: path name for flow tracer if necessary
@@ -613,25 +667,35 @@ class Extractor(Generic[P]):
         self._exnam = cast('Engines', (engine or 'default').lower())  # extract using engine
 
         if reassembly:
-            from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
-            from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
-            from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
+            reasm_obj_ipv4 = reasm_obj_ipv6 = reasm_obj_tcp = None
 
             if self._ipv4:
                 logger.info('IPv4 reassembly enabled')
+
+                module, class_ = self.__reassembly__['ipv4']
+                reasm_cls_ipv4 = getattr(importlib.import_module(module), class_)  # type: Type[IPv4_Reassembly]
+                reasm_obj_ipv4 = reasm_cls_ipv4(strict=reasm_strict, store=reasm_store)
             if self._ipv6:
                 logger.info('IPv6 reassembly enabled')
+
+                module, class_ = self.__reassembly__['ipv6']
+                reasm_cls_ipv6 = getattr(importlib.import_module(module), class_)  # type: Type[IPv6_Reassembly]
+                reasm_obj_ipv6 = reasm_cls_ipv6(strict=reasm_strict, store=reasm_store)
             if self._tcp:
                 logger.info('TCP reassembly enabled')
 
+                module, class_ = self.__reassembly__['tcp']
+                reasm_cls_tcp = getattr(importlib.import_module(module), class_)  # type: Type[TCP_Reassembly]
+                reasm_obj_tcp = reasm_cls_tcp(strict=reasm_strict, store=reasm_store)
+
             self._reasm = ReassemblyManager(
-                ipv4=IPv4_Reassembly(strict=strict) if self._ipv4 else None,
-                ipv6=IPv6_Reassembly(strict=strict) if self._ipv6 else None,
-                tcp=TCP_Reassembly(strict=strict) if self._tcp else None,
+                ipv4=reasm_obj_ipv4,
+                ipv6=reasm_obj_ipv6,
+                tcp=reasm_obj_tcp,
             )
 
         if trace:
-            from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow  # isort: skip
+            trace_obj_tcp = None
 
             if self._exnam in ('pyshark',) and trace_format in ('pcap',):
                 warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
@@ -641,9 +705,13 @@ class Extractor(Generic[P]):
             if self._tcp:
                 logger.info('TCP flow tracing enabled')
 
+                module, class_ = self.__traceflow__['tcp']
+                trace_cls_tcp = getattr(importlib.import_module(module), class_)  # type: Type[TCP_TraceFlow]
+                trace_obj_tcp = trace_cls_tcp(fout=trace_fout, format=trace_format, byteorder=trace_byteorder,
+                                              nanosecond=trace_nanosecond)
+
             self._trace = TraceFlowManager(
-                tcp=TCP_TraceFlow(fout=trace_fout, format=trace_format, byteorder=trace_byteorder,
-                                  nanosecond=trace_nanosecond) if self._tcp else None,
+                tcp=trace_obj_tcp,
             )
 
         self._ifile = open(ifnm, 'rb')  # input file # pylint: disable=unspecified-encoding,consider-using-with

@@ -131,11 +131,15 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddre
         if FIN:
             buf = self._buffer.pop(BUFID)
             # fpout, label = buf['fpout'], buf['label']
-            self._stream.append(Index(
+
+            index = Index(
                 fpout=f'{self._fproot}/{label}{self._fdpext}' if self._fdpext is not None else None,
                 index=tuple(buf.index),
                 label=label,
-            ))
+            )
+            for callback in self.__callback_fn__:
+                callback(index)
+            self._stream.append(index)
 
         # return label or output object
         return fpout if output else label

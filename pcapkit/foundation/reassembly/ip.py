@@ -53,7 +53,7 @@ class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]
 
         """
         # clear cache
-        self._newflg = False
+        self._flag_n = False
         self.__cached__.clear()
 
         BUFID = info.bufid  # Buffer Identifier
@@ -134,7 +134,7 @@ class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]
         stop = (TDL + 7) // 8
         flag = checked or (TDL and all(RCVBT[start:stop]))
         # if datagram is not implemented
-        if not flag and self._strflg:
+        if not flag and self._flag_s:
             data = []  # type: list[bytes]
             byte = bytearray()
             # extract received payload
@@ -178,4 +178,8 @@ class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]
                 payload=bytes(payload),
                 packet=self.protocol.analyze(bufid[3], bytes(payload)),
             )
-        return [packet]
+
+        ret = [packet]
+        for callback in self.__callback_fn__:
+            callback(ret)
+        return ret
