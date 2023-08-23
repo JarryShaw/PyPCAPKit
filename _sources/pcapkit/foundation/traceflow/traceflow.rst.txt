@@ -15,7 +15,8 @@ which is an abstract base class for all flow tracing classes.
    .. autoproperty:: protocol
    .. autoproperty:: index
 
-   .. automethod:: register
+   .. automethod:: register_dumper
+   .. automethod:: register_callback
    .. automethod:: make_fout
 
    .. automethod:: dump
@@ -23,6 +24,8 @@ which is an abstract base class for all flow tracing classes.
    .. automethod:: submit
 
    .. autoattribute:: __output__
+      :no-value:
+   .. autoattribute:: __callback_fn__
       :no-value:
 
    .. autoattribute:: _buffer

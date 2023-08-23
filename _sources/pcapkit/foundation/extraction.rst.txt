@@ -58,6 +58,8 @@ extracts parametres from a PCAP file.
 
    .. automethod:: register_dumper
    .. automethod:: register_engine
+   .. automethod:: register_reassembly
+   .. automethod:: register_traceflow
 
    .. automethod:: run
    .. automethod:: record_header
@@ -87,6 +89,10 @@ extracts parametres from a PCAP file.
    .. autoattribute:: __output__
       :no-value:
    .. autoattribute:: __engine__
+      :no-value:
+   .. autoattribute:: __reassembly__
+      :no-value:
+   .. autoattribute:: __traceflow__
       :no-value:
 
    .. automethod:: __iter__

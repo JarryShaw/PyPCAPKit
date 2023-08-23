@@ -366,13 +366,15 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TraceFlow&#39;</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">dictdumper.dumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+
+    <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;Index&#39;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
 
 <span class="n">BufferID</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;BufferID&#39;</span><span class="p">)</span>
 <span class="n">Buffer</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
@@ -395,6 +397,9 @@
 
     <span class="c1"># Internal data storage for cached properties.</span>
     <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+
+    <span class="c1">#: List of callback functions upon reassembled datagram.</span>
+    <span class="n">__callback_fn__</span><span class="p">:</span> <span class="s1">&#39;list[CallbackFn]&#39;</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -442,8 +447,8 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="TraceFlow.register"><a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.register">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<div class="viewcode-block" id="TraceFlow.register_dumper"><a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.register_dumper">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register_dumper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new dumper class.</span>
 
 <span class="sd">        Notes:</span>
@@ -458,6 +463,22 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TraceFlow.register_callback"><a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.register_callback">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register_callback</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;CallbackFn&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register callback function.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            callback: callback function, which will be called</span>
+<span class="sd">                when reassembled datagram is obtained, with the</span>
+<span class="sd">                list of reassembled datagrams as its only argument</span>
+<span class="sd">            index: index of datagram to be called</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TraceFlow.make_fout"><a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.make_fout">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">make_fout</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;./tmp&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;pcap&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Type[Dumper], str | None]&#39;</span><span class="p">:</span>
@@ -623,7 +644,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=fbf0d4b2"></script>
+</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=503bf110"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>

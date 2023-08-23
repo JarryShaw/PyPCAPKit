@@ -357,13 +357,17 @@
 <span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
+
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+
+    <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="s1">&#39;DT&#39;</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Reassembly&#39;</span><span class="p">]</span>
 
@@ -386,11 +390,15 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_strflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="n">_newflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">_flag_s</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">_flag_d</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">_flag_n</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
 
     <span class="c1"># Internal data storage for cached properties.</span>
     <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+
+    <span class="c1">#: List of callback functions upon reassembled datagram.</span>
+    <span class="n">__callback_fn__</span><span class="p">:</span> <span class="s1">&#39;list[CallbackFn]&#39;</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -406,9 +414,9 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Total number of reassembled packets.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cached</span>
@@ -420,7 +428,16 @@
     <span class="c1"># reassembled datagram</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">datagram</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[DT, ...]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembled datagram.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembled datagram.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: If :attr:`self._flag_d &lt;_flag_d&gt;` is</span>
+<span class="sd">                set to :data:`False`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_d</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(store=False) has no attribute &quot;datagram&quot;&#39;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">)</span>
@@ -444,7 +461,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># clear cache</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;fetch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
@@ -477,9 +494,9 @@
 <span class="sd">        will be returned.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fetch&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cached</span>
@@ -523,6 +540,23 @@
         <span class="k">for</span> <span class="n">packet</span> <span class="ow">in</span> <span class="n">packets</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
 
+    <span class="c1"># register callback function</span>
+<div class="viewcode-block" id="Reassembly.register"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.register">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;CallbackFn&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register callback function.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            callback: callback function, which will be called</span>
+<span class="sd">                when reassembled datagram is obtained, with the</span>
+<span class="sd">                list of reassembled datagrams as its only argument</span>
+<span class="sd">            index: index of datagram to be called</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
@@ -536,18 +570,23 @@
 
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise packet reassembly.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            strict: if return all datagrams (including those not</span>
 <span class="sd">                implemented) when submit</span>
+<span class="sd">            store: if store reassembled datagram in memory, i.e.,</span>
+<span class="sd">                :attr:`self._dtgram &lt;_dtgram&gt;` (if not, datagram</span>
+<span class="sd">                will be discarded after callback)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#: bool: Strict mode flag.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_strflg</span> <span class="o">=</span> <span class="n">strict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span> <span class="o">=</span> <span class="n">strict</span>
+        <span class="c1">#: bool: Store mode flag.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_d</span> <span class="o">=</span> <span class="n">store</span>
         <span class="c1">#: bool: New datagram flag.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1">#: dict[IT, BT]: Dict buffer field.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[IT, BT]</span>
@@ -562,7 +601,7 @@
 <span class="sd">                (detailed format described in corresponding protocol)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div></div>
 </pre></div>
         </article>
@@ -596,7 +635,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=fbf0d4b2"></script>
+</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=503bf110"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>

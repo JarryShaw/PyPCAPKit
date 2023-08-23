@@ -96,3 +96,21 @@ Dumper Registries
 .. autofunction:: pcapkit.foundation.registry.foundation.register_extractor_dumper
 
 .. autofunction:: pcapkit.foundation.registry.foundation.register_traceflow_dumper
+
+Callback Registries
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback
+
+.. autofunction:: pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback
+
+.. autofunction:: pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback
+
+.. autofunction:: pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback
+
+Extractor Registries
+~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.foundation.registry.foundation.register_extractor_reassembly
+
+.. autofunction:: pcapkit.foundation.registry.foundation.register_extractor_traceflow

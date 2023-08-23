@@ -404,7 +404,7 @@
             <span class="n">files</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">&#39;bool | VerboseHandler&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                       <span class="c1"># output settings # pylint: disable=line-too-long</span>
             <span class="n">engine</span><span class="p">:</span> <span class="s1">&#39;Optional[Engines]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="s1">&#39;Optional[Layers] | Type[Protocol]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                         <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
             <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Optional[Protocols]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                                                                        <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
-            <span class="n">reassembly</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                                                             <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
+            <span class="n">reassembly</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reasm_store</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
             <span class="n">trace</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
             <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
             <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">:</span>
@@ -421,7 +421,7 @@
 
 <span class="sd">        files: if split each frame into different files</span>
 <span class="sd">        nofile: if no output file is to be dumped</span>
-<span class="sd">        verbose: a :obj:`bool` value or a function takes the :class:`Extract`</span>
+<span class="sd">        verbose: a :obj:`bool` value or a function takes the :class:`Extractor`</span>
 <span class="sd">            instance and current parsed frame (depends on engine selected) as</span>
 <span class="sd">            parameters to print verbose output information</span>
 
@@ -430,7 +430,8 @@
 <span class="sd">        protocol: extract til which protocol</span>
 
 <span class="sd">        reassembly: if perform reassembly</span>
-<span class="sd">        strict: if set strict flag for reassembly</span>
+<span class="sd">        reasm_strict: if set strict flag for reassembly</span>
+<span class="sd">        reasm_store: if store reassembled datagrams</span>
 
 <span class="sd">        trace: if trace TCP traffic flows</span>
 <span class="sd">        trace_fout: path name for flow tracer if necessary</span>
@@ -438,10 +439,11 @@
 <span class="sd">        trace_byteorder: output file byte order</span>
 <span class="sd">        trace_nanosecond: output nanosecond-resolution file flag</span>
 
-<span class="sd">        ip: if record data for IPv4 &amp; IPv6 reassembly</span>
-<span class="sd">        ipv4: if perform IPv4 reassembly</span>
-<span class="sd">        ipv6: if perform IPv6 reassembly</span>
+<span class="sd">        ip: if record data for IPv4 &amp; IPv6 reassembly (must be used with ``reassembly=True``)</span>
+<span class="sd">        ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)</span>
+<span class="sd">        ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)</span>
 <span class="sd">        tcp: if perform TCP reassembly and/or flow tracing</span>
+<span class="sd">            (must be used with ``reassembly=True`` or ``trace=True``)</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        An :class:`~pcapkit.foundation.extraction.Extractor` object.</span>
@@ -454,7 +456,8 @@
                      <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="n">nofile</span><span class="p">,</span>
                      <span class="n">auto</span><span class="o">=</span><span class="n">auto</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
                      <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
-                     <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="n">reassembly</span><span class="p">,</span>
+                     <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span>
+                     <span class="n">reassembly</span><span class="o">=</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">reasm_store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span>
                      <span class="n">trace</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">trace_fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
                      <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">)</span></div>
 
@@ -543,7 +546,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=fbf0d4b2"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=503bf110"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>

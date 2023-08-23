@@ -413,7 +413,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># clear cache</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
         <span class="n">BUFID</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">bufid</span>  <span class="c1"># Buffer Identifier</span>
@@ -544,7 +544,7 @@
         <span class="k">for</span> <span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buf</span><span class="o">.</span><span class="n">ack</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># if this buffer is not implemented</span>
             <span class="c1"># go through every hole and extract received payload</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">HDL</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strflg</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">HDL</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
                 <span class="n">start</span> <span class="o">=</span> <span class="n">stop</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">HDL</span><span class="p">:</span>
@@ -589,6 +589,9 @@
                         <span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">((</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)),</span>
                     <span class="p">)</span>
                     <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
+            <span class="n">callback</span><span class="p">(</span><span class="n">datagram</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">datagram</span></div></div>
 </pre></div>
         </article>
@@ -622,7 +625,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=fbf0d4b2"></script>
+</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=503bf110"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
