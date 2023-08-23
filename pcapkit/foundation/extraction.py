@@ -435,8 +435,8 @@ class Extractor(Generic[P]):
         return module
 
     @classmethod
-    def make_name(cls, fin: 'str' = 'in.pcap', fout: 'str' = 'out', fmt: 'Formats' = 'tree',
-                  extension: 'bool' = True, *, files: 'bool' = False,
+    def make_name(cls, fin: 'str | IO[bytes]' = 'in.pcap', fout: 'str' = 'out',
+                  fmt: 'Formats' = 'tree', extension: 'bool' = True, *, files: 'bool' = False,
                   nofile: 'bool' = False) -> 'tuple[str, Optional[str], Formats, Optional[str], bool]':
         """Generate input and output filenames.
 
@@ -456,7 +456,7 @@ class Extractor(Generic[P]):
            and ``extension`` is :data:`True`.
 
         Args:
-            fin: Input filename.
+            fin: Input filename or a binary IO object.
             fout: Output filename.
             fmt: Output file format.
             extension: If append ``.pcap`` file extension to the input filename
@@ -479,13 +479,16 @@ class Extractor(Generic[P]):
             FormatError: If output format not provided and cannot be presumpted.
 
         """
-        if extension:  # pylint: disable=else-if-used
-            ifnm = fin if os.path.splitext(fin)[1] in cls.PCAP_EXT else f'{fin}.pcap'
-        else:
-            ifnm = fin
+        if isinstance(fin, str):
+            if extension:  # pylint: disable=else-if-used
+                ifnm = fin if os.path.splitext(fin)[1] in cls.PCAP_EXT else f'{fin}.pcap'
+            else:
+                ifnm = fin
 
-        if not os.path.isfile(ifnm):
-            raise FileNotFound(2, 'No such file or directory', ifnm)
+            if not os.path.isfile(ifnm):
+                raise FileNotFound(2, 'No such file or directory', ifnm)
+        else:
+            ifnm = fin.name
 
         if nofile:
             ofnm = None
@@ -568,7 +571,7 @@ class Extractor(Generic[P]):
     ##########################################################################
 
     def __init__(self,
-                 fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,                 # basic settings # pylint: disable=redefined-builtin
+                 fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,     # basic settings # pylint: disable=redefined-builtin
                  auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings # pylint: disable=line-too-long
                  files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
                  engine: 'Optional[Engines]' = None, layer: 'Optional[Layers]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings # pylint: disable=line-too-long
@@ -579,7 +582,8 @@ class Extractor(Generic[P]):
         """Initialise PCAP Reader.
 
         Args:
-            fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
+            fin: file name to be read or a binary IO object;
+                if file not exist, raise :exc:`FileNotFound`
             fout: file name to be written
             format: file format of output
 
@@ -633,14 +637,15 @@ class Extractor(Generic[P]):
         self._ofnm = ofnm  # output file name
         self._fext = oext  # output file extension
 
-        self._flag_a = auto        # auto extract flag
-        self._flag_d = store       # store data flag
-        self._flag_e = False       # EOF flag
-        self._flag_f = files       # split file flag
-        self._flag_q = nofile      # no output flag
-        self._flag_r = reassembly  # reassembly flag
-        self._flag_t = trace       # trace flag
-        self._flag_v = False       # verbose flag
+        self._flag_a = auto                  # auto extract flag
+        self._flag_d = store                 # store data flag
+        self._flag_e = False                 # EOF flag
+        self._flag_f = files                 # split file flag
+        self._flag_q = nofile                # no output flag
+        self._flag_r = reassembly            # reassembly flag
+        self._flag_t = trace                 # trace flag
+        self._flag_v = False                 # verbose flag
+        self._flag_s = isinstance(fin, str)  # input filename flag
 
         # verbose callback function
         if isinstance(verbose, bool):
@@ -714,7 +719,11 @@ class Extractor(Generic[P]):
                 tcp=trace_obj_tcp,
             )
 
-        self._ifile = open(ifnm, 'rb')  # input file # pylint: disable=unspecified-encoding,consider-using-with
+        if self._flag_s:
+            self._ifile = open(ifnm, 'rb')  # input file # pylint: disable=unspecified-encoding,consider-using-with
+        else:
+            self._ifile = cast('IO[bytes]', fin)
+
         if not self._flag_q:
             module, class_, ext = self.__output__[fmt]
             if ext is None:
@@ -796,5 +805,6 @@ class Extractor(Generic[P]):
         """
         # pylint: disable=attribute-defined-outside-init
         self._flag_e = True
-        self._ifile.close()
+        if self._flag_s:
+            self._ifile.close()
         self._exeng.close()

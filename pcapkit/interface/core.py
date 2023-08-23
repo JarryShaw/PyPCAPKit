@@ -21,7 +21,7 @@ from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import FormatError
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import Optional, Type, IO
 
     from typing_extensions import Literal
 
@@ -56,7 +56,7 @@ PCAPKit = 'default'
 PyShark = 'pyshark'
 
 
-def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,                 # basic settings # pylint: disable=redefined-builtin
+def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,     # basic settings # pylint: disable=redefined-builtin
             auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings # pylint: disable=line-too-long
             files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
             engine: 'Optional[Engines]' = None, layer: 'Optional[Layers] | Type[Protocol]' = None,                         # extraction settings # pylint: disable=line-too-long
@@ -68,7 +68,8 @@ def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: '
     """Extract a PCAP file.
 
     Arguments:
-        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
+        fin: file name to be read or a binary IO object;
+            if file not exist, raise :exc:`FileNotFound`
         fout: file name to be written
         format: file format of output
 
