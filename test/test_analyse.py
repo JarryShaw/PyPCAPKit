@@ -6,7 +6,7 @@ import pcapkit
 
 extraction = pcapkit.extract(
     fin='../sample/http6.cap',  # fout='../sample/http.txt', format='tree',
-    store=False, tcp=True, verbose=True, nofile=True, strict=True, extension=False
+    store=False, tcp=True, verbose=True, nofile=True, reasm_strict=True, extension=False
 )
 # pprint.pprint(extraction.reassembly.tcp)
 print()

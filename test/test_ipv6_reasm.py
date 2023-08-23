@@ -9,13 +9,13 @@ os.system('> ../sample/out')  # nosec: B605 B607
 
 extraction = pcapkit.extract(
     fin='../sample/ipv6.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
-    store=False, ipv6=True, verbose=True, strict=True, nofile=True, reassembly=True,
+    store=False, ipv6=True, verbose=True, reasm_strict=True, nofile=True, reassembly=True,
 )
 # pprint.pprint(extraction.frame)
 
 with open('../sample/out', 'a') as file:  # pylint: disable=unspecified-encoding
     # pprint.pprint(extraction.reassembly.ipv6)
-    for datagram in extraction.reassembly.ipv6:  # type: ignore[union-attr]
+    for datagram in extraction.reassembly.ipv6:
         print(f'completed = {datagram.completed}')
         file.write(f'completed = {datagram.completed}')
         file.write('\n')
