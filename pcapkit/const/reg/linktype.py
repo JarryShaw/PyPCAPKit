@@ -895,6 +895,11 @@ class LinkType(IntEnum):
     #: [``DLT_FIRA_UCI``] Ultra-wideband (UWB) controller interface protocol (UCI).
     FIRA_UCI = 299
 
+    #: [``DLT_MDB``] MDB (Multi-Drop Bus) protocol between a vending machine
+    #: controller and peripherals inside the vending machine, with the message
+    #: format specified by the PCAP format for MDB specification.
+    MDB = 300
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'LinkType':
         """Backport support for original codes.
