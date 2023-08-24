@@ -45,7 +45,8 @@ def get_parser() -> 'ArgumentParser':
     parser.add_argument('-V', '--version', action='version', version=__version__)
     parser.add_argument('fin', metavar='input-file-name',
                         help=('The name of input pcap file. If ".pcap" omits, '
-                              'it will be automatically appended.'))
+                              'it will be automatically appended. Use "-" to indicate '
+                              'reading from `stdin\'.'))
     parser.add_argument('-o', '--output', action='store', metavar='file-name', dest='fout',
                         help=('The name of input pcap file. If format extension '
                               'omits, it will be automatically appended.'))
@@ -98,6 +99,9 @@ def main() -> 'int':
         fmt = TREE
     else:
         fmt = None
+
+    if args.fin == '-':
+        args.fin = sys.stdin.buffer
 
     extractor = Extractor(store=False, auto=False,
                           fin=args.fin, fout=args.fout,

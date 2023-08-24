@@ -984,7 +984,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     # Data models.
     ##########################################################################
 
-    @overload  # type: ignore[override]
+    @overload
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       num: 'int', sct: 'int', ctx: 'Context', **kwargs: 'Any') -> 'None': ...
     @overload
