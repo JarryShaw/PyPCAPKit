@@ -16,10 +16,12 @@ extracts parametres from a PCAP file.
 
 import collections
 import importlib
+import io
 import os
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
+from pcapkit.corekit.io import SeekableReader
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
@@ -33,6 +35,7 @@ from pcapkit.utilities.logging import logger
 from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
 
 if TYPE_CHECKING:
+    from io import BufferedReader
     from types import ModuleType, TracebackType
     from typing import IO, Any, Callable, DefaultDict, Optional, Type, Union
 
@@ -126,7 +129,7 @@ class Extractor(Generic[P]):
         _exeng: 'Engine[P]'
 
         #: Input file object.
-        _ifile: 'IO[bytes]'
+        _ifile: 'BufferedReader'
         #: Output file object.
         _ofile: 'Dumper | Type[Dumper]'
 
@@ -578,7 +581,8 @@ class Extractor(Generic[P]):
                  reassembly: 'bool' = False, reasm_strict: 'bool' = True, reasm_store: 'bool' = True,                           # reassembly settings # pylint: disable=line-too-long
                  trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
                  trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
-                 ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False) -> 'None':
+                 ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
+                 buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None) -> 'None':
         """Initialise PCAP Reader.
 
         Args:
@@ -616,6 +620,10 @@ class Extractor(Generic[P]):
             ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)
             tcp: if perform TCP reassembly and/or flow tracing
                 (must be used with ``reassembly=True`` or ``trace=True``)
+
+            buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
+            buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
+            buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
 
         Warns:
             FormatWarning: Warns under following circumstances:
@@ -722,7 +730,10 @@ class Extractor(Generic[P]):
         if self._flag_s:
             self._ifile = open(ifnm, 'rb')  # input file # pylint: disable=unspecified-encoding,consider-using-with
         else:
-            self._ifile = cast('IO[bytes]', fin)
+            self._ifile = cast('BufferedReader', fin)
+
+        if not self._ifile.seekable():
+            self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path)
 
         if not self._flag_q:
             module, class_, ext = self.__output__[fmt]
@@ -734,8 +745,12 @@ class Extractor(Generic[P]):
 
             self._ofile = dumper if self._flag_f else dumper(ofnm)  # output file
 
-        self._magic = self._ifile.read(4)  # magic number
-        self._ifile.seek(0, os.SEEK_SET)
+        # NOTE: we use peek() to read the magic number, as the file pointer
+        # will not be moved after reading; however, the returned bytes object
+        # may not be exactly 4 bytes, so we use [:4] to get the first 4 bytes
+        self._magic = self._ifile.peek(4)[:4]
+        #self._magic = self._ifile.read(4)  # magic number
+        #self._ifile.seek(0, os.SEEK_SET)
 
         self.run()    # start extraction
 

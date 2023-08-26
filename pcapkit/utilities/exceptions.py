@@ -14,6 +14,7 @@ when exception raised on user's operation.
 .. _tbtrim: https://github.com/gousaiyang/tbtrim
 
 """
+import io
 import os
 import struct
 import sys
@@ -37,13 +38,13 @@ __all__ = [
     'InfoError', 'IPError', 'EnumError', 'ComparisonError',         # TypeError
     'RegistryError', 'FieldError',                                  # TypeError
     'FormatError', 'UnsupportedCall',                               # AttributeError
-    'FileError',                                                    # IOError
+    'FileError', 'UnsupportedOperation',                            # IOError
     'FileExists',                                                   # FileExistsError
     'FileNotFound',                                                 # FileNotFoundError
     'ProtocolNotFound',                                             # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
     'EndianError', 'KeyExists', 'NoDefaultValue',                   # ValueError
-    'FieldValueError', 'SchemaError',                               # ValueError
+    'FieldValueError', 'SchemaError', 'SeekError', 'TruncateError', # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
     'MissingKeyError', 'FragmentError', 'PacketError',              # KeyError
@@ -292,6 +293,14 @@ class SchemaError(BaseError, ValueError):
     """Invalid schema."""
 
 
+class SeekError(BaseError, ValueError):
+    """Invalid seek position."""
+
+
+class TruncateError(BaseError, ValueError):
+    """Invalid truncate size."""
+
+
 ##############################################################################
 # NotImplementedError session.
 ##############################################################################
@@ -343,3 +352,12 @@ class PacketError(BaseError, KeyError):
 class ModuleNotFound(BaseError, ModuleNotFoundError):
     """Module not found."""
     # kwargs: name, path
+
+
+##############################################################################
+# io.UnsupportedOperation session.
+##############################################################################
+
+
+class UnsupportedOperation(BaseError, io.UnsupportedOperation):
+    """Unsupported operation."""

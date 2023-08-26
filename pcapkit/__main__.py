@@ -81,6 +81,8 @@ def get_parser() -> 'ArgumentParser':
                         help='Indicate extraction stops after which protocol.')
     parser.add_argument('-L', '--layer', action='store', dest='layer', default='None', metavar='LAYER',
                         help='Indicate extract frames until which layer.')
+    parser.add_argument('-B', '--buffer-save', action='store_true', default=False,
+                        help='Indicate if store buffer to file when reading from stdin.')
     return parser
 
 
@@ -103,12 +105,12 @@ def main() -> 'int':
     if args.fin == '-':
         args.fin = sys.stdin.buffer
 
-    extractor = Extractor(store=False, auto=False,
+    extractor = Extractor(store=False, auto=not args.verbose,
                           fin=args.fin, fout=args.fout,
                           files=args.files, format=fmt,
                           layer=args.layer, protocol=args.protocol,
                           engine=args.engine, extension=args.auto_extension,
-                          verbose=args.verbose)  # type: ignore[var-annotated]
+                          verbose=args.verbose, buffer_save=args.buffer_save)  # type: ignore[var-annotated]
 
     if args.verbose:
         try:

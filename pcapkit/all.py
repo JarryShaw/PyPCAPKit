@@ -64,6 +64,7 @@ __all__ = [
     'IPv4AddressField', 'IPv6AddressField',                 # IP address protocol fields
     'IPv4InterfaceField', 'IPv6InterfaceField',
     'ListField', 'OptionField',                             # container protocol fields
+    'SeekableReader',                                       # Seekable Reader
 
     # pcapkit.dumpkit
     'PCAPIO',                                               # PCAP Dumper

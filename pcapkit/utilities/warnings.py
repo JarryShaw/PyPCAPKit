@@ -27,6 +27,7 @@ __all__ = [
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
     'UnknownFieldWarning', 'RegistryWarning', 'SchemaWarning', 'InfoWarning',
+    'SeekWarning',
     # ResourceWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning', 'EmojiWarning',
     'VendorWarning',
@@ -137,6 +138,10 @@ class SchemaWarning(BaseWarning, RuntimeWarning):
 
 class InfoWarning(BaseWarning, RuntimeWarning):
     """Info class warning."""
+
+
+class SeekWarning(BaseWarning, RuntimeWarning):
+    """Seek operation warning."""
 
 
 ##############################################################################

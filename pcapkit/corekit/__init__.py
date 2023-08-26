@@ -15,6 +15,7 @@ and :class:`~pcapkit.corekit.multidict.MultiDict` family inspired from
 :class:`~pcapkit.corekit.fields.field.Field` family for data parsing.
 
 """
+from pcapkit.corekit.io import SeekableReader
 from pcapkit.corekit.fields import *
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
@@ -49,4 +50,6 @@ __all__ = [
 
     'IPv4AddressField', 'IPv6AddressField',
     'IPv4InterfaceField', 'IPv6InterfaceField',
+
+    'SeekableReader',
 ]

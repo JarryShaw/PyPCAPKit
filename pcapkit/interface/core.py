@@ -9,6 +9,7 @@ interfaces, variables, and etc., which wraps around the
 foundation classes from :mod:`pcapkit.foundation`.
 
 """
+import io
 import sys
 from typing import TYPE_CHECKING
 
@@ -21,7 +22,7 @@ from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import FormatError
 
 if TYPE_CHECKING:
-    from typing import Optional, Type, IO
+    from typing import IO, Optional, Type
 
     from typing_extensions import Literal
 
@@ -64,7 +65,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
             reassembly: 'bool' = False, reasm_strict: 'bool' = True, reasm_store: 'bool' = True,                           # reassembly settings # pylint: disable=line-too-long
             trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
             trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
-            ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False) -> 'Extractor':
+            ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
+            buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None) -> 'Extractor':
     """Extract a PCAP file.
 
     Arguments:
@@ -103,6 +105,10 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
         tcp: if perform TCP reassembly and/or flow tracing
             (must be used with ``reassembly=True`` or ``trace=True``)
 
+        buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
+        buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
+        buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
+
     Returns:
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
 
@@ -117,7 +123,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                      ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp,
                      reassembly=reassembly, reasm_store=reasm_store, reasm_strict=reasm_strict,
                      trace=trace, trace_fout=trace_fout, trace_format=trace_format,
-                     trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond)
+                     trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond,
+                     buffer_size=buffer_size, buffer_path=buffer_path, buffer_save=buffer_save)
 
 
 def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False) -> 'Reassembly':
