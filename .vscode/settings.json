@@ -109,6 +109,7 @@
         "fext",
         "fileio",
         "fileng",
+        "fileno",
         "fname",
         "fnum",
         "fout",

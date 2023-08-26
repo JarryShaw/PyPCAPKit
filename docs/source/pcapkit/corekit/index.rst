@@ -17,6 +17,7 @@ and :class:`~pcapkit.corekit.multidict.MultiDict` family inspired from
 
    fields
    infoclass
+   io
    multidict
    protochain
    version

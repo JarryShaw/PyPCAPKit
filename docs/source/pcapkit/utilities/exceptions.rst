@@ -316,6 +316,22 @@ when exception raised on user's operation.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
+.. autoexception:: pcapkit.utilities.exceptions.SeekError
+   :no-members:
+   :show-inheritance:
+
+   :param quiet: If :data:`True`, suppress exception message.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoexception:: pcapkit.utilities.exceptions.TruncateError
+   :no-members:
+   :show-inheritance:
+
+   :param quiet: If :data:`True`, suppress exception message.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
 :exc:`NotImplementedError` Category
 -----------------------------------
 
@@ -377,6 +393,17 @@ when exception raised on user's operation.
 -----------------------------------
 
 .. autoexception:: pcapkit.utilities.exceptions.ModuleNotFound
+   :no-members:
+   :show-inheritance:
+
+   :param quiet: If :data:`True`, suppress exception message.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+:exc:`io.UnsupportedOperation` Category
+-----------------------------------
+
+.. autoexception:: pcapkit.utilities.exceptions.UnsupportedOperation
    :no-members:
    :show-inheritance:
 
