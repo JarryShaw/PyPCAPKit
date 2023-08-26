@@ -260,6 +260,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/version.html">Version Info</a></li>
@@ -608,6 +609,42 @@
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.warnings.</span></span><span class="sig-name descname"><span class="pre">SchemaWarning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/warnings.html#SchemaWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.warnings.SchemaWarning" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
 <p>Schema warning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.warnings.InfoWarning">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.warnings.</span></span><span class="sig-name descname"><span class="pre">InfoWarning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/warnings.html#InfoWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.warnings.InfoWarning" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Info class warning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.warnings.SeekWarning">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.warnings.</span></span><span class="sig-name descname"><span class="pre">SeekWarning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/warnings.html#SeekWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.warnings.SeekWarning" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Seek operation warning.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

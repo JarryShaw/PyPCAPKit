@@ -248,6 +248,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -352,6 +353,7 @@
 <span class="sd">foundation classes from :mod:`pcapkit.foundation`.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -364,7 +366,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FormatError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">IO</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
@@ -407,7 +409,8 @@
             <span class="n">reassembly</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reasm_store</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
             <span class="n">trace</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
             <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-            <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">:</span>
+            <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
+            <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract a PCAP file.</span>
 
 <span class="sd">    Arguments:</span>
@@ -446,6 +449,10 @@
 <span class="sd">        tcp: if perform TCP reassembly and/or flow tracing</span>
 <span class="sd">            (must be used with ``reassembly=True`` or ``trace=True``)</span>
 
+<span class="sd">        buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
+<span class="sd">        buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
+<span class="sd">        buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        An :class:`~pcapkit.foundation.extraction.Extractor` object.</span>
 
@@ -460,7 +467,8 @@
                      <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span>
                      <span class="n">reassembly</span><span class="o">=</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">reasm_store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span>
                      <span class="n">trace</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">trace_fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
-                     <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">)</span></div>
+                     <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">,</span>
+                     <span class="n">buffer_size</span><span class="o">=</span><span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_path</span><span class="o">=</span><span class="n">buffer_path</span><span class="p">,</span> <span class="n">buffer_save</span><span class="o">=</span><span class="n">buffer_save</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="reassemble"><a class="viewcode-back" href="../../../pcapkit/interface/core.html#pcapkit.interface.core.reassemble">[docs]</a><span class="k">def</span> <span class="nf">reassemble</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;str | Type[Protocol]&#39;</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Reassembly&#39;</span><span class="p">:</span>

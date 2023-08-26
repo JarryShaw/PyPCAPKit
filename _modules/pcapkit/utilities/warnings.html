@@ -248,6 +248,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -370,6 +371,7 @@
     <span class="s1">&#39;FileWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;LayerWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ProtocolWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;AttributeWarning&#39;</span><span class="p">,</span>
     <span class="s1">&#39;DevModeWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRequestWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRuntimeWarning&#39;</span><span class="p">,</span>
     <span class="s1">&#39;UnknownFieldWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;RegistryWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;SchemaWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;InfoWarning&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SeekWarning&#39;</span><span class="p">,</span>
     <span class="c1"># ResourceWarning</span>
     <span class="s1">&#39;DPKTWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ScapyWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;PySharkWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;EmojiWarning&#39;</span><span class="p">,</span>
     <span class="s1">&#39;VendorWarning&#39;</span><span class="p">,</span>
@@ -478,8 +480,12 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema warning.&quot;&quot;&quot;</span></div>
 
 
-<span class="k">class</span> <span class="nc">InfoWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Info class warning.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="InfoWarning"><a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.InfoWarning">[docs]</a><span class="k">class</span> <span class="nc">InfoWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Info class warning.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="SeekWarning"><a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.SeekWarning">[docs]</a><span class="k">class</span> <span class="nc">SeekWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Seek operation warning.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>

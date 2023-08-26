@@ -260,6 +260,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/version.html">Version Info</a></li>
@@ -1087,6 +1088,44 @@ when exception raised on user’s operation.</p>
 </dl>
 </dd></dl>
 
+<dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.SeekError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">SeekError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#SeekError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.SeekError" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
+<p>Invalid seek position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quiet</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – If <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, suppress exception message.</p></li>
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.TruncateError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">TruncateError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#TruncateError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.TruncateError" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
+<p>Invalid truncate size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quiet</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – If <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, suppress exception message.</p></li>
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="notimplementederror-category">
 <h2><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.11)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">NotImplementedError</span></code></a> Category<a class="headerlink" href="#notimplementederror-category" title="Permalink to this heading">#</a></h2>
@@ -1234,6 +1273,28 @@ when exception raised on user’s operation.</p>
 </dl>
 </dd></dl>
 
+</section>
+<section id="io-unsupportedoperation-category">
+<h2><a class="reference external" href="https://docs.python.org/3/library/io.html#io.UnsupportedOperation" title="(in Python v3.11)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">io.UnsupportedOperation</span></code></a> Category<a class="headerlink" href="#io-unsupportedoperation-category" title="Permalink to this heading">#</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.UnsupportedOperation">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">UnsupportedOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#UnsupportedOperation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.UnsupportedOperation" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/io.html#io.UnsupportedOperation" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnsupportedOperation</span></code></a></p>
+<p>Unsupported operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quiet</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – If <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, suppress exception message.</p></li>
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <hr /><aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
@@ -1310,6 +1371,7 @@ when exception raised on user’s operation.</p>
 <li><a class="reference internal" href="#struct-error-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code> Category</a></li>
 <li><a class="reference internal" href="#keyerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code> Category</a></li>
 <li><a class="reference internal" href="#modulenotfounderror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code> Category</a></li>
+<li><a class="reference internal" href="#io-unsupportedoperation-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">io.UnsupportedOperation</span></code> Category</a></li>
 </ul>
 </li>
 </ul>

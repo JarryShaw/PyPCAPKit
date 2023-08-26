@@ -247,6 +247,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/version.html">Version Info</a></li>
@@ -5720,15 +5721,19 @@
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.packet.Packet.CLOSE">CLOSE (pcapkit.const.hip.packet.Packet attribute)</a>
 </li>
-        <li><a href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine.close">close() (pcapkit.foundation.engines.engine.Engine method)</a>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.close">close() (pcapkit.corekit.io.SeekableReader method)</a>
 
         <ul>
+          <li><a href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine.close">(pcapkit.foundation.engines.engine.Engine method)</a>
+</li>
           <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark.close">(pcapkit.foundation.engines.pyshark.PyShark method)</a>
 </li>
         </ul></li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.packet.Packet.CLOSE_ACK">CLOSE_ACK (pcapkit.const.hip.packet.Packet attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.close_combat">close_combat (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.closed">closed (pcapkit.corekit.io.SeekableReader property)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.cloudcheck">cloudcheck (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -5852,10 +5857,10 @@
 </li>
         <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.CODE_120">CODE_120 (pcapkit.const.ftp.return_code.ReturnCode attribute)</a>
 </li>
-        <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.CODE_125">CODE_125 (pcapkit.const.ftp.return_code.ReturnCode attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.CODE_125">CODE_125 (pcapkit.const.ftp.return_code.ReturnCode attribute)</a>
+</li>
         <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.CODE_150">CODE_150 (pcapkit.const.ftp.return_code.ReturnCode attribute)</a>
 </li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.status_code.StatusCode.CODE_200">CODE_200 (pcapkit.const.http.status_code.StatusCode attribute)</a>
@@ -7453,6 +7458,8 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.desktop_dna">desktop_dna (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.deskview">deskview (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.detach">detach() (pcapkit.corekit.io.SeekableReader method)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.devbasic">devbasic (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -9633,6 +9640,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.filenet_tms">filenet_tms (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.fileno">fileno() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FileNotFound">FileNotFound</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.filesphere">filesphere (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -10204,6 +10213,8 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.flr_agent">flr_agent (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.flukeserver">flukeserver (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.flush">flush() (pcapkit.corekit.io.SeekableReader method)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.fly">fly (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -12781,6 +12792,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.infotos">infotos (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.InfoWarning">InfoWarning</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.infowave">infowave (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.ingres_net">ingres_net (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -13490,6 +13503,8 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.isa100_gci">isa100_gci (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.isakmp">isakmp (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.isatty">isatty() (pcapkit.corekit.io.SeekableReader method)</a>
 </li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_endtime">isb_endtime (pcapkit.const.pcapng.option_type.OptionType attribute)</a>
 </li>
@@ -16608,6 +16623,8 @@
           <li><a href="pcapkit/corekit/fields.html#module-pcapkit.corekit.fields.strings">pcapkit.corekit.fields.strings</a>
 </li>
           <li><a href="pcapkit/corekit/infoclass.html#module-pcapkit.corekit.infoclass">pcapkit.corekit.infoclass</a>
+</li>
+          <li><a href="pcapkit/corekit/io.html#module-pcapkit.corekit.io">pcapkit.corekit.io</a>
 </li>
           <li><a href="pcapkit/corekit/multidict.html#module-pcapkit.corekit.multidict">pcapkit.corekit.multidict</a>
 </li>
@@ -21743,6 +21760,13 @@
 </li>
         </ul></li>
         <li>
+    pcapkit.corekit.io
+
+        <ul>
+          <li><a href="pcapkit/corekit/io.html#module-pcapkit.corekit.io">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.corekit.multidict
 
         <ul>
@@ -23882,6 +23906,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.pearldoc_xact">pearldoc_xact (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.peek">peek() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.PEER_PERMISSION">PEER_PERMISSION (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.peerbook_port">peerbook_port (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -25759,8 +25785,12 @@
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType.RAW">RAW (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
-        <li><a href="pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Fragment.raw">raw (pcapkit.foundation.reassembly.data.tcp.Fragment attribute)</a>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.raw">raw (pcapkit.corekit.io.SeekableReader property)</a>
+
+        <ul>
+          <li><a href="pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Fragment.raw">(pcapkit.foundation.reassembly.data.tcp.Fragment attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.Raw_Frame_Relay">Raw_Frame_Relay (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.data.internet.ipv6.IPv6.raw_len">raw_len (pcapkit.protocols.data.internet.ipv6.IPv6 attribute)</a>
@@ -25847,9 +25877,11 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reachout">reachout (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.read">read() (pcapkit.protocols.application.ftp.FTP method)</a>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.read">read() (pcapkit.corekit.io.SeekableReader method)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.read">(pcapkit.protocols.application.ftp.FTP method)</a>
+</li>
           <li><a href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.read">(pcapkit.protocols.application.http.HTTP method)</a>
 </li>
           <li><a href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP.read">(pcapkit.protocols.application.httpv1.HTTP method)</a>
@@ -25903,6 +25935,8 @@
           <li><a href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.read">(pcapkit.protocols.transport.udp.UDP method)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.read1">read1() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
         <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT.read_frame">read_frame() (pcapkit.foundation.engines.dpkt.DPKT method)</a>
 
         <ul>
@@ -25917,6 +25951,16 @@
           <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy.read_frame">(pcapkit.foundation.engines.scapy.Scapy method)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readable">readable() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readinto">readinto() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readinto1">readinto1() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readline">readline() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readlines">readlines() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.RealError">RealError</a>
 </li>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.operator_id.OperatorID.Realm_of_the_Operator">Realm_of_the_Operator (pcapkit.const.mh.operator_id.OperatorID attribute)</a>
@@ -27717,6 +27761,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_6640">reserved_6640 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_6655">reserved_6655 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_6656">reserved_6656 (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -27725,8 +27771,6 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_6687">reserved_6687 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_6688">reserved_6688 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_6690">reserved_6690 (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -30432,7 +30476,17 @@
 </li>
         <li><a href="pcapkit/const/ipv6.html#pcapkit.const.ipv6.seed_id.SeedID.SEEDID_64_BIT_UNSIGNED_INTEGER">SEEDID_64_BIT_UNSIGNED_INTEGER (pcapkit.const.ipv6.seed_id.SeedID attribute)</a>
 </li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.seek">seek() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.seekable">seekable() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader">SeekableReader (class in pcapkit.corekit.io)</a>
+</li>
+        <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.SeekError">SeekError</a>
+</li>
         <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.decorators.seekset">seekset() (in module pcapkit.utilities.decorators)</a>
+</li>
+        <li><a href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.SeekWarning">SeekWarning</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route.seg_left">seg_left (pcapkit.protocols.data.internet.ipv6_route.IPv6_Route attribute)</a>
 
@@ -31172,14 +31226,14 @@
           <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.smf_dpd_data_selector">(in module pcapkit.protocols.schema.internet.ipv6_opts)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.smf_i_dpd_tid_selector">smf_i_dpd_tid_selector() (in module pcapkit.protocols.schema.internet.hopopt)</a>
 
         <ul>
           <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_tid_selector">(in module pcapkit.protocols.schema.internet.ipv6_opts)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/ipv6.html#pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode">SMFDPDMode (class in pcapkit.const.ipv6.smf_dpd_mode)</a>
 
         <ul>
@@ -32760,6 +32814,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.tell">tell (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.tell">tell() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.tellumat_nms">tellumat_nms (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.telnet">telnet (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -33170,10 +33226,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.tnp1_port">tnp1_port (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.tnp_discover">tnp_discover (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.tns_adv">tns_adv (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.tns_cml">tns_cml (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -33531,6 +33587,10 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.truecm">truecm (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.trueconf">trueconf (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.truncate">truncate() (pcapkit.corekit.io.SeekableReader method)</a>
+</li>
+        <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.TruncateError">TruncateError</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.trunk_1">trunk_1 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -34322,10 +34382,10 @@
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.Unassigned_933">Unassigned_933 (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.Unassigned_935">Unassigned_935 (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.unassigned_9613">unassigned_9613 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.unassigned_9615">unassigned_9615 (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -34555,6 +34615,8 @@
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage.UNSUPPORTED_HIT_SUITE">UNSUPPORTED_HIT_SUITE (pcapkit.const.hip.notify_message.NotifyMessage attribute)</a>
 </li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall">UnsupportedCall</a>
+</li>
+        <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedOperation">UnsupportedOperation</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.uohost">uohost (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -35580,10 +35642,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.willy">willy (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.wimaxasncp">wimaxasncp (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.wimd">wimd (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.wimsic">wimsic (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -35727,6 +35789,8 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.wpl_ers_zmq">wpl_ers_zmq (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.wrap_comment">wrap_comment() (pcapkit.vendor.default.Vendor static method)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.write">write() (pcapkit.corekit.io.SeekableReader method)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.writesrv">writesrv (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>

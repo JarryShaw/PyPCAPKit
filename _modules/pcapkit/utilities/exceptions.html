@@ -248,6 +248,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -357,6 +358,7 @@
 <span class="sd">.. _tbtrim: https://github.com/gousaiyang/tbtrim</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">struct</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -380,13 +382,13 @@
     <span class="s1">&#39;InfoError&#39;</span><span class="p">,</span> <span class="s1">&#39;IPError&#39;</span><span class="p">,</span> <span class="s1">&#39;EnumError&#39;</span><span class="p">,</span> <span class="s1">&#39;ComparisonError&#39;</span><span class="p">,</span>         <span class="c1"># TypeError</span>
     <span class="s1">&#39;RegistryError&#39;</span><span class="p">,</span> <span class="s1">&#39;FieldError&#39;</span><span class="p">,</span>                                  <span class="c1"># TypeError</span>
     <span class="s1">&#39;FormatError&#39;</span><span class="p">,</span> <span class="s1">&#39;UnsupportedCall&#39;</span><span class="p">,</span>                               <span class="c1"># AttributeError</span>
-    <span class="s1">&#39;FileError&#39;</span><span class="p">,</span>                                                    <span class="c1"># IOError</span>
+    <span class="s1">&#39;FileError&#39;</span><span class="p">,</span> <span class="s1">&#39;UnsupportedOperation&#39;</span><span class="p">,</span>                            <span class="c1"># IOError</span>
     <span class="s1">&#39;FileExists&#39;</span><span class="p">,</span>                                                   <span class="c1"># FileExistsError</span>
     <span class="s1">&#39;FileNotFound&#39;</span><span class="p">,</span>                                                 <span class="c1"># FileNotFoundError</span>
     <span class="s1">&#39;ProtocolNotFound&#39;</span><span class="p">,</span>                                             <span class="c1"># IndexError</span>
     <span class="s1">&#39;VersionError&#39;</span><span class="p">,</span> <span class="s1">&#39;IndexNotFound&#39;</span><span class="p">,</span> <span class="s1">&#39;ProtocolError&#39;</span><span class="p">,</span>               <span class="c1"># ValueError</span>
     <span class="s1">&#39;EndianError&#39;</span><span class="p">,</span> <span class="s1">&#39;KeyExists&#39;</span><span class="p">,</span> <span class="s1">&#39;NoDefaultValue&#39;</span><span class="p">,</span>                   <span class="c1"># ValueError</span>
-    <span class="s1">&#39;FieldValueError&#39;</span><span class="p">,</span> <span class="s1">&#39;SchemaError&#39;</span><span class="p">,</span>                               <span class="c1"># ValueError</span>
+    <span class="s1">&#39;FieldValueError&#39;</span><span class="p">,</span> <span class="s1">&#39;SchemaError&#39;</span><span class="p">,</span> <span class="s1">&#39;SeekError&#39;</span><span class="p">,</span> <span class="s1">&#39;TruncateError&#39;</span><span class="p">,</span> <span class="c1"># ValueError</span>
     <span class="s1">&#39;ProtocolNotImplemented&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorNotImplemented&#39;</span><span class="p">,</span>               <span class="c1"># NotImplementedError</span>
     <span class="s1">&#39;StructError&#39;</span><span class="p">,</span>                                                  <span class="c1"># struct.error</span>
     <span class="s1">&#39;MissingKeyError&#39;</span><span class="p">,</span> <span class="s1">&#39;FragmentError&#39;</span><span class="p">,</span> <span class="s1">&#39;PacketError&#39;</span><span class="p">,</span>              <span class="c1"># KeyError</span>
@@ -635,6 +637,14 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Invalid schema.&quot;&quot;&quot;</span></div>
 
 
+<div class="viewcode-block" id="SeekError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.SeekError">[docs]</a><span class="k">class</span> <span class="nc">SeekError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Invalid seek position.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="TruncateError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.TruncateError">[docs]</a><span class="k">class</span> <span class="nc">TruncateError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Invalid truncate size.&quot;&quot;&quot;</span></div>
+
+
 <span class="c1">##############################################################################</span>
 <span class="c1"># NotImplementedError session.</span>
 <span class="c1">##############################################################################</span>
@@ -686,6 +696,15 @@
 <div class="viewcode-block" id="ModuleNotFound"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ModuleNotFound">[docs]</a><span class="k">class</span> <span class="nc">ModuleNotFound</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ModuleNotFoundError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Module not found.&quot;&quot;&quot;</span></div>
     <span class="c1"># kwargs: name, path</span>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># io.UnsupportedOperation session.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="UnsupportedOperation"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedOperation">[docs]</a><span class="k">class</span> <span class="nc">UnsupportedOperation</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">UnsupportedOperation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsupported operation.&quot;&quot;&quot;</span></div>
 </pre></div>
         </article>
       </div>

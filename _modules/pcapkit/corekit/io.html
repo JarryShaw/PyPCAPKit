@@ -1,0 +1,858 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+        <title>pcapkit.corekit.io - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">PyPCAPKit</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../pcapkit/index.html">Module Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Module Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/interface/index.html">User Interface</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of User Interface</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Library Foundation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/extraction.html">Extractor for PCAP Files</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/foundation/reassembly/index.html">Fragmented Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Fragmented Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../pcapkit/foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../pcapkit/foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../pcapkit/foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../pcapkit/foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/foundation/traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Trace Flows</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/traceflow/tcp.html">Trace TCP Flows</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/registry.html">Registry Management</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/foundation/engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/engine.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Protocol Family</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Link Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Internet Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Transport Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Application Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/toolkit/index.html">Compatibility Tools</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Compatibility Tools</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of Dump Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/const/index.html">Constant Enumerations</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Constant Enumerations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/vendor/index.html">Vendor Crawlers</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle navigation of Vendor Crawlers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for pcapkit.corekit.io</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Seekable I/O Object</span>
+<span class="sd">=========================</span>
+
+<span class="sd">.. module:: pcapkit.corekit.io</span>
+
+<span class="sd">:mod:`pcapkit.corekit.io` contains seekable I/O object</span>
+<span class="sd">:class:`~pcapkit.corekit.io.SeekableReader`, which is a customised</span>
+<span class="sd">implementation to :class:`io.BufferedReader`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">SeekError</span><span class="p">,</span> <span class="n">TruncateError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span>
+                                          <span class="n">UnsupportedOperation</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">SeekWarning</span><span class="p">,</span> <span class="n">warn</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span><span class="p">,</span> <span class="n">RawIOBase</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
+
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Buffer</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SeekableReader&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="SeekableReader"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader">[docs]</a><span class="k">class</span> <span class="nc">SeekableReader</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BufferedReader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Seekable buffered reader.</span>
+
+<span class="sd">    A buffered binary stream providing higher-level access to a readable, non seekable</span>
+<span class="sd">    :class:`~io.RawIOBase` raw binary stream. It inherits :class:`~io.BufferedIOBase`.</span>
+
+<span class="sd">    When reading data from this object, a larger amount of data may be requested from the</span>
+<span class="sd">    underlying raw stream, and kept in an internal buffer. The buffered data can then be returned</span>
+<span class="sd">    directly on subsequent reads.</span>
+
+<span class="sd">    The constructor creates a :class:`~io.BufferedReader` for the given readable ``raw`` stream and</span>
+<span class="sd">    ``buffer_size``. If ``buffer_size`` is omitted, :data:`~io.DEFAULT_BUFFER_SIZE` is used.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        raw: Underlying raw stream.</span>
+<span class="sd">        buffer_size: Buffer size.</span>
+<span class="sd">        buffer_save: Whether to save buffer to file.</span>
+<span class="sd">        buffer_path: Path to save buffer.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Whether the stream is closed.</span>
+        <span class="n">_closed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: Underlying raw stream.</span>
+        <span class="n">_stream</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span>
+
+        <span class="c1">#: Current position of the stream.</span>
+        <span class="n">_tell</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+
+        <span class="c1">#: Buffer.</span>
+        <span class="n">_buffer</span><span class="p">:</span> <span class="s1">&#39;BytesIO&#39;</span>
+        <span class="c1">#: Buffer view.</span>
+        <span class="n">_buffer_view</span><span class="p">:</span> <span class="s1">&#39;memoryview&#39;</span>
+
+        <span class="c1">#: Buffer size.</span>
+        <span class="n">_buffer_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+        <span class="c1">#: Buffer start position.</span>
+        <span class="n">_buffer_set</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+        <span class="c1">#: Buffer current position.</span>
+        <span class="n">_buffer_cur</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+
+        <span class="c1">#: Path to save buffer.</span>
+        <span class="n">_buffer_path</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="c1">#: File to save buffer.</span>
+        <span class="n">_buffer_file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes] | None&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">closed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:data:`True` if the stream is closed.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RawIOBase&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The underlying raw stream (a :class:`~io.RawIOBase` instance) that</span>
+<span class="sd">        :class:`~io.BufferedIOBase` deals with. This is not part of the :class:`~io.BufferedIOBase`</span>
+<span class="sd">        API and may not exist on some implementations.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;RawIOBase&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
+
+    <span class="nd">@raw</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">&#39;RawIOBase&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">&quot;can&#39;t set attribute&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span>
+                 <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;RawIOBase&#39;</span><span class="p">,</span> <span class="n">raw</span><span class="p">),</span> <span class="n">buffer_size</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span> <span class="o">=</span> <span class="n">raw</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">buffer_size</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getbuffer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">=</span> <span class="n">buffer_size</span>
+
+        <span class="k">if</span> <span class="n">buffer_save</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">buffer_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">buffer_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span> <span class="o">=</span> <span class="n">buffer_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_write_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+
+        <span class="n">buf_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="n">old_ptr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">+=</span> <span class="n">buf_len</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">buf_len</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[:</span><span class="o">-</span><span class="n">buf_len</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">+</span> <span class="n">buf_len</span><span class="p">:</span><span class="n">old_ptr</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[</span><span class="o">-</span><span class="n">buf_len</span><span class="p">:]</span> <span class="o">=</span> <span class="n">buf</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span>
+
+            <span class="c1"># move the pointer to the end of the original contents</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">buf_len</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[</span><span class="n">old_ptr</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span>
+
+<div class="viewcode-block" id="SeekableReader.close"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flush and close this stream. This method has no effect if the file is already closed.</span>
+<span class="sd">        Once the file is closed, any operation on the file (e.g. reading or writing) will raise</span>
+<span class="sd">        a :exc:`ValueError`.</span>
+
+<span class="sd">        As a convenience, it is allowed to call this method more than once; only the first call,</span>
+<span class="sd">        however, will have an effect.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="SeekableReader.fileno"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.fileno">[docs]</a>    <span class="k">def</span> <span class="nf">fileno</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the underlying file descriptor (an integer) of the stream if it exists.</span>
+<span class="sd">        An :exc:`OSError` is raised if the IO object does not use a file descriptor.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">fileno</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SeekableReader.flush"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flush the write buffers of the stream if applicable. This does nothing for</span>
+<span class="sd">        read-only and non-blocking streams.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SeekableReader.isatty"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.isatty">[docs]</a>    <span class="k">def</span> <span class="nf">isatty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return :data:`True` if the stream is interactive (i.e., connected to a</span>
+<span class="sd">        terminal/tty device).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">isatty</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SeekableReader.readable"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readable">[docs]</a>    <span class="k">def</span> <span class="nf">readable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return :data:`True` if the stream can be read from. If :data:`False`,</span>
+<span class="sd">        :meth:`read` will raise :exc:`OSError`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">readable</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SeekableReader.readline"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readline">[docs]</a>    <span class="k">def</span> <span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and return one line from the stream. If ``size`` is specified, at most</span>
+<span class="sd">        ``size`` bytes will be read.</span>
+
+<span class="sd">        The line terminator is always ``b&#39;\n&#39;`` for binary files; for text files, the</span>
+<span class="sd">        ``newline`` argument to :func:`open` can be used to select the line</span>
+<span class="sd">        terminator(s) recognized.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_file</span><span class="p">:</span>
+                    <span class="n">temp_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+                    <span class="n">buf</span> <span class="o">=</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">buf</span></div>
+
+<div class="viewcode-block" id="SeekableReader.readlines"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readlines">[docs]</a>    <span class="k">def</span> <span class="nf">readlines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hint</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[bytes]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and return a list of lines from the stream. ``hint`` can be specified to control</span>
+<span class="sd">        the number of lines read: no more lines will be read if the total size (in</span>
+<span class="sd">        bytes/characters) of all lines so far exceeds ``hint``.</span>
+
+<span class="sd">        ``hint`` values of ``0`` or less, as well as :obj:`None`, are treated as no hint.</span>
+
+<span class="sd">        Note that it&#39;s already possible to iterate on file objects using ``for line in file: ...``</span>
+<span class="sd">        without calling :meth:`file.readlines() &lt;readlines&gt;`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">hint</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">hint</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">lines</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="n">hint</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">hint</span> <span class="o">-</span> <span class="n">size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lines</span></div>
+
+<div class="viewcode-block" id="SeekableReader.seek"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.seek">[docs]</a>    <span class="k">def</span> <span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">whence</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Change the stream position to the given byte ``offset``. ``offset`` is interpreted</span>
+<span class="sd">        relative to the position indicated by ``whence``. The default value for ``whence`` is</span>
+<span class="sd">        :data:`~io.SEEK_SET`. Values for ``whence`` are:</span>
+
+<span class="sd">        * :data:`~io.SEEK_SET` or ``0`` - start of the stream (the default); ``offset`` should</span>
+<span class="sd">          be zero or positive</span>
+<span class="sd">        * :data:`~io.SEEK_CUR` or ``1`` - current stream position; ``offset`` may be negative</span>
+<span class="sd">        * :data:`~io.SEEK_END` or ``2`` - end of the stream; ``offset`` is usually negative</span>
+
+<span class="sd">        Return the new absolute position.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">buf_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span>
+
+        <span class="k">if</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">offset</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SeekError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;negative seek value </span><span class="si">{</span><span class="n">offset</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="k">elif</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+=</span> <span class="n">offset</span>
+        <span class="k">elif</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="n">buf_end</span> <span class="o">+</span> <span class="n">offset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SeekError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;invalid whence (</span><span class="si">{</span><span class="n">whence</span><span class="si">}</span><span class="s1">, should be </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="si">}</span><span class="s1"> or </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;</span> <span class="n">buf_end</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;seek beyond the end of the buffer: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="si">}</span><span class="s1"> &gt; </span><span class="si">{</span><span class="n">buf_end</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                     <span class="n">SeekWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SeekError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cannot seek before the beginning of the buffer: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="si">}</span><span class="s1"> &lt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span></div>
+
+<div class="viewcode-block" id="SeekableReader.seekable"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.seekable">[docs]</a>    <span class="k">def</span> <span class="nf">seekable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return :data:`True` if the stream supports random access. If :data:`False`,</span>
+<span class="sd">        :meth:`seek`, :meth:`tell` and :meth:`truncate` will raise :exc:`OSError`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="SeekableReader.tell"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.tell">[docs]</a>    <span class="k">def</span> <span class="nf">tell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the current stream position.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span></div>
+
+<div class="viewcode-block" id="SeekableReader.truncate"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.truncate">[docs]</a>    <span class="k">def</span> <span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resize the stream to the given ``size`` in bytes (or the current position if ``size`` is</span>
+<span class="sd">        not specified). The current stream position isn&#39;t changed. This resizing can extend or</span>
+<span class="sd">        reduce the current file size. In case of extension, the contents of the new file area</span>
+<span class="sd">        depend on the platform (on most systems, additional bytes are zero-filled). The new file</span>
+<span class="sd">        size is returned.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TruncateError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;negative size value </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getbuffer</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># keep the last ``size`` bytes</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getbuffer</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="o">-</span><span class="n">size</span><span class="p">:]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span></div>
+
+    <span class="k">def</span> <span class="nf">writable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return :obj:`True` if the stream supports writing. If :obj:`False`, :meth:`write` and</span>
+<span class="sd">        :meth:`truncate` will raise :exc:`OSError`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">writelines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="s1">&#39;Iterable[Buffer]&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write a list of lines to the stream. Line separators are not added, so it is usual for</span>
+<span class="sd">        each of the lines provided to have a line separator at the end.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s1">&#39;write&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SeekableReader.detach"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.detach">[docs]</a>    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RawIOBase&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Separate the underlying raw stream from the buffer and return it.</span>
+
+<span class="sd">        After the raw stream has been detached, the buffer is in an unusable state.</span>
+
+<span class="sd">        Some buffers, like :class:`~io.BytesIO`, do not have the concept of a single raw stream to</span>
+<span class="sd">        return from this method. They raise :exc:`~io.UnsupportedOperation`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">&#39;detach&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s1">&#39;detach&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SeekableReader.read"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and return ``size`` bytes, or if ``size`` is not given or negative, until EOF or if</span>
+<span class="sd">        the read call would block in non-blocking mode.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_file</span><span class="p">:</span>
+                    <span class="n">temp_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+                    <span class="n">buf</span> <span class="o">=</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">buf</span></div>
+
+<div class="viewcode-block" id="SeekableReader.read1"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.read1">[docs]</a>    <span class="k">def</span> <span class="nf">read1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and return up to ``size`` bytes with only one call on the raw stream. If at least</span>
+<span class="sd">        one byte is buffered, only buffered bytes are returned. Otherwise, one raw stream read call</span>
+<span class="sd">        is made.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">&#39;read1&#39;</span><span class="p">):</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_file</span><span class="p">:</span>
+                    <span class="n">temp_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+                    <span class="n">buf</span> <span class="o">=</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="p">:</span>  <span class="c1"># only if the buffer is empty</span>
+                <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">&#39;read1&#39;</span><span class="p">):</span>
+                        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">buf</span></div>
+
+<div class="viewcode-block" id="SeekableReader.readinto"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readinto">[docs]</a>    <span class="k">def</span> <span class="nf">readinto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read bytes into a pre-allocated, writable :term:`bytes-like object` ``b`` and return the</span>
+<span class="sd">        number of bytes read. For example, ``b`` might be a :obj:`bytearray`.</span>
+
+<span class="sd">        Like :meth:`read`, multiple reads may be issued to the underlying raw stream, unless the</span>
+<span class="sd">        latter is interactive.</span>
+
+<span class="sd">        A :exc:`BlockingIOError` is raised if the underlying raw stream is in non blocking-mode,</span>
+<span class="sd">        and has no data available at the moment.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;memoryview&#39;</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+        <span class="n">buf_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+
+        <span class="n">b</span><span class="p">[:</span><span class="n">buf_len</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span>
+        <span class="k">return</span> <span class="n">buf_len</span></div>
+
+<div class="viewcode-block" id="SeekableReader.readinto1"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readinto1">[docs]</a>    <span class="k">def</span> <span class="nf">readinto1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read bytes into a pre-allocated, writable :term:`bytes-like object` ``b``, using at most</span>
+<span class="sd">        one call to the underlying raw stream&#39;s :meth:`read` (or :meth:`readinto`) method. Return</span>
+<span class="sd">        the number of bytes read.</span>
+
+<span class="sd">        A :exc:`BlockingIOError` is raised if the underlying raw stream is in non blocking-mode,</span>
+<span class="sd">        and has no data available at the moment.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;memoryview&#39;</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+        <span class="n">buf_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+
+        <span class="n">b</span><span class="p">[:</span><span class="n">buf_len</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span>
+        <span class="k">return</span> <span class="n">buf_len</span></div>
+
+<div class="viewcode-block" id="SeekableReader.write"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the given :term:`bytes-like object`, ``b``, and return the number of bytes written</span>
+<span class="sd">        (always equal to the length of ``b`` in bytes, since if the write fails an :exc:`OSError`</span>
+<span class="sd">        will be raised).  Depending on the actual implementation, these bytes may be readily written</span>
+<span class="sd">        to the underlying stream, or held in a buffer for performance and latency reasons.</span>
+
+<span class="sd">        When in non-blocking mode, a :exc:`BlockingIOError` is raised if the data needed to be</span>
+<span class="sd">        written to the raw stream but it couldn&#39;t accept all the data without blocking.</span>
+
+<span class="sd">        The caller may release or mutate ``b`` after this method returns, so the implementation</span>
+<span class="sd">        should only access ``b`` during the method call.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s1">&#39;write&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SeekableReader.peek"><a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.peek">[docs]</a>    <span class="k">def</span> <span class="nf">peek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return bytes from the stream without advancing the position.</span>
+
+<span class="sd">        At most one single read on the raw stream is done to satisfy the call.</span>
+<span class="sd">        The number of bytes returned may be less or more than requested.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">&#39;peek&#39;</span><span class="p">):</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_file</span><span class="p">:</span>
+                    <span class="n">temp_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+                    <span class="n">buf</span> <span class="o">=</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>  <span class="c1"># only if the buffer is empty and/or not enough</span>
+                <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">&#39;peek&#39;</span><span class="p">):</span>
+                        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">buf</span></div></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2023, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=708a6bfb"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>

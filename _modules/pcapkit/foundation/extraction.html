@@ -248,6 +248,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -359,10 +360,12 @@
 
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.io</span> <span class="kn">import</span> <span class="n">SeekableReader</span>
 <span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">make_dumper</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.pcap</span> <span class="kn">import</span> <span class="n">PCAP</span> <span class="k">as</span> <span class="n">PCAP_Engine</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.pcapng</span> <span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">PCAPNG_Engine</span>
@@ -376,6 +379,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BufferedReader</span>
     <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">ModuleType</span><span class="p">,</span> <span class="n">TracebackType</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -469,7 +473,7 @@
         <span class="n">_exeng</span><span class="p">:</span> <span class="s1">&#39;Engine[P]&#39;</span>
 
         <span class="c1">#: Input file object.</span>
-        <span class="n">_ifile</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span>
+        <span class="n">_ifile</span><span class="p">:</span> <span class="s1">&#39;BufferedReader&#39;</span>
         <span class="c1">#: Output file object.</span>
         <span class="n">_ofile</span><span class="p">:</span> <span class="s1">&#39;Dumper | Type[Dumper]&#39;</span>
 
@@ -921,7 +925,8 @@
                  <span class="n">reassembly</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reasm_store</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
                  <span class="n">trace</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
                  <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-                 <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                 <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
+                 <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise PCAP Reader.</span>
 
 <span class="sd">        Args:</span>
@@ -959,6 +964,10 @@
 <span class="sd">            ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)</span>
 <span class="sd">            tcp: if perform TCP reassembly and/or flow tracing</span>
 <span class="sd">                (must be used with ``reassembly=True`` or ``trace=True``)</span>
+
+<span class="sd">            buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
+<span class="sd">            buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
+<span class="sd">            buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            FormatWarning: Warns under following circumstances:</span>
@@ -1065,7 +1074,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">ifnm</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>  <span class="c1"># input file # pylint: disable=unspecified-encoding,consider-using-with</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;BufferedReader&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seekable</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">SeekableReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
             <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">]</span>
@@ -1077,8 +1089,12 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">dumper</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span> <span class="k">else</span> <span class="n">dumper</span><span class="p">(</span><span class="n">ofnm</span><span class="p">)</span>  <span class="c1"># output file</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># magic number</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="c1"># NOTE: we use peek() to read the magic number, as the file pointer</span>
+        <span class="c1"># will not be moved after reading; however, the returned bytes object</span>
+        <span class="c1"># may not be exactly 4 bytes, so we use [:4] to get the first 4 bytes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="mi">4</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="c1">#self._magic = self._ifile.read(4)  # magic number</span>
+        <span class="c1">#self._ifile.seek(0, os.SEEK_SET)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>    <span class="c1"># start extraction</span>
 
