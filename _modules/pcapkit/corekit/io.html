@@ -447,10 +447,10 @@
 
         <span class="k">if</span> <span class="n">buffer_save</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">buffer_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;wb&#39;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">name</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">buffer_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">buffer_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span> <span class="o">=</span> <span class="n">buffer_path</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="kc">None</span>
@@ -594,7 +594,11 @@
 <span class="sd">        Return the new absolute position.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">buf_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span>
+        <span class="c1"># NOTE: we mark the end of buffer content to the end of buffer</span>
+        <span class="c1"># so that it may trigger the IO to read more data to fill in</span>
+        <span class="c1"># the content.</span>
+        <span class="n">buf_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span>
+        <span class="c1">#buf_end = self._buffer_set + self._buffer_cur</span>
 
         <span class="k">if</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">offset</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -611,6 +615,14 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;</span> <span class="n">buf_end</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;seek beyond the end of the buffer: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="si">}</span><span class="s1"> &gt; </span><span class="si">{</span><span class="n">buf_end</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
                      <span class="n">SeekWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">tmp_end</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">):</span>
+                <span class="c1"># NOTE: if we do need to seek beyond the existing contents,</span>
+                <span class="c1"># then we&#39;ll do a quick read to make up the contents</span>
+                <span class="n">tmp_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="n">tmp_end</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="n">tmp_end</span>
+
+                <span class="n">tmp_buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="n">tmp_len</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="n">tmp_end</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_buf</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -798,7 +810,7 @@
                 <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_file</span><span class="p">:</span>
@@ -813,7 +825,7 @@
                         <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">buf</span></div></div>
 </pre></div>

@@ -442,6 +442,8 @@
         <span class="n">_flag_t</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
         <span class="c1">#: Verbose flag.</span>
         <span class="n">_flag_v</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: No EOF flag.</span>
+        <span class="n">_flag_n</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
 
         <span class="c1">#: Verbose callback function.</span>
         <span class="c1">#_vfunc: &#39;VerboseHandler&#39;</span>
@@ -909,6 +911,9 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
                 <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
                     <span class="c1"># quit when EOF</span>
                     <span class="k">break</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span></div>
@@ -926,7 +931,8 @@
                  <span class="n">trace</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
                  <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
                  <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
-                 <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                 <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># buffer settings # pylint: disable=line-too-long</span>
+                 <span class="n">no_eof</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise PCAP Reader.</span>
 
 <span class="sd">        Args:</span>
@@ -969,6 +975,8 @@
 <span class="sd">            buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 <span class="sd">            buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 
+<span class="sd">            no_eof: if raise :exc:`EOFError` when EOF</span>
+
 <span class="sd">        Warns:</span>
 <span class="sd">            FormatWarning: Warns under following circumstances:</span>
 
@@ -998,6 +1006,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span> <span class="o">=</span> <span class="n">trace</span>                 <span class="c1"># trace flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_v</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># verbose flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># input filename flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="n">no_eof</span>                <span class="c1"># no EOF flag</span>
 
         <span class="c1"># verbose callback function</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
@@ -1120,6 +1129,9 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span>  <span class="c1"># pylint: disable=raise-missing-from</span></div>
 
