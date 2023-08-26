@@ -98,6 +98,8 @@ class Extractor(Generic[P]):
         _flag_t: 'bool'
         #: Verbose flag.
         _flag_v: 'bool'
+        #: No EOF flag.
+        _flag_n: 'bool'
 
         #: Verbose callback function.
         #_vfunc: 'VerboseHandler'
@@ -565,6 +567,9 @@ class Extractor(Generic[P]):
                 try:
                     self._exeng.read_frame()
                 except (EOFError, StopIteration):
+                    if self._flag_n:
+                        continue
+
                     # quit when EOF
                     break
             self._cleanup()
@@ -582,7 +587,8 @@ class Extractor(Generic[P]):
                  trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
                  trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
                  ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
-                 buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None) -> 'None':
+                 buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
+                 no_eof: 'bool' = False) -> 'None':
         """Initialise PCAP Reader.
 
         Args:
@@ -625,6 +631,8 @@ class Extractor(Generic[P]):
             buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
             buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
 
+            no_eof: if raise :exc:`EOFError` when EOF
+
         Warns:
             FormatWarning: Warns under following circumstances:
 
@@ -654,6 +662,7 @@ class Extractor(Generic[P]):
         self._flag_t = trace                 # trace flag
         self._flag_v = False                 # verbose flag
         self._flag_s = isinstance(fin, str)  # input filename flag
+        self._flag_n = no_eof                # no EOF flag
 
         # verbose callback function
         if isinstance(verbose, bool):
@@ -776,6 +785,9 @@ class Extractor(Generic[P]):
         try:
             return self._exeng.read_frame()
         except (EOFError, StopIteration):
+            if self._flag_n:
+                return self.__next__()
+
             self._cleanup()
             raise StopIteration  # pylint: disable=raise-missing-from
 

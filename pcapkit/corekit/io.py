@@ -103,10 +103,10 @@ class SeekableReader(io.BufferedReader):
 
         if buffer_save:
             if buffer_path is None:
-                self._buffer_file = tempfile.NamedTemporaryFile('wb')
+                self._buffer_file = tempfile.NamedTemporaryFile('wb', buffering=0)
                 self._buffer_path = self._buffer_file.name
             else:
-                self._buffer_file = open(buffer_path, 'wb')
+                self._buffer_file = open(buffer_path, 'wb', buffering=0)
                 self._buffer_path = buffer_path
         else:
             self._buffer_file = None
@@ -250,7 +250,11 @@ class SeekableReader(io.BufferedReader):
         Return the new absolute position.
 
         """
-        buf_end = self._buffer_set + self._buffer_cur
+        # NOTE: we mark the end of buffer content to the end of buffer
+        # so that it may trigger the IO to read more data to fill in
+        # the content.
+        buf_end = self._buffer_set + self._buffer_size
+        #buf_end = self._buffer_set + self._buffer_cur
 
         if whence == io.SEEK_SET:
             if offset < 0:
@@ -267,6 +271,14 @@ class SeekableReader(io.BufferedReader):
             if self._tell > buf_end:
                 warn(f'seek beyond the end of the buffer: {self._tell} > {buf_end}',
                      SeekWarning, stacklevel=stacklevel())
+            if self._tell > (tmp_end := self._buffer_set + self._buffer_cur):
+                # NOTE: if we do need to seek beyond the existing contents,
+                # then we'll do a quick read to make up the contents
+                tmp_len = self._tell - tmp_end
+                self._tell = tmp_end
+
+                tmp_buf = self.read1(tmp_len)
+                self._tell = tmp_end + len(tmp_buf)
             self._buffer.seek(self._tell - self._buffer_set, io.SEEK_SET)
         else:
             if self._buffer_file is None:
@@ -454,7 +466,7 @@ class SeekableReader(io.BufferedReader):
                 buf = self._stream.peek(size)
             else:
                 buf = self._stream.read(size)
-            self._write_buffer(buf)
+                self._write_buffer(buf)
         else:
             if self._buffer_file is not None and self._tell < self._buffer_set:
                 with open(self._buffer_path, 'rb') as temp_file:
@@ -469,6 +481,6 @@ class SeekableReader(io.BufferedReader):
                         buf += self._stream.peek(size_rem)
                     else:
                         buf += self._stream.read(size_rem)
-                    self._write_buffer(buf)
+                        self._write_buffer(buf)
 
         return buf

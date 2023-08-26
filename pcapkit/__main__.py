@@ -102,6 +102,7 @@ def main() -> 'int':
     else:
         fmt = None
 
+    no_eof = args.fin == '-'
     if args.fin == '-':
         args.fin = sys.stdin.buffer
 
@@ -110,7 +111,8 @@ def main() -> 'int':
                           files=args.files, format=fmt,
                           layer=args.layer, protocol=args.protocol,
                           engine=args.engine, extension=args.auto_extension,
-                          verbose=args.verbose, buffer_save=args.buffer_save)  # type: ignore[var-annotated]
+                          verbose=args.verbose, buffer_save=args.buffer_save,
+                          no_eof=no_eof)  # type: ignore[var-annotated]
 
     if args.verbose:
         try:

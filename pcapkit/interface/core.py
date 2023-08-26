@@ -66,7 +66,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
             trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
             trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
             ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
-            buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None) -> 'Extractor':
+            buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
+            no_eof: 'bool' = False) -> 'Extractor':
     """Extract a PCAP file.
 
     Arguments:
@@ -109,6 +110,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
         buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
         buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
 
+        no_eof: if not raise :exc:`EOFError` when reach EOF
+
     Returns:
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
 
@@ -124,7 +127,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                      reassembly=reassembly, reasm_store=reasm_store, reasm_strict=reasm_strict,
                      trace=trace, trace_fout=trace_fout, trace_format=trace_format,
                      trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond,
-                     buffer_size=buffer_size, buffer_path=buffer_path, buffer_save=buffer_save)
+                     buffer_size=buffer_size, buffer_path=buffer_path, buffer_save=buffer_save,
+                     no_eof=no_eof)
 
 
 def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False) -> 'Reassembly':
