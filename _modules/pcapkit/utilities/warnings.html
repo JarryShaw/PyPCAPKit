@@ -371,7 +371,7 @@
     <span class="s1">&#39;FileWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;LayerWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ProtocolWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;AttributeWarning&#39;</span><span class="p">,</span>
     <span class="s1">&#39;DevModeWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRequestWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRuntimeWarning&#39;</span><span class="p">,</span>
     <span class="s1">&#39;UnknownFieldWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;RegistryWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;SchemaWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;InfoWarning&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SeekWarning&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SeekWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ExtractionWarning&#39;</span><span class="p">,</span>
     <span class="c1"># ResourceWarning</span>
     <span class="s1">&#39;DPKTWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ScapyWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;PySharkWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;EmojiWarning&#39;</span><span class="p">,</span>
     <span class="s1">&#39;VendorWarning&#39;</span><span class="p">,</span>
@@ -392,6 +392,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">stacklevel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">stacklevel</span> <span class="o">=</span> <span class="n">stacklevel_calculator</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">DEVMODE</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span>
+                   <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">)</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span></div>
 
 
@@ -486,6 +489,10 @@
 
 <div class="viewcode-block" id="SeekWarning"><a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.SeekWarning">[docs]</a><span class="k">class</span> <span class="nc">SeekWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Seek operation warning.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ExtractionWarning"><a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.ExtractionWarning">[docs]</a><span class="k">class</span> <span class="nc">ExtractionWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extraction warning.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>
