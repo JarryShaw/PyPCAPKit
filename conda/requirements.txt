@@ -18,7 +18,7 @@ requests == 2.31.0
 scapy == 2.5.0
 six == 1.16.0
 soupsieve == 2.4.1
-tbtrim == 0.3.0
+tbtrim == 0.3.1
 termcolor == 2.3.0
 typing-extensions ; python_version < "3.11"
 urllib3 == 2.0.4
