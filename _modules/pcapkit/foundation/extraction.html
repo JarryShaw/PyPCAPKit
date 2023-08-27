@@ -1133,19 +1133,20 @@
 <span class="sd">        until the EOF reached; then it calls :meth:`_cleanup` for the aftermath.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;EOF reached&#39;</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;EOF reached&#39;</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
+                    <span class="k">continue</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
-            <span class="k">raise</span> <span class="ne">StopIteration</span> <span class="kn">from</span> <span class="nn">error</span>  <span class="c1"># pylint: disable=raise-missing-from</span>
-        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
-            <span class="k">raise</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="ne">StopIteration</span> <span class="kn">from</span> <span class="nn">error</span>  <span class="c1"># pylint: disable=raise-missing-from</span>
+            <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
+                <span class="k">raise</span></div>
 
 <div class="viewcode-block" id="Extractor.__call__"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Works as a simple wrapper for the iteration protocol.</span>
@@ -1156,19 +1157,20 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_a</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">):</span>
-                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;EOF reached&#39;</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">):</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;EOF reached&#39;</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__call__</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
+                        <span class="k">continue</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
-                <span class="k">raise</span>
-            <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
-                <span class="k">raise</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
+                    <span class="k">raise</span>
+                <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
+                    <span class="k">raise</span>
         <span class="k">raise</span> <span class="n">CallableError</span><span class="p">(</span><span class="s2">&quot;&#39;Extractor(auto=True)&#39; object is not callable&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">:</span>

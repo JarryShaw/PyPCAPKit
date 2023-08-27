@@ -467,6 +467,7 @@
     <span class="k">def</span> <span class="nf">_write_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 
         <span class="n">buf_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
         <span class="n">old_ptr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span>
@@ -554,8 +555,9 @@
                 <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                <span class="n">buf_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf_tmp</span><span class="p">)</span>
+                <span class="n">buf</span> <span class="o">+=</span> <span class="n">buf_tmp</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">buf</span></div>
@@ -721,8 +723,9 @@
 
             <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                <span class="n">buf_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf_tmp</span><span class="p">)</span>
+                <span class="n">buf</span> <span class="o">+=</span> <span class="n">buf_tmp</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">buf</span></div>
@@ -752,10 +755,11 @@
                 <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
                 <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">&#39;read1&#39;</span><span class="p">):</span>
-                        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                        <span class="n">buf_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                        <span class="n">buf_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf_tmp</span><span class="p">)</span>
+                    <span class="n">buf</span> <span class="o">+=</span> <span class="n">buf_tmp</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">buf</span></div>
@@ -838,10 +842,11 @@
                 <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
                 <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">&#39;peek&#39;</span><span class="p">):</span>
-                        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                        <span class="n">buf_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                        <span class="n">buf_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf_tmp</span><span class="p">)</span>
+                        <span class="n">buf</span> <span class="o">+=</span> <span class="n">buf_tmp</span>
         <span class="k">return</span> <span class="n">buf</span></div></div>
 </pre></div>
         </article>
