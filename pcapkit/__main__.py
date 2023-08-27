@@ -83,6 +83,9 @@ def get_parser() -> 'ArgumentParser':
                         help='Indicate extract frames until which layer.')
     parser.add_argument('-B', '--buffer-save', action='store_true', default=False,
                         help='Indicate if store buffer to file when reading from stdin.')
+    parser.add_argument('-O', '--buffer-path', action='store', metavar='file-name', dest='buffer_path',
+                        help=('The name of buffer storage file. If `--buffer-save` is set and this '
+                              'omits, it will be automatically assigned.'))
     return parser
 
 
@@ -112,7 +115,7 @@ def main() -> 'int':
                           layer=args.layer, protocol=args.protocol,
                           engine=args.engine, extension=args.auto_extension,
                           verbose=args.verbose, buffer_save=args.buffer_save,
-                          no_eof=no_eof)  # type: ignore[var-annotated]
+                          no_eof=no_eof, buffer_path=args.buffer_path)  # type: ignore[var-annotated]
 
     if args.verbose:
         try:

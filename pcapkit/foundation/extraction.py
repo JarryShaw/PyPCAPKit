@@ -32,7 +32,7 @@ from pcapkit.foundation.traceflow.data import TraceFlowData
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import logger
-from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
+from pcapkit.utilities.warnings import EngineWarning, ExtractionWarning, FormatWarning, warn
 
 if TYPE_CHECKING:
     from io import BufferedReader
@@ -567,11 +567,17 @@ class Extractor(Generic[P]):
                 try:
                     self._exeng.read_frame()
                 except (EOFError, StopIteration):
+                    warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
+
                     if self._flag_n:
                         continue
 
                     # quit when EOF
                     break
+                except KeyboardInterrupt:
+                    self._cleanup()
+                    raise
+
             self._cleanup()
 
     ##########################################################################
@@ -742,7 +748,8 @@ class Extractor(Generic[P]):
             self._ifile = cast('BufferedReader', fin)
 
         if not self._ifile.seekable():
-            self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path)
+            self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path,
+                                         stream_closing=not self._flag_s)
 
         if not self._flag_q:
             module, class_, ext = self.__output__[fmt]
@@ -784,12 +791,17 @@ class Extractor(Generic[P]):
         """
         try:
             return self._exeng.read_frame()
-        except (EOFError, StopIteration):
+        except (EOFError, StopIteration) as error:
+            warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
+
             if self._flag_n:
                 return self.__next__()
 
             self._cleanup()
-            raise StopIteration  # pylint: disable=raise-missing-from
+            raise StopIteration from error  # pylint: disable=raise-missing-from
+        except KeyboardInterrupt:
+            self._cleanup()
+            raise
 
     def __call__(self) -> 'P':
         """Works as a simple wrapper for the iteration protocol.
@@ -802,9 +814,17 @@ class Extractor(Generic[P]):
         if not self._flag_a:
             try:
                 return self._exeng.read_frame()
-            except (EOFError, StopIteration) as error:
+            except (EOFError, StopIteration):
+                warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
+
+                if self._flag_n:
+                    return self.__call__()
+
                 self._cleanup()
-                raise error
+                raise
+            except KeyboardInterrupt:
+                self._cleanup()
+                raise
         raise CallableError("'Extractor(auto=True)' object is not callable")
 
     def __enter__(self) -> 'Extractor':
@@ -832,6 +852,8 @@ class Extractor(Generic[P]):
         """
         # pylint: disable=attribute-defined-outside-init
         self._flag_e = True
-        if self._flag_s:
+        if isinstance(self._ifile, SeekableReader):
+            self._ifile.close()
+        elif not self._flag_s:
             self._ifile.close()
         self._exeng.close()

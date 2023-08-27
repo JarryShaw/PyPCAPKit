@@ -44,10 +44,14 @@ class SeekableReader(io.BufferedReader):
         buffer_size: Buffer size.
         buffer_save: Whether to save buffer to file.
         buffer_path: Path to save buffer.
+        stream_closing: Whether the stream should be closed upon exiting.
 
     """
 
     if TYPE_CHECKING:
+        #: Whether the stream should be closed upon exiting.
+        _closing: 'bool'
+
         #: Whether the stream is closed.
         _closed: 'bool'
         #: Underlying raw stream.
@@ -90,10 +94,12 @@ class SeekableReader(io.BufferedReader):
         raise UnsupportedCall("can't set attribute")
 
     def __init__(self, raw: 'IO[bytes]', buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE,
-                 buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None) -> 'None':
+                 buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, *,
+                 stream_closing: 'bool' = True) -> 'None':
         super().__init__(cast('RawIOBase', raw), buffer_size)
 
         self._closed = False
+        self._closing = stream_closing
 
         self._stream = raw
         self._buffer = io.BytesIO(bytearray(buffer_size))
@@ -126,7 +132,7 @@ class SeekableReader(io.BufferedReader):
             if buf_len >= self._buffer_size:
                 self._buffer_view[:] = buf[-self._buffer_size:]
             else:
-                self._buffer_view[:-buf_len] = self._buffer_view[-self._buffer_size + buf_len:old_ptr]
+                self._buffer_view[:-buf_len] = self._buffer_view[old_ptr - (self._buffer_size - buf_len):old_ptr]
                 self._buffer_view[-buf_len:] = buf
 
             self._buffer_set += self._buffer_cur - self._buffer_size
@@ -150,9 +156,12 @@ class SeekableReader(io.BufferedReader):
             return
         self.flush()
 
-        self._stream.close()
+        if self._closing:
+            self._stream.close()
         if self._buffer_file is not None:
             self._buffer_file.close()
+        self._buffer.close()
+
         self._closed = True
 
     def fileno(self) -> 'int':
@@ -273,8 +282,12 @@ class SeekableReader(io.BufferedReader):
                      SeekWarning, stacklevel=stacklevel())
             if self._tell > (tmp_end := self._buffer_set + self._buffer_cur):
                 # NOTE: if we do need to seek beyond the existing contents,
-                # then we'll do a quick read to make up the contents
-                tmp_len = self._tell - tmp_end
+                # then we'll do a quick read to make up the contents; the
+                # size of the read is set to be 1/4 size of the buffer or
+                # the size of the content to be read, whichever is larger.
+                # However, the length to fill must not be larger than the
+                # buffer size itself.
+                tmp_len = min(max(self._tell - tmp_end, self._buffer_size // 4), self._buffer_size)
                 self._tell = tmp_end
 
                 tmp_buf = self.read1(tmp_len)
@@ -362,6 +375,7 @@ class SeekableReader(io.BufferedReader):
             else:
                 buf = self._buffer.read(min(size, self._buffer_cur - 1))
 
+            size_rem = -1
             if size < 0 or (size_rem := size - len(buf)) > 0:
                 buf += self._stream.read(size_rem)
                 self._write_buffer(buf)
@@ -391,6 +405,7 @@ class SeekableReader(io.BufferedReader):
                 buf = self._buffer.read1(min(size, self._buffer_cur - 1))
 
             if not buf:  # only if the buffer is empty
+                size_rem = -1
                 if size < 0 or (size_rem := size - len(buf)) > 0:
                     if hasattr(self._stream, 'read1'):
                         buf += self._stream.read1(size_rem)
@@ -476,11 +491,11 @@ class SeekableReader(io.BufferedReader):
                 buf = self._buffer.read(min(size, self._buffer_cur - 1))
 
             if not buf and len(buf) < size:  # only if the buffer is empty and/or not enough
+                size_rem = -1
                 if size < 0 or (size_rem := size - len(buf)) > 0:
                     if hasattr(self._stream, 'peek'):
                         buf += self._stream.peek(size_rem)
                     else:
                         buf += self._stream.read(size_rem)
                         self._write_buffer(buf)
-
         return buf

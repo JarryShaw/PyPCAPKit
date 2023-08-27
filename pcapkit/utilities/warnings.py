@@ -27,7 +27,7 @@ __all__ = [
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
     'UnknownFieldWarning', 'RegistryWarning', 'SchemaWarning', 'InfoWarning',
-    'SeekWarning',
+    'SeekWarning', 'ExtractionWarning',
     # ResourceWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning', 'EmojiWarning',
     'VendorWarning',
@@ -48,6 +48,9 @@ def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
     """
     if stacklevel is None:
         stacklevel = stacklevel_calculator()
+
+    logger.warning(message, exc_info=DEVMODE, stack_info=VERBOSE,
+                   stacklevel=stacklevel)
     warnings.warn(message, category, stacklevel)
 
 
@@ -142,6 +145,10 @@ class InfoWarning(BaseWarning, RuntimeWarning):
 
 class SeekWarning(BaseWarning, RuntimeWarning):
     """Seek operation warning."""
+
+
+class ExtractionWarning(BaseWarning, RuntimeWarning):
+    """Extraction warning."""
 
 
 ##############################################################################
