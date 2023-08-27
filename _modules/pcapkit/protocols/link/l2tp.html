@@ -1,10 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>pcapkit.protocols.link.l2tp - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=135e06be" />
@@ -417,7 +417,9 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;L2TP&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="L2TP"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP">[docs]</a><span class="k">class</span> <span class="nc">L2TP</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_L2TP</span><span class="p">,</span> <span class="n">Schema_L2TP</span><span class="p">],</span>
+<div class="viewcode-block" id="L2TP">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP">[docs]</a>
+<span class="k">class</span> <span class="nc">L2TP</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_L2TP</span><span class="p">,</span> <span class="n">Schema_L2TP</span><span class="p">],</span>
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_L2TP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_L2TP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Layer Two Tunnelling Protocol.&quot;&quot;&quot;</span>
 
@@ -444,7 +446,9 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="L2TP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_L2TP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="L2TP.read">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.read">[docs]</a>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_L2TP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Layer Two Tunnelling Protocol.</span>
 
 <span class="sd">        Structure of L2TP header [:rfc:`2661`]:</span>
@@ -506,7 +510,10 @@
         <span class="n">length</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">len</span> <span class="k">else</span> <span class="p">(</span><span class="n">length</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">l2tp</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">hdr_len</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="L2TP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+
+<div class="viewcode-block" id="L2TP.make">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.make">[docs]</a>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[2]&#39;</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
              <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Type | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">Data</span><span class="p">,</span>
              <span class="n">type_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -564,15 +571,21 @@
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="L2TP.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[16]&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="L2TP.__length_hint__">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.__length_hint__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[16]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">16</span></div>
 
-<div class="viewcode-block" id="L2TP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="L2TP.__index__">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.__index__">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
@@ -582,11 +595,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer&#39;</span><span class="p">)</span></div>
 
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="L2TP._make_data"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP._make_data">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="L2TP._make_data">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP._make_data">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_L2TP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
 
@@ -608,7 +624,9 @@
             <span class="s1">&#39;nr&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">nr</span><span class="p">,</span>
             <span class="s1">&#39;offset&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>
             <span class="s1">&#39;payload&#39;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-        <span class="p">}</span></div></div>
+        <span class="p">}</span></div>
+</div>
+
 </pre></div>
         </article>
       </div>
@@ -641,9 +659,9 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../../../../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../../_static/copybutton.js?v=f281be69"></script>

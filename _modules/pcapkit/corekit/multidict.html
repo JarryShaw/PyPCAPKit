@@ -1,10 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>pcapkit.corekit.multidict - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
@@ -456,7 +456,9 @@
 <span class="c1">###############################################################################</span>
 
 
-<div class="viewcode-block" id="MultiDict"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict">[docs]</a><span class="k">class</span> <span class="nc">MultiDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_KT</span><span class="p">,</span> <span class="n">_VT</span><span class="p">]):</span>
+<div class="viewcode-block" id="MultiDict">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict">[docs]</a>
+<span class="k">class</span> <span class="nc">MultiDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_KT</span><span class="p">,</span> <span class="n">_VT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A :class:`MultiDict` is a dictionary subclass customized to deal with</span>
 <span class="sd">    multiple values for the same key.</span>
 
@@ -536,7 +538,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">dict</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="p">[</span><span class="n">value</span><span class="p">])</span>
 
-<div class="viewcode-block" id="MultiDict.add"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="MultiDict.add">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.add">[docs]</a>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a new value for the key.</span>
 
 <span class="sd">        Args:</span>
@@ -546,18 +550,24 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">dict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type,attr-defined]</span></div>
 
+
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT | _T&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_VT | _T&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT | _T&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="MultiDict.get"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_VT | _T&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT | _T&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[assignment,misc]</span>
+<div class="viewcode-block" id="MultiDict.get">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.get">[docs]</a>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_VT | _T&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT | _T&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[assignment,misc]</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">except</span> <span class="n">MissingKeyError</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">default</span></div>
 
-<div class="viewcode-block" id="MultiDict.getlist"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.getlist">[docs]</a>    <span class="k">def</span> <span class="nf">getlist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[_VT]&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiDict.getlist">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.getlist">[docs]</a>
+    <span class="k">def</span> <span class="nf">getlist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[_VT]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of items for a given key.</span>
 
 <span class="sd">        If that key is not in the :class:`MultiDict`, the return value</span>
@@ -576,7 +586,10 @@
             <span class="k">return</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiDict.setlist"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.setlist">[docs]</a>    <span class="k">def</span> <span class="nf">setlist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">new_list</span><span class="p">:</span> <span class="s1">&#39;Iterable[_VT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiDict.setlist">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.setlist">[docs]</a>
+    <span class="k">def</span> <span class="nf">setlist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">new_list</span><span class="p">:</span> <span class="s1">&#39;Iterable[_VT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove the old values for a key and add new ones.</span>
 
 <span class="sd">        Notes:</span>
@@ -591,7 +604,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">dict</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_list</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="MultiDict.setdefault"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.setdefault">[docs]</a>    <span class="k">def</span> <span class="nf">setdefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;Optional[_VT]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiDict.setdefault">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.setdefault">[docs]</a>
+    <span class="k">def</span> <span class="nf">setdefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;Optional[_VT]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;If key is in the dictionary, returns its value.</span>
 
 <span class="sd">        If not, set it to default and return default.</span>
@@ -610,7 +626,10 @@
             <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">default</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
-<div class="viewcode-block" id="MultiDict.setlistdefault"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.setlistdefault">[docs]</a>    <span class="k">def</span> <span class="nf">setlistdefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default_list</span><span class="p">:</span> <span class="s1">&#39;Optional[Iterable[_VT]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[_VT]&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiDict.setlistdefault">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.setlistdefault">[docs]</a>
+    <span class="k">def</span> <span class="nf">setlistdefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default_list</span><span class="p">:</span> <span class="s1">&#39;Optional[Iterable[_VT]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[_VT]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Like :meth:`setdefault` but sets multiple values.</span>
 
 <span class="sd">        The list returned is not a copy, but the list that is actually used</span>
@@ -631,7 +650,10 @@
             <span class="n">default_list</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;list[_VT]&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">default_list</span></div>
 
-<div class="viewcode-block" id="MultiDict.items"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multi</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterable[tuple[_KT, _VT]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+
+<div class="viewcode-block" id="MultiDict.items">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.items">[docs]</a>
+    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multi</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterable[tuple[_KT, _VT]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an interator of ``(key, value)`` paris.</span>
 
 <span class="sd">        Args:</span>
@@ -647,21 +669,31 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="MultiDict.lists"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.lists">[docs]</a>    <span class="k">def</span> <span class="nf">lists</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterator[tuple[_KT, list[_VT]]]&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiDict.lists">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.lists">[docs]</a>
+    <span class="k">def</span> <span class="nf">lists</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterator[tuple[_KT, list[_VT]]]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an iterator of ``(key, values)`` pairs, where ``values`` is</span>
 <span class="sd">        the :obj:`list` of all values associated with the key.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="nb">dict</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiDict.values"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.values">[docs]</a>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterator[_VT]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+
+<div class="viewcode-block" id="MultiDict.values">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.values">[docs]</a>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterator[_VT]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns an iterator of the first value on every key&#39;s value list.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="nb">dict</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="MultiDict.listvalues"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.listvalues">[docs]</a>    <span class="k">def</span> <span class="nf">listvalues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterator[list[_VT]]&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiDict.listvalues">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.listvalues">[docs]</a>
+    <span class="k">def</span> <span class="nf">listvalues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterator[list[_VT]]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an iterator of all values associated with a key. Zipping</span>
 <span class="sd">        :meth:`keys` and this is the same as calling :meth:`lists`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;MultiDict[_KT, _VT]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a shallow copy of this object.&quot;&quot;&quot;</span>
@@ -676,7 +708,9 @@
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[_KT, list[_VT]]&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="MultiDict.to_dict"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[_KT, _VT] | dict[_KT, list[_VT]]&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="MultiDict.to_dict">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.to_dict">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[_KT, _VT] | dict[_KT, list[_VT]]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the contents as regular :obj:`dict`.</span>
 
 <span class="sd">        If ``flat`` is :obj:`True` the returned :obj:`dict` will only have the</span>
@@ -693,7 +727,10 @@
             <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lists</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="MultiDict.update"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping</span><span class="p">:</span> <span class="s1">&#39;Mapping[_KT, _VT] | Iterable[tuple[_KT, _VT]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+
+<div class="viewcode-block" id="MultiDict.update">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping</span><span class="p">:</span> <span class="s1">&#39;Mapping[_KT, _VT] | Iterable[tuple[_KT, _VT]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;:meth:`update` extends rather than replaces existing key lists.</span>
 
 <span class="sd">        If the value :obj:`list` for a key in ``other_dict`` is empty, no new</span>
@@ -709,12 +746,15 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">iter_multi_items</span><span class="p">(</span><span class="n">mapping</span><span class="p">):</span>
             <span class="n">MultiDict</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
+
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_VT | _T&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT | _T&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="MultiDict.pop"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.pop">[docs]</a>    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_VT | _T&#39;</span> <span class="o">=</span> <span class="n">_missing</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT | _T&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[assignment,misc]</span>
+<div class="viewcode-block" id="MultiDict.pop">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.pop">[docs]</a>
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_VT | _T&#39;</span> <span class="o">=</span> <span class="n">_missing</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT | _T&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[assignment,misc]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pop the first item for a :obj:`list` on the :obj:`dict`.</span>
 
 <span class="sd">        Afterwards the ``key`` is removed from the :obj:`dict`, so additional</span>
@@ -739,7 +779,10 @@
 
             <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="MultiDict.popitem"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.popitem">[docs]</a>    <span class="k">def</span> <span class="nf">popitem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[_KT, _VT]&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiDict.popitem">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.popitem">[docs]</a>
+    <span class="k">def</span> <span class="nf">popitem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[_KT, _VT]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pop an item from the :obj:`dict`.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">item</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -751,7 +794,10 @@
         <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="kn">from</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="MultiDict.poplist"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.poplist">[docs]</a>    <span class="k">def</span> <span class="nf">poplist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[_VT]&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiDict.poplist">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.poplist">[docs]</a>
+    <span class="k">def</span> <span class="nf">poplist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;_KT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[_VT]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pop the :obj:`list` for a key from the :obj:`dict`.</span>
 
 <span class="sd">        If the key is not in the :obj:`dict` an empty :obj:`list` is returned.</span>
@@ -766,12 +812,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="p">[])</span></div>
 
-<div class="viewcode-block" id="MultiDict.popitemlist"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.popitemlist">[docs]</a>    <span class="k">def</span> <span class="nf">popitemlist</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[_KT, list[_VT]]&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MultiDict.popitemlist">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.popitemlist">[docs]</a>
+    <span class="k">def</span> <span class="nf">popitemlist</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[_KT, list[_VT]]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pop a ``(key, list)`` :obj:`tuple` from the :obj:`dict`.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">dict</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
         <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="kn">from</span> <span class="kc">None</span></div>
+
 
     <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;MultiDict[_KT, _VT]&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -783,7 +833,10 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="si">!r}</span><span class="s1">)&#39;</span></div>
 
 
-<div class="viewcode-block" id="OrderedMultiDict"><a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict">[docs]</a><span class="k">class</span> <span class="nc">OrderedMultiDict</span><span class="p">(</span><span class="n">MultiDict</span><span class="p">[</span><span class="n">_KT</span><span class="p">,</span> <span class="n">_VT</span><span class="p">]):</span>
+
+<div class="viewcode-block" id="OrderedMultiDict">
+<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict">[docs]</a>
+<span class="k">class</span> <span class="nc">OrderedMultiDict</span><span class="p">(</span><span class="n">MultiDict</span><span class="p">[</span><span class="n">_KT</span><span class="p">,</span> <span class="n">_VT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Works like a regular :class:`MultiDict` but preserves the order of the</span>
 <span class="sd">    fields.</span>
 
@@ -968,6 +1021,7 @@
             <span class="n">bucket</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">key</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">buckets</span><span class="p">]</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -1000,9 +1054,9 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../../../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=f281be69"></script>

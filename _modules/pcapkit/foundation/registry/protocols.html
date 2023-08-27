@@ -1,10 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>pcapkit.foundation.registry.protocols - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=135e06be" />
@@ -468,7 +468,9 @@
 
 
 <span class="c1"># NOTE: pcapkit.protocols.__proto__</span>
-<div class="viewcode-block" id="register_protocol"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol">[docs]</a><span class="k">def</span> <span class="nf">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="register_protocol">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol">[docs]</a>
+<span class="k">def</span> <span class="nf">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered protocol class.</span>
 
 <span class="sd">    The protocol class must be a subclass of</span>
@@ -486,12 +488,15 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
 
 
+
 <span class="c1">###############################################################################</span>
 <span class="c1"># Top-Level Registries</span>
 <span class="c1">###############################################################################</span>
 
 
-<div class="viewcode-block" id="register_linktype"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype">[docs]</a><span class="k">def</span> <span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="register_linktype">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype">[docs]</a>
+<span class="k">def</span> <span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -526,8 +531,11 @@
     <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcap.frame.Frame.__proto__</span>
-<div class="viewcode-block" id="register_pcap"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcap">[docs]</a><span class="k">def</span> <span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="register_pcap">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcap">[docs]</a>
+<span class="k">def</span> <span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -554,8 +562,11 @@
     <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__proto__</span>
-<div class="viewcode-block" id="register_pcapng"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng">[docs]</a><span class="k">def</span> <span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="register_pcapng">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng">[docs]</a>
+<span class="k">def</span> <span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -582,13 +593,16 @@
     <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
 
 
+
 <span class="c1">###############################################################################</span>
 <span class="c1"># Link Layer Registries</span>
 <span class="c1">###############################################################################</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.link.link.Link.__proto__</span>
-<div class="viewcode-block" id="register_ethertype"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ethertype">[docs]</a><span class="k">def</span> <span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="register_ethertype">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ethertype">[docs]</a>
+<span class="k">def</span> <span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -615,13 +629,16 @@
     <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
 
 
+
 <span class="c1">###############################################################################</span>
 <span class="c1"># Internet Layer Registries</span>
 <span class="c1">###############################################################################</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.internet.internet.Internet.__proto__</span>
-<div class="viewcode-block" id="register_transtype"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_transtype">[docs]</a><span class="k">def</span> <span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="register_transtype">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_transtype">[docs]</a>
+<span class="k">def</span> <span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -648,8 +665,11 @@
     <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.internet.internet.IPv4</span>
-<div class="viewcode-block" id="register_ipv4_option"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ipv4_option">[docs]</a><span class="k">def</span> <span class="nf">register_ipv4_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv4_OptionNumber&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[IPv4_OptionParser, IPv4_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_ipv4_option">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ipv4_option">[docs]</a>
+<span class="k">def</span> <span class="nf">register_ipv4_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv4_OptionNumber&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[IPv4_OptionParser, IPv4_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                          <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_IPv4_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
@@ -673,8 +693,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv4 option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.internet.hip.HIP</span>
-<div class="viewcode-block" id="register_hip_parameter"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_hip_parameter">[docs]</a><span class="k">def</span> <span class="nf">register_hip_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;HIP_Parameter&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[HIP_ParameterParser, HIP_ParameterConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_hip_parameter">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_hip_parameter">[docs]</a>
+<span class="k">def</span> <span class="nf">register_hip_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;HIP_Parameter&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[HIP_ParameterParser, HIP_ParameterConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_HIP_Parameter]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a parameter parser.</span>
 
@@ -698,8 +721,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered HIP parameter parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.internet.hopopt.HOPOPT.__option__</span>
-<div class="viewcode-block" id="register_hopopt_option"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_hopopt_option">[docs]</a><span class="k">def</span> <span class="nf">register_hopopt_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[HOPOPT_OptionParser, HOPOPT_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_hopopt_option">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_hopopt_option">[docs]</a>
+<span class="k">def</span> <span class="nf">register_hopopt_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[HOPOPT_OptionParser, HOPOPT_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_HOPOPT_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
@@ -723,8 +749,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered HOPOPT option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__</span>
-<div class="viewcode-block" id="register_ipv6_opts_option"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ipv6_opts_option">[docs]</a><span class="k">def</span> <span class="nf">register_ipv6_opts_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[IPv6_Opts_OptionParser, IPv6_Opts_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_ipv6_opts_option">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ipv6_opts_option">[docs]</a>
+<span class="k">def</span> <span class="nf">register_ipv6_opts_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[IPv6_Opts_OptionParser, IPv6_Opts_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                               <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_IPv6_Opts_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
@@ -748,8 +777,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv6-Opts option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__</span>
-<div class="viewcode-block" id="register_ipv6_route_routing"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ipv6_route_routing">[docs]</a><span class="k">def</span> <span class="nf">register_ipv6_route_routing</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Routing&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[IPv6_Route_TypeParser, IPv6_Route_TypeConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_ipv6_route_routing">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ipv6_route_routing">[docs]</a>
+<span class="k">def</span> <span class="nf">register_ipv6_route_routing</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Routing&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[IPv6_Route_TypeParser, IPv6_Route_TypeConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                 <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_IPv6_Route_RoutingType]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a routing data parser.</span>
 
@@ -773,8 +805,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv6-Route routing data parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.internet.mh.MH.__message__</span>
-<div class="viewcode-block" id="register_mh_message"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_message">[docs]</a><span class="k">def</span> <span class="nf">register_mh_message</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;MH_Packet&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[MH_PacketParser, MH_PacketConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_mh_message">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_message">[docs]</a>
+<span class="k">def</span> <span class="nf">register_mh_message</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;MH_Packet&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[MH_PacketParser, MH_PacketConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_MH_Packet]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a message type parser.</span>
 
@@ -798,8 +833,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MH message type parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.internet.mh.MH.__option__</span>
-<div class="viewcode-block" id="register_mh_option"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_option">[docs]</a><span class="k">def</span> <span class="nf">register_mh_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;MH_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[MH_OptionParser, MH_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_mh_option">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_option">[docs]</a>
+<span class="k">def</span> <span class="nf">register_mh_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;MH_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[MH_OptionParser, MH_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_MH_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a option parser.</span>
 
@@ -823,8 +861,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MH option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.internet.mh.MH.__extension__</span>
-<div class="viewcode-block" id="register_mh_extension"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_extension">[docs]</a><span class="k">def</span> <span class="nf">register_mh_extension</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;MH_CGAExtension&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]&#39;</span><span class="p">,</span>
+<div class="viewcode-block" id="register_mh_extension">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_extension">[docs]</a>
+<span class="k">def</span> <span class="nf">register_mh_extension</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;MH_CGAExtension&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]&#39;</span><span class="p">,</span>
                           <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_MH_CGAExtension]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a CGA extension parser.</span>
 
@@ -848,12 +889,15 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MH CGA extension: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1">###############################################################################</span>
 <span class="c1"># Transport Layer Registries</span>
 <span class="c1">###############################################################################</span>
 
 
-<div class="viewcode-block" id="register_port"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_port">[docs]</a><span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;tcp&quot;, &quot;udp&quot;]&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="register_port">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_port">[docs]</a>
+<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;tcp&quot;, &quot;udp&quot;]&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -893,8 +937,11 @@
     <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__proto__</span>
-<div class="viewcode-block" id="register_tcp"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp">[docs]</a><span class="k">def</span> <span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="register_tcp">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp">[docs]</a>
+<span class="k">def</span> <span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -921,8 +968,11 @@
     <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__option__</span>
-<div class="viewcode-block" id="register_tcp_option"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp_option">[docs]</a><span class="k">def</span> <span class="nf">register_tcp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[TCP_OptionParser, TCP_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_tcp_option">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp_option">[docs]</a>
+<span class="k">def</span> <span class="nf">register_tcp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[TCP_OptionParser, TCP_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_TCP_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
@@ -946,8 +996,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered TCP option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__mp_option__</span>
-<div class="viewcode-block" id="register_tcp_mp_option"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp_mp_option">[docs]</a><span class="k">def</span> <span class="nf">register_tcp_mp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[TCP_MPOptionParser, TCP_MPOptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_tcp_mp_option">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp_mp_option">[docs]</a>
+<span class="k">def</span> <span class="nf">register_tcp_mp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[TCP_MPOptionParser, TCP_MPOptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_TCP_MPTCP]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an MPTCP option parser.</span>
 
@@ -971,8 +1024,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MPTCP option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.transport.udp.UDP.__proto__</span>
-<div class="viewcode-block" id="register_udp"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_udp">[docs]</a><span class="k">def</span> <span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="register_udp">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_udp">[docs]</a>
+<span class="k">def</span> <span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -999,13 +1055,16 @@
     <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
 
 
+
 <span class="c1">###############################################################################</span>
 <span class="c1"># Application Layer Registries</span>
 <span class="c1">###############################################################################</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.application.httpv2.HTTPv2.__frame__</span>
-<div class="viewcode-block" id="register_http_frame"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_http_frame">[docs]</a><span class="k">def</span> <span class="nf">register_http_frame</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;HTTP_Frame&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_http_frame">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_http_frame">[docs]</a>
+<span class="k">def</span> <span class="nf">register_http_frame</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;HTTP_Frame&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_HTTP_FrameType]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a frame parser.</span>
 
@@ -1029,13 +1088,16 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered HTTP/2 frame parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1">###############################################################################</span>
 <span class="c1"># Miscellaneous Protocol Registries</span>
 <span class="c1">###############################################################################</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__block__</span>
-<div class="viewcode-block" id="register_pcapng_block"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_block">[docs]</a><span class="k">def</span> <span class="nf">register_pcapng_block</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_BlockType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_pcapng_block">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_block">[docs]</a>
+<span class="k">def</span> <span class="nf">register_pcapng_block</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_BlockType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_PCAPNG_BlockType]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a block parser.</span>
 
@@ -1059,8 +1121,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG block parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__option__</span>
-<div class="viewcode-block" id="register_pcapng_option"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_option">[docs]</a><span class="k">def</span> <span class="nf">register_pcapng_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_OptionType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_pcapng_option">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_option">[docs]</a>
+<span class="k">def</span> <span class="nf">register_pcapng_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_OptionType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_PCAPNG_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a option parser.</span>
 
@@ -1084,8 +1149,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__record__</span>
-<div class="viewcode-block" id="register_pcapng_record"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_record">[docs]</a><span class="k">def</span> <span class="nf">register_pcapng_record</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_RecordType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_pcapng_record">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_record">[docs]</a>
+<span class="k">def</span> <span class="nf">register_pcapng_record</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_RecordType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_PCAPNG_NameResolutionRecord]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a name resolution record parser.</span>
 
@@ -1110,8 +1178,11 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG name resolution record parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__</span>
-<div class="viewcode-block" id="register_pcapng_secrets"><a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_secrets">[docs]</a><span class="k">def</span> <span class="nf">register_pcapng_secrets</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_SecretsType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="register_pcapng_secrets">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_secrets">[docs]</a>
+<span class="k">def</span> <span class="nf">register_pcapng_secrets</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_SecretsType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_PCAPNG_DSBSecrets]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a decryption secrets parser.</span>
 
@@ -1133,6 +1204,7 @@
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_PCAPNG_DSBSecrets</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG decryption secrets parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -1165,9 +1237,9 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../../../../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../../_static/copybutton.js?v=f281be69"></script>

@@ -1,10 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../../../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html" /><link rel="search" title="Search" href="../../../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>pcapkit.protocols.schema.internet.hip - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=135e06be" />
@@ -413,7 +413,9 @@
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypedDict</span>
 
-<div class="viewcode-block" id="PacketType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.PacketType">[docs]</a>    <span class="k">class</span> <span class="nc">PacketType</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<div class="viewcode-block" id="PacketType">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.PacketType">[docs]</a>
+    <span class="k">class</span> <span class="nc">PacketType</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Packet type.&quot;&quot;&quot;</span>
 
         <span class="c1">#: Reversed bit.</span>
@@ -421,7 +423,10 @@
         <span class="c1">#: Packet type.</span>
         <span class="nb">type</span><span class="p">:</span> <span class="nb">int</span></div>
 
-<div class="viewcode-block" id="VersionType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.VersionType">[docs]</a>    <span class="k">class</span> <span class="nc">VersionType</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VersionType">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.VersionType">[docs]</a>
+    <span class="k">class</span> <span class="nc">VersionType</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Version type.&quot;&quot;&quot;</span>
 
         <span class="c1">#: Version.</span>
@@ -429,19 +434,28 @@
         <span class="c1">#: Reversed bit.</span>
         <span class="n">bit_1</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="ControlsType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ControlsType">[docs]</a>    <span class="k">class</span> <span class="nc">ControlsType</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ControlsType">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ControlsType">[docs]</a>
+    <span class="k">class</span> <span class="nc">ControlsType</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Controls type.&quot;&quot;&quot;</span>
 
         <span class="c1">#: Anonymous.</span>
         <span class="n">anonymous</span><span class="p">:</span> <span class="nb">bool</span></div>
 
-<div class="viewcode-block" id="LocatorFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.LocatorFlags">[docs]</a>    <span class="k">class</span> <span class="nc">LocatorFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LocatorFlags">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.LocatorFlags">[docs]</a>
+    <span class="k">class</span> <span class="nc">LocatorFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Locator flags.&quot;&quot;&quot;</span>
 
         <span class="c1">#: Preferred flag.</span>
         <span class="n">preferred</span><span class="p">:</span> <span class="nb">bool</span></div>
 
-<div class="viewcode-block" id="DIData"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.DIData">[docs]</a>    <span class="k">class</span> <span class="nc">DIData</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DIData">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.DIData">[docs]</a>
+    <span class="k">class</span> <span class="nc">DIData</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;DI type data.&quot;&quot;&quot;</span>
 
         <span class="c1">#: DI type.</span>
@@ -449,7 +463,10 @@
         <span class="c1">#: DI length.</span>
         <span class="nb">len</span><span class="p">:</span> <span class="nb">int</span></div>
 
-<div class="viewcode-block" id="RouteFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RouteFlags">[docs]</a>    <span class="k">class</span> <span class="nc">RouteFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="RouteFlags">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RouteFlags">[docs]</a>
+    <span class="k">class</span> <span class="nc">RouteFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Route destination flags.&quot;&quot;&quot;</span>
 
         <span class="c1">#: Symmetric flag.</span>
@@ -458,7 +475,10 @@
         <span class="n">must_follow</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
-<div class="viewcode-block" id="locator_value_selector"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.locator_value_selector">[docs]</a><span class="k">def</span> <span class="nf">locator_value_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="locator_value_selector">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.locator_value_selector">[docs]</a>
+<span class="k">def</span> <span class="nf">locator_value_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`Locator.value` field.</span>
 
 <span class="sd">    Args:</span>
@@ -482,7 +502,10 @@
     <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="s1">&#39;invalid locator type or length&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="host_id_hi_selector"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.host_id_hi_selector">[docs]</a><span class="k">def</span> <span class="nf">host_id_hi_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="host_id_hi_selector">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.host_id_hi_selector">[docs]</a>
+<span class="k">def</span> <span class="nf">host_id_hi_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`HostIDParameter.hi` field.</span>
 
 <span class="sd">    Args:</span>
@@ -507,7 +530,10 @@
     <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;hi_len&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_Parameter</span><span class="p">]):</span>
+
+<div class="viewcode-block" id="Parameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.Parameter">[docs]</a>
+<span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_Parameter</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base schema for HIP parameters.&quot;&quot;&quot;</span>
 
     <span class="n">__default__</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedParameter</span>
@@ -518,7 +544,10 @@
     <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="UnassignedParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.UnassignedParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="UnassignedParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.UnassignedParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">UnassignedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP unsigned parameters.&quot;&quot;&quot;</span>
 
@@ -531,7 +560,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ESPInfoParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ESPInfoParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="ESPInfoParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ESPInfoParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">ESPInfoParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ESP_INFO</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ESP_INFO`` parameters.&quot;&quot;&quot;</span>
 
@@ -551,7 +583,10 @@
                      <span class="n">old_spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">new_spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="R1CounterParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.R1CounterParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="R1CounterParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.R1CounterParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">R1CounterParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">R1_COUNTER</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``R1_COUNTER`` parameters.&quot;&quot;&quot;</span>
 
@@ -566,7 +601,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">counter</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="Locator"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.Locator">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="Locator">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.Locator">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">Locator</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP locators.&quot;&quot;&quot;</span>
 
@@ -594,7 +632,10 @@
                      <span class="n">lifetime</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;bytes | LocatorData&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="LocatorSetParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.LocatorSetParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="LocatorSetParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.LocatorSetParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">LocatorSetParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">LOCATOR_SET</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``LOCATOR_SET`` parameters.&quot;&quot;&quot;</span>
 
@@ -610,7 +651,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">locators</span><span class="p">:</span> <span class="s1">&#39;list[Locator]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="LocatorData"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.LocatorData">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="LocatorData">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.LocatorData">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">LocatorData</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP locator data.&quot;&quot;&quot;</span>
 
@@ -623,7 +667,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | int | bytes | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="PuzzleParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.PuzzleParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="PuzzleParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.PuzzleParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">PuzzleParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">PUZZLE</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``PUZZLE`` parameters.&quot;&quot;&quot;</span>
 
@@ -643,7 +690,10 @@
                      <span class="n">opaque</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SolutionParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.SolutionParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="SolutionParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.SolutionParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">SolutionParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">SOLUTION</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``SOLUTION`` parameters.&quot;&quot;&quot;</span>
 
@@ -665,7 +715,10 @@
                      <span class="n">opaque</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">solution</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SEQParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.SEQParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="SEQParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.SEQParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">SEQParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">SEQ</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``SEQ`` parameters.&quot;&quot;&quot;</span>
 
@@ -678,7 +731,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">update_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ACKParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ACKParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="ACKParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ACKParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">ACKParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ACK</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ACK`` parameters.&quot;&quot;&quot;</span>
 
@@ -694,7 +750,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">update_id</span><span class="p">:</span> <span class="s1">&#39;bytes | list[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="DHGroupListParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.DHGroupListParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="DHGroupListParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.DHGroupListParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">DHGroupListParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">DH_GROUP_LIST</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``DH_GROUP_LIST`` parameters.&quot;&quot;&quot;</span>
 
@@ -710,7 +769,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">groups</span><span class="p">:</span> <span class="s1">&#39;list[Enum_Group]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="DiffieHellmanParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.DiffieHellmanParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="DiffieHellmanParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.DiffieHellmanParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">DiffieHellmanParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">DIFFIE_HELLMAN</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``DIFFIE_HELLMAN`` parameters.&quot;&quot;&quot;</span>
 
@@ -728,7 +790,10 @@
                      <span class="n">pub_val</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HIPTransformParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPTransformParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HIPTransformParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPTransformParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HIPTransformParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_TRANSFORM</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``TRANSFORM`` parameters.&quot;&quot;&quot;</span>
 
@@ -744,7 +809,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">suites</span><span class="p">:</span> <span class="s1">&#39;list[Enum_Suite]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HIPCipherParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPCipherParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HIPCipherParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPCipherParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HIPCipherParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_CIPHER</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``CIPHER`` parameters.&quot;&quot;&quot;</span>
 
@@ -760,7 +828,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ciphers</span><span class="p">:</span> <span class="s1">&#39;list[Enum_Cipher]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="NATTraversalModeParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.NATTraversalModeParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="NATTraversalModeParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.NATTraversalModeParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">NATTraversalModeParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">NAT_TRAVERSAL_MODE</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``NAT_TRAVERSAL_MODE`` parameters.&quot;&quot;&quot;</span>
 
@@ -778,7 +849,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">modes</span><span class="p">:</span> <span class="s1">&#39;list[Enum_NATTraversal]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="TransactionPacingParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.TransactionPacingParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="TransactionPacingParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.TransactionPacingParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">TransactionPacingParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">TRANSACTION_PACING</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``TRANSACTION_PACING`` parameters.&quot;&quot;&quot;</span>
 
@@ -791,7 +865,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">min_ta</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EncryptedParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="EncryptedParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">EncryptedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ENCRYPTED</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ENCRYPTED`` parameters.&quot;&quot;&quot;</span>
 
@@ -809,7 +886,9 @@
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="mi">8</span><span class="p">))</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
 
-<div class="viewcode-block" id="EncryptedParameter.pre_unpack"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter.pre_unpack">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="EncryptedParameter.pre_unpack">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter.pre_unpack">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">pre_unpack</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare ``packet`` data for unpacking process.</span>
 
@@ -850,7 +929,10 @@
 
         <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__cipher__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cipher_id</span></div>
 
-<div class="viewcode-block" id="EncryptedParameter.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="EncryptedParameter.post_process">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter.post_process">[docs]</a>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
@@ -863,6 +945,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cipher</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__cipher__&#39;</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
+
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Cipher ID.</span>
         <span class="n">cipher</span><span class="p">:</span> <span class="s1">&#39;Enum_Cipher&#39;</span>
@@ -871,7 +954,10 @@
                      <span class="n">iv</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HostIDParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HostIDParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HostIDParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HostIDParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HostIDParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HOST_ID</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``HOST_ID`` parameters.&quot;&quot;&quot;</span>
 
@@ -900,11 +986,17 @@
                      <span class="n">di</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HostIdentity"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HostIdentity">[docs]</a><span class="k">class</span> <span class="nc">HostIdentity</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_HIAlgorithm</span><span class="p">]):</span>
+
+<div class="viewcode-block" id="HostIdentity">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HostIdentity">[docs]</a>
+<span class="k">class</span> <span class="nc">HostIdentity</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_HIAlgorithm</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Host identity schema.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="ECDSACurveHostIdentity"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ECDSACurveHostIdentity">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="ECDSACurveHostIdentity">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ECDSACurveHostIdentity">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">ECDSACurveHostIdentity</span><span class="p">(</span><span class="n">HostIdentity</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_HIAlgorithm</span><span class="o">.</span><span class="n">ECDSA</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Host identity schema with ECDSA curve.&quot;&quot;&quot;</span>
 
@@ -917,7 +1009,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">curve</span><span class="p">:</span> <span class="s1">&#39;Enum_ECDSACurve&#39;</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ECDSALowCurveHostIdentity"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ECDSALowCurveHostIdentity">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="ECDSALowCurveHostIdentity">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ECDSALowCurveHostIdentity">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">ECDSALowCurveHostIdentity</span><span class="p">(</span><span class="n">HostIdentity</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_HIAlgorithm</span><span class="o">.</span><span class="n">ECDSA_LOW</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Host identity schema with ECDSA_LOW curve.&quot;&quot;&quot;</span>
 
@@ -930,7 +1025,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">curve</span><span class="p">:</span> <span class="s1">&#39;Enum_ECDSALowCurve&#39;</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EdDSACurveHostIdentity"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EdDSACurveHostIdentity">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="EdDSACurveHostIdentity">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EdDSACurveHostIdentity">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">EdDSACurveHostIdentity</span><span class="p">(</span><span class="n">HostIdentity</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_HIAlgorithm</span><span class="o">.</span><span class="n">EdDSA</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Host identity schema with EdDSA curve.&quot;&quot;&quot;</span>
 
@@ -943,7 +1041,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">curve</span><span class="p">:</span> <span class="s1">&#39;Enum_EdDSACurve&#39;</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HITSuiteListParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HITSuiteListParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HITSuiteListParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HITSuiteListParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HITSuiteListParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIT_SUITE_LIST</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``HIT_SUITE_LIST`` parameters.&quot;&quot;&quot;</span>
 
@@ -959,7 +1060,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">suites</span><span class="p">:</span> <span class="s1">&#39;list[Enum_HITSuite]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="CertParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.CertParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="CertParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.CertParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">CertParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">CERT</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``CERT`` parameters.&quot;&quot;&quot;</span>
 
@@ -981,7 +1085,10 @@
                      <span class="n">cert_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cert_type</span><span class="p">:</span> <span class="s1">&#39;Enum_Certificate&#39;</span><span class="p">,</span> <span class="n">cert</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="NotificationParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.NotificationParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="NotificationParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.NotificationParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">NotificationParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">NOTIFICATION</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``NOTIFICATION`` parameters.&quot;&quot;&quot;</span>
 
@@ -998,7 +1105,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">msg_type</span><span class="p">:</span> <span class="s1">&#39;Enum_NotifyMessage&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EchoRequestSignedParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EchoRequestSignedParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="EchoRequestSignedParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EchoRequestSignedParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">EchoRequestSignedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_REQUEST_SIGNED</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ECHO_REQUEST_SIGNED`` parameters.&quot;&quot;&quot;</span>
 
@@ -1011,7 +1121,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RegInfoParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegInfoParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RegInfoParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegInfoParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RegInfoParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_INFO</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``REG_INFO`` parameters.&quot;&quot;&quot;</span>
 
@@ -1032,7 +1145,10 @@
                      <span class="n">reg_info</span><span class="p">:</span> <span class="s1">&#39;list[Enum_Registration]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RegRequestParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegRequestParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RegRequestParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegRequestParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RegRequestParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_REQUEST</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``REG_REQUEST`` parameters.&quot;&quot;&quot;</span>
 
@@ -1050,7 +1166,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">reg_request</span><span class="p">:</span> <span class="s1">&#39;list[Enum_Registration]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RegResponseParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegResponseParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RegResponseParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegResponseParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RegResponseParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_RESPONSE</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``REG_RESPONSE`` parameters.&quot;&quot;&quot;</span>
 
@@ -1068,7 +1187,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">reg_response</span><span class="p">:</span> <span class="s1">&#39;list[Enum_Registration]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RegFailedParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegFailedParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RegFailedParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegFailedParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RegFailedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_FAILED</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``REG_FAILED`` parameters.&quot;&quot;&quot;</span>
 
@@ -1086,7 +1208,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">reg_failed</span><span class="p">:</span> <span class="s1">&#39;list[Enum_RegistrationFailure]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RegFromParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegFromParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RegFromParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RegFromParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RegFromParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_FROM</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``REG_FROM`` parameters.&quot;&quot;&quot;</span>
 
@@ -1103,7 +1228,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | bytes | int | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EchoResponseSignedParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EchoResponseSignedParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="EchoResponseSignedParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EchoResponseSignedParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">EchoResponseSignedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_RESPONSE_SIGNED</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ECHO_RESPONSE_SIGNED`` parameters.&quot;&quot;&quot;</span>
 
@@ -1116,7 +1244,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="TransportFormatListParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.TransportFormatListParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="TransportFormatListParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.TransportFormatListParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">TransportFormatListParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">TRANSPORT_FORMAT_LIST</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``TRANSPORT_FORMAT_LIST`` parameters.&quot;&quot;&quot;</span>
 
@@ -1132,7 +1263,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">formats</span><span class="p">:</span> <span class="s1">&#39;list[Enum_Parameter]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ESPTransformParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ESPTransformParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="ESPTransformParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ESPTransformParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">ESPTransformParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ESP_TRANSFORM</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ESP_TRANSFORM`` parameters.&quot;&quot;&quot;</span>
 
@@ -1150,7 +1284,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">suites</span><span class="p">:</span> <span class="s1">&#39;list[Enum_ESPTransformSuite]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SeqDataParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.SeqDataParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="SeqDataParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.SeqDataParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">SeqDataParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">SEQ_DATA</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``SEQ_DATA`` parameters.&quot;&quot;&quot;</span>
 
@@ -1163,7 +1300,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="AckDataParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.AckDataParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="AckDataParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.AckDataParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">AckDataParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ACK_DATA</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ACK_DATA`` parameters.&quot;&quot;&quot;</span>
 
@@ -1179,7 +1319,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="PayloadMICParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.PayloadMICParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="PayloadMICParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.PayloadMICParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">PayloadMICParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">PAYLOAD_MIC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``PAYLOAD_MIC`` parameters.&quot;&quot;&quot;</span>
 
@@ -1198,7 +1341,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">mic</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="TransactionIDParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.TransactionIDParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="TransactionIDParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.TransactionIDParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">TransactionIDParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">TRANSACTION_ID</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``TRANSACTION_ID`` parameters.&quot;&quot;&quot;</span>
 
@@ -1211,7 +1357,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="OverlayIDParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.OverlayIDParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="OverlayIDParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.OverlayIDParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">OverlayIDParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">OVERLAY_ID</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``OVERLAY_ID`` parameters.&quot;&quot;&quot;</span>
 
@@ -1224,7 +1373,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RouteDstParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RouteDstParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RouteDstParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RouteDstParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RouteDstParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ROUTE_DST</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ROUTE_DST`` parameters.&quot;&quot;&quot;</span>
 
@@ -1247,7 +1399,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;RouteFlags&#39;</span><span class="p">,</span> <span class="n">hit</span><span class="p">:</span> <span class="s1">&#39;list[str | int | bytes | IPv6Address]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HIPTransportModeParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HIPTransportModeParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HIPTransportModeParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_TRANSPORT_MODE</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``HIP_TRANSPORT_MODE`` parameters.&quot;&quot;&quot;</span>
 
@@ -1265,7 +1420,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;list[Enum_Transport]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HIPMACParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPMACParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HIPMACParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPMACParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HIPMACParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_MAC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``HIP_MAC`` parameters.&quot;&quot;&quot;</span>
 
@@ -1278,7 +1436,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HIPMAC2Parameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPMAC2Parameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HIPMAC2Parameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPMAC2Parameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HIPMAC2Parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_MAC_2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``HIP_MAC_2`` parameters.&quot;&quot;&quot;</span>
 
@@ -1291,7 +1452,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HIPSignature2Parameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPSignature2Parameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HIPSignature2Parameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPSignature2Parameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HIPSignature2Parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_SIGNATURE_2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``HIP_SIGNATURE_2`` parameters.&quot;&quot;&quot;</span>
 
@@ -1306,7 +1470,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_HIAlgorithm&#39;</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HIPSignatureParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPSignatureParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HIPSignatureParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPSignatureParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HIPSignatureParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_SIGNATURE</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``HIP_SIGNATURE`` parameters.&quot;&quot;&quot;</span>
 
@@ -1321,7 +1488,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_HIAlgorithm&#39;</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EchoRequestUnsignedParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EchoRequestUnsignedParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="EchoRequestUnsignedParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EchoRequestUnsignedParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">EchoRequestUnsignedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_REQUEST_UNSIGNED</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ECHO_REQUEST_UNSIGNED`` parameters.&quot;&quot;&quot;</span>
 
@@ -1334,7 +1504,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EchoResponseUnsignedParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EchoResponseUnsignedParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="EchoResponseUnsignedParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EchoResponseUnsignedParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">EchoResponseUnsignedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_RESPONSE_UNSIGNED</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ECHO_RESPONSE_UNSIGNED`` parameters.&quot;&quot;&quot;</span>
 
@@ -1347,7 +1520,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RelayFromParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RelayFromParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RelayFromParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RelayFromParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RelayFromParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RELAY_FROM</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``RELAY_FROM`` parameters.&quot;&quot;&quot;</span>
 
@@ -1364,7 +1540,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;str | bytes | int | IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RelayToParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RelayToParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RelayToParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RelayToParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RelayToParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RELAY_TO</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``RELAY_TO`` parameters.&quot;&quot;&quot;</span>
 
@@ -1381,7 +1560,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;str | bytes | int | IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="OverlayTTLParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.OverlayTTLParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="OverlayTTLParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.OverlayTTLParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">OverlayTTLParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">OVERLAY_TTL</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``OVERLAY_TTL`` parameters.&quot;&quot;&quot;</span>
 
@@ -1396,7 +1578,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RouteViaParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RouteViaParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RouteViaParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RouteViaParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RouteViaParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ROUTE_VIA</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``ROUTE_VIA`` parameters.&quot;&quot;&quot;</span>
 
@@ -1419,7 +1604,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;RouteFlags&#39;</span><span class="p">,</span> <span class="n">hit</span><span class="p">:</span> <span class="s1">&#39;list[str | bytes | int | IPv6Address]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="FromParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.FromParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="FromParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.FromParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">FromParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">FROM</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``FROM`` parameters.&quot;&quot;&quot;</span>
 
@@ -1432,7 +1620,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;str | bytes | int | IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RVSHMACParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RVSHMACParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RVSHMACParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RVSHMACParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RVSHMACParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RVS_HMAC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``RVS_HMAC`` parameters.&quot;&quot;&quot;</span>
 
@@ -1445,7 +1636,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ViaRVSParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ViaRVSParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="ViaRVSParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.ViaRVSParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">ViaRVSParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">VIA_RVS</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``VIA_RVS`` parameters.&quot;&quot;&quot;</span>
 
@@ -1461,7 +1655,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;list[str | bytes | int | IPv6Address]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RelayHMACParameter"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RelayHMACParameter">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="RelayHMACParameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.RelayHMACParameter">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">RelayHMACParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RELAY_HMAC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``RELAY_HMAC`` parameters.&quot;&quot;&quot;</span>
 
@@ -1474,7 +1671,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HIP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIP">[docs]</a><span class="nd">@schema_final</span>
+
+<div class="viewcode-block" id="HIP">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIP">[docs]</a>
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">HIP</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP packet.&quot;&quot;&quot;</span>
 
@@ -1526,6 +1726,7 @@
                      <span class="n">ver</span><span class="p">:</span> <span class="s1">&#39;VersionType&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="s1">&#39;ControlsType&#39;</span><span class="p">,</span>
                      <span class="n">shit</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">rhit</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">&#39;bytes | list[bytes | Parameter]&#39;</span><span class="p">,</span>
                      <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -1558,9 +1759,9 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../../../_static/copybutton.js?v=f281be69"></script>

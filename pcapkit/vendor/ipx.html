@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="MH Vendor Crawlers" href="mh.html" /><link rel="prev" title="IPv6 Vendor Crawlers" href="ipv6.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>IPX Vendor Crawlers - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -362,9 +362,9 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-pcapkit.vendor.ipx">
-<span id="ipx-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX" title="pcapkit.protocols.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.ipx" title="Permalink to this heading">#</a></h1>
-<p>This module contains all vendor crawlers of
+          <section id="ipx-vendor-crawlers">
+<h1><a class="reference internal" href="../protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX" title="pcapkit.protocols.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a> Vendor Crawlers<a class="headerlink" href="#ipx-vendor-crawlers" title="Link to this heading">#</a></h1>
+<p id="module-pcapkit.vendor.ipx">This module contains all vendor crawlers of
 <a class="reference internal" href="../protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX" title="pcapkit.protocols.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a> implementations. Available
 vendor crawlers include:</p>
 <div class="table-wrapper docutils container">
@@ -379,13 +379,13 @@ vendor crawlers include:</p>
 </tbody>
 </table>
 </div>
-<section id="module-pcapkit.vendor.ipx.packet">
-<span id="ipx-packet-types"></span><h2>IPX Packet Types<a class="headerlink" href="#module-pcapkit.vendor.ipx.packet" title="Permalink to this heading">#</a></h2>
-<p>This module contains the vendor crawler for <strong>IPX Packet Types</strong>,
+<section id="ipx-packet-types">
+<h2>IPX Packet Types<a class="headerlink" href="#ipx-packet-types" title="Link to this heading">#</a></h2>
+<p id="module-pcapkit.vendor.ipx.packet">This module contains the vendor crawler for <strong>IPX Packet Types</strong>,
 which is automatically generating <a class="reference internal" href="../const/ipx.html#pcapkit.const.ipx.packet.Packet" title="pcapkit.const.ipx.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipx.packet.Packet</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipx.packet.Packet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipx.packet.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipx/packet.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipx.packet.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipx/packet.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>IPX Packet Types</p>
 <dl class="field-list simple">
@@ -395,26 +395,26 @@ which is automatically generating <a class="reference internal" href="../const/i
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipx.packet.Packet.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.FLAG" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.FLAG" title="Link to this definition">#</a></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipx.packet.Packet.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.LINK" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.LINK" title="Link to this definition">#</a></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="module-pcapkit.vendor.ipx.socket">
-<span id="socket-types"></span><h2>Socket Types<a class="headerlink" href="#module-pcapkit.vendor.ipx.socket" title="Permalink to this heading">#</a></h2>
-<p>This module contains the vendor crawler for <strong>Socket Types</strong>,
+<section id="socket-types">
+<h2>Socket Types<a class="headerlink" href="#socket-types" title="Link to this heading">#</a></h2>
+<p id="module-pcapkit.vendor.ipx.socket">This module contains the vendor crawler for <strong>Socket Types</strong>,
 which is automatically generating <a class="reference internal" href="../const/ipx.html#pcapkit.const.ipx.socket.Socket" title="pcapkit.const.ipx.socket.Socket"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket.Socket</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipx.socket.</span></span><span class="sig-name descname"><span class="pre">Socket</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipx/socket.html#Socket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipx.socket.</span></span><span class="sig-name descname"><span class="pre">Socket</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipx/socket.html#Socket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Socket Types</p>
 <dl class="field-list simple">
@@ -424,13 +424,13 @@ which is automatically generating <a class="reference internal" href="../const/i
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.FLAG" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.FLAG" title="Link to this definition">#</a></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.LINK" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.LINK" title="Link to this definition">#</a></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
@@ -505,8 +505,8 @@ which is automatically generating <a class="reference internal" href="../const/i
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.vendor.ipx.packet">IPX Packet Types</a></li>
-<li><a class="reference internal" href="#module-pcapkit.vendor.ipx.socket">Socket Types</a></li>
+<li><a class="reference internal" href="#ipx-packet-types">IPX Packet Types</a></li>
+<li><a class="reference internal" href="#socket-types">Socket Types</a></li>
 </ul>
 </li>
 </ul>
@@ -518,9 +518,9 @@ which is automatically generating <a class="reference internal" href="../const/i
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>

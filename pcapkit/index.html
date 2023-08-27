@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="User Interface" href="interface/index.html" /><link rel="prev" title="PyPCAPKit - Comprehensive Network Packet Analysis Library" href="../index.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>Module Documentation - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -362,9 +362,9 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-pcapkit">
-<span id="module-documentation"></span><h1>Module Documentation<a class="headerlink" href="#module-pcapkit" title="Permalink to this heading">#</a></h1>
-<p><a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is an independent open source library, using only
+          <section id="module-documentation">
+<h1>Module Documentation<a class="headerlink" href="#module-documentation" title="Link to this heading">#</a></h1>
+<p id="module-pcapkit"><a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is an independent open source library, using only
 <a class="reference external" href="https://dictdumper.jarryshaw.me">DictDumper</a> as its formatted output dumper.</p>
 <p>Unlike popular PCAP file extractors, such as <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>,
 <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, and etc, <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> tends to provide comprehensive
@@ -395,8 +395,8 @@ schema definitions as well as various customisable interfaces.</p>
 <li class="toctree-l2"><a class="reference internal" href="protocols/transport/index.html">Transport Layer Protocols</a></li>
 <li class="toctree-l2"><a class="reference internal" href="protocols/application/index.html">Application Layer Protocols</a></li>
 <li class="toctree-l2"><a class="reference internal" href="protocols/index.html#protocol-registry">Protocol Registry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocols/index.html#module-pcapkit.protocols.schema.schema">Header Schema</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocols/index.html#module-pcapkit.protocols.data.data">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocols/index.html#header-schema">Header Schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocols/index.html#data-model">Data Model</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="corekit/index.html">Core Utilities</a><ul>
@@ -416,16 +416,16 @@ schema definitions as well as various customisable interfaces.</p>
 <li class="toctree-l1"><a class="reference internal" href="dumpkit/index.html">Dump Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="dumpkit/null.html">Null Dumper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dumpkit/pcap.html">PCAP Dumper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dumpkit/index.html#module-pcapkit.dumpkit.common">Common Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dumpkit/index.html#common-utilities">Common Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="utilities/index.html">Module Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="utilities/index.html#auxiliary-functions">Auxiliary Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="utilities/index.html#module-pcapkit.utilities.logging">Logging System</a></li>
-<li class="toctree-l2"><a class="reference internal" href="utilities/index.html#module-pcapkit.utilities.decorators">Decorator Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="utilities/index.html#module-pcapkit.utilities.compat">Version Compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utilities/index.html#logging-system">Logging System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utilities/index.html#decorator-functions">Decorator Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utilities/index.html#version-compatibility">Version Compatibility</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="const/index.html">Constant Enumerations</a><ul>
@@ -449,9 +449,9 @@ schema definitions as well as various customisable interfaces.</p>
 </li>
 </ul>
 </div>
-<section id="module-pcapkit.__main__">
-<span id="command-line-tool"></span><h2>Command Line Tool<a class="headerlink" href="#module-pcapkit.__main__" title="Permalink to this heading">#</a></h2>
-<div class="admonition important">
+<section id="command-line-tool">
+<h2>Command Line Tool<a class="headerlink" href="#command-line-tool" title="Link to this heading">#</a></h2>
+<div class="admonition important" id="module-pcapkit.__main__">
 <p class="admonition-title">Important</p>
 <p>This module requires <code class="docutils literal notranslate"><span class="pre">emoji</span></code> package to be installed.</p>
 </div>
@@ -500,18 +500,18 @@ optional arguments:
 </pre></div>
 </div>
 </section>
-<section id="module-pcapkit.all">
-<span id="library-index"></span><h2>Library Index<a class="headerlink" href="#module-pcapkit.all" title="Permalink to this heading">#</a></h2>
-<p><a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has defined various and numerous functions
+<section id="library-index">
+<h2>Library Index<a class="headerlink" href="#library-index" title="Link to this heading">#</a></h2>
+<p id="module-pcapkit.all"><a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has defined various and numerous functions
 and classes, which have different features and purposes.
 To make a simple index for this library, <a class="reference internal" href="#module-pcapkit.all" title="pcapkit.all"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.all</span></code></a>
 contains all things from <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
 </section>
 <section id="environment-variables">
-<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Permalink to this heading">#</a></h2>
+<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading">#</a></h2>
 <dl class="std envvar">
 <dt class="sig sig-object std" id="envvar-PCAPKIT_DEVMODE">
-<span class="sig-name descname"><span class="pre">PCAPKIT_DEVMODE</span></span><a class="headerlink" href="#envvar-PCAPKIT_DEVMODE" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">PCAPKIT_DEVMODE</span></span><a class="headerlink" href="#envvar-PCAPKIT_DEVMODE" title="Link to this definition">#</a></dt>
 <dd><p>If set to <code class="docutils literal notranslate"><span class="pre">1</span></code>, <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> will run in development mode.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -521,7 +521,7 @@ contains all things from <a class="reference internal" href="#module-pcapkit" ti
 
 <dl class="std envvar">
 <dt class="sig sig-object std" id="envvar-PCAPKIT_VERBOSE">
-<span class="sig-name descname"><span class="pre">PCAPKIT_VERBOSE</span></span><a class="headerlink" href="#envvar-PCAPKIT_VERBOSE" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">PCAPKIT_VERBOSE</span></span><a class="headerlink" href="#envvar-PCAPKIT_VERBOSE" title="Link to this definition">#</a></dt>
 <dd><p>If set to <code class="docutils literal notranslate"><span class="pre">1</span></code>, <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> will run with verbose output.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -531,19 +531,19 @@ contains all things from <a class="reference internal" href="#module-pcapkit" ti
 
 <dl class="std envvar">
 <dt class="sig sig-object std" id="envvar-PCAPKIT_HTTP_PROXY">
-<span class="sig-name descname"><span class="pre">PCAPKIT_HTTP_PROXY</span></span><a class="headerlink" href="#envvar-PCAPKIT_HTTP_PROXY" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">PCAPKIT_HTTP_PROXY</span></span><a class="headerlink" href="#envvar-PCAPKIT_HTTP_PROXY" title="Link to this definition">#</a></dt>
 <dd><p>HTTP proxy address for <a class="reference internal" href="vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawlers.</p>
 </dd></dl>
 
 <dl class="std envvar">
 <dt class="sig sig-object std" id="envvar-PCAPKIT_HTTPS_PROXY">
-<span class="sig-name descname"><span class="pre">PCAPKIT_HTTPS_PROXY</span></span><a class="headerlink" href="#envvar-PCAPKIT_HTTPS_PROXY" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">PCAPKIT_HTTPS_PROXY</span></span><a class="headerlink" href="#envvar-PCAPKIT_HTTPS_PROXY" title="Link to this definition">#</a></dt>
 <dd><p>HTTPS proxy address for <a class="reference internal" href="vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawlers.</p>
 </dd></dl>
 
 <dl class="std envvar">
 <dt class="sig sig-object std" id="envvar-PCAPKIT_SPHINX">
-<span class="sig-name descname"><span class="pre">PCAPKIT_SPHINX</span></span><a class="headerlink" href="#envvar-PCAPKIT_SPHINX" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">PCAPKIT_SPHINX</span></span><a class="headerlink" href="#envvar-PCAPKIT_SPHINX" title="Link to this definition">#</a></dt>
 <dd><p>If set to <code class="docutils literal notranslate"><span class="pre">1</span></code>, <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> will run with Sphinx additional
 typing hints and docstrings support.</p>
 <div class="admonition seealso">
@@ -611,8 +611,8 @@ typing hints and docstrings support.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Module Documentation</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.__main__">Command Line Tool</a></li>
-<li><a class="reference internal" href="#module-pcapkit.all">Library Index</a></li>
+<li><a class="reference internal" href="#command-line-tool">Command Line Tool</a></li>
+<li><a class="reference internal" href="#library-index">Library Index</a></li>
 <li><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
 </ul>
 </li>
@@ -625,9 +625,9 @@ typing hints and docstrings support.</p>
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>

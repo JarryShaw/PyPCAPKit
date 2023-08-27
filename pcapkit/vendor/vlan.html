@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="HIP Vendor Crawler" href="hip.html" /><link rel="prev" title="OSPF Vendor Crawlers" href="ospf.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>VLAN Vendor Crawlers - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -362,9 +362,9 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-pcapkit.vendor.vlan">
-<span id="vlan-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.vlan" title="Permalink to this heading">#</a></h1>
-<p>This module contains all vendor crawlers of
+          <section id="vlan-vendor-crawlers">
+<h1><a class="reference internal" href="../protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> Vendor Crawlers<a class="headerlink" href="#vlan-vendor-crawlers" title="Link to this heading">#</a></h1>
+<p id="module-pcapkit.vendor.vlan">This module contains all vendor crawlers of
 <a class="reference internal" href="../protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> implementations. Available
 vendor crawlers include:</p>
 <div class="table-wrapper docutils container">
@@ -376,13 +376,13 @@ vendor crawlers include:</p>
 </tbody>
 </table>
 </div>
-<section id="module-pcapkit.vendor.vlan.priority_level">
-<span id="priority-levels-defined-in-ieee-802-1p"></span><h2>Priority levels defined in IEEE 802.1p<a class="headerlink" href="#module-pcapkit.vendor.vlan.priority_level" title="Permalink to this heading">#</a></h2>
-<p>This module contains the vendor crawler for <strong>Priority levels defined in IEEE 802.1p</strong>,
+<section id="priority-levels-defined-in-ieee-802-1p">
+<h2>Priority levels defined in IEEE 802.1p<a class="headerlink" href="#priority-levels-defined-in-ieee-802-1p" title="Link to this heading">#</a></h2>
+<p id="module-pcapkit.vendor.vlan.priority_level">This module contains the vendor crawler for <strong>Priority levels defined in IEEE 802.1p</strong>,
 which is automatically generating <a class="reference internal" href="../const/vlan.html#pcapkit.const.vlan.priority_level.PriorityLevel" title="pcapkit.const.vlan.priority_level.PriorityLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.vlan.priority_level.PriorityLevel</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.vlan.priority_level.PriorityLevel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.vlan.priority_level.</span></span><span class="sig-name descname"><span class="pre">PriorityLevel</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.vlan.priority_level.</span></span><span class="sig-name descname"><span class="pre">PriorityLevel</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Priority levels defined in IEEE 802.1p</p>
 <dl class="field-list simple">
@@ -392,13 +392,13 @@ which is automatically generating <a class="reference internal" href="../const/v
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.vlan.priority_level.PriorityLevel.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0b000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0b111'</span></em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.FLAG" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0b000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0b111'</span></em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.FLAG" title="Link to this definition">#</a></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels'</span></em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels'</span></em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK" title="Link to this definition">#</a></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
@@ -469,7 +469,7 @@ which is automatically generating <a class="reference internal" href="../const/v
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.vendor.vlan.priority_level">Priority levels defined in IEEE 802.1p</a></li>
+<li><a class="reference internal" href="#priority-levels-defined-in-ieee-802-1p">Priority levels defined in IEEE 802.1p</a></li>
 </ul>
 </li>
 </ul>
@@ -481,9 +481,9 @@ which is automatically generating <a class="reference internal" href="../const/v
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>

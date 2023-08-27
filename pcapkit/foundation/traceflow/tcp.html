@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="Registry Management" href="../registry.html" /><link rel="prev" title="Base Class" href="traceflow.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>Trace TCP Flows - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
@@ -362,13 +362,13 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-pcapkit.foundation.traceflow.tcp">
-<span id="trace-tcp-flows"></span><h1>Trace TCP Flows<a class="headerlink" href="#module-pcapkit.foundation.traceflow.tcp" title="Permalink to this heading">#</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.foundation.traceflow.tcp" title="pcapkit.foundation.traceflow.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.tcp</span></code></a> is the interface to trace
+          <section id="trace-tcp-flows">
+<h1>Trace TCP Flows<a class="headerlink" href="#trace-tcp-flows" title="Link to this heading">#</a></h1>
+<p id="module-pcapkit.foundation.traceflow.tcp"><a class="reference internal" href="#module-pcapkit.foundation.traceflow.tcp" title="pcapkit.foundation.traceflow.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.tcp</span></code></a> is the interface to trace
 TCP flows from a series of packets and connections.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.TraceFlow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.</span></span><span class="sig-name descname"><span class="pre">TraceFlow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'little'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.</span></span><span class="sig-name descname"><span class="pre">TraceFlow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'little'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">BufferID</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Buffer</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Index</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Packet</span></code>]</p>
 <p>Base flow tracing class.</p>
 <dl class="field-list simple">
@@ -388,19 +388,19 @@ TCP flows from a series of packets and connections.</p>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.TraceFlow.name">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.name" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.name" title="Link to this definition">#</a></dt>
 <dd><p>Protocol name of current reassembly object.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.TraceFlow.protocol">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">Protocol</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.protocol" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">Protocol</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.protocol" title="Link to this definition">#</a></dt>
 <dd><p>Protocol of current reassembly object.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.TraceFlow.dump">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.dump" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.dump" title="Link to this definition">#</a></dt>
 <dd><p>Dump frame to output files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -414,7 +414,7 @@ TCP flows from a series of packets and connections.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.TraceFlow.trace">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow.trace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.trace" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow.trace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.trace" title="Link to this definition">#</a></dt>
 <dd><p>Trace packets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -437,7 +437,7 @@ flow label itself.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.TraceFlow.submit">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.submit" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlow.submit" title="Link to this definition">#</a></dt>
 <dd><p>Submit traced TCP flows.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -452,9 +452,9 @@ flow label itself.</p>
 </dd></dl>
 
 <section id="terminology">
-<h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this heading">#</a></h2>
+<h2>Terminology<a class="headerlink" href="#terminology" title="Link to this heading">#</a></h2>
 <dl class="glossary">
-<dt id="term-trace.tcp.packet">trace.tcp.packet<a class="headerlink" href="#term-trace.tcp.packet" title="Permalink to this term">#</a></dt><dd><p>Data structure for <strong>TCP flow tracing</strong>
+<dt id="term-trace.tcp.packet">trace.tcp.packet<a class="headerlink" href="#term-trace.tcp.packet" title="Link to this term">#</a></dt><dd><p>Data structure for <strong>TCP flow tracing</strong>
 (<a class="reference internal" href="#pcapkit.foundation.traceflow.TraceFlow.dump" title="pcapkit.foundation.traceflow.TraceFlow.dump"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow.dump</span></code></a>)
 is as following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tract_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -476,7 +476,7 @@ is as following:</p>
 <p><a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.data.tcp.Packet</span></code></a></p>
 </div>
 </dd>
-<dt id="term-trace.tcp.buffer">trace.tcp.buffer<a class="headerlink" href="#term-trace.tcp.buffer" title="Permalink to this term">#</a></dt><dd><p>Data structure for internal buffering when performing flow tracing algorithms
+<dt id="term-trace.tcp.buffer">trace.tcp.buffer<a class="headerlink" href="#term-trace.tcp.buffer" title="Link to this term">#</a></dt><dd><p>Data structure for internal buffering when performing flow tracing algorithms
 (<code class="xref py py-attr docutils literal notranslate"><span class="pre">TraceFlow._buffer</span></code>)
 is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(dict) buffer --&gt; memory buffer for reassembly
@@ -497,7 +497,7 @@ is as following:</p>
 <p><a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Buffer" title="pcapkit.foundation.traceflow.data.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.data.tcp.Buffer</span></code></a></p>
 </div>
 </dd>
-<dt id="term-trace.tcp.index">trace.tcp.index<a class="headerlink" href="#term-trace.tcp.index" title="Permalink to this term">#</a></dt><dd><p>Data structure for <strong>TCP flow tracing</strong> (element from
+<dt id="term-trace.tcp.index">trace.tcp.index<a class="headerlink" href="#term-trace.tcp.index" title="Link to this term">#</a></dt><dd><p>Data structure for <strong>TCP flow tracing</strong> (element from
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">TraceFlow.index</span></code>
 <em>tuple</em>) is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) index
@@ -516,11 +516,11 @@ is as following:</p>
 </dd>
 </dl>
 </section>
-<section id="module-pcapkit.foundation.traceflow.data.tcp">
-<span id="data-structures"></span><h2>Data Structures<a class="headerlink" href="#module-pcapkit.foundation.traceflow.data.tcp" title="Permalink to this heading">#</a></h2>
-<dl class="py class">
+<section id="data-structures">
+<h2>Data Structures<a class="headerlink" href="#data-structures" title="Link to this heading">#</a></h2>
+<dl class="py class" id="module-pcapkit.foundation.traceflow.data.tcp">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/tcp.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/tcp.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>]</p>
 <p>Data structure for <strong>TCP flow tracing</strong>.</p>
 <div class="admonition seealso">
@@ -540,61 +540,61 @@ is as following:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.protocol">
-<span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_LinkType</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.protocol" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_LinkType</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.protocol" title="Link to this definition">#</a></dt>
 <dd><p>Data link type from global header.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.index">
-<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.index" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.index" title="Link to this definition">#</a></dt>
 <dd><p>Frame number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.frame">
-<span class="sig-name descname"><span class="pre">frame</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Data_Frame</span> <span class="pre">|</span> <span class="pre">dict[str,</span> <span class="pre">Any]</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.frame" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">frame</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Data_Frame</span> <span class="pre">|</span> <span class="pre">dict[str,</span> <span class="pre">Any]</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.frame" title="Link to this definition">#</a></dt>
 <dd><p>Extracted frame info.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.syn">
-<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.syn" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.syn" title="Link to this definition">#</a></dt>
 <dd><p>TCP synchronise (SYN) flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.fin">
-<span class="sig-name descname"><span class="pre">fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.fin" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.fin" title="Link to this definition">#</a></dt>
 <dd><p>TCP finish (FIN) flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.src">
-<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPAddress</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.src" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPAddress</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.src" title="Link to this definition">#</a></dt>
 <dd><p>Source IP.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.dst">
-<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPAddress</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.dst" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPAddress</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.dst" title="Link to this definition">#</a></dt>
 <dd><p>Destination IP.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.srcport">
-<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.srcport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.srcport" title="Link to this definition">#</a></dt>
 <dd><p>TCP source port.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.dstport">
-<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.dstport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.dstport" title="Link to this definition">#</a></dt>
 <dd><p>TCP destination port.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.timestamp">
-<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.timestamp" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.timestamp" title="Link to this definition">#</a></dt>
 <dd><p>Frame timestamp.</p>
 </dd></dl>
 
@@ -602,14 +602,14 @@ is as following:</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.BufferID">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.tcp.</span></span><span class="sig-name descname"><span class="pre">BufferID</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.BufferID" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.tcp.</span></span><span class="sig-name descname"><span class="pre">BufferID</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.BufferID" title="Link to this definition">#</a></dt>
 <dd><p>Buffer ID.</p>
 <p>alias of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Buffer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/tcp.html#Buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/tcp.html#Buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>Data structure for <strong>TCP flow tracing</strong>.</p>
 <div class="admonition seealso">
@@ -629,19 +629,19 @@ is as following:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Buffer.fpout">
-<span class="sig-name descname"><span class="pre">fpout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dumper</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.fpout" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">fpout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dumper</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.fpout" title="Link to this definition">#</a></dt>
 <dd><p>Output dumper object.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Buffer.index">
-<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[int]</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.index" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[int]</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.index" title="Link to this definition">#</a></dt>
 <dd><p>List of frame index.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Buffer.label">
-<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.label" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.label" title="Link to this definition">#</a></dt>
 <dd><p>Flow label generated from <code class="docutils literal notranslate"><span class="pre">BUFID</span></code>.</p>
 </dd></dl>
 
@@ -649,7 +649,7 @@ is as following:</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Index">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/tcp.html#Index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/tcp.html#Index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>Data structure for <strong>TCP flow tracing</strong>.</p>
 <div class="admonition seealso">
@@ -670,19 +670,19 @@ is as following:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Index.fpout">
-<span class="sig-name descname"><span class="pre">fpout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index.fpout" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">fpout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index.fpout" title="Link to this definition">#</a></dt>
 <dd><p>Output filename if exists.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Index.index">
-<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple[int,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index.index" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple[int,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index.index" title="Link to this definition">#</a></dt>
 <dd><p>Tuple of frame index.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Index.label">
-<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index.label" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index.label" title="Link to this definition">#</a></dt>
 <dd><p>Flow label generated from <code class="docutils literal notranslate"><span class="pre">BUFID</span></code>.</p>
 </dd></dl>
 
@@ -748,7 +748,7 @@ is as following:</p>
             <ul>
 <li><a class="reference internal" href="#">Trace TCP Flows</a><ul>
 <li><a class="reference internal" href="#terminology">Terminology</a></li>
-<li><a class="reference internal" href="#module-pcapkit.foundation.traceflow.data.tcp">Data Structures</a></li>
+<li><a class="reference internal" href="#data-structures">Data Structures</a></li>
 </ul>
 </li>
 </ul>
@@ -760,9 +760,9 @@ is as following:</p>
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../../../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=f281be69"></script>

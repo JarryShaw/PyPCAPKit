@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Dump Utilities" href="../dumpkit/index.html" /><link rel="prev" title="Built-in Support" href="builtin.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>3rd-Party Support - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -363,10 +363,10 @@
         </div>
         <article role="main">
           <section id="rd-party-support">
-<h1>3rd-Party Support<a class="headerlink" href="#rd-party-support" title="Permalink to this heading">#</a></h1>
-<section id="module-pcapkit.toolkit.scapy">
-<span id="scapy-tools"></span><h2>Scapy Tools<a class="headerlink" href="#module-pcapkit.toolkit.scapy" title="Permalink to this heading">#</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.toolkit.scapy" title="pcapkit.toolkit.scapy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.scapy</span></code></a> contains all you need for
+<h1>3rd-Party Support<a class="headerlink" href="#rd-party-support" title="Link to this heading">#</a></h1>
+<section id="scapy-tools">
+<h2>Scapy Tools<a class="headerlink" href="#scapy-tools" title="Link to this heading">#</a></h2>
+<p id="module-pcapkit.toolkit.scapy"><a class="reference internal" href="#module-pcapkit.toolkit.scapy" title="pcapkit.toolkit.scapy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.scapy</span></code></a> contains all you need for
 <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> handy usage with <a class="reference external" href="https://scapy.net">Scapy</a> engine. All reforming
 functions returns with a flag to indicate if usable for
 its caller.</p>
@@ -376,7 +376,7 @@ its caller.</p>
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.scapy.ipv4_reassembly">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.ipv4_reassembly" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.ipv4_reassembly" title="Link to this definition">#</a></dt>
 <dd><p>Make data for IPv4 reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -408,7 +408,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.scapy.ipv6_reassembly">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">ipv6_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#ipv6_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.ipv6_reassembly" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">ipv6_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#ipv6_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.ipv6_reassembly" title="Link to this definition">#</a></dt>
 <dd><p>Make data for IPv6 reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -443,7 +443,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.scapy.tcp_reassembly">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">tcp_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#tcp_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.tcp_reassembly" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">tcp_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#tcp_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.tcp_reassembly" title="Link to this definition">#</a></dt>
 <dd><p>Store data for TCP reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -474,7 +474,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.htm
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.scapy.tcp_traceflow">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.tcp_traceflow" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.tcp_traceflow" title="Link to this definition">#</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -504,10 +504,10 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 </dd></dl>
 
 <section id="auxiliary-functions">
-<h3>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Permalink to this heading">#</a></h3>
+<h3>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.scapy.packet2chain">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">packet2chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#packet2chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.packet2chain" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">packet2chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#packet2chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.packet2chain" title="Link to this definition">#</a></dt>
 <dd><p>Fetch Scapy packet protocol chain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -527,7 +527,7 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.scapy.packet2dict">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.packet2dict" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.packet2dict" title="Link to this definition">#</a></dt>
 <dd><p>Convert Scapy packet into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -547,15 +547,15 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 
 </section>
 </section>
-<section id="module-pcapkit.toolkit.dpkt">
-<span id="dpkt-tools"></span><h2>DPKT Tools<a class="headerlink" href="#module-pcapkit.toolkit.dpkt" title="Permalink to this heading">#</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.toolkit.dpkt" title="pcapkit.toolkit.dpkt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.dpkt</span></code></a> contains all you need for
+<section id="dpkt-tools">
+<h2>DPKT Tools<a class="headerlink" href="#dpkt-tools" title="Link to this heading">#</a></h2>
+<p id="module-pcapkit.toolkit.dpkt"><a class="reference internal" href="#module-pcapkit.toolkit.dpkt" title="pcapkit.toolkit.dpkt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.dpkt</span></code></a> contains all you need for
 <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> handy usage with <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> engine. All reforming
 functions returns with a flag to indicate if usable for
 its caller.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.ipv4_reassembly">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.ipv4_reassembly" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.ipv4_reassembly" title="Link to this definition">#</a></dt>
 <dd><p>Make data for IPv4 reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -587,7 +587,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.ipv6_reassembly">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">ipv6_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#ipv6_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.ipv6_reassembly" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">ipv6_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#ipv6_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.ipv6_reassembly" title="Link to this definition">#</a></dt>
 <dd><p>Make data for IPv6 reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -619,7 +619,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.tcp_reassembly">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">tcp_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#tcp_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.tcp_reassembly" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">tcp_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#tcp_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.tcp_reassembly" title="Link to this definition">#</a></dt>
 <dd><p>Make data for TCP reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -650,7 +650,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.htm
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.tcp_traceflow">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.tcp_traceflow" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.tcp_traceflow" title="Link to this definition">#</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -682,10 +682,10 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 </dd></dl>
 
 <section id="id1">
-<h3>Auxiliary Functions<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h3>
+<h3>Auxiliary Functions<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.ipv6_hdr_len">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">ipv6_hdr_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#ipv6_hdr_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.ipv6_hdr_len" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">ipv6_hdr_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#ipv6_hdr_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.ipv6_hdr_len" title="Link to this definition">#</a></dt>
 <dd><p>Calculate length of headers before IPv6 Fragment header.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -707,7 +707,7 @@ Routing header <a class="reference external" href="https://dpkt.readthedocs.io/e
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.packet2chain">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">packet2chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#packet2chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.packet2chain" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">packet2chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#packet2chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.packet2chain" title="Link to this definition">#</a></dt>
 <dd><p>Fetch DPKT packet protocol chain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -724,7 +724,7 @@ Routing header <a class="reference external" href="https://dpkt.readthedocs.io/e
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.packet2dict">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.packet2dict" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.packet2dict" title="Link to this definition">#</a></dt>
 <dd><p>Convert DPKT packet into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -745,9 +745,9 @@ Routing header <a class="reference external" href="https://dpkt.readthedocs.io/e
 
 </section>
 </section>
-<section id="module-pcapkit.toolkit.pyshark">
-<span id="pyshark-tools"></span><h2>PyShark Tools<a class="headerlink" href="#module-pcapkit.toolkit.pyshark" title="Permalink to this heading">#</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.toolkit.pyshark" title="pcapkit.toolkit.pyshark"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pyshark</span></code></a> contains all you need for
+<section id="pyshark-tools">
+<h2>PyShark Tools<a class="headerlink" href="#pyshark-tools" title="Link to this heading">#</a></h2>
+<p id="module-pcapkit.toolkit.pyshark"><a class="reference internal" href="#module-pcapkit.toolkit.pyshark" title="pcapkit.toolkit.pyshark"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pyshark</span></code></a> contains all you need for
 <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> handy usage with <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> engine. All
 reforming functions returns with a flag to indicate if
 usable for its caller.</p>
@@ -759,7 +759,7 @@ the <a class="reference external" href="https://kiminewt.github.io/pyshark">PySh
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.tcp_traceflow">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="Link to this definition">#</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -786,10 +786,10 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 </dd></dl>
 
 <section id="id2">
-<h3>Auxiliary Functions<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
+<h3>Auxiliary Functions<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.packet2dict">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.packet2dict" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.packet2dict" title="Link to this definition">#</a></dt>
 <dd><p>Convert PyShark packet into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -864,15 +864,15 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">3rd-Party Support</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.toolkit.scapy">Scapy Tools</a><ul>
+<li><a class="reference internal" href="#scapy-tools">Scapy Tools</a><ul>
 <li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-pcapkit.toolkit.dpkt">DPKT Tools</a><ul>
+<li><a class="reference internal" href="#dpkt-tools">DPKT Tools</a><ul>
 <li><a class="reference internal" href="#id1">Auxiliary Functions</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-pcapkit.toolkit.pyshark">PyShark Tools</a><ul>
+<li><a class="reference internal" href="#pyshark-tools">PyShark Tools</a><ul>
 <li><a class="reference internal" href="#id2">Auxiliary Functions</a></li>
 </ul>
 </li>
@@ -887,9 +887,9 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>

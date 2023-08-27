@@ -1,10 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../../../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html" /><link rel="search" title="Search" href="../../../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>pcapkit.protocols.data.misc.pcapng - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=135e06be" />
@@ -403,7 +403,9 @@
                                                <span class="n">WireGuardKeyLabel</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="PCAPNG"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PCAPNG">[docs]</a><span class="k">class</span> <span class="nc">PCAPNG</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="PCAPNG">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PCAPNG">[docs]</a>
+<span class="k">class</span> <span class="nc">PCAPNG</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file blocks.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Block type.</span>
@@ -412,7 +414,10 @@
     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
 
 
-<div class="viewcode-block" id="UnknownBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.UnknownBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="UnknownBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.UnknownBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">UnknownBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for unknown PCAP-NG file blocks.&quot;&quot;&quot;</span>
 
@@ -423,7 +428,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Option">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.Option">[docs]</a>
+<span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option type.</span>
@@ -432,7 +440,10 @@
     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
 
 
-<div class="viewcode-block" id="UnknownOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.UnknownOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="UnknownOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.UnknownOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">UnknownOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for unknown PCAP-NG file options.&quot;&quot;&quot;</span>
 
@@ -443,7 +454,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EndOfOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EndOfOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="EndOfOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EndOfOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">EndOfOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``opt_endofopt`` options.&quot;&quot;&quot;</span>
 
@@ -451,7 +465,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="CommentOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.CommentOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="CommentOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.CommentOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">CommentOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``opt_comment`` options.&quot;&quot;&quot;</span>
 
@@ -462,7 +479,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="CustomOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.CustomOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="CustomOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.CustomOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">CustomOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``opt_custom`` options.&quot;&quot;&quot;</span>
 
@@ -475,7 +495,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SectionHeaderBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SectionHeaderBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="SectionHeaderBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SectionHeaderBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">SectionHeaderBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG Section Header Block (SHB).&quot;&quot;&quot;</span>
 
@@ -493,7 +516,10 @@
                      <span class="n">section_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_NameOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_NameOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_NameOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_NameOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_NameOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_name`` options.&quot;&quot;&quot;</span>
 
@@ -504,7 +530,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_DescriptionOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_DescriptionOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_DescriptionOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_DescriptionOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_DescriptionOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_description`` options.&quot;&quot;&quot;</span>
 
@@ -512,7 +541,10 @@
     <span class="n">description</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span></div>
 
 
-<div class="viewcode-block" id="IF_IPv4AddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_IPv4AddrOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_IPv4AddrOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_IPv4AddrOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_IPv4AddrOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_IPv4addr`` options.&quot;&quot;&quot;</span>
 
@@ -523,7 +555,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">interface</span><span class="p">:</span> <span class="s1">&#39;IPv4Interface&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_IPv6AddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_IPv6AddrOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_IPv6AddrOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_IPv6AddrOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_IPv6AddrOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_IPv6addr`` options.&quot;&quot;&quot;</span>
 
@@ -534,7 +569,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">interface</span><span class="p">:</span> <span class="s1">&#39;IPv6Interface&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_MACAddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_MACAddrOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_MACAddrOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_MACAddrOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_MACAddrOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_MACaddr`` options.&quot;&quot;&quot;</span>
 
@@ -545,7 +583,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">interface</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_EUIAddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_EUIAddrOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_EUIAddrOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_EUIAddrOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_EUIAddrOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_EUIaddr`` options.&quot;&quot;&quot;</span>
 
@@ -556,7 +597,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">interface</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_SpeedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_SpeedOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_SpeedOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_SpeedOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_SpeedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_speed`` options.&quot;&quot;&quot;</span>
 
@@ -567,7 +611,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">speed</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_TSResolOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_TSResolOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_TSResolOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_TSResolOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_TSResolOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_tsresol`` options.&quot;&quot;&quot;</span>
 
@@ -578,7 +625,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_TZoneOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_TZoneOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_TZoneOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_TZoneOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_TZoneOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_tzone`` options.&quot;&quot;&quot;</span>
 
@@ -589,7 +639,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timezone</span><span class="p">:</span> <span class="s1">&#39;dt_timezone&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_FilterOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_FilterOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_FilterOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_FilterOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_FilterOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_filter`` options.&quot;&quot;&quot;</span>
 
@@ -602,7 +655,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_FilterType&#39;</span><span class="p">,</span> <span class="n">expression</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_OSOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_OSOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_OSOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_OSOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_OSOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_os`` options.&quot;&quot;&quot;</span>
 
@@ -613,7 +669,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">os</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_FCSLenOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_FCSLenOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_FCSLenOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_FCSLenOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_FCSLenOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_fcslen`` options.&quot;&quot;&quot;</span>
 
@@ -624,7 +683,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">fcs_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_TSOffsetOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_TSOffsetOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_TSOffsetOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_TSOffsetOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_TSOffsetOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_tsoffset`` options.&quot;&quot;&quot;</span>
 
@@ -635,7 +697,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_HardwareOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_HardwareOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_HardwareOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_HardwareOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_HardwareOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_hardware`` options.&quot;&quot;&quot;</span>
 
@@ -646,7 +711,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hardware</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_TxSpeedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_TxSpeedOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_TxSpeedOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_TxSpeedOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_TxSpeedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_txspeed`` options.&quot;&quot;&quot;</span>
 
@@ -657,7 +725,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">speed</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IF_RxSpeedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_RxSpeedOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IF_RxSpeedOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_RxSpeedOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IF_RxSpeedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``if_rxspeed`` options.&quot;&quot;&quot;</span>
 
@@ -668,7 +739,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">speed</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="InterfaceDescriptionBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="InterfaceDescriptionBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">InterfaceDescriptionBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG Interface Description Block (IDB).&quot;&quot;&quot;</span>
 
@@ -684,7 +758,10 @@
                      <span class="n">snaplen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EPB_FlagsOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_FlagsOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="EPB_FlagsOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_FlagsOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">EPB_FlagsOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``epb_flags`` options.&quot;&quot;&quot;</span>
 
@@ -718,7 +795,10 @@
                      <span class="n">delimiter_error</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">preamble_error</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">symbol_error</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EPB_HashOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_HashOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="EPB_HashOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_HashOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">EPB_HashOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``epb_hash`` options.&quot;&quot;&quot;</span>
 
@@ -731,7 +811,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_HashAlgorithm&#39;</span><span class="p">,</span> <span class="nb">hash</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EPB_DropCountOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_DropCountOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="EPB_DropCountOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_DropCountOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">EPB_DropCountOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``epb_dropcount`` options.&quot;&quot;&quot;</span>
 
@@ -742,7 +825,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">drop_count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EPB_PacketIDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_PacketIDOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="EPB_PacketIDOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_PacketIDOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">EPB_PacketIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``epb_packetid`` options.&quot;&quot;&quot;</span>
 
@@ -753,7 +839,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EPB_QueueOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_QueueOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="EPB_QueueOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_QueueOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">EPB_QueueOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``epb_queue`` options.&quot;&quot;&quot;</span>
 
@@ -764,7 +853,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">queue_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EPB_VerdictOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_VerdictOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="EPB_VerdictOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_VerdictOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">EPB_VerdictOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``epb_verdict`` options.&quot;&quot;&quot;</span>
 
@@ -777,7 +869,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">verdict</span><span class="p">:</span> <span class="s1">&#39;Enum_VerdictType&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EnhancedPacketBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="EnhancedPacketBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">EnhancedPacketBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG Enhanced Packet Block (EPB).&quot;&quot;&quot;</span>
 
@@ -809,7 +904,10 @@
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SimplePacketBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SimplePacketBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="SimplePacketBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SimplePacketBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">SimplePacketBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG Simple Packet Block (SPB).&quot;&quot;&quot;</span>
 
@@ -823,7 +921,9 @@
     <span class="c1">#: Captured packet length.</span>
     <span class="n">captured_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
 
-<div class="viewcode-block" id="SimplePacketBlock.__post_init__"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SimplePacketBlock.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="SimplePacketBlock.__post_init__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SimplePacketBlock.__post_init__">[docs]</a>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post-initialization handling.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
@@ -831,6 +931,7 @@
                 <span class="n">timestamp</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">),</span>
                 <span class="n">timestamp_epoch</span><span class="o">=</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
             <span class="p">)</span></div>
+
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Protocol chain.</span>
@@ -847,7 +948,10 @@
                      <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">original_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">captured_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="NameResolutionRecord"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord">[docs]</a><span class="k">class</span> <span class="nc">NameResolutionRecord</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NameResolutionRecord">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord">[docs]</a>
+<span class="k">class</span> <span class="nc">NameResolutionRecord</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG NRB records.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Record type.</span>
@@ -856,7 +960,10 @@
     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
 
 
-<div class="viewcode-block" id="UnknownRecord"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.UnknownRecord">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="UnknownRecord">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.UnknownRecord">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">UnknownRecord</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG NRB unknown records.&quot;&quot;&quot;</span>
 
@@ -867,7 +974,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_RecordType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EndRecord"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EndRecord">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="EndRecord">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EndRecord">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">EndRecord</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``nrb_record_end`` records.&quot;&quot;&quot;</span>
 
@@ -875,7 +985,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_RecordType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IPv4Record"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IPv4Record">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IPv4Record">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IPv4Record">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IPv4Record</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``nrb_record_ipv4`` records.&quot;&quot;&quot;</span>
 
@@ -889,7 +1002,10 @@
                      <span class="n">records</span><span class="p">:</span> <span class="s1">&#39;tuple[str, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IPv6Record"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IPv6Record">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="IPv6Record">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IPv6Record">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">IPv6Record</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``nrb_record_ipv6`` records.&quot;&quot;&quot;</span>
 
@@ -903,7 +1019,10 @@
                      <span class="n">records</span><span class="p">:</span> <span class="s1">&#39;tuple[str, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="NS_DNSNameOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NS_DNSNameOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="NS_DNSNameOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NS_DNSNameOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">NS_DNSNameOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``ns_dnsname`` option.&quot;&quot;&quot;</span>
 
@@ -914,7 +1033,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="NS_DNSIP4AddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NS_DNSIP4AddrOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="NS_DNSIP4AddrOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NS_DNSIP4AddrOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">NS_DNSIP4AddrOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``ns_dnsip4addr`` option.&quot;&quot;&quot;</span>
 
@@ -925,7 +1047,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="NS_DNSIP6AddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NS_DNSIP6AddrOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="NS_DNSIP6AddrOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NS_DNSIP6AddrOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">NS_DNSIP6AddrOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``ns_dnsip6addr`` option.&quot;&quot;&quot;</span>
 
@@ -936,7 +1061,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="NameResolutionBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NameResolutionBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="NameResolutionBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NameResolutionBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">NameResolutionBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG Name Resolution Block (NRB).&quot;&quot;&quot;</span>
 
@@ -945,7 +1073,9 @@
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span>
 
-<div class="viewcode-block" id="NameResolutionBlock.__post_init__"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NameResolutionBlock.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="NameResolutionBlock.__post_init__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NameResolutionBlock.__post_init__">[docs]</a>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post-initialization handling.&quot;&quot;&quot;</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="p">()</span>  <span class="c1"># type: MultiDict[IPv4Address | IPv6Address, str]</span>
         <span class="n">reverse_mapping</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="p">()</span>  <span class="c1"># type: MultiDict[str, IPv4Address | IPv6Address]</span>
@@ -961,6 +1091,7 @@
             <span class="n">reverse_mapping</span><span class="o">=</span><span class="n">reverse_mapping</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Name resolution mapping (IP address -&gt; name).</span>
         <span class="n">mapping</span><span class="p">:</span> <span class="s1">&#39;MultiDict[IPv4Address | IPv6Address, str]&#39;</span>
@@ -971,7 +1102,10 @@
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ISB_StartTimeOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_StartTimeOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="ISB_StartTimeOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_StartTimeOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">ISB_StartTimeOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``isb_starttime`` option.&quot;&quot;&quot;</span>
 
@@ -985,7 +1119,10 @@
                      <span class="n">timestamp_epoch</span><span class="p">:</span> <span class="s1">&#39;Decimal&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ISB_EndTimeOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_EndTimeOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="ISB_EndTimeOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_EndTimeOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">ISB_EndTimeOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``isb_endtime`` option.&quot;&quot;&quot;</span>
 
@@ -999,7 +1136,10 @@
                      <span class="n">timestamp_epoch</span><span class="p">:</span> <span class="s1">&#39;Decimal&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ISB_IFRecvOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_IFRecvOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="ISB_IFRecvOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_IFRecvOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">ISB_IFRecvOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``isb_ifrecv`` option.&quot;&quot;&quot;</span>
 
@@ -1010,7 +1150,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ISB_IFDropOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_IFDropOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="ISB_IFDropOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_IFDropOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">ISB_IFDropOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``isb_ifdrop`` option.&quot;&quot;&quot;</span>
 
@@ -1021,7 +1164,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ISB_FilterAcceptOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_FilterAcceptOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="ISB_FilterAcceptOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_FilterAcceptOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">ISB_FilterAcceptOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``isb_filteraccept`` option.&quot;&quot;&quot;</span>
 
@@ -1032,7 +1178,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ISB_OSDropOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_OSDropOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="ISB_OSDropOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_OSDropOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">ISB_OSDropOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``isb_osdrop`` option.&quot;&quot;&quot;</span>
 
@@ -1043,7 +1192,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ISB_UsrDelivOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_UsrDelivOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="ISB_UsrDelivOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ISB_UsrDelivOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">ISB_UsrDelivOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``isb_usrdeliv`` option.&quot;&quot;&quot;</span>
 
@@ -1054,7 +1206,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="InterfaceStatisticsBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.InterfaceStatisticsBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="InterfaceStatisticsBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.InterfaceStatisticsBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">InterfaceStatisticsBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG Interface Statistics Block (ISB).&quot;&quot;&quot;</span>
 
@@ -1072,7 +1227,10 @@
                      <span class="n">timestamp_epoch</span><span class="p">:</span> <span class="s1">&#39;Decimal&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SystemdJournalExportBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SystemdJournalExportBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="SystemdJournalExportBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SystemdJournalExportBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">SystemdJournalExportBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG :manpage:`systemd(1)` Journal Export Block.&quot;&quot;&quot;</span>
 
@@ -1083,11 +1241,17 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;tuple[OrderedMultiDict[str, str | bytes], ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="DSBSecrets"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.DSBSecrets">[docs]</a><span class="k">class</span> <span class="nc">DSBSecrets</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DSBSecrets">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.DSBSecrets">[docs]</a>
+<span class="k">class</span> <span class="nc">DSBSecrets</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for DSB secrets data.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="UnknownSecrets"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.UnknownSecrets">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="UnknownSecrets">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.UnknownSecrets">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">UnknownSecrets</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for unknown DSB secrets.&quot;&quot;&quot;</span>
 
@@ -1098,7 +1262,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="TLSKeyLog"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.TLSKeyLog">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="TLSKeyLog">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.TLSKeyLog">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">TLSKeyLog</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TLS key log DSB secrets.&quot;&quot;&quot;</span>
 
@@ -1109,7 +1276,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="s1">&#39;dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="WireGuardKeyLog"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="WireGuardKeyLog">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">WireGuardKeyLog</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for WireGuard key DSB secrets.&quot;&quot;&quot;</span>
 
@@ -1120,7 +1290,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[WireGuardKeyLabel, bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ZigBeeNWKKey"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="ZigBeeNWKKey">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">ZigBeeNWKKey</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for ZigBEE NWK Key and ZigBee PANID secrets data.&quot;&quot;&quot;</span>
 
@@ -1133,7 +1306,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nwk_key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">pan_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ZigBeeAPSKey"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="ZigBeeAPSKey">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">ZigBeeAPSKey</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for ZigBEE APS Key secrets data.&quot;&quot;&quot;</span>
 
@@ -1148,7 +1324,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aps_key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">pan_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">short_address</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="DecryptionSecretsBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="DecryptionSecretsBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">DecryptionSecretsBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG Decryption Secrets Block (DSB).&quot;&quot;&quot;</span>
 
@@ -1167,7 +1346,10 @@
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="CustomBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.CustomBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="CustomBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.CustomBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">CustomBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG Custom Block (CB).&quot;&quot;&quot;</span>
 
@@ -1180,7 +1362,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="PACK_FlagsOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PACK_FlagsOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="PACK_FlagsOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PACK_FlagsOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">PACK_FlagsOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file ``pack_flags`` options.&quot;&quot;&quot;</span>
 
@@ -1214,7 +1399,10 @@
                      <span class="n">delimiter_error</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">preamble_error</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">symbol_error</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="PACK_HashOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PACK_HashOption">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="PACK_HashOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PACK_HashOption">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">PACK_HashOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG ``pack_hash`` options.&quot;&quot;&quot;</span>
 
@@ -1227,7 +1415,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_HashAlgorithm&#39;</span><span class="p">,</span> <span class="nb">hash</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="PacketBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PacketBlock">[docs]</a><span class="nd">@info_final</span>
+
+<div class="viewcode-block" id="PacketBlock">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PacketBlock">[docs]</a>
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">PacketBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG Packet Block (obsolete).&quot;&quot;&quot;</span>
 
@@ -1259,6 +1450,7 @@
                      <span class="n">interface_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">drop_count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;dt_type&#39;</span><span class="p">,</span>
                      <span class="n">timestamp_epoch</span><span class="p">:</span> <span class="s1">&#39;Decimal&#39;</span><span class="p">,</span> <span class="n">captured_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">original_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -1291,9 +1483,9 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=56a0a47e"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=2e6055c8"></script>
     <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../../../_static/copybutton.js?v=f281be69"></script>
