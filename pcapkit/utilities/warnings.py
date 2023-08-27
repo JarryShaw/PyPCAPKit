@@ -49,7 +49,7 @@ def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
     if stacklevel is None:
         stacklevel = stacklevel_calculator()
 
-    logger.warning(message, exc_info=DEVMODE, stack_info=VERBOSE,
+    logger.warning(message, exc_info=VERBOSE, stack_info=VERBOSE,
                    stacklevel=stacklevel)
     warnings.warn(message, category, stacklevel)
 

@@ -123,6 +123,7 @@ class SeekableReader(io.BufferedReader):
     def _write_buffer(self, buf: 'bytes', /) -> 'None':
         if self._buffer_file is not None:
             self._buffer_file.write(buf)
+            self._buffer_file.flush()
 
         buf_len = len(buf)
         old_ptr = self._buffer_cur
@@ -210,8 +211,9 @@ class SeekableReader(io.BufferedReader):
                 buf = self._buffer.readline(min(size, self._buffer_cur - 1))
 
             if not buf.endswith(b'\n') and (size_rem := size - len(buf)) > 0:
-                buf += self._stream.readline(size_rem)
-                self._write_buffer(buf)
+                buf_tmp = self._stream.readline(size_rem)
+                self._write_buffer(buf_tmp)
+                buf += buf_tmp
 
         self._tell += len(buf)
         return buf
@@ -377,8 +379,9 @@ class SeekableReader(io.BufferedReader):
 
             size_rem = -1
             if size < 0 or (size_rem := size - len(buf)) > 0:
-                buf += self._stream.read(size_rem)
-                self._write_buffer(buf)
+                buf_tmp = self._stream.read(size_rem)
+                self._write_buffer(buf_tmp)
+                buf += buf_tmp
 
         self._tell += len(buf)
         return buf
@@ -408,10 +411,11 @@ class SeekableReader(io.BufferedReader):
                 size_rem = -1
                 if size < 0 or (size_rem := size - len(buf)) > 0:
                     if hasattr(self._stream, 'read1'):
-                        buf += self._stream.read1(size_rem)
+                        buf_tmp = self._stream.read1(size_rem)
                     else:
-                        buf += self._stream.read(size_rem)
-                    self._write_buffer(buf)
+                        buf_tmp = self._stream.read(size_rem)
+                    self._write_buffer(buf_tmp)
+                    buf += buf_tmp
 
         self._tell += len(buf)
         return buf
@@ -494,8 +498,9 @@ class SeekableReader(io.BufferedReader):
                 size_rem = -1
                 if size < 0 or (size_rem := size - len(buf)) > 0:
                     if hasattr(self._stream, 'peek'):
-                        buf += self._stream.peek(size_rem)
+                        buf_tmp = self._stream.peek(size_rem)
                     else:
-                        buf += self._stream.read(size_rem)
-                        self._write_buffer(buf)
+                        buf_tmp = self._stream.read(size_rem)
+                        self._write_buffer(buf_tmp)
+                        buf += buf_tmp
         return buf

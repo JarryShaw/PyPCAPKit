@@ -789,19 +789,20 @@ class Extractor(Generic[P]):
         until the EOF reached; then it calls :meth:`_cleanup` for the aftermath.
 
         """
-        try:
-            return self._exeng.read_frame()
-        except (EOFError, StopIteration) as error:
-            warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
+        while True:
+            try:
+                return self._exeng.read_frame()
+            except (EOFError, StopIteration) as error:
+                warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
 
-            if self._flag_n:
-                return self.__next__()
+                if self._flag_n:
+                    continue
 
-            self._cleanup()
-            raise StopIteration from error  # pylint: disable=raise-missing-from
-        except KeyboardInterrupt:
-            self._cleanup()
-            raise
+                self._cleanup()
+                raise StopIteration from error  # pylint: disable=raise-missing-from
+            except KeyboardInterrupt:
+                self._cleanup()
+                raise
 
     def __call__(self) -> 'P':
         """Works as a simple wrapper for the iteration protocol.
@@ -812,19 +813,20 @@ class Extractor(Generic[P]):
 
         """
         if not self._flag_a:
-            try:
-                return self._exeng.read_frame()
-            except (EOFError, StopIteration):
-                warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
+            while True:
+                try:
+                    return self._exeng.read_frame()
+                except (EOFError, StopIteration):
+                    warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
 
-                if self._flag_n:
-                    return self.__call__()
+                    if self._flag_n:
+                        continue
 
-                self._cleanup()
-                raise
-            except KeyboardInterrupt:
-                self._cleanup()
-                raise
+                    self._cleanup()
+                    raise
+                except KeyboardInterrupt:
+                    self._cleanup()
+                    raise
         raise CallableError("'Extractor(auto=True)' object is not callable")
 
     def __enter__(self) -> 'Extractor':
