@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Info Class" href="infoclass.html" /><link rel="prev" title="Core Utilities" href="index.html" />
 
-    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
+    <!-- Generated with Sphinx 7.2.4 and Furo 2023.08.19 -->
         <title>Protocol Fields - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -362,13 +362,13 @@
           </label>
         </div>
         <article role="main">
-          <section id="protocol-fields">
-<h1>Protocol Fields<a class="headerlink" href="#protocol-fields" title="Link to this heading">#</a></h1>
-<p id="module-pcapkit.corekit.fields"><a class="reference internal" href="#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a> is collection of protocol fields,
+          <section id="module-pcapkit.corekit.fields">
+<span id="protocol-fields"></span><h1>Protocol Fields<a class="headerlink" href="#module-pcapkit.corekit.fields" title="Link to this heading">#</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a> is collection of protocol fields,
 descriptive of the structure of protocol headers.</p>
-<section id="base-field">
-<h2>Base Field<a class="headerlink" href="#base-field" title="Link to this heading">#</a></h2>
-<dl class="py class" id="module-pcapkit.corekit.fields.field">
+<section id="module-pcapkit.corekit.fields.field">
+<span id="base-field"></span><h2>Base Field<a class="headerlink" href="#module-pcapkit.corekit.fields.field" title="Link to this heading">#</a></h2>
+<dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.field._Field">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">_Field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/field.html#_Field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field._Field" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
@@ -605,9 +605,9 @@ updating the current instance.</p>
 
 </section>
 </section>
-<section id="numerical-fields">
-<h2>Numerical Fields<a class="headerlink" href="#numerical-fields" title="Link to this heading">#</a></h2>
-<dl class="py class" id="module-pcapkit.corekit.fields.numbers">
+<section id="module-pcapkit.corekit.fields.numbers">
+<span id="numerical-fields"></span><h2>Numerical Fields<a class="headerlink" href="#module-pcapkit.corekit.fields.numbers" title="Link to this heading">#</a></h2>
+<dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.numbers.NumberField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.numbers.</span></span><span class="sig-name descname"><span class="pre">NumberField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder='big'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bit_length=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">NumberField.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/numbers.html#NumberField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.numbers.NumberField" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
@@ -916,9 +916,9 @@ an integer value and accept the current packet as its only argument.</p></li>
 </dd></dl>
 
 </section>
-<section id="text-fields">
-<h2>Text Fields<a class="headerlink" href="#text-fields" title="Link to this heading">#</a></h2>
-<dl class="py class" id="module-pcapkit.corekit.fields.strings">
+<section id="module-pcapkit.corekit.fields.strings">
+<span id="text-fields"></span><h2>Text Fields<a class="headerlink" href="#module-pcapkit.corekit.fields.strings" title="Link to this heading">#</a></h2>
+<dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.strings._TextField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.strings.</span></span><span class="sig-name descname"><span class="pre">_TextField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">_TextField.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/strings.html#_TextField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.strings._TextField" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
@@ -1140,9 +1140,9 @@ an integer value and accept the current packet as its only argument.</p></li>
 </dd></dl>
 
 </section>
-<section id="ip-address-fields">
-<h2>IP Address Fields<a class="headerlink" href="#ip-address-fields" title="Link to this heading">#</a></h2>
-<dl class="py class" id="module-pcapkit.corekit.fields.ipaddress">
+<section id="module-pcapkit.corekit.fields.ipaddress">
+<span id="ip-address-fields"></span><h2>IP Address Fields<a class="headerlink" href="#module-pcapkit.corekit.fields.ipaddress" title="Link to this heading">#</a></h2>
+<dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._IPField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">_IPField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">Field.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#_IPField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._IPField" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
@@ -1415,9 +1415,9 @@ an integer value and accept the current packet as its only argument.</p></li>
 
 </section>
 </section>
-<section id="container-fields">
-<h2>Container Fields<a class="headerlink" href="#container-fields" title="Link to this heading">#</a></h2>
-<dl class="py class" id="module-pcapkit.corekit.fields.collections">
+<section id="module-pcapkit.corekit.fields.collections">
+<span id="container-fields"></span><h2>Container Fields<a class="headerlink" href="#module-pcapkit.corekit.fields.collections" title="Link to this heading">#</a></h2>
+<dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.ListField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.collections.</span></span><span class="sig-name descname"><span class="pre">ListField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length=&lt;function</span> <span class="pre">ListField.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">ListField.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/collections.html#ListField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.collections.ListField" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.field._Field" title="pcapkit.corekit.fields.field._Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Field</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_TL</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_TL</span></code>]</p>
@@ -1591,9 +1591,9 @@ the next fields can be aware of such informations.</p>
 </dd></dl>
 
 </section>
-<section id="miscellaneous-fields">
-<h2>Miscellaneous Fields<a class="headerlink" href="#miscellaneous-fields" title="Link to this heading">#</a></h2>
-<dl class="py class" id="module-pcapkit.corekit.fields.misc">
+<section id="module-pcapkit.corekit.fields.misc">
+<span id="miscellaneous-fields"></span><h2>Miscellaneous Fields<a class="headerlink" href="#module-pcapkit.corekit.fields.misc" title="Link to this heading">#</a></h2>
+<dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.misc.ConditionalField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.misc.</span></span><span class="sig-name descname"><span class="pre">ConditionalField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/misc.html#ConditionalField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.misc.ConditionalField" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.field._Field" title="pcapkit.corekit.fields.field._Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Field</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_TC</span></code>]</p>
@@ -2245,19 +2245,19 @@ instead of updating the current instance.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Protocol Fields</a><ul>
-<li><a class="reference internal" href="#base-field">Base Field</a><ul>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.field">Base Field</a><ul>
 <li><a class="reference internal" href="#auxiliary">Auxiliary</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#numerical-fields">Numerical Fields</a></li>
-<li><a class="reference internal" href="#text-fields">Text Fields</a></li>
-<li><a class="reference internal" href="#ip-address-fields">IP Address Fields</a><ul>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.numbers">Numerical Fields</a></li>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.strings">Text Fields</a></li>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.ipaddress">IP Address Fields</a><ul>
 <li><a class="reference internal" href="#ip-addresses">IP Addresses</a></li>
 <li><a class="reference internal" href="#ip-interface">IP Interface</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#container-fields">Container Fields</a></li>
-<li><a class="reference internal" href="#miscellaneous-fields">Miscellaneous Fields</a></li>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.collections">Container Fields</a></li>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.misc">Miscellaneous Fields</a></li>
 </ul>
 </li>
 </ul>
@@ -2269,7 +2269,7 @@ instead of updating the current instance.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=2e6055c8"></script>
+</div><script src="../../_static/documentation_options.js?v=400650ea"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
