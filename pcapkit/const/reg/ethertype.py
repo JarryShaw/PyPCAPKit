@@ -18,17 +18,20 @@ __all__ = ['EtherType']
 class EtherType(IntEnum):
     """[EtherType] Ethertype IEEE 802 Numbers"""
 
-    #: XEROX PUP (see 0A00) [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, "PUP:
-    #: An Internetwork Architecture", XEROX Palo Alto Research Center, CSL-79-10,
-    #: July 1979; also in IEEE Transactions on Communication, Volume COM-28, Number
-    #: 4, April 1980.][Neil Sembower]
-    XEROX_PUP = 0x0200
+    #: Formerly XEROX PUP. Invalid as an Ethertype since 1983. Use 0x0A00. [Boggs,
+    #: D., J. Shoch, E. Taft, and R. Metcalfe, "PUP: An Internetwork Architecture",
+    #: XEROX Palo Alto Research Center, CSL-79-10, July 1979; also in IEEE
+    #: Transactions on Communication, Volume COM-28, Number 4, April 1980.][Neil
+    #: Sembower]
+    Formerly_XEROX_PUP_Invalid_as_an_Ethertype_since_1983_Use_0x0A00 = 0x0200
 
-    #: PUP Addr Trans (see 0A01) [Neil Sembower]
-    PUP_Addr_Trans_0x0201 = 0x0201
+    #: Formerly PUP Addr Trans. Invalid as an Ethertype since 1983. Use 0x0A01.
+    #: [Neil Sembower]
+    Formerly_PUP_Addr_Trans_Invalid_as_an_Ethertype_since_1983_Use_0x0A01 = 0x0201
 
-    #: Nixdorf [Neil Sembower]
-    Nixdorf = 0x0400
+    #: Old Nixdorf private protocol. Invalid as an Ethertype since 1983. [Neil
+    #: Sembower]
+    Old_Nixdorf_private_protocol_Invalid_as_an_Ethertype_since_1983 = 0x0400
 
     #: XEROX NS IDP ["The Ethernet, A Local Area Network: Data Link Layer and
     #: Physical Layer Specification", AA-K759B-TK, Digital Equipment Corporation,
@@ -84,7 +87,7 @@ class EtherType(IntEnum):
     Xerox_IEEE802_3_PUP = 0x0A00
 
     #: PUP Addr Trans [Neil Sembower]
-    PUP_Addr_Trans_0x0A01 = 0x0A01
+    PUP_Addr_Trans = 0x0A01
 
     #: Banyan VINES [Neil Sembower]
     Banyan_VINES = 0x0BAD
@@ -507,8 +510,8 @@ class EtherType(IntEnum):
     #: processor for processing. [:rfc:`8157`]
     The_Ethertype_will_be_used_to_identify_a_Channel_in_which_control_messages_are_encapsulated_as_payload_of_GRE_packets_When_a_GRE_packet_tagged_with_the_Ethertype_is_received_the_payload_will_be_handed_to_the_network_processor_for_processing = 0xB7EA
 
-    #: BBN VITAL-LanBridge cache [Neil Sembower]
-    BBN_VITAL_LanBridge_cache = 0xFF00
+    #: BBN VITAL-LanBridge cache private protocol. [Neil Sembower]
+    BBN_VITAL_LanBridge_cache_private_protocol = 0xFF00
 
     #: Reserved [:rfc:`1701`]
     Reserved = 0xFFFF
@@ -540,11 +543,12 @@ class EtherType(IntEnum):
         if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0000 <= value <= 0x05DC:
-            #: IEEE802.3 Length Field [Neil Sembower]
+            #: IEEE802.3 Length Field [IEEE Std 802.3]
             return extend_enum(cls, 'IEEE802_3_Length_Field_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x0101 <= value <= 0x01FF:
-            #: Experimental [Neil Sembower]
-            return extend_enum(cls, 'Experimental_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            #: Old Xerox Experimental values. Invalid as an Ethertype since 1983. [Neil
+    #: Sembower]
+            return extend_enum(cls, 'Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x0888 <= value <= 0x088A:
             #: Xyplex [Neil Sembower]
             return extend_enum(cls, 'Xyplex_0x%s' % hex(value)[2:].upper().zfill(4), value)
@@ -705,6 +709,6 @@ class EtherType(IntEnum):
             #: Invisible Software [Neil Sembower]
             return extend_enum(cls, 'Invisible_Software_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0xFF00 <= value <= 0xFF0F:
-            #: ISC Bunker Ramo [Neil Sembower]
-            return extend_enum(cls, 'ISC_Bunker_Ramo_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            #: ISC Bunker Ramo private protocol. [Neil Sembower]
+            return extend_enum(cls, 'ISC_Bunker_Ramo_private_protocol_0x%s' % hex(value)[2:].upper().zfill(4), value)
         return super()._missing_(value)
