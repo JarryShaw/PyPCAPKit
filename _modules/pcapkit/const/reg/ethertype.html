@@ -364,17 +364,20 @@
 <span class="k">class</span> <span class="nc">EtherType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;[EtherType] Ethertype IEEE 802 Numbers&quot;&quot;&quot;</span>
 
-    <span class="c1">#: XEROX PUP (see 0A00) [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, &quot;PUP:</span>
-    <span class="c1">#: An Internetwork Architecture&quot;, XEROX Palo Alto Research Center, CSL-79-10,</span>
-    <span class="c1">#: July 1979; also in IEEE Transactions on Communication, Volume COM-28, Number</span>
-    <span class="c1">#: 4, April 1980.][Neil Sembower]</span>
-    <span class="n">XEROX_PUP</span> <span class="o">=</span> <span class="mh">0x0200</span>
+    <span class="c1">#: Formerly XEROX PUP. Invalid as an Ethertype since 1983. Use 0x0A00. [Boggs,</span>
+    <span class="c1">#: D., J. Shoch, E. Taft, and R. Metcalfe, &quot;PUP: An Internetwork Architecture&quot;,</span>
+    <span class="c1">#: XEROX Palo Alto Research Center, CSL-79-10, July 1979; also in IEEE</span>
+    <span class="c1">#: Transactions on Communication, Volume COM-28, Number 4, April 1980.][Neil</span>
+    <span class="c1">#: Sembower]</span>
+    <span class="n">Formerly_XEROX_PUP_Invalid_as_an_Ethertype_since_1983_Use_0x0A00</span> <span class="o">=</span> <span class="mh">0x0200</span>
 
-    <span class="c1">#: PUP Addr Trans (see 0A01) [Neil Sembower]</span>
-    <span class="n">PUP_Addr_Trans_0x0201</span> <span class="o">=</span> <span class="mh">0x0201</span>
+    <span class="c1">#: Formerly PUP Addr Trans. Invalid as an Ethertype since 1983. Use 0x0A01.</span>
+    <span class="c1">#: [Neil Sembower]</span>
+    <span class="n">Formerly_PUP_Addr_Trans_Invalid_as_an_Ethertype_since_1983_Use_0x0A01</span> <span class="o">=</span> <span class="mh">0x0201</span>
 
-    <span class="c1">#: Nixdorf [Neil Sembower]</span>
-    <span class="n">Nixdorf</span> <span class="o">=</span> <span class="mh">0x0400</span>
+    <span class="c1">#: Old Nixdorf private protocol. Invalid as an Ethertype since 1983. [Neil</span>
+    <span class="c1">#: Sembower]</span>
+    <span class="n">Old_Nixdorf_private_protocol_Invalid_as_an_Ethertype_since_1983</span> <span class="o">=</span> <span class="mh">0x0400</span>
 
     <span class="c1">#: XEROX NS IDP [&quot;The Ethernet, A Local Area Network: Data Link Layer and</span>
     <span class="c1">#: Physical Layer Specification&quot;, AA-K759B-TK, Digital Equipment Corporation,</span>
@@ -430,7 +433,7 @@
     <span class="n">Xerox_IEEE802_3_PUP</span> <span class="o">=</span> <span class="mh">0x0A00</span>
 
     <span class="c1">#: PUP Addr Trans [Neil Sembower]</span>
-    <span class="n">PUP_Addr_Trans_0x0A01</span> <span class="o">=</span> <span class="mh">0x0A01</span>
+    <span class="n">PUP_Addr_Trans</span> <span class="o">=</span> <span class="mh">0x0A01</span>
 
     <span class="c1">#: Banyan VINES [Neil Sembower]</span>
     <span class="n">Banyan_VINES</span> <span class="o">=</span> <span class="mh">0x0BAD</span>
@@ -853,8 +856,8 @@
     <span class="c1">#: processor for processing. [:rfc:`8157`]</span>
     <span class="n">The_Ethertype_will_be_used_to_identify_a_Channel_in_which_control_messages_are_encapsulated_as_payload_of_GRE_packets_When_a_GRE_packet_tagged_with_the_Ethertype_is_received_the_payload_will_be_handed_to_the_network_processor_for_processing</span> <span class="o">=</span> <span class="mh">0xB7EA</span>
 
-    <span class="c1">#: BBN VITAL-LanBridge cache [Neil Sembower]</span>
-    <span class="n">BBN_VITAL_LanBridge_cache</span> <span class="o">=</span> <span class="mh">0xFF00</span>
+    <span class="c1">#: BBN VITAL-LanBridge cache private protocol. [Neil Sembower]</span>
+    <span class="n">BBN_VITAL_LanBridge_cache_private_protocol</span> <span class="o">=</span> <span class="mh">0xFF00</span>
 
     <span class="c1">#: Reserved [:rfc:`1701`]</span>
     <span class="n">Reserved</span> <span class="o">=</span> <span class="mh">0xFFFF</span>
@@ -888,11 +891,12 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mh">0x0000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">if</span> <span class="mh">0x0000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x05DC</span><span class="p">:</span>
-            <span class="c1">#: IEEE802.3 Length Field [Neil Sembower]</span>
+            <span class="c1">#: IEEE802.3 Length Field [IEEE Std 802.3]</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;IEEE802_3_Length_Field_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mh">0x0101</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x01FF</span><span class="p">:</span>
-            <span class="c1">#: Experimental [Neil Sembower]</span>
-            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Experimental_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="c1">#: Old Xerox Experimental values. Invalid as an Ethertype since 1983. [Neil</span>
+    <span class="c1">#: Sembower]</span>
+            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mh">0x0888</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x088A</span><span class="p">:</span>
             <span class="c1">#: Xyplex [Neil Sembower]</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Xyplex_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
@@ -1053,8 +1057,8 @@
             <span class="c1">#: Invisible Software [Neil Sembower]</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Invisible_Software_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mh">0xFF00</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFF0F</span><span class="p">:</span>
-            <span class="c1">#: ISC Bunker Ramo [Neil Sembower]</span>
-            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;ISC_Bunker_Ramo_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="c1">#: ISC Bunker Ramo private protocol. [Neil Sembower]</span>
+            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;ISC_Bunker_Ramo_private_protocol_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>
 
@@ -1090,7 +1094,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=400650ea"></script>
+</div><script src="../../../../_static/documentation_options.js?v=60b7ca01"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
