@@ -22429,6 +22429,12 @@ class AppType(StrEnum):
     #: [UDP] Asymmetric Extended Route Optimization (AERO) [:rfc:`6706`]
     aero: 'AppType' = 8060, 'aero', TransportProtocol.get('udp')
 
+    #: [TCP] Nikatron Device Protocol
+    nikatron_dev: 'AppType' = 8061, 'nikatron-dev', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_8061: 'AppType' = 8061, 'reserved', TransportProtocol.get('udp')
+
     #: [TCP] Toad BI Application Server
     toad_bi_appsrvr: 'AppType' = 8066, 'toad-bi-appsrvr', TransportProtocol.get('tcp')
 
@@ -31211,7 +31217,7 @@ class AppType(StrEnum):
         if 8045 <= value <= 8050:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 8061 <= value <= 8065:
+        if 8062 <= value <= 8065:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 8068 <= value <= 8069:
