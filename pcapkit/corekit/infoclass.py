@@ -267,7 +267,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
 
         if dict_ is None:
             data_iter = kwargs.items()  # type: Iterable[tuple[str, Any]]
-        elif isinstance(dict_, collections.abc.Mapping):
+        elif isinstance(dict_, (dict, collections.abc.Mapping)) or hasattr(dict_, 'items'):
             data_iter = itertools.chain(dict_.items(), kwargs.items())
         else:
             data_iter = itertools.chain(dict_, kwargs.items())
