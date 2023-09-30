@@ -75,12 +75,10 @@ class Option(IntEnum):
     #: Minimum Path MTU Hop-by-Hop Option [:rfc:`9268`]
     Minimum_Path_MTU_Hop_by_Hop_Option = 0x30
 
-    #: IOAM Destination Option and IOAM Hop-by-Hop Option [RFC-ietf-ippm-ioam-
-    #: ipv6-options-12]
+    #: IOAM Destination Option and IOAM Hop-by-Hop Option [:rfc:`9486`]
     IOAM_Destination_Option_and_IOAM_Hop_by_Hop_Option_0x11 = 0x11
 
-    #: IOAM Destination Option and IOAM Hop-by-Hop Option [RFC-ietf-ippm-ioam-
-    #: ipv6-options-12]
+    #: IOAM Destination Option and IOAM Hop-by-Hop Option [:rfc:`9486`]
     IOAM_Destination_Option_and_IOAM_Hop_by_Hop_Option_0x31 = 0x31
 
     #: AltMark [:rfc:`9343`]
