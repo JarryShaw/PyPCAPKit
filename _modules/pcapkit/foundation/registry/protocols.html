@@ -352,9 +352,11 @@
 <span class="sd">This module provides the protocol registries for :mod:`pcapkit`.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">importlib</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.apptype</span> <span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.apptype</span> <span class="kn">import</span> <span class="n">TransportProtocol</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.module</span> <span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols</span> <span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv2</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.hip</span> <span class="kn">import</span> <span class="n">HIP</span>
@@ -392,8 +394,6 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
-
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.const.hip.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">HIP_Parameter</span>
     <span class="kn">from</span> <span class="nn">pcapkit.const.http.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">HTTP_Frame</span>
@@ -467,6 +467,8 @@
     <span class="s1">&#39;register_pcapng_record&#39;</span><span class="p">,</span>
 <span class="p">]</span>
 
+<span class="n">NULL</span> <span class="o">=</span> <span class="s1">&#39;(null)&#39;</span>
+
 
 <span class="c1"># NOTE: pcapkit.protocols.__proto__</span>
 <div class="viewcode-block" id="register_protocol">
@@ -483,7 +485,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">protocol_registry</span><span class="p">[</span><span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">=</span> <span class="n">protocol</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
@@ -495,9 +497,16 @@
 <span class="c1">###############################################################################</span>
 
 
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
 <div class="viewcode-block" id="register_linktype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype">[docs]</a>
-<span class="k">def</span> <span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
+                      <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -510,33 +519,42 @@
 <span class="sd">    - :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__`</span>
 <span class="sd">    - :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__proto__`</span>
 
+<span class="sd">    Arguments:</span>
+<span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
+<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">        class\_: class name</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        * :func:`pcapkit.foundation..registry.protocol.register_pcap`</span>
 <span class="sd">        * :func:`pcapkit.foundation..registry.protocol.register_pcapng`</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">        module: module name</span>
-<span class="sd">        class\_: class name</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered linktype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
 
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcap.frame.Frame.__proto__</span>
 <div class="viewcode-block" id="register_pcap">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcap">[docs]</a>
-<span class="k">def</span> <span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
+                  <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -548,26 +566,35 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">        module: module name</span>
+<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP linktype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
 
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__proto__</span>
 <div class="viewcode-block" id="register_pcapng">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng">[docs]</a>
-<span class="k">def</span> <span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
+                    <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -579,19 +606,21 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">        module: module name</span>
+<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG linktype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
 
 
 
@@ -600,10 +629,17 @@
 <span class="c1">###############################################################################</span>
 
 
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
 <span class="c1"># NOTE: pcapkit.protocols.link.link.Link.__proto__</span>
 <div class="viewcode-block" id="register_ethertype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ethertype">[docs]</a>
-<span class="k">def</span> <span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
+                       <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -615,19 +651,21 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`</span>
-<span class="sd">        module: module name</span>
+<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Link</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">Link</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered ethertype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
 
 
 
@@ -636,10 +674,17 @@
 <span class="c1">###############################################################################</span>
 
 
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
 <span class="c1"># NOTE: pcapkit.protocols.internet.internet.Internet.__proto__</span>
 <div class="viewcode-block" id="register_transtype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_transtype">[docs]</a>
-<span class="k">def</span> <span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
+                       <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -651,19 +696,21 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`</span>
-<span class="sd">        module: module name</span>
+<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Internet</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">Internet</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered transtype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
 
 
 
@@ -896,9 +943,20 @@
 <span class="c1">###############################################################################</span>
 
 
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
 <div class="viewcode-block" id="register_port">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_port">[docs]</a>
-<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;tcp&quot;, &quot;udp&quot;]&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
+                  <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -909,40 +967,61 @@
 <span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` and/or</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.</span>
 
+<span class="sd">    Arguments:</span>
+<span class="sd">        code: port number</span>
+<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">        class\_: class name</span>
+<span class="sd">        proto: protocol name (must be a valid transport protocol)</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        * :func:`pcapkit.foundation.registry.register_tcp_port`</span>
 <span class="sd">        * :func:`pcapkit.foundation.registry.register_udp_port`</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        proto: protocol name (must be ``tcp`` or ``udp``)</span>
-<span class="sd">        code: port number</span>
-<span class="sd">        module: module name</span>
-<span class="sd">        class\_: class name</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">proto</span> <span class="o">==</span> <span class="s1">&#39;tcp&#39;</span><span class="p">:</span>
-        <span class="bp">cls</span> <span class="o">=</span> <span class="n">TCP</span>
-    <span class="k">elif</span> <span class="n">proto</span> <span class="o">==</span> <span class="s1">&#39;udp&#39;</span><span class="p">:</span>
-        <span class="bp">cls</span> <span class="o">=</span> <span class="n">UDP</span>  <span class="c1"># type: ignore[assignment]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be &quot;tcp&quot; or &quot;udp&quot;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">proto</span> <span class="ow">is</span> <span class="n">NULL</span><span class="p">:</span>
+            <span class="n">proto</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">proto</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+    <span class="n">_reg</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">proto</span> <span class="o">=</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
 
-    <span class="bp">cls</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered </span><span class="si">%s</span><span class="s1"> port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">code</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">test</span><span class="p">,</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;dict[TransportProtocol, Type[Protocol]]&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span> <span class="n">TCP</span><span class="p">,</span>
+        <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span><span class="p">:</span> <span class="n">UDP</span><span class="p">,</span>
+    <span class="p">})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">test</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">proto</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered </span><span class="si">%s</span><span class="s1"> port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="n">_reg</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_reg</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
 
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__proto__</span>
 <div class="viewcode-block" id="register_tcp">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp">[docs]</a>
-<span class="k">def</span> <span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
+                 <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -954,19 +1033,23 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
-<span class="sd">        module: module name</span>
+<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">TCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">TCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered TCP port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
 
 
 
@@ -1026,10 +1109,17 @@
 
 
 
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
 <span class="c1"># NOTE: pcapkit.protocols.transport.udp.UDP.__proto__</span>
 <div class="viewcode-block" id="register_udp">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_udp">[docs]</a>
-<span class="k">def</span> <span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
+                 <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -1041,19 +1131,23 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
-<span class="sd">        module: module name</span>
+<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">UDP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">UDP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered UDP port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
 
 
 

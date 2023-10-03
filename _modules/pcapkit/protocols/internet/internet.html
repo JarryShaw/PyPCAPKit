@@ -344,6 +344,7 @@
         <article role="main">
           <h1>Source code for pcapkit.protocols.internet.internet</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># mypy: disable-error-code=dict-item</span>
 <span class="sd">&quot;&quot;&quot;Base Protocol</span>
 <span class="sd">===================</span>
 
@@ -356,13 +357,14 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.module</span> <span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">PT</span><span class="p">,</span> <span class="n">ST</span><span class="p">,</span> <span class="n">Protocol</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.decorators</span> <span class="kn">import</span> <span class="n">beholder</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -423,25 +425,25 @@
     <span class="c1">#: Layer of protocol.</span>
     <span class="n">__layer__</span> <span class="o">=</span> <span class="s1">&#39;Internet&#39;</span>  <span class="c1"># type: Literal[&#39;Internet&#39;]</span>
 
-    <span class="c1">#: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,</span>
+    <span class="c1">#: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,</span>
     <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.internet.internet.Internet._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>  <span class="c1"># type: ignore[return-value,arg-type]</span>
         <span class="p">{</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">:</span>          <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.hopopt&#39;</span><span class="p">,</span>     <span class="s1">&#39;HOPOPT&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>            <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv4&#39;</span><span class="p">,</span>       <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">:</span>             <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.transport.tcp&#39;</span><span class="p">,</span>       <span class="s1">&#39;TCP&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">:</span>             <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.transport.udp&#39;</span><span class="p">,</span>       <span class="s1">&#39;UDP&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>            <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6&#39;</span><span class="p">,</span>       <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6_route&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6_Route&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6_frag&#39;</span><span class="p">,</span>  <span class="s1">&#39;IPv6_Frag&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>              <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ah&#39;</span><span class="p">,</span>         <span class="s1">&#39;AH&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_NoNxt</span><span class="p">:</span>      <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span>            <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6_opts&#39;</span><span class="p">,</span>  <span class="s1">&#39;IPv6_Opts&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span><span class="p">:</span>       <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipx&#39;</span><span class="p">,</span>        <span class="s1">&#39;IPX&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.mh&#39;</span><span class="p">,</span>         <span class="s1">&#39;MH&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HIP</span><span class="p">:</span>             <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.hip&#39;</span><span class="p">,</span>        <span class="s1">&#39;HIP&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">:</span>          <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.hopopt&#39;</span><span class="p">,</span>     <span class="s1">&#39;HOPOPT&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv4&#39;</span><span class="p">,</span>       <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.transport.tcp&#39;</span><span class="p">,</span>       <span class="s1">&#39;TCP&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.transport.udp&#39;</span><span class="p">,</span>       <span class="s1">&#39;UDP&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6&#39;</span><span class="p">,</span>       <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6_route&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6_Route&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6_frag&#39;</span><span class="p">,</span>  <span class="s1">&#39;IPv6_Frag&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>              <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ah&#39;</span><span class="p">,</span>         <span class="s1">&#39;AH&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_NoNxt</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span>            <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6_opts&#39;</span><span class="p">,</span>  <span class="s1">&#39;IPv6_Opts&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipx&#39;</span><span class="p">,</span>        <span class="s1">&#39;IPX&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.mh&#39;</span><span class="p">,</span>         <span class="s1">&#39;MH&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HIP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.hip&#39;</span><span class="p">,</span>        <span class="s1">&#39;HIP&#39;</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -462,22 +464,26 @@
 <div class="viewcode-block" id="Internet.register">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet.register">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new protocol class</span>
-<span class="sd">            should be as ``{module}.{class_}``.</span>
+<span class="sd">            should be as ``{protocol.module}.{protocol.name}``.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`</span>
-<span class="sd">            module: module name</span>
-<span class="sd">            class\_: class name</span>
+<span class="sd">            protocol: module descriptor or a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
 
     <span class="c1">##########################################################################</span>
@@ -578,8 +584,10 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">module</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">))</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span>  <span class="c1"># type: ignore[assignment]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># type: ignore[unreachable]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># update mapping upon import</span>
 
         <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>  <span class="c1"># type: ignore[abstract]</span>
                          <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">)</span>
