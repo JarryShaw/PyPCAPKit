@@ -12,16 +12,16 @@ which is an abstract base class for all flow tracing classes.
 """
 import abc
 import collections
-import importlib
 import os
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
-from pcapkit.corekit.module import ModuleDescriptor
 from dictdumper.dumper import Dumper
+
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
-from pcapkit.utilities.exceptions import FileExists, stacklevel, RegistryError
-from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn, RegistryWarning
+from pcapkit.utilities.exceptions import FileExists, RegistryError, stacklevel
+from pcapkit.utilities.warnings import FileWarning, FormatWarning, RegistryWarning, warn
 
 __all__ = ['TraceFlow']
 
