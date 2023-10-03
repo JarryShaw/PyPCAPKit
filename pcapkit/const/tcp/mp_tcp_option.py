@@ -18,32 +18,31 @@ __all__ = ['MPTCPOption']
 class MPTCPOption(IntEnum):
     """[MPTCPOption] Multipath TCP options [:rfc:`6824`]"""
 
-    #: Multipath Capable [:rfc:`8684, Section 3.1`]
+    #: Multipath Capable [:rfc:`8684#3.1`]
     MP_CAPABLE = 0x0
 
-    #: Join Connection [:rfc:`8684, Section 3.2`]
+    #: Join Connection [:rfc:`8684#3.2`]
     MP_JOIN = 0x1
 
-    #: Data Sequence Signal (Data ACK and Data Sequence Mapping) [:rfc:`8684,
-    #: Section 3.3`]
+    #: Data Sequence Signal (Data ACK and Data Sequence Mapping) [:rfc:`8684#3.3`]
     DSS = 0x2
 
-    #: Add Address [:rfc:`8684, Section 3.4.1`]
+    #: Add Address [:rfc:`8684#3.4.1`]
     ADD_ADDR = 0x3
 
-    #: Remove Address [:rfc:`8684, Section 3.4.2`]
+    #: Remove Address [:rfc:`8684#3.4.2`]
     REMOVE_ADDR = 0x4
 
-    #: Change Subflow Priority [:rfc:`8684, Section 3.3.8`]
+    #: Change Subflow Priority [:rfc:`8684#3.3.8`]
     MP_PRIO = 0x5
 
-    #: Fallback [:rfc:`8684, Section 3.7`]
+    #: Fallback [:rfc:`8684#3.7`]
     MP_FAIL = 0x6
 
-    #: Fast Close [:rfc:`8684, Section 3.5`]
+    #: Fast Close [:rfc:`8684#3.5`]
     MP_FASTCLOSE = 0x7
 
-    #: Subflow Reset [:rfc:`8684, Section 3.6`]
+    #: Subflow Reset [:rfc:`8684#3.6`]
     MP_TCPRST = 0x8
 
     #: [:rfc:`8684`]

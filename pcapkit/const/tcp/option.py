@@ -102,8 +102,7 @@ class Option(IntEnum):
     #: Quick-Start Response [:rfc:`4782`]
     Quick_Start_Response = 27
 
-    #: User Timeout Option (also, other known unauthorized use) [***][1]
-    #: [:rfc:`5482`]
+    #: User Timeout Option (also, other known unauthorized use)  [:rfc:`5482`]
     User_Timeout_Option = 28
 
     #: TCP Authentication Option (TCP-AO) [:rfc:`5925`]
@@ -112,13 +111,13 @@ class Option(IntEnum):
     #: Multipath TCP (MPTCP) [:rfc:`8684`]
     Multipath_TCP = 30
 
-    #: Reserved (known unauthorized use without proper IANA assignment) [**]
+    #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_31 = 31
 
-    #: Reserved (known unauthorized use without proper IANA assignment) [**]
+    #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_32 = 32
 
-    #: Reserved (known unauthorized use without proper IANA assignment) [**]
+    #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_33 = 33
 
     #: TCP Fast Open Cookie [:rfc:`7413`]
@@ -127,16 +126,16 @@ class Option(IntEnum):
     #: Encryption Negotiation (TCP-ENO) [:rfc:`8547`]
     Encryption_Negotiation = 69
 
-    #: Reserved (known unauthorized use without proper IANA assignment) [**]
+    #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_70 = 70
 
-    #: Reserved (known unauthorized use without proper IANA assignment) [**]
+    #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_76 = 76
 
-    #: Reserved (known unauthorized use without proper IANA assignment) [**]
+    #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_77 = 77
 
-    #: Reserved (known unauthorized use without proper IANA assignment) [**]
+    #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_78 = 78
 
     #: Accurate ECN Order 0 (AccECN0) (TEMPORARY - registered 2022-08-03, extension
@@ -151,11 +150,11 @@ class Option(IntEnum):
     Accurate_ECN_Order_1 = 174
 
     #: RFC3692-style Experiment 1 (also improperly used for shipping
-    #: products) [*] [:rfc:`4727`]
+    #: products)  [:rfc:`4727`]
     RFC3692_style_Experiment_1 = 253
 
     #: RFC3692-style Experiment 2 (also improperly used for shipping
-    #: products) [*] [:rfc:`4727`]
+    #: products)  [:rfc:`4727`]
     RFC3692_style_Experiment_2 = 254
 
     @staticmethod

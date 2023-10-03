@@ -366,9 +366,9 @@ class AppType(StrEnum):
     acas: 'AppType' = 62, 'acas', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] whois++ IANA assigned this well-formed service name as a replacement
-    #: for "whois++".
+    #:   for "whois++".
     #: - [UDP] whois++ IANA assigned this well-formed service name as a replacement
-    #: for "whois++".
+    #:   for "whois++".
     whoispp: 'AppType' = 63, 'whoispp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] whois++
@@ -723,10 +723,10 @@ class AppType(StrEnum):
     aed_512: 'AppType' = 149, 'aed-512', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Oracle SQL*NET IANA assigned this well-formed service name as a
-    #: replacement for "sql*net".
+    #:   replacement for "sql*net".
     #: - [TCP] Oracle SQL*NET
     #: - [UDP] Oracle SQL*NET IANA assigned this well-formed service name as a
-    #: replacement for "sql*net".
+    #:   replacement for "sql*net".
     #: - [UDP] Oracle SQL*NET
     sql_net_66: 'AppType' = 66, 'sql-net', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -819,10 +819,10 @@ class AppType(StrEnum):
     multiplex: 'AppType' = 171, 'multiplex', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Network Innovations CL/1 IANA assigned this well-formed service name
-    #: as a replacement for "cl/1".
+    #:   as a replacement for "cl/1".
     #: - [TCP] Network Innovations CL/1
     #: - [UDP] Network Innovations CL/1 IANA assigned this well-formed service name
-    #: as a replacement for "cl/1".
+    #:   as a replacement for "cl/1".
     #: - [UDP] Network Innovations CL/1
     cl_1: 'AppType' = 172, 'cl-1', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -972,18 +972,18 @@ class AppType(StrEnum):
     qmtp: 'AppType' = 209, 'qmtp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] ANSI Z39.50 IANA assigned this well-formed service name as a
-    #: replacement for "z39.50".
+    #:   replacement for "z39.50".
     #: - [TCP] ANSI Z39.50
     #: - [UDP] ANSI Z39.50 IANA assigned this well-formed service name as a
-    #: replacement for "z39.50".
+    #:   replacement for "z39.50".
     #: - [UDP] ANSI Z39.50
     z39_50: 'AppType' = 210, 'z39-50', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Texas Instruments 914C/G Terminal IANA assigned this well-formed
-    #: service name as a replacement for "914c/g".
+    #:   service name as a replacement for "914c/g".
     #: - [TCP] Texas Instruments 914C/G Terminal
     #: - [UDP] Texas Instruments 914C/G Terminal IANA assigned this well-formed
-    #: service name as a replacement for "914c/g".
+    #:   service name as a replacement for "914c/g".
     #: - [UDP] Texas Instruments 914C/G Terminal
     AppType_914c_g: 'AppType' = 211, '914c-g', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -1060,10 +1060,10 @@ class AppType(StrEnum):
     dsp3270: 'AppType' = 246, 'dsp3270', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] SUBNTBCST_TFTP IANA assigned this well-formed service name as a
-    #: replacement for "subntbcst_tftp".
+    #:   replacement for "subntbcst_tftp".
     #: - [TCP] SUBNTBCST_TFTP
     #: - [UDP] SUBNTBCST_TFTP IANA assigned this well-formed service name as a
-    #: replacement for "subntbcst_tftp".
+    #:   replacement for "subntbcst_tftp".
     #: - [UDP] SUBNTBCST_TFTP
     subntbcst_tftp: 'AppType' = 247, 'subntbcst-tftp', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -1137,7 +1137,7 @@ class AppType(StrEnum):
     gist: 'AppType' = 270, 'gist', TransportProtocol.get('udp')
 
     #: [TCP] IETF Network Endpoint Assessment (NEA) Posture Transport Protocol over
-    #: TLS (PT-TLS) [:rfc:`6876`]
+    #:   TLS (PT-TLS) [:rfc:`6876`]
     pt_tls: 'AppType' = 271, 'pt-tls', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -1323,10 +1323,10 @@ class AppType(StrEnum):
     srssend: 'AppType' = 362, 'srssend', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] RSVP Tunnel IANA assigned this well-formed service name as a
-    #: replacement for "rsvp_tunnel".
+    #:   replacement for "rsvp_tunnel".
     #: - [TCP] RSVP Tunnel
     #: - [UDP] RSVP Tunnel IANA assigned this well-formed service name as a
-    #: replacement for "rsvp_tunnel".
+    #:   replacement for "rsvp_tunnel".
     #: - [UDP] RSVP Tunnel
     rsvp_tunnel: 'AppType' = 363, 'rsvp-tunnel', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -1587,18 +1587,18 @@ class AppType(StrEnum):
     svrloc: 'AppType' = 427, 'svrloc', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] OCS_CMU IANA assigned this well-formed service name as a replacement
-    #: for "ocs_cmu".
+    #:   for "ocs_cmu".
     #: - [TCP] OCS_CMU
     #: - [UDP] OCS_CMU IANA assigned this well-formed service name as a replacement
-    #: for "ocs_cmu".
+    #:   for "ocs_cmu".
     #: - [UDP] OCS_CMU
     ocs_cmu: 'AppType' = 428, 'ocs-cmu', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] OCS_AMU IANA assigned this well-formed service name as a replacement
-    #: for "ocs_amu".
+    #:   for "ocs_amu".
     #: - [TCP] OCS_AMU
     #: - [UDP] OCS_AMU IANA assigned this well-formed service name as a replacement
-    #: for "ocs_amu".
+    #:   for "ocs_amu".
     #: - [UDP] OCS_AMU
     ocs_amu: 'AppType' = 429, 'ocs-amu', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -1651,10 +1651,10 @@ class AppType(StrEnum):
     decvms_sysmgt: 'AppType' = 441, 'decvms-sysmgt', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] cvc_hostd IANA assigned this well-formed service name as a replacement
-    #: for "cvc_hostd".
+    #:   for "cvc_hostd".
     #: - [TCP] cvc_hostd
     #: - [UDP] cvc_hostd IANA assigned this well-formed service name as a replacement
-    #: for "cvc_hostd".
+    #:   for "cvc_hostd".
     #: - [UDP] cvc_hostd
     cvc_hostd: 'AppType' = 442, 'cvc-hostd', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -1924,27 +1924,27 @@ class AppType(StrEnum):
     passgo: 'AppType' = 511, 'passgo', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] remote process execution; authentication performed using passwords and
-    #: UNIX login names
+    #:   UNIX login names
     exec: 'AppType' = 512, 'exec', TransportProtocol.get('tcp')
 
     #: [UDP]
     comsat: 'AppType' = 512, 'comsat', TransportProtocol.get('udp')
 
     #: [UDP] used by mail system to notify users of new mail received; currently
-    #: receives messages only from processes on the same machine
+    #:   receives messages only from processes on the same machine
     biff: 'AppType' = 512, 'biff', TransportProtocol.get('udp')
 
     #: [TCP] remote login a la telnet; automatic authentication performed based on
-    #: priviledged port numbers and distributed data bases which identify
-    #: "authentication domains"
+    #:   priviledged port numbers and distributed data bases which identify
+    #:   "authentication domains"
     login: 'AppType' = 513, 'login', TransportProtocol.get('tcp')
 
     #: [UDP] maintains data bases showing who's logged in to machines on a local
-    #: net and the load average of the machine
+    #:   net and the load average of the machine
     who: 'AppType' = 513, 'who', TransportProtocol.get('udp')
 
     #: [TCP] cmd like exec, but automatic authentication is performed as for login
-    #: server
+    #:   server
     shell: 'AppType' = 514, 'shell', TransportProtocol.get('tcp')
 
     #: [UDP]  [:rfc:`5426`]
@@ -1959,11 +1959,11 @@ class AppType(StrEnum):
     videotex: 'AppType' = 516, 'videotex', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] like tenex link, but across machine - unfortunately, doesn't use link
-    #: protocol (this is actually just a rendezvous port from which a tcp
-    #: connection is established)
+    #:   protocol (this is actually just a rendezvous port from which a tcp
+    #:   connection is established)
     #: - [UDP] like tenex link, but across machine - unfortunately, doesn't use link
-    #: protocol (this is actually just a rendezvous port from which a tcp
-    #: connection is established)
+    #:   protocol (this is actually just a rendezvous port from which a tcp
+    #:   connection is established)
     talk: 'AppType' = 517, 'talk', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP]
@@ -1978,7 +1978,7 @@ class AppType(StrEnum):
     efs: 'AppType' = 520, 'efs', TransportProtocol.get('tcp')
 
     #: [UDP] local routing process (on site); uses variant of Xerox NS routing
-    #: information protocol - RIP
+    #:   information protocol - RIP
     router: 'AppType' = 520, 'router', TransportProtocol.get('udp')
 
     #: - [TCP] ripng
@@ -2388,10 +2388,10 @@ class AppType(StrEnum):
     cryptoadmin: 'AppType' = 624, 'cryptoadmin', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] DEC DLM IANA assigned this well-formed service name as a replacement
-    #: for "dec_dlm".
+    #:   for "dec_dlm".
     #: - [TCP] DEC DLM
     #: - [UDP] DEC DLM IANA assigned this well-formed service name as a replacement
-    #: for "dec_dlm".
+    #:   for "dec_dlm".
     #: - [UDP] DEC DLM
     dec_dlm: 'AppType' = 625, 'dec-dlm', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -2885,7 +2885,7 @@ class AppType(StrEnum):
     rpasswd: 'AppType' = 774, 'rpasswd', TransportProtocol.get('tcp')
 
     #: - [UDP] IANA assigned this well-formed service name as a replacement for
-    #: "acmaint_dbd".
+    #:   "acmaint_dbd".
     #: - [UDP]
     acmaint_dbd: 'AppType' = 774, 'acmaint-dbd', TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -2893,7 +2893,7 @@ class AppType(StrEnum):
     entomb: 'AppType' = 775, 'entomb', TransportProtocol.get('tcp')
 
     #: - [UDP] IANA assigned this well-formed service name as a replacement for
-    #: "acmaint_transd".
+    #:   "acmaint_transd".
     #: - [UDP]
     acmaint_transd: 'AppType' = 775, 'acmaint-transd', TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -2916,10 +2916,10 @@ class AppType(StrEnum):
     unassigned_787: 'AppType' = 787, 'unassigned', TransportProtocol.get('undefined')
 
     #: - [TCP] IANA assigned this well-formed service name as a replacement for
-    #: "mdbs_daemon".
+    #:   "mdbs_daemon".
     #: - [TCP]
     #: - [UDP] IANA assigned this well-formed service name as a replacement for
-    #: "mdbs_daemon".
+    #:   "mdbs_daemon".
     #: - [UDP]
     mdbs_daemon: 'AppType' = 800, 'mdbs-daemon', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -2969,7 +2969,7 @@ class AppType(StrEnum):
 
     #: - [TCP] DNS query-response protocol run over TLS [:rfc:`7858`]
     #: - [UDP] DNS query-response protocol run over DTLS or QUIC
-    #: [:rfc:`7858`][:rfc:`8094`][:rfc:`9250`]
+    #:   [:rfc:`7858`][:rfc:`8094`][:rfc:`9250`]
     domain_s: 'AppType' = 853, 'domain-s', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Dynamic Link Exchange Protocol (DLEP) [:rfc:`8175`]
@@ -3001,10 +3001,10 @@ class AppType(StrEnum):
     iclcnet_locate: 'AppType' = 886, 'iclcnet-locate', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] ICL coNETion server info IANA assigned this well-formed service name
-    #: as a replacement for "iclcnet_svinfo".
+    #:   as a replacement for "iclcnet_svinfo".
     #: - [TCP] ICL coNETion server info
     #: - [UDP] ICL coNETion server info IANA assigned this well-formed service name
-    #: as a replacement for "iclcnet_svinfo".
+    #:   as a replacement for "iclcnet_svinfo".
     #: - [UDP] ICL coNETion server info
     iclcnet_svinfo: 'AppType' = 887, 'iclcnet-svinfo', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -3051,14 +3051,14 @@ class AppType(StrEnum):
     reserved_914: 'AppType' = 914, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Routing in Fat Trees Link Information Elements (TEMPORARY - registered
-    #: 2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
+    #:   2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
     rift_lies: 'AppType' = 914, 'rift-lies', TransportProtocol.get('udp')
 
     #: [TCP] Reserved
     reserved_915: 'AppType' = 915, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Routing in Fat Trees Topology Information Elements (TEMPORARY -
-    #: registered 2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
+    #:   registered 2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
     rift_ties: 'AppType' = 915, 'rift-ties', TransportProtocol.get('udp')
 
     #: [TCP] BIND9 remote name daemon controller
@@ -3328,18 +3328,18 @@ class AppType(StrEnum):
     fpo_fns: 'AppType' = 1066, 'fpo-fns', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Installation Bootstrap Proto. Serv. IANA assigned this well-formed
-    #: service name as a replacement for "instl_boots".
+    #:   service name as a replacement for "instl_boots".
     #: - [TCP] Installation Bootstrap Proto. Serv.
     #: - [UDP] Installation Bootstrap Proto. Serv. IANA assigned this well-formed
-    #: service name as a replacement for "instl_boots".
+    #:   service name as a replacement for "instl_boots".
     #: - [UDP] Installation Bootstrap Proto. Serv.
     instl_boots: 'AppType' = 1067, 'instl-boots', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Installation Bootstrap Proto. Cli. IANA assigned this well-formed
-    #: service name as a replacement for "instl_bootc".
+    #:   service name as a replacement for "instl_bootc".
     #: - [TCP] Installation Bootstrap Proto. Cli.
     #: - [UDP] Installation Bootstrap Proto. Cli. IANA assigned this well-formed
-    #: service name as a replacement for "instl_bootc".
+    #:   service name as a replacement for "instl_bootc".
     #: - [UDP] Installation Bootstrap Proto. Cli.
     instl_bootc: 'AppType' = 1068, 'instl-bootc', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -3622,10 +3622,10 @@ class AppType(StrEnum):
     trim: 'AppType' = 1137, 'trim', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] encrypted admin requests IANA assigned this well-formed service name
-    #: as a replacement for "encrypted_admin".
+    #:   as a replacement for "encrypted_admin".
     #: - [TCP] encrypted admin requests
     #: - [UDP] encrypted admin requests IANA assigned this well-formed service name
-    #: as a replacement for "encrypted_admin".
+    #:   as a replacement for "encrypted_admin".
     #: - [UDP] encrypted admin requests
     encrypted_admin: 'AppType' = 1138, 'encrypted-admin', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -4329,10 +4329,10 @@ class AppType(StrEnum):
     sti_envision: 'AppType' = 1312, 'sti-envision', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] BMC_PATROLDB IANA assigned this well-formed service name as a
-    #: replacement for "bmc_patroldb".
+    #:   replacement for "bmc_patroldb".
     #: - [TCP] BMC_PATROLDB
     #: - [UDP] BMC_PATROLDB IANA assigned this well-formed service name as a
-    #: replacement for "bmc_patroldb".
+    #:   replacement for "bmc_patroldb".
     #: - [UDP] BMC_PATROLDB
     bmc_patroldb: 'AppType' = 1313, 'bmc-patroldb', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -4621,10 +4621,10 @@ class AppType(StrEnum):
     os_licman: 'AppType' = 1384, 'os-licman', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Atex Publishing License Manager IANA assigned this well-formed service
-    #: name as a replacement for "atex_elmd".
+    #:   name as a replacement for "atex_elmd".
     #: - [TCP] Atex Publishing License Manager
     #: - [UDP] Atex Publishing License Manager IANA assigned this well-formed service
-    #: name as a replacement for "atex_elmd".
+    #:   name as a replacement for "atex_elmd".
     #: - [UDP] Atex Publishing License Manager
     atex_elmd: 'AppType' = 1385, 'atex-elmd', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -4751,10 +4751,10 @@ class AppType(StrEnum):
     dbstar: 'AppType' = 1415, 'dbstar', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Novell LU6.2 IANA assigned this well-formed service name as a
-    #: replacement for "novell-lu6.2".
+    #:   replacement for "novell-lu6.2".
     #: - [TCP] Novell LU6.2
     #: - [UDP] Novell LU6.2 IANA assigned this well-formed service name as a
-    #: replacement for "novell-lu6.2".
+    #:   replacement for "novell-lu6.2".
     #: - [UDP] Novell LU6.2
     novell_lu6_2: 'AppType' = 1416, 'novell-lu6-2', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -4907,10 +4907,10 @@ class AppType(StrEnum):
     genie_lm: 'AppType' = 1453, 'genie-lm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] interHDL License Manager IANA assigned this well-formed service name
-    #: as a replacement for "interhdl_elmd".
+    #:   as a replacement for "interhdl_elmd".
     #: - [TCP] interHDL License Manager
     #: - [UDP] interHDL License Manager IANA assigned this well-formed service name
-    #: as a replacement for "interhdl_elmd".
+    #:   as a replacement for "interhdl_elmd".
     #: - [UDP] interHDL License Manager
     interhdl_elmd: 'AppType' = 1454, 'interhdl-elmd', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -4939,10 +4939,10 @@ class AppType(StrEnum):
     proshare2: 'AppType' = 1460, 'proshare2', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] IBM Wireless LAN IANA assigned this well-formed service name as a
-    #: replacement for "ibm_wrless_lan".
+    #:   replacement for "ibm_wrless_lan".
     #: - [TCP] IBM Wireless LAN
     #: - [UDP] IBM Wireless LAN IANA assigned this well-formed service name as a
-    #: replacement for "ibm_wrless_lan".
+    #:   replacement for "ibm_wrless_lan".
     #: - [UDP] IBM Wireless LAN
     ibm_wrless_lan: 'AppType' = 1461, 'ibm-wrless-lan', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -4955,10 +4955,10 @@ class AppType(StrEnum):
     nucleus: 'AppType' = 1463, 'nucleus', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] MSL License Manager IANA assigned this well-formed service name as a
-    #: replacement for "msl_lmd".
+    #:   replacement for "msl_lmd".
     #: - [TCP] MSL License Manager
     #: - [UDP] MSL License Manager IANA assigned this well-formed service name as a
-    #: replacement for "msl_lmd".
+    #:   replacement for "msl_lmd".
     #: - [UDP] MSL License Manager
     msl_lmd: 'AppType' = 1464, 'msl-lmd', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -5047,10 +5047,10 @@ class AppType(StrEnum):
     lansource: 'AppType' = 1485, 'lansource', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] nms_topo_serv IANA assigned this well-formed service name as a
-    #: replacement for "nms_topo_serv".
+    #:   replacement for "nms_topo_serv".
     #: - [TCP] nms_topo_serv
     #: - [UDP] nms_topo_serv IANA assigned this well-formed service name as a
-    #: replacement for "nms_topo_serv".
+    #:   replacement for "nms_topo_serv".
     #: - [UDP] nms_topo_serv
     nms_topo_serv: 'AppType' = 1486, 'nms-topo-serv', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -5078,10 +5078,10 @@ class AppType(StrEnum):
     stone_design_1: 'AppType' = 1492, 'stone-design-1', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] netmap_lm IANA assigned this well-formed service name as a replacement
-    #: for "netmap_lm".
+    #:   for "netmap_lm".
     #: - [TCP] netmap_lm
     #: - [UDP] netmap_lm IANA assigned this well-formed service name as a replacement
-    #: for "netmap_lm".
+    #:   for "netmap_lm".
     #: - [UDP] netmap_lm
     netmap_lm: 'AppType' = 1493, 'netmap-lm', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -5337,10 +5337,10 @@ class AppType(StrEnum):
     livelan: 'AppType' = 1555, 'livelan', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] VERITAS Private Branch Exchange IANA assigned this well-formed service
-    #: name as a replacement for "veritas_pbx".
+    #:   name as a replacement for "veritas_pbx".
     #: - [TCP] VERITAS Private Branch Exchange
     #: - [UDP] VERITAS Private Branch Exchange IANA assigned this well-formed service
-    #: name as a replacement for "veritas_pbx".
+    #:   name as a replacement for "veritas_pbx".
     #: - [UDP] VERITAS Private Branch Exchange
     veritas_pbx: 'AppType' = 1556, 'veritas-pbx', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -5467,10 +5467,10 @@ class AppType(StrEnum):
     ibm_abtact: 'AppType' = 1586, 'ibm-abtact', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] pra_elmd IANA assigned this well-formed service name as a replacement
-    #: for "pra_elmd".
+    #:   for "pra_elmd".
     #: - [TCP] pra_elmd
     #: - [UDP] pra_elmd IANA assigned this well-formed service name as a replacement
-    #: for "pra_elmd".
+    #:   for "pra_elmd".
     #: - [UDP] pra_elmd
     pra_elmd: 'AppType' = 1587, 'pra-elmd', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -5729,10 +5729,10 @@ class AppType(StrEnum):
     nkd: 'AppType' = 1650, 'nkd', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] shiva_confsrvr IANA assigned this well-formed service name as a
-    #: replacement for "shiva_confsrvr".
+    #:   replacement for "shiva_confsrvr".
     #: - [TCP] shiva_confsrvr
     #: - [UDP] shiva_confsrvr IANA assigned this well-formed service name as a
-    #: replacement for "shiva_confsrvr".
+    #:   replacement for "shiva_confsrvr".
     #: - [UDP] shiva_confsrvr
     shiva_confsrvr: 'AppType' = 1651, 'shiva-confsrvr', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -7196,7 +7196,7 @@ class AppType(StrEnum):
     search: 'AppType' = 2010, 'search', TransportProtocol.get('tcp')
 
     #: - [UDP] IANA assigned this well-formed service name as a replacement for
-    #: "pipe_server".
+    #:   "pipe_server".
     #: - [UDP]
     pipe_server: 'AppType' = 2010, 'pipe-server', TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -8078,10 +8078,10 @@ class AppType(StrEnum):
     ethernet_ip_s: 'AppType' = 2221, 'ethernet-ip-s', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] EtherNet/IP I/O IANA assigned this well-formed service name as a
-    #: replacement for "EtherNet/IP-1".
+    #:   replacement for "EtherNet/IP-1".
     #: - [TCP] EtherNet/IP I/O
     #: - [UDP] EtherNet/IP I/O IANA assigned this well-formed service name as a
-    #: replacement for "EtherNet/IP-1".
+    #:   replacement for "EtherNet/IP-1".
     #: - [UDP] EtherNet/IP I/O
     ethernet_ip_1: 'AppType' = 2222, 'ethernet-ip-1', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -8561,10 +8561,10 @@ class AppType(StrEnum):
     AppType_3com_webview: 'AppType' = 2339, '3com-webview', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] WRS Registry IANA assigned this well-formed service name as a
-    #: replacement for "wrs_registry".
+    #:   replacement for "wrs_registry".
     #: - [TCP] WRS Registry
     #: - [UDP] WRS Registry IANA assigned this well-formed service name as a
-    #: replacement for "wrs_registry".
+    #:   replacement for "wrs_registry".
     #: - [UDP] WRS Registry
     wrs_registry: 'AppType' = 2340, 'wrs-registry', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -8589,34 +8589,34 @@ class AppType(StrEnum):
     dbm: 'AppType' = 2345, 'dbm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Game Connection Port IANA assigned this well-formed service name as a
-    #: replacement for "redstorm_join".
+    #:   replacement for "redstorm_join".
     #: - [TCP] Game Connection Port
     #: - [UDP] Game Connection Port IANA assigned this well-formed service name as a
-    #: replacement for "redstorm_join".
+    #:   replacement for "redstorm_join".
     #: - [UDP] Game Connection Port
     redstorm_join: 'AppType' = 2346, 'redstorm-join', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Game Announcement and Location IANA assigned this well-formed service
-    #: name as a replacement for "redstorm_find".
+    #:   name as a replacement for "redstorm_find".
     #: - [TCP] Game Announcement and Location
     #: - [UDP] Game Announcement and Location IANA assigned this well-formed service
-    #: name as a replacement for "redstorm_find".
+    #:   name as a replacement for "redstorm_find".
     #: - [UDP] Game Announcement and Location
     redstorm_find: 'AppType' = 2347, 'redstorm-find', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Information to query for game status IANA assigned this well-formed
-    #: service name as a replacement for "redstorm_info".
+    #:   service name as a replacement for "redstorm_info".
     #: - [TCP] Information to query for game status
     #: - [UDP] Information to query for game status IANA assigned this well-formed
-    #: service name as a replacement for "redstorm_info".
+    #:   service name as a replacement for "redstorm_info".
     #: - [UDP] Information to query for game status
     redstorm_info: 'AppType' = 2348, 'redstorm-info', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Diagnostics Port IANA assigned this well-formed service name as a
-    #: replacement for "redstorm_diag".
+    #:   replacement for "redstorm_diag".
     #: - [TCP] Diagnostics Port
     #: - [UDP] Diagnostics Port IANA assigned this well-formed service name as a
-    #: replacement for "redstorm_diag".
+    #:   replacement for "redstorm_diag".
     #: - [UDP] Diagnostics Port
     redstorm_diag: 'AppType' = 2349, 'redstorm-diag', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -8822,10 +8822,10 @@ class AppType(StrEnum):
     ms_olap2: 'AppType' = 2394, 'ms-olap2', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] LAN900 Remote IANA assigned this well-formed service name as a
-    #: replacement for "lan900_remote".
+    #:   replacement for "lan900_remote".
     #: - [TCP] LAN900 Remote
     #: - [UDP] LAN900 Remote IANA assigned this well-formed service name as a
-    #: replacement for "lan900_remote".
+    #:   replacement for "lan900_remote".
     #: - [UDP] LAN900 Remote
     lan900_remote: 'AppType' = 2395, 'lan900-remote', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -9032,10 +9032,10 @@ class AppType(StrEnum):
     dtn1: 'AppType' = 2445, 'dtn1', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] bues_service IANA assigned this well-formed service name as a
-    #: replacement for "bues_service".
+    #:   replacement for "bues_service".
     #: - [TCP] bues_service
     #: - [UDP] bues_service IANA assigned this well-formed service name as a
-    #: replacement for "bues_service".
+    #:   replacement for "bues_service".
     #: - [UDP] bues_service
     bues_service: 'AppType' = 2446, 'bues-service', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -9368,10 +9368,10 @@ class AppType(StrEnum):
     iqserver: 'AppType' = 2527, 'iqserver', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] NCR CCL IANA assigned this well-formed service name as a replacement
-    #: for "ncr_ccl".
+    #:   for "ncr_ccl".
     #: - [TCP] NCR CCL
     #: - [UDP] NCR CCL IANA assigned this well-formed service name as a replacement
-    #: for "ncr_ccl".
+    #:   for "ncr_ccl".
     #: - [UDP] NCR CCL
     ncr_ccl: 'AppType' = 2528, 'ncr-ccl', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -9868,10 +9868,10 @@ class AppType(StrEnum):
     sonus: 'AppType' = 2653, 'sonus', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Corel VNC Admin IANA assigned this well-formed service name as a
-    #: replacement for "corel_vncadmin".
+    #:   replacement for "corel_vncadmin".
     #: - [TCP] Corel VNC Admin
     #: - [UDP] Corel VNC Admin IANA assigned this well-formed service name as a
-    #: replacement for "corel_vncadmin".
+    #:   replacement for "corel_vncadmin".
     #: - [UDP] Corel VNC Admin
     corel_vncadmin: 'AppType' = 2654, 'corel-vncadmin', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -10475,9 +10475,9 @@ class AppType(StrEnum):
     btprjctrl: 'AppType' = 2803, 'btprjctrl', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] March Networks Digital Video Recorders and Enterprise Service Manager
-    #: products
+    #:   products
     #: - [UDP] March Networks Digital Video Recorders and Enterprise Service Manager
-    #: products
+    #:   products
     dvr_esm: 'AppType' = 2804, 'dvr-esm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] WTA WSP-S
@@ -10937,18 +10937,18 @@ class AppType(StrEnum):
     tksocket: 'AppType' = 2915, 'tksocket', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Elvin Server IANA assigned this well-formed service name as a
-    #: replacement for "elvin_server".
+    #:   replacement for "elvin_server".
     #: - [TCP] Elvin Server
     #: - [UDP] Elvin Server IANA assigned this well-formed service name as a
-    #: replacement for "elvin_server".
+    #:   replacement for "elvin_server".
     #: - [UDP] Elvin Server
     elvin_server: 'AppType' = 2916, 'elvin-server', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Elvin Client IANA assigned this well-formed service name as a
-    #: replacement for "elvin_client".
+    #:   replacement for "elvin_client".
     #: - [TCP] Elvin Client
     #: - [UDP] Elvin Client IANA assigned this well-formed service name as a
-    #: replacement for "elvin_client".
+    #:   replacement for "elvin_client".
     #: - [UDP] Elvin Client
     elvin_client: 'AppType' = 2917, 'elvin-client', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -11350,10 +11350,10 @@ class AppType(StrEnum):
     gilatskysurfer: 'AppType' = 3013, 'gilatskysurfer', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Broker Service IANA assigned this well-formed service name as a
-    #: replacement for "broker_service".
+    #:   replacement for "broker_service".
     #: - [TCP] Broker Service
     #: - [UDP] Broker Service IANA assigned this well-formed service name as a
-    #: replacement for "broker_service".
+    #:   replacement for "broker_service".
     #: - [UDP] Broker Service
     broker_service: 'AppType' = 3014, 'broker-service', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -11362,34 +11362,34 @@ class AppType(StrEnum):
     nati_dstp: 'AppType' = 3015, 'nati-dstp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Notify Server IANA assigned this well-formed service name as a
-    #: replacement for "notify_srvr".
+    #:   replacement for "notify_srvr".
     #: - [TCP] Notify Server
     #: - [UDP] Notify Server IANA assigned this well-formed service name as a
-    #: replacement for "notify_srvr".
+    #:   replacement for "notify_srvr".
     #: - [UDP] Notify Server
     notify_srvr: 'AppType' = 3016, 'notify-srvr', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Event Listener IANA assigned this well-formed service name as a
-    #: replacement for "event_listener".
+    #:   replacement for "event_listener".
     #: - [TCP] Event Listener
     #: - [UDP] Event Listener IANA assigned this well-formed service name as a
-    #: replacement for "event_listener".
+    #:   replacement for "event_listener".
     #: - [UDP] Event Listener
     event_listener: 'AppType' = 3017, 'event-listener', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Service Registry IANA assigned this well-formed service name as a
-    #: replacement for "srvc_registry".
+    #:   replacement for "srvc_registry".
     #: - [TCP] Service Registry
     #: - [UDP] Service Registry IANA assigned this well-formed service name as a
-    #: replacement for "srvc_registry".
+    #:   replacement for "srvc_registry".
     #: - [UDP] Service Registry
     srvc_registry: 'AppType' = 3018, 'srvc-registry', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Resource Manager IANA assigned this well-formed service name as a
-    #: replacement for "resource_mgr".
+    #:   replacement for "resource_mgr".
     #: - [TCP] Resource Manager
     #: - [UDP] Resource Manager IANA assigned this well-formed service name as a
-    #: replacement for "resource_mgr".
+    #:   replacement for "resource_mgr".
     #: - [UDP] Resource Manager
     resource_mgr: 'AppType' = 3019, 'resource-mgr', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -11410,10 +11410,10 @@ class AppType(StrEnum):
     magicnotes: 'AppType' = 3023, 'magicnotes', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] NDS_SSO IANA assigned this well-formed service name as a replacement
-    #: for "nds_sso".
+    #:   for "nds_sso".
     #: - [TCP] NDS_SSO
     #: - [UDP] NDS_SSO IANA assigned this well-formed service name as a replacement
-    #: for "nds_sso".
+    #:   for "nds_sso".
     #: - [UDP] NDS_SSO
     nds_sso: 'AppType' = 3024, 'nds-sso', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -11426,26 +11426,26 @@ class AppType(StrEnum):
     agri_gateway: 'AppType' = 3026, 'agri-gateway', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] LiebDevMgmt_C IANA assigned this well-formed service name as a
-    #: replacement for "LiebDevMgmt_C".
+    #:   replacement for "LiebDevMgmt_C".
     #: - [TCP] LiebDevMgmt_C
     #: - [UDP] LiebDevMgmt_C IANA assigned this well-formed service name as a
-    #: replacement for "LiebDevMgmt_C".
+    #:   replacement for "LiebDevMgmt_C".
     #: - [UDP] LiebDevMgmt_C
     liebdevmgmt_c: 'AppType' = 3027, 'liebdevmgmt-c', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] LiebDevMgmt_DM IANA assigned this well-formed service name as a
-    #: replacement for "LiebDevMgmt_DM".
+    #:   replacement for "LiebDevMgmt_DM".
     #: - [TCP] LiebDevMgmt_DM
     #: - [UDP] LiebDevMgmt_DM IANA assigned this well-formed service name as a
-    #: replacement for "LiebDevMgmt_DM".
+    #:   replacement for "LiebDevMgmt_DM".
     #: - [UDP] LiebDevMgmt_DM
     liebdevmgmt_dm: 'AppType' = 3028, 'liebdevmgmt-dm', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] LiebDevMgmt_A IANA assigned this well-formed service name as a
-    #: replacement for "LiebDevMgmt_A".
+    #:   replacement for "LiebDevMgmt_A".
     #: - [TCP] LiebDevMgmt_A
     #: - [UDP] LiebDevMgmt_A IANA assigned this well-formed service name as a
-    #: replacement for "LiebDevMgmt_A".
+    #:   replacement for "LiebDevMgmt_A".
     #: - [UDP] LiebDevMgmt_A
     liebdevmgmt_a: 'AppType' = 3029, 'liebdevmgmt-a', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -11534,10 +11534,10 @@ class AppType(StrEnum):
     nsws: 'AppType' = 3049, 'nsws', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] gds_db IANA assigned this well-formed service name as a replacement
-    #: for "gds_db".
+    #:   for "gds_db".
     #: - [TCP] gds_db
     #: - [UDP] gds_db IANA assigned this well-formed service name as a replacement
-    #: for "gds_db".
+    #:   for "gds_db".
     #: - [UDP] gds_db
     gds_db: 'AppType' = 3050, 'gds-db', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -11660,10 +11660,10 @@ class AppType(StrEnum):
     lv_frontpanel: 'AppType' = 3079, 'lv-frontpanel', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] stm_pproc IANA assigned this well-formed service name as a replacement
-    #: for "stm_pproc".
+    #:   for "stm_pproc".
     #: - [TCP] stm_pproc
     #: - [UDP] stm_pproc IANA assigned this well-formed service name as a replacement
-    #: for "stm_pproc".
+    #:   for "stm_pproc".
     #: - [UDP] stm_pproc
     stm_pproc: 'AppType' = 3080, 'stm-pproc', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -11832,7 +11832,7 @@ class AppType(StrEnum):
     d2000webserver: 'AppType' = 3120, 'd2000webserver', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] The pacemaker remote (pcmk-remote) service extends high availability
-    #: functionality outside of the Linux cluster into remote nodes.
+    #:   functionality outside of the Linux cluster into remote nodes.
     pcmk_remote: 'AppType' = 3121, 'pcmk-remote', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -12910,10 +12910,10 @@ class AppType(StrEnum):
     dyna_lm: 'AppType' = 3395, 'dyna-lm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Printer Agent IANA assigned this well-formed service name as a
-    #: replacement for "printer_agent".
+    #:   replacement for "printer_agent".
     #: - [TCP] Printer Agent
     #: - [UDP] Printer Agent IANA assigned this well-formed service name as a
-    #: replacement for "printer_agent".
+    #:   replacement for "printer_agent".
     #: - [UDP] Printer Agent
     printer_agent: 'AppType' = 3396, 'printer-agent', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -14863,10 +14863,10 @@ class AppType(StrEnum):
     pnbscada: 'AppType' = 3875, 'pnbscada', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] DirectoryLockdown Agent IANA assigned this well-formed service name as
-    #: a replacement for "dl_agent".
+    #:   a replacement for "dl_agent".
     #: - [TCP] DirectoryLockdown Agent
     #: - [UDP] DirectoryLockdown Agent IANA assigned this well-formed service name as
-    #: a replacement for "dl_agent".
+    #:   a replacement for "dl_agent".
     #: - [UDP] DirectoryLockdown Agent
     dl_agent: 'AppType' = 3876, 'dl-agent', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -14963,18 +14963,18 @@ class AppType(StrEnum):
     itv_control: 'AppType' = 3899, 'itv-control', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] udt_os IANA assigned this well-formed service name as a replacement
-    #: for "udt_os".
+    #:   for "udt_os".
     #: - [TCP] udt_os
     #: - [UDP] udt_os IANA assigned this well-formed service name as a replacement
-    #: for "udt_os".
+    #:   for "udt_os".
     #: - [UDP] udt_os
     udt_os_1382: 'AppType' = 1382, 'udt-os', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Unidata UDT OS IANA assigned this well-formed service name as a
-    #: replacement for "udt_os".
+    #:   replacement for "udt_os".
     #: - [TCP] Unidata UDT OS
     #: - [UDP] Unidata UDT OS IANA assigned this well-formed service name as a
-    #: replacement for "udt_os".
+    #:   replacement for "udt_os".
     #: - [UDP] Unidata UDT OS
     udt_os_3900: 'AppType' = 3900, 'udt-os', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -15127,10 +15127,10 @@ class AppType(StrEnum):
     dvbservdsc: 'AppType' = 3937, 'dvbservdsc', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Oracle dbControl Agent po IANA assigned this well-formed service name
-    #: as a replacement for "dbcontrol_agent".
+    #:   as a replacement for "dbcontrol_agent".
     #: - [TCP] Oracle dbControl Agent po
     #: - [UDP] Oracle dbControl Agent po IANA assigned this well-formed service name
-    #: as a replacement for "dbcontrol_agent".
+    #:   as a replacement for "dbcontrol_agent".
     #: - [UDP] Oracle dbControl Agent po
     dbcontrol_agent: 'AppType' = 3938, 'dbcontrol-agent', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -15167,9 +15167,9 @@ class AppType(StrEnum):
     backupedge: 'AppType' = 3946, 'backupedge', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Connect and Control Protocol for Consumer, Commercial, and Industrial
-    #: Electronic Devices
+    #:   Electronic Devices
     #: - [UDP] Connect and Control Protocol for Consumer, Commercial, and Industrial
-    #: Electronic Devices
+    #:   Electronic Devices
     ccp: 'AppType' = 3947, 'ccp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Anton Paar Device Administration Protocol
@@ -15325,10 +15325,10 @@ class AppType(StrEnum):
     mapper_mapethd: 'AppType' = 3985, 'mapper-mapethd', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] MAPPER workstation server IANA assigned this well-formed service name
-    #: as a replacement for "mapper-ws_ethd".
+    #:   as a replacement for "mapper-ws_ethd".
     #: - [TCP] MAPPER workstation server
     #: - [UDP] MAPPER workstation server IANA assigned this well-formed service name
-    #: as a replacement for "mapper-ws_ethd".
+    #:   as a replacement for "mapper-ws_ethd".
     #: - [UDP] MAPPER workstation server
     mapper_ws_ethd: 'AppType' = 3986, 'mapper-ws-ethd', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -15627,10 +15627,10 @@ class AppType(StrEnum):
     dlms_cosem: 'AppType' = 4059, 'dlms-cosem', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] DSMETER Inter-Agent Transfer Channel IANA assigned this well-formed
-    #: service name as a replacement for "dsmeter_iatc".
+    #:   service name as a replacement for "dsmeter_iatc".
     #: - [TCP] DSMETER Inter-Agent Transfer Channel
     #: - [UDP] DSMETER Inter-Agent Transfer Channel IANA assigned this well-formed
-    #: service name as a replacement for "dsmeter_iatc".
+    #:   service name as a replacement for "dsmeter_iatc".
     #: - [UDP] DSMETER Inter-Agent Transfer Channel
     dsmeter_iatc: 'AppType' = 4060, 'dsmeter-iatc', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -15651,10 +15651,10 @@ class AppType(StrEnum):
     ice_srouter: 'AppType' = 4064, 'ice-srouter', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Avanti Common Data IANA assigned this well-formed service name as a
-    #: replacement for "avanti_cdp".
+    #:   replacement for "avanti_cdp".
     #: - [TCP] Avanti Common Data
     #: - [UDP] Avanti Common Data IANA assigned this well-formed service name as a
-    #: replacement for "avanti_cdp".
+    #:   replacement for "avanti_cdp".
     #: - [UDP] Avanti Common Data
     avanti_cdp: 'AppType' = 4065, 'avanti-cdp', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -15935,18 +15935,18 @@ class AppType(StrEnum):
     stars: 'AppType' = 4131, 'stars', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] NUTS Daemon IANA assigned this well-formed service name as a
-    #: replacement for "nuts_dem".
+    #:   replacement for "nuts_dem".
     #: - [TCP] NUTS Daemon
     #: - [UDP] NUTS Daemon IANA assigned this well-formed service name as a
-    #: replacement for "nuts_dem".
+    #:   replacement for "nuts_dem".
     #: - [UDP] NUTS Daemon
     nuts_dem: 'AppType' = 4132, 'nuts-dem', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] NUTS Bootp Server IANA assigned this well-formed service name as a
-    #: replacement for "nuts_bootp".
+    #:   replacement for "nuts_bootp".
     #: - [TCP] NUTS Bootp Server
     #: - [UDP] NUTS Bootp Server IANA assigned this well-formed service name as a
-    #: replacement for "nuts_bootp".
+    #:   replacement for "nuts_bootp".
     #: - [UDP] NUTS Bootp Server
     nuts_bootp: 'AppType' = 4133, 'nuts-bootp', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -15975,10 +15975,10 @@ class AppType(StrEnum):
     thrtx: 'AppType' = 4139, 'thrtx', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Cedros Fraud Detection System IANA assigned this well-formed service
-    #: name as a replacement for "cedros_fds".
+    #:   name as a replacement for "cedros_fds".
     #: - [TCP] Cedros Fraud Detection System
     #: - [UDP] Cedros Fraud Detection System IANA assigned this well-formed service
-    #: name as a replacement for "cedros_fds".
+    #:   name as a replacement for "cedros_fds".
     #: - [UDP] Cedros Fraud Detection System
     cedros_fds: 'AppType' = 4140, 'cedros-fds', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -16022,18 +16022,18 @@ class AppType(StrEnum):
     poweralert_nsa: 'AppType' = 4150, 'poweralert-nsa', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Men & Mice Remote Control IANA assigned this well-formed service name
-    #: as a replacement for "menandmice_noh".
+    #:   as a replacement for "menandmice_noh".
     #: - [TCP] Men & Mice Remote Control
     #: - [UDP] Men & Mice Remote Control IANA assigned this well-formed service name
-    #: as a replacement for "menandmice_noh".
+    #:   as a replacement for "menandmice_noh".
     #: - [UDP] Men & Mice Remote Control
     menandmice_noh: 'AppType' = 4151, 'menandmice-noh', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] iDigTech Multiplex IANA assigned this well-formed service name as a
-    #: replacement for "idig_mux".
+    #:   replacement for "idig_mux".
     #: - [TCP] iDigTech Multiplex
     #: - [UDP] iDigTech Multiplex IANA assigned this well-formed service name as a
-    #: replacement for "idig_mux".
+    #:   replacement for "idig_mux".
     #: - [UDP] iDigTech Multiplex
     idig_mux: 'AppType' = 4152, 'idig-mux', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -16176,10 +16176,10 @@ class AppType(StrEnum):
     cyborgnet: 'AppType' = 4183, 'cyborgnet', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] UNIVERSE SUITE MESSAGE SERVICE IANA assigned this well-formed service
-    #: name as a replacement for "universe_suite".
+    #:   name as a replacement for "universe_suite".
     #: - [TCP] UNIVERSE SUITE MESSAGE SERVICE
     #: - [UDP] UNIVERSE SUITE MESSAGE SERVICE IANA assigned this well-formed service
-    #: name as a replacement for "universe_suite".
+    #:   name as a replacement for "universe_suite".
     #: - [UDP] UNIVERSE SUITE MESSAGE SERVICE
     universe_suite: 'AppType' = 4184, 'universe-suite', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -16194,7 +16194,7 @@ class AppType(StrEnum):
     reserved_4186: 'AppType' = 4186, 'reserved', TransportProtocol.get('udp')
 
     #: - [TCP] Cascade Proxy IANA assigned this well-formed service name as a
-    #: replacement for "csc_proxy".
+    #:   replacement for "csc_proxy".
     #: - [TCP] Cascade Proxy
     csc_proxy: 'AppType' = 4187, 'csc-proxy', TransportProtocol.get('tcp') | TransportProtocol.get('tcp')
 
@@ -16401,7 +16401,7 @@ class AppType(StrEnum):
     reserved_4330: 'AppType' = 4330, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] ktickets REST API for event management and ticketing systems (embedded
-    #: POS devices)
+    #:   POS devices)
     ktickets_rest: 'AppType' = 4331, 'ktickets-rest', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -16521,7 +16521,7 @@ class AppType(StrEnum):
     omabcastltkm: 'AppType' = 4359, 'omabcastltkm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Matrix VNet Communication Protocol IANA assigned this well-formed
-    #: service name as a replacement for "matrix_vnet".
+    #:   service name as a replacement for "matrix_vnet".
     #: - [TCP] Matrix VNet Communication Protocol
     matrix_vnet: 'AppType' = 4360, 'matrix-vnet', TransportProtocol.get('tcp') | TransportProtocol.get('tcp')
 
@@ -16558,10 +16558,10 @@ class AppType(StrEnum):
     epmd: 'AppType' = 4369, 'epmd', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] ELPRO V2 Protocol Tunnel IANA assigned this well-formed service name
-    #: as a replacement for "elpro_tunnel".
+    #:   as a replacement for "elpro_tunnel".
     #: - [TCP] ELPRO V2 Protocol Tunnel
     #: - [UDP] ELPRO V2 Protocol Tunnel IANA assigned this well-formed service name
-    #: as a replacement for "elpro_tunnel".
+    #:   as a replacement for "elpro_tunnel".
     #: - [UDP] ELPRO V2 Protocol Tunnel
     elpro_tunnel: 'AppType' = 4370, 'elpro-tunnel', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -17057,14 +17057,14 @@ class AppType(StrEnum):
     iax: 'AppType' = 4569, 'iax', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Service to distribute and update within a site deployment information
-    #: for Oracle Communications Suite
+    #:   for Oracle Communications Suite
     deploymentmap: 'AppType' = 4570, 'deploymentmap', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
     reserved_4570: 'AppType' = 4570, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] A port for communication between a server and client for a custom
-    #: backup system
+    #:   backup system
     cardifftec_back: 'AppType' = 4573, 'cardifftec-back', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -17159,13 +17159,13 @@ class AppType(StrEnum):
     ventoso: 'AppType' = 4621, 'ventoso', TransportProtocol.get('udp')
 
     #: - [TCP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal
-    #: Channel Protocol. The service name is used to construct the SRV service
-    #: names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
-    #: servers used to establish DOTS signal channel. [:rfc:`8973`][:rfc:`9132`]
+    #:   Channel Protocol. The service name is used to construct the SRV service
+    #:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
+    #:   servers used to establish DOTS signal channel. [:rfc:`8973`][:rfc:`9132`]
     #: - [UDP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal
-    #: Channel Protocol. The service name is used to construct the SRV service
-    #: names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
-    #: servers used to establish DOTS signal channel. [:rfc:`8973`][:rfc:`9132`]
+    #:   Channel Protocol. The service name is used to construct the SRV service
+    #:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
+    #:   servers used to establish DOTS signal channel. [:rfc:`8973`][:rfc:`9132`]
     dots_signal: 'AppType' = 4646, 'dots-signal', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] PlayStation2 App Port
@@ -17514,7 +17514,7 @@ class AppType(StrEnum):
     reserved_4789: 'AppType' = 4789, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Generic Protocol Extension for Virtual eXtensible Local Area Network
-    #: (VXLAN)
+    #:   (VXLAN)
     vxlan_gpe: 'AppType' = 4790, 'vxlan-gpe', TransportProtocol.get('udp')
 
     #: [TCP] Reserved
@@ -17597,10 +17597,10 @@ class AppType(StrEnum):
     wcr_remlib: 'AppType' = 4845, 'wcr-remlib', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Contamac ICM Service IANA assigned this well-formed service name as a
-    #: replacement for "contamac_icm".
+    #:   replacement for "contamac_icm".
     #: - [TCP] Contamac ICM Service
     #: - [UDP] Contamac ICM Service IANA assigned this well-formed service name as a
-    #: replacement for "contamac_icm".
+    #:   replacement for "contamac_icm".
     #: - [UDP] Contamac ICM Service
     contamac_icm: 'AppType' = 4846, 'contamac-icm', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -17721,7 +17721,7 @@ class AppType(StrEnum):
     hfcs: 'AppType' = 4900, 'hfcs', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] FileLocator Remote Search Agent IANA assigned this well-formed service
-    #: name as a replacement for "flr_agent".
+    #:   name as a replacement for "flr_agent".
     #: - [TCP] FileLocator Remote Search Agent
     flr_agent: 'AppType' = 4901, 'flr-agent', TransportProtocol.get('tcp') | TransportProtocol.get('tcp')
 
@@ -18331,10 +18331,10 @@ class AppType(StrEnum):
     ctsd: 'AppType' = 5137, 'ctsd', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] RMONITOR SECURE IANA assigned this well-formed service name as a
-    #: replacement for "rmonitor_secure".
+    #:   replacement for "rmonitor_secure".
     #: - [TCP] RMONITOR SECURE
     #: - [UDP] RMONITOR SECURE IANA assigned this well-formed service name as a
-    #: replacement for "rmonitor_secure".
+    #:   replacement for "rmonitor_secure".
     #: - [UDP] RMONITOR SECURE
     rmonitor_secure: 'AppType' = 5145, 'rmonitor-secure', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -18349,10 +18349,10 @@ class AppType(StrEnum):
     atmp: 'AppType' = 5150, 'atmp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] ESRI SDE Instance IANA assigned this well-formed service name as a
-    #: replacement for "esri_sde".
+    #:   replacement for "esri_sde".
     #: - [TCP] ESRI SDE Instance
     #: - [UDP] ESRI SDE Remote Start IANA assigned this well-formed service name as a
-    #: replacement for "esri_sde".
+    #:   replacement for "esri_sde".
     #: - [UDP] ESRI SDE Remote Start
     esri_sde: 'AppType' = 5151, 'esri-sde', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -18409,10 +18409,10 @@ class AppType(StrEnum):
     vpa_disc: 'AppType' = 5164, 'vpa-disc', TransportProtocol.get('udp')
 
     #: - [TCP] ife_1corp IANA assigned this well-formed service name as a replacement
-    #: for "ife_icorp".
+    #:   for "ife_icorp".
     #: - [TCP] ife_1corp
     #: - [UDP] ife_1corp IANA assigned this well-formed service name as a replacement
-    #: for "ife_icorp".
+    #:   for "ife_icorp".
     #: - [UDP] ife_1corp
     ife_icorp: 'AppType' = 5165, 'ife-icorp', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -18457,14 +18457,14 @@ class AppType(StrEnum):
     reserved_5194: 'AppType' = 5194, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] The protocol is used by a license server and client programs to
-    #: control use of program licenses that float to networked machines
+    #:   control use of program licenses that float to networked machines
     ampl_lic: 'AppType' = 5195, 'ampl-lic', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
     reserved_5195: 'AppType' = 5195, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] The protocol is used by two programs that exchange "table" data used
-    #: in the AMPL modeling language
+    #:   in the AMPL modeling language
     ampl_tableproxy: 'AppType' = 5196, 'ampl-tableproxy', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -19235,7 +19235,7 @@ class AppType(StrEnum):
     sdt: 'AppType' = 5568, 'sdt', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] PLASA E1.33, Remote Device Management (RDM) controller status
-    #: notifications
+    #:   notifications
     rdmnet_ctrl: 'AppType' = 5569, 'rdmnet-ctrl', TransportProtocol.get('tcp')
 
     #: [UDP] PLASA E1.33, Remote Device Management (RDM) messages
@@ -19288,7 +19288,7 @@ class AppType(StrEnum):
     bis_sync: 'AppType' = 5585, 'bis-sync', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Planning to send mobile terminated SMS to the specific port so that
-    #: the SMS is not visible to the client
+    #:   the SMS is not visible to the client
     att_mt_sms: 'AppType' = 5586, 'att-mt-sms', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -19826,9 +19826,9 @@ class AppType(StrEnum):
     cpdlc: 'AppType' = 5911, 'cpdlc', TransportProtocol.get('sctp')
 
     #: - [TCP] Aeronautical Information Service/Meteorological applications using
-    #: ACARS
+    #:   ACARS
     #: - [UDP] Aeronautical Information Service/Meteorological applications using
-    #: ACARS
+    #:   ACARS
     ais_met: 'AppType' = 5912, 'ais-met', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [SCTP] Flight Information Services
@@ -20214,7 +20214,7 @@ class AppType(StrEnum):
     reserved_6201: 'AppType' = 6201, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Management of service nodes in a processing grid for thermodynamic
-    #: calculations
+    #:   calculations
     thermo_calc: 'AppType' = 6201, 'thermo-calc', TransportProtocol.get('udp')
 
     #: - [TCP] QMTP over TLS
@@ -20280,10 +20280,10 @@ class AppType(StrEnum):
     bmc_grx: 'AppType' = 6300, 'bmc-grx', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] BMC CONTROL-D LDAP SERVER IANA assigned this well-formed service name
-    #: as a replacement for "bmc_ctd_ldap".
+    #:   as a replacement for "bmc_ctd_ldap".
     #: - [TCP] BMC CONTROL-D LDAP SERVER
     #: - [UDP] BMC CONTROL-D LDAP SERVER IANA assigned this well-formed service name
-    #: as a replacement for "bmc_ctd_ldap".
+    #:   as a replacement for "bmc_ctd_ldap".
     #: - [UDP] BMC CONTROL-D LDAP SERVER
     bmc_ctd_ldap: 'AppType' = 6301, 'bmc-ctd-ldap', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -20481,10 +20481,10 @@ class AppType(StrEnum):
     sun_sr_https: 'AppType' = 6443, 'sun-sr-https', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Grid Engine Execution Service IANA assigned this well-formed service
-    #: name as a replacement for "sge_execd".
+    #:   name as a replacement for "sge_execd".
     #: - [TCP] Grid Engine Execution Service
     #: - [UDP] Grid Engine Execution Service IANA assigned this well-formed service
-    #: name as a replacement for "sge_execd".
+    #:   name as a replacement for "sge_execd".
     #: - [UDP] Grid Engine Execution Service
     sge_execd: 'AppType' = 6445, 'sge-execd', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -20501,9 +20501,9 @@ class AppType(StrEnum):
     skip_cert_send: 'AppType' = 6456, 'skip-cert-send', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Port assignment for medical device communication in accordance to IEEE
-    #: 11073-20701
+    #:   11073-20701
     #: - [UDP] Port assignment for medical device communication in accordance to IEEE
-    #: 11073-20701
+    #:   11073-20701
     ieee11073_20701: 'AppType' = 6464, 'ieee11073-20701', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] LVision License Manager
@@ -20555,26 +20555,26 @@ class AppType(StrEnum):
     boks: 'AppType' = 6500, 'boks', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] BoKS Servc IANA assigned this well-formed service name as a
-    #: replacement for "boks_servc".
+    #:   replacement for "boks_servc".
     #: - [TCP] BoKS Servc
     #: - [UDP] BoKS Servc IANA assigned this well-formed service name as a
-    #: replacement for "boks_servc".
+    #:   replacement for "boks_servc".
     #: - [UDP] BoKS Servc
     boks_servc: 'AppType' = 6501, 'boks-servc', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] BoKS Servm IANA assigned this well-formed service name as a
-    #: replacement for "boks_servm".
+    #:   replacement for "boks_servm".
     #: - [TCP] BoKS Servm
     #: - [UDP] BoKS Servm IANA assigned this well-formed service name as a
-    #: replacement for "boks_servm".
+    #:   replacement for "boks_servm".
     #: - [UDP] BoKS Servm
     boks_servm: 'AppType' = 6502, 'boks-servm', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] BoKS Clntd IANA assigned this well-formed service name as a
-    #: replacement for "boks_clntd".
+    #:   replacement for "boks_clntd".
     #: - [TCP] BoKS Clntd
     #: - [UDP] BoKS Clntd IANA assigned this well-formed service name as a
-    #: replacement for "boks_clntd".
+    #:   replacement for "boks_clntd".
     #: - [UDP] BoKS Clntd
     boks_clntd: 'AppType' = 6503, 'boks-clntd', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -20582,34 +20582,34 @@ class AppType(StrEnum):
     unassigned_6504: 'AppType' = 6504, 'unassigned', TransportProtocol.get('undefined')
 
     #: - [TCP] BoKS Admin Private Port IANA assigned this well-formed service name as
-    #: a replacement for "badm_priv".
+    #:   a replacement for "badm_priv".
     #: - [TCP] BoKS Admin Private Port
     #: - [UDP] BoKS Admin Private Port IANA assigned this well-formed service name as
-    #: a replacement for "badm_priv".
+    #:   a replacement for "badm_priv".
     #: - [UDP] BoKS Admin Private Port
     badm_priv: 'AppType' = 6505, 'badm-priv', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] BoKS Admin Public Port IANA assigned this well-formed service name as
-    #: a replacement for "badm_pub".
+    #:   a replacement for "badm_pub".
     #: - [TCP] BoKS Admin Public Port
     #: - [UDP] BoKS Admin Public Port IANA assigned this well-formed service name as
-    #: a replacement for "badm_pub".
+    #:   a replacement for "badm_pub".
     #: - [UDP] BoKS Admin Public Port
     badm_pub: 'AppType' = 6506, 'badm-pub', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] BoKS Dir Server, Private Port IANA assigned this well-formed service
-    #: name as a replacement for "bdir_priv".
+    #:   name as a replacement for "bdir_priv".
     #: - [TCP] BoKS Dir Server, Private Port
     #: - [UDP] BoKS Dir Server, Private Port IANA assigned this well-formed service
-    #: name as a replacement for "bdir_priv".
+    #:   name as a replacement for "bdir_priv".
     #: - [UDP] BoKS Dir Server, Private Port
     bdir_priv: 'AppType' = 6507, 'bdir-priv', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] BoKS Dir Server, Public Port IANA assigned this well-formed service
-    #: name as a replacement for "bdir_pub".
+    #:   name as a replacement for "bdir_pub".
     #: - [TCP] BoKS Dir Server, Public Port
     #: - [UDP] BoKS Dir Server, Public Port IANA assigned this well-formed service
-    #: name as a replacement for "bdir_pub".
+    #:   name as a replacement for "bdir_pub".
     #: - [UDP] BoKS Dir Server, Public Port
     bdir_pub: 'AppType' = 6508, 'bdir-pub', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -20625,7 +20625,7 @@ class AppType(StrEnum):
     reserved_6511: 'AppType' = 6511, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Datagram Congestion Control Protocol Encapsulation for NAT Traversal
-    #: [:rfc:`6773`]
+    #:   [:rfc:`6773`]
     dccp_udp: 'AppType' = 6511, 'dccp-udp', TransportProtocol.get('udp')
 
     #: [TCP] NETCONF over TLS [:rfc:`7589`]
@@ -20692,7 +20692,7 @@ class AppType(StrEnum):
     reserved_6567: 'AppType' = 6567, 'reserved', TransportProtocol.get('undefined')
 
     #: - [TCP] CanIt Storage Manager IANA assigned this well-formed service name as a
-    #: replacement for "canit_store".
+    #:   replacement for "canit_store".
     #: - [TCP] CanIt Storage Manager
     canit_store: 'AppType' = 6568, 'canit-store', TransportProtocol.get('tcp') | TransportProtocol.get('tcp')
 
@@ -20785,9 +20785,9 @@ class AppType(StrEnum):
     afesc_mc: 'AppType' = 6628, 'afesc-mc', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Secondary, (non ANDI) multi-protocol multi-function interface to
-    #: the Allied ANDI-based family of forecourt controllers
+    #:   the Allied ANDI-based family of forecourt controllers
     #: - [UDP] Secondary, (non ANDI) multi-protocol multi-function interface to
-    #: the Allied ANDI-based family of forecourt controllers
+    #:   the Allied ANDI-based family of forecourt controllers
     nexgen_aux: 'AppType' = 6629, 'nexgen-aux', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [N/A] Unassigned
@@ -20866,18 +20866,18 @@ class AppType(StrEnum):
     p4p_portal: 'AppType' = 6671, 'p4p-portal', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] vision_server IANA assigned this well-formed service name as a
-    #: replacement for "vision_server".
+    #:   replacement for "vision_server".
     #: - [TCP] vision_server
     #: - [UDP] vision_server IANA assigned this well-formed service name as a
-    #: replacement for "vision_server".
+    #:   replacement for "vision_server".
     #: - [UDP] vision_server
     vision_server: 'AppType' = 6672, 'vision-server', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] vision_elmd IANA assigned this well-formed service name as a
-    #: replacement for "vision_elmd".
+    #:   replacement for "vision_elmd".
     #: - [TCP] vision_elmd
     #: - [UDP] vision_elmd IANA assigned this well-formed service name as a
-    #: replacement for "vision_elmd".
+    #:   replacement for "vision_elmd".
     #: - [UDP] vision_elmd
     vision_elmd: 'AppType' = 6673, 'vision-elmd', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -21026,7 +21026,7 @@ class AppType(StrEnum):
     reserved_6784: 'AppType' = 6784, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Bidirectional Forwarding Detection (BFD) on Link Aggregation Group
-    #: (LAG) Interfaces [:rfc:`7130`]
+    #:   (LAG) Interfaces [:rfc:`7130`]
     bfd_lag: 'AppType' = 6784, 'bfd-lag', TransportProtocol.get('udp')
 
     #: - [TCP] DGPF Individual Exchange
@@ -21472,14 +21472,14 @@ class AppType(StrEnum):
     dlip: 'AppType' = 7201, 'dlip', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Inter-Channel Termination Protocol (ICTP) for multi-wavelength PON
-    #: (Passive Optical Network) systems [TR-352][Inter-Channel-Termination
-    #: protocol (ICTP) is a peer-to-peer protocol with       a binary message
-    #: format that is used by a set of optical line terminal (OLT) channel
-    #: terminations (CT) comprising a 40-Gigabit-capable next-generation passive
-    #: optical network (NG-PON2) system to       exchange channel profile
-    #: configuration and status information and to coordinate the operation of
-    #: tunable optical network units (ONUs) in a multi-wavelength channel
-    #: environment.]
+    #:   (Passive Optical Network) systems [TR-352][Inter-Channel-Termination
+    #:   protocol (ICTP) is a peer-to-peer protocol with       a binary message
+    #:   format that is used by a set of optical line terminal (OLT) channel
+    #:   terminations (CT) comprising a 40-Gigabit-capable next-generation passive
+    #:   optical network (NG-PON2) system to       exchange channel profile
+    #:   configuration and status information and to coordinate the operation of
+    #:   tunable optical network units (ONUs) in a multi-wavelength channel
+    #:   environment.]
     pon_ictp: 'AppType' = 7202, 'pon-ictp', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -22254,7 +22254,7 @@ class AppType(StrEnum):
     mcreport: 'AppType' = 8003, 'mcreport', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Opensource Evolv Enterprise Platform P2P Network Node Connection
-    #: Protocol
+    #:   Protocol
     p2pevolvenet: 'AppType' = 8004, 'p2pevolvenet', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -22458,8 +22458,8 @@ class AppType(StrEnum):
     gadugadu: 'AppType' = 8074, 'gadugadu', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Mles is a client-server data distribution protocol targeted to serve
-    #: as a lightweight and reliable distributed publish/subscribe database
-    #: service.
+    #:   as a lightweight and reliable distributed publish/subscribe database
+    #:   service.
     mles: 'AppType' = 8077, 'mles', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -23052,7 +23052,7 @@ class AppType(StrEnum):
     msi_cps_rm: 'AppType' = 8675, 'msi-cps-rm', TransportProtocol.get('tcp')
 
     #: [UDP] Motorola Solutions Customer Programming Software for Radio Management
-    #: Discovery
+    #:   Discovery
     msi_cps_rm_disc: 'AppType' = 8675, 'msi-cps-rm-disc', TransportProtocol.get('udp')
 
     #: - [TCP] Sun App Server - JMX/RMI
@@ -23529,9 +23529,9 @@ class AppType(StrEnum):
     peerwire: 'AppType' = 9104, 'peerwire', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Xadmin Control Service [Ari√´n Huisken <xadmin&huisken-systems.nl> 15
-    #: June 2009]
+    #:   June 2009]
     #: - [UDP] Xadmin Control Service [Ari√´n Huisken <xadmin&huisken-systems.nl> 15
-    #: June 2009]
+    #:   June 2009]
     xadmin: 'AppType' = 9105, 'xadmin', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Astergate Control Service
@@ -23960,7 +23960,7 @@ class AppType(StrEnum):
     unassigned_9615: 'AppType' = 9615, 'unassigned', TransportProtocol.get('undefined')
 
     #: - [TCP] eRunbook Agent IANA assigned this well-formed service name as a
-    #: replacement for "erunbook_agent".
+    #:   replacement for "erunbook_agent".
     #: - [TCP] eRunbook Agent
     erunbook_agent: 'AppType' = 9616, 'erunbook-agent', TransportProtocol.get('tcp') | TransportProtocol.get('tcp')
 
@@ -23968,7 +23968,7 @@ class AppType(StrEnum):
     reserved_9616: 'AppType' = 9616, 'reserved', TransportProtocol.get('udp')
 
     #: - [TCP] eRunbook Server IANA assigned this well-formed service name as a
-    #: replacement for "erunbook_server".
+    #:   replacement for "erunbook_server".
     #: - [TCP] eRunbook Server
     erunbook_server: 'AppType' = 9617, 'erunbook-server', TransportProtocol.get('tcp') | TransportProtocol.get('tcp')
 
@@ -24076,7 +24076,7 @@ class AppType(StrEnum):
     reserved_9877: 'AppType' = 9877, 'reserved', TransportProtocol.get('udp')
 
     #: [UDP] The KX509 Kerberized Certificate Issuance Protocol in Use in 2012
-    #: [:rfc:`6717`]
+    #:   [:rfc:`6717`]
     kca_service: 'AppType' = 9878, 'kca-service', TransportProtocol.get('udp')
 
     #: [TCP] Reserved
@@ -24259,10 +24259,10 @@ class AppType(StrEnum):
     documentum: 'AppType' = 10002, 'documentum', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] EMC-Documentum Content Server Product IANA assigned this well-formed
-    #: service name as a replacement for "documentum_s".
+    #:   service name as a replacement for "documentum_s".
     #: - [TCP] EMC-Documentum Content Server Product
     #: - [UDP] EMC-Documentum Content Server Product IANA assigned this well-formed
-    #: service name as a replacement for "documentum_s".
+    #:   service name as a replacement for "documentum_s".
     #: - [UDP] EMC-Documentum Content Server Product
     documentum_s: 'AppType' = 10003, 'documentum-s', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -24594,14 +24594,14 @@ class AppType(StrEnum):
     reserved_11108: 'AppType' = 11108, 'reserved', TransportProtocol.get('tcp')
 
     #: [TCP] Data migration facility Manager (DMF) is a browser based interface to
-    #: DMF
+    #:   DMF
     sgi_dmfmgr: 'AppType' = 11109, 'sgi-dmfmgr', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
     reserved_11109: 'AppType' = 11109, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] Data migration facility (DMF) SOAP is a web server protocol to support
-    #: remote access to DMF
+    #:   remote access to DMF
     sgi_soap: 'AppType' = 11110, 'sgi-soap', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -24862,8 +24862,8 @@ class AppType(StrEnum):
     unassigned_12301: 'AppType' = 12301, 'unassigned', TransportProtocol.get('undefined')
 
     #: [TCP] Remote Administration Daemon (RAD) is a system service that offers
-    #: secure, remote, programmatic access to Solaris system configuration and run-
-    #: time state
+    #:   secure, remote, programmatic access to Solaris system configuration and run-
+    #:   time state
     rads: 'AppType' = 12302, 'rads', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -25247,7 +25247,7 @@ class AppType(StrEnum):
     vtp: 'AppType' = 16666, 'vtp', TransportProtocol.get('udp')
 
     #: [TCP] This server provides callable services to mainframe External Security
-    #: Managers from any TCP/IP platform
+    #:   Managers from any TCP/IP platform
     cadsisvr: 'AppType' = 16789, 'cadsisvr', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -25310,9 +25310,9 @@ class AppType(StrEnum):
     avtp: 'AppType' = 17220, 'avtp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] IEEE 1722.1 AVB Discovery, Enumeration, Connection management, and
-    #: Control
+    #:   Control
     #: - [UDP] IEEE 1722.1 AVB Discovery, Enumeration, Connection management, and
-    #: Control
+    #:   Control
     avdecc: 'AppType' = 17221, 'avdecc', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Reserved
@@ -25322,7 +25322,7 @@ class AppType(StrEnum):
     cpsp: 'AppType' = 17222, 'cpsp', TransportProtocol.get('udp')
 
     #: [TCP] ISA100 GCI is a service utilizing a common interface between an ISA100
-    #: Wireless gateway and a client application
+    #:   Wireless gateway and a client application
     isa100_gci: 'AppType' = 17223, 'isa100-gci', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -25611,10 +25611,10 @@ class AppType(StrEnum):
     opendeploy: 'AppType' = 20014, 'opendeploy', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] NetBurner ID Port IANA assigned this well-formed service name as a
-    #: replacement for "nburn_id".
+    #:   replacement for "nburn_id".
     #: - [TCP] NetBurner ID Port
     #: - [UDP] NetBurner ID Port IANA assigned this well-formed service name as a
-    #: replacement for "nburn_id".
+    #:   replacement for "nburn_id".
     #: - [UDP] NetBurner ID Port
     nburn_id: 'AppType' = 20034, 'nburn-id', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -25970,10 +25970,10 @@ class AppType(StrEnum):
     reserved_24323: 'AppType' = 24323, 'reserved', TransportProtocol.get('udp')
 
     #: - [TCP] Intel RCI IANA assigned this well-formed service name as a replacement
-    #: for "intel_rci".
+    #:   for "intel_rci".
     #: - [TCP] Intel RCI
     #: - [UDP] Intel RCI IANA assigned this well-formed service name as a replacement
-    #: for "intel_rci".
+    #:   for "intel_rci".
     #: - [UDP] Intel RCI
     intel_rci: 'AppType' = 24386, 'intel-rci', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -25992,7 +25992,7 @@ class AppType(StrEnum):
     bilobit_update: 'AppType' = 24577, 'bilobit-update', TransportProtocol.get('udp')
 
     #: [TCP] Service used by SmarDTV to communicate between a CAM and a second
-    #: screen application
+    #:   screen application
     sdtvwcam: 'AppType' = 24666, 'sdtvwcam', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -26382,7 +26382,7 @@ class AppType(StrEnum):
     lm_mon: 'AppType' = 31620, 'lm-mon', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] DS Expert Monitor IANA assigned this well-formed service name as a
-    #: replacement for "dsx_monitor".
+    #:   replacement for "dsx_monitor".
     #: - [TCP] DS Expert Monitor
     dsx_monitor: 'AppType' = 31685, 'dsx-monitor', TransportProtocol.get('tcp') | TransportProtocol.get('tcp')
 
@@ -26394,18 +26394,18 @@ class AppType(StrEnum):
     gamesmith_port: 'AppType' = 31765, 'gamesmith-port', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Embedded Device Configuration Protocol TX IANA assigned this well-
-    #: formed service name as a replacement for "iceedcp_tx".
+    #:   formed service name as a replacement for "iceedcp_tx".
     #: - [TCP] Embedded Device Configuration Protocol TX
     #: - [UDP] Embedded Device Configuration Protocol TX IANA assigned this well-
-    #: formed service name as a replacement for "iceedcp_tx".
+    #:   formed service name as a replacement for "iceedcp_tx".
     #: - [UDP] Embedded Device Configuration Protocol TX
     iceedcp_tx: 'AppType' = 31948, 'iceedcp-tx', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
     #: - [TCP] Embedded Device Configuration Protocol RX IANA assigned this well-
-    #: formed service name as a replacement for "iceedcp_rx".
+    #:   formed service name as a replacement for "iceedcp_rx".
     #: - [TCP] Embedded Device Configuration Protocol RX
     #: - [UDP] Embedded Device Configuration Protocol RX IANA assigned this well-
-    #: formed service name as a replacement for "iceedcp_rx".
+    #:   formed service name as a replacement for "iceedcp_rx".
     #: - [UDP] Embedded Device Configuration Protocol RX
     iceedcp_rx: 'AppType' = 31949, 'iceedcp-rx', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -26805,8 +26805,8 @@ class AppType(StrEnum):
     reserved_38638: 'AppType' = 38638, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] Sruth is a service for the distribution of routinely-       generated
-    #: but arbitrary files based on a publish/subscribe       distribution model
-    #: and implemented using a peer-to-peer transport       mechanism
+    #:   but arbitrary files based on a publish/subscribe       distribution model
+    #:   and implemented using a peer-to-peer transport       mechanism
     sruth: 'AppType' = 38800, 'sruth', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -27015,10 +27015,10 @@ class AppType(StrEnum):
     asihpi: 'AppType' = 44600, 'asihpi', TransportProtocol.get('udp')
 
     #: - [TCP] EtherNet/IP messaging IANA assigned this well-formed service name as a
-    #: replacement for "EtherNet/IP-2".
+    #:   replacement for "EtherNet/IP-2".
     #: - [TCP] EtherNet/IP messaging
     #: - [UDP] EtherNet/IP messaging IANA assigned this well-formed service name as a
-    #: replacement for "EtherNet/IP-2".
+    #:   replacement for "EtherNet/IP-2".
     #: - [UDP] EtherNet/IP messaging
     ethernet_ip_2: 'AppType' = 44818, 'ethernet-ip-2', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -27087,7 +27087,7 @@ class AppType(StrEnum):
     reserved_46336: 'AppType' = 46336, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] Connection between a desktop computer or server and a signature tablet
-    #: to capture handwritten signatures
+    #:   to capture handwritten signatures
     spremotetablet: 'AppType' = 46998, 'spremotetablet', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -27550,7 +27550,7 @@ class AppType(StrEnum):
     activeraid: 'AppType' = -1, 'activeraid', TransportProtocol.get('undefined')
 
     #: [N/A] Encrypted transport of Active Storage Proprietary Device Management
-    #: Protocol
+    #:   Protocol
     activeraid_ssl: 'AppType' = -1, 'activeraid-ssl', TransportProtocol.get('undefined')
 
     #: - [TCP] Adam Hall network control and monitoring
@@ -27564,7 +27564,7 @@ class AppType(StrEnum):
     addressbooksrv: 'AppType' = -1, 'addressbooksrv', TransportProtocol.get('tcp')
 
     #: [N/A] difusi Cloud based plug & play network       synchronization protocol,
-    #: content pool database discovery, and       cloudOS SAaS discovery protocol.
+    #:   content pool database discovery, and       cloudOS SAaS discovery protocol.
     adnodes: 'AppType' = -1, 'adnodes', TransportProtocol.get('undefined')
 
     #: [TCP] Adobe Shadow Server
@@ -27702,7 +27702,7 @@ class AppType(StrEnum):
     asam_cmp: 'AppType' = -1, 'asam-cmp', TransportProtocol.get('udp')
 
     #: [TCP] protocol for an event-based architecture for distributed control of
-    #: mobile robots
+    #:   mobile robots
     aseba: 'AppType' = -1, 'aseba', TransportProtocol.get('tcp')
 
     #: [UDP] Asterisk Caller-ID Notification Service
@@ -27718,7 +27718,7 @@ class AppType(StrEnum):
     atnet: 'AppType' = -1, 'atnet', TransportProtocol.get('udp')
 
     #: [N/A] Atlassian Application (JIRA, Confluence, Fisheye, Crucible, Crowd,
-    #: Bamboo) discovery service
+    #:   Bamboo) discovery service
     atlassianapp: 'AppType' = -1, 'atlassianapp', TransportProtocol.get('undefined')
 
     #: - [TCP] Attero Tech Audio Device
@@ -27876,14 +27876,14 @@ class AppType(StrEnum):
     brski_proxy: 'AppType' = -1, 'brski-proxy', TransportProtocol.get('tcp')
 
     #: [TCP] The Bootstrapping Remote Secure Key Infrastructure Registrar
-    #: [:rfc:`8995`]
+    #:   [:rfc:`8995`]
     brski_registrar: 'AppType' = -1, 'brski-registrar', TransportProtocol.get('tcp')
 
     #: [N/A] Backup Simplicity
     bsqdea: 'AppType' = -1, 'bsqdea', TransportProtocol.get('undefined')
 
     #: [TCP] Beats Transfer Protocol allows for the discovery and control of
-    #: devices
+    #:   devices
     btp: 'AppType' = -1, 'btp', TransportProtocol.get('tcp')
 
     #: [TCP] buddycloud API
@@ -28095,7 +28095,7 @@ class AppType(StrEnum):
     #: [TCP] DNS Long-Lived Queries over TLS [:rfc:`6281`]
     dns_llq_tls: 'AppType' = -1, 'dns-llq-tls', TransportProtocol.get('tcp')
 
-    #: [TCP] DNS Push Notification Service Type [:rfc:`8765, Section 6.1`]
+    #: [TCP] DNS Push Notification Service Type [:rfc:`8765#6.1`]
     dns_push_tls: 'AppType' = -1, 'dns-push-tls', TransportProtocol.get('tcp')
 
     #: [TCP] DNS queries to the authoritative server over TLS
@@ -28115,18 +28115,18 @@ class AppType(StrEnum):
     dop: 'AppType' = -1, 'dop', TransportProtocol.get('undefined')
 
     #: - [TCP] DOTS Signal Channel Call Home Protocol.       The service name is used
-    #: to construct the SRV service names "_dots-call-home._udp"       and "_dots-
-    #: call-home._tcp" for discovering Call Home DOTS clients used to establish
-    #: DOTS signal channel call home. [:rfc:`8973`]
+    #:   to construct the SRV service names "_dots-call-home._udp"       and "_dots-
+    #:   call-home._tcp" for discovering Call Home DOTS clients used to establish
+    #:   DOTS signal channel call home. [:rfc:`8973`]
     #: - [UDP] DOTS Signal Channel Call Home Protocol.       The service name is used
-    #: to construct the SRV service names "_dots-call-home._udp"       and "_dots-
-    #: call-home._tcp" for discovering Call Home DOTS clients used to establish
-    #: DOTS signal channel call home. [:rfc:`8973`]
+    #:   to construct the SRV service names "_dots-call-home._udp"       and "_dots-
+    #:   call-home._tcp" for discovering Call Home DOTS clients used to establish
+    #:   DOTS signal channel call home. [:rfc:`8973`]
     dots_call_home: 'AppType' = -1, 'dots-call-home', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] DOTS Data Channel Protocol.       The service name is used to
-    #: construct the SRV service name "_dots-data._tcp" for       discovering DOTS
-    #: servers used to establish DOTS data channel. [:rfc:`8973`]
+    #:   construct the SRV service name "_dots-data._tcp" for       discovering DOTS
+    #:   servers used to establish DOTS data channel. [:rfc:`8973`]
     dots_data: 'AppType' = -1, 'dots-data', TransportProtocol.get('tcp')
 
     #: [N/A] DropCopy
@@ -28142,7 +28142,7 @@ class AppType(StrEnum):
     dtrmtdesktop: 'AppType' = -1, 'dtrmtdesktop', TransportProtocol.get('undefined')
 
     #: [TCP] A communication protocol that allows a school teacher to set work
-    #: activities to students over a LAN.
+    #:   activities to students over a LAN.
     duckrace: 'AppType' = -1, 'duckrace', TransportProtocol.get('tcp')
 
     #: [N/A] Documents To Go Desktop Sync Protocol
@@ -28337,15 +28337,15 @@ class AppType(StrEnum):
     glrdrvmon: 'AppType' = -1, 'glrdrvmon', TransportProtocol.get('undefined')
 
     #: - [TCP] Service related to Google Expeditions which is a technology for
-    #: enabling multi-participant virtual fieldtrip experiences over a local
-    #: wireless network. See http://g.co/expeditions for more details
+    #:   enabling multi-participant virtual fieldtrip experiences over a local
+    #:   wireless network. See http://g.co/expeditions for more details
     #: - [UDP] Service related to Google Expeditions which is a technology for
-    #: enabling multi-participant virtual fieldtrip experiences over a local
-    #: wireless network. See http://g.co/expeditions for more details
+    #:   enabling multi-participant virtual fieldtrip experiences over a local
+    #:   wireless network. See http://g.co/expeditions for more details
     googexpeditions: 'AppType' = -1, 'googexpeditions', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Service related to Google Cast which is a technology for enabling
-    #: multi-screen experiences. See developers.google.com/cast for more details
+    #:   multi-screen experiences. See developers.google.com/cast for more details
     googlecast: 'AppType' = -1, 'googlecast', TransportProtocol.get('tcp')
 
     #: [TCP] For iOS Application named GoOrStop
@@ -28379,11 +28379,11 @@ class AppType(StrEnum):
     gucam_http: 'AppType' = -1, 'gucam-http', TransportProtocol.get('tcp')
 
     #: [N/A] Special service type for resolving by GUID (Globally Unique
-    #: Identifier)
+    #:   Identifier)
     guid: 'AppType' = -1, 'guid', TransportProtocol.get('undefined')
 
     #: [N/A] H.323 Real-time audio, video and data communication call setup
-    #: protocol
+    #:   protocol
     h323: 'AppType' = -1, 'h323', TransportProtocol.get('undefined')
 
     #: [TCP] HbbTV Application Information Table
@@ -28435,18 +28435,18 @@ class AppType(StrEnum):
     hpr_bldwin: 'AppType' = -1, 'hpr-bldwin', TransportProtocol.get('undefined')
 
     #: [N/A] Identifies systems that house databases for the Remote Build System
-    #: and Remote Test System
+    #:   and Remote Test System
     hpr_db: 'AppType' = -1, 'hpr-db', TransportProtocol.get('undefined')
 
     #: [N/A] HP Remote Repository for Build and Test Results
     hpr_rep: 'AppType' = -1, 'hpr-rep', TransportProtocol.get('undefined')
 
     #: [N/A] HP Remote System that houses compilers and tools for Linux-based
-    #: Systems
+    #:   Systems
     hpr_toollnx: 'AppType' = -1, 'hpr-toollnx', TransportProtocol.get('undefined')
 
     #: [N/A] HP Remote System that houses compilers and tools for Microsoft Windows
-    #: Systems
+    #:   Systems
     hpr_toolwin: 'AppType' = -1, 'hpr-toolwin', TransportProtocol.get('undefined')
 
     #: [N/A] HP Remote Test System for Linux-based Systems
@@ -28515,7 +28515,7 @@ class AppType(StrEnum):
     iconquer: 'AppType' = -1, 'iconquer', TransportProtocol.get('undefined')
 
     #: [TCP] A Remote Control Application service used to control Computers on a
-    #: Local Area Network
+    #:   Local Area Network
     icontrolbox: 'AppType' = -1, 'icontrolbox', TransportProtocol.get('tcp')
 
     #: [N/A] Generic Data Acquisition and Control Protocol
@@ -28531,7 +28531,7 @@ class AppType(StrEnum):
     idsync: 'AppType' = -1, 'idsync', TransportProtocol.get('undefined')
 
     #: [N/A] iFFL Bonjour service for communication between client and server
-    #: applications.
+    #:   applications.
     iffl: 'AppType' = -1, 'iffl', TransportProtocol.get('undefined')
 
     #: [N/A] Published iFolder
@@ -28685,7 +28685,7 @@ class AppType(StrEnum):
     jukejoint: 'AppType' = -1, 'jukejoint', TransportProtocol.get('tcp')
 
     #: [TCP] KeynoteAccess is used for sending remote requests/responses when
-    #: controlling a slideshow with Keynote Remote
+    #:   controlling a slideshow with Keynote Remote
     keynoteaccess: 'AppType' = -1, 'keynoteaccess', TransportProtocol.get('tcp')
 
     #: [TCP] KeynotePairing is used to pair Keynote Remote with Keynote
@@ -28864,7 +28864,7 @@ class AppType(StrEnum):
     mcrcp: 'AppType' = -1, 'mcrcp', TransportProtocol.get('undefined')
 
     #: [N/A] MediaBoardONE Asset and Information Manager data sharing and
-    #: synchronization protocol
+    #:   synchronization protocol
     mediaboard1: 'AppType' = -1, 'mediaboard1', TransportProtocol.get('undefined')
 
     #: [TCP] Mediatap streaming protocol
@@ -28898,17 +28898,17 @@ class AppType(StrEnum):
     mielesemiprof: 'AppType' = -1, 'mielesemiprof', TransportProtocol.get('tcp')
 
     #: [TCP] A Medical Interoperability Service Type, used to identify medical
-    #: devices providing network interfaces.
+    #:   devices providing network interfaces.
     mist: 'AppType' = -1, 'mist', TransportProtocol.get('tcp')
 
     #: [TCP] Provides a client with access to the Mathematical Mesh, a user-focused
-    #: PKI.
+    #:   PKI.
     mmm: 'AppType' = -1, 'mmm', TransportProtocol.get('tcp')
 
     #: - [TCP] A Remote Control Application service used to control Computers on a
-    #: Local Area Network
+    #:   Local Area Network
     #: - [UDP] A Remote Control Application service used to control Computers on a
-    #: Local Area Network
+    #:   Local Area Network
     mn_passage: 'AppType' = -1, 'mn-passage', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [N/A] modo LAN Services
@@ -28980,7 +28980,7 @@ class AppType(StrEnum):
     nasmon: 'AppType' = -1, 'nasmon', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] This DNS-SD service is used by mobile clients to locate the Nasuni
-    #: Filer (a storage product) for a given company.
+    #:   Filer (a storage product) for a given company.
     nasunifiler: 'AppType' = -1, 'nasunifiler', TransportProtocol.get('tcp')
 
     #: [N/A] Network Clipboard Broadcasts
@@ -29019,7 +29019,7 @@ class AppType(StrEnum):
     nextcap: 'AppType' = -1, 'nextcap', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] NFS service for the domain root, the root of an organization's
-    #: published file namespace. [:rfc:`6641`]
+    #:   published file namespace. [:rfc:`6641`]
     nfs_domainroot: 'AppType' = -1, 'nfs-domainroot', TransportProtocol.get('tcp')
 
     #: [TCP] NGR Key Distribution
@@ -29043,7 +29043,7 @@ class AppType(StrEnum):
     ni_sysapi: 'AppType' = -1, 'ni-sysapi', TransportProtocol.get('tcp')
 
     #: [TCP] Lightweight event based control protocol utilising JavaScript Object
-    #: Notation
+    #:   Notation
     nodel: 'AppType' = -1, 'nodel', TransportProtocol.get('tcp')
 
     #: [TCP] Network Quality test server endpoint
@@ -29072,19 +29072,19 @@ class AppType(StrEnum):
     obf: 'AppType' = -1, 'obf', TransportProtocol.get('undefined')
 
     #: [N/A] Means for clients to locate servers in an Objective
-    #: (http://www.objective.com) instance.
+    #:   (http://www.objective.com) instance.
     objective: 'AppType' = -1, 'objective', TransportProtocol.get('undefined')
 
     #: - [TCP] Insecure OCP.1 protocol, which is the insecure TCP/IP implementation
-    #: of the Object Control Architecture
+    #:   of the Object Control Architecture
     #: - [UDP] Insecure OCP.1 protocol, which is the insecure TCP/IP implementation
-    #: of the Object Control Architecture
+    #:   of the Object Control Architecture
     oca: 'AppType' = -1, 'oca', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Secure OCP.1 protocol, which is the secure TCP/IP implementation of
-    #: the Object Control Architecture
+    #:   the Object Control Architecture
     #: - [UDP] Secure OCP.1 protocol, which is the secure TCP/IP implementation of
-    #: the Object Control Architecture
+    #:   the Object Control Architecture
     ocasec: 'AppType' = -1, 'ocasec', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Insecure OCP.1 hosted on a WebSocket
@@ -29121,7 +29121,7 @@ class AppType(StrEnum):
     oma_bcast_sg: 'AppType' = -1, 'oma-bcast-sg', TransportProtocol.get('undefined')
 
     #: [TCP] Open Mobile Alliance (OMA) Device Management (DM) Bootstrap Server
-    #: Discovery Service
+    #:   Discovery Service
     omadm_bootstrap: 'AppType' = -1, 'omadm-bootstrap', TransportProtocol.get('tcp')
 
     #: [N/A] OmniWeb
@@ -29331,7 +29331,7 @@ class AppType(StrEnum):
     quinn: 'AppType' = -1, 'quinn', TransportProtocol.get('undefined')
 
     #: [TCP] Broadcast of Qwizdom Presentation sessions for joining by a client,
-    #: such as Qwizdom Notes+.
+    #:   such as Qwizdom Notes+.
     qwizcollab: 'AppType' = -1, 'qwizcollab', TransportProtocol.get('tcp')
 
     #: [N/A] Rakket Client Protocol
@@ -29351,13 +29351,13 @@ class AppType(StrEnum):
     radioport: 'AppType' = -1, 'radioport', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [UDP] Authentication, Accounting, and Dynamic Authorization via the RADIUS
-    #: protocol. This service name is used to construct the SRV service label
-    #: "_radiusdtls" for discovery of RADIUS/DTLS servers. [:rfc:`7585`]
+    #:   protocol. This service name is used to construct the SRV service label
+    #:   "_radiusdtls" for discovery of RADIUS/DTLS servers. [:rfc:`7585`]
     radiusdtls: 'AppType' = -1, 'radiusdtls', TransportProtocol.get('udp')
 
     #: [TCP] Authentication, Accounting, and Dynamic Authorization via the RADIUS
-    #: protocol. This service name is used to construct the SRV service label
-    #: "_radiustls" for discovery of RADIUS/TLS servers. [:rfc:`7585`]
+    #:   protocol. This service name is used to construct the SRV service label
+    #:   "_radiustls" for discovery of RADIUS/TLS servers. [:rfc:`7585`]
     radiustls: 'AppType' = -1, 'radiustls', TransportProtocol.get('tcp')
 
     #: [TCP] Model Railroad Messaging
@@ -29435,7 +29435,7 @@ class AppType(StrEnum):
     roambot: 'AppType' = -1, 'roambot', TransportProtocol.get('tcp')
 
     #: [TCP] Like ircu (RFC1459), but failure tolerant due to strong consistency
-    #: among n>=3 servers
+    #:   among n>=3 servers
     robustirc: 'AppType' = -1, 'robustirc', TransportProtocol.get('tcp')
 
     #: [N/A] Roku Control Protocol
@@ -29454,7 +29454,7 @@ class AppType(StrEnum):
     rr_disc: 'AppType' = -1, 'rr-disc', TransportProtocol.get('undefined')
 
     #: [TCP] Ruckus Radio Access Device, Installation, Commissioning and
-    #: Troubleshooting service.
+    #:   Troubleshooting service.
     rradict: 'AppType' = -1, 'rradict', TransportProtocol.get('tcp')
 
     #: [N/A] Remote System Management Protocol (Server Instance)
@@ -29524,11 +29524,11 @@ class AppType(StrEnum):
     scone: 'AppType' = -1, 'scone', TransportProtocol.get('undefined')
 
     #: - [TCP] The service name is used by the SFTP protocol to upload log files from
-    #: vehicles to road side units in a securely way in a cooperative intelligent
-    #: transportation system.
+    #:   vehicles to road side units in a securely way in a cooperative intelligent
+    #:   transportation system.
     #: - [UDP] The service name is used by the SFTP protocol to upload log files from
-    #: vehicles to road side units in a securely way in a cooperative intelligent
-    #: transportation system.
+    #:   vehicles to road side units in a securely way in a cooperative intelligent
+    #:   transportation system.
     scoop_sftp: 'AppType' = -1, 'scoop-sftp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] SCPI-RAW
@@ -29594,10 +29594,10 @@ class AppType(StrEnum):
     sge_exec: 'AppType' = -1, 'sge-exec', TransportProtocol.get('undefined')
 
     #: - [TCP] Grid Engine Qmaster Service IANA assigned this well-formed service
-    #: name as a replacement for "sge_qmaster".
+    #:   name as a replacement for "sge_qmaster".
     #: - [TCP] Grid Engine Qmaster Service
     #: - [UDP] Grid Engine Qmaster Service IANA assigned this well-formed service
-    #: name as a replacement for "sge_qmaster".
+    #:   name as a replacement for "sge_qmaster".
     #: - [UDP] Grid Engine Qmaster Service
     sge_qmaster_6444: 'AppType' = 6444, 'sge-qmaster', TransportProtocol.get('tcp') | TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('udp')
 
@@ -29620,7 +29620,7 @@ class AppType(StrEnum):
     shoppersync: 'AppType' = -1, 'shoppersync', TransportProtocol.get('undefined')
 
     #: [UDP] The protocol is used to sync database among iOS devices and Mac OS X
-    #: computers.
+    #:   computers.
     shots_sync: 'AppType' = -1, 'shots-sync', TransportProtocol.get('udp')
 
     #: [N/A] Nicecast
@@ -29642,9 +29642,9 @@ class AppType(StrEnum):
     sironaxray: 'AppType' = -1, 'sironaxray', TransportProtocol.get('undefined')
 
     #: - [TCP] The protocol is used to transfer database records between an iOS
-    #: device to a Mac OS X computer
+    #:   device to a Mac OS X computer
     #: - [UDP] The protocol is used to transfer database records between an iOS
-    #: device to a Mac OS X computer
+    #:   device to a Mac OS X computer
     skillscapture: 'AppType' = -1, 'skillscapture', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [N/A] Skype
@@ -29691,14 +29691,14 @@ class AppType(StrEnum):
     smsync: 'AppType' = -1, 'smsync', TransportProtocol.get('undefined')
 
     #: [TCP] End-to-end TLS Relay Client Connection [https://snif.host/relay-
-    #: proto#snif-cln]
+    #:   proto#snif-cln]
     snif_cln: 'AppType' = -1, 'snif-cln', TransportProtocol.get('tcp')
 
     #: [TCP] End-to-end TLS Relay Cluster [https://snif.host/relay-proto#snif-fifo]
     snif_fifo: 'AppType' = -1, 'snif-fifo', TransportProtocol.get('tcp')
 
     #: [TCP] End-to-end TLS Relay Service Connection [https://snif.host/relay-
-    #: proto#snif-srv]
+    #:   proto#snif-srv]
     snif_srv: 'AppType' = -1, 'snif-srv', TransportProtocol.get('tcp')
 
     #: [N/A] Simple Object Access Protocol
@@ -29826,7 +29826,7 @@ class AppType(StrEnum):
     swordfish: 'AppType' = -1, 'swordfish', TransportProtocol.get('undefined')
 
     #: [N/A] Framework for transferring any file from any app, to       any app on
-    #: any device: simply with a swÿp.
+    #:   any device: simply with a swÿp.
     swyp: 'AppType' = -1, 'swyp', TransportProtocol.get('undefined')
 
     #: [N/A] Synchronize! Pro X
@@ -29836,7 +29836,7 @@ class AppType(StrEnum):
     sybase_tds: 'AppType' = -1, 'sybase-tds', TransportProtocol.get('undefined')
 
     #: [TCP] Remote control of Synclavier Digital Audio Workstation over local area
-    #: network.
+    #:   network.
     synclavier: 'AppType' = -1, 'synclavier', TransportProtocol.get('tcp')
 
     #: [N/A] Syncopation Synchronization Protocol by Sonzea
@@ -29852,7 +29852,7 @@ class AppType(StrEnum):
     synksharing: 'AppType' = -1, 'synksharing', TransportProtocol.get('undefined')
 
     #: [TCP] This service name is used to construct the       SRV service label
-    #: "_sztp" for discovering       SZTP bootstrap servers. [:rfc:`8572`]
+    #:   "_sztp" for discovering       SZTP bootstrap servers. [:rfc:`8572`]
     sztp: 'AppType' = -1, 'sztp', TransportProtocol.get('tcp')
 
     #: [N/A] Data Transmission and Synchronization
@@ -29962,11 +29962,11 @@ class AppType(StrEnum):
     touch_remote: 'AppType' = -1, 'touch-remote', TransportProtocol.get('undefined')
 
     #: [TCP] Coordination service for client users of the TotalPraisTrax iPad
-    #: application
+    #:   application
     tptx_console: 'AppType' = -1, 'tptx-console', TransportProtocol.get('tcp')
 
     #: [TCP] Service discovery and media transfer for peer to peer mobile media
-    #: transfer app
+    #:   transfer app
     transmitr: 'AppType' = -1, 'transmitr', TransportProtocol.get('tcp')
 
     #: [UDP] Thread Radio Encapsulation Link
@@ -30176,7 +30176,7 @@ class AppType(StrEnum):
     wicop: 'AppType' = -1, 'wicop', TransportProtocol.get('udp')
 
     #: [TCP] System for transferring files between mobile device and computer in a
-    #: local network
+    #:   local network
     wifile: 'AppType' = -1, 'wifile', TransportProtocol.get('tcp')
 
     #: [N/A] WiTap Sample Game Protocol

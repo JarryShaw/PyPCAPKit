@@ -74,7 +74,8 @@ class Option(Vendor):
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             tmp1 = f" {''.join(temp)}" if rfcs else ''
-            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f'{dscp}{tmp1}', re.MULTILINE))
+            desc = self.wrap_comment(re.sub(r'(\[(\*+)\])|(\[(\d+)\])', r'',
+                                            re.sub(r'\r*\n', ' ', f'{dscp}{tmp1}', re.MULTILINE)))
 
             name = dscp.split(' (')[0]
             try:

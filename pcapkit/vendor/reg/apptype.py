@@ -14,6 +14,7 @@ import csv
 import keyword
 import re
 import sys
+import textwrap
 from typing import TYPE_CHECKING, Callable
 
 from pcapkit.vendor.default import Vendor
@@ -207,6 +208,19 @@ class AppType(Vendor):
         return collections.Counter(map(lambda item: '[%s] %s' % (item[2], item[0].strip() or self.safe_name(item[3].strip())),
                                        filter(lambda item: len(item[1].split('-')) != 2, reader)))
 
+    @staticmethod
+    def wrap_comment(text: 'str') -> 'str':
+        """Wraps long-length text to shorter lines of comments.
+
+        Args:
+            text: Source text.
+
+        Returns:
+            Wrapped comments.
+
+        """
+        return '\n    #:   '.join(textwrap.wrap(text.strip(), 76))
+
     def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process registry data.
 
@@ -235,7 +249,14 @@ class AppType(Vendor):
             #    temp.append(f'[{rfc[:3]} {rfc[3:]}]')
             for rfc in filter(None, map(lambda s: s.strip(), re.split(r'\[|\]', item[8]))):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
-                    temp.append(f'[:rfc:`{rfc[3:]}`]')
+                    match = re.fullmatch(r'RFC(?P<rfc>\d+)(, Section (?P<sec>.*?))?', rfc)
+                    if match is None:
+                        temp.append(f'[{rfc}]')
+                    else:
+                        if match.group('sec') is not None:
+                            temp.append(f'[:rfc:`{match.group("rfc")}#{match.group("sec")}`]')
+                        else:
+                            temp.append(f'[:rfc:`{match.group("rfc")}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             cmmt = self.wrap_comment('[%s] %s %s' % (item[2].strip().upper() or 'N/A',

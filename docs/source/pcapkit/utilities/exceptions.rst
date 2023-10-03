@@ -401,7 +401,7 @@ when exception raised on user's operation.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
 :exc:`io.UnsupportedOperation` Category
------------------------------------
+---------------------------------------
 
 .. autoexception:: pcapkit.utilities.exceptions.UnsupportedOperation
    :no-members:

@@ -79,7 +79,10 @@ class LinkType(Vendor):
                 code, _ = temp, int(temp)
 
                 pres = f"{name} = {code}"
-                sufs = '#: %s' % self.wrap_comment(f"[``{desc}``] {cmmt}")  # pylint: disable=consider-using-f-string
+                if desc:
+                    sufs = "#: %s" % self.wrap_comment(f"[``{desc}``] {cmmt}")  # pylint: disable=consider-using-f-string
+                else:
+                    sufs = "#: %s" % self.wrap_comment(cmmt)
 
                 # if len(pres) > 74:
                 #     sufs = f"\n{' '*80}{sufs}"

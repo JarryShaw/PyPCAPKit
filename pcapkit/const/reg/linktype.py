@@ -666,7 +666,7 @@ class LinkType(IntEnum):
     #: frame data for the LLCP Protocol as specified by NFCForum-TS-LLCP\_1.1.
     NFC_LLCP = 245
 
-    #: [````] Packet filter state syncing.
+    #: Packet filter state syncing.
     PFSYNC = 246
 
     #: [``DLT_INFINIBAND``] Raw InfiniBand frames, starting with the Local Routing

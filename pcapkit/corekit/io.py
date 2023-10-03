@@ -188,7 +188,7 @@ class SeekableReader(io.BufferedReader):
         return self._stream.readable()
 
     def readline(self, size: 'int | None' = -1, /) -> 'bytes':
-        """Read and return one line from the stream. If ``size`` is specified, at most
+        r"""Read and return one line from the stream. If ``size`` is specified, at most
         ``size`` bytes will be read.
 
         The line terminator is always ``b'\n'`` for binary files; for text files, the
@@ -337,7 +337,7 @@ class SeekableReader(io.BufferedReader):
         self._buffer_size = size
         return self._buffer_size
 
-    def writable(self) -> 'bool':
+    def writeable(self) -> 'bool':
         """Return :obj:`True` if the stream supports writing. If :obj:`False`, :meth:`write` and
         :meth:`truncate` will raise :exc:`OSError`."""
         return False

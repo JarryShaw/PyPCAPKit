@@ -51,7 +51,14 @@ class MPTCPOption(Vendor):
                     continue
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     # temp.append(f'[{rfc[:3]} {rfc[3:]}]')
-                    temp.append(f'[:rfc:`{rfc[3:]}`]')
+                    match = re.fullmatch(r'RFC(?P<rfc>\d+)(, Section (?P<sec>.*?))?', rfc)
+                    if match is None:
+                        temp.append(f'[{rfc}]')
+                    else:
+                        if match.group('sec') is not None:
+                            temp.append(f'[:rfc:`{match.group("rfc")}#{match.group("sec")}`]')
+                        else:
+                            temp.append(f'[:rfc:`{match.group("rfc")}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             tmp1 = f" {''.join(temp)}" if rfcs else ''
