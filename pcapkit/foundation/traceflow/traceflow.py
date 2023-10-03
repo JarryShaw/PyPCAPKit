@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=dict-item
 """Base Class
 ================
 
@@ -16,16 +17,17 @@ import os
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
+from pcapkit.corekit.module import ModuleDescriptor
+from dictdumper.dumper import Dumper
 from pcapkit.dumpkit.common import make_dumper
-from pcapkit.utilities.exceptions import FileExists, stacklevel
-from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
+from pcapkit.utilities.exceptions import FileExists, stacklevel, RegistryError
+from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn, RegistryWarning
 
 __all__ = ['TraceFlow']
 
 if TYPE_CHECKING:
     from typing import Any, Callable, DefaultDict, Optional, Type
 
-    from dictdumper.dumper import Dumper
     from typing_extensions import Literal, Self
 
     from pcapkit.corekit.infoclass import Info
@@ -62,22 +64,23 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[str, tuple[str, str, str | None]]: Format dumper mapping for
-    #: writing output files. The values should be a tuple representing the
-    #: module name, class name and file extension.
+    #: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]:
+    #: Format dumper mapping for writing output files. The values should be a
+    #: tuple representing the module name and class name, or a
+    #: :class:`dictdumper.dumper.Dumper` subclass, and corresponding file extension.
     __output__ = collections.defaultdict(
-        lambda: ('pcapkit.dumpkit', 'NotImplementedIO', None),
+        lambda: (ModuleDescriptor('pcapkit.dumpkit', 'NotImplementedIO'), None),
         {
-            'pcap': ('pcapkit.dumpkit', 'PCAPIO', '.pcap'),
-            'cap': ('pcapkit.dumpkit', 'PCAPIO', '.pcap'),
-            'plist': ('dictdumper', 'PLIST', '.plist'),
-            'xml': ('dictdumper', 'PLIST', '.plist'),
-            'json': ('dictdumper', 'JSON', '.json'),
-            'tree': ('dictdumper', 'Tree', '.txt'),
-            'text': ('dictdumper', 'Text', '.txt'),
-            'txt': ('dictdumper', 'Tree', '.txt'),
-        }
-    )  # type: DefaultDict[str, tuple[str, str, str | None]]
+            'pcap': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPIO'), '.pcap'),
+            'cap': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPIO'), '.pcap'),
+            'plist': (ModuleDescriptor('dictdumper', 'PLIST'), '.plist'),
+            'xml': (ModuleDescriptor('dictdumper', 'PLIST'), '.plist'),
+            'json': (ModuleDescriptor('dictdumper', 'JSON'), '.json'),
+            'tree': (ModuleDescriptor('dictdumper', 'Tree'), '.txt'),
+            'text': (ModuleDescriptor('dictdumper', 'Text'), '.txt'),
+            'txt': (ModuleDescriptor('dictdumper', 'Tree'), '.txt'),
+        },
+    )  # type: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]
 
     ##########################################################################
     # Properties.
@@ -105,21 +108,26 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
     ##########################################################################
 
     @classmethod
-    def register_dumper(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+    def register_dumper(cls, format: 'str', dumper: 'ModuleDescriptor[Dumper] | Type[Dumper]', ext: 'str') -> 'None':
         r"""Register a new dumper class.
 
         Notes:
             The full qualified class name of the new dumper class
-            should be as ``{module}.{class_}``.
+            should be as ``{dumper.module}.{dumper.name}``.
 
         Arguments:
             format: format name
-            module: module name
-            class\_: class name
+            dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass
             ext: file extension
 
         """
-        cls.__output__[format] = (module, class_, ext)
+        if isinstance(dumper, ModuleDescriptor):
+            dumper = dumper.klass
+        if not issubclass(dumper, Dumper):
+            raise RegistryError(f'dumper must be a Dumper subclass, not {dumper!r}')
+        if format in cls.__output__:
+            warn(f'dumper {format} already registered, overwriting', RegistryWarning)
+        cls.__output__[format] = (dumper, ext)
 
     @classmethod
     def register_callback(cls, callback: 'CallbackFn', *, index: 'Optional[int]' = None) -> 'None':
@@ -156,11 +164,12 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
             FileExists: If ``fout`` exists and ``fmt`` is **NOT** :data:`None`.
 
         """
-        module, class_, ext = cls.__output__[fmt]
+        output, ext = cls.__output__[fmt]
         if ext is None:
             warn(f'Unsupported output format: {fmt}; disabled file output feature',
                  FormatWarning, stacklevel=stacklevel())
-        output = getattr(importlib.import_module(module), class_)  # type: Type[Dumper]
+        if isinstance(output, ModuleDescriptor):
+            output = output.klass
 
         try:
             os.makedirs(fout, exist_ok=True)
