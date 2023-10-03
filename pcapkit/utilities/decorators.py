@@ -18,7 +18,7 @@ import traceback
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.utilities.exceptions import StructError, stacklevel
-from pcapkit.utilities.logging import VERBOSE, logger, DEVMODE
+from pcapkit.utilities.logging import DEVMODE, VERBOSE, logger
 
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type, TypeVar

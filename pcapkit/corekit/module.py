@@ -11,7 +11,7 @@ which is originally designed as :obj:`tuple[str, str] <tuple>`.
 """
 import collections
 import importlib
-from typing import Generic, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 __all__ = ['ModuleDescriptor']
 

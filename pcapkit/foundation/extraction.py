@@ -17,28 +17,28 @@ import collections
 import importlib
 import io
 import os
-from re import M
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from dictdumper.dumper import Dumper
-from pcapkit.foundation.engines.engine import Engine
-from pcapkit.foundation.reassembly.reassembly import Reassembly
-from pcapkit.foundation.traceflow.traceflow import TraceFlow
 
-from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.io import SeekableReader
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
+from pcapkit.foundation.engines.engine import Engine
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.reassembly.data import ReassemblyData
+from pcapkit.foundation.reassembly.reassembly import Reassembly
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.foundation.traceflow.data import TraceFlowData
-from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError, RegistryError,
-                                          UnsupportedCall, stacklevel)
+from pcapkit.foundation.traceflow.traceflow import TraceFlow
+from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
+                                          RegistryError, UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import logger
-from pcapkit.utilities.warnings import EngineWarning, ExtractionWarning, FormatWarning, RegistryWarning, warn
+from pcapkit.utilities.warnings import (EngineWarning, ExtractionWarning, FormatWarning,
+                                        RegistryWarning, warn)
 
 if TYPE_CHECKING:
     from io import BufferedReader

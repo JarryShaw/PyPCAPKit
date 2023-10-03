@@ -44,12 +44,12 @@ import ipaddress
 import math
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.const.reg.transtype import TransType
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.transport.tcp import CC as Data_CC
 from pcapkit.protocols.data.transport.tcp import MPTCPDSS as Data_MPTCPDSS

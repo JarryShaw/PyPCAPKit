@@ -14,14 +14,15 @@ which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.
 import collections
 from typing import TYPE_CHECKING, Generic
 
-from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.protocol import PT, ST, Protocol
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from typing import DefaultDict, Type
+
     from typing_extensions import Literal
 
 __all__ = ['Link']

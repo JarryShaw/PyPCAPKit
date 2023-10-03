@@ -27,7 +27,6 @@ import textwrap
 import time
 from typing import TYPE_CHECKING, cast, overload
 
-from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
@@ -36,6 +35,7 @@ from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
 from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
