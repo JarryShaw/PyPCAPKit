@@ -10,7 +10,7 @@ emoji == 2.8.0
 html5lib == 1.1
 idna == 3.4
 lxml == 4.9.3
-packaging == 23.1
+packaging == 23.2
 pathlib2 ; python_version < "3.5"
 pyshark == 0.6
 pysocks == 1.7.1
@@ -21,5 +21,5 @@ soupsieve == 2.5
 tbtrim == 0.3.1
 termcolor == 2.3.0
 typing-extensions ; python_version < "3.11"
-urllib3 == 2.0.5
+urllib3 == 2.0.6
 webencodings == 0.5.1
