@@ -344,6 +344,7 @@
         <article role="main">
           <h1>Source code for pcapkit.foundation.traceflow.traceflow</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># mypy: disable-error-code=dict-item</span>
 <span class="sd">&quot;&quot;&quot;Base Class</span>
 <span class="sd">================</span>
 
@@ -361,16 +362,17 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">overload</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.module</span> <span class="kn">import</span> <span class="n">ModuleDescriptor</span>
+<span class="kn">from</span> <span class="nn">dictdumper.dumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
 <span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">make_dumper</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FileExists</span><span class="p">,</span> <span class="n">stacklevel</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">FileWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FileExists</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">,</span> <span class="n">RegistryError</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">FileWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">,</span> <span class="n">RegistryWarning</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TraceFlow&#39;</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
-    <span class="kn">from</span> <span class="nn">dictdumper.dumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
@@ -409,22 +411,23 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[str, tuple[str, str, str | None]]: Format dumper mapping for</span>
-    <span class="c1">#: writing output files. The values should be a tuple representing the</span>
-    <span class="c1">#: module name, class name and file extension.</span>
+    <span class="c1">#: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]:</span>
+    <span class="c1">#: Format dumper mapping for writing output files. The values should be a</span>
+    <span class="c1">#: tuple representing the module name and class name, or a</span>
+    <span class="c1">#: :class:`dictdumper.dumper.Dumper` subclass, and corresponding file extension.</span>
     <span class="n">__output__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.dumpkit&#39;</span><span class="p">,</span> <span class="s1">&#39;NotImplementedIO&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.dumpkit&#39;</span><span class="p">,</span> <span class="s1">&#39;NotImplementedIO&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">),</span>
         <span class="p">{</span>
-            <span class="s1">&#39;pcap&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.dumpkit&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAPIO&#39;</span><span class="p">,</span> <span class="s1">&#39;.pcap&#39;</span><span class="p">),</span>
-            <span class="s1">&#39;cap&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.dumpkit&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAPIO&#39;</span><span class="p">,</span> <span class="s1">&#39;.pcap&#39;</span><span class="p">),</span>
-            <span class="s1">&#39;plist&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;PLIST&#39;</span><span class="p">,</span> <span class="s1">&#39;.plist&#39;</span><span class="p">),</span>
-            <span class="s1">&#39;xml&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;PLIST&#39;</span><span class="p">,</span> <span class="s1">&#39;.plist&#39;</span><span class="p">),</span>
-            <span class="s1">&#39;json&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON&#39;</span><span class="p">,</span> <span class="s1">&#39;.json&#39;</span><span class="p">),</span>
-            <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;Tree&#39;</span><span class="p">,</span> <span class="s1">&#39;.txt&#39;</span><span class="p">),</span>
-            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;Text&#39;</span><span class="p">,</span> <span class="s1">&#39;.txt&#39;</span><span class="p">),</span>
-            <span class="s1">&#39;txt&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;Tree&#39;</span><span class="p">,</span> <span class="s1">&#39;.txt&#39;</span><span class="p">),</span>
-        <span class="p">}</span>
-    <span class="p">)</span>  <span class="c1"># type: DefaultDict[str, tuple[str, str, str | None]]</span>
+            <span class="s1">&#39;pcap&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.dumpkit&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAPIO&#39;</span><span class="p">),</span> <span class="s1">&#39;.pcap&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;cap&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.dumpkit&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAPIO&#39;</span><span class="p">),</span> <span class="s1">&#39;.pcap&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;plist&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;PLIST&#39;</span><span class="p">),</span> <span class="s1">&#39;.plist&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;xml&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;PLIST&#39;</span><span class="p">),</span> <span class="s1">&#39;.plist&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;json&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON&#39;</span><span class="p">),</span> <span class="s1">&#39;.json&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;Tree&#39;</span><span class="p">),</span> <span class="s1">&#39;.txt&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;Text&#39;</span><span class="p">),</span> <span class="s1">&#39;.txt&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;txt&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;Tree&#39;</span><span class="p">),</span> <span class="s1">&#39;.txt&#39;</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -454,21 +457,26 @@
 <div class="viewcode-block" id="TraceFlow.register_dumper">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.register_dumper">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register_dumper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+    <span class="k">def</span> <span class="nf">register_dumper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Dumper] | Type[Dumper]&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new dumper class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new dumper class</span>
-<span class="sd">            should be as ``{module}.{class_}``.</span>
+<span class="sd">            should be as ``{dumper.module}.{dumper.name}``.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            format: format name</span>
-<span class="sd">            module: module name</span>
-<span class="sd">            class\_: class name</span>
+<span class="sd">            dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass</span>
 <span class="sd">            ext: file extension</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">dumper</span> <span class="o">=</span> <span class="n">dumper</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">Dumper</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;dumper must be a Dumper subclass, not </span><span class="si">{</span><span class="n">dumper</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;dumper </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1"> already registered, overwriting&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TraceFlow.register_callback">
@@ -511,11 +519,12 @@
 <span class="sd">            FileExists: If ``fout`` exists and ``fmt`` is **NOT** :data:`None`.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">]</span>
+        <span class="n">output</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">ext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unsupported output format: </span><span class="si">{</span><span class="n">fmt</span><span class="si">}</span><span class="s1">; disabled file output feature&#39;</span><span class="p">,</span>
                  <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>  <span class="c1"># type: Type[Dumper]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">klass</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">fout</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
