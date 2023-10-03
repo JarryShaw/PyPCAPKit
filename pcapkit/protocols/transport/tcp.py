@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=dict-item
 """TCP - Transmission Control Protocol
 =========================================
 
@@ -39,11 +40,11 @@ Octets      Bits        Name                    Description
 """
 import collections
 import datetime
-import enum
 import ipaddress
 import math
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.const.reg.transtype import TransType
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.flags import Flags as Enum_Flags
@@ -301,14 +302,14 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[arg-type,return-value]
         {
-            21: ('pcapkit.protocols.application.ftp', 'FTP'),  # FTP
-            80: ('pcapkit.protocols.application.httpv1', 'HTTP'),  # HTTP/1.*
+            21: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP'),      # FTP
+            80: ModuleDescriptor('pcapkit.protocols.application.httpv1', 'HTTP'),  # HTTP/1.*
         },
     )
 

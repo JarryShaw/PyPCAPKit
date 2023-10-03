@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=dict-item
 """Base Protocol
 ===================
 
@@ -13,11 +14,14 @@ which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.
 import collections
 from typing import TYPE_CHECKING, Generic
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.protocols.protocol import PT, ST, Protocol
+from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
+    from typing import DefaultDict, Type
     from typing_extensions import Literal
 
 __all__ = ['Link']
@@ -57,22 +61,22 @@ class Link(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-metho
     #: Layer of protocol.
     __layer__ = 'Link'  # type: Literal['Link']
 
-    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[arg-type,return-value]
         {
-            Enum_EtherType.Address_Resolution_Protocol:         ('pcapkit.protocols.link.arp',      'ARP'),
-            Enum_EtherType.Reverse_Address_Resolution_Protocol: ('pcapkit.protocols.link.rarp',     'RARP'),
-            Enum_EtherType.Customer_VLAN_Tag_Type:              ('pcapkit.protocols.link.vlan',     'VLAN'),
-            Enum_EtherType.Internet_Protocol_version_4:         ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-            Enum_EtherType.Internet_Protocol_version_6:         ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+            Enum_EtherType.Address_Resolution_Protocol:         ModuleDescriptor('pcapkit.protocols.link.arp',      'ARP'),
+            Enum_EtherType.Reverse_Address_Resolution_Protocol: ModuleDescriptor('pcapkit.protocols.link.rarp',     'RARP'),
+            Enum_EtherType.Customer_VLAN_Tag_Type:              ModuleDescriptor('pcapkit.protocols.link.vlan',     'VLAN'),
+            Enum_EtherType.Internet_Protocol_version_4:         ModuleDescriptor('pcapkit.protocols.internet.ipv4', 'IPv4'),
+            Enum_EtherType.Internet_Protocol_version_6:         ModuleDescriptor('pcapkit.protocols.internet.ipv6', 'IPv6'),
 
             # c.f., https://en.wikipedia.org/wiki/EtherType#Values
-            0x8137:                                             ('pcapkit.protocols.internet.ipx',  'IPX'),
+            0x8137:                                             ModuleDescriptor('pcapkit.protocols.internet.ipx',  'IPX'),
         },
-    )
+    )  # type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[Protocol] | Type[Protocol]]
 
     ##########################################################################
     # Properties.
@@ -89,22 +93,26 @@ class Link(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-metho
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_EtherType', module: str, class_: str) -> 'None':  # type: ignore[override]
+    def register(cls, code: 'Enum_EtherType', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
             The full qualified class name of the new protocol class
-            should be as ``{module}.{class_}``.
+            should be as ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
-            module: module name
-            class\_: class name
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         """
+        if isinstance(protocol, ModuleDescriptor):
+            protocol = protocol.klass
+        if not issubclass(protocol, Protocol):
+            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
             warn(f'protocol {code} already registered, overwriting', RegistryWarning)
-        cls.__proto__[code] = (module, class_)
+        cls.__proto__[code] = protocol
 
     ##########################################################################
     # Utilities.

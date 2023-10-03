@@ -2,19 +2,19 @@
 # mypy: disable-error-code=assignment
 """header schema for ethernet protocol"""
 
-import importlib
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField
 from pcapkit.corekit.fields.strings import BytesField
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['Ethernet']
 
 if TYPE_CHECKING:
-    from typing import Any, Type
+    from typing import Any
 
     from pcapkit.protocols.protocol import Protocol
 
@@ -24,8 +24,9 @@ def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
     from pcapkit.protocols.link.ethernet import Ethernet  # pylint: disable=import-outside-toplevel
 
     type_ = packet['type']
-    module, name = Ethernet.__proto__[type_]
-    protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
+    protocol = Ethernet.__proto__[type_]
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
     self.protocol = protocol
 
 

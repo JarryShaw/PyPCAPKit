@@ -11,10 +11,10 @@ which is a base class for transport layer protocols, eg.
 :class:`~pcapkit.protocols.transport.transport.udp.UDP`.
 
 """
-import importlib
 import io
-from typing import TYPE_CHECKING, Generic, cast
+from typing import TYPE_CHECKING, Generic
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.protocol import PT, ST, Protocol
 from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, logger
@@ -35,7 +35,7 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
         #: Protocol index mapping for decoding next layer,
         #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
         #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-        __proto__: 'DefaultDict[int, tuple[str, str]]'
+        __proto__: 'DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]'
 
     ##########################################################################
     # Defaults.
@@ -59,30 +59,33 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'int', module: str, class_: str) -> 'None':
+    def register(cls, code: 'int', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':
         """Register a new protocol class.
+
+        Notes:
+            The full qualified class name of the new protocol class
+            should be as ``{protocol.module}.{protocol.name}``.
+
+        Arguments:
+            code: port number
+            protocol: module name
 
         Important:
             This method must be called from a non-abstract class, as the
             protocol map should be associated directly with specific
             transport layer protocol type.
 
-        Arguments:
-            code: port number
-            module: module name
-            class_: class name
-
-        Notes:
-            The full qualified class name of the new protocol class
-            should be as ``{module}.{class_}``.
-
         """
         if cls is Transport:
             raise UnsupportedCall(f'{cls.__name__} is an abstract class')
 
+        if isinstance(protocol, ModuleDescriptor):
+            protocol = protocol.klass
+        if not issubclass(protocol, Protocol):
+            raise TypeError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
             warn(f'port {code} already registered, overwriting', RegistryWarning)
-        cls.__proto__[code] = (module, class_)
+        cls.__proto__[code] = protocol
 
     @classmethod
     def analyze(cls, ports: 'tuple[int, int]', payload: 'bytes', **kwargs: 'Any') -> 'Protocol':  # type: ignore[override] # pylint: disable=arguments-renamed
@@ -99,10 +102,12 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
 
         """
         if ports[0] in cls.__proto__:
-            module, name = cls.__proto__[ports[0]]
+            protocol = cls.__proto__[ports[0]]
         else:
-            module, name = cls.__proto__[ports[1]]
-        protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
+            protocol = cls.__proto__[ports[1]]
+
+        if isinstance(protocol, ModuleDescriptor):
+            protocol = protocol.klass
 
         payload_io = io.BytesIO(payload)
         try:

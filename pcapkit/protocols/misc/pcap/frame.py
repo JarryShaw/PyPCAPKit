@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=dict-item
 """Frame Header
 ==================
 
@@ -29,13 +30,14 @@ import sys
 import time
 from typing import TYPE_CHECKING, cast, overload
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
 from pcapkit.utilities.compat import localcontext
-from pcapkit.utilities.exceptions import UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -80,18 +82,19 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_LinkType, tuple[str, str]]: Protocol index mapping for
+    #: DefaultDict[Enum_LinkType, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for
     #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-    #: The values should be a tuple representing the module name and class name.
+    #: The values should be a tuple representing the module name and class name, or
+    #: a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[return-value,arg-type]
         {
-            Enum_LinkType.ETHERNET: ('pcapkit.protocols.link', 'Ethernet'),
-            Enum_LinkType.IPV4:     ('pcapkit.protocols.internet', 'IPv4'),
-            Enum_LinkType.IPV6:     ('pcapkit.protocols.internet', 'IPv6'),
+            Enum_LinkType.ETHERNET: ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
+            Enum_LinkType.IPV4:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
+            Enum_LinkType.IPV6:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
         },
-    )  # type: DefaultDict[Enum_LinkType | int, tuple[str, str]]
+    )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[Protocol] | Type[Protocol]]
 
     ##########################################################################
     # Properties.
@@ -117,22 +120,26 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None':  # type: ignore[override]
+    def register(cls, code: 'Enum_LinkType', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
             The full qualified class name of the new protocol class
-            should be as ``{module}.{class_}``.
+            should be as ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-            module: module name
-            class\_: class name
+            module: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         """
+        if isinstance(protocol, ModuleDescriptor):
+            protocol = protocol.klass
+        if not issubclass(protocol, Protocol):
+            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
             warn(f'protocol {code} already registered, overwriting', RegistryWarning)
-        cls.__proto__[code] = (module, class_)
+        cls.__proto__[code] = protocol
 
     def index(self, name: 'str | Protocol | Type[Protocol]') -> 'int':
         """Call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`.

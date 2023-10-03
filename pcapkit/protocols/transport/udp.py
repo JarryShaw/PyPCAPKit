@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=dict-item
 """UDP - User Datagram Protocol
 ==================================
 
@@ -24,6 +25,7 @@ Octets      Bits        Name                    Description
 import collections
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.transport.udp import UDP as Data_UDP
 from pcapkit.protocols.schema.transport.udp import UDP as Schema_UDP
@@ -63,13 +65,13 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[arg-type,return-value]
         {
-            80: ('pcapkit.protocols.application.http', 'HTTP'),  # HTTP
+            80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),  # HTTP
         },
     )
 

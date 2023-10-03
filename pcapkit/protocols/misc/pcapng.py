@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=dict-item
 """PCAP-NG File Format
 =========================
 
@@ -26,6 +27,7 @@ import textwrap
 import time
 from typing import TYPE_CHECKING, cast, overload
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
@@ -170,7 +172,7 @@ from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireG
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.utilities.compat import StrEnum, localcontext
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import ProtocolError, RegistryError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
                                         RegistryWarning, warn)
 
@@ -516,18 +518,19 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_LinkType, tuple[str, str]]: Protocol index mapping for
+    #: DefaultDict[Enum_LinkType, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for
     #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-    #: The values should be a tuple representing the module name and class name.
+    #: The values should be a tuple representing the module name and class name,
+    #: or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[arg-type,return-value]
         {
-            Enum_LinkType.ETHERNET: ('pcapkit.protocols.link', 'Ethernet'),
-            Enum_LinkType.IPV4:     ('pcapkit.protocols.internet', 'IPv4'),
-            Enum_LinkType.IPV6:     ('pcapkit.protocols.internet', 'IPv6'),
+            Enum_LinkType.ETHERNET: ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
+            Enum_LinkType.IPV4:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
+            Enum_LinkType.IPV6:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
         },
-    )  # type: DefaultDict[Enum_LinkType | int, tuple[str, str]]
+    )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[Protocol] | Type[Protocol]]
 
     #: DefaultDict[Enum_BlockType, str | tuple[BlockParser, BlockConstructor]]:
     #: Block type to method mapping. Method names are expected to be referred
@@ -725,22 +728,26 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None':  # type: ignore[override]
+    def register(cls, code: 'Enum_LinkType', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
             The full qualified class name of the new protocol class
-            should be as ``{module}.{class_}``.
+            should be as ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-            module: module name
-            class\_: class name
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         """
+        if isinstance(protocol, ModuleDescriptor):
+            protocol = protocol.klass
+        if not issubclass(protocol, Protocol):
+            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
             warn(f'protocol {code} already registered, overwriting', RegistryWarning)
-        cls.__proto__[code] = (module, class_)
+        cls.__proto__[code] = protocol
 
     @classmethod
     def register_block(cls, code: 'Enum_BlockType', meth: 'str | tuple[BlockParser, BlockConstructor]') -> 'None':
@@ -3291,15 +3298,15 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         self._byte = sys.byteorder
 
         if block is not None:
-            major_version = cast('int', block.version.major)
-            minor_version = cast('int', block.version.minor)
+            major_version = block.version.major
+            minor_version = block.version.minor
             section_length = block.section_length
             options = block.options
         else:
             if major_version is None:
-                major_version = cast('int', version[0])
+                major_version = version[0]
             if minor_version is None:
-                minor_version = cast('int', version[1])
+                minor_version = version[1]
 
         if options is not None:
             options_value, total_length = self._make_pcapng_options(options, namespace='shb')

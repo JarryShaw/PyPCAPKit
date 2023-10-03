@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=dict-item
 """Root Protocol
 ===================
 
@@ -15,7 +16,6 @@ import collections
 import contextlib
 import enum
 import functools
-import importlib
 import io
 import os
 import shutil
@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 import aenum
 import chardet
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols import data as data_module
 from pcapkit.protocols import schema as schema_module
@@ -41,6 +41,7 @@ from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, RegistryError,
                                           StructError, UnsupportedCall)
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -94,11 +95,12 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
     __layer__: 'Optional[Literal["Link", "Internet", "Transport", "Application"]]' = None
 
     #: Protocol index mapping for decoding next layer, c.f.
-    # :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-    #: The values should be a tuple representing the module name and class name.
-    __proto__: 'DefaultDict[int, tuple[str, str]]' = collections.defaultdict(
-        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
+    #: The values should be a tuple representing the module name and class name,
+    #: or a :class:`Protocol` subclass.
+    __proto__: 'DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]' = collections.defaultdict(
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[return-value,arg-type]
     )
 
     ##########################################################################
@@ -368,8 +370,10 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             instance.
 
         """
-        module, name = cls.__proto__[proto]
-        protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
+        protocol = cls.__proto__[proto]
+        if isinstance(protocol, ModuleDescriptor):
+            protocol = protocol.klass
+            cls.__proto__[proto] = protocol  # update mapping upon import
 
         payload_io = io.BytesIO(payload)
         try:
@@ -388,23 +392,26 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         return report
 
     @classmethod
-    def register(cls, code: 'int', module: 'str', class_: 'str') -> 'None':
+    def register(cls, code: 'int', protocol: 'ModuleDescriptor | Type[Protocol]') -> 'None':
         r"""Register a new protocol class.
 
         Notes:
             The full qualified class name of the new protocol class
-            should be as ``{module}.{class_}``.
+            should be as ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code
-            module: module name
-            class\_: class name
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         """
-        protocol = getattr(importlib.import_module(module), class_)
+        if isinstance(protocol, ModuleDescriptor):
+            protocol = protocol.klass
         if not issubclass(protocol, Protocol):
-            raise RegistryError('protocol must be a Protocol subclass')
-        cls.__proto__[code] = (module, class_)
+            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
+        if code in cls.__proto__:
+            warn(f'protocol {code} already registered, overwriting', RegistryWarning)
+        cls.__proto__[code] = protocol
 
     @classmethod
     def from_schema(cls, schema: 'ST | dict[str, Any]') -> 'Self':
@@ -1121,8 +1128,10 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
-            module, name = self.__proto__[proto]
-            protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
+            protocol = self.__proto__[proto]  # type: ignore[assignment]
+            if isinstance(protocol, ModuleDescriptor):
+                protocol = protocol.klass  # type: ignore[unreachable]
+                self.__proto__[proto] = protocol  # update mapping upon import
 
         next_ = protocol(file_, length, alias=proto, packet=packet,
                          layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]

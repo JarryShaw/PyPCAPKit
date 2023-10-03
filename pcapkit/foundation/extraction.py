@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-outside-toplevel,fixme
+# mypy: disable-error-code=dict-item
 """Extractor for PCAP Files
 ==============================
 
@@ -12,15 +13,20 @@ coordinates information exchange in all network layers,
 extracts parametres from a PCAP file.
 
 """
-# TODO: implement engine support for pypcap & pycapfile
-
 import collections
 import importlib
 import io
 import os
+from re import M
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
+from dictdumper.dumper import Dumper
+from pcapkit.foundation.engines.engine import Engine
+from pcapkit.foundation.reassembly.reassembly import Reassembly
+from pcapkit.foundation.traceflow.traceflow import TraceFlow
+
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.io import SeekableReader
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
@@ -29,23 +35,21 @@ from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.reassembly.data import ReassemblyData
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.foundation.traceflow.data import TraceFlowData
-from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
+from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError, RegistryError,
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import logger
-from pcapkit.utilities.warnings import EngineWarning, ExtractionWarning, FormatWarning, warn
+from pcapkit.utilities.warnings import EngineWarning, ExtractionWarning, FormatWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from io import BufferedReader
     from types import ModuleType, TracebackType
     from typing import IO, Any, Callable, DefaultDict, Optional, Type, Union
 
-    from dictdumper.dumper import Dumper
     from dpkt.dpkt import Packet as DPKTPacket
     from pyshark.packet.packet import Packet as PySharkPacket
     from scapy.packet import Packet as ScapyPacket
     from typing_extensions import Literal
 
-    from pcapkit.foundation.engines.engine import Engine
     from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
     from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
     from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
@@ -147,46 +151,50 @@ class Extractor(Generic[P]):
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[str, tuple[str, str, str | None]]: Format dumper mapping for
-    #: writing output files. The values should be a tuple representing the
-    #: module name, class name and file extension.
+    #: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]:
+    #: Format dumper mapping for writing output files. The values should be a
+    #: tuple representing the module name and class name, or a
+    #: :class:`dictdumper.dumper.Dumper` subclass, and corresponding file extension.
     __output__ = collections.defaultdict(
-        lambda: ('pcapkit.dumpkit', 'NotImplementedIO', None),
+        lambda: (ModuleDescriptor('pcapkit.dumpkit', 'NotImplementedIO'), None),
         {
-            'pcap': ('pcapkit.dumpkit', 'PCAPIO', '.pcap'),
-            'cap': ('pcapkit.dumpkit', 'PCAPIO', '.pcap'),
-            'plist': ('dictdumper', 'PLIST', '.plist'),
-            'xml': ('dictdumper', 'PLIST', '.plist'),
-            'json': ('dictdumper', 'JSON', '.json'),
-            'tree': ('dictdumper', 'Tree', '.txt'),
-            'text': ('dictdumper', 'Text', '.txt'),
-            'txt': ('dictdumper', 'Tree', '.txt'),
+            'pcap': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPIO'), '.pcap'),
+            'cap': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPIO'), '.pcap'),
+            'plist': (ModuleDescriptor('dictdumper', 'PLIST'), '.plist'),
+            'xml': (ModuleDescriptor('dictdumper', 'PLIST'), '.plist'),
+            'json': (ModuleDescriptor('dictdumper', 'JSON'), '.json'),
+            'tree': (ModuleDescriptor('dictdumper', 'Tree'), '.txt'),
+            'text': (ModuleDescriptor('dictdumper', 'Text'), '.txt'),
+            'txt': (ModuleDescriptor('dictdumper', 'Tree'), '.txt'),
         },
-    )  # type: DefaultDict[str, tuple[str, str, str | None]]
+    )  # type: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]
 
-    #: dict[str, tuple[str, str]]: Engine mapping for extracting frames.
-    #: The values should be a tuple representing the module name and class name.
+    #: dict[str, ModuleDescriptor[Engine] | Type[Engine]]: Engine mapping for extracting
+    #: frames. The values should be a tuple representing the module name and class
+    #: name, or an :class:`~pcapkit.foundation.engines.engine.Engine` subclass.
     __engine__ = {
-        'scapy': ('pcapkit.foundation.engines.scapy', 'Scapy'),
-        'dpkt': ('pcapkit.foundation.engines.dpkt', 'DPKT'),
-        'pyshark': ('pcapkit.foundation.engines.pyshark', 'PyShark'),
-    }  # type: dict[str, tuple[str, str]]
+        'scapy': ModuleDescriptor('pcapkit.foundation.engines.scapy', 'Scapy'),
+        'dpkt': ModuleDescriptor('pcapkit.foundation.engines.dpkt', 'DPKT'),
+        'pyshark': ModuleDescriptor('pcapkit.foundation.engines.pyshark', 'PyShark'),
+    }  # type: dict[str, ModuleDescriptor[Engine] | Type[Engine]]
 
-    #: dict[str, tuple[str, str]]: Reassembly support mapping for extracting
-    #: frames. The values should be a tuple representing the module name and
-    #: class name.
+    #: dict[str, ModuleDescriptor[Reassembly] | Type[Reassembly]]: Reassembly support mapping
+    #: for extracting frames. The values should be a tuple representing the module
+    #: name and class name, or a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
+    #: subclass.
     __reassembly__ = {
-        'ipv4': ('pcapkit.foundation.reassembly.ipv4', 'IPv4'),
-        'ipv6': ('pcapkit.foundation.reassembly.ipv6', 'IPv6'),
-        'tcp': ('pcapkit.foundation.reassembly.tcp', 'TCP'),
-    }  # type: dict[str, tuple[str, str]]
+        'ipv4': ModuleDescriptor('pcapkit.foundation.reassembly.ipv4', 'IPv4'),
+        'ipv6': ModuleDescriptor('pcapkit.foundation.reassembly.ipv6', 'IPv6'),
+        'tcp': ModuleDescriptor('pcapkit.foundation.reassembly.tcp', 'TCP'),
+    }  # type: dict[str, ModuleDescriptor[Reassembly] | Type[Reassembly]]
 
-    #: dict[str, tuple[str, str]]: Flow tracing support mapping for extracting
-    #: frames. The values should be a tuple representing the module name and
-    #: class name.
+    #: dict[str, ModuleDescriptor[TraceFlow] | Type[TraceFlow]]: Flow tracing support mapping
+    #: for extracting frames. The values should be a tuple representing the module
+    #: name and class name, or a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
+    #: subclass.
     __traceflow__ = {
-        'tcp': ('pcapkit.foundation.traceflow.tcp', 'TCP'),
-    }  # type: dict[str, tuple[str, str]]
+        'tcp': ModuleDescriptor('pcapkit.foundation.traceflow.tcp', 'TCP'),
+    }  # type: dict[str, ModuleDescriptor[TraceFlow] | Type[TraceFlow]]
 
     ##########################################################################
     # Properties.
@@ -296,70 +304,92 @@ class Extractor(Generic[P]):
     ##########################################################################
 
     @classmethod
-    def register_dumper(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':
+    def register_dumper(cls, format: 'str', dumper: 'ModuleDescriptor[Dumper] | Type[Dumper]', ext: 'str') -> 'None':
         r"""Register a new dumper class.
 
         Notes:
             The full qualified class name of the new dumper class
-            should be as ``{module}.{class_}``.
+            should be as ``{dumper.module}.{dumper.name}``.
 
         Arguments:
             format: format name
-            module: module name
-            class\_: class name
+            dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass
             ext: file extension
 
         """
-        cls.__output__[format] = (module, class_, ext)
+        if isinstance(dumper, ModuleDescriptor):
+            dumper = dumper.klass
+        if not issubclass(dumper, Dumper):
+            raise RegistryError(f'dumper must be a Dumper subclass, not {dumper!r}')
+        if format in cls.__output__:
+            warn(f'dumper {format} already registered, overwriting', RegistryWarning)
+        cls.__output__[format] = (dumper, ext)
 
     @classmethod
-    def register_engine(cls, engine: 'str', module: 'str', class_: 'str') -> 'None':
+    def register_engine(cls, name: 'str', engine: 'ModuleDescriptor[Engine] | Type[Engine]') -> 'None':
         r"""Register a new extraction engine.
 
         Notes:
             The full qualified class name of the new extraction engine
-            should be as ``{module}.{class_}``.
+            should be as ``{engine.module}.{engine.name}``.
 
         Arguments:
-            engine: engine name
-            module: module name
-            class\_: class name
+            name: engine name
+            engine: module descriptor or an
+                :class:`~pcapkit.foundation.engines.engine.Engine` subclass
 
         """
-        cls.__engine__[engine] = (module, class_)
-
+        if isinstance(engine, ModuleDescriptor):
+            engine = engine.klass
+        if not issubclass(engine, Engine):
+            raise RegistryError(f'engine must be an Engine subclass, not {engine!r}')
+        if name in cls.__engine__:
+            warn(f'engine {name} already registered, overwriting', RegistryWarning)
+        cls.__engine__[name] = engine
 
     @classmethod
-    def register_reassembly(cls, protocol: 'str', module: 'str', class_: 'str') -> 'None':
+    def register_reassembly(cls, protocol: 'str', reassembly: 'ModuleDescriptor[Reassembly] | Type[Reassembly]') -> 'None':
         r"""Register a new reassembly engine.
 
         Notes:
             The full qualified class name of the new reassembly engine
-            should be as ``{module}.{class_}``.
+            should be as ``{reassembly.module}.{reassembly.name}``.
 
         Arguments:
             protocol: protocol name
-            module: module name
-            class\_: class name
+            reassembly: module descriptor or a
+                :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass
 
         """
-        cls.__reassembly__[protocol] = (module, class_)
+        if isinstance(reassembly, ModuleDescriptor):
+            reassembly = reassembly.klass
+        if not issubclass(reassembly, Reassembly):
+            raise RegistryError(f'reassembly must be a Reassembly subclass, not {reassembly!r}')
+        if protocol in cls.__reassembly__:
+            warn(f'reassembly {protocol} already registered, overwriting', RegistryWarning)
+        cls.__reassembly__[protocol] = reassembly
 
     @classmethod
-    def register_traceflow(cls, protocol: 'str', module: 'str', class_: 'str') -> 'None':
+    def register_traceflow(cls, protocol: 'str', traceflow: 'ModuleDescriptor[TraceFlow] | Type[TraceFlow]') -> 'None':
         r"""Register a new flow tracing engine.
 
         Notes:
             The full qualified class name of the new flow tracing engine
-            should be as ``{module}.{class_}``.
+            should be as ``{traceflow.module}.{traceflow.name}``.
 
         Arguments:
             protocol: protocol name
-            module: module name
-            class\_: class name
+            traceflow: module descriptor or a
+                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass
 
         """
-        cls.__traceflow__[protocol] = (module, class_)
+        if isinstance(traceflow, ModuleDescriptor):
+            traceflow = traceflow.klass
+        if not issubclass(traceflow, TraceFlow):
+            raise RegistryError(f'traceflow must be a TraceFlow subclass, not {traceflow!r}')
+        if protocol in cls.__traceflow__:
+            warn(f'traceflow {protocol} already registered, overwriting', RegistryWarning)
+        cls.__traceflow__[protocol] = traceflow
 
     def run(self) -> 'None':  # pylint: disable=inconsistent-return-statements
         """Start extraction.
@@ -383,8 +413,9 @@ class Extractor(Generic[P]):
 
         """
         if self._exnam in self.__engine__:  # check if engine is supported
-            mod, cls = self.__engine__[self._exnam]
-            eng = cast('Type[Engine]', getattr(importlib.import_module(mod), cls))
+            eng = self.__engine__[self._exnam]
+            if isinstance(eng, ModuleDescriptor):
+                eng = eng.klass
 
             if self.import_test(eng.module(), name=eng.name()) is not None:
                 self._exeng = eng(self)
@@ -499,7 +530,7 @@ class Extractor(Generic[P]):
             ofnm = None
             ext = None
         else:
-            ext = cls.__output__[fmt][2]
+            ext = cls.__output__[fmt][1]
             if ext is None:
                 raise FormatError(f'unknown output format: {fmt}')
 
@@ -700,21 +731,27 @@ class Extractor(Generic[P]):
             if self._ipv4:
                 logger.info('IPv4 reassembly enabled')
 
-                module, class_ = self.__reassembly__['ipv4']
-                reasm_cls_ipv4 = getattr(importlib.import_module(module), class_)  # type: Type[IPv4_Reassembly]
-                reasm_obj_ipv4 = reasm_cls_ipv4(strict=reasm_strict, store=reasm_store)
+                reasm_cls_ipv4 = self.__reassembly__['ipv4']
+                if isinstance(reasm_cls_ipv4, ModuleDescriptor):
+                    reasm_cls_ipv4 = reasm_cls_ipv4.klass
+                    self.__reassembly__['ipv4'] = reasm_cls_ipv4  # update mapping upon import
+                reasm_obj_ipv4 = cast('IPv4_Reassembly', reasm_cls_ipv4(strict=reasm_strict, store=reasm_store))
             if self._ipv6:
                 logger.info('IPv6 reassembly enabled')
 
-                module, class_ = self.__reassembly__['ipv6']
-                reasm_cls_ipv6 = getattr(importlib.import_module(module), class_)  # type: Type[IPv6_Reassembly]
-                reasm_obj_ipv6 = reasm_cls_ipv6(strict=reasm_strict, store=reasm_store)
+                reasm_cls_ipv6 = self.__reassembly__['ipv6']
+                if isinstance(reasm_cls_ipv6, ModuleDescriptor):
+                    reasm_cls_ipv6 = reasm_cls_ipv6.klass
+                    self.__reassembly__['ipv6'] = reasm_cls_ipv6  # update mapping upon import
+                reasm_obj_ipv6 = cast('IPv6_Reassembly', reasm_cls_ipv6(strict=reasm_strict, store=reasm_store))
             if self._tcp:
                 logger.info('TCP reassembly enabled')
 
-                module, class_ = self.__reassembly__['tcp']
-                reasm_cls_tcp = getattr(importlib.import_module(module), class_)  # type: Type[TCP_Reassembly]
-                reasm_obj_tcp = reasm_cls_tcp(strict=reasm_strict, store=reasm_store)
+                reasm_cls_tcp = self.__reassembly__['tcp']
+                if isinstance(reasm_cls_tcp, ModuleDescriptor):
+                    reasm_cls_tcp = reasm_cls_tcp.klass
+                    self.__reassembly__['tcp'] = reasm_cls_tcp  # update mapping upon import
+                reasm_obj_tcp = cast('TCP_Reassembly', reasm_cls_tcp(strict=reasm_strict, store=reasm_store))
 
             self._reasm = ReassemblyManager(
                 ipv4=reasm_obj_ipv4,
@@ -733,10 +770,12 @@ class Extractor(Generic[P]):
             if self._tcp:
                 logger.info('TCP flow tracing enabled')
 
-                module, class_ = self.__traceflow__['tcp']
-                trace_cls_tcp = getattr(importlib.import_module(module), class_)  # type: Type[TCP_TraceFlow]
-                trace_obj_tcp = trace_cls_tcp(fout=trace_fout, format=trace_format, byteorder=trace_byteorder,
-                                              nanosecond=trace_nanosecond)
+                trace_cls_tcp = self.__traceflow__['tcp']
+                if isinstance(trace_cls_tcp, ModuleDescriptor):
+                    trace_cls_tcp = trace_cls_tcp.klass
+                    self.__traceflow__['tcp'] = trace_cls_tcp  # update mapping upon import
+                trace_obj_tcp = cast('TCP_TraceFlow', trace_cls_tcp(fout=trace_fout, format=trace_format,
+                                                                    byteorder=trace_byteorder, nanosecond=trace_nanosecond))
 
             self._trace = TraceFlowManager(
                 tcp=trace_obj_tcp,
@@ -752,11 +791,13 @@ class Extractor(Generic[P]):
                                          stream_closing=not self._flag_s)
 
         if not self._flag_q:
-            module, class_, ext = self.__output__[fmt]
+            output, ext = self.__output__[fmt]
             if ext is None:
                 warn(f'Unsupported output format: {fmt}; disabled file output feature',
                      FormatWarning, stacklevel=stacklevel())
-            output = getattr(importlib.import_module(module), class_)  # type: Type[Dumper]
+            if isinstance(output, ModuleDescriptor):
+                output = output.klass
+                self.__output__[fmt] = (output, ext)  # update mapping upon import
             dumper = make_dumper(output)
 
             self._ofile = dumper if self._flag_f else dumper(ofnm)  # output file
