@@ -414,9 +414,6 @@ the read call would block in non-blocking mode.</p>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – </p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -429,9 +426,6 @@ is made.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -449,9 +443,6 @@ and has no data available at the moment.</p>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>b</strong> (<em>Buffer</em>) – </p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -466,9 +457,6 @@ and has no data available at the moment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>b</strong> (<em>Buffer</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -488,20 +476,14 @@ and has no data available at the moment.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.readline">
 <span class="sig-name descname"><span class="pre">readline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.readline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.readline" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Read and return one line from the stream. If <code class="docutils literal notranslate"><span class="pre">size</span></code> is specified, at most
+<code class="docutils literal notranslate"><span class="pre">size</span></code> bytes will be read.</p>
+<p>The line terminator is always <code class="docutils literal notranslate"><span class="pre">b'\n'</span></code> for binary files; for text files, the
+<code class="docutils literal notranslate"><span class="pre">newline</span></code> argument to <a class="reference external" href="https://docs.python.org/3/library/functions.html#open" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> can be used to select the line
+terminator(s) recognized.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – </p>
-</dd>
-</dl>
-<dl>
-<dt>Read and return one line from the stream. If <code class="docutils literal notranslate"><span class="pre">size</span></code> is specified, at most</dt><dd><p><code class="docutils literal notranslate"><span class="pre">size</span></code> bytes will be read.</p>
-<p>The line terminator is always <a href="#id1"><span class="problematic" id="id2">``</span></a>b’</p>
-</dd>
-<dt>‘`` for binary files; for text files, the</dt><dd><p><code class="docutils literal notranslate"><span class="pre">newline</span></code> argument to <a class="reference external" href="https://docs.python.org/3/library/functions.html#open" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> can be used to select the line
-terminator(s) recognized.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -519,8 +501,17 @@ without calling <a class="reference internal" href="#pcapkit.corekit.io.Seekable
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</p>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>hint</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.writeable">
+<span class="sig-name descname"><span class="pre">writeable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.writeable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.writeable" title="Link to this definition">#</a></dt>
+<dd><p>Return <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if the stream supports writing. If <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> and
+<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.truncate" title="pcapkit.corekit.io.SeekableReader.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.11)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -539,9 +530,6 @@ should only access <code class="docutils literal notranslate"><span class="pre">
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>b</strong> (<em>Buffer</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -572,17 +560,6 @@ be zero or positive</p></li>
 <li><p><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code> - end of the stream; <code class="docutils literal notranslate"><span class="pre">offset</span></code> is usually negative</p></li>
 </ul>
 <p>Return the new absolute position.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
-<li><p><strong>whence</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -607,9 +584,6 @@ size is returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -650,9 +624,6 @@ The number of bytes returned may be less or more than requested.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
 </dd>
 </dl>
 </dd></dl>

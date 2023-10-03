@@ -421,12 +421,9 @@ below:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -602,82 +599,39 @@ below:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.next">
 <span class="sig-name descname"><span class="pre">next</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_TransType</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">next&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.next" title="Link to this definition">#</a></dt>
 <dd><p>Next header.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.reserved">
 <span class="sig-name descname"><span class="pre">reserved</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">reserved&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.reserved" title="Link to this definition">#</a></dt>
 <dd><p>Reserved.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.flags">
 <span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Flags</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.flags" title="Link to this definition">#</a></dt>
 <dd><p>Fragment offset and flags.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.id">
 <span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">id&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.id" title="Link to this definition">#</a></dt>
 <dd><p>Identification.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.payload">
 <span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag.payload" title="Link to this definition">#</a></dt>
 <dd><p>Payload.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -687,7 +641,7 @@ below:</p>
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.internet.ipv6_frag" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6_frag.</span></span><span class="sig-name descname"><span class="pre">IPv6_Frag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6_frag.html#IPv6_Frag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6_frag.</span></span><span class="sig-name descname"><span class="pre">IPv6_Frag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6_frag.html#IPv6_Frag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for IPv6 fragment header.</p>
 <dl class="field-list simple">

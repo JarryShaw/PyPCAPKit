@@ -391,12 +391,9 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -590,26 +587,15 @@ header-field    :==:    field-name &quot;:&quot; OWS field-value OWS
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.application.httpv1.HTTP.data">
 <span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">data&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.application.httpv1.HTTP.data" title="Link to this definition">#</a></dt>
 <dd><p>Packet data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -619,7 +605,7 @@ header-field    :==:    field-name &quot;:&quot; OWS field-value OWS
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.application.httpv1" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.HTTP">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">HTTP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/httpv1.html#HTTP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.HTTP" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">HTTP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/httpv1.html#HTTP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.HTTP" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for HTTP/1.* protocol.</p>
 <dl class="field-list simple">
@@ -658,12 +644,9 @@ header-field    :==:    field-name &quot;:&quot; OWS field-value OWS
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -676,7 +659,7 @@ header-field    :==:    field-name &quot;:&quot; OWS field-value OWS
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.RequestHeader">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">RequestHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/httpv1.html#RequestHeader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.RequestHeader" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">RequestHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/httpv1.html#RequestHeader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.RequestHeader" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.application.httpv1.Header" title="pcapkit.protocols.data.application.httpv1.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">Header</span></code></a></p>
 <p>Data model for HTTP/1.* request header line.</p>
 <dl class="field-list simple">
@@ -715,7 +698,7 @@ header-field    :==:    field-name &quot;:&quot; OWS field-value OWS
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.ResponseHeader">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">ResponseHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/httpv1.html#ResponseHeader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.ResponseHeader" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">ResponseHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/httpv1.html#ResponseHeader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.ResponseHeader" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.application.httpv1.Header" title="pcapkit.protocols.data.application.httpv1.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">Header</span></code></a></p>
 <p>Data model for HTTP/1.* response header line.</p>
 <dl class="field-list simple">

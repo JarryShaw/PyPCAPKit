@@ -365,32 +365,31 @@
 <span class="k">class</span> <span class="nc">MPTCPOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;[MPTCPOption] Multipath TCP options [:rfc:`6824`]&quot;&quot;&quot;</span>
 
-    <span class="c1">#: Multipath Capable [:rfc:`8684, Section 3.1`]</span>
+    <span class="c1">#: Multipath Capable [:rfc:`8684#3.1`]</span>
     <span class="n">MP_CAPABLE</span> <span class="o">=</span> <span class="mh">0x0</span>
 
-    <span class="c1">#: Join Connection [:rfc:`8684, Section 3.2`]</span>
+    <span class="c1">#: Join Connection [:rfc:`8684#3.2`]</span>
     <span class="n">MP_JOIN</span> <span class="o">=</span> <span class="mh">0x1</span>
 
-    <span class="c1">#: Data Sequence Signal (Data ACK and Data Sequence Mapping) [:rfc:`8684,</span>
-    <span class="c1">#: Section 3.3`]</span>
+    <span class="c1">#: Data Sequence Signal (Data ACK and Data Sequence Mapping) [:rfc:`8684#3.3`]</span>
     <span class="n">DSS</span> <span class="o">=</span> <span class="mh">0x2</span>
 
-    <span class="c1">#: Add Address [:rfc:`8684, Section 3.4.1`]</span>
+    <span class="c1">#: Add Address [:rfc:`8684#3.4.1`]</span>
     <span class="n">ADD_ADDR</span> <span class="o">=</span> <span class="mh">0x3</span>
 
-    <span class="c1">#: Remove Address [:rfc:`8684, Section 3.4.2`]</span>
+    <span class="c1">#: Remove Address [:rfc:`8684#3.4.2`]</span>
     <span class="n">REMOVE_ADDR</span> <span class="o">=</span> <span class="mh">0x4</span>
 
-    <span class="c1">#: Change Subflow Priority [:rfc:`8684, Section 3.3.8`]</span>
+    <span class="c1">#: Change Subflow Priority [:rfc:`8684#3.3.8`]</span>
     <span class="n">MP_PRIO</span> <span class="o">=</span> <span class="mh">0x5</span>
 
-    <span class="c1">#: Fallback [:rfc:`8684, Section 3.7`]</span>
+    <span class="c1">#: Fallback [:rfc:`8684#3.7`]</span>
     <span class="n">MP_FAIL</span> <span class="o">=</span> <span class="mh">0x6</span>
 
-    <span class="c1">#: Fast Close [:rfc:`8684, Section 3.5`]</span>
+    <span class="c1">#: Fast Close [:rfc:`8684#3.5`]</span>
     <span class="n">MP_FASTCLOSE</span> <span class="o">=</span> <span class="mh">0x7</span>
 
-    <span class="c1">#: Subflow Reset [:rfc:`8684, Section 3.6`]</span>
+    <span class="c1">#: Subflow Reset [:rfc:`8684#3.6`]</span>
     <span class="n">MP_TCPRST</span> <span class="o">=</span> <span class="mh">0x8</span>
 
     <span class="c1">#: [:rfc:`8684`]</span>

@@ -431,12 +431,9 @@ as below:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -523,8 +520,8 @@ as below:</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
-<li><p><strong>__packet__</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>] </em><em>| </em><em>None</em>) – Optional packet data.</p></li>
-<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>__packet__</strong> – Optional packet data.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -630,110 +627,51 @@ as below:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.hextet">
 <span class="sig-name descname"><span class="pre">hextet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPv6Hextet</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">hextet&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.hextet" title="Link to this definition">#</a></dt>
 <dd><p>Version, traffic class and flow label.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.length">
 <span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">length&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.length" title="Link to this definition">#</a></dt>
 <dd><p>Payload length.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.next">
 <span class="sig-name descname"><span class="pre">next</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_TransType</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">next&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.next" title="Link to this definition">#</a></dt>
 <dd><p>Next header.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.limit">
 <span class="sig-name descname"><span class="pre">limit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">limit&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.limit" title="Link to this definition">#</a></dt>
 <dd><p>Hop limit.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.src">
 <span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPv6Address</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv6AddressField</span> <span class="pre">src&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.src" title="Link to this definition">#</a></dt>
 <dd><p>Source address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.dst">
 <span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPv6Address</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv6AddressField</span> <span class="pre">dst&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.dst" title="Link to this definition">#</a></dt>
 <dd><p>Destination address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.payload">
 <span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.payload" title="Link to this definition">#</a></dt>
 <dd><p>Payload.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -761,7 +699,7 @@ as below:</p>
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.internet.ipv6" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6.html#IPv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6.html#IPv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for Internet Protocol version 6.</p>
 <div class="admonition important">
@@ -772,12 +710,9 @@ to create an instance of this data model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="pcapkit.protocols.data.internet.ipv6.IPv6">IPv6</a></p>
 </dd>
 </dl>
 <dl class="py attribute">

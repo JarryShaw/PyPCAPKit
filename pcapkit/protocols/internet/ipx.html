@@ -421,12 +421,9 @@ as below:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -550,110 +547,51 @@ as below:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipx.IPX.chksum">
 <span class="sig-name descname"><span class="pre">chksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">chksum&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipx.IPX.chksum" title="Link to this definition">#</a></dt>
 <dd><p>Checksum.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipx.IPX.len">
 <span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">len&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipx.IPX.len" title="Link to this definition">#</a></dt>
 <dd><p>Packet length (header includes).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipx.IPX.count">
 <span class="sig-name descname"><span class="pre">count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">count&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipx.IPX.count" title="Link to this definition">#</a></dt>
 <dd><p>Transport control (hop count).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipx.IPX.type">
 <span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_Packet</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">type&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipx.IPX.type" title="Link to this definition">#</a></dt>
 <dd><p>Packet type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipx.IPX.dst">
 <span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">dst&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipx.IPX.dst" title="Link to this definition">#</a></dt>
 <dd><p>Destination address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipx.IPX.src">
 <span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">src&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipx.IPX.src" title="Link to this definition">#</a></dt>
 <dd><p>Source address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipx.IPX.payload">
 <span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipx.IPX.payload" title="Link to this definition">#</a></dt>
 <dd><p>Payload.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -663,7 +601,7 @@ as below:</p>
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.internet.ipx" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipx.IPX">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipx.</span></span><span class="sig-name descname"><span class="pre">IPX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipx.html#IPX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipx.IPX" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipx.</span></span><span class="sig-name descname"><span class="pre">IPX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipx.html#IPX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipx.IPX" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for Internetwork Packet Exchange.</p>
 <dl class="field-list simple">
@@ -714,7 +652,7 @@ as below:</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipx.Address">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipx.</span></span><span class="sig-name descname"><span class="pre">Address</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipx.html#Address"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipx.Address" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipx.</span></span><span class="sig-name descname"><span class="pre">Address</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipx.html#Address"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipx.Address" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for IPX address.</p>
 <dl class="field-list simple">

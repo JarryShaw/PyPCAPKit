@@ -542,12 +542,9 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -1221,10 +1218,7 @@ enumeration:</p>
 <dd><p>Make options for IPv4.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>option</strong> – IPv4 options</p></li>
-<li><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>[</em><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.Option" title="pcapkit.protocols.schema.internet.ipv4.Option"><em>Option</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><em>tuple</em></a><em>[</em><a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><em>OptionNumber</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em>] </em><em>| </em><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><em>OrderedMultiDict</em></a><em>[</em><a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><em>OptionNumber</em></a><em>, </em><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><em>Option</em></a><em>]</em>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>option</strong> – IPv4 options</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.Option" title="pcapkit.protocols.schema.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
@@ -1309,13 +1303,7 @@ enumeration:</p>
 <li><p><strong>kind</strong> (<a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionNumber</span></code></a>) – option type code</p></li>
 <li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.SECOption" title="pcapkit.protocols.data.internet.ipv4.SECOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SECOption</span></code></a>]) – option data</p></li>
 <li><p><strong>sec</strong> – security option</p></li>
-<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – arbitrary keyword arguments</p></li>
-<li><p><strong>level</strong> (<a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.classification_level.ClassificationLevel" title="pcapkit.const.ipv4.classification_level.ClassificationLevel"><em>ClassificationLevel</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.11)"><em>IntEnum</em></a><em> | </em><em>IntEnum</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
-<li><p><strong>level_default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>level_namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><em>Type</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.11)"><em>IntEnum</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><em>Type</em></a><em>[</em><em>IntEnum</em><em>] </em><em>| </em><em>None</em>) – </p></li>
-<li><p><strong>level_reversed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-<li><p><strong>authorities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>[</em><a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.protection_authority.ProtectionAuthority" title="pcapkit.const.ipv4.protection_authority.ProtectionAuthority"><em>ProtectionAuthority</em></a><em>] </em><em>| </em><em>None</em>) – </p></li>
-<li><p><strong>**kwargs</strong> – </p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1362,7 +1350,6 @@ enumeration:</p>
 <li><p><strong>counts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – maximum number of timestamps to record</p></li>
 <li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – list of timestamps</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – arbitrary keyword arguments</p></li>
-<li><p><strong>overflow</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1574,8 +1561,6 @@ enumeration:</p>
 <li><p><strong>ttl</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – time to live (in seconds)</p></li>
 <li><p><strong>nonce</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – nonce value</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – arbitrary keyword arguments</p></li>
-<li><p><strong>kind</strong> (<a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><em>OptionNumber</em></a>) – </p></li>
-<li><p><strong>option</strong> (<em>QuickStartRequestOption</em><em> | </em><em>QuickStartReportOption</em><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1613,194 +1598,87 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.vihl">
 <span class="sig-name descname"><span class="pre">vihl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">VerIHLField</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">vihl&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.vihl" title="Link to this definition">#</a></dt>
 <dd><p>Version and header length.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.tos">
 <span class="sig-name descname"><span class="pre">tos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ToSField</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">tos&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.tos" title="Link to this definition">#</a></dt>
 <dd><p>Type of service.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.length">
 <span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">length&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.length" title="Link to this definition">#</a></dt>
 <dd><p>Total length.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.id">
 <span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">id&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.id" title="Link to this definition">#</a></dt>
 <dd><p>Identification.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.flags">
 <span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Flags</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.flags" title="Link to this definition">#</a></dt>
 <dd><p>Flags and fragment offset.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.ttl">
 <span class="sig-name descname"><span class="pre">ttl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">ttl&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.ttl" title="Link to this definition">#</a></dt>
 <dd><p>Time to live.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.proto">
 <span class="sig-name descname"><span class="pre">proto</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_TransType</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">proto&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.proto" title="Link to this definition">#</a></dt>
 <dd><p>Protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.chksum">
 <span class="sig-name descname"><span class="pre">chksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">chksum&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.chksum" title="Link to this definition">#</a></dt>
 <dd><p>Header checksum.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.src">
 <span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPv4Address</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv4AddressField</span> <span class="pre">src&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.src" title="Link to this definition">#</a></dt>
 <dd><p>Source address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.dst">
 <span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPv4Address</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv4AddressField</span> <span class="pre">dst&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.dst" title="Link to this definition">#</a></dt>
 <dd><p>Destination address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.options">
 <span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[Option]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;OptionField</span> <span class="pre">options&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.options" title="Link to this definition">#</a></dt>
 <dd><p>Options.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.padding">
 <span class="sig-name descname"><span class="pre">padding</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.padding" title="Link to this definition">#</a></dt>
 <dd><p>Padding.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.payload">
 <span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.payload" title="Link to this definition">#</a></dt>
 <dd><p>Payload.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1813,40 +1691,21 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.Option.type">
 <span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_OptionNumber</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">type&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.Option.type" title="Link to this definition">#</a></dt>
 <dd><p>Option type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.Option.length">
 <span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">length&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.Option.length" title="Link to this definition">#</a></dt>
 <dd><p>Option length.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1876,26 +1735,15 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.UnassignedOption.data">
 <span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">data&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.UnassignedOption.data" title="Link to this definition">#</a></dt>
 <dd><p>Option data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1908,12 +1756,9 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -1932,12 +1777,9 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -1956,40 +1798,21 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.SECOption.level">
 <span class="sig-name descname"><span class="pre">level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_ClassificationLevel</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">level&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SECOption.level" title="Link to this definition">#</a></dt>
 <dd><p>Classification level.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.SECOption.data">
 <span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">data&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SECOption.data" title="Link to this definition">#</a></dt>
 <dd><p>Protection authority flags.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2002,54 +1825,27 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.LSROption.pointer">
 <span class="sig-name descname"><span class="pre">pointer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">pointer&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.LSROption.pointer" title="Link to this definition">#</a></dt>
 <dd><p>Pointer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.LSROption.route">
 <span class="sig-name descname"><span class="pre">route</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[IPv4Address]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ListField</span> <span class="pre">route&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.LSROption.route" title="Link to this definition">#</a></dt>
 <dd><p>Route.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.LSROption.remainder">
 <span class="sig-name descname"><span class="pre">remainder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">remainder&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.LSROption.remainder" title="Link to this definition">#</a></dt>
 <dd><p>Remaining data buffer0.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2062,68 +1858,33 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.TSOption.pointer">
 <span class="sig-name descname"><span class="pre">pointer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">pointer&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.TSOption.pointer" title="Link to this definition">#</a></dt>
 <dd><p>Pointer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.TSOption.flags">
 <span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TSFlags</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.TSOption.flags" title="Link to this definition">#</a></dt>
 <dd><p>Overflow and flags.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.TSOption.ts_data">
 <span class="sig-name descname"><span class="pre">ts_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[int]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ListField</span> <span class="pre">ts_data&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.TSOption.ts_data" title="Link to this definition">#</a></dt>
 <dd><p>Timestamps and internet addresses.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.TSOption.remainder">
 <span class="sig-name descname"><span class="pre">remainder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">remainder&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.TSOption.remainder" title="Link to this definition">#</a></dt>
 <dd><p>Remaining data buffer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -2153,40 +1914,21 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.ESECOption.format">
 <span class="sig-name descname"><span class="pre">format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">format&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.ESECOption.format" title="Link to this definition">#</a></dt>
 <dd><p>Additional security information format code.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.ESECOption.info">
 <span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">info&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.ESECOption.info" title="Link to this definition">#</a></dt>
 <dd><p>Additional security information.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2199,54 +1941,27 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.RROption.pointer">
 <span class="sig-name descname"><span class="pre">pointer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">pointer&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.RROption.pointer" title="Link to this definition">#</a></dt>
 <dd><p>Pointer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.RROption.route">
 <span class="sig-name descname"><span class="pre">route</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[IPv4Address]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ListField</span> <span class="pre">route&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.RROption.route" title="Link to this definition">#</a></dt>
 <dd><p>Route.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.RROption.remainder">
 <span class="sig-name descname"><span class="pre">remainder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">remainder&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.RROption.remainder" title="Link to this definition">#</a></dt>
 <dd><p>Remaining data buffer0.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2259,26 +1974,15 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.SIDOption.sid">
 <span class="sig-name descname"><span class="pre">sid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">sid&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SIDOption.sid" title="Link to this definition">#</a></dt>
 <dd><p>Stream identifier.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2291,54 +1995,27 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.SSROption.pointer">
 <span class="sig-name descname"><span class="pre">pointer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">pointer&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SSROption.pointer" title="Link to this definition">#</a></dt>
 <dd><p>Pointer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.SSROption.route">
 <span class="sig-name descname"><span class="pre">route</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[IPv4Address]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ListField</span> <span class="pre">route&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SSROption.route" title="Link to this definition">#</a></dt>
 <dd><p>Route.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.SSROption.remainder">
 <span class="sig-name descname"><span class="pre">remainder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">remainder&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SSROption.remainder" title="Link to this definition">#</a></dt>
 <dd><p>Remaining data buffer0.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2351,26 +2028,15 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.MTUPOption.mtu">
 <span class="sig-name descname"><span class="pre">mtu</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">mtu&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.MTUPOption.mtu" title="Link to this definition">#</a></dt>
 <dd><p>MTU.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2383,26 +2049,15 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.MTUROption.mtu">
 <span class="sig-name descname"><span class="pre">mtu</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">mtu&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.MTUROption.mtu" title="Link to this definition">#</a></dt>
 <dd><p>MTU.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2415,68 +2070,33 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.TROption.id">
 <span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">id&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.TROption.id" title="Link to this definition">#</a></dt>
 <dd><p>ID number.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.TROption.out">
 <span class="sig-name descname"><span class="pre">out</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">out&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.TROption.out" title="Link to this definition">#</a></dt>
 <dd><p>Outbound hop count.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.TROption.ret">
 <span class="sig-name descname"><span class="pre">ret</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">ret&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.TROption.ret" title="Link to this definition">#</a></dt>
 <dd><p>Return hop count.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.TROption.origin">
 <span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPv4Address</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv4AddressField</span> <span class="pre">origin&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.TROption.origin" title="Link to this definition">#</a></dt>
 <dd><p>Originator IP address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2489,26 +2109,15 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.RTRALTOption.alert">
 <span class="sig-name descname"><span class="pre">alert</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_RouterAlert</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">alert&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.RTRALTOption.alert" title="Link to this definition">#</a></dt>
 <dd><p>Router alert value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2521,26 +2130,15 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.QSOption.flags">
 <span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">QuickStartFlags</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.QSOption.flags" title="Link to this definition">#</a></dt>
 <dd><p>Flags.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -2752,7 +2350,7 @@ instance.</p></li>
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.internet.ipv4" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.IPv4">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">IPv4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#IPv4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.IPv4" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">IPv4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#IPv4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.IPv4" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for IPv4 packet.</p>
 <dl class="field-list simple">
@@ -2839,7 +2437,7 @@ instance.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.ToSField">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">ToSField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#ToSField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.ToSField" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">ToSField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#ToSField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.ToSField" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for IPv4 ToS fields.</p>
 <div class="admonition important">
@@ -2850,12 +2448,9 @@ to create an instance of this data model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.ToSField" title="pcapkit.protocols.data.internet.ipv4.ToSField">ToSField</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -2897,7 +2492,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.Flags">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">Flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#Flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.Flags" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">Flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#Flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.Flags" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for IPv4 Flags.</p>
 <dl class="field-list simple">
@@ -2930,12 +2525,9 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -2960,18 +2552,15 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.OptionType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">OptionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#OptionType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.OptionType" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">OptionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#OptionType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.OptionType" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for IPv4 option type data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.OptionType" title="pcapkit.protocols.data.internet.ipv4.OptionType">OptionType</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -3001,7 +2590,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.UnassignedOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">UnassignedOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#UnassignedOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.UnassignedOption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">UnassignedOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#UnassignedOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.UnassignedOption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 unassigned option.</p>
 <dl class="field-list simple">
@@ -3022,7 +2611,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.EOOLOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">EOOLOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#EOOLOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.EOOLOption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">EOOLOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#EOOLOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.EOOLOption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 End of Option List (<code class="docutils literal notranslate"><span class="pre">EOOL</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3037,7 +2626,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.NOPOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">NOPOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#NOPOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.NOPOption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">NOPOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#NOPOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.NOPOption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 No Operation (<code class="docutils literal notranslate"><span class="pre">NOP</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3052,7 +2641,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.SECOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">SECOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#SECOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.SECOption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">SECOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#SECOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.SECOption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 Security (<code class="docutils literal notranslate"><span class="pre">SEC</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3079,7 +2668,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.LSROption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">LSROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#LSROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.LSROption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">LSROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#LSROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.LSROption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 Loose Source Route (<code class="docutils literal notranslate"><span class="pre">LSR</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3106,7 +2695,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.TSOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">TSOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#TSOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.TSOption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">TSOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#TSOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.TSOption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 Time Stamp (<code class="docutils literal notranslate"><span class="pre">TS</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3145,7 +2734,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.ESECOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">ESECOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#ESECOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.ESECOption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">ESECOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#ESECOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.ESECOption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 Extended Security (<code class="docutils literal notranslate"><span class="pre">ESEC</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3172,7 +2761,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.RROption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">RROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#RROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.RROption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">RROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#RROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.RROption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 Record Route (<code class="docutils literal notranslate"><span class="pre">RR</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3199,7 +2788,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.SIDOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">SIDOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#SIDOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.SIDOption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">SIDOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#SIDOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.SIDOption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 Stream ID (<code class="docutils literal notranslate"><span class="pre">SID</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3220,7 +2809,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.SSROption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">SSROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#SSROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.SSROption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">SSROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#SSROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.SSROption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 Strict Source Route (<code class="docutils literal notranslate"><span class="pre">SSR</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3247,7 +2836,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.MTUPOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">MTUPOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#MTUPOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.MTUPOption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">MTUPOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#MTUPOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.MTUPOption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 MTU Probe (<code class="docutils literal notranslate"><span class="pre">MTUP</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3268,7 +2857,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.MTUROption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">MTUROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#MTUROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.MTUROption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">MTUROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#MTUROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.MTUROption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 MTU Reply (<code class="docutils literal notranslate"><span class="pre">MTUR</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3289,7 +2878,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.TROption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">TROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#TROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.TROption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">TROption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#TROption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.TROption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 Traceroute (<code class="docutils literal notranslate"><span class="pre">TR</span></code>) option.</p>
 <div class="admonition important">
@@ -3300,12 +2889,9 @@ to create an instance of this data model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.TROption" title="pcapkit.protocols.data.internet.ipv4.TROption">TROption</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -3335,7 +2921,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.RTRALTOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">RTRALTOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#RTRALTOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.RTRALTOption" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">RTRALTOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv4.html#RTRALTOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.RTRALTOption" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Data model for IPv4 Router Alert (<code class="docutils literal notranslate"><span class="pre">RTRALT</span></code>) option.</p>
 <dl class="field-list simple">
@@ -3362,12 +2948,9 @@ directly use <a class="reference external" href="https://docs.python.org/3/libra
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py attribute">

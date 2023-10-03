@@ -19,3 +19,4 @@ all engine support functionality.
    .. automethod:: close
 
    .. automethod:: __call__
+   .. automethod:: __init_subclass__

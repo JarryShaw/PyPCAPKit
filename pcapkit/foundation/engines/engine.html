@@ -370,7 +370,7 @@ all engine support functionality.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.engine.</span></span><span class="sig-name descname"><span class="pre">Engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#Engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_Engine</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
 <p>Base class for engine support.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -385,7 +385,7 @@ all engine support functionality.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine.run">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#Engine.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.run" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.run" title="Link to this definition">#</a></dt>
 <dd><p>Start extraction.</p>
 <p>This method is the entry point for file extraction. It is to be used
 for preparing the extraction process, such as parsing the file header
@@ -399,7 +399,7 @@ and setting up the extraction engines.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine.read_frame">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#Engine.read_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.read_frame" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.read_frame" title="Link to this definition">#</a></dt>
 <dd><p>Read frame.</p>
 <p>This method is to be used for reading a frame from the file. It is to
 read a frame from the file using the prepared engine instance and
@@ -413,7 +413,7 @@ return the parsed frame.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine.close">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#Engine.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.close" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.close" title="Link to this definition">#</a></dt>
 <dd><p>Close engine.</p>
 <p>This method is to be used for closing the engine instance. It is to
 close the engine instance after the extraction process is finished.</p>
@@ -426,13 +426,42 @@ close the engine instance after the extraction process is finished.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#Engine.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.__call__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.__call__" title="Link to this definition">#</a></dt>
 <dd><p>Start extraction.</p>
 <p>This method will directly call <a class="reference internal" href="#pcapkit.foundation.engines.engine.Engine.run" title="pcapkit.foundation.engines.engine.Engine.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> to start the
 extraction process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine.__init_subclass__">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#Engine.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.__init_subclass__" title="Link to this definition">#</a></dt>
+<dd><p>Initialise subclass.</p>
+<p>This method is to be used for registering the engine class to
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> class.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Use keyword argument <code class="docutils literal notranslate"><span class="pre">name</span></code> to specify the engine name at
+class definition:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyEngine</span><span class="p">(</span><span class="n">Engine</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;my_engine&#39;</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Engine name, default to class name.</p></li>
+<li><p><strong>*args</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>

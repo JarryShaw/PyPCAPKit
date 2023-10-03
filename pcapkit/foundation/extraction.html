@@ -387,35 +387,29 @@ extracts parametres from a PCAP file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fin</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>IO</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em>]</em><em>]</em>) – file name to be read; if file not exist, raise <code class="xref py py-exc docutils literal notranslate"><span class="pre">FileNotFound</span></code></p></li>
-<li><p><strong>fout</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – file name to be written</p></li>
-<li><p><strong>format</strong> (<em>Optional</em><em>[</em><em>Formats</em><em>]</em>) – file format of output</p></li>
-<li><p><strong>auto</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if automatically run till EOF</p></li>
-<li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if check and append extensions to output file</p></li>
-<li><p><strong>store</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if store extracted packet info</p></li>
-<li><p><strong>files</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if split each frame into different files</p></li>
-<li><p><strong>nofile</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if no output file is to be dumped</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em> | </em><em>VerboseHandler</em>) – a <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> value or a function takes the <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance and current parsed frame (depends on engine selected) as parameters to print verbose output information</p></li>
-<li><p><strong>engine</strong> (<em>Optional</em><em>[</em><em>Engines</em><em>]</em>) – extraction engine to be used</p></li>
-<li><p><strong>layer</strong> (<em>Optional</em><em>[</em><em>Layers</em><em>]</em>) – extract til which layer</p></li>
-<li><p><strong>protocol</strong> (<em>Optional</em><em>[</em><em>Protocols</em><em>]</em>) – extract til which protocol</p></li>
-<li><p><strong>reassembly</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if perform reassembly</p></li>
+<li><p><strong>fin</strong> – file name to be read; if file not exist, raise <code class="xref py py-exc docutils literal notranslate"><span class="pre">FileNotFound</span></code></p></li>
+<li><p><strong>fout</strong> – file name to be written</p></li>
+<li><p><strong>format</strong> – file format of output</p></li>
+<li><p><strong>auto</strong> – if automatically run till EOF</p></li>
+<li><p><strong>extension</strong> – if check and append extensions to output file</p></li>
+<li><p><strong>store</strong> – if store extracted packet info</p></li>
+<li><p><strong>files</strong> – if split each frame into different files</p></li>
+<li><p><strong>nofile</strong> – if no output file is to be dumped</p></li>
+<li><p><strong>verbose</strong> – a <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> value or a function takes the <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance and current parsed frame (depends on engine selected) as parameters to print verbose output information</p></li>
+<li><p><strong>engine</strong> – extraction engine to be used</p></li>
+<li><p><strong>layer</strong> – extract til which layer</p></li>
+<li><p><strong>protocol</strong> – extract til which protocol</p></li>
+<li><p><strong>reassembly</strong> – if perform reassembly</p></li>
 <li><p><strong>strict</strong> – if set strict flag for reassembly</p></li>
-<li><p><strong>trace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if trace TCP traffic flows</p></li>
-<li><p><strong>trace_fout</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – path name for flow tracer if necessary</p></li>
-<li><p><strong>trace_format</strong> (<em>Optional</em><em>[</em><em>Formats</em><em>]</em>) – output file format of flow tracer</p></li>
-<li><p><strong>trace_byteorder</strong> (<em>Literal</em><em>[</em><em>&quot;big&quot;</em><em>, </em><em>&quot;little&quot;</em><em>]</em>) – output file byte order</p></li>
-<li><p><strong>trace_nanosecond</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – output nanosecond-resolution file flag</p></li>
-<li><p><strong>ip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if record data for IPv4 &amp; IPv6 reassembly</p></li>
-<li><p><strong>ipv4</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if perform IPv4 reassembly</p></li>
-<li><p><strong>ipv6</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if perform IPv6 reassembly</p></li>
-<li><p><strong>tcp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if perform TCP reassembly and/or flow tracing</p></li>
-<li><p><strong>reasm_strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-<li><p><strong>reasm_store</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-<li><p><strong>buffer_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
-<li><p><strong>buffer_save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-<li><p><strong>buffer_path</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
-<li><p><strong>no_eof</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
+<li><p><strong>trace</strong> – if trace TCP traffic flows</p></li>
+<li><p><strong>trace_fout</strong> – path name for flow tracer if necessary</p></li>
+<li><p><strong>trace_format</strong> – output file format of flow tracer</p></li>
+<li><p><strong>trace_byteorder</strong> – output file byte order</p></li>
+<li><p><strong>trace_nanosecond</strong> – output nanosecond-resolution file flag</p></li>
+<li><p><strong>ip</strong> – if record data for IPv4 &amp; IPv6 reassembly</p></li>
+<li><p><strong>ipv4</strong> – if perform IPv4 reassembly</p></li>
+<li><p><strong>ipv6</strong> – if perform IPv6 reassembly</p></li>
+<li><p><strong>tcp</strong> – if perform TCP reassembly and/or flow tracing</p></li>
 </ul>
 </dd>
 </dl>
@@ -621,9 +615,6 @@ different driver method:
 <dd class="field-odd"><p><strong>EngineWarning</strong> – If the extraction engine is not available. This is either due to
 dependency not installed, or supplied engine unknown.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -661,11 +652,6 @@ upon completion of the parsing process.
 <p>Under non-auto mode, i.e. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_a" title="pcapkit.foundation.extraction.Extractor._flag_a"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_a</span></code></a> is
 <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>, the method performs no action.</p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">

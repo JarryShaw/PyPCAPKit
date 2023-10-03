@@ -377,12 +377,9 @@ utility arguments and methods of specified protocols.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -462,11 +459,6 @@ method may return multiple values.
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__getitem__" title="pcapkit.protocols.protocol.Protocol.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol.__getitem__()</span></code></a></p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, …]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -939,9 +931,6 @@ or a <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" t
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -1011,11 +1000,6 @@ modules respectively. If the class is not found, the default
 </pre></div>
 </div>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1035,11 +1019,6 @@ modules respectively. If the class is not found, the default
 </pre></div>
 </div>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1111,7 +1090,7 @@ to handle the <code class="docutils literal notranslate"><span class="pre">name<
 <h2>Data Models<a class="headerlink" href="#data-models" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.protocol.Packet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.protocol.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/data/protocol.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.protocol.Packet" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.protocol.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/data/protocol.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.protocol.Packet" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Header and payload data.</p>
 <dl class="field-list simple">
