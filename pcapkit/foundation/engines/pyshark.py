@@ -12,7 +12,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 """
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.foundation.engines.engine import Engine
+from pcapkit.foundation.engines.engine import _Engine as Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, warn

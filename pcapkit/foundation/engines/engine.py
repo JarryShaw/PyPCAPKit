@@ -14,16 +14,32 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 __all__ = ['Engine']
 
 if TYPE_CHECKING:
+    from typing import Any, Optional
+
     from pcapkit.foundation.extraction import Extractor
 
 T = TypeVar('T')
 
 
-class Engine(Generic[T], metaclass=abc.ABCMeta):
+class EngineMeta(abc.ABCMeta, Generic[T]):
+    """Meta class to add dynamic support to :class:`Engine`.
+
+    This meta class is used to generate necessary attributes for the
+    :class:`Engine` class. It can be useful to reduce unnecessary
+    registry calls and simplify the customisation process.
+
+    """
+
+
+class _Engine(Generic[T], metaclass=EngineMeta):
     """Base class for engine support.
 
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
+
+    Note:
+        This class is for internal use only. For customisation, please use
+        :class:`Engine` instead.
 
     """
 
@@ -93,3 +109,52 @@ class Engine(Generic[T], metaclass=abc.ABCMeta):
         close the engine instance after the extraction process is finished.
 
         """
+
+
+class Engine(_Engine[T], Generic[T]):
+    """Base class for engine support.
+
+    Args:
+        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
+
+    """
+
+    @classmethod
+    def name(cls) -> 'str':
+        """Engine name."""
+        return cls.__name__
+
+    @classmethod
+    def module(cls) -> 'str':
+        """Engine module name."""
+        return cls.__module__
+
+    def __init_subclass__(cls, /, name: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+        """Initialise subclass.
+
+        This method is to be used for registering the engine class to
+        :class:`~pcapkit.foundation.extraction.Extractor` class.
+
+        Example:
+
+            Use keyword argument ``name`` to specify the engine name at
+            class definition:
+
+            .. code-block:: python
+
+               class MyEngine(Engine, name='my_engine'):
+                   ...
+
+        Args:
+            name: Engine name, default to class name.
+            *args: Arbitrary positional arguments.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
+        if name is None:
+            name = cls.name()
+
+        from pcapkit.foundation.extraction import Extractor
+        Extractor.register_engine(name, cls)
+
+        return super().__init_subclass__()
