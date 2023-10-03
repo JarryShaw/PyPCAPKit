@@ -13,5 +13,21 @@ import collections
 
 __all__ = ['VersionInfo']
 
-VersionInfo = collections.namedtuple('VersionInfo', ['major', 'minor'])
-VersionInfo.__doc__ = """VersionInfo is alike :class:`sys.version_info`."""
+
+class VersionInfo(collections.namedtuple('VersionInfo', ['major', 'minor'])):
+    """VersionInfo is alike :class:`sys.version_info`."""
+
+    __slots__ = ()
+
+    #: Major version.
+    major: int
+    #: Minor version.
+    minor: int
+
+    @property
+    def version(self) -> 'str':
+        """Return version string."""
+        return f'{self.major}.{self.minor}'
+
+    def __str__(self) -> 'str':
+        return f'{self.major}.{self.minor}'

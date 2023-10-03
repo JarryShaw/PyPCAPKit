@@ -11,6 +11,8 @@ which is originally designed alike :class:`sys.version_info`.
    :no-members:
    :show-inheritance:
 
+   .. autoproperty:: version
+
    .. property:: major
       :type: int
 
