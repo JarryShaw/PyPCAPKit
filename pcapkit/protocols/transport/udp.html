@@ -261,6 +261,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/version.html">Version Info</a></li>
@@ -534,13 +535,13 @@ attribute:</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.udp.UDP.__proto__">
-<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[int,</span> <span class="pre">tuple[str,</span> <span class="pre">str]]</span></em><a class="headerlink" href="#pcapkit.protocols.transport.udp.UDP.__proto__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[int,</span> <span class="pre">ModuleDescriptor[Protocol]</span> <span class="pre">|</span> <span class="pre">Type[Protocol]]</span></em><a class="headerlink" href="#pcapkit.protocols.transport.udp.UDP.__proto__" title="Link to this definition">#</a></dt>
 <dd><p>Protocol index mapping for decoding next layer,
 c.f. <a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport._decode_next_layer" title="pcapkit.protocols.transport.transport.Transport._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
 &amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DefaultDict[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]]</p>
+<dd class="field-odd"><p>DefaultDict[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor">ModuleDescriptor</a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>] | <a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type">Type</a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -771,7 +772,7 @@ c.f. <a class="reference internal" href="transport.html#pcapkit.protocols.transp
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=0ed1cf23"></script>
+</div><script src="../../../_static/documentation_options.js?v=3ab0eb05"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>

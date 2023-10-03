@@ -249,6 +249,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -346,19 +347,19 @@
 <span class="c1"># mypy: disable-error-code=assignment</span>
 <span class="sd">&quot;&quot;&quot;header schema for ethernet protocol&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">importlib</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="n">PayloadField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BytesField</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.module</span> <span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Ethernet&#39;</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
 
@@ -370,8 +371,9 @@
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.link.ethernet</span> <span class="kn">import</span> <span class="n">Ethernet</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
     <span class="n">type_</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
-    <span class="n">module</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">Ethernet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">type_</span><span class="p">]</span>
-    <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">))</span>
+    <span class="n">protocol</span> <span class="o">=</span> <span class="n">Ethernet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">type_</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
 
@@ -430,7 +432,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=0ed1cf23"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=3ab0eb05"></script>
     <script src="../../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/scripts/furo.js?v=32e29ea5"></script>

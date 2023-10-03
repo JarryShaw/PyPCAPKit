@@ -248,6 +248,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/version.html">Version Info</a></li>
@@ -14146,6 +14147,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.kjtsiteserver">kjtsiteserver (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass">klass (pcapkit.corekit.module.ModuleDescriptor property)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.klio">klio (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.klogin">klogin (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -16632,6 +16635,8 @@
 </li>
           <li><a href="pcapkit/corekit/io.html#module-pcapkit.corekit.io">pcapkit.corekit.io</a>
 </li>
+          <li><a href="pcapkit/corekit/module.html#module-pcapkit.corekit.module">pcapkit.corekit.module</a>
+</li>
           <li><a href="pcapkit/corekit/multidict.html#module-pcapkit.corekit.multidict">pcapkit.corekit.multidict</a>
 </li>
           <li><a href="pcapkit/corekit/protochain.html#module-pcapkit.corekit.protochain">pcapkit.corekit.protochain</a>
@@ -17199,6 +17204,10 @@
         </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.module">module (pcapkit.corekit.module.ModuleDescriptor property)</a>
+</li>
+        <li><a href="pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor">ModuleDescriptor (class in pcapkit.corekit.module)</a>
+</li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ModuleNotFound">ModuleNotFound</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.mogeneti_auth">mogeneti_auth (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -17880,6 +17889,8 @@
 </li>
           <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.SwitchField.name">(pcapkit.corekit.fields.misc.SwitchField property)</a>
 </li>
+          <li><a href="pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.name">(pcapkit.corekit.module.ModuleDescriptor property)</a>
+</li>
           <li><a href="pcapkit/foundation/reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4.name">(pcapkit.foundation.reassembly.ipv4.IPv4 property)</a>
 </li>
           <li><a href="pcapkit/foundation/reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6.name">(pcapkit.foundation.reassembly.ipv6.IPv6 property)</a>
@@ -18519,10 +18530,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.newlixengine">newlixengine (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.newlixreg">newlixreg (pcapkit.const.reg.apptype.AppType attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.newlixreg">newlixreg (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.newoak">newoak (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.news">news (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -21775,6 +21786,13 @@
 </li>
         </ul></li>
         <li>
+    pcapkit.corekit.module
+
+        <ul>
+          <li><a href="pcapkit/corekit/module.html#module-pcapkit.corekit.module">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.corekit.multidict
 
         <ul>
@@ -22807,6 +22825,8 @@
           <li><a href="pcapkit/toolkit/index.html#module-pcapkit.toolkit">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.toolkit.dpkt
 
@@ -22814,8 +22834,6 @@
           <li><a href="pcapkit/toolkit/3rdparty.html#module-pcapkit.toolkit.dpkt">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.toolkit.pcap
 
@@ -28435,7 +28453,7 @@
 </li>
           <li><a href="pcapkit/const/ftp.html#index-20">RFC 2428</a>, <a href="pcapkit/const/ftp.html#index-21">[1]</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-10">RFC 2460</a>, <a href="pcapkit/const/ipv6.html#index-107">[1]</a>, <a href="pcapkit/const/ipv6.html#index-9">[2]</a>, <a href="pcapkit/protocols/internet/ip.html#index-1">[3]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-0">[4]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-10">RFC 2460</a>, <a href="pcapkit/const/ipv6.html#index-109">[1]</a>, <a href="pcapkit/const/ipv6.html#index-9">[2]</a>, <a href="pcapkit/protocols/internet/ip.html#index-1">[3]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-0">[4]</a>
 </li>
           <li><a href="pcapkit/toolkit/3rdparty.html#index-3">RFC 2460#section-4.1</a>
 </li>
@@ -28461,9 +28479,9 @@
 </li>
           <li><a href="pcapkit/const/ipv6.html#index-11">RFC 2675</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-13">[1]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-13">[2]</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-37">RFC 2710</a>
+          <li><a href="pcapkit/const/ipv6.html#index-39">RFC 2710</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-16">RFC 2711</a>, <a href="pcapkit/const/ipv6.html#index-38">[1]</a>, <a href="pcapkit/const/ipv6.html#index-39">[2]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-4">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-4">[4]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-16">RFC 2711</a>, <a href="pcapkit/const/ipv6.html#index-40">[1]</a>, <a href="pcapkit/const/ipv6.html#index-41">[2]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-4">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-4">[4]</a>
 </li>
           <li><a href="pcapkit/const/ftp.html#index-10">RFC 2773</a>, <a href="pcapkit/const/ftp.html#index-18">[1]</a>, <a href="pcapkit/const/ftp.html#index-34">[2]</a>, <a href="pcapkit/const/ftp.html#index-5">[3]</a>
 </li>
@@ -28483,7 +28501,7 @@
 </li>
           <li><a href="pcapkit/const/tcp.html#index-49">RFC 3168</a>, <a href="pcapkit/const/tcp.html#index-50">[1]</a>
 </li>
-          <li><a href="pcapkit/const/ipv4.html#index-30">RFC 3175</a>, <a href="pcapkit/const/ipv4.html#index-31">[1]</a>, <a href="pcapkit/const/ipv4.html#index-32">[2]</a>, <a href="pcapkit/const/ipv4.html#index-33">[3]</a>, <a href="pcapkit/const/ipv4.html#index-34">[4]</a>, <a href="pcapkit/const/ipv4.html#index-35">[5]</a>, <a href="pcapkit/const/ipv4.html#index-36">[6]</a>, <a href="pcapkit/const/ipv4.html#index-37">[7]</a>, <a href="pcapkit/const/ipv4.html#index-38">[8]</a>, <a href="pcapkit/const/ipv4.html#index-39">[9]</a>, <a href="pcapkit/const/ipv4.html#index-40">[10]</a>, <a href="pcapkit/const/ipv4.html#index-41">[11]</a>, <a href="pcapkit/const/ipv4.html#index-42">[12]</a>, <a href="pcapkit/const/ipv4.html#index-43">[13]</a>, <a href="pcapkit/const/ipv4.html#index-44">[14]</a>, <a href="pcapkit/const/ipv4.html#index-45">[15]</a>, <a href="pcapkit/const/ipv4.html#index-46">[16]</a>, <a href="pcapkit/const/ipv4.html#index-47">[17]</a>, <a href="pcapkit/const/ipv4.html#index-48">[18]</a>, <a href="pcapkit/const/ipv4.html#index-49">[19]</a>, <a href="pcapkit/const/ipv4.html#index-50">[20]</a>, <a href="pcapkit/const/ipv4.html#index-51">[21]</a>, <a href="pcapkit/const/ipv4.html#index-52">[22]</a>, <a href="pcapkit/const/ipv4.html#index-53">[23]</a>, <a href="pcapkit/const/ipv4.html#index-54">[24]</a>, <a href="pcapkit/const/ipv4.html#index-55">[25]</a>, <a href="pcapkit/const/ipv4.html#index-56">[26]</a>, <a href="pcapkit/const/ipv4.html#index-57">[27]</a>, <a href="pcapkit/const/ipv4.html#index-58">[28]</a>, <a href="pcapkit/const/ipv4.html#index-59">[29]</a>, <a href="pcapkit/const/ipv4.html#index-60">[30]</a>, <a href="pcapkit/const/ipv4.html#index-61">[31]</a>, <a href="pcapkit/const/ipv6.html#index-41">[32]</a>, <a href="pcapkit/const/ipv6.html#index-42">[33]</a>, <a href="pcapkit/const/ipv6.html#index-43">[34]</a>, <a href="pcapkit/const/ipv6.html#index-44">[35]</a>, <a href="pcapkit/const/ipv6.html#index-45">[36]</a>, <a href="pcapkit/const/ipv6.html#index-46">[37]</a>, <a href="pcapkit/const/ipv6.html#index-47">[38]</a>, <a href="pcapkit/const/ipv6.html#index-48">[39]</a>, <a href="pcapkit/const/ipv6.html#index-49">[40]</a>, <a href="pcapkit/const/ipv6.html#index-50">[41]</a>, <a href="pcapkit/const/ipv6.html#index-51">[42]</a>, <a href="pcapkit/const/ipv6.html#index-52">[43]</a>, <a href="pcapkit/const/ipv6.html#index-53">[44]</a>, <a href="pcapkit/const/ipv6.html#index-54">[45]</a>, <a href="pcapkit/const/ipv6.html#index-55">[46]</a>, <a href="pcapkit/const/ipv6.html#index-56">[47]</a>, <a href="pcapkit/const/ipv6.html#index-57">[48]</a>, <a href="pcapkit/const/ipv6.html#index-58">[49]</a>, <a href="pcapkit/const/ipv6.html#index-59">[50]</a>, <a href="pcapkit/const/ipv6.html#index-60">[51]</a>, <a href="pcapkit/const/ipv6.html#index-61">[52]</a>, <a href="pcapkit/const/ipv6.html#index-62">[53]</a>, <a href="pcapkit/const/ipv6.html#index-63">[54]</a>, <a href="pcapkit/const/ipv6.html#index-64">[55]</a>, <a href="pcapkit/const/ipv6.html#index-65">[56]</a>, <a href="pcapkit/const/ipv6.html#index-66">[57]</a>, <a href="pcapkit/const/ipv6.html#index-67">[58]</a>, <a href="pcapkit/const/ipv6.html#index-68">[59]</a>, <a href="pcapkit/const/ipv6.html#index-69">[60]</a>, <a href="pcapkit/const/ipv6.html#index-70">[61]</a>, <a href="pcapkit/const/ipv6.html#index-71">[62]</a>, <a href="pcapkit/const/ipv6.html#index-72">[63]</a>, <a href="pcapkit/const/reg.html#index-73">[64]</a>
+          <li><a href="pcapkit/const/ipv4.html#index-30">RFC 3175</a>, <a href="pcapkit/const/ipv4.html#index-31">[1]</a>, <a href="pcapkit/const/ipv4.html#index-32">[2]</a>, <a href="pcapkit/const/ipv4.html#index-33">[3]</a>, <a href="pcapkit/const/ipv4.html#index-34">[4]</a>, <a href="pcapkit/const/ipv4.html#index-35">[5]</a>, <a href="pcapkit/const/ipv4.html#index-36">[6]</a>, <a href="pcapkit/const/ipv4.html#index-37">[7]</a>, <a href="pcapkit/const/ipv4.html#index-38">[8]</a>, <a href="pcapkit/const/ipv4.html#index-39">[9]</a>, <a href="pcapkit/const/ipv4.html#index-40">[10]</a>, <a href="pcapkit/const/ipv4.html#index-41">[11]</a>, <a href="pcapkit/const/ipv4.html#index-42">[12]</a>, <a href="pcapkit/const/ipv4.html#index-43">[13]</a>, <a href="pcapkit/const/ipv4.html#index-44">[14]</a>, <a href="pcapkit/const/ipv4.html#index-45">[15]</a>, <a href="pcapkit/const/ipv4.html#index-46">[16]</a>, <a href="pcapkit/const/ipv4.html#index-47">[17]</a>, <a href="pcapkit/const/ipv4.html#index-48">[18]</a>, <a href="pcapkit/const/ipv4.html#index-49">[19]</a>, <a href="pcapkit/const/ipv4.html#index-50">[20]</a>, <a href="pcapkit/const/ipv4.html#index-51">[21]</a>, <a href="pcapkit/const/ipv4.html#index-52">[22]</a>, <a href="pcapkit/const/ipv4.html#index-53">[23]</a>, <a href="pcapkit/const/ipv4.html#index-54">[24]</a>, <a href="pcapkit/const/ipv4.html#index-55">[25]</a>, <a href="pcapkit/const/ipv4.html#index-56">[26]</a>, <a href="pcapkit/const/ipv4.html#index-57">[27]</a>, <a href="pcapkit/const/ipv4.html#index-58">[28]</a>, <a href="pcapkit/const/ipv4.html#index-59">[29]</a>, <a href="pcapkit/const/ipv4.html#index-60">[30]</a>, <a href="pcapkit/const/ipv4.html#index-61">[31]</a>, <a href="pcapkit/const/ipv6.html#index-43">[32]</a>, <a href="pcapkit/const/ipv6.html#index-44">[33]</a>, <a href="pcapkit/const/ipv6.html#index-45">[34]</a>, <a href="pcapkit/const/ipv6.html#index-46">[35]</a>, <a href="pcapkit/const/ipv6.html#index-47">[36]</a>, <a href="pcapkit/const/ipv6.html#index-48">[37]</a>, <a href="pcapkit/const/ipv6.html#index-49">[38]</a>, <a href="pcapkit/const/ipv6.html#index-50">[39]</a>, <a href="pcapkit/const/ipv6.html#index-51">[40]</a>, <a href="pcapkit/const/ipv6.html#index-52">[41]</a>, <a href="pcapkit/const/ipv6.html#index-53">[42]</a>, <a href="pcapkit/const/ipv6.html#index-54">[43]</a>, <a href="pcapkit/const/ipv6.html#index-55">[44]</a>, <a href="pcapkit/const/ipv6.html#index-56">[45]</a>, <a href="pcapkit/const/ipv6.html#index-57">[46]</a>, <a href="pcapkit/const/ipv6.html#index-58">[47]</a>, <a href="pcapkit/const/ipv6.html#index-59">[48]</a>, <a href="pcapkit/const/ipv6.html#index-60">[49]</a>, <a href="pcapkit/const/ipv6.html#index-61">[50]</a>, <a href="pcapkit/const/ipv6.html#index-62">[51]</a>, <a href="pcapkit/const/ipv6.html#index-63">[52]</a>, <a href="pcapkit/const/ipv6.html#index-64">[53]</a>, <a href="pcapkit/const/ipv6.html#index-65">[54]</a>, <a href="pcapkit/const/ipv6.html#index-66">[55]</a>, <a href="pcapkit/const/ipv6.html#index-67">[56]</a>, <a href="pcapkit/const/ipv6.html#index-68">[57]</a>, <a href="pcapkit/const/ipv6.html#index-69">[58]</a>, <a href="pcapkit/const/ipv6.html#index-70">[59]</a>, <a href="pcapkit/const/ipv6.html#index-71">[60]</a>, <a href="pcapkit/const/ipv6.html#index-72">[61]</a>, <a href="pcapkit/const/ipv6.html#index-73">[62]</a>, <a href="pcapkit/const/ipv6.html#index-74">[63]</a>, <a href="pcapkit/const/reg.html#index-73">[64]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-139">RFC 3195</a>, <a href="pcapkit/const/reg.html#index-140">[1]</a>
 </li>
@@ -28653,7 +28671,7 @@
 </li>
           <li><a href="pcapkit/const/reg.html#index-394">RFC 4712</a>, <a href="pcapkit/const/reg.html#index-395">[1]</a>
 </li>
-          <li><a href="pcapkit/const/ipv4.html#index-26">RFC 4727</a>, <a href="pcapkit/const/ipv4.html#index-27">[1]</a>, <a href="pcapkit/const/ipv4.html#index-28">[2]</a>, <a href="pcapkit/const/ipv4.html#index-29">[3]</a>, <a href="pcapkit/const/ipv6.html#index-112">[4]</a>, <a href="pcapkit/const/ipv6.html#index-113">[5]</a>, <a href="pcapkit/const/ipv6.html#index-29">[6]</a>, <a href="pcapkit/const/ipv6.html#index-30">[7]</a>, <a href="pcapkit/const/ipv6.html#index-31">[8]</a>, <a href="pcapkit/const/ipv6.html#index-32">[9]</a>, <a href="pcapkit/const/ipv6.html#index-33">[10]</a>, <a href="pcapkit/const/ipv6.html#index-34">[11]</a>, <a href="pcapkit/const/ipv6.html#index-35">[12]</a>, <a href="pcapkit/const/ipv6.html#index-36">[13]</a>, <a href="pcapkit/const/reg.html#index-198">[14]</a>, <a href="pcapkit/const/reg.html#index-200">[15]</a>, <a href="pcapkit/const/reg.html#index-202">[16]</a>, <a href="pcapkit/const/reg.html#index-204">[17]</a>, <a href="pcapkit/const/reg.html#index-206">[18]</a>, <a href="pcapkit/const/reg.html#index-208">[19]</a>, <a href="pcapkit/const/reg.html#index-210">[20]</a>, <a href="pcapkit/const/reg.html#index-212">[21]</a>, <a href="pcapkit/const/tcp.html#index-43">[22]</a>, <a href="pcapkit/const/tcp.html#index-44">[23]</a>
+          <li><a href="pcapkit/const/ipv4.html#index-26">RFC 4727</a>, <a href="pcapkit/const/ipv4.html#index-27">[1]</a>, <a href="pcapkit/const/ipv4.html#index-28">[2]</a>, <a href="pcapkit/const/ipv4.html#index-29">[3]</a>, <a href="pcapkit/const/ipv6.html#index-114">[4]</a>, <a href="pcapkit/const/ipv6.html#index-115">[5]</a>, <a href="pcapkit/const/ipv6.html#index-31">[6]</a>, <a href="pcapkit/const/ipv6.html#index-32">[7]</a>, <a href="pcapkit/const/ipv6.html#index-33">[8]</a>, <a href="pcapkit/const/ipv6.html#index-34">[9]</a>, <a href="pcapkit/const/ipv6.html#index-35">[10]</a>, <a href="pcapkit/const/ipv6.html#index-36">[11]</a>, <a href="pcapkit/const/ipv6.html#index-37">[12]</a>, <a href="pcapkit/const/ipv6.html#index-38">[13]</a>, <a href="pcapkit/const/reg.html#index-198">[14]</a>, <a href="pcapkit/const/reg.html#index-200">[15]</a>, <a href="pcapkit/const/reg.html#index-202">[16]</a>, <a href="pcapkit/const/reg.html#index-204">[17]</a>, <a href="pcapkit/const/reg.html#index-206">[18]</a>, <a href="pcapkit/const/reg.html#index-208">[19]</a>, <a href="pcapkit/const/reg.html#index-210">[20]</a>, <a href="pcapkit/const/reg.html#index-212">[21]</a>, <a href="pcapkit/const/tcp.html#index-43">[22]</a>, <a href="pcapkit/const/tcp.html#index-44">[23]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-55">RFC 4728</a>
 </li>
@@ -28703,7 +28721,7 @@
 </li>
           <li><a href="pcapkit/const/mh.html#index-164">RFC 5094</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-108">RFC 5095</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-1">[1]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-3">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-4">[3]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-110">RFC 5095</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-1">[1]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-3">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-4">[3]</a>
 </li>
           <li><a href="pcapkit/const/mh.html#index-163">RFC 5096</a>, <a href="pcapkit/const/mh.html#index-227">[1]</a>
 </li>
@@ -28729,7 +28747,7 @@
 </li>
           <li><a href="pcapkit/const/reg.html#index-65">RFC 5340</a>
 </li>
-          <li><a href="pcapkit/const/ipv4.html#index-95">RFC 5350</a>, <a href="pcapkit/const/ipv6.html#index-40">[1]</a>
+          <li><a href="pcapkit/const/ipv4.html#index-95">RFC 5350</a>, <a href="pcapkit/const/ipv6.html#index-42">[1]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-282">RFC 5352</a>, <a href="pcapkit/const/reg.html#index-283">[1]</a>, <a href="pcapkit/const/reg.html#index-284">[2]</a>, <a href="pcapkit/const/reg.html#index-285">[3]</a>
 </li>
@@ -28833,9 +28851,9 @@
 </li>
           <li><a href="pcapkit/const/reg.html#index-116">RFC 5971</a>
 </li>
-          <li><a href="pcapkit/const/ipv4.html#index-94">RFC 5973</a>, <a href="pcapkit/const/ipv6.html#index-105">[1]</a>
+          <li><a href="pcapkit/const/ipv4.html#index-94">RFC 5973</a>, <a href="pcapkit/const/ipv6.html#index-107">[1]</a>
 </li>
-          <li><a href="pcapkit/const/ipv4.html#index-62">RFC 5974</a>, <a href="pcapkit/const/ipv4.html#index-63">[1]</a>, <a href="pcapkit/const/ipv4.html#index-64">[2]</a>, <a href="pcapkit/const/ipv4.html#index-65">[3]</a>, <a href="pcapkit/const/ipv4.html#index-66">[4]</a>, <a href="pcapkit/const/ipv4.html#index-67">[5]</a>, <a href="pcapkit/const/ipv4.html#index-68">[6]</a>, <a href="pcapkit/const/ipv4.html#index-69">[7]</a>, <a href="pcapkit/const/ipv4.html#index-70">[8]</a>, <a href="pcapkit/const/ipv4.html#index-71">[9]</a>, <a href="pcapkit/const/ipv4.html#index-72">[10]</a>, <a href="pcapkit/const/ipv4.html#index-73">[11]</a>, <a href="pcapkit/const/ipv4.html#index-74">[12]</a>, <a href="pcapkit/const/ipv4.html#index-75">[13]</a>, <a href="pcapkit/const/ipv4.html#index-76">[14]</a>, <a href="pcapkit/const/ipv4.html#index-77">[15]</a>, <a href="pcapkit/const/ipv4.html#index-78">[16]</a>, <a href="pcapkit/const/ipv4.html#index-79">[17]</a>, <a href="pcapkit/const/ipv4.html#index-80">[18]</a>, <a href="pcapkit/const/ipv4.html#index-81">[19]</a>, <a href="pcapkit/const/ipv4.html#index-82">[20]</a>, <a href="pcapkit/const/ipv4.html#index-83">[21]</a>, <a href="pcapkit/const/ipv4.html#index-84">[22]</a>, <a href="pcapkit/const/ipv4.html#index-85">[23]</a>, <a href="pcapkit/const/ipv4.html#index-86">[24]</a>, <a href="pcapkit/const/ipv4.html#index-87">[25]</a>, <a href="pcapkit/const/ipv4.html#index-88">[26]</a>, <a href="pcapkit/const/ipv4.html#index-89">[27]</a>, <a href="pcapkit/const/ipv4.html#index-90">[28]</a>, <a href="pcapkit/const/ipv4.html#index-91">[29]</a>, <a href="pcapkit/const/ipv4.html#index-92">[30]</a>, <a href="pcapkit/const/ipv4.html#index-93">[31]</a>, <a href="pcapkit/const/ipv6.html#index-100">[32]</a>, <a href="pcapkit/const/ipv6.html#index-101">[33]</a>, <a href="pcapkit/const/ipv6.html#index-102">[34]</a>, <a href="pcapkit/const/ipv6.html#index-103">[35]</a>, <a href="pcapkit/const/ipv6.html#index-104">[36]</a>, <a href="pcapkit/const/ipv6.html#index-73">[37]</a>, <a href="pcapkit/const/ipv6.html#index-74">[38]</a>, <a href="pcapkit/const/ipv6.html#index-75">[39]</a>, <a href="pcapkit/const/ipv6.html#index-76">[40]</a>, <a href="pcapkit/const/ipv6.html#index-77">[41]</a>, <a href="pcapkit/const/ipv6.html#index-78">[42]</a>, <a href="pcapkit/const/ipv6.html#index-79">[43]</a>, <a href="pcapkit/const/ipv6.html#index-80">[44]</a>, <a href="pcapkit/const/ipv6.html#index-81">[45]</a>, <a href="pcapkit/const/ipv6.html#index-82">[46]</a>, <a href="pcapkit/const/ipv6.html#index-83">[47]</a>, <a href="pcapkit/const/ipv6.html#index-84">[48]</a>, <a href="pcapkit/const/ipv6.html#index-85">[49]</a>, <a href="pcapkit/const/ipv6.html#index-86">[50]</a>, <a href="pcapkit/const/ipv6.html#index-87">[51]</a>, <a href="pcapkit/const/ipv6.html#index-88">[52]</a>, <a href="pcapkit/const/ipv6.html#index-89">[53]</a>, <a href="pcapkit/const/ipv6.html#index-90">[54]</a>, <a href="pcapkit/const/ipv6.html#index-91">[55]</a>, <a href="pcapkit/const/ipv6.html#index-92">[56]</a>, <a href="pcapkit/const/ipv6.html#index-93">[57]</a>, <a href="pcapkit/const/ipv6.html#index-94">[58]</a>, <a href="pcapkit/const/ipv6.html#index-95">[59]</a>, <a href="pcapkit/const/ipv6.html#index-96">[60]</a>, <a href="pcapkit/const/ipv6.html#index-97">[61]</a>, <a href="pcapkit/const/ipv6.html#index-98">[62]</a>, <a href="pcapkit/const/ipv6.html#index-99">[63]</a>
+          <li><a href="pcapkit/const/ipv4.html#index-62">RFC 5974</a>, <a href="pcapkit/const/ipv4.html#index-63">[1]</a>, <a href="pcapkit/const/ipv4.html#index-64">[2]</a>, <a href="pcapkit/const/ipv4.html#index-65">[3]</a>, <a href="pcapkit/const/ipv4.html#index-66">[4]</a>, <a href="pcapkit/const/ipv4.html#index-67">[5]</a>, <a href="pcapkit/const/ipv4.html#index-68">[6]</a>, <a href="pcapkit/const/ipv4.html#index-69">[7]</a>, <a href="pcapkit/const/ipv4.html#index-70">[8]</a>, <a href="pcapkit/const/ipv4.html#index-71">[9]</a>, <a href="pcapkit/const/ipv4.html#index-72">[10]</a>, <a href="pcapkit/const/ipv4.html#index-73">[11]</a>, <a href="pcapkit/const/ipv4.html#index-74">[12]</a>, <a href="pcapkit/const/ipv4.html#index-75">[13]</a>, <a href="pcapkit/const/ipv4.html#index-76">[14]</a>, <a href="pcapkit/const/ipv4.html#index-77">[15]</a>, <a href="pcapkit/const/ipv4.html#index-78">[16]</a>, <a href="pcapkit/const/ipv4.html#index-79">[17]</a>, <a href="pcapkit/const/ipv4.html#index-80">[18]</a>, <a href="pcapkit/const/ipv4.html#index-81">[19]</a>, <a href="pcapkit/const/ipv4.html#index-82">[20]</a>, <a href="pcapkit/const/ipv4.html#index-83">[21]</a>, <a href="pcapkit/const/ipv4.html#index-84">[22]</a>, <a href="pcapkit/const/ipv4.html#index-85">[23]</a>, <a href="pcapkit/const/ipv4.html#index-86">[24]</a>, <a href="pcapkit/const/ipv4.html#index-87">[25]</a>, <a href="pcapkit/const/ipv4.html#index-88">[26]</a>, <a href="pcapkit/const/ipv4.html#index-89">[27]</a>, <a href="pcapkit/const/ipv4.html#index-90">[28]</a>, <a href="pcapkit/const/ipv4.html#index-91">[29]</a>, <a href="pcapkit/const/ipv4.html#index-92">[30]</a>, <a href="pcapkit/const/ipv4.html#index-93">[31]</a>, <a href="pcapkit/const/ipv6.html#index-100">[32]</a>, <a href="pcapkit/const/ipv6.html#index-101">[33]</a>, <a href="pcapkit/const/ipv6.html#index-102">[34]</a>, <a href="pcapkit/const/ipv6.html#index-103">[35]</a>, <a href="pcapkit/const/ipv6.html#index-104">[36]</a>, <a href="pcapkit/const/ipv6.html#index-105">[37]</a>, <a href="pcapkit/const/ipv6.html#index-106">[38]</a>, <a href="pcapkit/const/ipv6.html#index-75">[39]</a>, <a href="pcapkit/const/ipv6.html#index-76">[40]</a>, <a href="pcapkit/const/ipv6.html#index-77">[41]</a>, <a href="pcapkit/const/ipv6.html#index-78">[42]</a>, <a href="pcapkit/const/ipv6.html#index-79">[43]</a>, <a href="pcapkit/const/ipv6.html#index-80">[44]</a>, <a href="pcapkit/const/ipv6.html#index-81">[45]</a>, <a href="pcapkit/const/ipv6.html#index-82">[46]</a>, <a href="pcapkit/const/ipv6.html#index-83">[47]</a>, <a href="pcapkit/const/ipv6.html#index-84">[48]</a>, <a href="pcapkit/const/ipv6.html#index-85">[49]</a>, <a href="pcapkit/const/ipv6.html#index-86">[50]</a>, <a href="pcapkit/const/ipv6.html#index-87">[51]</a>, <a href="pcapkit/const/ipv6.html#index-88">[52]</a>, <a href="pcapkit/const/ipv6.html#index-89">[53]</a>, <a href="pcapkit/const/ipv6.html#index-90">[54]</a>, <a href="pcapkit/const/ipv6.html#index-91">[55]</a>, <a href="pcapkit/const/ipv6.html#index-92">[56]</a>, <a href="pcapkit/const/ipv6.html#index-93">[57]</a>, <a href="pcapkit/const/ipv6.html#index-94">[58]</a>, <a href="pcapkit/const/ipv6.html#index-95">[59]</a>, <a href="pcapkit/const/ipv6.html#index-96">[60]</a>, <a href="pcapkit/const/ipv6.html#index-97">[61]</a>, <a href="pcapkit/const/ipv6.html#index-98">[62]</a>, <a href="pcapkit/const/ipv6.html#index-99">[63]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-376">RFC 6012</a>, <a href="pcapkit/const/reg.html#index-377">[1]</a>
 </li>
@@ -28867,7 +28885,7 @@
 </li>
           <li><a href="pcapkit/const/hip.html#index-104">RFC 6261</a>, <a href="pcapkit/const/hip.html#index-158">[1]</a>, <a href="pcapkit/const/hip.html#index-194">[2]</a>, <a href="pcapkit/const/hip.html#index-195">[3]</a>, <a href="pcapkit/const/hip.html#index-196">[4]</a>, <a href="pcapkit/const/hip.html#index-197">[5]</a>, <a href="pcapkit/protocols/internet/hip.html#index-40">[6]</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-109">RFC 6275</a>, <a href="pcapkit/const/ipv6.html#index-20">[1]</a>, <a href="pcapkit/const/ipv6.html#index-4">[2]</a>, <a href="pcapkit/const/mh.html#index-145">[3]</a>, <a href="pcapkit/const/mh.html#index-146">[4]</a>, <a href="pcapkit/const/mh.html#index-147">[5]</a>, <a href="pcapkit/const/mh.html#index-148">[6]</a>, <a href="pcapkit/const/mh.html#index-149">[7]</a>, <a href="pcapkit/const/mh.html#index-150">[8]</a>, <a href="pcapkit/const/mh.html#index-216">[9]</a>, <a href="pcapkit/const/mh.html#index-217">[10]</a>, <a href="pcapkit/const/mh.html#index-218">[11]</a>, <a href="pcapkit/const/mh.html#index-219">[12]</a>, <a href="pcapkit/const/mh.html#index-22">[13]</a>, <a href="pcapkit/const/mh.html#index-220">[14]</a>, <a href="pcapkit/const/mh.html#index-221">[15]</a>, <a href="pcapkit/const/mh.html#index-222">[16]</a>, <a href="pcapkit/const/mh.html#index-223">[17]</a>, <a href="pcapkit/const/mh.html#index-273">[18]</a>, <a href="pcapkit/const/mh.html#index-275">[19]</a>, <a href="pcapkit/const/mh.html#index-281">[20]</a>, <a href="pcapkit/const/mh.html#index-282">[21]</a>, <a href="pcapkit/const/mh.html#index-283">[22]</a>, <a href="pcapkit/const/mh.html#index-284">[23]</a>, <a href="pcapkit/const/mh.html#index-285">[24]</a>, <a href="pcapkit/const/mh.html#index-286">[25]</a>, <a href="pcapkit/const/mh.html#index-287">[26]</a>, <a href="pcapkit/const/mh.html#index-288">[27]</a>, <a href="pcapkit/const/mh.html#index-289">[28]</a>, <a href="pcapkit/const/mh.html#index-290">[29]</a>, <a href="pcapkit/const/mh.html#index-291">[30]</a>, <a href="pcapkit/const/mh.html#index-292">[31]</a>, <a href="pcapkit/const/mh.html#index-32">[32]</a>, <a href="pcapkit/const/mh.html#index-327">[33]</a>, <a href="pcapkit/const/mh.html#index-33">[34]</a>, <a href="pcapkit/const/mh.html#index-34">[35]</a>, <a href="pcapkit/const/mh.html#index-35">[36]</a>, <a href="pcapkit/const/reg.html#index-74">[37]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-14">[38]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-14">[39]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-5">[40]</a>, <a href="pcapkit/protocols/internet/mh.html#index-0">[41]</a>, <a href="pcapkit/protocols/internet/mh.html#index-1">[42]</a>, <a href="pcapkit/protocols/internet/mh.html#index-10">[43]</a>, <a href="pcapkit/protocols/internet/mh.html#index-11">[44]</a>, <a href="pcapkit/protocols/internet/mh.html#index-12">[45]</a>, <a href="pcapkit/protocols/internet/mh.html#index-13">[46]</a>, <a href="pcapkit/protocols/internet/mh.html#index-14">[47]</a>, <a href="pcapkit/protocols/internet/mh.html#index-15">[48]</a>, <a href="pcapkit/protocols/internet/mh.html#index-2">[49]</a>, <a href="pcapkit/protocols/internet/mh.html#index-3">[50]</a>, <a href="pcapkit/protocols/internet/mh.html#index-4">[51]</a>, <a href="pcapkit/protocols/internet/mh.html#index-5">[52]</a>, <a href="pcapkit/protocols/internet/mh.html#index-6">[53]</a>, <a href="pcapkit/protocols/internet/mh.html#index-7">[54]</a>, <a href="pcapkit/protocols/internet/mh.html#index-8">[55]</a>, <a href="pcapkit/protocols/internet/mh.html#index-9">[56]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-111">RFC 6275</a>, <a href="pcapkit/const/ipv6.html#index-20">[1]</a>, <a href="pcapkit/const/ipv6.html#index-4">[2]</a>, <a href="pcapkit/const/mh.html#index-145">[3]</a>, <a href="pcapkit/const/mh.html#index-146">[4]</a>, <a href="pcapkit/const/mh.html#index-147">[5]</a>, <a href="pcapkit/const/mh.html#index-148">[6]</a>, <a href="pcapkit/const/mh.html#index-149">[7]</a>, <a href="pcapkit/const/mh.html#index-150">[8]</a>, <a href="pcapkit/const/mh.html#index-216">[9]</a>, <a href="pcapkit/const/mh.html#index-217">[10]</a>, <a href="pcapkit/const/mh.html#index-218">[11]</a>, <a href="pcapkit/const/mh.html#index-219">[12]</a>, <a href="pcapkit/const/mh.html#index-22">[13]</a>, <a href="pcapkit/const/mh.html#index-220">[14]</a>, <a href="pcapkit/const/mh.html#index-221">[15]</a>, <a href="pcapkit/const/mh.html#index-222">[16]</a>, <a href="pcapkit/const/mh.html#index-223">[17]</a>, <a href="pcapkit/const/mh.html#index-273">[18]</a>, <a href="pcapkit/const/mh.html#index-275">[19]</a>, <a href="pcapkit/const/mh.html#index-281">[20]</a>, <a href="pcapkit/const/mh.html#index-282">[21]</a>, <a href="pcapkit/const/mh.html#index-283">[22]</a>, <a href="pcapkit/const/mh.html#index-284">[23]</a>, <a href="pcapkit/const/mh.html#index-285">[24]</a>, <a href="pcapkit/const/mh.html#index-286">[25]</a>, <a href="pcapkit/const/mh.html#index-287">[26]</a>, <a href="pcapkit/const/mh.html#index-288">[27]</a>, <a href="pcapkit/const/mh.html#index-289">[28]</a>, <a href="pcapkit/const/mh.html#index-290">[29]</a>, <a href="pcapkit/const/mh.html#index-291">[30]</a>, <a href="pcapkit/const/mh.html#index-292">[31]</a>, <a href="pcapkit/const/mh.html#index-32">[32]</a>, <a href="pcapkit/const/mh.html#index-327">[33]</a>, <a href="pcapkit/const/mh.html#index-33">[34]</a>, <a href="pcapkit/const/mh.html#index-34">[35]</a>, <a href="pcapkit/const/mh.html#index-35">[36]</a>, <a href="pcapkit/const/reg.html#index-74">[37]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-14">[38]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-14">[39]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-5">[40]</a>, <a href="pcapkit/protocols/internet/mh.html#index-0">[41]</a>, <a href="pcapkit/protocols/internet/mh.html#index-1">[42]</a>, <a href="pcapkit/protocols/internet/mh.html#index-10">[43]</a>, <a href="pcapkit/protocols/internet/mh.html#index-11">[44]</a>, <a href="pcapkit/protocols/internet/mh.html#index-12">[45]</a>, <a href="pcapkit/protocols/internet/mh.html#index-13">[46]</a>, <a href="pcapkit/protocols/internet/mh.html#index-14">[47]</a>, <a href="pcapkit/protocols/internet/mh.html#index-15">[48]</a>, <a href="pcapkit/protocols/internet/mh.html#index-2">[49]</a>, <a href="pcapkit/protocols/internet/mh.html#index-3">[50]</a>, <a href="pcapkit/protocols/internet/mh.html#index-4">[51]</a>, <a href="pcapkit/protocols/internet/mh.html#index-5">[52]</a>, <a href="pcapkit/protocols/internet/mh.html#index-6">[53]</a>, <a href="pcapkit/protocols/internet/mh.html#index-7">[54]</a>, <a href="pcapkit/protocols/internet/mh.html#index-8">[55]</a>, <a href="pcapkit/protocols/internet/mh.html#index-9">[56]</a>
 </li>
           <li><a href="pcapkit/const/mh.html#index-366">RFC 6275#section-6.1.9</a>, <a href="pcapkit/vendor/mh.html#index-1">[1]</a>
 </li>
@@ -28903,7 +28921,7 @@
 </li>
           <li><a href="pcapkit/const/ipv6.html#index-13">RFC 6553</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-9">[1]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-9">[2]</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-110">RFC 6554</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-6">[1]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-112">RFC 6554</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-6">[1]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-401">RFC 6559</a>, <a href="pcapkit/const/reg.html#index-402">[1]</a>
 </li>
@@ -28915,7 +28933,7 @@
 </li>
           <li><a href="pcapkit/const/mh.html#index-329">RFC 6618</a>, <a href="pcapkit/const/mh.html#index-49">[1]</a>, <a href="pcapkit/const/mh.html#index-50">[2]</a>, <a href="pcapkit/const/mh.html#index-51">[3]</a>, <a href="pcapkit/const/reg.html#index-397">[4]</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-114">RFC 6621</a>, <a href="pcapkit/const/ipv6.html#index-115">[1]</a>, <a href="pcapkit/const/ipv6.html#index-116">[2]</a>, <a href="pcapkit/const/ipv6.html#index-117">[3]</a>, <a href="pcapkit/const/ipv6.html#index-19">[4]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-6">[5]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-6">[6]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-116">RFC 6621</a>, <a href="pcapkit/const/ipv6.html#index-117">[1]</a>, <a href="pcapkit/const/ipv6.html#index-118">[2]</a>, <a href="pcapkit/const/ipv6.html#index-119">[3]</a>, <a href="pcapkit/const/ipv6.html#index-19">[4]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-6">[5]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-6">[6]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-450">RFC 6641</a>
 </li>
@@ -29023,7 +29041,7 @@
 </li>
           <li><a href="pcapkit/const/ospf.html#index-4">RFC 7474</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-106">RFC 7506</a>
+          <li><a href="pcapkit/const/ipv6.html#index-108">RFC 7506</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-380">RFC 7510</a>, <a href="pcapkit/const/reg.html#index-381">[1]</a>
 </li>
@@ -29165,7 +29183,7 @@
 </li>
           <li><a href="pcapkit/const/reg.html#index-45">RFC 869</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-111">RFC 8754</a>
+          <li><a href="pcapkit/const/ipv6.html#index-113">RFC 8754</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-352">RFC 8764</a>, <a href="pcapkit/const/reg.html#index-353">[1]</a>
 </li>
@@ -29369,13 +29387,15 @@
 </li>
           <li><a href="pcapkit/const/reg.html#index-300">RFC 9329</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-28">RFC 9343</a>
+          <li><a href="pcapkit/const/ipv6.html#index-30">RFC 9343</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-83">RFC 9347</a>
 </li>
           <li><a href="pcapkit/const/hip.html#index-22">RFC 9374</a>, <a href="pcapkit/const/hip.html#index-71">[1]</a>, <a href="pcapkit/const/mh.html#index-357">[2]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-47">RFC 938</a>
+</li>
+          <li><a href="pcapkit/const/ipv6.html#index-28">RFC 9486</a>, <a href="pcapkit/const/ipv6.html#index-29">[1]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-98">RFC 951</a>
 </li>
@@ -35033,6 +35053,8 @@
 </li>
           <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.version">(pcapkit.corekit.fields.ipaddress.IPv6InterfaceField property)</a>
 </li>
+          <li><a href="pcapkit/corekit/version.html#pcapkit.corekit.version.VersionInfo.version">(pcapkit.corekit.version.VersionInfo property)</a>
+</li>
           <li><a href="pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcap.PCAP.version">(pcapkit.foundation.engines.pcap.PCAP property)</a>
 </li>
           <li><a href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.version">(pcapkit.protocols.application.http.HTTP property)</a>
@@ -36310,7 +36332,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=0ed1cf23"></script>
+</div><script src="_static/documentation_options.js?v=3ab0eb05"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=32e29ea5"></script>

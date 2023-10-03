@@ -249,6 +249,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -343,6 +344,7 @@
         <article role="main">
           <h1>Source code for pcapkit.protocols.transport.tcp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># mypy: disable-error-code=dict-item</span>
 <span class="sd">&quot;&quot;&quot;TCP - Transmission Control Protocol</span>
 <span class="sd">=========================================</span>
 
@@ -383,7 +385,6 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">enum</span>
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
@@ -393,6 +394,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.flags</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Enum_Flags</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">Enum_MPTCPOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.module</span> <span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">CC</span> <span class="k">as</span> <span class="n">Data_CC</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPDSS</span> <span class="k">as</span> <span class="n">Data_MPTCPDSS</span>
@@ -647,14 +649,14 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,</span>
+    <span class="c1">#: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,</span>
     <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.transport.transport.Transport._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type,return-value]</span>
         <span class="p">{</span>
-            <span class="mi">21</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.application.ftp&#39;</span><span class="p">,</span> <span class="s1">&#39;FTP&#39;</span><span class="p">),</span>  <span class="c1"># FTP</span>
-            <span class="mi">80</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.application.httpv1&#39;</span><span class="p">,</span> <span class="s1">&#39;HTTP&#39;</span><span class="p">),</span>  <span class="c1"># HTTP/1.*</span>
+            <span class="mi">21</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.application.ftp&#39;</span><span class="p">,</span> <span class="s1">&#39;FTP&#39;</span><span class="p">),</span>      <span class="c1"># FTP</span>
+            <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.application.httpv1&#39;</span><span class="p">,</span> <span class="s1">&#39;HTTP&#39;</span><span class="p">),</span>  <span class="c1"># HTTP/1.*</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -3634,7 +3636,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=0ed1cf23"></script>
+</div><script src="../../../../_static/documentation_options.js?v=3ab0eb05"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>

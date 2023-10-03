@@ -249,6 +249,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -343,6 +344,7 @@
         <article role="main">
           <h1>Source code for pcapkit.protocols.misc.pcapng</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># mypy: disable-error-code=dict-item</span>
 <span class="sd">&quot;&quot;&quot;PCAP-NG File Format</span>
 <span class="sd">=========================</span>
 
@@ -378,6 +380,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.const.pcapng.secrets_type</span> <span class="kn">import</span> <span class="n">SecretsType</span> <span class="k">as</span> <span class="n">Enum_SecretsType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.pcapng.verdict_type</span> <span class="kn">import</span> <span class="n">VerdictType</span> <span class="k">as</span> <span class="n">Enum_VerdictType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.module</span> <span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.version</span> <span class="kn">import</span> <span class="n">VersionInfo</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">Data_PCAPNG</span>
@@ -514,7 +517,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">ZigBeeAPSKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeAPSKey</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">ZigBeeNWKKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeNWKKey</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">localcontext</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="p">(</span><span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
                                         <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
@@ -874,18 +877,19 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[Enum_LinkType, tuple[str, str]]: Protocol index mapping for</span>
+    <span class="c1">#: DefaultDict[Enum_LinkType, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for</span>
     <span class="c1">#: decoding next layer, c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
-    <span class="c1">#: The values should be a tuple representing the module name and class name.</span>
+    <span class="c1">#: The values should be a tuple representing the module name and class name,</span>
+    <span class="c1">#: or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type,return-value]</span>
         <span class="p">{</span>
-            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link&#39;</span><span class="p">,</span> <span class="s1">&#39;Ethernet&#39;</span><span class="p">),</span>
-            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
-            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
+            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link&#39;</span><span class="p">,</span> <span class="s1">&#39;Ethernet&#39;</span><span class="p">),</span>
+            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
+            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
         <span class="p">},</span>
-    <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_LinkType | int, tuple[str, str]]</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[Protocol] | Type[Protocol]]</span>
 
     <span class="c1">#: DefaultDict[Enum_BlockType, str | tuple[BlockParser, BlockConstructor]]:</span>
     <span class="c1">#: Block type to method mapping. Method names are expected to be referred</span>
@@ -1085,22 +1089,26 @@
 <div class="viewcode-block" id="PCAPNG.register">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG.register">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new protocol class</span>
-<span class="sd">            should be as ``{module}.{class_}``.</span>
+<span class="sd">            should be as ``{protocol.module}.{protocol.name}``.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">            module: module name</span>
-<span class="sd">            class\_: class name</span>
+<span class="sd">            protocol: module descriptor or a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG.register_block">
@@ -3879,15 +3887,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span>
 
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">major_version</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">major</span><span class="p">)</span>
-            <span class="n">minor_version</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">minor</span><span class="p">)</span>
+            <span class="n">major_version</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">major</span>
+            <span class="n">minor_version</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">minor</span>
             <span class="n">section_length</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">section_length</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">major_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">major_version</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">major_version</span> <span class="o">=</span> <span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">minor_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">minor_version</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">minor_version</span> <span class="o">=</span> <span class="n">version</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;shb&#39;</span><span class="p">)</span>
@@ -6304,7 +6312,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=0ed1cf23"></script>
+</div><script src="../../../../_static/documentation_options.js?v=3ab0eb05"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>

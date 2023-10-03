@@ -249,6 +249,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -343,6 +344,7 @@
         <article role="main">
           <h1>Source code for pcapkit.protocols.protocol</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># mypy: disable-error-code=dict-item</span>
 <span class="sd">&quot;&quot;&quot;Root Protocol</span>
 <span class="sd">===================</span>
 
@@ -359,7 +361,6 @@
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">enum</span>
 <span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
@@ -372,7 +373,7 @@
 <span class="kn">import</span> <span class="nn">aenum</span>
 <span class="kn">import</span> <span class="nn">chardet</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.module</span> <span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols</span> <span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">data_module</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols</span> <span class="kn">import</span> <span class="n">schema</span> <span class="k">as</span> <span class="n">schema_module</span>
@@ -385,6 +386,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.decorators</span> <span class="kn">import</span> <span class="n">beholder</span><span class="p">,</span> <span class="n">seekset</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ProtocolNotFound</span><span class="p">,</span> <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span>
                                           <span class="n">StructError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -440,11 +442,12 @@
     <span class="n">__layer__</span><span class="p">:</span> <span class="s1">&#39;Optional[Literal[&quot;Link&quot;, &quot;Internet&quot;, &quot;Transport&quot;, &quot;Application&quot;]]&#39;</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">#: Protocol index mapping for decoding next layer, c.f.</span>
-    <span class="c1"># :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
+    <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
-    <span class="c1">#: The values should be a tuple representing the module name and class name.</span>
-    <span class="n">__proto__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[int, tuple[str, str]]&#39;</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
+    <span class="c1">#: The values should be a tuple representing the module name and class name,</span>
+    <span class="c1">#: or a :class:`Protocol` subclass.</span>
+    <span class="n">__proto__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]&#39;</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>  <span class="c1"># type: ignore[return-value,arg-type]</span>
     <span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
@@ -740,8 +743,10 @@
 <span class="sd">            instance.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">module</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span>
-        <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">))</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># update mapping upon import</span>
 
         <span class="n">payload_io</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -763,23 +768,26 @@
 <div class="viewcode-block" id="Protocol.register">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.register">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new protocol class</span>
-<span class="sd">            should be as ``{module}.{class_}``.</span>
+<span class="sd">            should be as ``{protocol.module}.{protocol.name}``.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: protocol code</span>
-<span class="sd">            module: module name</span>
-<span class="sd">            class\_: class name</span>
+<span class="sd">            protocol: module descriptor or a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
 
 <div class="viewcode-block" id="Protocol.from_schema">
@@ -1547,8 +1555,10 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">module</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">))</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span>  <span class="c1"># type: ignore[assignment]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># type: ignore[unreachable]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># update mapping upon import</span>
 
         <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span>
                          <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
@@ -1606,7 +1616,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=0ed1cf23"></script>
+</div><script src="../../../_static/documentation_options.js?v=3ab0eb05"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
