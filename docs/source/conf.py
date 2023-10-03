@@ -83,7 +83,7 @@ autodoc_default_options = {
     # 'private-members': True,
     'show-inheritance': True,
 }
-autodoc_typehints = 'description'
+autodoc_typehints = 'signature'
 #autodoc_member_order = 'bysource'
 #autodoc_member_order = 'alphabetic'
 autoclass_content = 'class'
