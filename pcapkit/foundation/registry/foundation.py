@@ -7,24 +7,25 @@
 This module provides the foundation registries for :mod:`pcapkit`.
 
 """
-import importlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast, overload
 
-from dictdumper import Dumper
-
-from pcapkit.foundation.engines import Engine
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
 from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
-from pcapkit.foundation.reassembly.reassembly import Reassembly
 from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
-from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import logger
 
 if TYPE_CHECKING:
+    from typing import Type
+
+    from dictdumper import Dumper
+
+    from pcapkit.foundation.engines import Engine
     from pcapkit.foundation.reassembly.reassembly import CallbackFn as Reasm_CallbackFn
+    from pcapkit.foundation.reassembly.reassembly import Reassembly
     from pcapkit.foundation.traceflow.traceflow import CallbackFn as Trace_CallbackFn
 
 __all__ = [
@@ -40,14 +41,22 @@ __all__ = [
     'register_extractor_reassembly', 'register_extractor_traceflow',
 ]
 
+NULL = '(null)'
 
 ###############################################################################
 # Engine Registries
 ###############################################################################
 
 
+@overload
+def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | Type[Engine]') -> 'None': ...
+@overload
+def register_extractor_engine(name: 'str', module: 'str', class_: 'str') -> 'None': ...
+
+
 # NOTE: pcapkit.foundation.extraction.Extractor.__engine__
-def register_extractor_engine(engine: 'str', module: 'str', class_: 'str') -> 'None':  # pylint: disable=redefined-builtin
+def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | Type[Engine] | str',
+                              class_: 'str' = NULL) -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new engine class.
 
     Notes:
@@ -59,16 +68,16 @@ def register_extractor_engine(engine: 'str', module: 'str', class_: 'str') -> 'N
 
     Arguments:
         engine: engine name
-        module: module name
+        module: module name or module descriptor or an
+            :class:`~pcapkit.foundation.engines.engine.Engine` subclass
         class\_: class name
 
     """
-    engine_cls = getattr(importlib.import_module(module), class_)
-    if not issubclass(engine_cls, Engine):
-        raise RegistryError('engine must be a Engine subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Engine]', ModuleDescriptor(module, class_))
 
-    Extractor.register_engine(engine, module, class_)
-    logger.info('registered extractor engine: %s', engine)
+    Extractor.register_engine(name, module)
+    logger.info('registered extractor engine: %s', name)
 
 
 ###############################################################################
@@ -76,7 +85,14 @@ def register_extractor_engine(engine: 'str', module: 'str', class_: 'str') -> 'N
 ###############################################################################
 
 
-def register_dumper(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+@overload
+def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper]', *, ext: 'str') -> 'None': ...
+@overload
+def register_dumper(format: 'str', module: 'str', class_: 'str', *, ext: 'str') -> 'None': ...
+
+
+def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
+                    class_: 'str' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new dumper class.
 
     Notes:
@@ -87,28 +103,35 @@ def register_dumper(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 
     :data:`pcapkit.foundation.traceflow.TraceFlow.__output__` and
     :data:`pcapkit.foundation.extraction.Extractor.__output__` registry.
 
+    Arguments:
+        format: format name
+        module: module name or module descriptor or a
+            :class:`~dictdumper.dumper.Dumper` subclass
+        class\_: class name
+        ext: file extension
+
     See Also:
         * :func:`pcapkit.foundation.registry.register_extractor_dumper`
         * :func:`pcapkit.foundation.registry.register_traceflow`
 
-    Arguments:
-        format: format name
-        module: module name
-        class\_: class name
-        ext: file extension
-
     """
-    dumper = getattr(importlib.import_module(module), class_)
-    if not issubclass(dumper, Dumper):
-        raise RegistryError('dumper must be a Dumper subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
 
-    Extractor.register_dumper(format, module, class_, ext)
-    TraceFlow.register_dumper(format, module, class_, ext)
-    logger.info('registered output format: %s', dumper.__name__)
+    Extractor.register_dumper(format, module, ext)
+    TraceFlow.register_dumper(format, module, ext)
+    logger.info('registered output format: %s', format)
+
+
+@overload
+def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper]', *, ext: 'str') -> 'None': ...
+@overload
+def register_extractor_dumper(format: 'str', module: 'str', class_: 'str', *, ext: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.foundation.extraction.Extractor.__output__
-def register_extractor_dumper(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
+                              class_: 'str' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new dumper class.
 
     Notes:
@@ -120,21 +143,28 @@ def register_extractor_dumper(format: 'str', module: 'str', class_: 'str', ext: 
 
     Arguments:
         format: format name
-        module: module name
+        module: module name or module descriptor or a
+            :class:`~dictdumper.dumper.Dumper` subclass
         class\_: class name
         ext: file extension
 
     """
-    dumper = getattr(importlib.import_module(module), class_)
-    if not issubclass(dumper, Dumper):
-        raise RegistryError('dumper must be a Dumper subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
 
-    Extractor.register_dumper(format, module, class_, ext)
+    Extractor.register_dumper(format, module, ext)
     logger.info('registered extractor output dumper: %s', format)
 
 
+@overload
+def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper]', *, ext: 'str') -> 'None': ...
+@overload
+def register_traceflow_dumper(format: 'str', module: 'str', class_: 'str', *, ext: 'str') -> 'None': ...
+
+
 # NOTE: pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__
-def register_traceflow_dumper(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
+                              class_: 'str' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new dumper class.
 
     Notes:
@@ -146,16 +176,16 @@ def register_traceflow_dumper(format: 'str', module: 'str', class_: 'str', ext: 
 
     Arguments:
         format: format name
-        module: module name
+        module: module name or module descriptor or a
+            :class:`~dictdumper.dumper.Dumper` subclass
         class\_: class name
         ext: file extension
 
     """
-    dumper = getattr(importlib.import_module(module), class_)
-    if not issubclass(dumper, Dumper):
-        raise RegistryError('dumper must be a Dumper subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
 
-    TraceFlow.register_dumper(format, module, class_, ext)
+    TraceFlow.register_dumper(format, module, ext)
     logger.info('registered traceflow output: %s', format)
 
 
@@ -229,51 +259,65 @@ def register_traceflow_tcp_callback(callback: 'Trace_CallbackFn') -> 'None':
 ###############################################################################
 
 
+@overload
+def register_extractor_reassembly(protocol: 'str', module: 'ModuleDescriptor[Reassembly] | Type[Reassembly]') -> 'None': ...
+@overload
+def register_extractor_reassembly(protocol: 'str', module: 'str', class_: 'str') -> 'None': ...
+
+
 # NOTE: pcapkit.foundation.extraction.Extractor.__reassembly__
-def register_extractor_reassembly(protocol: 'str', module: 'str', class_: 'str') -> 'None':  # pylint: disable=redefined-builtin
-    r"""Registered a new engine class.
+def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescriptor[Reassembly] | Type[Reassembly]',
+                                  class_: 'str' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+    r"""Registered a new reassembly class.
 
     Notes:
-        The full qualified class name of the new engine class
+        The full qualified class name of the new reassembly class
         should be as ``{module}.{class_}``.
 
-    The function will register the given engine class to the
+    The function will register the given reassembly class to the
     :data:`pcapkit.foundation.extraction.Extractor.__reassembly__` registry.
 
     Arguments:
-        engine: engine name
-        module: module name
+        protocol: protocol name
+        module: module name or module descriptor or a
+            :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass
         class\_: class name
 
     """
-    engine_cls = getattr(importlib.import_module(module), class_)
-    if not issubclass(engine_cls, Reassembly):
-        raise RegistryError('engine must be a Reassembly subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Reassembly]', ModuleDescriptor(module, class_))
 
-    Extractor.register_reassembly(protocol, module, class_)
+    Extractor.register_reassembly(protocol, module)
     logger.info('registered extractor reassembly: %s', protocol)
 
 
+@overload
+def register_extractor_traceflow(protocol: 'str', module: 'ModuleDescriptor[TraceFlow] | Type[TraceFlow]') -> 'None': ...
+@overload
+def register_extractor_traceflow(protocol: 'str', module: 'str', class_: 'str') -> 'None': ...
+
+
 # NOTE: pcapkit.foundation.extraction.Extractor.__traceflow__
-def register_extractor_traceflow(protocol: 'str', module: 'str', class_: 'str') -> 'None':  # pylint: disable=redefined-builtin
-    r"""Registered a new engine class.
+def register_extractor_traceflow(protocol: 'str', module: 'str | ModuleDescriptor[TraceFlow] | Type[TraceFlow]',
+                                 class_: 'str' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+    r"""Registered a new flow tracing class.
 
     Notes:
-        The full qualified class name of the new engine class
+        The full qualified class name of the new flow tracing class
         should be as ``{module}.{class_}``.
 
-    The function will register the given engine class to the
+    The function will register the given flow tracing class to the
     :data:`pcapkit.foundation.extraction.Extractor.__traceflow__` registry.
 
     Arguments:
-        engine: engine name
-        module: module name
+        protocol: protocol name
+        module: module name or module descriptor or a
+            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass
         class\_: class name
 
     """
-    engine_cls = getattr(importlib.import_module(module), class_)
-    if not issubclass(engine_cls, TraceFlow):
-        raise RegistryError('engine must be a TraceFlow subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[TraceFlow]', ModuleDescriptor(module, class_))
 
-    Extractor.register_traceflow(protocol, module, class_)
+    Extractor.register_traceflow(protocol, module)
     logger.info('registered extractor flow tracing: %s', protocol)

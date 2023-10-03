@@ -7,9 +7,11 @@
 This module provides the protocol registries for :mod:`pcapkit`.
 
 """
-import importlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast, overload
 
+from pcapkit.const.reg.apptype import AppType as Enum_AppType
+from pcapkit.const.reg.apptype import TransportProtocol
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 from pcapkit.protocols.internet.hip import HIP
@@ -47,8 +49,6 @@ from pcapkit.utilities.logging import logger
 
 if TYPE_CHECKING:
     from typing import Optional, Type
-
-    from typing_extensions import Literal
 
     from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
     from pcapkit.const.http.frame import Frame as HTTP_Frame
@@ -122,6 +122,8 @@ __all__ = [
     'register_pcapng_record',
 ]
 
+NULL = '(null)'
+
 
 # NOTE: pcapkit.protocols.__proto__
 def register_protocol(protocol: 'Type[Protocol]') -> 'None':
@@ -136,7 +138,7 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
 
     """
     if not issubclass(protocol, Protocol):
-        raise RegistryError('protocol must be a Protocol subclass')
+        raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
 
     protocol_registry[protocol.__name__.upper()] = protocol
     logger.info('registered protocol: %s', protocol.__name__)
@@ -147,7 +149,14 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
 ###############################################################################
 
 
-def register_linktype(code: 'LinkType', module: 'str', class_: 'str') -> 'None':
+@overload
+def register_linktype(code: 'LinkType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+@overload
+def register_linktype(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
+
+
+def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                      class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -160,30 +169,39 @@ def register_linktype(code: 'LinkType', module: 'str', class_: 'str') -> 'None':
     - :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__`
     - :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__proto__`
 
+    Arguments:
+        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+        class\_: class name
+
     See Also:
         * :func:`pcapkit.foundation..registry.protocol.register_pcap`
         * :func:`pcapkit.foundation..registry.protocol.register_pcapng`
 
-    Arguments:
-        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-        module: module name
-        class\_: class name
-
     """
-    protocol = getattr(importlib.import_module(module), class_)
-    if not issubclass(protocol, Protocol):
-        raise RegistryError('protocol must be a Protocol subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
-    Frame.register(code, module, class_)
-    PCAPNG.register(code, module, class_)
+    Frame.register(code, module)
+    PCAPNG.register(code, module)
     logger.info('registered linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    register_protocol(protocol)
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    register_protocol(module)
+
+
+@overload
+def register_pcap(code: 'LinkType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+@overload
+def register_pcap(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.misc.pcap.frame.Frame.__proto__
-def register_pcap(code: 'LinkType', module: 'str', class_: 'str') -> 'None':
+def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                  class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -195,23 +213,32 @@ def register_pcap(code: 'LinkType', module: 'str', class_: 'str') -> 'None':
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-        module: module name
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.Protocol` subclass
         class\_: class name
 
     """
-    protocol = getattr(importlib.import_module(module), class_)
-    if not issubclass(protocol, Protocol):
-        raise RegistryError('protocol must be a Protocol subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
-    Frame.register(code, module, class_)
+    Frame.register(code, module)
     logger.info('registered PCAP linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    register_protocol(protocol)
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    register_protocol(module)
+
+
+@overload
+def register_pcapng(code: 'LinkType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+@overload
+def register_pcapng(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__proto__
-def register_pcapng(code: 'LinkType', module: 'str', class_: 'str') -> 'None':
+def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                    class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -223,19 +250,21 @@ def register_pcapng(code: 'LinkType', module: 'str', class_: 'str') -> 'None':
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-        module: module name
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.Protocol` subclass
         class\_: class name
 
     """
-    protocol = getattr(importlib.import_module(module), class_)
-    if not issubclass(protocol, Protocol):
-        raise RegistryError('protocol must be a Protocol subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
-    PCAPNG.register(code, module, class_)
+    PCAPNG.register(code, module)
     logger.info('registered PCAP-NG linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    register_protocol(protocol)
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    register_protocol(module)
 
 
 ###############################################################################
@@ -243,8 +272,15 @@ def register_pcapng(code: 'LinkType', module: 'str', class_: 'str') -> 'None':
 ###############################################################################
 
 
+@overload
+def register_ethertype(code: 'EtherType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+@overload
+def register_ethertype(code: 'EtherType', module: 'str', class_: 'str') -> 'None': ...
+
+
 # NOTE: pcapkit.protocols.link.link.Link.__proto__
-def register_ethertype(code: 'EtherType', module: 'str', class_: 'str') -> 'None':
+def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                       class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -256,19 +292,21 @@ def register_ethertype(code: 'EtherType', module: 'str', class_: 'str') -> 'None
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
-        module: module name
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.Protocol` subclass
         class\_: class name
 
     """
-    protocol = getattr(importlib.import_module(module), class_)
-    if not issubclass(protocol, Protocol):
-        raise RegistryError('protocol must be a Protocol subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
-    Link.register(code, module, class_)
+    Link.register(code, module)
     logger.info('registered ethertype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    register_protocol(protocol)
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    register_protocol(module)
 
 
 ###############################################################################
@@ -276,8 +314,15 @@ def register_ethertype(code: 'EtherType', module: 'str', class_: 'str') -> 'None
 ###############################################################################
 
 
+@overload
+def register_transtype(code: 'TransType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+@overload
+def register_transtype(code: 'TransType', module: 'str', class_: 'str') -> 'None': ...
+
+
 # NOTE: pcapkit.protocols.internet.internet.Internet.__proto__
-def register_transtype(code: 'TransType', module: 'str', class_: 'str') -> 'None':
+def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                       class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -289,19 +334,21 @@ def register_transtype(code: 'TransType', module: 'str', class_: 'str') -> 'None
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
-        module: module name
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.Protocol` subclass
         class\_: class name
 
     """
-    protocol = getattr(importlib.import_module(module), class_)
-    if not issubclass(protocol, Protocol):
-        raise RegistryError('protocol must be a Protocol subclass')
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
-    Internet.register(code, module, class_)
+    Internet.register(code, module)
     logger.info('registered transtype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    register_protocol(protocol)
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    register_protocol(module)
 
 
 # NOTE: pcapkit.protocols.internet.internet.IPv4
@@ -509,7 +556,18 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
 ###############################################################################
 
 
-def register_port(proto: 'Literal["tcp", "udp"]', code: 'int', module: 'str', class_: 'str') -> 'None':
+@overload
+def register_port(code: 'int', module: 'ModuleDescriptor[Protocol] | Type[Protocol]', *, proto: 'TransportProtocol | str') -> 'None': ...
+@overload
+def register_port(code: 'Enum_AppType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
+@overload
+def register_port(code: 'int', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str') -> 'None': ...
+@overload
+def register_port(code: 'Enum_AppType', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
+
+
+def register_port(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                  class_: 'str' = NULL, *, proto: 'TransportProtocol | str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -520,37 +578,58 @@ def register_port(proto: 'Literal["tcp", "udp"]', code: 'int', module: 'str', cl
     :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` and/or
     :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.
 
+    Arguments:
+        code: port number
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+        class\_: class name
+        proto: protocol name (must be a valid transport protocol)
+
     See Also:
         * :func:`pcapkit.foundation.registry.register_tcp_port`
         * :func:`pcapkit.foundation.registry.register_udp_port`
 
-    Arguments:
-        proto: protocol name (must be ``tcp`` or ``udp``)
-        code: port number
-        module: module name
-        class\_: class name
-
     """
-    if proto == 'tcp':
-        cls = TCP
-    elif proto == 'udp':
-        cls = UDP  # type: ignore[assignment]
-    else:
-        raise RegistryError('protocol must be "tcp" or "udp"')
+    if isinstance(code, Enum_AppType):
+        if proto is NULL:
+            proto = code.proto
+        code = code.port
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
-    protocol = getattr(importlib.import_module(module), class_)
-    if not issubclass(protocol, Protocol):
-        raise RegistryError('protocol must be a Protocol subclass')
+    _reg = False
+    if isinstance(proto, str):
+        proto = TransportProtocol.get(proto.lower())
 
-    cls.register(code, module, class_)
-    logger.info('registered %s port: %s', proto.upper(), code)
+    for test, cls in cast('dict[TransportProtocol, Type[Protocol]]', {
+        TransportProtocol.tcp: TCP,
+        TransportProtocol.udp: UDP,
+    }).items():
+        if test not in proto:
+            continue
+
+        cls.register(code, module)
+        logger.info('registered %s port: %s', test.name, code)
+        _reg = True
+
+    if not _reg:
+        raise RegistryError(f'unknown transport protocol: {proto.name}')
 
     # register protocol to protocol registry
-    register_protocol(protocol)
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    register_protocol(module)
+
+
+@overload
+def register_tcp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+@overload
+def register_tcp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.transport.tcp.TCP.__proto__
-def register_tcp(code: 'int', module: 'str', class_: 'str') -> 'None':
+def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                 class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -562,19 +641,23 @@ def register_tcp(code: 'int', module: 'str', class_: 'str') -> 'None':
 
     Arguments:
         code: port number
-        module: module name
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.Protocol` subclass
         class\_: class name
 
     """
-    protocol = getattr(importlib.import_module(module), class_)
-    if not issubclass(protocol, Protocol):
-        raise RegistryError('protocol must be a Protocol subclass')
+    if isinstance(code, Enum_AppType):
+        code = code.port
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
-    TCP.register(code, module, class_)
+    TCP.register(code, module)
     logger.info('registered TCP port: %s', code)
 
     # register protocol to protocol registry
-    register_protocol(protocol)
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    register_protocol(module)
 
 
 # NOTE: pcapkit.protocols.transport.tcp.TCP.__option__
@@ -627,8 +710,15 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
     logger.info('registered MPTCP option parser: %s', code.name)
 
 
+@overload
+def register_udp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+@overload
+def register_udp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
+
+
 # NOTE: pcapkit.protocols.transport.udp.UDP.__proto__
-def register_udp(code: 'int', module: str, class_: str) -> 'None':
+def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                 class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -640,19 +730,23 @@ def register_udp(code: 'int', module: str, class_: str) -> 'None':
 
     Arguments:
         code: port number
-        module: module name
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.Protocol` subclass
         class\_: class name
 
     """
-    protocol = getattr(importlib.import_module(module), class_)
-    if not issubclass(protocol, Protocol):
-        raise RegistryError('protocol must be a Protocol subclass')
+    if isinstance(code, Enum_AppType):
+        code = code.port
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
-    UDP.register(code, module, class_)
+    UDP.register(code, module)
     logger.info('registered UDP port: %s', code)
 
     # register protocol to protocol registry
-    register_protocol(protocol)
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    register_protocol(module)
 
 
 ###############################################################################
