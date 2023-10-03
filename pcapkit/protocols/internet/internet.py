@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=dict-item
 """Base Protocol
 ===================
 
@@ -11,13 +12,14 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
 
 """
 import collections
-import importlib
 from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import PT, ST, Protocol
 from pcapkit.utilities.decorators import beholder
+from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -76,25 +78,25 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
     #: Layer of protocol.
     __layer__ = 'Internet'  # type: Literal['Internet']
 
-    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.internet.internet.Internet._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.internet.Internet._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[return-value,arg-type]
         {
-            Enum_TransType.HOPOPT:          ('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
-            Enum_TransType.IPv4:            ('pcapkit.protocols.internet.ipv4',       'IPv4'),
-            Enum_TransType.TCP:             ('pcapkit.protocols.transport.tcp',       'TCP'),
-            Enum_TransType.UDP:             ('pcapkit.protocols.transport.udp',       'UDP'),
-            Enum_TransType.IPv6:            ('pcapkit.protocols.internet.ipv6',       'IPv6'),
-            Enum_TransType.IPv6_Route:      ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
-            Enum_TransType.IPv6_Frag:       ('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
-            Enum_TransType.AH:              ('pcapkit.protocols.internet.ah',         'AH'),
-            Enum_TransType.IPv6_NoNxt:      ('pcapkit.protocols.misc.raw',            'Raw'),
-            Enum_TransType.IPv6_Opts:       ('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
-            Enum_TransType.IPX_in_IP:       ('pcapkit.protocols.internet.ipx',        'IPX'),
-            Enum_TransType.Mobility_Header: ('pcapkit.protocols.internet.mh',         'MH'),
-            Enum_TransType.HIP:             ('pcapkit.protocols.internet.hip',        'HIP'),
+            Enum_TransType.HOPOPT:          ModuleDescriptor('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
+            Enum_TransType.IPv4:            ModuleDescriptor('pcapkit.protocols.internet.ipv4',       'IPv4'),
+            Enum_TransType.TCP:             ModuleDescriptor('pcapkit.protocols.transport.tcp',       'TCP'),
+            Enum_TransType.UDP:             ModuleDescriptor('pcapkit.protocols.transport.udp',       'UDP'),
+            Enum_TransType.IPv6:            ModuleDescriptor('pcapkit.protocols.internet.ipv6',       'IPv6'),
+            Enum_TransType.IPv6_Route:      ModuleDescriptor('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
+            Enum_TransType.IPv6_Frag:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
+            Enum_TransType.AH:              ModuleDescriptor('pcapkit.protocols.internet.ah',         'AH'),
+            Enum_TransType.IPv6_NoNxt:      ModuleDescriptor('pcapkit.protocols.misc.raw',            'Raw'),
+            Enum_TransType.IPv6_Opts:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
+            Enum_TransType.IPX_in_IP:       ModuleDescriptor('pcapkit.protocols.internet.ipx',        'IPX'),
+            Enum_TransType.Mobility_Header: ModuleDescriptor('pcapkit.protocols.internet.mh',         'MH'),
+            Enum_TransType.HIP:             ModuleDescriptor('pcapkit.protocols.internet.hip',        'HIP'),
         },
     )
 
@@ -113,22 +115,26 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_TransType', module: str, class_: str) -> 'None':  # type: ignore[override]
+    def register(cls, code: 'Enum_TransType', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
             The full qualified class name of the new protocol class
-            should be as ``{module}.{class_}``.
+            should be as ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
-            module: module name
-            class\_: class name
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         """
+        if isinstance(protocol, ModuleDescriptor):
+            protocol = protocol.klass
+        if not issubclass(protocol, Protocol):
+            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
             warn(f'protocol {code} already registered, overwriting', RegistryWarning)
-        cls.__proto__[code] = (module, class_)
+        cls.__proto__[code] = protocol
 
     ##########################################################################
     # Utilities.
@@ -223,8 +229,10 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
-            module, name = self.__proto__[proto]
-            protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
+            protocol = self.__proto__[proto]  # type: ignore[assignment]
+            if isinstance(protocol, ModuleDescriptor):
+                protocol = protocol.klass  # type: ignore[unreachable]
+                self.__proto__[proto] = protocol  # update mapping upon import
 
         next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
                          alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto)
