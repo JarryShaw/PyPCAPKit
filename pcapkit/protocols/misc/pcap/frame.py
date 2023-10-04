@@ -34,7 +34,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
 from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall, stacklevel

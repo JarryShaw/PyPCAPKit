@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 __all__ = ['ProtoChain']
 
@@ -69,7 +69,7 @@ class ProtoChain(collections.abc.Sequence):
             data: Protocol chain list.
 
         """
-        from pcapkit.protocols.protocol import Protocol  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.protocol import ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
 
         temp_data = []
         for proto in data:
@@ -105,7 +105,7 @@ class ProtoChain(collections.abc.Sequence):
             stop += len(self)
 
         # prepare comparison values
-        from pcapkit.protocols.protocol import Protocol  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.protocol import ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
         comp = Protocol.expand_comp(value)
 
         pool = self.__data__[start:stop]
@@ -124,7 +124,7 @@ class ProtoChain(collections.abc.Sequence):
 
         """
         # prepare comparison values
-        from pcapkit.protocols.protocol import Protocol  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.protocol import ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
         comp = Protocol.expand_comp(value)
 
         cnt = 0
@@ -150,7 +150,7 @@ class ProtoChain(collections.abc.Sequence):
             basis: Original protocol chain as base stacks.
 
         """
-        from pcapkit.protocols.protocol import Protocol  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.protocol import ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
         if isinstance(proto, Protocol):
             if alias is None:
                 alias = proto.alias
@@ -196,7 +196,7 @@ class ProtoChain(collections.abc.Sequence):
             Whether ``name`` is in the chain.
 
         """
-        from pcapkit.protocols.protocol import Protocol  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.protocol import ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
         comp = Protocol.expand_comp(name)
 
         for alias, proto in self.__data__:

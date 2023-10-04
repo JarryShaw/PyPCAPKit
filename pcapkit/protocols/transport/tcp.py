@@ -148,7 +148,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.transport.tcp import MPTCP as Data_MPTCP
     from pcapkit.protocols.data.transport.tcp import MPTCPJoin as Data_MPTCPJoin
     from pcapkit.protocols.data.transport.tcp import Option as Data_Option
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
     from pcapkit.protocols.schema.schema import Schema
     from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_MPTCP
     from pcapkit.protocols.schema.transport.tcp import Flags as Schema_Flags

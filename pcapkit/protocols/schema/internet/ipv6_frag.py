@@ -15,7 +15,7 @@ __all__ = ['IPv6_Frag']
 if TYPE_CHECKING:
     from typing_extensions import TypedDict
 
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
     class Flags(TypedDict):
         """Fragment offset and flags."""

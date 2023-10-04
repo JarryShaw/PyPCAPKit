@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal, TypeAlias
 
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
 

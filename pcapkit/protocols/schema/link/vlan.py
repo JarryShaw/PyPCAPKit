@@ -15,7 +15,7 @@ from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 __all__ = ['VLAN', 'TCI']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict

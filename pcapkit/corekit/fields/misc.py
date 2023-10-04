@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pcapkit.corekit.fields.field import NoValueType
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
     from pcapkit.protocols.schema.schema import Schema
 
 _TC = TypeVar('_TC')

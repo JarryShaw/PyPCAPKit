@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, overload
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.misc.null import NoPayload
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.utilities.exceptions import UnsupportedCall
 

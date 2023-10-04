@@ -16,7 +16,7 @@ __all__ = ['UDP']
 if TYPE_CHECKING:
     from typing import Any
 
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 
 class PortEnumField(EnumField):

@@ -218,7 +218,7 @@ if TYPE_CHECKING:
     from pcapkit.const.hip.transport import Transport as Enum_Transport
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.data.internet.hip import Parameter as Data_Parameter
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
     from pcapkit.protocols.schema.internet.hip import Parameter as Schema_Parameter
 
     Parameter = OrderedMultiDict[Enum_Parameter, Data_Parameter]

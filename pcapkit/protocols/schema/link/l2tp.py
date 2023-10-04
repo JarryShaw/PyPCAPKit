@@ -15,7 +15,7 @@ __all__ = ['L2TP']
 if TYPE_CHECKING:
     from typing import Optional
 
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import Literal, TypedDict

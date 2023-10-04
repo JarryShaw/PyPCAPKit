@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.const.reg.apptype import AppType as Enum_AppType
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['UDP']

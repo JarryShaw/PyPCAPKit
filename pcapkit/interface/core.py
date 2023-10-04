@@ -18,7 +18,7 @@ from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
 from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
 from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.utilities.exceptions import FormatError
 
 if TYPE_CHECKING:

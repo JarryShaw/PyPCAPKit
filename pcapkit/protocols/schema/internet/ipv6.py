@@ -17,7 +17,7 @@ __all__ = ['IPv6']
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
 
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict

@@ -13,9 +13,6 @@ utility arguments and methods of specified protocols.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: info_name
@@ -87,3 +84,14 @@ Data Models
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
+
+Internal Definitions
+--------------------
+
+.. autoclass:: pcapkit.protocols.protocol.ProtocolBase
+   :no-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.protocol.ProtocolMeta
+   :no-members:
+   :show-inheritance:

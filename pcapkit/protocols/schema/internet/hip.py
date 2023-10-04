@@ -64,7 +64,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
     from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import Literal, TypedDict

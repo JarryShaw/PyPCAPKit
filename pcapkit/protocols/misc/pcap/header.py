@@ -33,7 +33,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.data.misc.pcap.header import MagicNumber as Data_MagicNumber
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
 from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
 

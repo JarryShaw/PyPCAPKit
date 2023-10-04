@@ -56,7 +56,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
     from pcapkit.protocols.misc.pcap.frame import Frame
     from pcapkit.protocols.misc.pcapng import PCAPNG
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']

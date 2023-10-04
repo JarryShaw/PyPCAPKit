@@ -15,7 +15,7 @@ import io
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.protocols.protocol import PT, ST, Protocol
+from pcapkit.protocols.protocol import PT, ST, ProtocolBase as Protocol
 from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, logger
 from pcapkit.utilities.warnings import RegistryWarning, warn

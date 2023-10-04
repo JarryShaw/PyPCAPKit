@@ -112,7 +112,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.protocols.data.internet.ipv4 import Option as Data_Option
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
     from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_Option
 
     Option = OrderedMultiDict[Enum_OptionNumber, Data_Option]

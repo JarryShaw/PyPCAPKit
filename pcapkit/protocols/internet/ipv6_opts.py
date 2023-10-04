@@ -110,7 +110,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.internet.ipv6_opts import Option as Data_Option
     from pcapkit.protocols.data.internet.ipv6_opts import QuickStartOption as Data_QuickStartOption
     from pcapkit.protocols.data.internet.ipv6_opts import SMFDPDOption as Data_SMFDPDOption
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
     from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_Option
     from pcapkit.protocols.schema.internet.ipv6_opts import \
         QuickStartOption as Schema_QuickStartOption

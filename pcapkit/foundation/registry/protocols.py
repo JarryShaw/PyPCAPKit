@@ -24,7 +24,7 @@ from pcapkit.protocols.internet.mh import MH
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcapng import PCAPNG
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.protocols.schema.application.httpv2 import FrameType as Schema_HTTP_FrameType
 from pcapkit.protocols.schema.internet.hip import Parameter as Schema_HIP_Parameter
 from pcapkit.protocols.schema.internet.hopopt import Option as Schema_HOPOPT_Option

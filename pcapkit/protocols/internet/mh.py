@@ -171,7 +171,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.data.internet.mh import Option as Data_Option
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
     from pcapkit.protocols.schema.internet.mh import Option as Schema_Option
     from pcapkit.protocols.schema.internet.mh import Packet as Schema_Packet
     from pcapkit.protocols.schema.schema import Schema

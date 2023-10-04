@@ -13,7 +13,7 @@ from pcapkit.protocols.schema.schema import Schema, schema_final
 __all__ = ['IPX']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 
 @schema_final

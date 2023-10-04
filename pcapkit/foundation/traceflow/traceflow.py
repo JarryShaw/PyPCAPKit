@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
     from pcapkit.corekit.infoclass import Info
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
     CallbackFn = Callable[['Index'], None]
 

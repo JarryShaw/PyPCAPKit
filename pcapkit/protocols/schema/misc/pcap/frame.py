@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pcapkit.corekit.fields.numbers import NumberField as Field
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 
 def byteorder_callback(field: 'Field', packet: 'dict[str, Any]') -> 'None':

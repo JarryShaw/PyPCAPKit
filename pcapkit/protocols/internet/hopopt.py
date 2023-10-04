@@ -107,7 +107,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.internet.hopopt import Option as Data_Option
     from pcapkit.protocols.data.internet.hopopt import QuickStartOption as Data_QuickStartOption
     from pcapkit.protocols.data.internet.hopopt import SMFDPDOption as Data_SMFDPDOption
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
     from pcapkit.protocols.schema.internet.hopopt import Option as Schema_Option
     from pcapkit.protocols.schema.internet.hopopt import QuickStartOption as Schema_QuickStartOption
     from pcapkit.protocols.schema.internet.hopopt import SMFDPDOption as Schema_SMFDPDOption

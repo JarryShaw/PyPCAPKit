@@ -23,7 +23,7 @@ import string
 import struct
 import textwrap
 import urllib.parse
-from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, overload
 
 import aenum
 import chardet
@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal, Self
 
-__all__ = ['Protocol']
+__all__ = ['ProtocolBase']
 
 PT = TypeVar('PT', bound='Data')
 ST = TypeVar('ST', bound='Schema')
@@ -59,8 +59,24 @@ ST = TypeVar('ST', bound='Schema')
 readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
 
 
-class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
-    """Abstract base class for all protocol family."""
+class ProtocolMeta(abc.ABCMeta):
+    """Meta class to add dynamic support to :class:`Protocol`.
+
+    This meta class is used to generate necessary attributes for the
+    :class:`Protocol` class. It can be useful to reduce unnecessary
+    registry calls and simplify the customisation process.
+
+    """
+
+
+class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
+    """Abstract base class for all protocol family.
+
+    Note:
+        This class is for internal use only. For customisation, please use
+        :class:`Protocol` instead.
+
+    """
 
     if TYPE_CHECKING:
         #: Parsed packet data.
@@ -70,7 +86,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         #: Source packet stream.
         _file: 'IO[bytes]'
         #: Next layer protocol instance.
-        _next: 'Protocol'
+        _next: 'ProtocolBase'
         #: Protocol chain instance.
         _protos: 'ProtoChain'
 
@@ -99,7 +115,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name,
     #: or a :class:`Protocol` subclass.
-    __proto__: 'DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]' = collections.defaultdict(
+    __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[return-value,arg-type]
     )
 
@@ -145,7 +161,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
 
     # payload of current instance
     @property
-    def payload(self) -> 'Protocol':
+    def payload(self) -> 'ProtocolBase':
         """Payload of current instance."""
         return self._next
 
@@ -322,7 +338,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             return url.replace('%', r'\x').encode().decode('unicode_escape', errors='replace')
 
     @staticmethod
-    def expand_comp(value: 'str | Protocol | Type[Protocol]') -> 'tuple':
+    def expand_comp(value: 'str | ProtocolBase | Type[ProtocolBase]') -> 'tuple':
         """Expand protocol class to protocol name.
 
         The method is used to expand protocol class to protocol name, in the
@@ -343,9 +359,9 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             value: Protocol class or name.
 
         """
-        if isinstance(value, type) and issubclass(value, Protocol):
+        if isinstance(value, type) and issubclass(value, ProtocolBase):
             comp = (value, *(name.upper() for name in value.id()))
-        elif isinstance(value, Protocol):
+        elif isinstance(value, ProtocolBase):
             comp = (type(value), *(name.upper() for name in value.id()))
         else:
             from pcapkit.protocols import __proto__ as protocols_registry  # pylint: disable=import-outside-toplevel # isort: skip
@@ -357,7 +373,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         return comp
 
     @classmethod
-    def analyze(cls, proto: 'int', payload: 'bytes', **kwargs: 'Any') -> 'Protocol':
+    def analyze(cls, proto: 'int', payload: 'bytes', **kwargs: 'Any') -> 'ProtocolBase':
         """Analyse packet payload.
 
         Args:
@@ -407,7 +423,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
-        if not issubclass(protocol, Protocol):
+        if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
             warn(f'protocol {code} already registered, overwriting', RegistryWarning)
@@ -484,7 +500,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             length: Length of packet data.
             _layer (str): Parse packet until ``_layer``
                 (:attr:`self._exlayer <pcapkit.protocols.protocol.Protocol._exlayer>`).
-            _protocol (str | Protocol | Type[Protocol]): Parse packet until ``_protocol``
+            _protocol (str | ProtocolBase | Type[ProtocolBase]): Parse packet until ``_protocol``
                 (:attr:`self._exproto <pcapkit.protocols.protocol.Protocol._exproto>`).
             **kwargs: Arbitrary keyword arguments.
 
@@ -496,7 +512,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         #: str: Parse packet until such layer.
         self._exlayer = kwargs.pop('_layer', None)  # type: Optional[str]
         #: str: Parse packet until such protocol.
-        self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | Protocol | Type[Protocol]]
+        self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | ProtocolBase | Type[ProtocolBase]]
         #: bool: If terminate parsing next layer of protocol.
         self._sigterm = self._check_term_threshold()
 
@@ -637,7 +653,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         """Iterate through :attr:`self._data <pcapkit.protocols.protocol.Protocol._data>`."""
         return io.BytesIO(self._data)
 
-    def __getitem__(self, key: 'str | Protocol | Type[Protocol]') -> 'Protocol':
+    def __getitem__(self, key: 'str | Protocol | Type[Protocol]') -> 'ProtocolBase':
         """Subscription (``getitem``) support.
 
         * If ``key`` is a :class:`~pcapkit.protocols.protocol.Protocol` object,
@@ -725,9 +741,9 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             other: Comparision against the object.
 
         """
-        if isinstance(other, type) and issubclass(other, Protocol):
+        if isinstance(other, type) and issubclass(other, ProtocolBase):
             return cls is other
-        if isinstance(other, Protocol):
+        if isinstance(other, ProtocolBase):
             return cls.id() == other.id()
 
         if isinstance(other, str):
@@ -1035,7 +1051,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         return data.to_dict()
 
     @classmethod
-    def _make_payload(cls, data: 'Data') -> 'Protocol':
+    def _make_payload(cls, data: 'Data') -> 'ProtocolBase':
         """Create payload from ``data`` for protocol construction.
 
         This method uses ``__next_type__`` and ``__next_name__`` to
@@ -1052,7 +1068,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
 
         """
         proto = cast('Optional[Type[Protocol]]', data.get('__next_type__'))
-        if proto is None or not (isinstance(proto, type) and issubclass(proto, Protocol)):
+        if proto is None or not (isinstance(proto, type) and issubclass(proto, ProtocolBase)):
             from pcapkit.protocols.misc.null import \
                 NoPayload  # pylint: disable=import-outside-toplevel
             return NoPayload()
@@ -1085,7 +1101,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
 
         """
-        next_ = cast('Protocol', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
+        next_ = cast('ProtocolBase', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -1104,7 +1120,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
 
     @beholder
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,
-                           packet: 'Optional[dict[str, Any]]' = None) -> 'Protocol':
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
         """Import next layer extractor.
 
         Arguments:
@@ -1117,7 +1133,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
 
         """
         if TYPE_CHECKING:
-            protocol: 'Type[Protocol]'
+            protocol: 'Type[ProtocolBase]'
 
         file_ = self._get_payload()
         if length is None:
@@ -1155,3 +1171,42 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
                     break
 
         return layer_match or protocol_match
+
+
+class Protocol(ProtocolBase, Generic[PT, ST]):
+    """Abstract base class for all protocol family."""
+
+    def __init_subclass__(cls, /, schema: 'Optional[Type[ST]]' = None,
+                          data: 'Optional[Type[PT]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+        """Initialisation for subclasses.
+
+        Args:
+            schema: Schema class.
+            data: Data class.
+            *args: Arbitrary positional arguments.
+            **kwargs: Arbitrary keyword arguments.
+
+        This method is called when a subclass of :class:`Protocol` is defined.
+        It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
+        attribute of the subclass.
+
+        Notes:
+            When ``schema`` and/or ``data`` is not specified, the method will first
+            try to find the corresponding class in the
+            :mod:`~pcapkit.protocols.schema` and :mod:`~pcapkit.protocols.data`
+            modules respectively. If the class is not found, the default
+            :class:`~pcapkit.protocols.schema.schema.Schema_Raw` and
+            :class:`~pcapkit.protocols.data.data.Data_Raw` classes will be used.
+
+        This method also registers the subclass to the protocol registry,
+        i.e., :attr:`pcapkit.protocols.__proto__`.
+
+        See Also:
+            For more information on the registry, please refer to
+            :func:`pcapkit.foundation.registry.protocols.register_protocol`.
+
+        """
+        from pcapkit.foundation.registry.protocols import register_protocol
+        register_protocol(cls)
+
+        return super().__init_subclass__(schema, data, *args, **kwargs)

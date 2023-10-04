@@ -10,7 +10,7 @@ __all__ = ['Data']
 if TYPE_CHECKING:
     from typing import Type
 
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 
 class Data(Info):

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 
 def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':

@@ -16,7 +16,7 @@ __all__ = ['Ethernet']
 if TYPE_CHECKING:
     from typing import Any
 
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 
 def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':

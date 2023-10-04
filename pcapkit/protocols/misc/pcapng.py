@@ -103,7 +103,7 @@ from pcapkit.protocols.data.misc.pcapng import UnknownSecrets as Data_UnknownSec
 from pcapkit.protocols.data.misc.pcapng import WireGuardKeyLog as Data_WireGuardKeyLog
 from pcapkit.protocols.data.misc.pcapng import ZigBeeAPSKey as Data_ZigBeeAPSKey
 from pcapkit.protocols.data.misc.pcapng import ZigBeeNWKKey as Data_ZigBeeNWKKey
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.protocols.schema.misc.pcapng import PCAPNG as Schema_PCAPNG
 from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_BlockType
 from pcapkit.protocols.schema.misc.pcapng import CommentOption as Schema_CommentOption

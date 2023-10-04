@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict
