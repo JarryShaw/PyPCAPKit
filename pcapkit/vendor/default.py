@@ -8,7 +8,6 @@
 only, which is the base meta class for all vendor crawlers.
 
 """
-
 import abc
 import collections
 import contextlib
@@ -115,7 +114,17 @@ def get_proxies() -> 'dict[str, str]':
     return PROXIES
 
 
-class Vendor(metaclass=abc.ABCMeta):
+class VendorMeta(abc.ABCMeta):
+    """Meta class to add dynamic support to :class:`Vendor`.
+
+    This meta class is used to generate necessary attributes for the
+    :class:`Vendor` class. It can be useful to reduce unnecessary
+    registry calls and simplify the customisation process.
+
+    """
+
+
+class Vendor(metaclass=VendorMeta):
     """Default vendor generator.
 
     Inherit this class with :attr:`~Vendor.FLAG` &

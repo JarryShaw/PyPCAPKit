@@ -31,6 +31,10 @@ only, which is the base meta class for all vendor crawlers.
    .. automethod:: request
    .. automethod:: _request
 
+.. autoclass:: pcapkit.vendor.default.VendorMeta
+   :no-members:
+   :show-inheritance:
+
 Auxiliary Functions
 -------------------
 
