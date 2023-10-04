@@ -20,3 +20,14 @@ all engine support functionality.
 
    .. automethod:: __call__
    .. automethod:: __init_subclass__
+
+Internal Definitions
+--------------------
+
+.. autoclass:: pcapkit.foundation.engines.engine.EngineMeta
+   :no-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.foundation.engines.engine.EngineBase
+   :no-members:
+   :show-inheritance:
