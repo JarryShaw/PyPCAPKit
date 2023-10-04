@@ -375,7 +375,7 @@
 <span class="kn">import</span> <span class="nn">struct</span>
 <span class="kn">import</span> <span class="nn">textwrap</span>
 <span class="kn">import</span> <span class="nn">urllib.parse</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">import</span> <span class="nn">aenum</span>
 <span class="kn">import</span> <span class="nn">chardet</span>
@@ -402,7 +402,7 @@
     <span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Protocol&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ProtocolBase&#39;</span><span class="p">]</span>
 
 <span class="n">PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">)</span>
 <span class="n">ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Schema&#39;</span><span class="p">)</span>
@@ -411,10 +411,29 @@
 <span class="n">readable</span> <span class="o">=</span> <span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">char</span><span class="p">:</span> <span class="ow">not</span> <span class="n">char</span><span class="o">.</span><span class="n">isspace</span><span class="p">(),</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span><span class="p">)]</span>
 
 
-<div class="viewcode-block" id="Protocol">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol">[docs]</a>
-<span class="k">class</span> <span class="nc">Protocol</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">ST</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for all protocol family.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ProtocolMeta">
+<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolMeta">[docs]</a>
+<span class="k">class</span> <span class="nc">ProtocolMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support to :class:`Protocol`.</span>
+
+<span class="sd">    This meta class is used to generate necessary attributes for the</span>
+<span class="sd">    :class:`Protocol` class. It can be useful to reduce unnecessary</span>
+<span class="sd">    registry calls and simplify the customisation process.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="ProtocolBase">
+<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase">[docs]</a>
+<span class="k">class</span> <span class="nc">ProtocolBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">ST</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ProtocolMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for all protocol family.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This class is for internal use only. For customisation, please use</span>
+<span class="sd">        :class:`Protocol` instead.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Parsed packet data.</span>
@@ -424,7 +443,7 @@
         <span class="c1">#: Source packet stream.</span>
         <span class="n">_file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span>
         <span class="c1">#: Next layer protocol instance.</span>
-        <span class="n">_next</span><span class="p">:</span> <span class="s1">&#39;Protocol&#39;</span>
+        <span class="n">_next</span><span class="p">:</span> <span class="s1">&#39;ProtocolBase&#39;</span>
         <span class="c1">#: Protocol chain instance.</span>
         <span class="n">_protos</span><span class="p">:</span> <span class="s1">&#39;ProtoChain&#39;</span>
 
@@ -453,7 +472,7 @@
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="c1">#: The values should be a tuple representing the module name and class name,</span>
     <span class="c1">#: or a :class:`Protocol` subclass.</span>
-    <span class="n">__proto__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]&#39;</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+    <span class="n">__proto__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]&#39;</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>  <span class="c1"># type: ignore[return-value,arg-type]</span>
     <span class="p">)</span>
 
@@ -499,7 +518,7 @@
 
     <span class="c1"># payload of current instance</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtocolBase&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Payload of current instance.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next</span>
 
@@ -539,8 +558,6 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="Protocol.id">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.id">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[str, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
@@ -552,11 +569,8 @@
 <span class="sd">            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,)</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,)</span>
 
-
-<div class="viewcode-block" id="Protocol.read">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.read">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PT&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read (parse) packet data.</span>
@@ -568,11 +582,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-
-<div class="viewcode-block" id="Protocol.make">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.make">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ST&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
@@ -583,11 +594,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Curated protocol schema data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-
-<div class="viewcode-block" id="Protocol.pack">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.pack">[docs]</a>
     <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pack (construct) packet data.</span>
 
@@ -605,11 +613,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__packet__&#39;</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Protocol.unpack">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.unpack">[docs]</a>
     <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PT&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unpack (parse) packet data.</span>
 
@@ -629,11 +634,8 @@
         <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Optional[ST]&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__packet__&#39;</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Protocol.decode">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.decode">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="n">byte</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                <span class="n">errors</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;strict&quot;, &quot;ignore&quot;, &quot;replace&quot;]&#39;</span> <span class="o">=</span> <span class="s1">&#39;strict&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
@@ -664,11 +666,8 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">byte</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">charset</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="n">errors</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">UnicodeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">byte</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;unicode_escape&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="n">byte</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;unicode_escape&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Protocol.unquote">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.unquote">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">unquote</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
                 <span class="n">errors</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;strict&quot;, &quot;ignore&quot;, &quot;replace&quot;]&#39;</span> <span class="o">=</span> <span class="s1">&#39;replace&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
@@ -693,13 +692,10 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">unquote</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="n">errors</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">UnicodeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;unicode_escape&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;unicode_escape&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Protocol.expand_comp">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.expand_comp">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">expand_comp</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;str | Protocol | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">expand_comp</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;str | ProtocolBase | Type[ProtocolBase]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Expand protocol class to protocol name.</span>
 
 <span class="sd">        The method is used to expand protocol class to protocol name, in the</span>
@@ -720,9 +716,9 @@
 <span class="sd">            value: Protocol class or name.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
             <span class="n">comp</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">id</span><span class="p">()))</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
             <span class="n">comp</span> <span class="o">=</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="o">*</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">id</span><span class="p">()))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">pcapkit.protocols</span> <span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocols_registry</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort: skip</span>
@@ -731,13 +727,10 @@
                 <span class="n">comp</span> <span class="o">=</span> <span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">proto</span><span class="o">.</span><span class="n">id</span><span class="p">()))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">comp</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">(),)</span>
-        <span class="k">return</span> <span class="n">comp</span></div>
+        <span class="k">return</span> <span class="n">comp</span>
 
-
-<div class="viewcode-block" id="Protocol.analyze">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtocolBase&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Analyse packet payload.</span>
 
 <span class="sd">        Args:</span>
@@ -769,11 +762,8 @@
             <span class="c1">#logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())</span>
 
             <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
-        <span class="k">return</span> <span class="n">report</span></div>
+        <span class="k">return</span> <span class="n">report</span>
 
-
-<div class="viewcode-block" id="Protocol.register">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.register">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
@@ -790,15 +780,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>
 
-
-<div class="viewcode-block" id="Protocol.from_schema">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_schema">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_schema</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;ST | dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create protocol instance from schema.</span>
@@ -819,11 +806,8 @@
         <span class="c1"># initialize protocol instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">schema</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span>  <span class="c1"># type: ignore[misc]</span>
 
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="k">return</span> <span class="bp">self</span>
 
-
-<div class="viewcode-block" id="Protocol.from_data">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;PT | dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create protocol instance from data.</span>
@@ -844,8 +828,7 @@
         <span class="c1"># initialize protocol instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
 
-        <span class="k">return</span> <span class="bp">self</span></div>
-
+        <span class="k">return</span> <span class="bp">self</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
@@ -866,8 +849,6 @@
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="Protocol.__init__">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes] | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisation.</span>
 
@@ -876,7 +857,7 @@
 <span class="sd">            length: Length of packet data.</span>
 <span class="sd">            _layer (str): Parse packet until ``_layer``</span>
 <span class="sd">                (:attr:`self._exlayer &lt;pcapkit.protocols.protocol.Protocol._exlayer&gt;`).</span>
-<span class="sd">            _protocol (str | Protocol | Type[Protocol]): Parse packet until ``_protocol``</span>
+<span class="sd">            _protocol (str | ProtocolBase | Type[ProtocolBase]): Parse packet until ``_protocol``</span>
 <span class="sd">                (:attr:`self._exproto &lt;pcapkit.protocols.protocol.Protocol._exproto&gt;`).</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -888,21 +869,18 @@
         <span class="c1">#: str: Parse packet until such layer.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_layer&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[str]</span>
         <span class="c1">#: str: Parse packet until such protocol.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_protocol&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[str | Protocol | Type[Protocol]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_protocol&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[str | ProtocolBase | Type[ProtocolBase]]</span>
         <span class="c1">#: bool: If terminate parsing next layer of protocol.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_term_threshold</span><span class="p">()</span>
 
         <span class="c1"># post-init customisations</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
 
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes] | bytes&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="Protocol.__post_init__">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__post_init__">[docs]</a>
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes] | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
@@ -927,11 +905,8 @@
         <span class="c1">#: io.BytesIO: Source packet stream.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
         <span class="c1">#: pcapkit.protocols.data.data.Data: Parsed packet data.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Protocol.__init_subclass__">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init_subclass__">[docs]</a>
     <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[ST]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[PT]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisation for subclasses.</span>
@@ -963,11 +938,8 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[PT]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data_module</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">Data_Raw</span><span class="p">))</span>
 
         <span class="bp">cls</span><span class="o">.</span><span class="n">__schema__</span> <span class="o">=</span> <span class="n">schema</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span> <span class="o">=</span> <span class="n">data</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span> <span class="o">=</span> <span class="n">data</span>
 
-
-<div class="viewcode-block" id="Protocol.__repr__">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__repr__">[docs]</a>
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns representation of parsed protocol data.</span>
 
@@ -983,11 +955,8 @@
         <span class="n">repr_</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">info_name</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="si">!r}</span><span class="s1">&gt;&#39;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;__repr__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">repr_</span>
-        <span class="k">return</span> <span class="n">repr_</span></div>
+        <span class="k">return</span> <span class="n">repr_</span>
 
-
-<div class="viewcode-block" id="Protocol.__str__">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__str__">[docs]</a>
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns formatted hex representation of source data stream.</span>
 
@@ -1017,8 +986,7 @@
         <span class="n">str_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">length</span><span class="p">)</span><span class="si">}</span><span class="s1">    </span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="n">hexlst</span><span class="p">,</span> <span class="n">strlst</span><span class="p">)))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;__str__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">str_</span>
-        <span class="k">return</span> <span class="n">str_</span></div>
-
+        <span class="k">return</span> <span class="n">str_</span>
 
     <span class="k">def</span> <span class="fm">__bytes__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns source data stream in :obj:`bytes`.&quot;&quot;&quot;</span>
@@ -1042,9 +1010,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate through :attr:`self._data &lt;pcapkit.protocols.protocol.Protocol._data&gt;`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Protocol.__getitem__">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__getitem__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;str | Protocol | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;str | Protocol | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtocolBase&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Subscription (``getitem``) support.</span>
 
 <span class="sd">        * If ``key`` is a :class:`~pcapkit.protocols.protocol.Protocol` object,</span>
@@ -1085,11 +1051,8 @@
                 <span class="k">if</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">test_comp</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">payload</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">payload</span>
-        <span class="k">raise</span> <span class="n">ProtocolNotFound</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">ProtocolNotFound</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Protocol.__contains__">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__contains__">[docs]</a>
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str | Protocol | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns if certain protocol is in the instance.</span>
 
@@ -1120,16 +1083,12 @@
                 <span class="k">if</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">test_comp</span><span class="p">:</span>
                     <span class="k">return</span> <span class="kc">True</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">payload</span>
-        <span class="k">return</span> <span class="kc">False</span></div>
+        <span class="k">return</span> <span class="kc">False</span>
 
-
-<div class="viewcode-block" id="Protocol.__index__">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__index__">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;StdlibEnum | AenumEnum&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.&quot;&quot;&quot;</span></div>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.&quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
@@ -1139,9 +1098,9 @@
 <span class="sd">            other: Comparision against the object.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="n">other</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">id</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">id</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -1157,8 +1116,6 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="Protocol._get_payload">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._get_payload">[docs]</a>
     <span class="k">def</span> <span class="nf">_get_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get payload of :attr:`self.__header__ &lt;Protocol.__header__&gt;`.</span>
 
@@ -1169,8 +1126,7 @@
 <span class="sd">            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span></div>
-
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[StdlibEnum | AenumEnum]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>
@@ -1269,8 +1225,6 @@
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">_read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">discard</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Packet&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long</span>
 
-<div class="viewcode-block" id="Protocol._read_packet">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._read_packet">[docs]</a>
     <span class="nd">@seekset</span>  <span class="c1"># type: ignore[misc]</span>
     <span class="k">def</span> <span class="nf">_read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">discard</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes | Data_Packet&#39;</span><span class="p">:</span>
@@ -1298,8 +1252,7 @@
                 <span class="n">header</span><span class="o">=</span><span class="n">data_header</span><span class="p">,</span>
                 <span class="n">payload</span><span class="o">=</span><span class="n">data_payload</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)</span></div>
-
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_make_pack</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">integer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -1386,8 +1339,6 @@
                     <span class="n">namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
                     <span class="nb">reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">pack</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="Protocol._make_index">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._make_index">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_make_index</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str | int | StdlibEnum | AenumEnum&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                     <span class="n">namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1441,11 +1392,8 @@
 
         <span class="k">if</span> <span class="n">pack</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_pack</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="n">lilendian</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">index</span></div>
+        <span class="k">return</span> <span class="n">index</span>
 
-
-<div class="viewcode-block" id="Protocol._make_data">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
@@ -1457,13 +1405,10 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="Protocol._make_payload">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._make_payload">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_make_payload</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_make_payload</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtocolBase&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create payload from ``data`` for protocol construction.</span>
 
 <span class="sd">        This method uses ``__next_type__`` and ``__next_name__`` to</span>
@@ -1480,7 +1425,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">proto</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Optional[Type[Protocol]]&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__next_type__&#39;</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">proto</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">proto</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">)):</span>
             <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.null</span> <span class="kn">import</span> \
                 <span class="n">NoPayload</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
             <span class="k">return</span> <span class="n">NoPayload</span><span class="p">()</span>
@@ -1491,11 +1436,8 @@
                 <span class="n">NoPayload</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
             <span class="k">return</span> <span class="n">NoPayload</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
 
-
-<div class="viewcode-block" id="Protocol._decode_next_layer">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer">[docs]</a>
     <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PT&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Decode next layer protocol.</span>
@@ -1516,7 +1458,7 @@
 <span class="sd">            be included when :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` is called.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Protocol&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[misc,call-arg,redundant-cast]</span>
+        <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ProtocolBase&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[misc,call-arg,redundant-cast]</span>
         <span class="n">info</span><span class="p">,</span> <span class="n">chain</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">next_</span><span class="o">.</span><span class="n">protochain</span>
 
         <span class="c1"># make next layer protocol name</span>
@@ -1531,14 +1473,11 @@
         <span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">next_</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="n">ProtoChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">chain</span><span class="p">)</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
-        <span class="k">return</span> <span class="n">dict_</span></div>
+        <span class="k">return</span> <span class="n">dict_</span>
 
-
-<div class="viewcode-block" id="Protocol._import_next_layer">
-<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer">[docs]</a>
     <span class="nd">@beholder</span>
     <span class="k">def</span> <span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">:</span>
+                           <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtocolBase&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Import next layer extractor.</span>
 
 <span class="sd">        Arguments:</span>
@@ -1551,7 +1490,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span>
+            <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[ProtocolBase]&#39;</span>
 
         <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1569,8 +1508,7 @@
 
         <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span>
                          <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
-        <span class="k">return</span> <span class="n">next_</span></div>
-
+        <span class="k">return</span> <span class="n">next_</span>
 
     <span class="k">def</span> <span class="nf">_check_term_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if reached termination threshold.&quot;&quot;&quot;</span>
@@ -1590,6 +1528,51 @@
                     <span class="k">break</span>
 
         <span class="k">return</span> <span class="n">layer_match</span> <span class="ow">or</span> <span class="n">protocol_match</span></div>
+
+
+
+<div class="viewcode-block" id="Protocol">
+<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol">[docs]</a>
+<span class="k">class</span> <span class="nc">Protocol</span><span class="p">(</span><span class="n">ProtocolBase</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">ST</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for all protocol family.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Protocol.__init_subclass__">
+<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init_subclass__">[docs]</a>
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[ST]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[PT]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisation for subclasses.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Schema class.</span>
+<span class="sd">            data: Data class.</span>
+<span class="sd">            *args: Arbitrary positional arguments.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        This method is called when a subclass of :class:`Protocol` is defined.</span>
+<span class="sd">        It is used to set the :attr:`self.__schema__ &lt;pcapkit.protocols.protocol.Protocol.__schema__&gt;`</span>
+<span class="sd">        attribute of the subclass.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            When ``schema`` and/or ``data`` is not specified, the method will first</span>
+<span class="sd">            try to find the corresponding class in the</span>
+<span class="sd">            :mod:`~pcapkit.protocols.schema` and :mod:`~pcapkit.protocols.data`</span>
+<span class="sd">            modules respectively. If the class is not found, the default</span>
+<span class="sd">            :class:`~pcapkit.protocols.schema.schema.Schema_Raw` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.data.data.Data_Raw` classes will be used.</span>
+
+<span class="sd">        This method also registers the subclass to the protocol registry,</span>
+<span class="sd">        i.e., :attr:`pcapkit.protocols.__proto__`.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            For more information on the registry, please refer to</span>
+<span class="sd">            :func:`pcapkit.foundation.registry.protocols.register_protocol`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pcapkit.foundation.registry.protocols</span> <span class="kn">import</span> <span class="n">register_protocol</span>
+        <span class="n">register_protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
 
 </pre></div>
         </article>

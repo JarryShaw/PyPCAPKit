@@ -366,7 +366,7 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span> <span class="nn">dictdumper.dumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
 
@@ -385,7 +385,7 @@
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
 
     <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;Index&#39;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
 
@@ -484,6 +484,32 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol name of current flow tracing object.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This property is not available as a class</span>
+<span class="sd">            attribute.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__protocol_name__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__protocol_name__</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># type: ignore[return-value]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current flow tracing object.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This property is not available as a class</span>
+<span class="sd">            attribute.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__protocol_type__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__protocol_type__</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">protocol</span>  <span class="c1"># type: ignore[return-value]</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Index table for traced flow.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
@@ -494,8 +520,6 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="TraceFlowBase.register_dumper">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.register_dumper">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_dumper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Dumper] | Type[Dumper]&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new dumper class.</span>
@@ -516,11 +540,8 @@
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;dumper must be a Dumper subclass, not </span><span class="si">{</span><span class="n">dumper</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;dumper </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1"> already registered, overwriting&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="TraceFlowBase.register_callback">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.register_callback">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_callback</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;CallbackFn&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register callback function.</span>
@@ -535,11 +556,8 @@
         <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="TraceFlowBase.make_fout">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.make_fout">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">make_fout</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;./tmp&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;pcap&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Type[Dumper], str | None]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make root path for output.</span>
@@ -573,11 +591,8 @@
                 <span class="n">warn</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">strerror</span><span class="p">,</span> <span class="n">FileWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">FileExists</span><span class="p">(</span><span class="o">*</span><span class="n">error</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="n">ext</span></div>
+        <span class="k">return</span> <span class="n">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="n">ext</span>
 
-
-<div class="viewcode-block" id="TraceFlowBase.dump">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.dump">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
@@ -585,16 +600,13 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            packet: a flow packet (:term:`trace.tcp.packet`)</span>
 
-<span class="sd">        &quot;&quot;&quot;</span></div>
-
+<span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[True]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="TraceFlowBase.trace">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.trace">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper | str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Trace packets.</span>
@@ -609,11 +621,8 @@
 <span class="sd">            the output file named after the flow label; otherwise, returns the</span>
 <span class="sd">            flow label itself.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-
-<div class="viewcode-block" id="TraceFlowBase.submit">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.submit">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit traced TCP flows.</span>
@@ -621,8 +630,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Traced TCP flow (:term:`trace.tcp.index`).</span>
 
-<span class="sd">        &quot;&quot;&quot;</span></div>
-
+<span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
@@ -637,8 +645,6 @@
 
         <span class="k">return</span> <span class="bp">self</span>
 
-<div class="viewcode-block" id="TraceFlowBase.__init__">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
                  <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
@@ -674,11 +680,8 @@
         <span class="c1">#: Type[Dumper]: Dumper class.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span> <span class="o">=</span> <span class="n">fio</span>
         <span class="c1">#: Optional[str]: Output file extension.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span>
 
-
-<div class="viewcode-block" id="TraceFlowBase.__call__">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
 
@@ -688,7 +691,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># trace frame record</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
-</div>
 
 
 
@@ -736,7 +738,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
         <span class="n">Extractor</span><span class="o">.</span><span class="n">register_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">cls</span><span class="p">)</span>

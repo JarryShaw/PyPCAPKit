@@ -366,13 +366,11 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.data.tcp</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">DatagramID</span><span class="p">,</span>
                                                     <span class="n">Fragment</span><span class="p">,</span> <span class="n">HoleDiscriptor</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.reassembly</span> <span class="kn">import</span> <span class="n">Reassembly</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.reassembly</span> <span class="kn">import</span> <span class="n">ReassemblyBase</span> <span class="k">as</span> <span class="n">Reassembly</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Protocol</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
-
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TCP&#39;</span><span class="p">]</span>
 
@@ -398,19 +396,17 @@
 <span class="sd">        &gt;&gt;&gt; result = tcp_reassembly.datagram</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[TCP_Protocol]&#39;</span>
+
     <span class="c1">##########################################################################</span>
-    <span class="c1"># Methods.</span>
+    <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Transmission Control Protocol&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current packet.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;Transmission Control Protocol&#39;</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[TCP_Protocol]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current reassembly object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">TCP_Protocol</span>
+    <span class="c1">#: Protocol name of current reassembly object.</span>
+    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">&#39;TCP&#39;</span>
+    <span class="c1">#: Protocol of current reassembly object.</span>
+    <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">TCP_Protocol</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>

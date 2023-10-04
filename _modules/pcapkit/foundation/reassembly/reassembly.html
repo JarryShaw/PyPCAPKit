@@ -364,9 +364,11 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">abc</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols</span> <span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
@@ -374,7 +376,7 @@
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
 
     <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="s1">&#39;DT&#39;</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span>
 
@@ -390,16 +392,57 @@
 <span class="n">BT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;BT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Reassembly">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly">[docs]</a>
-<span class="k">class</span> <span class="nc">Reassembly</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">DT</span><span class="p">,</span> <span class="n">IT</span><span class="p">,</span> <span class="n">BT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<div class="viewcode-block" id="ReassemblyMeta">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta">[docs]</a>
+<span class="k">class</span> <span class="nc">ReassemblyMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support to :class:`Reassembly`.</span>
+
+<span class="sd">    This meta class is used to generate necessary attributes for the</span>
+<span class="sd">    :class:`Reassembly` class. It can be useful to reduce unnecessary</span>
+<span class="sd">    registry calls and simplify the customisation process.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Protocol name of current reassembly object.</span>
+        <span class="n">__protocol_name__</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="c1">#: Protocol of current reassembly object.</span>
+        <span class="n">__protocol_type__</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol name of current reassembly object.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__protocol_name__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__protocol_name__</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current reassembly object.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__protocol_type__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__protocol_type__</span>
+        <span class="k">return</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">Raw</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ReassemblyBase">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase">[docs]</a>
+<span class="k">class</span> <span class="nc">ReassemblyBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">DT</span><span class="p">,</span> <span class="n">IT</span><span class="p">,</span> <span class="n">BT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ReassemblyMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for reassembly procedure.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        strict: if return all datagrams (including those not</span>
 <span class="sd">            implemented) when submit</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        This class is for internal use only. For customisation, please use</span>
+<span class="sd">        :class:`TraceFlow` instead.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Protocol name of current reassembly object.</span>
+        <span class="n">__protocol_name__</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="c1">#: Protocol of current reassembly object.</span>
+        <span class="n">__protocol_type__</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span>
 
     <span class="n">_flag_s</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
     <span class="n">_flag_d</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
@@ -415,11 +458,31 @@
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1"># protocol name of current reassembly object</span>
     <span class="nd">@property</span>
-    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol name of current reassembly object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol name of current reassembly object.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This property is not available as a class</span>
+<span class="sd">            attribute.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__protocol_name__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__protocol_name__</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># type: ignore[return-value]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current reassembly object.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This property is not available as a class</span>
+<span class="sd">            attribute.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__protocol_type__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__protocol_type__</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">protocol</span>  <span class="c1"># type: ignore[return-value]</span>
 
     <span class="c1"># total number of reassembled packets</span>
     <span class="nd">@property</span>
@@ -453,18 +516,11 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current reassembly object.&quot;&quot;&quot;</span>
-
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="c1"># reassembly procedure</span>
-<div class="viewcode-block" id="Reassembly.reassembly">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
@@ -476,12 +532,9 @@
         <span class="c1"># clear cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;fetch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;fetch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># submit reassembled payload</span>
-<div class="viewcode-block" id="Reassembly.submit">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.submit">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;BT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[DT]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
@@ -490,12 +543,9 @@
 <span class="sd">            buf: buffer dict of reassembled packets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
-<span class="sd">        &quot;&quot;&quot;</span></div>
-
+<span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="c1"># fetch datagram</span>
-<div class="viewcode-block" id="Reassembly.fetch">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.fetch">[docs]</a>
     <span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[DT, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch datagram.</span>
 
@@ -529,12 +579,9 @@
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">temp_dtgram</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;fetch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
-        <span class="k">return</span> <span class="n">ret</span></div>
-
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># return datagram index</span>
-<div class="viewcode-block" id="Reassembly.index">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.index">[docs]</a>
     <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt_num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return datagram index.</span>
 
@@ -549,12 +596,9 @@
         <span class="k">for</span> <span class="n">counter</span><span class="p">,</span> <span class="n">datagram</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datagram</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">pkt_num</span> <span class="ow">in</span> <span class="n">datagram</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>  <span class="c1"># type: ignore[attr-defined]</span>
                 <span class="k">return</span> <span class="n">counter</span>
-        <span class="k">return</span> <span class="kc">None</span></div>
-
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># run automatically</span>
-<div class="viewcode-block" id="Reassembly.run">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.run">[docs]</a>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;list[PT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run automatically.</span>
 
@@ -563,12 +607,9 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">packet</span> <span class="ow">in</span> <span class="n">packets</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
     <span class="c1"># register callback function</span>
-<div class="viewcode-block" id="Reassembly.register">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.register">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;CallbackFn&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register callback function.</span>
@@ -583,8 +624,7 @@
         <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div>
-
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
@@ -622,8 +662,6 @@
         <span class="c1">#: list[DT]: List reassembled datagram.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[DT]</span>
 
-<div class="viewcode-block" id="Reassembly.__call__">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Call packet reassembly.</span>
 
@@ -634,6 +672,59 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Reassembly">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly">[docs]</a>
+<span class="k">class</span> <span class="nc">Reassembly</span><span class="p">(</span><span class="n">ReassemblyBase</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">DT</span><span class="p">,</span> <span class="n">IT</span><span class="p">,</span> <span class="n">BT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">DT</span><span class="p">,</span> <span class="n">IT</span><span class="p">,</span> <span class="n">BT</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base flow tracing class.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        Use keyword argument ``protocol`` to specify the protocol</span>
+<span class="sd">        name at class definition:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           class MyProtocol(Reassembly, protocol=&#39;my_protocol&#39;):</span>
+<span class="sd">               ...</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        fout: output path</span>
+<span class="sd">        format: output format</span>
+<span class="sd">        byteorder: output file byte order</span>
+<span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">        *args: Arbitrary positional arguments.</span>
+<span class="sd">        **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Reassembly.__init_subclass__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.__init_subclass__">[docs]</a>
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise subclass.</span>
+
+<span class="sd">        This method is to be used for registering the engine class to</span>
+<span class="sd">        :class:`~pcapkit.foundation.extraction.Extractor` class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Protocol name, default to class name.</span>
+<span class="sd">            *args: Arbitrary positional arguments.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            For more details, please refer to</span>
+<span class="sd">            :meth:`~pcapkit.foundation.extraction.Extractor.register_Reassembly`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
+        <span class="n">Extractor</span><span class="o">.</span><span class="n">register_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">cls</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
 </div>
 
 </pre></div>

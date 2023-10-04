@@ -369,9 +369,6 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
-
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IPv4&#39;</span><span class="p">]</span>
 
@@ -397,19 +394,15 @@
 <span class="sd">        &gt;&gt;&gt; result = ipv4_reassembly.datagram</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1">##########################################################################</span>
-    <span class="c1"># Properties.</span>
+    <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Internet Protocol version 4&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current packet.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;Internet Protocol version 4&#39;</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[IPv4_Protocol]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current reassembly object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">IPv4_Protocol</span></div>
+    <span class="c1">#: Protocol name of current reassembly object.</span>
+    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">&#39;IPv4&#39;</span>
+    <span class="c1">#: Protocol of current reassembly object.</span>
+    <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv4_Protocol</span></div>
 
 </pre></div>
         </article>

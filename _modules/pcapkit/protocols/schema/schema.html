@@ -527,8 +527,6 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SchemaMeta.__prepare__">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.SchemaMeta.__prepare__">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__prepare__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">&#39;tuple[type, ...]&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Mapping[str, object]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the namespace for the schema class.</span>
@@ -546,11 +544,8 @@
         <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__fields__&#39;</span><span class="p">):</span>
                 <span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">__fields__</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">__fields__</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="SchemaMeta.__new__">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.SchemaMeta.__new__">[docs]</a>
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">&#39;tuple[type, ...]&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Schema]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the schema class.</span>
 
@@ -581,7 +576,6 @@
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
-</div>
 
 
 
@@ -1160,9 +1154,18 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Mapping of enumeration numbers to schemas.</span>
-        <span class="n">registry</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span>
-        <span class="c1">#: Mapping of enumeration numbers to schemas.</span>
         <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapping of enumeration numbers to schemas.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This property is not available as a class</span>
+<span class="sd">            attribute.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__enum__</span>
 
 <div class="viewcode-block" id="EnumSchema.__init_subclass__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__">[docs]</a>
