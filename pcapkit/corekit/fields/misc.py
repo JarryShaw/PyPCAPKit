@@ -5,7 +5,7 @@ import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from pcapkit.corekit.fields.field import NoValue, FieldBase
+from pcapkit.corekit.fields.field import FieldBase, NoValue
 from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
 
 __all__ = [

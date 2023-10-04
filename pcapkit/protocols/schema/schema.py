@@ -10,7 +10,7 @@ import sys
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast, final
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
-from pcapkit.corekit.fields.field import NoValue, FieldBase
+from pcapkit.corekit.fields.field import FieldBase, NoValue
 from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.corekit.infoclass import FinalisedState
