@@ -758,9 +758,18 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
 
     if TYPE_CHECKING:
         #: Mapping of enumeration numbers to schemas.
-        registry: 'DefaultDict[ET, Type[Self]]'
-        #: Mapping of enumeration numbers to schemas.
         __enum__: 'DefaultDict[ET, Type[Self]]'
+
+    @property
+    def registry(self) -> 'DefaultDict[ET, Type[Self]]':
+        """Mapping of enumeration numbers to schemas.
+
+        Note:
+            This property is not available as a class
+            attribute.
+
+        """
+        return self.__enum__
 
     def __init_subclass__(cls, /, code: 'Optional[ET | Iterable[ET]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Register enumeration to :attr:`registry` mapping.

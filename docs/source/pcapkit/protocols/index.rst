@@ -65,11 +65,11 @@ Meta Classes
 ~~~~~~~~~~~~
 
 .. autoclass:: pcapkit.protocols.schema.schema.SchemaMeta
-   :members:
+   :no-members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.schema.EnumMeta
-   :members:
+   :no-members:
    :show-inheritance:
 
 Data Model

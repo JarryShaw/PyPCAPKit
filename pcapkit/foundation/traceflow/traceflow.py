@@ -14,7 +14,7 @@ import abc
 import collections
 import os
 import sys
-from typing import TYPE_CHECKING, Generic, TypeVar, overload
+from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
 from dictdumper.dumper import Dumper
 
@@ -125,6 +125,32 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
     ##########################################################################
     # Properties.
     ##########################################################################
+
+    @property
+    def name(self) -> 'str':
+        """Protocol name of current flow tracing object.
+
+        Note:
+            This property is not available as a class
+            attribute.
+
+        """
+        if hasattr(self, '__protocol_name__'):
+            return self.__protocol_name__
+        return type(self).name  # type: ignore[return-value]
+
+    @property
+    def protocol(self) -> 'Type[Protocol]':
+        """Protocol of current flow tracing object.
+
+        Note:
+            This property is not available as a class
+            attribute.
+
+        """
+        if hasattr(self, '__protocol_type__'):
+            return self.__protocol_type__
+        return type(self).protocol  # type: ignore[return-value]
 
     @property
     def index(self) -> 'tuple[Index, ...]':
@@ -350,7 +376,7 @@ class TraceFlow(TraceFlowBase[BufferID, Buffer, Index, Packet], Generic[BufferID
 
         """
         if protocol is None:
-            protocol = cls.name
+            protocol = cast('str', cls.name)
 
         from pcapkit.foundation.extraction import Extractor
         Extractor.register_traceflow(protocol.lower(), cls)

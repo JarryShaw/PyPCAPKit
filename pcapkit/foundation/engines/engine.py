@@ -9,7 +9,7 @@ all engine support functionality.
 
 """
 import abc
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 __all__ = ['Engine']
 
@@ -70,6 +70,32 @@ class EngineBase(Generic[T], metaclass=EngineMeta):
     ##########################################################################
     # Properties.
     ##########################################################################
+
+    @property
+    def name(self) -> 'str':
+        """Engine name.
+
+        Note:
+            This property is not available as a class
+            attribute.
+
+        """
+        if hasattr(self, '__engine_name__'):
+            return self.__engine_name__
+        return type(self).name  # type: ignore[return-value]
+
+    @property
+    def module(self) -> 'str':
+        """Engine module name.
+
+        Note:
+            This property is not available as a class
+            attribute.
+
+        """
+        if hasattr(self, '__engine_module__'):
+            return self.__engine_module__
+        return type(self).module  # type: ignore[return-value]
 
     @property
     def extractor(self) -> 'Extractor':
@@ -160,7 +186,7 @@ class Engine(EngineBase[T], Generic[T]):
 
         """
         if name is None:
-            name = cls.name
+            name = cast('str', cls.name)
 
         from pcapkit.foundation.extraction import Extractor
         Extractor.register_engine(name.lower(), cls)
