@@ -17,10 +17,12 @@ however, this implement still used the elder one.
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.foundation.reassembly.data.ip import AT, Buffer, BufferID, Datagram, DatagramID, Packet
-from pcapkit.foundation.reassembly.reassembly import Reassembly
+from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
 
 if TYPE_CHECKING:
+    from typing import Type
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.protocols.internet.ip import IP as IP_Protocol
 
 __all__ = ['IP']
 
@@ -40,6 +42,8 @@ class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]
         reassembly classes.
 
     """
+    if TYPE_CHECKING:
+        protocol: 'Type[IP_Protocol]'
 
     ##########################################################################
     # Methods.

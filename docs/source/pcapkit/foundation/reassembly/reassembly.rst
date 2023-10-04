@@ -13,13 +13,11 @@ implements datagram reassembly of IP and TCP packets.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
+   .. autoproperty:: protocol
+
    .. autoproperty:: count
    .. autoproperty:: datagram
-   .. autoproperty:: protocol
 
    .. automethod:: reassembly
    .. automethod:: submit
@@ -44,3 +42,15 @@ implements datagram reassembly of IP and TCP packets.
       :no-value:
 
    .. automethod:: __call__
+   .. automethod:: __init_subclass__
+
+Internal Definitions
+--------------------
+
+.. autoclass:: pcapkit.foundation.reassembly.reassembly.ReassemblyBase
+   :no-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.foundation.reassembly.reassembly.ReassemblyMeta
+   :no-members:
+   :show-inheritance:

@@ -12,9 +12,11 @@ implements datagram reassembly of IP and TCP packets.
 
 """
 import abc
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, Type, TypeVar, cast
+from pcapkit.protocols.misc.raw import Raw
 
 from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.protocols import __proto__ as protocol_registry
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Type
@@ -38,14 +40,52 @@ IT = TypeVar('IT', bound='tuple')
 BT = TypeVar('BT', bound='Info')
 
 
-class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
+class ReassemblyMeta(abc.ABCMeta):
+    """Meta class to add dynamic support to :class:`Reassembly`.
+
+    This meta class is used to generate necessary attributes for the
+    :class:`Reassembly` class. It can be useful to reduce unnecessary
+    registry calls and simplify the customisation process.
+
+    """
+    if TYPE_CHECKING:
+        #: Protocol name of current reassembly object.
+        __protocol_name__: 'str'
+        #: Protocol of current reassembly object.
+        __protocol_type__: 'Type[Protocol]'
+
+    @property
+    def name(cls) -> 'str':
+        """Protocol name of current reassembly object."""
+        if hasattr(cls, '__protocol_name__'):
+            return cls.__protocol_name__
+        return cls.__name__
+
+    @property
+    def protocol(cls) -> 'Type[Protocol]':
+        """Protocol of current reassembly object."""
+        if hasattr(cls, '__protocol_type__'):
+            return cls.__protocol_type__
+        return protocol_registry.get(cls.name.upper(), Raw)
+
+
+class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
     """Base class for reassembly procedure.
 
     Args:
         strict: if return all datagrams (including those not
             implemented) when submit
 
+    Note:
+        This class is for internal use only. For customisation, please use
+        :class:`TraceFlow` instead.
+
     """
+    if TYPE_CHECKING:
+        #: Protocol name of current reassembly object.
+        __protocol_name__: 'str'
+        #: Protocol of current reassembly object.
+        __protocol_type__: 'Type[Protocol]'
 
     _flag_s: 'bool'
     _flag_d: 'bool'
@@ -61,11 +101,31 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
     # Properties.
     ##########################################################################
 
-    # protocol name of current reassembly object
     @property
-    @abc.abstractmethod
     def name(self) -> 'str':
-        """Protocol name of current reassembly object."""
+        """Protocol name of current reassembly object.
+
+        Note:
+            This property is not available as a class
+            attribute.
+
+        """
+        if hasattr(self, '__protocol_name__'):
+            return self.__protocol_name__
+        return type(self).name  # type: ignore[return-value]
+
+    @property
+    def protocol(self) -> 'Type[Protocol]':
+        """Protocol of current reassembly object.
+
+        Note:
+            This property is not available as a class
+            attribute.
+
+        """
+        if hasattr(self, '__protocol_type__'):
+            return self.__protocol_type__
+        return type(self).protocol  # type: ignore[return-value]
 
     # total number of reassembled packets
     @property
@@ -98,11 +158,6 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
         if self._buffer:
             return self.fetch()
         return tuple(self._dtgram)
-
-    @property
-    @abc.abstractmethod
-    def protocol(self) -> 'Type[Protocol]':
-        """Protocol of current reassembly object."""
 
     ##########################################################################
     # Methods.
@@ -260,3 +315,51 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
         """
         self._flag_n = True
         self.reassembly(packet)
+
+
+class Reassembly(ReassemblyBase[PT, DT, IT, BT], Generic[PT, DT, IT, BT]):
+    """Base flow tracing class.
+
+    Example:
+
+        Use keyword argument ``protocol`` to specify the protocol
+        name at class definition:
+
+        .. code-block:: python
+
+           class MyProtocol(Reassembly, protocol='my_protocol'):
+               ...
+
+    Arguments:
+        fout: output path
+        format: output format
+        byteorder: output file byte order
+        nanosecond: output nanosecond-resolution file flag
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
+
+    """
+
+    def __init_subclass__(cls, /, protocol: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+        """Initialise subclass.
+
+        This method is to be used for registering the engine class to
+        :class:`~pcapkit.foundation.extraction.Extractor` class.
+
+        Args:
+            name: Protocol name, default to class name.
+            *args: Arbitrary positional arguments.
+            **kwargs: Arbitrary keyword arguments.
+
+        See Also:
+            For more details, please refer to
+            :meth:`~pcapkit.foundation.extraction.Extractor.register_Reassembly`.
+
+        """
+        if protocol is None:
+            protocol = cast('str', cls.name)
+
+        from pcapkit.foundation.extraction import Extractor
+        Extractor.register_reassembly(protocol.lower(), cls)
+
+        return super().__init_subclass__()

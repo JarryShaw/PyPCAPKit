@@ -17,9 +17,6 @@ from pcapkit.protocols.internet.ipv6 import IPv6 as IPv6_Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Type
-
-    from typing_extensions import Literal
 
 __all__ = ['IPv6']
 
@@ -43,16 +40,12 @@ class IPv6(IP['IPv6Address']):
         >>> result = ipv6_reassembly.datagram
 
     """
+
     ##########################################################################
-    # Properties.
+    # Defaults.
     ##########################################################################
 
-    @property
-    def name(self) -> 'Literal["Internet Protocol version 6"]':
-        """Protocol of current packet."""
-        return 'Internet Protocol version 6'
-
-    @property
-    def protocol(self) -> 'Type[IPv6_Protocol]':
-        """Protocol of current reassembly object."""
-        return IPv6_Protocol
+    #: Protocol name of current reassembly object.
+    __protocol_name__ = 'IPv6'
+    #: Protocol of current reassembly object.
+    __protocol_type__ = IPv6_Protocol

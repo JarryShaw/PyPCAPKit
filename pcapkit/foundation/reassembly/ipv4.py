@@ -17,9 +17,6 @@ from pcapkit.protocols.internet.ipv4 import IPv4 as IPv4_Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
-    from typing import Type
-
-    from typing_extensions import Literal
 
 __all__ = ['IPv4']
 
@@ -43,16 +40,12 @@ class IPv4(IP['IPv4Address']):
         >>> result = ipv4_reassembly.datagram
 
     """
+
     ##########################################################################
-    # Properties.
+    # Defaults.
     ##########################################################################
 
-    @property
-    def name(self) -> 'Literal["Internet Protocol version 4"]':
-        """Protocol of current packet."""
-        return 'Internet Protocol version 4'
-
-    @property
-    def protocol(self) -> 'Type[IPv4_Protocol]':
-        """Protocol of current reassembly object."""
-        return IPv4_Protocol
+    #: Protocol name of current reassembly object.
+    __protocol_name__ = 'IPv4'
+    #: Protocol of current reassembly object.
+    __protocol_type__ = IPv4_Protocol
