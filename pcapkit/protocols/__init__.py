@@ -34,6 +34,8 @@ from pcapkit.protocols.schema.schema import Schema
 if TYPE_CHECKING:
     from typing import Type
 
+    from pcapkit.protocols.protocol import ProtocolBase
+
 __all__ = [
     # PCAP Headers
     'Header', 'Frame',
@@ -64,7 +66,7 @@ __all__ = [
 ]
 
 #: dict[str, Type[Protocol]]: Protocol registry.
-__proto__ = {}  # type: dict[str, Type[Protocol]]
+__proto__ = {}  # type: dict[str, Type[ProtocolBase]]
 for name in __all__:
     __proto__[name.upper()] = globals()[name]
 

@@ -408,7 +408,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         return report
 
     @classmethod
-    def register(cls, code: 'int', protocol: 'ModuleDescriptor | Type[Protocol]') -> 'None':
+    def register(cls, code: 'int', protocol: 'ModuleDescriptor | Type[ProtocolBase]') -> 'None':
         r"""Register a new protocol class.
 
         Notes:
