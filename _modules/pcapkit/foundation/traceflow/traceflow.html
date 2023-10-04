@@ -372,6 +372,8 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.module</span> <span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">make_dumper</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols</span> <span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FileExists</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">FileWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -393,9 +395,41 @@
 <span class="n">Packet</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TraceFlow">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow">[docs]</a>
-<span class="k">class</span> <span class="nc">TraceFlow</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<div class="viewcode-block" id="TraceFlowMeta">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowMeta">[docs]</a>
+<span class="k">class</span> <span class="nc">TraceFlowMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support to :class:`TraceFlow`.</span>
+
+<span class="sd">    This meta class is used to generate necessary attributes for the</span>
+<span class="sd">    :class:`TraceFlow` class. It can be useful to reduce unnecessary</span>
+<span class="sd">    registry calls and simplify the customisation process.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Protocol name of current reassembly object.</span>
+        <span class="n">__protocol_name__</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="c1">#: Protocol of current reassembly object.</span>
+        <span class="n">__protocol_type__</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol name of current reassembly object.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__protocol_name__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__protocol_name__</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current reassembly object.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__protocol_type__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__protocol_type__</span>
+        <span class="k">return</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">Raw</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="TraceFlowBase">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase">[docs]</a>
+<span class="k">class</span> <span class="nc">TraceFlowBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">TraceFlowMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base flow tracing class.</span>
 
 <span class="sd">    Arguments:</span>
@@ -406,7 +440,16 @@
 <span class="sd">        *args: Arbitrary positional arguments.</span>
 <span class="sd">        **kwargs: Arbitrary keyword arguments.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        This class is for internal use only. For customisation, please use</span>
+<span class="sd">        :class:`TraceFlow` instead.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Protocol name of current reassembly object.</span>
+        <span class="n">__protocol_name__</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="c1">#: Protocol of current reassembly object.</span>
+        <span class="n">__protocol_type__</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span>
 
     <span class="c1"># Internal data storage for cached properties.</span>
     <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
@@ -441,16 +484,6 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol name of current reassembly object.&quot;&quot;&quot;</span>
-
-    <span class="nd">@property</span>
-    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current reassembly object.&quot;&quot;&quot;</span>
-
-    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Index table for traced flow.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
@@ -461,8 +494,8 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="TraceFlow.register_dumper">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.register_dumper">[docs]</a>
+<div class="viewcode-block" id="TraceFlowBase.register_dumper">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.register_dumper">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_dumper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Dumper] | Type[Dumper]&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new dumper class.</span>
@@ -486,8 +519,8 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TraceFlow.register_callback">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.register_callback">[docs]</a>
+<div class="viewcode-block" id="TraceFlowBase.register_callback">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.register_callback">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_callback</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;CallbackFn&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register callback function.</span>
@@ -505,8 +538,8 @@
             <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TraceFlow.make_fout">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.make_fout">[docs]</a>
+<div class="viewcode-block" id="TraceFlowBase.make_fout">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.make_fout">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">make_fout</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;./tmp&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;pcap&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Type[Dumper], str | None]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make root path for output.</span>
@@ -543,8 +576,8 @@
         <span class="k">return</span> <span class="n">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="n">ext</span></div>
 
 
-<div class="viewcode-block" id="TraceFlow.dump">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.dump">[docs]</a>
+<div class="viewcode-block" id="TraceFlowBase.dump">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.dump">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
@@ -560,8 +593,8 @@
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="TraceFlow.trace">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.trace">[docs]</a>
+<div class="viewcode-block" id="TraceFlowBase.trace">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.trace">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper | str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Trace packets.</span>
@@ -579,8 +612,8 @@
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="TraceFlow.submit">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.submit">[docs]</a>
+<div class="viewcode-block" id="TraceFlowBase.submit">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.submit">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit traced TCP flows.</span>
@@ -604,6 +637,8 @@
 
         <span class="k">return</span> <span class="bp">self</span>
 
+<div class="viewcode-block" id="TraceFlowBase.__init__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
                  <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
@@ -639,10 +674,11 @@
         <span class="c1">#: Type[Dumper]: Dumper class.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span> <span class="o">=</span> <span class="n">fio</span>
         <span class="c1">#: Optional[str]: Output file extension.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span></div>
 
-<div class="viewcode-block" id="TraceFlow.__call__">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.__call__">[docs]</a>
+
+<div class="viewcode-block" id="TraceFlowBase.__call__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlowBase.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
 
@@ -652,6 +688,60 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># trace frame record</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TraceFlow">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow">[docs]</a>
+<span class="k">class</span> <span class="nc">TraceFlow</span><span class="p">(</span><span class="n">TraceFlowBase</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base flow tracing class.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        Use keyword argument ``protocol`` to specify the protocol</span>
+<span class="sd">        name at class definition:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           class MyProtocol(TraceFlow, protocol=&#39;my_protocol&#39;):</span>
+<span class="sd">               ...</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        fout: output path</span>
+<span class="sd">        format: output format</span>
+<span class="sd">        byteorder: output file byte order</span>
+<span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">        *args: Arbitrary positional arguments.</span>
+<span class="sd">        **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TraceFlow.__init_subclass__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.__init_subclass__">[docs]</a>
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise subclass.</span>
+
+<span class="sd">        This method is to be used for registering the engine class to</span>
+<span class="sd">        :class:`~pcapkit.foundation.extraction.Extractor` class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Protocol name, default to class name.</span>
+<span class="sd">            *args: Arbitrary positional arguments.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            For more details, please refer to</span>
+<span class="sd">            :meth:`~pcapkit.foundation.extraction.Extractor.register_traceflow`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
+        <span class="n">Extractor</span><span class="o">.</span><span class="n">register_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">cls</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
 </div>
 
 </pre></div>
@@ -686,7 +776,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=3ab0eb05"></script>
+</div><script src="../../../../_static/documentation_options.js?v=1a0171ee"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
