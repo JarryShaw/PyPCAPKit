@@ -20,6 +20,8 @@ from dictdumper.dumper import Dumper
 
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
+from pcapkit.protocols import __proto__ as protocol_registry
+from pcapkit.protocols.misc.raw import Raw
 from pcapkit.utilities.exceptions import FileExists, RegistryError, stacklevel
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, RegistryWarning, warn
 
@@ -41,7 +43,36 @@ Index = TypeVar('Index', bound='Info')
 Packet = TypeVar('Packet', bound='Info')
 
 
-class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta):
+class TraceFlowMeta(abc.ABCMeta):
+    """Meta class to add dynamic support to :class:`TraceFlow`.
+
+    This meta class is used to generate necessary attributes for the
+    :class:`TraceFlow` class. It can be useful to reduce unnecessary
+    registry calls and simplify the customisation process.
+
+    """
+    if TYPE_CHECKING:
+        #: Protocol name of current reassembly object.
+        __protocol_name__: 'str'
+        #: Protocol of current reassembly object.
+        __protocol_type__: 'Type[Protocol]'
+
+    @property
+    def name(cls) -> 'str':
+        """Protocol name of current reassembly object."""
+        if hasattr(cls, '__protocol_name__'):
+            return cls.__protocol_name__
+        return cls.__name__
+
+    @property
+    def protocol(cls) -> 'Type[Protocol]':
+        """Protocol of current reassembly object."""
+        if hasattr(cls, '__protocol_type__'):
+            return cls.__protocol_type__
+        return protocol_registry.get(cls.name.upper(), Raw)
+
+
+class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlowMeta):
     """Base flow tracing class.
 
     Arguments:
@@ -52,7 +83,16 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
         *args: Arbitrary positional arguments.
         **kwargs: Arbitrary keyword arguments.
 
+    Note:
+        This class is for internal use only. For customisation, please use
+        :class:`TraceFlow` instead.
+
     """
+    if TYPE_CHECKING:
+        #: Protocol name of current reassembly object.
+        __protocol_name__: 'str'
+        #: Protocol of current reassembly object.
+        __protocol_type__: 'Type[Protocol]'
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
@@ -85,16 +125,6 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
     ##########################################################################
     # Properties.
     ##########################################################################
-
-    @property
-    @abc.abstractmethod
-    def name(self) -> 'str':
-        """Protocol name of current reassembly object."""
-
-    @property
-    @abc.abstractmethod
-    def protocol(self) -> 'Type[Protocol]':
-        """Protocol of current reassembly object."""
 
     @property
     def index(self) -> 'tuple[Index, ...]':
@@ -278,3 +308,51 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
         """
         # trace frame record
         self.dump(packet)
+
+
+class TraceFlow(TraceFlowBase[BufferID, Buffer, Index, Packet], Generic[BufferID, Buffer, Index, Packet]):
+    """Base flow tracing class.
+
+    Example:
+
+        Use keyword argument ``protocol`` to specify the protocol
+        name at class definition:
+
+        .. code-block:: python
+
+           class MyProtocol(TraceFlow, protocol='my_protocol'):
+               ...
+
+    Arguments:
+        fout: output path
+        format: output format
+        byteorder: output file byte order
+        nanosecond: output nanosecond-resolution file flag
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
+
+    """
+
+    def __init_subclass__(cls, /, protocol: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+        """Initialise subclass.
+
+        This method is to be used for registering the engine class to
+        :class:`~pcapkit.foundation.extraction.Extractor` class.
+
+        Args:
+            name: Protocol name, default to class name.
+            *args: Arbitrary positional arguments.
+            **kwargs: Arbitrary keyword arguments.
+
+        See Also:
+            For more details, please refer to
+            :meth:`~pcapkit.foundation.extraction.Extractor.register_traceflow`.
+
+        """
+        if protocol is None:
+            protocol = cls.name
+
+        from pcapkit.foundation.extraction import Extractor
+        Extractor.register_traceflow(protocol.lower(), cls)
+
+        return super().__init_subclass__()

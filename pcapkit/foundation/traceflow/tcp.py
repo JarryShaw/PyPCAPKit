@@ -12,14 +12,12 @@ TCP flows from a series of packets and connections.
 from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.foundation.traceflow.data.tcp import Buffer, BufferID, Index, IPAddress, Packet
-from pcapkit.foundation.traceflow.traceflow import TraceFlow
+from pcapkit.foundation.traceflow.traceflow import TraceFlowBase as TraceFlow
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
 __all__ = ['TCP']
 
 if TYPE_CHECKING:
-    from typing import Type
-
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal
 
@@ -38,18 +36,13 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddre
     """
 
     ##########################################################################
-    # Methods.
+    # Defaults.
     ##########################################################################
 
-    @property
-    def name(self) -> 'Literal["Transmission Control Protocol"]':
-        """Protocol of current packet."""
-        return 'Transmission Control Protocol'
-
-    @property
-    def protocol(self) -> 'Type[TCP_Protocol]':
-        """Protocol of current reassembly object."""
-        return TCP_Protocol
+    #: Protocol name of current reassembly object.
+    __protocol_name__ = 'TCP'
+    #: Protocol of current reassembly object.
+    __protocol_type__ = TCP_Protocol
 
     ##########################################################################
     # Methods.
