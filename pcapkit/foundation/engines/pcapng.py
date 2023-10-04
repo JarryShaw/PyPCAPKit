@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.foundation.engines.engine import _Engine as Engine
+from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import DeprecatedFormatWarning

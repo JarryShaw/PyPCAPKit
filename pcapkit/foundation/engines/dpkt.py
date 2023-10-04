@@ -13,7 +13,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.foundation.engines.engine import _Engine as Engine
+from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 

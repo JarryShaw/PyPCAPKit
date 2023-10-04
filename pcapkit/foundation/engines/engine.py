@@ -31,7 +31,7 @@ class EngineMeta(abc.ABCMeta, Generic[T]):
     """
 
 
-class _Engine(Generic[T], metaclass=EngineMeta):
+class EngineBase(Generic[T], metaclass=EngineMeta):
     """Base class for engine support.
 
     Args:
@@ -111,8 +111,18 @@ class _Engine(Generic[T], metaclass=EngineMeta):
         """
 
 
-class Engine(_Engine[T], Generic[T]):
+class Engine(EngineBase[T], Generic[T]):
     """Base class for engine support.
+
+    Example:
+
+        Use keyword argument ``name`` to specify the engine name at
+        class definition:
+
+        .. code-block:: python
+
+           class MyEngine(Engine, name='my_engine'):
+               ...
 
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
@@ -134,16 +144,6 @@ class Engine(_Engine[T], Generic[T]):
 
         This method is to be used for registering the engine class to
         :class:`~pcapkit.foundation.extraction.Extractor` class.
-
-        Example:
-
-            Use keyword argument ``name`` to specify the engine name at
-            class definition:
-
-            .. code-block:: python
-
-               class MyEngine(Engine, name='my_engine'):
-                   ...
 
         Args:
             name: Engine name, default to class name.

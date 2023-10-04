@@ -10,7 +10,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.foundation.engines.engine import _Engine as Engine
+from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
 
