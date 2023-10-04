@@ -32,7 +32,7 @@ class _IPField(Field[_T], Generic[_T]):
     Args:
         length: Field size (in bytes).
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -48,7 +48,7 @@ class _IPAddressField(_IPField[_AT]):
     Args:
         length: Field size (in bytes).
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -95,7 +95,7 @@ class IPv4AddressField(_IPAddressField[ipaddress.IPv4Address]):
     Args:
         default: Field default value, if any.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -117,7 +117,7 @@ class IPv6AddressField(_IPAddressField[ipaddress.IPv6Address]):
     Args:
         default: Field default value, if any.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -141,7 +141,7 @@ class _IPInterfaceField(_IPField[_IT]):
             an integer value and accept the current packet as its only argument.
         default: Field default value, if any.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -152,7 +152,7 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
     Args:
         default: Field default value, if any.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -215,7 +215,7 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
     Args:
         default: Field default value, if any.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 

@@ -42,7 +42,7 @@ class NumberField(Field[int], Generic[_T]):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -187,7 +187,7 @@ class Int32Field(NumberField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -206,7 +206,7 @@ class UInt32Field(NumberField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -225,7 +225,7 @@ class Int16Field(NumberField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -244,7 +244,7 @@ class UInt16Field(NumberField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -263,7 +263,7 @@ class Int64Field(NumberField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -282,7 +282,7 @@ class UInt64Field(NumberField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -301,7 +301,7 @@ class Int8Field(NumberField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -320,7 +320,7 @@ class UInt8Field(NumberField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -341,7 +341,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         bit_length: Field bit length.
         namespace: Field namespace (a :class:`enum.IntEnum` class).
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 

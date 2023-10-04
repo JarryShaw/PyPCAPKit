@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address
     from typing import Any, DefaultDict, Optional, Type
 
-    from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.protocol import Protocol
 

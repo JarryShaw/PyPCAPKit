@@ -88,7 +88,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv6Address
     from typing import Any
 
-    from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import Protocol
 
 if SPHINX_TYPE_CHECKING:

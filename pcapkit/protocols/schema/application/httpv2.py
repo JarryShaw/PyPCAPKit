@@ -28,7 +28,7 @@ __all__ = [
 if TYPE_CHECKING:
     from typing import Any, Optional
 
-    from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.corekit.fields.field import FieldBase as Field
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict

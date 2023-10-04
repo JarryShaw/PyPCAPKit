@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any, DefaultDict, Optional, Type
 
-    from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import Protocol
 
 if SPHINX_TYPE_CHECKING:
@@ -244,7 +244,7 @@ class PortEnumField(EnumField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     Important:
         This class is specifically designed for :class:`~pcapkit.const.reg.apptype.AppType`

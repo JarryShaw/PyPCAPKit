@@ -30,7 +30,7 @@ class PortEnumField(EnumField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     Important:
         This class is specifically designed for :class:`~pcapkit.const.reg.apptype.AppType`

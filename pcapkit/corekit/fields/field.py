@@ -30,17 +30,27 @@ class NoValueType:
         return False
 
 
-#: NoValueType: Default value for :attr:`_Field.default`.
+#: NoValueType: Default value for :attr:`FieldBase.default`.
 NoValue = NoValueType()
 
 
-class _Field(Generic[_T], metaclass=abc.ABCMeta):
+class FieldMeta(abc.ABCMeta, Generic[_T]):
+    """Meta class to add dynamic support to :class:`FieldBase`.
+
+    This meta class is used to generate necessary attributes for the
+    :class:`FieldBase` class. It can be useful to reduce unnecessary
+    registry calls and simplify the customisation process.
+
+    """
+
+
+class FieldBase(Generic[_T], metaclass=FieldMeta):
     """Internal base class for protocol fields.
 
     Important:
-        A negative value of :attr:`~_Field.length` indicates that the field
+        A negative value of :attr:`~FieldBase.length` indicates that the field
         is variable-length (i.e., length unspecified) and thus
-        :meth:`~_Field.pack` should be considerate of the template format
+        :meth:`~FieldBase.pack` should be considerate of the template format
         and the actual value provided for packing.
 
     Args:
@@ -104,7 +114,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         Returns:
             Updated field instance.
 
-        This method will return a new instance of :class:`_Field` instead of
+        This method will return a new instance of :class:`FieldBase` instead of
         updating the current instance.
 
         """
@@ -204,7 +214,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         return self.post_process(value, packet)
 
 
-class Field(_Field[_T], Generic[_T]):
+class Field(FieldBase[_T], Generic[_T]):
     """Base class for protocol fields.
 
     Args:
@@ -212,7 +222,7 @@ class Field(_Field[_T], Generic[_T]):
             an integer value and accept the current packet as its only argument.
         default: Field default value, if any.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 

@@ -15,7 +15,7 @@ and :class:`~pcapkit.corekit.multidict.MultiDict` family inspired from
 .. toctree::
    :maxdepth: 2
 
-   fields
+   fields/index
    infoclass
    io
    module

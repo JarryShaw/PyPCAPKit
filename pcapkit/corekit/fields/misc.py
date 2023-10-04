@@ -5,7 +5,7 @@ import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from pcapkit.corekit.fields.field import NoValue, _Field
+from pcapkit.corekit.fields.field import NoValue, FieldBase
 from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
 
 __all__ = [
@@ -29,7 +29,7 @@ _TP = TypeVar('_TP', bound='Protocol')
 _TN = TypeVar('_TN', bound='NoValueType')
 
 
-class NoValueField(_Field[_TN]):
+class NoValueField(FieldBase[_TN]):
     """Schema field for no value type (or :obj:`None`)."""
 
     _default = NoValue
@@ -71,7 +71,7 @@ class NoValueField(_Field[_TN]):
         return None  # type: ignore[return-value]
 
 
-class ConditionalField(_Field[_TC]):
+class ConditionalField(FieldBase[_TC]):
     """Conditional value for protocol fields.
 
     Args:
@@ -123,13 +123,13 @@ class ConditionalField(_Field[_TC]):
         return True
 
     @property
-    def field(self) -> '_Field[_TC]':
+    def field(self) -> 'FieldBase[_TC]':
         """Field instance."""
         return self._field
 
-    def __init__(self, field: '_Field[_TC]',  # pylint: disable=super-init-not-called
+    def __init__(self, field: 'FieldBase[_TC]',  # pylint: disable=super-init-not-called
                  condition: 'Callable[[dict[str, Any]], bool]') -> 'None':
-        self._field = field  # type: _Field[_TC]
+        self._field = field  # type: FieldBase[_TC]
         self._condition = condition
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Self':
@@ -219,7 +219,7 @@ class ConditionalField(_Field[_TC]):
         return self._condition(packet)
 
 
-class PayloadField(_Field[_TP]):
+class PayloadField(FieldBase[_TP]):
     """Payload value for protocol fields.
 
     Args:
@@ -228,7 +228,7 @@ class PayloadField(_Field[_TP]):
         default: Field default value.
         protocol: Payload protocol.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -352,7 +352,7 @@ class PayloadField(_Field[_TP]):
         return self._protocol(file, length)  # type: ignore[abstract]
 
 
-class SwitchField(_Field[_TC]):
+class SwitchField(FieldBase[_TC]):
     """Conditional type-switching field for protocol schema.
 
     Args:
@@ -402,13 +402,13 @@ class SwitchField(_Field[_TC]):
         return True
 
     @property
-    def field(self) -> '_Field[_TC]':
+    def field(self) -> 'FieldBase[_TC]':
         """Field instance."""
         return self._field
 
-    def __init__(self, selector: 'Callable[[dict[str, Any]], _Field[_TC]]' = lambda _: NoValueField()) -> 'None':  # type: ignore[assignment,return-value]
+    def __init__(self, selector: 'Callable[[dict[str, Any]], FieldBase[_TC]]' = lambda _: NoValueField()) -> 'None':  # type: ignore[assignment,return-value]
         #self._name = '<switch>'
-        self._field = cast('_Field[_TC]', NoValueField())
+        self._field = cast('FieldBase[_TC]', NoValueField())
         self._selector = selector
 
     def __call__(self, packet: 'dict[str, Any]') -> 'SwitchField[_TC]':
@@ -490,7 +490,7 @@ class SwitchField(_Field[_TC]):
         return self._field.unpack(buffer, packet)
 
 
-class SchemaField(_Field[_TS]):
+class SchemaField(FieldBase[_TS]):
     """Schema field for protocol schema.
 
     Args:
@@ -621,7 +621,7 @@ class SchemaField(_Field[_TS]):
         }))
 
 
-class ForwardMatchField(_Field[_TC]):
+class ForwardMatchField(FieldBase[_TC]):
     """Schema field for non-capturing forward matching.
 
     Args:
@@ -670,11 +670,11 @@ class ForwardMatchField(_Field[_TC]):
         return True
 
     @property
-    def field(self) -> '_Field[_TC]':
+    def field(self) -> 'FieldBase[_TC]':
         """Field instance."""
         return self._field
 
-    def __init__(self, field: '_Field[_TC]') -> 'None':
+    def __init__(self, field: 'FieldBase[_TC]') -> 'None':
         #self._name = '<forward_match>'
         self._field = field
 

@@ -61,7 +61,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv6Address
     from typing import Any, Optional
 
-    from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
     from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter
     from pcapkit.protocols.protocol import Protocol

@@ -36,7 +36,7 @@ class _TextField(Field[_T], Generic[_T]):
             an integer value and accept the current packet as its only argument.
         default: Field default value, if any.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -73,7 +73,7 @@ class BytesField(_TextField[bytes]):
             an integer value and accept the current packet as its only argument.
         default: Field default value, if any.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -113,7 +113,7 @@ class StringField(_TextField[str]):
             the method will try again replacing ``'%'`` with ``'\x'`` then decoding the
             ``url`` as ``'utf-8'`` with ``'replace'`` for error handling.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     .. |chardet| replace:: ``chardet``
     .. _chardet: https://chardet.readthedocs.io
@@ -184,7 +184,7 @@ class BitField(_TextField[Dict[str, Any]]):
         namespace: Field namespace (a dict mapping field name to a tuple of start index,
             and length of the subfield).
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """
 
@@ -240,6 +240,6 @@ class PaddingField(BytesField):
             an integer value and accept the current packet as its only argument.
         default: Field default value, if any.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     """

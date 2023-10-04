@@ -5,7 +5,7 @@ import copy
 import io
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.field import _Field
+from pcapkit.corekit.fields.field import FieldBase
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.utilities.compat import List
 from pcapkit.utilities.exceptions import FieldValueError
@@ -24,11 +24,11 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.schema.schema import Schema
 
-_TL = TypeVar('_TL', 'Schema', '_Field', 'bytes')
+_TL = TypeVar('_TL', 'Schema', 'FieldBase', 'bytes')
 _TS = TypeVar('_TS', bound='Schema')
 
 
-class ListField(_Field[List[_TL]], Generic[_TL]):
+class ListField(FieldBase[List[_TL]], Generic[_TL]):
     """Field list for protocol fields.
 
     Args:
@@ -36,7 +36,7 @@ class ListField(_Field[List[_TL]], Generic[_TL]):
             an integer value and accept the current packet as its only argument.
         item_type: Field type of the contained items.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     This field is used to represent a list of fields, as in the case of lists of
     constrant-length-field items in a protocol.
@@ -54,7 +54,7 @@ class ListField(_Field[List[_TL]], Generic[_TL]):
         return True
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
-                 item_type: 'Optional[_Field]' = None,
+                 item_type: 'Optional[FieldBase]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         #self._name = '<list>'
         self._callback = callback
@@ -173,7 +173,7 @@ class OptionField(ListField, Generic[_TS]):
             option schema.
         eool: Enumeration of the EOOL (end-of-option-list, or equivalent) option
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     This field is used to represent a list of fields, as in the case of lists of
     options and/or parameters in a protocol.

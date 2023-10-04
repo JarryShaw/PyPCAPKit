@@ -22,10 +22,10 @@ T = TypeVar('T')
 
 
 class EngineMeta(abc.ABCMeta, Generic[T]):
-    """Meta class to add dynamic support to :class:`Engine`.
+    """Meta class to add dynamic support to :class:`EngineBase`.
 
     This meta class is used to generate necessary attributes for the
-    :class:`Engine` class. It can be useful to reduce unnecessary
+    :class:`EngineBase` class. It can be useful to reduce unnecessary
     registry calls and simplify the customisation process.
 
     """

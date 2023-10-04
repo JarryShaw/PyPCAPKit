@@ -65,7 +65,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal, Self
 
-    from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel
     from pcapkit.protocols.protocol import Protocol
 
@@ -239,7 +239,7 @@ class OptionEnumField(EnumField):
         bit_length: Field bit length.
         namespace: Option namespace, i.e., namespace of the enum item.
         callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     Important:
         This class is specifically designed for :class:`~pcapkit.const.pcapng.option_type.OptionType`

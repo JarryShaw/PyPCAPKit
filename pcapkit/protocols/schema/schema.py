@@ -10,7 +10,7 @@ import sys
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast, final
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
-from pcapkit.corekit.fields.field import NoValue, _Field
+from pcapkit.corekit.fields.field import NoValue, FieldBase
 from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.corekit.infoclass import FinalisedState
@@ -234,7 +234,7 @@ class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
         #: List of builtin methods.
         __builtin__: 'set[str]'
         #: Mapping of fields.
-        __fields__: 'OrderedDict[str, _Field]'
+        __fields__: 'OrderedDict[str, FieldBase]'
         #: Mapping of field names to packed values.
         __buffer__: 'dict[str, bytes]'
         #: Flag for whether the schema is recently updated.
