@@ -1,4 +1,4 @@
-Sphinx==7.2.5
+Sphinx==7.2.6
 
 # extentions
 sphinx-autodoc-typehints==1.24.0
