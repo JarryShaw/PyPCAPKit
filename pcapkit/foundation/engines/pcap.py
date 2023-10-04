@@ -47,18 +47,18 @@ class PCAP(Engine[Frame]):
     )
 
     ##########################################################################
-    # Properties.
+    # Defaults.
     ##########################################################################
 
-    @classmethod
-    def name(cls) -> 'str':
-        """Engine name."""
-        return 'PCAP'
+    #: Engine name.
+    __engine_name__ = 'PCAP'
 
-    @classmethod
-    def module(cls) -> 'str':
-        """Engine module name."""
-        return 'pcapkit.foundation.engine.pcap'
+    #: Engine module name.
+    __engine_module__ = 'pcapkit.protocols.misc.pcap'
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
 
     @property
     def header(self) -> 'Header':

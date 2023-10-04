@@ -29,6 +29,25 @@ class EngineMeta(abc.ABCMeta, Generic[T]):
     registry calls and simplify the customisation process.
 
     """
+    if TYPE_CHECKING:
+        #: Engine name.
+        __engine_name__: 'str'
+        #: Engine module name.
+        __engine_module__: 'str'
+
+    @property
+    def name(cls) -> 'str':
+        """Engine name."""
+        if hasattr(cls, '__engine_name__'):
+            return cls.__engine_name__
+        return cls.__name__
+
+    @property
+    def module(cls) -> 'str':
+        """Engine module name."""
+        if hasattr(cls, '__engine_module__'):
+            return cls.__engine_module__
+        return cls.__module__
 
 
 class EngineBase(Generic[T], metaclass=EngineMeta):
@@ -42,20 +61,15 @@ class EngineBase(Generic[T], metaclass=EngineMeta):
         :class:`Engine` instead.
 
     """
+    if TYPE_CHECKING:
+        #: Engine name.
+        __engine_name__: 'str'
+        #: Engine module name.
+        __engine_module__: 'str'
 
     ##########################################################################
     # Properties.
     ##########################################################################
-
-    @classmethod
-    @abc.abstractmethod
-    def name(cls) -> 'str':
-        """Engine name."""
-
-    @classmethod
-    @abc.abstractmethod
-    def module(cls) -> 'str':
-        """Engine module name."""
 
     @property
     def extractor(self) -> 'Extractor':
@@ -129,16 +143,6 @@ class Engine(EngineBase[T], Generic[T]):
 
     """
 
-    @classmethod
-    def name(cls) -> 'str':
-        """Engine name."""
-        return cls.__name__
-
-    @classmethod
-    def module(cls) -> 'str':
-        """Engine module name."""
-        return cls.__module__
-
     def __init_subclass__(cls, /, name: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialise subclass.
 
@@ -152,7 +156,7 @@ class Engine(EngineBase[T], Generic[T]):
 
         """
         if name is None:
-            name = cls.name()
+            name = cls.name
 
         from pcapkit.foundation.extraction import Extractor
         Extractor.register_engine(name, cls)

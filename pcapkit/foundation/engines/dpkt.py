@@ -40,18 +40,14 @@ class DPKT(Engine['DPKTPacket']):
     """
 
     ##########################################################################
-    # Properties.
+    # Defaults.
     ##########################################################################
 
-    @classmethod
-    def name(cls) -> 'str':
-        """Engine name."""
-        return 'DPKT'
+    #: Engine name.
+    __engine_name__ = 'DPKT'
 
-    @classmethod
-    def module(cls) -> 'str':
-        """Engine module name."""
-        return 'dpkt'
+    #: Engine module name.
+    __engine_module__ = 'dpkt'
 
     ##########################################################################
     # Data models.

@@ -35,18 +35,14 @@ class Scapy(Engine['ScapyPacket']):
     """
 
     ##########################################################################
-    # Properties.
+    # Defaults.
     ##########################################################################
 
-    @classmethod
-    def name(cls) -> 'str':
-        """Engine name."""
-        return 'Scapy'
+    #: Engine name.
+    __engine_name__ = 'Scapy'
 
-    @classmethod
-    def module(cls) -> 'str':
-        """Engine module name."""
-        return 'scapy'
+    #: Engine module name.
+    __engine_module__ = 'scapy'
 
     ##########################################################################
     # Data models.

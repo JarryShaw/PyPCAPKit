@@ -98,18 +98,14 @@ class PCAPNG(Engine[P_PCAPNG]):
     )
 
     ##########################################################################
-    # Properties.
+    # Defaults.
     ##########################################################################
 
-    @classmethod
-    def name(cls) -> 'str':
-        """Engine name."""
-        return 'PCAP-NG'
+    #: Engine name.
+    __engine_name__ = 'PCAP-NG'
 
-    @classmethod
-    def module(cls) -> 'str':
-        """Engine module name."""
-        return 'pcapkit.foundation.engine.pcapng'
+    #: Engine module name.
+    __engine_module__ = 'pcapkit.protocols.misc.pcapng'
 
     ##########################################################################
     # Data models.

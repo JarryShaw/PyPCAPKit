@@ -35,18 +35,14 @@ class PyShark(Engine['PySharkPacket']):
     """
 
     ##########################################################################
-    # Properties.
+    # Defaults.
     ##########################################################################
 
-    @classmethod
-    def name(cls) -> 'str':
-        """Engine name."""
-        return 'PyShark'
+    #: Engine name.
+    __engine_name__ = 'PyShark'
 
-    @classmethod
-    def module(cls) -> 'str':
-        """Engine module name."""
-        return 'pyshark'
+    #: Engine module name.
+    __engine_module__ = 'pyshark'
 
     ##########################################################################
     # Data models.
