@@ -259,8 +259,9 @@ class AppType(Vendor):
                             temp.append(f'[:rfc:`{match.group("rfc")}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            cmmt = self.wrap_comment('[%s] %s %s' % (item[2].strip().upper() or 'N/A',
-                                     desc, ''.join(temp)))  # pylint: disable=consider-using-f-string
+            cmmt = self.wrap_comment(re.sub(r'\s+', r' ',
+                                            '[%s] %s %s' % (item[2].strip().upper() or 'N/A',
+                                                            desc, ''.join(temp))))  # pylint: disable=consider-using-f-string
 
             try:
                 code, _ = port, int(port)
@@ -306,7 +307,10 @@ class AppType(Vendor):
                 key = '%s_' % key
 
             pres = f"{key}: 'AppType' = {code}, {svc!r}, {proto}"
-            sufs = f'#: {cmmt}'
+            if cmmt.startswith('-'):
+                sufs = f'#: {cmmt}'
+            else:
+                sufs = '#: %s' % cmmt.replace('    #:   ', '    #: ')
 
             enum.append(f'{sufs}\n    {pres}')
 

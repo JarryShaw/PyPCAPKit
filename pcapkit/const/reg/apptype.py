@@ -1137,7 +1137,7 @@ class AppType(StrEnum):
     gist: 'AppType' = 270, 'gist', TransportProtocol.get('udp')
 
     #: [TCP] IETF Network Endpoint Assessment (NEA) Posture Transport Protocol over
-    #:   TLS (PT-TLS) [:rfc:`6876`]
+    #: TLS (PT-TLS) [:rfc:`6876`]
     pt_tls: 'AppType' = 271, 'pt-tls', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -1924,30 +1924,30 @@ class AppType(StrEnum):
     passgo: 'AppType' = 511, 'passgo', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] remote process execution; authentication performed using passwords and
-    #:   UNIX login names
+    #: UNIX login names
     exec: 'AppType' = 512, 'exec', TransportProtocol.get('tcp')
 
     #: [UDP]
     comsat: 'AppType' = 512, 'comsat', TransportProtocol.get('udp')
 
     #: [UDP] used by mail system to notify users of new mail received; currently
-    #:   receives messages only from processes on the same machine
+    #: receives messages only from processes on the same machine
     biff: 'AppType' = 512, 'biff', TransportProtocol.get('udp')
 
     #: [TCP] remote login a la telnet; automatic authentication performed based on
-    #:   priviledged port numbers and distributed data bases which identify
-    #:   "authentication domains"
+    #: priviledged port numbers and distributed data bases which identify
+    #: "authentication domains"
     login: 'AppType' = 513, 'login', TransportProtocol.get('tcp')
 
     #: [UDP] maintains data bases showing who's logged in to machines on a local
-    #:   net and the load average of the machine
+    #: net and the load average of the machine
     who: 'AppType' = 513, 'who', TransportProtocol.get('udp')
 
     #: [TCP] cmd like exec, but automatic authentication is performed as for login
-    #:   server
+    #: server
     shell: 'AppType' = 514, 'shell', TransportProtocol.get('tcp')
 
-    #: [UDP]  [:rfc:`5426`]
+    #: [UDP] [:rfc:`5426`]
     syslog: 'AppType' = 514, 'syslog', TransportProtocol.get('udp')
 
     #: - [TCP] spooler
@@ -1978,7 +1978,7 @@ class AppType(StrEnum):
     efs: 'AppType' = 520, 'efs', TransportProtocol.get('tcp')
 
     #: [UDP] local routing process (on site); uses variant of Xerox NS routing
-    #:   information protocol - RIP
+    #: information protocol - RIP
     router: 'AppType' = 520, 'router', TransportProtocol.get('udp')
 
     #: - [TCP] ripng
@@ -3051,14 +3051,14 @@ class AppType(StrEnum):
     reserved_914: 'AppType' = 914, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Routing in Fat Trees Link Information Elements (TEMPORARY - registered
-    #:   2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
+    #: 2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
     rift_lies: 'AppType' = 914, 'rift-lies', TransportProtocol.get('udp')
 
     #: [TCP] Reserved
     reserved_915: 'AppType' = 915, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Routing in Fat Trees Topology Information Elements (TEMPORARY -
-    #:   registered 2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
+    #: registered 2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
     rift_ties: 'AppType' = 915, 'rift-ties', TransportProtocol.get('udp')
 
     #: [TCP] BIND9 remote name daemon controller
@@ -4866,8 +4866,8 @@ class AppType(StrEnum):
     #: - [UDP] Integrated Engineering Software
     ies_lm: 'AppType' = 1443, 'ies-lm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] Marcam  License Management
-    #: - [UDP] Marcam  License Management
+    #: - [TCP] Marcam License Management
+    #: - [UDP] Marcam License Management
     marcam_lm: 'AppType' = 1444, 'marcam-lm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Proxima License Manager
@@ -11832,7 +11832,7 @@ class AppType(StrEnum):
     d2000webserver: 'AppType' = 3120, 'd2000webserver', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] The pacemaker remote (pcmk-remote) service extends high availability
-    #:   functionality outside of the Linux cluster into remote nodes.
+    #: functionality outside of the Linux cluster into remote nodes.
     pcmk_remote: 'AppType' = 3121, 'pcmk-remote', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -16401,7 +16401,7 @@ class AppType(StrEnum):
     reserved_4330: 'AppType' = 4330, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] ktickets REST API for event management and ticketing systems (embedded
-    #:   POS devices)
+    #: POS devices)
     ktickets_rest: 'AppType' = 4331, 'ktickets-rest', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -17057,14 +17057,14 @@ class AppType(StrEnum):
     iax: 'AppType' = 4569, 'iax', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Service to distribute and update within a site deployment information
-    #:   for Oracle Communications Suite
+    #: for Oracle Communications Suite
     deploymentmap: 'AppType' = 4570, 'deploymentmap', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
     reserved_4570: 'AppType' = 4570, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] A port for communication between a server and client for a custom
-    #:   backup system
+    #: backup system
     cardifftec_back: 'AppType' = 4573, 'cardifftec-back', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -17514,7 +17514,7 @@ class AppType(StrEnum):
     reserved_4789: 'AppType' = 4789, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Generic Protocol Extension for Virtual eXtensible Local Area Network
-    #:   (VXLAN)
+    #: (VXLAN)
     vxlan_gpe: 'AppType' = 4790, 'vxlan-gpe', TransportProtocol.get('udp')
 
     #: [TCP] Reserved
@@ -18457,14 +18457,14 @@ class AppType(StrEnum):
     reserved_5194: 'AppType' = 5194, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] The protocol is used by a license server and client programs to
-    #:   control use of program licenses that float to networked machines
+    #: control use of program licenses that float to networked machines
     ampl_lic: 'AppType' = 5195, 'ampl-lic', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
     reserved_5195: 'AppType' = 5195, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] The protocol is used by two programs that exchange "table" data used
-    #:   in the AMPL modeling language
+    #: in the AMPL modeling language
     ampl_tableproxy: 'AppType' = 5196, 'ampl-tableproxy', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -19235,7 +19235,7 @@ class AppType(StrEnum):
     sdt: 'AppType' = 5568, 'sdt', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] PLASA E1.33, Remote Device Management (RDM) controller status
-    #:   notifications
+    #: notifications
     rdmnet_ctrl: 'AppType' = 5569, 'rdmnet-ctrl', TransportProtocol.get('tcp')
 
     #: [UDP] PLASA E1.33, Remote Device Management (RDM) messages
@@ -19288,7 +19288,7 @@ class AppType(StrEnum):
     bis_sync: 'AppType' = 5585, 'bis-sync', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Planning to send mobile terminated SMS to the specific port so that
-    #:   the SMS is not visible to the client
+    #: the SMS is not visible to the client
     att_mt_sms: 'AppType' = 5586, 'att-mt-sms', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -20214,7 +20214,7 @@ class AppType(StrEnum):
     reserved_6201: 'AppType' = 6201, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Management of service nodes in a processing grid for thermodynamic
-    #:   calculations
+    #: calculations
     thermo_calc: 'AppType' = 6201, 'thermo-calc', TransportProtocol.get('udp')
 
     #: - [TCP] QMTP over TLS
@@ -20625,7 +20625,7 @@ class AppType(StrEnum):
     reserved_6511: 'AppType' = 6511, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Datagram Congestion Control Protocol Encapsulation for NAT Traversal
-    #:   [:rfc:`6773`]
+    #: [:rfc:`6773`]
     dccp_udp: 'AppType' = 6511, 'dccp-udp', TransportProtocol.get('udp')
 
     #: [TCP] NETCONF over TLS [:rfc:`7589`]
@@ -20784,10 +20784,10 @@ class AppType(StrEnum):
     #: - [UDP] AFE Stock Channel M/C
     afesc_mc: 'AppType' = 6628, 'afesc-mc', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] Secondary, (non ANDI) multi-protocol multi-function interface to
-    #:   the Allied ANDI-based family of forecourt controllers
-    #: - [UDP] Secondary, (non ANDI) multi-protocol multi-function interface to
-    #:   the Allied ANDI-based family of forecourt controllers
+    #: - [TCP] Secondary, (non ANDI) multi-protocol multi-function interface to the
+    #:   Allied ANDI-based family of forecourt controllers
+    #: - [UDP] Secondary, (non ANDI) multi-protocol multi-function interface to the
+    #:   Allied ANDI-based family of forecourt controllers
     nexgen_aux: 'AppType' = 6629, 'nexgen-aux', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [N/A] Unassigned
@@ -21026,7 +21026,7 @@ class AppType(StrEnum):
     reserved_6784: 'AppType' = 6784, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Bidirectional Forwarding Detection (BFD) on Link Aggregation Group
-    #:   (LAG) Interfaces [:rfc:`7130`]
+    #: (LAG) Interfaces [:rfc:`7130`]
     bfd_lag: 'AppType' = 6784, 'bfd-lag', TransportProtocol.get('udp')
 
     #: - [TCP] DGPF Individual Exchange
@@ -21472,14 +21472,13 @@ class AppType(StrEnum):
     dlip: 'AppType' = 7201, 'dlip', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Inter-Channel Termination Protocol (ICTP) for multi-wavelength PON
-    #:   (Passive Optical Network) systems [TR-352][Inter-Channel-Termination
-    #:   protocol (ICTP) is a peer-to-peer protocol with       a binary message
-    #:   format that is used by a set of optical line terminal (OLT) channel
-    #:   terminations (CT) comprising a 40-Gigabit-capable next-generation passive
-    #:   optical network (NG-PON2) system to       exchange channel profile
-    #:   configuration and status information and to coordinate the operation of
-    #:   tunable optical network units (ONUs) in a multi-wavelength channel
-    #:   environment.]
+    #: (Passive Optical Network) systems [TR-352][Inter-Channel-Termination
+    #: protocol (ICTP) is a peer-to-peer protocol with a binary message format that
+    #: is used by a set of optical line terminal (OLT) channel terminations (CT)
+    #: comprising a 40-Gigabit-capable next-generation passive optical network (NG-
+    #: PON2) system to exchange channel profile configuration and status
+    #: information and to coordinate the operation of tunable optical network units
+    #: (ONUs) in a multi-wavelength channel environment.]
     pon_ictp: 'AppType' = 7202, 'pon-ictp', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -22254,7 +22253,7 @@ class AppType(StrEnum):
     mcreport: 'AppType' = 8003, 'mcreport', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Opensource Evolv Enterprise Platform P2P Network Node Connection
-    #:   Protocol
+    #: Protocol
     p2pevolvenet: 'AppType' = 8004, 'p2pevolvenet', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -22458,8 +22457,8 @@ class AppType(StrEnum):
     gadugadu: 'AppType' = 8074, 'gadugadu', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Mles is a client-server data distribution protocol targeted to serve
-    #:   as a lightweight and reliable distributed publish/subscribe database
-    #:   service.
+    #: as a lightweight and reliable distributed publish/subscribe database
+    #: service.
     mles: 'AppType' = 8077, 'mles', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -23052,7 +23051,7 @@ class AppType(StrEnum):
     msi_cps_rm: 'AppType' = 8675, 'msi-cps-rm', TransportProtocol.get('tcp')
 
     #: [UDP] Motorola Solutions Customer Programming Software for Radio Management
-    #:   Discovery
+    #: Discovery
     msi_cps_rm_disc: 'AppType' = 8675, 'msi-cps-rm-disc', TransportProtocol.get('udp')
 
     #: - [TCP] Sun App Server - JMX/RMI
@@ -24076,7 +24075,7 @@ class AppType(StrEnum):
     reserved_9877: 'AppType' = 9877, 'reserved', TransportProtocol.get('udp')
 
     #: [UDP] The KX509 Kerberized Certificate Issuance Protocol in Use in 2012
-    #:   [:rfc:`6717`]
+    #: [:rfc:`6717`]
     kca_service: 'AppType' = 9878, 'kca-service', TransportProtocol.get('udp')
 
     #: [TCP] Reserved
@@ -24594,14 +24593,14 @@ class AppType(StrEnum):
     reserved_11108: 'AppType' = 11108, 'reserved', TransportProtocol.get('tcp')
 
     #: [TCP] Data migration facility Manager (DMF) is a browser based interface to
-    #:   DMF
+    #: DMF
     sgi_dmfmgr: 'AppType' = 11109, 'sgi-dmfmgr', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
     reserved_11109: 'AppType' = 11109, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] Data migration facility (DMF) SOAP is a web server protocol to support
-    #:   remote access to DMF
+    #: remote access to DMF
     sgi_soap: 'AppType' = 11110, 'sgi-soap', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -24862,8 +24861,8 @@ class AppType(StrEnum):
     unassigned_12301: 'AppType' = 12301, 'unassigned', TransportProtocol.get('undefined')
 
     #: [TCP] Remote Administration Daemon (RAD) is a system service that offers
-    #:   secure, remote, programmatic access to Solaris system configuration and run-
-    #:   time state
+    #: secure, remote, programmatic access to Solaris system configuration and run-
+    #: time state
     rads: 'AppType' = 12302, 'rads', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -25247,7 +25246,7 @@ class AppType(StrEnum):
     vtp: 'AppType' = 16666, 'vtp', TransportProtocol.get('udp')
 
     #: [TCP] This server provides callable services to mainframe External Security
-    #:   Managers from any TCP/IP platform
+    #: Managers from any TCP/IP platform
     cadsisvr: 'AppType' = 16789, 'cadsisvr', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -25322,7 +25321,7 @@ class AppType(StrEnum):
     cpsp: 'AppType' = 17222, 'cpsp', TransportProtocol.get('udp')
 
     #: [TCP] ISA100 GCI is a service utilizing a common interface between an ISA100
-    #:   Wireless gateway and a client application
+    #: Wireless gateway and a client application
     isa100_gci: 'AppType' = 17223, 'isa100-gci', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -25992,7 +25991,7 @@ class AppType(StrEnum):
     bilobit_update: 'AppType' = 24577, 'bilobit-update', TransportProtocol.get('udp')
 
     #: [TCP] Service used by SmarDTV to communicate between a CAM and a second
-    #:   screen application
+    #: screen application
     sdtvwcam: 'AppType' = 24666, 'sdtvwcam', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -26804,9 +26803,9 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_38638: 'AppType' = 38638, 'reserved', TransportProtocol.get('udp')
 
-    #: [TCP] Sruth is a service for the distribution of routinely-       generated
-    #:   but arbitrary files based on a publish/subscribe       distribution model
-    #:   and implemented using a peer-to-peer transport       mechanism
+    #: [TCP] Sruth is a service for the distribution of routinely- generated but
+    #: arbitrary files based on a publish/subscribe distribution model and
+    #: implemented using a peer-to-peer transport mechanism
     sruth: 'AppType' = 38800, 'sruth', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -27087,7 +27086,7 @@ class AppType(StrEnum):
     reserved_46336: 'AppType' = 46336, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] Connection between a desktop computer or server and a signature tablet
-    #:   to capture handwritten signatures
+    #: to capture handwritten signatures
     spremotetablet: 'AppType' = 46998, 'spremotetablet', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -27554,7 +27553,7 @@ class AppType(StrEnum):
     activeraid: 'AppType' = -1, 'activeraid', TransportProtocol.get('undefined')
 
     #: [N/A] Encrypted transport of Active Storage Proprietary Device Management
-    #:   Protocol
+    #: Protocol
     activeraid_ssl: 'AppType' = -1, 'activeraid-ssl', TransportProtocol.get('undefined')
 
     #: - [TCP] Adam Hall network control and monitoring
@@ -27567,8 +27566,8 @@ class AppType(StrEnum):
     #: [TCP] Address Book Server used for contacts and calendar synchronisation
     addressbooksrv: 'AppType' = -1, 'addressbooksrv', TransportProtocol.get('tcp')
 
-    #: [N/A] difusi Cloud based plug & play network       synchronization protocol,
-    #:   content pool database discovery, and       cloudOS SAaS discovery protocol.
+    #: [N/A] difusi Cloud based plug & play network synchronization protocol,
+    #: content pool database discovery, and cloudOS SAaS discovery protocol.
     adnodes: 'AppType' = -1, 'adnodes', TransportProtocol.get('undefined')
 
     #: [TCP] Adobe Shadow Server
@@ -27706,7 +27705,7 @@ class AppType(StrEnum):
     asam_cmp: 'AppType' = -1, 'asam-cmp', TransportProtocol.get('udp')
 
     #: [TCP] protocol for an event-based architecture for distributed control of
-    #:   mobile robots
+    #: mobile robots
     aseba: 'AppType' = -1, 'aseba', TransportProtocol.get('tcp')
 
     #: [UDP] Asterisk Caller-ID Notification Service
@@ -27722,7 +27721,7 @@ class AppType(StrEnum):
     atnet: 'AppType' = -1, 'atnet', TransportProtocol.get('udp')
 
     #: [N/A] Atlassian Application (JIRA, Confluence, Fisheye, Crucible, Crowd,
-    #:   Bamboo) discovery service
+    #: Bamboo) discovery service
     atlassianapp: 'AppType' = -1, 'atlassianapp', TransportProtocol.get('undefined')
 
     #: - [TCP] Attero Tech Audio Device
@@ -27880,14 +27879,14 @@ class AppType(StrEnum):
     brski_proxy: 'AppType' = -1, 'brski-proxy', TransportProtocol.get('tcp')
 
     #: [TCP] The Bootstrapping Remote Secure Key Infrastructure Registrar
-    #:   [:rfc:`8995`]
+    #: [:rfc:`8995`]
     brski_registrar: 'AppType' = -1, 'brski-registrar', TransportProtocol.get('tcp')
 
     #: [N/A] Backup Simplicity
     bsqdea: 'AppType' = -1, 'bsqdea', TransportProtocol.get('undefined')
 
     #: [TCP] Beats Transfer Protocol allows for the discovery and control of
-    #:   devices
+    #: devices
     btp: 'AppType' = -1, 'btp', TransportProtocol.get('tcp')
 
     #: [TCP] buddycloud API
@@ -28118,19 +28117,19 @@ class AppType(StrEnum):
     #: [N/A] Roar (Death of Productivity)
     dop: 'AppType' = -1, 'dop', TransportProtocol.get('undefined')
 
-    #: - [TCP] DOTS Signal Channel Call Home Protocol.       The service name is used
-    #:   to construct the SRV service names "_dots-call-home._udp"       and "_dots-
-    #:   call-home._tcp" for discovering Call Home DOTS clients used to establish
-    #:   DOTS signal channel call home. [:rfc:`8973`]
-    #: - [UDP] DOTS Signal Channel Call Home Protocol.       The service name is used
-    #:   to construct the SRV service names "_dots-call-home._udp"       and "_dots-
-    #:   call-home._tcp" for discovering Call Home DOTS clients used to establish
-    #:   DOTS signal channel call home. [:rfc:`8973`]
+    #: - [TCP] DOTS Signal Channel Call Home Protocol. The service name is used to
+    #:   construct the SRV service names "_dots-call-home._udp" and "_dots-call-
+    #:   home._tcp" for discovering Call Home DOTS clients used to establish DOTS
+    #:   signal channel call home. [:rfc:`8973`]
+    #: - [UDP] DOTS Signal Channel Call Home Protocol. The service name is used to
+    #:   construct the SRV service names "_dots-call-home._udp" and "_dots-call-
+    #:   home._tcp" for discovering Call Home DOTS clients used to establish DOTS
+    #:   signal channel call home. [:rfc:`8973`]
     dots_call_home: 'AppType' = -1, 'dots-call-home', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: [TCP] DOTS Data Channel Protocol.       The service name is used to
-    #:   construct the SRV service name "_dots-data._tcp" for       discovering DOTS
-    #:   servers used to establish DOTS data channel. [:rfc:`8973`]
+    #: [TCP] DOTS Data Channel Protocol. The service name is used to construct the
+    #: SRV service name "_dots-data._tcp" for discovering DOTS servers used to
+    #: establish DOTS data channel. [:rfc:`8973`]
     dots_data: 'AppType' = -1, 'dots-data', TransportProtocol.get('tcp')
 
     #: [N/A] DropCopy
@@ -28146,7 +28145,7 @@ class AppType(StrEnum):
     dtrmtdesktop: 'AppType' = -1, 'dtrmtdesktop', TransportProtocol.get('undefined')
 
     #: [TCP] A communication protocol that allows a school teacher to set work
-    #:   activities to students over a LAN.
+    #: activities to students over a LAN.
     duckrace: 'AppType' = -1, 'duckrace', TransportProtocol.get('tcp')
 
     #: [N/A] Documents To Go Desktop Sync Protocol
@@ -28349,7 +28348,7 @@ class AppType(StrEnum):
     googexpeditions: 'AppType' = -1, 'googexpeditions', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Service related to Google Cast which is a technology for enabling
-    #:   multi-screen experiences. See developers.google.com/cast for more details
+    #: multi-screen experiences. See developers.google.com/cast for more details
     googlecast: 'AppType' = -1, 'googlecast', TransportProtocol.get('tcp')
 
     #: [TCP] For iOS Application named GoOrStop
@@ -28383,11 +28382,11 @@ class AppType(StrEnum):
     gucam_http: 'AppType' = -1, 'gucam-http', TransportProtocol.get('tcp')
 
     #: [N/A] Special service type for resolving by GUID (Globally Unique
-    #:   Identifier)
+    #: Identifier)
     guid: 'AppType' = -1, 'guid', TransportProtocol.get('undefined')
 
     #: [N/A] H.323 Real-time audio, video and data communication call setup
-    #:   protocol
+    #: protocol
     h323: 'AppType' = -1, 'h323', TransportProtocol.get('undefined')
 
     #: [TCP] HbbTV Application Information Table
@@ -28439,18 +28438,18 @@ class AppType(StrEnum):
     hpr_bldwin: 'AppType' = -1, 'hpr-bldwin', TransportProtocol.get('undefined')
 
     #: [N/A] Identifies systems that house databases for the Remote Build System
-    #:   and Remote Test System
+    #: and Remote Test System
     hpr_db: 'AppType' = -1, 'hpr-db', TransportProtocol.get('undefined')
 
     #: [N/A] HP Remote Repository for Build and Test Results
     hpr_rep: 'AppType' = -1, 'hpr-rep', TransportProtocol.get('undefined')
 
     #: [N/A] HP Remote System that houses compilers and tools for Linux-based
-    #:   Systems
+    #: Systems
     hpr_toollnx: 'AppType' = -1, 'hpr-toollnx', TransportProtocol.get('undefined')
 
     #: [N/A] HP Remote System that houses compilers and tools for Microsoft Windows
-    #:   Systems
+    #: Systems
     hpr_toolwin: 'AppType' = -1, 'hpr-toolwin', TransportProtocol.get('undefined')
 
     #: [N/A] HP Remote Test System for Linux-based Systems
@@ -28519,7 +28518,7 @@ class AppType(StrEnum):
     iconquer: 'AppType' = -1, 'iconquer', TransportProtocol.get('undefined')
 
     #: [TCP] A Remote Control Application service used to control Computers on a
-    #:   Local Area Network
+    #: Local Area Network
     icontrolbox: 'AppType' = -1, 'icontrolbox', TransportProtocol.get('tcp')
 
     #: [N/A] Generic Data Acquisition and Control Protocol
@@ -28535,7 +28534,7 @@ class AppType(StrEnum):
     idsync: 'AppType' = -1, 'idsync', TransportProtocol.get('undefined')
 
     #: [N/A] iFFL Bonjour service for communication between client and server
-    #:   applications.
+    #: applications.
     iffl: 'AppType' = -1, 'iffl', TransportProtocol.get('undefined')
 
     #: [N/A] Published iFolder
@@ -28689,7 +28688,7 @@ class AppType(StrEnum):
     jukejoint: 'AppType' = -1, 'jukejoint', TransportProtocol.get('tcp')
 
     #: [TCP] KeynoteAccess is used for sending remote requests/responses when
-    #:   controlling a slideshow with Keynote Remote
+    #: controlling a slideshow with Keynote Remote
     keynoteaccess: 'AppType' = -1, 'keynoteaccess', TransportProtocol.get('tcp')
 
     #: [TCP] KeynotePairing is used to pair Keynote Remote with Keynote
@@ -28868,7 +28867,7 @@ class AppType(StrEnum):
     mcrcp: 'AppType' = -1, 'mcrcp', TransportProtocol.get('undefined')
 
     #: [N/A] MediaBoardONE Asset and Information Manager data sharing and
-    #:   synchronization protocol
+    #: synchronization protocol
     mediaboard1: 'AppType' = -1, 'mediaboard1', TransportProtocol.get('undefined')
 
     #: [TCP] Mediatap streaming protocol
@@ -28902,11 +28901,11 @@ class AppType(StrEnum):
     mielesemiprof: 'AppType' = -1, 'mielesemiprof', TransportProtocol.get('tcp')
 
     #: [TCP] A Medical Interoperability Service Type, used to identify medical
-    #:   devices providing network interfaces.
+    #: devices providing network interfaces.
     mist: 'AppType' = -1, 'mist', TransportProtocol.get('tcp')
 
     #: [TCP] Provides a client with access to the Mathematical Mesh, a user-focused
-    #:   PKI.
+    #: PKI.
     mmm: 'AppType' = -1, 'mmm', TransportProtocol.get('tcp')
 
     #: - [TCP] A Remote Control Application service used to control Computers on a
@@ -28984,7 +28983,7 @@ class AppType(StrEnum):
     nasmon: 'AppType' = -1, 'nasmon', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] This DNS-SD service is used by mobile clients to locate the Nasuni
-    #:   Filer (a storage product) for a given company.
+    #: Filer (a storage product) for a given company.
     nasunifiler: 'AppType' = -1, 'nasunifiler', TransportProtocol.get('tcp')
 
     #: [N/A] Network Clipboard Broadcasts
@@ -29023,7 +29022,7 @@ class AppType(StrEnum):
     nextcap: 'AppType' = -1, 'nextcap', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] NFS service for the domain root, the root of an organization's
-    #:   published file namespace. [:rfc:`6641`]
+    #: published file namespace. [:rfc:`6641`]
     nfs_domainroot: 'AppType' = -1, 'nfs-domainroot', TransportProtocol.get('tcp')
 
     #: [TCP] NGR Key Distribution
@@ -29047,7 +29046,7 @@ class AppType(StrEnum):
     ni_sysapi: 'AppType' = -1, 'ni-sysapi', TransportProtocol.get('tcp')
 
     #: [TCP] Lightweight event based control protocol utilising JavaScript Object
-    #:   Notation
+    #: Notation
     nodel: 'AppType' = -1, 'nodel', TransportProtocol.get('tcp')
 
     #: [TCP] Network Quality test server endpoint
@@ -29076,7 +29075,7 @@ class AppType(StrEnum):
     obf: 'AppType' = -1, 'obf', TransportProtocol.get('undefined')
 
     #: [N/A] Means for clients to locate servers in an Objective
-    #:   (http://www.objective.com) instance.
+    #: (http://www.objective.com) instance.
     objective: 'AppType' = -1, 'objective', TransportProtocol.get('undefined')
 
     #: - [TCP] Insecure OCP.1 protocol, which is the insecure TCP/IP implementation
@@ -29125,7 +29124,7 @@ class AppType(StrEnum):
     oma_bcast_sg: 'AppType' = -1, 'oma-bcast-sg', TransportProtocol.get('undefined')
 
     #: [TCP] Open Mobile Alliance (OMA) Device Management (DM) Bootstrap Server
-    #:   Discovery Service
+    #: Discovery Service
     omadm_bootstrap: 'AppType' = -1, 'omadm-bootstrap', TransportProtocol.get('tcp')
 
     #: [N/A] OmniWeb
@@ -29335,7 +29334,7 @@ class AppType(StrEnum):
     quinn: 'AppType' = -1, 'quinn', TransportProtocol.get('undefined')
 
     #: [TCP] Broadcast of Qwizdom Presentation sessions for joining by a client,
-    #:   such as Qwizdom Notes+.
+    #: such as Qwizdom Notes+.
     qwizcollab: 'AppType' = -1, 'qwizcollab', TransportProtocol.get('tcp')
 
     #: [N/A] Rakket Client Protocol
@@ -29355,13 +29354,13 @@ class AppType(StrEnum):
     radioport: 'AppType' = -1, 'radioport', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [UDP] Authentication, Accounting, and Dynamic Authorization via the RADIUS
-    #:   protocol. This service name is used to construct the SRV service label
-    #:   "_radiusdtls" for discovery of RADIUS/DTLS servers. [:rfc:`7585`]
+    #: protocol. This service name is used to construct the SRV service label
+    #: "_radiusdtls" for discovery of RADIUS/DTLS servers. [:rfc:`7585`]
     radiusdtls: 'AppType' = -1, 'radiusdtls', TransportProtocol.get('udp')
 
     #: [TCP] Authentication, Accounting, and Dynamic Authorization via the RADIUS
-    #:   protocol. This service name is used to construct the SRV service label
-    #:   "_radiustls" for discovery of RADIUS/TLS servers. [:rfc:`7585`]
+    #: protocol. This service name is used to construct the SRV service label
+    #: "_radiustls" for discovery of RADIUS/TLS servers. [:rfc:`7585`]
     radiustls: 'AppType' = -1, 'radiustls', TransportProtocol.get('tcp')
 
     #: [TCP] Model Railroad Messaging
@@ -29439,7 +29438,7 @@ class AppType(StrEnum):
     roambot: 'AppType' = -1, 'roambot', TransportProtocol.get('tcp')
 
     #: [TCP] Like ircu (RFC1459), but failure tolerant due to strong consistency
-    #:   among n>=3 servers
+    #: among n>=3 servers
     robustirc: 'AppType' = -1, 'robustirc', TransportProtocol.get('tcp')
 
     #: [N/A] Roku Control Protocol
@@ -29458,7 +29457,7 @@ class AppType(StrEnum):
     rr_disc: 'AppType' = -1, 'rr-disc', TransportProtocol.get('undefined')
 
     #: [TCP] Ruckus Radio Access Device, Installation, Commissioning and
-    #:   Troubleshooting service.
+    #: Troubleshooting service.
     rradict: 'AppType' = -1, 'rradict', TransportProtocol.get('tcp')
 
     #: [N/A] Remote System Management Protocol (Server Instance)
@@ -29624,7 +29623,7 @@ class AppType(StrEnum):
     shoppersync: 'AppType' = -1, 'shoppersync', TransportProtocol.get('undefined')
 
     #: [UDP] The protocol is used to sync database among iOS devices and Mac OS X
-    #:   computers.
+    #: computers.
     shots_sync: 'AppType' = -1, 'shots-sync', TransportProtocol.get('udp')
 
     #: [N/A] Nicecast
@@ -29695,14 +29694,14 @@ class AppType(StrEnum):
     smsync: 'AppType' = -1, 'smsync', TransportProtocol.get('undefined')
 
     #: [TCP] End-to-end TLS Relay Client Connection [https://snif.host/relay-
-    #:   proto#snif-cln]
+    #: proto#snif-cln]
     snif_cln: 'AppType' = -1, 'snif-cln', TransportProtocol.get('tcp')
 
     #: [TCP] End-to-end TLS Relay Cluster [https://snif.host/relay-proto#snif-fifo]
     snif_fifo: 'AppType' = -1, 'snif-fifo', TransportProtocol.get('tcp')
 
     #: [TCP] End-to-end TLS Relay Service Connection [https://snif.host/relay-
-    #:   proto#snif-srv]
+    #: proto#snif-srv]
     snif_srv: 'AppType' = -1, 'snif-srv', TransportProtocol.get('tcp')
 
     #: [N/A] Simple Object Access Protocol
@@ -29829,8 +29828,8 @@ class AppType(StrEnum):
     #: [N/A] Swordfish Protocol for Input/Output
     swordfish: 'AppType' = -1, 'swordfish', TransportProtocol.get('undefined')
 
-    #: [N/A] Framework for transferring any file from any app, to       any app on
-    #:   any device: simply with a swÿp.
+    #: [N/A] Framework for transferring any file from any app, to any app on any
+    #: device: simply with a swÿp.
     swyp: 'AppType' = -1, 'swyp', TransportProtocol.get('undefined')
 
     #: [N/A] Synchronize! Pro X
@@ -29840,7 +29839,7 @@ class AppType(StrEnum):
     sybase_tds: 'AppType' = -1, 'sybase-tds', TransportProtocol.get('undefined')
 
     #: [TCP] Remote control of Synclavier Digital Audio Workstation over local area
-    #:   network.
+    #: network.
     synclavier: 'AppType' = -1, 'synclavier', TransportProtocol.get('tcp')
 
     #: [N/A] Syncopation Synchronization Protocol by Sonzea
@@ -29855,8 +29854,8 @@ class AppType(StrEnum):
     #: [N/A] SynkSharing synchronization protocol
     synksharing: 'AppType' = -1, 'synksharing', TransportProtocol.get('undefined')
 
-    #: [TCP] This service name is used to construct the       SRV service label
-    #:   "_sztp" for discovering       SZTP bootstrap servers. [:rfc:`8572`]
+    #: [TCP] This service name is used to construct the SRV service label "_sztp"
+    #: for discovering SZTP bootstrap servers. [:rfc:`8572`]
     sztp: 'AppType' = -1, 'sztp', TransportProtocol.get('tcp')
 
     #: [N/A] Data Transmission and Synchronization
@@ -29970,11 +29969,11 @@ class AppType(StrEnum):
     touch_remote: 'AppType' = -1, 'touch-remote', TransportProtocol.get('undefined')
 
     #: [TCP] Coordination service for client users of the TotalPraisTrax iPad
-    #:   application
+    #: application
     tptx_console: 'AppType' = -1, 'tptx-console', TransportProtocol.get('tcp')
 
     #: [TCP] Service discovery and media transfer for peer to peer mobile media
-    #:   transfer app
+    #: transfer app
     transmitr: 'AppType' = -1, 'transmitr', TransportProtocol.get('tcp')
 
     #: [UDP] Thread Radio Encapsulation Link
@@ -30184,7 +30183,7 @@ class AppType(StrEnum):
     wicop: 'AppType' = -1, 'wicop', TransportProtocol.get('udp')
 
     #: [TCP] System for transferring files between mobile device and computer in a
-    #:   local network
+    #: local network
     wifile: 'AppType' = -1, 'wifile', TransportProtocol.get('tcp')
 
     #: [N/A] WiTap Sample Game Protocol
