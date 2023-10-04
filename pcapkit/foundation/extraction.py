@@ -417,7 +417,7 @@ class Extractor(Generic[P]):
             if isinstance(eng, ModuleDescriptor):
                 eng = eng.klass
 
-            if self.import_test(eng.module(), name=eng.name()) is not None:
+            if self.import_test(eng.module, name=eng.name) is not None:
                 self._exeng = eng(self)
                 self._exeng.run()
 
@@ -425,7 +425,7 @@ class Extractor(Generic[P]):
                 self.record_frames()
                 return
 
-            warn(f'engine {eng.name()} (`{eng.module()}`) is not installed; '
+            warn(f'engine {eng.name} (`{eng.module}`) is not installed; '
                  'using default engine instead', EngineWarning, stacklevel=stacklevel())
             self._exnam = 'default'  # using default/pcapkit engine
 
@@ -569,14 +569,14 @@ class Extractor(Generic[P]):
             engine.run()
 
             self._ifile.seek(0, os.SEEK_SET)
-            return engine
+            return engine  # type: ignore[return-value]
 
         if self._magic in PCAPNG_Engine.MAGIC_NUMBER:
             engine = PCAPNG_Engine(self)  # type: ignore[assignment]
             engine.run()
 
             self._ifile.seek(0, os.SEEK_SET)
-            return engine
+            return engine  # type: ignore[return-value]
 
         raise FormatError(f'unknown file format: {self._magic!r}')
 

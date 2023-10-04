@@ -10,13 +10,24 @@ all engine support functionality.
    :members:
    :show-inheritance:
 
+   .. .. autoproperty:: name
+   .. .. autoproperty:: module
+   .. .. autoproperty:: extractor
+
+   .. .. automethod:: run
+   .. .. automethod:: read_frame
+   .. .. automethod:: close
+
+   .. .. automethod:: __call__
+   .. .. automethod:: __init_subclass__
+
 Internal Definitions
 --------------------
 
-.. autoclass:: pcapkit.foundation.engines.engine.EngineMeta
+.. autoclass:: pcapkit.foundation.engines.engine.EngineBase
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.engines.engine.EngineBase
+.. autoclass:: pcapkit.foundation.engines.engine.EngineMeta
    :members:
    :show-inheritance:

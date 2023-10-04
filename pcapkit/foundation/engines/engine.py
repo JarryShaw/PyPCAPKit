@@ -154,11 +154,15 @@ class Engine(EngineBase[T], Generic[T]):
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
+        See Also:
+            For more details, please refer to
+            :meth:`~pcapkit.foundation.extraction.Extractor.register_engine`.
+
         """
         if name is None:
             name = cls.name
 
         from pcapkit.foundation.extraction import Extractor
-        Extractor.register_engine(name, cls)
+        Extractor.register_engine(name.lower(), cls)
 
         return super().__init_subclass__()
