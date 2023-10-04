@@ -27514,6 +27514,10 @@ class AppType(StrEnum):
     #: [N/A] 1Password Password Manager data sharing and synchronization protocol
     AppType_1password: 'AppType' = -1, '1password', TransportProtocol.get('undefined')
 
+    #: - [TCP] Teledyne Marine 7k Sonar Protocol
+    #: - [UDP] Teledyne Marine 7k Sonar Protocol
+    AppType_7ksonar: 'AppType' = -1, '7ksonar', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
     #: [N/A] Altos Design Synchronization protocol
     a_d_sync: 'AppType' = -1, 'a-d-sync', TransportProtocol.get('undefined')
 
@@ -29945,6 +29949,10 @@ class AppType(StrEnum):
 
     #: [N/A] TiVo Videos Protocol
     tivo_videos: 'AppType' = -1, 'tivo-videos', TransportProtocol.get('undefined')
+
+    #: - [TCP] Teledyne Marine Sensor
+    #: - [UDP] Teledyne Marine Sensor
+    tmsensor: 'AppType' = -1, 'tmsensor', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [N/A] 2Do Sync Helper Tool for Mac OS X and PCs
     todogwa: 'AppType' = -1, 'todogwa', TransportProtocol.get('undefined')
