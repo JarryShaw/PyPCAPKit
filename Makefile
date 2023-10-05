@@ -42,6 +42,9 @@ docs:
 docs-clean:
 	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C docs clean
 
+docs-autobuild:
+	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C docs livehtml
+
 isort:
 	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit temp/sort.py
 	pipenv run isort -l100 -ppcapkit pcapkit/{const,vendor}/*/*.py
