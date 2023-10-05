@@ -112,7 +112,7 @@ __all__ = [
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
 
-    'register_port',
+    'register_apptype',
     'register_tcp', 'register_udp',
     'register_tcp_option', 'register_tcp_mp_option',
 
@@ -557,17 +557,17 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
 
 
 @overload
-def register_port(code: 'int', module: 'ModuleDescriptor[Protocol] | Type[Protocol]', *, proto: 'TransportProtocol | str') -> 'None': ...
+def register_apptype(code: 'int', module: 'ModuleDescriptor[Protocol] | Type[Protocol]', *, proto: 'TransportProtocol | str') -> 'None': ...
 @overload
-def register_port(code: 'Enum_AppType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
+def register_apptype(code: 'Enum_AppType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
 @overload
-def register_port(code: 'int', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str') -> 'None': ...
+def register_apptype(code: 'int', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str') -> 'None': ...
 @overload
-def register_port(code: 'Enum_AppType', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
+def register_apptype(code: 'Enum_AppType', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
 
 
-def register_port(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
-                  class_: 'str' = NULL, *, proto: 'TransportProtocol | str' = NULL) -> 'None':
+def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                     class_: 'str' = NULL, *, proto: 'TransportProtocol | str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -586,8 +586,8 @@ def register_port(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pr
         proto: protocol name (must be a valid transport protocol)
 
     See Also:
-        * :func:`pcapkit.foundation.registry.register_tcp_port`
-        * :func:`pcapkit.foundation.registry.register_udp_port`
+        * :func:`pcapkit.foundation.registry.register_tcp`
+        * :func:`pcapkit.foundation.registry.register_udp`
 
     """
     if isinstance(code, Enum_AppType):
