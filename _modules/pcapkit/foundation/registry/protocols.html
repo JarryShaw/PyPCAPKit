@@ -464,7 +464,7 @@
     <span class="s1">&#39;register_ipv6_opts_option&#39;</span><span class="p">,</span> <span class="s1">&#39;register_ipv6_route_routing&#39;</span><span class="p">,</span>
     <span class="s1">&#39;register_mh_message&#39;</span><span class="p">,</span> <span class="s1">&#39;register_mh_option&#39;</span><span class="p">,</span> <span class="s1">&#39;register_mh_extension&#39;</span><span class="p">,</span>
 
-    <span class="s1">&#39;register_port&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;register_apptype&#39;</span><span class="p">,</span>
     <span class="s1">&#39;register_tcp&#39;</span><span class="p">,</span> <span class="s1">&#39;register_udp&#39;</span><span class="p">,</span>
     <span class="s1">&#39;register_tcp_option&#39;</span><span class="p">,</span> <span class="s1">&#39;register_tcp_mp_option&#39;</span><span class="p">,</span>
 
@@ -951,19 +951,17 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 
-<div class="viewcode-block" id="register_port">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_port">[docs]</a>
-<span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
-                  <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
+                     <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -982,8 +980,8 @@
 <span class="sd">        proto: protocol name (must be a valid transport protocol)</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        * :func:`pcapkit.foundation.registry.register_tcp_port`</span>
-<span class="sd">        * :func:`pcapkit.foundation.registry.register_udp_port`</span>
+<span class="sd">        * :func:`pcapkit.foundation.registry.register_tcp`</span>
+<span class="sd">        * :func:`pcapkit.foundation.registry.register_udp`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
@@ -1014,8 +1012,7 @@
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
-
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
 
 
 <span class="nd">@overload</span>
