@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-outside-toplevel
-"""Trace TCP Flows
-=====================
+"""Follow TCP Streams
+========================
 
 .. module:: pcapkit.foundation.traceflow.tcp
 

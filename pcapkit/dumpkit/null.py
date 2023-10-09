@@ -15,7 +15,7 @@ Notes:
 """
 from typing import TYPE_CHECKING
 
-import dictdumper
+from pcapkit.dumpkit.common import DumperBase as Dumper
 
 if TYPE_CHECKING:
     from typing import IO, Any, Optional
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 __all__ = ['NotImplementedIO']
 
 
-class NotImplementedIO(dictdumper.Dumper):
+class NotImplementedIO(Dumper):
     """Unspecified output format."""
 
     ##########################################################################

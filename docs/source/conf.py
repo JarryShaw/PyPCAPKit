@@ -61,6 +61,8 @@ extensions = [
     "sphinxext.opengraph",
 
     'sphinx_copybutton',
+
+    'sphinxcontrib.mermaid',
 ]
 
 intersphinx_mapping = {

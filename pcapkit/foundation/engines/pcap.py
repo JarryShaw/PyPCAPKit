@@ -75,6 +75,11 @@ class PCAP(Engine[Frame]):
         """Data link layer protocol."""
         return self._dlink
 
+    @property
+    def nanosecond(self) -> 'bool':
+        """Nanosecond flag."""
+        return self._nnsec
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -84,11 +89,12 @@ class PCAP(Engine[Frame]):
 
         This method is the entry point for PCAP file extraction. It will start
         the extraction process by parsing the PCAP global header and then halt
-        the extraction process until the :meth:`self.extractor._read_frame <Extractor._read_frame>` method
-        is called.
+        the extraction process until the
+        :meth:`self.extractor.record_frames <pcapkit.foundation.extraction.Extractor.record_frames>`
+        method is called.
 
         The method will parse the PCAP global header and save the parsed result
-        as :attr:`self._gbhdr <_gbhdr>`. Information such as PCAP version, data
+        as :attr:`self.header <header>`. Information such as PCAP version, data
         link layer protocol type, nanosecond flag and byteorder will also be
         save the current :class:`PCAP` engine instance.
 

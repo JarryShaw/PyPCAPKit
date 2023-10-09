@@ -26,12 +26,13 @@ class IPv6(IP['IPv6Address']):
 
     Args:
         strict: if return all datagrams (including those not
-            implemented) when submit
-        *args: Arbitrary positional arguments.
-        **kwargs: Arbitrary keyword arguments.
+                implemented) when submit
+        store: if store reassembled datagram in memory, i.e.,
+            :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
+            (if not, datagram will be discarded after callback)
 
     Example:
-        >>> from pcapkit.reassembly import IPv6
+        >>> from pcapkit.foundation.reassembly import IPv6
         # Initialise instance:
         >>> ipv6_reassembly = IPv6()
         # Call reassembly:

@@ -28,12 +28,13 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
 
     Args:
         strict: if return all datagrams (including those not
-            implemented) when submit
-        *args: Arbitrary positional arguments.
-        **kwargs: Arbitrary keyword arguments.
+                implemented) when submit
+        store: if store reassembled datagram in memory, i.e.,
+            :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
+            (if not, datagram will be discarded after callback)
 
     Example:
-        >>> from pcapkit.reassembly import TCP
+        >>> from pcapkit.foundation.reassembly import TCP
         # Initialise instance:
         >>> tcp_reassembly = TCP()
         # Call reassembly:

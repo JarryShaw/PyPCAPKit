@@ -52,21 +52,21 @@ class TraceFlowMeta(abc.ABCMeta):
 
     """
     if TYPE_CHECKING:
-        #: Protocol name of current reassembly object.
+        #: Protocol name of current object.
         __protocol_name__: 'str'
-        #: Protocol of current reassembly object.
+        #: Protocol of current object.
         __protocol_type__: 'Type[Protocol]'
 
     @property
     def name(cls) -> 'str':
-        """Protocol name of current reassembly object."""
+        """Protocol name of current object."""
         if hasattr(cls, '__protocol_name__'):
             return cls.__protocol_name__
         return cls.__name__
 
     @property
     def protocol(cls) -> 'Type[Protocol]':
-        """Protocol of current reassembly object."""
+        """Protocol of current object."""
         if hasattr(cls, '__protocol_type__'):
             return cls.__protocol_type__
         return protocol_registry.get(cls.name.upper(), Raw)
@@ -80,8 +80,6 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         format: output format
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
-        *args: Arbitrary positional arguments.
-        **kwargs: Arbitrary keyword arguments.
 
     Note:
         This class is for internal use only. For customisation, please use
@@ -94,11 +92,11 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         #: Protocol of current reassembly object.
         __protocol_type__: 'Type[Protocol]'
 
+        #: List of callback functions upon reassembled datagram.
+        __callback_fn__: 'list[CallbackFn]'
+
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
-
-    #: List of callback functions upon reassembled datagram.
-    __callback_fn__: 'list[CallbackFn]' = []
 
     ##########################################################################
     # Defaults.
@@ -335,6 +333,16 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         # trace frame record
         self.dump(packet)
 
+    def __init_subclass__(cls) -> 'None':
+        """Initialise subclass.
+
+        This method is to be used for generating necessary attributes
+        for the :class:`TraceFlow` class. It can be useful to reduce
+        unnecessary registry calls and simplify the customisation process.
+
+        """
+        cls.__callback_fn__ = []
+
 
 class TraceFlow(TraceFlowBase[BufferID, Buffer, Index, Packet], Generic[BufferID, Buffer, Index, Packet]):
     """Base flow tracing class.
@@ -354,8 +362,6 @@ class TraceFlow(TraceFlowBase[BufferID, Buffer, Index, Packet], Generic[BufferID
         format: output format
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
-        *args: Arbitrary positional arguments.
-        **kwargs: Arbitrary keyword arguments.
 
     """
 
@@ -372,7 +378,7 @@ class TraceFlow(TraceFlowBase[BufferID, Buffer, Index, Packet], Generic[BufferID
 
         See Also:
             For more details, please refer to
-            :meth:`~pcapkit.foundation.extraction.Extractor.register_traceflow`.
+            :meth:`pcapkit.foundation.extraction.Extractor.register_traceflow`.
 
         """
         if protocol is None:

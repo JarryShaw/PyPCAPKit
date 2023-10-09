@@ -30,6 +30,7 @@ sphinx-autodoc-typehints = "*"
 furo = "*"
 sphinxext-opengraph = "*"
 sphinx-copybutton = "*"
+sphinxcontrib-mermaid = "*"
 rstcheck = {extras = ["sphinx","toml"],version = "*"}
 esbonio = "*"
 vermin = "*"

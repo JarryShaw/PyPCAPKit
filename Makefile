@@ -43,7 +43,7 @@ docs-clean:
 	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C docs clean
 
 docs-autobuild:
-	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C docs livehtml
+	PCAPKIT_SPHINX=1 SPHINXOPTS="--watch ../pcapkit" pipenv run $(MAKE) -C docs livehtml
 
 isort:
 	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit temp/sort.py

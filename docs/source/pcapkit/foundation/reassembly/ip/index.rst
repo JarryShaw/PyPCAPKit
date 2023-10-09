@@ -6,7 +6,7 @@ The following algorithm implement is based on IP
 reassembly procedure introduced in :rfc:`791`, using
 ``RCVBT`` (fragment receivedbit table). Though another
 algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
-however, this implement still used the elder one.
+however, this implement still used the original one.
 
 .. toctree::
    :maxdepth: 2
@@ -23,6 +23,8 @@ Algorithm
    The algorithm is described in :rfc:`791`.
 
 +-----------+-----------------------------+
+| Acronym   | Description                 |
++===========+=============================+
 | ``FO``    | Fragment Offset             |
 +-----------+-----------------------------+
 | ``IHL``   | Internet Header Length      |

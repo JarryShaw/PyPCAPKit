@@ -21,9 +21,9 @@ PyPCAPKit is a comprehensive Python-native network packet analysis library,
 with `DictDumper`_ as its formatted output dumper.
 
 Unlike popular PCAP file extractors, such as `Scapy`_, `DPKT`_, `PyShark`_,
-and etc, ``pcapkit`` uses **streaming** strategy to read input files. That
-is to read frame by frame, decrease occupation on memory, as well as enhance
-efficiency in some way.
+and etc, ``pcapkit`` is designed to be much more comprehensive, which means
+it is able to provide more detailed information about the packet, as well as
+a more *Pythonic* interface for users to interact with.
 
 Module Structure
 ----------------

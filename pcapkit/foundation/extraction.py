@@ -88,22 +88,31 @@ class Extractor(Generic[P]):
         #: Output file extension.
         _fext: 'Optional[str]'
 
-        #: Auto extract flag.
+        #: Auto extract flag. It indicates if the extraction process should
+        #: continue automatically until the EOF is reached.
         _flag_a: 'bool'
-        #: Store data flag.
+        #: Store data flag. It indicates if the extracted frames should be
+        #: stored in memory.
         _flag_d: 'bool'
-        #: EOF flag.
+        #: EOF flag. It indicates if the EOF is reached.
         _flag_e: 'bool'
-        #: Split file flag.
+        #: Split file flag, i.e. dump each frame into different files.
         _flag_f: 'bool'
-        #: No output file.
+        #: No output file, i.e., no output file is to be generated.
         _flag_q: 'bool'
-        #: Trace flag.
+        #: Trace flag. It indicates if the flow tracing is enabled.
         _flag_t: 'bool'
-        #: Verbose flag.
+        #: Verbose flag. This is used to determine if the verbose callback
+        #: function should be called at each frame.
         _flag_v: 'bool'
-        #: No EOF flag.
+        #: No EOF flag. It is useful when the input file is a live capture,
+        #: as the extraction process will not stop until the user interrupt
+        #: the process.
         _flag_n: 'bool'
+        #: Input filename flag. It indicates if the input file is a file
+        #: name or a binary IO object. For the latter, we should not close
+        #: the file object after extraction.
+        _flag_s: 'bool'
 
         #: Verbose callback function.
         #_vfunc: 'VerboseHandler'
@@ -115,14 +124,17 @@ class Extractor(Generic[P]):
 
         #: Frame record for reassembly.
         _reasm: 'ReassemblyManager'
-        #: Flow tracer.
+        #: Frame record for flow tracing.
         _trace: 'TraceFlowManager'
 
-        #: IPv4 reassembly flag.
+        #: IPv4 flag. It indicates if the IPv4 reassembly and/or flow tracing
+        #: is enabled.
         _ipv4: 'bool'
-        #: IPv6 reassembly flag.
+        #: IPv6 flag. It indicates if the IPv6 reassembly and/or flow tracing
+        #: is enabled.
         _ipv6: 'bool'
-        #: TCP reassembly flag.
+        #: TCP flag. It indicates if the TCP reassembly and/or flow tracing
+        #: is enabled.
         _tcp: 'bool'
 
         #: Extract til protocol.
@@ -151,7 +163,6 @@ class Extractor(Generic[P]):
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]:
     #: Format dumper mapping for writing output files. The values should be a
     #: tuple representing the module name and class name, or a
     #: :class:`dictdumper.dumper.Dumper` subclass, and corresponding file extension.
@@ -169,18 +180,17 @@ class Extractor(Generic[P]):
         },
     )  # type: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]
 
-    #: dict[str, ModuleDescriptor[Engine] | Type[Engine]]: Engine mapping for extracting
-    #: frames. The values should be a tuple representing the module name and class
-    #: name, or an :class:`~pcapkit.foundation.engines.engine.Engine` subclass.
+    #: Engine mapping for extracting frames. The values should be a tuple representing
+    #: the module name and class name, or an :class:`~pcapkit.foundation.engines.engine.Engine`
+    #: subclass.
     __engine__ = {
         'scapy': ModuleDescriptor('pcapkit.foundation.engines.scapy', 'Scapy'),
         'dpkt': ModuleDescriptor('pcapkit.foundation.engines.dpkt', 'DPKT'),
         'pyshark': ModuleDescriptor('pcapkit.foundation.engines.pyshark', 'PyShark'),
     }  # type: dict[str, ModuleDescriptor[Engine] | Type[Engine]]
 
-    #: dict[str, ModuleDescriptor[Reassembly] | Type[Reassembly]]: Reassembly support mapping
-    #: for extracting frames. The values should be a tuple representing the module
-    #: name and class name, or a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
+    #: Reassembly support mapping for extracting frames. The values should be a tuple
+    #: representing the module name and class name, or a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
     #: subclass.
     __reassembly__ = {
         'ipv4': ModuleDescriptor('pcapkit.foundation.reassembly.ipv4', 'IPv4'),
@@ -188,9 +198,8 @@ class Extractor(Generic[P]):
         'tcp': ModuleDescriptor('pcapkit.foundation.reassembly.tcp', 'TCP'),
     }  # type: dict[str, ModuleDescriptor[Reassembly] | Type[Reassembly]]
 
-    #: dict[str, ModuleDescriptor[TraceFlow] | Type[TraceFlow]]: Flow tracing support mapping
-    #: for extracting frames. The values should be a tuple representing the module
-    #: name and class name, or a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
+    #: Flow tracing support mapping for extracting frames. The values should be a tuple
+    #: representing the module name and class name, or a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
     #: subclass.
     __traceflow__ = {
         'tcp': ModuleDescriptor('pcapkit.foundation.traceflow.tcp', 'TCP'),
@@ -400,24 +409,26 @@ class Extractor(Generic[P]):
 
         * Default drivers:
 
-          * Global header: :meth:`~pcapkit.foundation.extraction.Extractor.record_header`
-          * Packet frames: :meth:`~pcapkit.foundation.extraction.Extractor.record_frames`
+          - PCAP Format: :class:`pcapkit.foundation.engines.pcap.PCAP`
+          - PCAP-NG Format: :class:`pcapkit.foundation.engines.pcapng.PCAPNG`
 
-        * DPKT driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_dpkt`
-        * Scapy driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_scapy`
-        * PyShark driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_pyshark`
+        * DPKT driver: :class:`pcapkit.foundation.engines.dpkt.DPKT`
+        * Scapy driver: :class:`pcapkit.foundation.engines.scapy.Scapy`
+        * PyShark driver: :class:`pcapkit.foundation.engines.pyshark.PyShark`
 
         Warns:
-            EngineWarning: If the extraction engine is not available. This is either due to
-                dependency not installed, or supplied engine unknown.
+            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not
+                available. This is either due to dependency not installed, or supplied
+                engine unknown.
 
+        :rtype: None
         """
         if self._exnam in self.__engine__:  # check if engine is supported
             eng = self.__engine__[self._exnam]
             if isinstance(eng, ModuleDescriptor):
                 eng = eng.klass
 
-            if self.import_test(eng.module, name=eng.name) is not None:
+            if self.import_test(eng.module, name=eng.name) is not None:  # type: ignore[arg-type]
                 self._exeng = eng(self)
                 self._exeng.run()
 
@@ -456,7 +467,7 @@ class Extractor(Generic[P]):
             name: Extraction engine display name.
 
         Warns:
-            EngineWarning: If the engine module is not installed.
+            pcapkit.utilities.warnings.EngineWarning: If the engine module is not installed.
 
         Returns:
             If succeeded, returns the module; otherwise, returns :data:`None`.
@@ -491,6 +502,14 @@ class Extractor(Generic[P]):
         6. it will also append corresponding file extension to the output file name if needed
            and ``extension`` is :data:`True`.
 
+        And the method returns the generated input and output filenames as follows:
+
+        0. input filename
+        1. output filename / directory name
+        2. output format
+        3. output file extension (without ``.``)
+        4. if split each frame into different files
+
         Args:
             fin: Input filename or a binary IO object.
             fout: Output filename.
@@ -502,13 +521,7 @@ class Extractor(Generic[P]):
             nofile: If no output file is to be dumped.
 
         Returns:
-            Generated input and output filenames:
-
-            0. input filename
-            1. output filename / directory name
-            2. output format
-            3. output file extension (without ``.``)
-            4. if split each frame into different files
+            Generated input and output filenames.
 
         Raises:
             FileNotFound: If input file does not exists.
@@ -583,9 +596,9 @@ class Extractor(Generic[P]):
     def record_frames(self) -> 'None':
         """Read packet frames.
 
-        The method calls :meth:`self._exeng.read_frame <pcapkit.foundation.engine.engine.Engin.read_frame>`
+        The method calls :meth:`self._exeng.read_frame <pcapkit.foundation.engines.engine.Engine.read_frame>`
         to parse each frame from the input PCAP file; and
-        performs cleanup by calling :meth:`self._exeng.close <pcapkit.foundation.engine.engine.Engin.close>`
+        performs cleanup by calling :meth:`self._exeng.close <pcapkit.foundation.engines.engine.Engine.close>`
         upon completion of the parsing process.
 
         Notes:
@@ -671,7 +684,7 @@ class Extractor(Generic[P]):
             no_eof: if raise :exc:`EOFError` when EOF
 
         Warns:
-            FormatWarning: Warns under following circumstances:
+            pcapkit.utilities.warnings.FormatWarning: Warns under following circumstances:
 
                 * If using PCAP output for TCP flow tracing while the extraction engine is PyShark.
                 * If output file format is not supported.
@@ -826,8 +839,9 @@ class Extractor(Generic[P]):
     def __next__(self) -> 'P':
         """Iterate and parse next PCAP frame.
 
-        It will call :meth:`_read_frame` to parse next PCAP frame internally,
-        until the EOF reached; then it calls :meth:`_cleanup` for the aftermath.
+        It will call :meth:`self._exeng.read_frame <pcapkit.foundation.engines.engine.Engine.read_frame>`
+        to parse next PCAP frame internally, until the EOF reached;
+        then it calls :meth:`self._cleanup <_cleanup>` for the aftermath.
 
         """
         while True:
@@ -887,10 +901,9 @@ class Extractor(Generic[P]):
     def _cleanup(self) -> 'None':
         """Cleanup after extraction & analysis.
 
-        The method clears the :attr:`self._expkg <Extractor._expkg>` and
-        :attr:`self._extmp <Extractor._extmp>` attributes, sets
-        :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
-        as :data:`True` and closes the input file.
+        The method calls :meth:`self._exeng.close <pcapkit.foundation.engines.engine.Engine.close>`,
+        sets :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
+        as :data:`True` and closes the input file (if necessary).
 
         """
         # pylint: disable=attribute-defined-outside-init

@@ -38,6 +38,13 @@ class DPKT(Engine['DPKTPacket']):
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     """
+    if TYPE_CHECKING:
+        import dpkt
+
+        #: Engine extraction package.
+        _expkg: 'dpkt'
+        #: Engine extraction temporary storage.
+        _extmp: 'Reader'
 
     ##########################################################################
     # Defaults.
@@ -68,17 +75,18 @@ class DPKT(Engine['DPKTPacket']):
     def run(self) -> 'None':
         """Call :class:`dpkt.pcap.Reader` to extract PCAP files.
 
-        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`dpkt` and
-        :attr:`self._extmp <Extractor._extmp>` as an iterator from :class:`dpkt.pcap.Reader`.
+        This method assigns :attr:`self._expkg <DPKT._expkg>`
+        as :mod:`dpkt` and :attr:`self._extmp <DPKT._extmp>`
+        as an iterator from :class:`dpkt.pcap.Reader`.
 
         Warns:
-            AttributeWarning: If :attr:`self._exlyr <Extractor._exlyr>` and/or
-                :attr:`self._exptl <Extractor._exptl>` is provided as the DPKT
-                engine currently does not support such operations.
+            AttributeWarning: If :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
+                and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
+                is provided as the DPKT engine currently does not support such operations.
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
-                file.
+                and/or PCAP-NG file.
 
         """
         from pcapkit.foundation.engines.pcap import PCAP
@@ -113,10 +121,11 @@ class DPKT(Engine['DPKTPacket']):
         """Read frames with DPKT engine.
 
         Returns:
-            dpkt.dpkt.Packet: Parsed frame instance.
+            Parsed frame instance.
 
         See Also:
-            Please refer to :meth:`_default_read_frame` for more operational information.
+            Please refer to :meth:`PCAP.read_frame <pcapkit.foundation.engines.pcap.PCAP.read_frame>`
+            for more operational information.
 
         """
         from pcapkit.toolkit.dpkt import (ipv4_reassembly, ipv6_reassembly, packet2dict,

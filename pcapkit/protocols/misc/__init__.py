@@ -15,6 +15,9 @@ indication of empty payload, and PCAP header classes.
 # PCAP Headers
 from pcapkit.protocols.misc.pcap import *
 
+# PCAPNG Format
+from pcapkit.protocols.misc.pcapng import *
+
 # Miscellaneous Classes for Protocols
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.misc.null import NoPayload
@@ -22,6 +25,9 @@ from pcapkit.protocols.misc.null import NoPayload
 __all__ = [
     # PCAP Headers
     'Header', 'Frame',
+
+    # PCAPNG Format
+    'PCAPNG',
 
     # No Payload
     'NoPayload',

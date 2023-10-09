@@ -111,8 +111,8 @@ def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dump
         ext: file extension
 
     See Also:
-        * :func:`pcapkit.foundation.registry.register_extractor_dumper`
-        * :func:`pcapkit.foundation.registry.register_traceflow`
+        * :func:`pcapkit.foundation.registry.foundation.register_extractor_dumper`
+        * :func:`pcapkit.foundation.registry.foundation.register_traceflow`
 
     """
     if isinstance(module, str):
@@ -199,7 +199,8 @@ def register_reassembly_ipv4_callback(callback: 'Reasm_CallbackFn') -> 'None':
     """Registered a new callback function.
 
     The function will register the given callback function to the
-    :data:`pcapkit.foundation.reassembly.ipv4.IPv4.__callback_fn__` registry.
+    :attr:`IPv4.__callback_fn__ <pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__>`
+    registry.
 
     Arguments:
         callback: callback function
@@ -214,7 +215,8 @@ def register_reassembly_ipv6_callback(callback: 'Reasm_CallbackFn') -> 'None':
     """Registered a new callback function.
 
     The function will register the given callback function to the
-    :data:`pcapkit.foundation.reassembly.ipv6.IPv6.__callback_fn__` registry.
+    :attr:`IPv6.__callback_fn__ <pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__>`
+    registry.
 
     Arguments:
         callback: callback function
@@ -229,7 +231,8 @@ def register_reassembly_tcp_callback(callback: 'Reasm_CallbackFn') -> 'None':
     """Registered a new callback function.
 
     The function will register the given callback function to the
-    :data:`pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__` registry.
+    :attr:`TCP.__callback_fn__ <pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__>`
+    registry.
 
     Arguments:
         callback: callback function
@@ -244,7 +247,8 @@ def register_traceflow_tcp_callback(callback: 'Trace_CallbackFn') -> 'None':
     """Registered a new callback function.
 
     The function will register the given callback function to the
-    :data:`pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__` registry.
+    :attr:`TCP.__callback_fn__ <pcapkit.foundation.traceflow.traceflow.TraceFlow.__callback_fn__>`
+    registry.
 
     Arguments:
         callback: callback function

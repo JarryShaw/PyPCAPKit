@@ -113,6 +113,13 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_ext_none
    .. automethod:: _make_ext_multiprefix
 
+   .. autoattribute:: __message__
+      :no-value:
+   .. autoattribute:: __option__
+      :no-value:
+   .. autoattribute:: __extension__
+      :no-value:
+
    .. automethod:: __post_init__
    .. automethod:: __index__
 

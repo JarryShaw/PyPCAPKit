@@ -27,7 +27,8 @@ BufferID: 'TypeAlias' = Tuple[AT, AT, int, 'TransType']
 
 @info_final
 class Packet(Info, Generic[AT]):
-    """Data model for :term:`reasm.ipv4.packet` / :term:`reasm.ipv6.packet`."""
+    """Data model for :term:`IPv4 <reasm.ipv4.packet>` and/or
+    :term:`IPv6 <reasm.ipv6.packet>` packet representation.."""
 
     #: Buffer ID.
     bufid: 'BufferID'
@@ -52,7 +53,8 @@ class Packet(Info, Generic[AT]):
 
 @info_final
 class DatagramID(Info, Generic[AT]):
-    """Data model for :term:`reasm.ipv4.datagram` / :term:`reasm.ipv6.datagram` original packet identifier."""
+    """Data model for :term:`IPv4 <reasm.ipv4.datagram>` and/or
+    :term:`IPv6 <reasm.ipv6.datagram>` original packet identifier."""
 
     #: Source address.
     src: 'AT'
@@ -69,7 +71,8 @@ class DatagramID(Info, Generic[AT]):
 
 @info_final
 class Datagram(Info, Generic[AT]):
-    """Data model for :term:`reasm.ipv4.datagram` / :term:`reasm.ipv6.datagram`."""
+    """Data model for :term:`IPv4 <reasm.ipv4.datagram>` and/or
+    :term:`IPv6 <reasm.ipv6.datagram>` reassembled datagram."""
 
     #: Completed flag.
     completed: 'bool'
@@ -96,7 +99,8 @@ class Datagram(Info, Generic[AT]):
 
 @info_final
 class Buffer(Info, Generic[AT]):
-    """Data model for :term:`reasm.ipv4.buffer` / :term:`reasm.ipv6.buffer`."""
+    """Data model for :term:`IPv4 <reasm.ipv4.buffer>` and/or
+    :term:`IPv6 <reasm.ipv6.buffer>` reassembly buffer entry."""
 
     #: Total data length.
     TDL: 'int'

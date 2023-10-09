@@ -40,6 +40,8 @@ Octets      Bits        Name                    Description
    .. autoproperty:: protocol
    .. autoproperty:: protochain
 
+   .. automethod:: register_parameter
+
    .. automethod:: read
    .. automethod:: make
 

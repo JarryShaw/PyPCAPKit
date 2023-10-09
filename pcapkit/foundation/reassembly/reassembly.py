@@ -74,7 +74,10 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
 
     Args:
         strict: if return all datagrams (including those not
-            implemented) when submit
+                implemented) when submit
+        store: if store reassembled datagram in memory, i.e.,
+            :attr:`self._dtgram <_dtgram>` (if not, datagram
+            will be discarded after callback)
 
     Note:
         This class is for internal use only. For customisation, please use
@@ -87,15 +90,15 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
         #: Protocol of current reassembly object.
         __protocol_type__: 'Type[Protocol]'
 
+        #: List of callback functions upon reassembled datagram.
+        __callback_fn__: 'list[CallbackFn]'
+
     _flag_s: 'bool'
     _flag_d: 'bool'
     _flag_n: 'bool'
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
-
-    #: List of callback functions upon reassembled datagram.
-    __callback_fn__: 'list[CallbackFn]' = []
 
     ##########################################################################
     # Properties.
@@ -196,13 +199,14 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
             Tuple of reassembled datagrams.
 
         Fetch reassembled datagrams from
-        :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`
+        :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
         and returns a *tuple* of such datagrams.
 
         If no cache found, the method will call
-        :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.submit` to
-        *forcedly* obtain newly reassembled payload. Otherwise, the
-        already calculated :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`
+        :meth:`self.submit <pcapkit.foundation.reassembly.reassembly.Reassembly.submit>`
+        to *forcedly* obtain newly reassembled payload. Otherwise, the
+        already calculated
+        :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
         will be returned.
 
         """
@@ -261,7 +265,9 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
             callback: callback function, which will be called
                 when reassembled datagram is obtained, with the
                 list of reassembled datagrams as its only argument
-            index: index of datagram to be called
+            index: index to be inserted in the callback list,; by
+                default, the callback will be appended to the end
+                of the list
 
         """
         if index is not None:
@@ -293,16 +299,25 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
                 will be discarded after callback)
 
         """
-        #: bool: Strict mode flag.
+        #: bool: Strict mode flag. If set to :data:`True`, all
+        #: data will be returned, including those not completely
+        #: reassembled; otherwise, only completely reassembled
+        #: data will be returned.
         self._flag_s = strict
-        #: bool: Store mode flag.
+        #: bool: Store mode flag. If set to :data:`True`, all
+        #: reassembled datagram will be stored in memory, i.e.,
+        #: :attr:`self._dtgram <_dtgram>`; otherwise, datagram
+        #: will be discarded after callback.
         self._flag_d = store
-        #: bool: New datagram flag.
+        #: bool: New datagram flag. If set to :data:`True`, the
+        #: :attr:`self._dtgram <_dtgram>` will be repopulated.
         self._flag_n = False
 
-        #: dict[IT, BT]: Dict buffer field.
+        #: dict[IT, BT]: Dict buffer field. This field is used to
+        #: store reassembled packets in the form of ``{bufid: buffer}``.
         self._buffer = {}  # type: dict[IT, BT]
-        #: list[DT]: List reassembled datagram.
+        #: list[DT]: List reassembled datagram. This list is used
+        #: to store reassembled datagrams.
         self._dtgram = []  # type: list[DT]
 
     def __call__(self, packet: 'PT') -> 'None':
@@ -315,6 +330,16 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
         """
         self._flag_n = True
         self.reassembly(packet)
+
+    def __init_subclass__(cls) -> 'None':
+        """Initialise subclass.
+
+        This method is to be used for generating necessary attributes
+        for the :class:`Reassembly` class. It can be useful to reduce
+        unnecessary registry calls and simplify the customisation process.
+
+        """
+        cls.__callback_fn__ = []
 
 
 class Reassembly(ReassemblyBase[PT, DT, IT, BT], Generic[PT, DT, IT, BT]):
@@ -331,12 +356,11 @@ class Reassembly(ReassemblyBase[PT, DT, IT, BT], Generic[PT, DT, IT, BT]):
                ...
 
     Arguments:
-        fout: output path
-        format: output format
-        byteorder: output file byte order
-        nanosecond: output nanosecond-resolution file flag
-        *args: Arbitrary positional arguments.
-        **kwargs: Arbitrary keyword arguments.
+        strict: if return all datagrams (including those not
+                implemented) when submit
+        store: if store reassembled datagram in memory, i.e.,
+            :attr:`self._dtgram <_dtgram>` (if not, datagram
+            will be discarded after callback)
 
     """
 
@@ -353,7 +377,7 @@ class Reassembly(ReassemblyBase[PT, DT, IT, BT], Generic[PT, DT, IT, BT]):
 
         See Also:
             For more details, please refer to
-            :meth:`~pcapkit.foundation.extraction.Extractor.register_Reassembly`.
+            :meth:`pcapkit.foundation.extraction.Extractor.register_reassembly`.
 
         """
         if protocol is None:

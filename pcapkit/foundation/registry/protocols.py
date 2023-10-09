@@ -176,8 +176,8 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
         class\_: class name
 
     See Also:
-        * :func:`pcapkit.foundation..registry.protocol.register_pcap`
-        * :func:`pcapkit.foundation..registry.protocol.register_pcapng`
+        * :func:`pcapkit.foundation.registry.protocols.register_pcap`
+        * :func:`pcapkit.foundation.registry.protocols.register_pcapng`
 
     """
     if isinstance(module, str):
@@ -360,11 +360,11 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
     :data:`pcapkit.protocols.internet.internet.IPv4` internal registry.
 
     Args:
-        code: :class:`IPv4 <pcapkit.protocols.internet.internet.IPv4>` option code as
+        code: :class:`IPv4 <pcapkit.protocols.internet.ipv4.IPv4>` option code as
             in :class:`~pcapkit.const.ipv4.option_number.OptionNumber`.
         meth: Method name or callable to parse and/or construct the option.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.ipv4.Option`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv4.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(IPv4, f'_read_opt_{meth}'):
@@ -389,7 +389,7 @@ def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_Paramet
             in :class:`~pcapkit.const.hip.parameter.Parameter`.
         meth: Method name or callable to parse and/or construct the parameter.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the parameter.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.hip.Parameter`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.internet.hip.Parameter`.
 
     """
     if isinstance(meth, str) and not hasattr(HIP, f'_read_param_{meth}'):
@@ -414,7 +414,7 @@ def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_Option
             in :class:`~pcapkit.const.ipv6.option.Option`.
         meth: Method name or callable to parse and/or construct the option.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.hopopt.Option`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.internet.hopopt.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(HOPOPT, f'_read_opt_{meth}'):
@@ -439,7 +439,7 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
             option code as in :class:`~pcapkit.const.ipv6.option.Option`.
         meth: Method name or callable to parse and/or construct the option.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.ipv6_opts.Option`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_opts.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(IPv6_Opts, f'_read_opt_{meth}'):
@@ -464,7 +464,7 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
             data type code as in :class:`~pcapkit.const.ipv6.routing.Routing`.
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the routing data.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.ipv6_route.RoutingType`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_route.RoutingType`.
 
     """
     if isinstance(meth, str) and not hasattr(IPv6_Route, f'_read_data_type_{meth}'):
@@ -479,7 +479,7 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
 # NOTE: pcapkit.protocols.internet.mh.MH.__message__
 def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, MH_PacketConstructor]', *,
                         schema: 'Optional[Type[Schema_MH_Packet]]' = None) -> 'None':
-    """Register a message type parser.
+    """Register a MH message type parser.
 
     The function will register the given message type parser to the
     :data:`pcapkit.protocols.internet.mh.MH.__message__` registry.
@@ -489,7 +489,7 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
             data type code as in :class:`~pcapkit.const.mh.packet.Packet`.
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.mh.Packet`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Packet`.
 
     """
     if isinstance(meth, str) and not hasattr(MH, f'_read_msg_{meth}'):
@@ -504,7 +504,7 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
 # NOTE: pcapkit.protocols.internet.mh.MH.__option__
 def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH_OptionConstructor]', *,
                        schema: 'Optional[Type[Schema_MH_Option]]' = None) -> 'None':
-    """Register a option parser.
+    """Register a MH option parser.
 
     The function will register the given option parser to the
     :data:`pcapkit.protocols.internet.mh.MH.__option__` registry.
@@ -514,7 +514,7 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
             data type code as in :class:`~pcapkit.const.mh.option.Option`.
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.mh.Option`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(MH, f'_read_opt_{meth}'):
@@ -539,7 +539,7 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
             data type code as in :class:`~pcapkit.const.mh.cga_extension.CGAExtension`.
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.mh.CGAExtension`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.CGAExtension`.
 
     """
     if isinstance(meth, str) and not hasattr(MH, f'_read_ext_{meth}'):
@@ -673,7 +673,7 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
             :class:`~pcapkit.const.tcp.option.Option`.
         meth: Method name or callable to parse and/or construct the option.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.transport.tcp.Option`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mode_{meth}'):
@@ -698,7 +698,7 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
             :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
         meth: Method name or callable to parse and/or construct the option.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.MPTCP`.
 
     """
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mptcp_{meth}'):
@@ -760,14 +760,14 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
     """Registered a frame parser.
 
     The function will register the given frame parser to the
-    :data:`pcapkit.protocols.application.httpv2.HTTPv2.__frame__` registry.
+    :data:`pcapkit.protocols.application.httpv2.HTTP.__frame__` registry.
 
     Args:
-        code: :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTPv2>` frame type
+        code: :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>` frame type
             code as in :class:`~pcapkit.const.http.frame.Frame`.
         meth: Method name or callable to parse and/or construct the frame.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the frame.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.application.httpv2.FrameType`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.application.httpv2.FrameType`.
 
     """
     if isinstance(meth, str) and not hasattr(HTTPv2, f'_read_http_{meth}'):
@@ -797,7 +797,7 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
             code as in :class:`~pcapkit.const.pcapng.block_type.BlockType`.
         meth: Method name or callable to parse and/or construct the block.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the block.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.misc.pcapng.BlockType`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_block_{meth}'):
@@ -822,7 +822,7 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
             code as in :class:`~pcapkit.const.pcapng.option_type.OptionType`.
         meth: Method name or callable to parse and/or construct the option.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.misc.pcapng.Option`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_option_{meth}'):
@@ -848,7 +848,7 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
         meth: Method name or callable to parse and/or construct the name
             resolution record.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the name resolution record.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord`.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_record_{meth}'):
@@ -873,7 +873,7 @@ def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPN
             secrets type code as in :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`.
         meth: Method name or callable to parse and/or construct the decryption secrets.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the decryption secrets.
-            It should be a subclass of :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets`.
+            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_secrets_{meth}'):

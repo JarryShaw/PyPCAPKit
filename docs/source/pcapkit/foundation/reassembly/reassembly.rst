@@ -13,8 +13,31 @@ implements datagram reassembly of IP and TCP packets.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: protocol
+   .. seealso::
+
+      For more information on customisation and extension, please
+      refer to :doc:`../../../ext`.
+
+   .. property:: name
+      :type: str
+
+      Protocol name of current reassembly class.
+
+      .. note::
+
+         This property is also available as a class variable. Its
+         value can be set by :attr:`__protocol_name__` class attribute.
+
+
+   .. property:: protocol
+      :type: Type[Protocol]
+
+      Protocol of current reassembly class.
+
+      .. note::
+
+         This property is also available as a class variable. Its
+         value can be set by :attr:`__protocol_type__` class attribute.
 
    .. autoproperty:: count
    .. autoproperty:: datagram
@@ -26,9 +49,7 @@ implements datagram reassembly of IP and TCP packets.
    .. automethod:: run
    .. automethod:: register
 
-   .. autoattribute:: _buffer
-      :no-value:
-   .. autoattribute:: _dtgram
+   .. autoattribute:: __callback_fn__
       :no-value:
 
    .. autoattribute:: _flag_s
@@ -38,11 +59,16 @@ implements datagram reassembly of IP and TCP packets.
    .. autoattribute:: _flag_n
       :no-value:
 
-   .. autoattribute:: __callback_fn__
+   .. autoattribute:: _buffer
+      :no-value:
+   .. autoattribute:: _dtgram
       :no-value:
 
    .. automethod:: __call__
    .. automethod:: __init_subclass__
+
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
 
 Internal Definitions
 --------------------

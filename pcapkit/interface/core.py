@@ -27,8 +27,8 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.foundation.extraction import Engines, Formats, Layers, Protocols, VerboseHandler
-    from pcapkit.foundation.reassembly.reassembly import Reassembly
-    from pcapkit.foundation.traceflow.traceflow import TraceFlow
+    from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
+    from pcapkit.foundation.traceflow.traceflow import TraceFlowBase as TraceFlow
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # interface functions

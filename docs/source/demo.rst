@@ -41,7 +41,7 @@ its main interface. Several scenarios are shown as below.
 
       from pcapkit import HTTP, extract
       # set strict to make sure full reassembly
-      extraction = extract(fin='in.pcap', store=False, nofile=True, tcp=True, strict=True)
+      extraction = extract(fin='in.pcap', store=False, nofile=True, reassembly=True, tcp=True, strict=True)
       # print extracted packet if HTTP in reassembled payloads
       for datagram in extraction.reassembly.tcp:
           if datagram.packet is not None and HTTP in datagram.packet:

@@ -40,6 +40,9 @@ __all__ = [
     # PCAP Headers
     'Header', 'Frame',
 
+    # PCAPNG Format
+    'PCAPNG',
+
     # No Payload
     'NoPayload',
 

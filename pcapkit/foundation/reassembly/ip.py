@@ -32,9 +32,10 @@ class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]
 
     Args:
         strict: if return all datagrams (including those not
-            implemented) when submit
-        *args: Arbitrary positional arguments.
-        **kwargs: Arbitrary keyword arguments.
+                implemented) when submit
+        store: if store reassembled datagram in memory, i.e.,
+            :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
+            (if not, datagram will be discarded after callback)
 
     Important:
         This class is not intended to be instantiated directly,

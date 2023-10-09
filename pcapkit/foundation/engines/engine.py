@@ -182,7 +182,7 @@ class Engine(EngineBase[T], Generic[T]):
 
         See Also:
             For more details, please refer to
-            :meth:`~pcapkit.foundation.extraction.Extractor.register_engine`.
+            :meth:`pcapkit.foundation.extraction.Extractor.register_engine`.
 
         """
         if name is None:

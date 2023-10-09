@@ -33,6 +33,13 @@ class PyShark(Engine['PySharkPacket']):
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     """
+    if TYPE_CHECKING:
+        import pyshark
+
+        #: Engine extraction package.
+        _expkg: 'pyshark'
+        #: Engine extraction temporary storage.
+        _extmp: 'FileCapture'
 
     ##########################################################################
     # Defaults.
@@ -63,15 +70,17 @@ class PyShark(Engine['PySharkPacket']):
     def run(self) -> 'None':
         """Call :class:`pyshark.FileCapture` to extract PCAP files.
 
-        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`pyshark` and
-        :attr:`self._extmp <Extractor._extmp>` as an iterator from :class:`pyshark.FileCapture`.
+        This method assigns :attr:`self._expkg <PyShark._expkg>`
+        as :mod:`pyshark` and :attr:`self._extmp <PyShark._extmp>`
+        as an iterator from :class:`pyshark.FileCapture`.
 
         Warns:
             AttributeWarning: Warns under following circumstances:
 
-                * if :attr:`self._exlyr <Extractor._exlyr>` and/or
-                  :attr:`self._exptl <Extractor._exptl>` is provided as the
-                  PyShark engine currently does not support such operations.
+                * if :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
+                  and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
+                  is provided as the PyShark engine currently does not
+                  support such operations.
                 * if reassembly is enabled, as the PyShark engine currently
                   does not support such operation.
 
@@ -106,7 +115,8 @@ class PyShark(Engine['PySharkPacket']):
             Parsed frame instance.
 
         See Also:
-            Please refer to :meth:`_default_read_frame` for more operational information.
+            Please refer to :meth:`PCAP.read_frame <pcapkit.foundation.engines.pcap.PCAP.read_frame>`
+            for more operational information.
 
         """
         from pcapkit.toolkit.pyshark import packet2dict, tcp_traceflow

@@ -15,9 +15,11 @@ import datetime
 import decimal
 import enum
 import ipaddress
+import tempfile
 from typing import TYPE_CHECKING
 
 import aenum
+import dictdumper.dumper
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
@@ -27,13 +29,80 @@ from pcapkit.utilities.logging import logger
 __all__ = ['make_dumper']
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, TextIO, Type
+    from typing import Any, DefaultDict, Optional, TextIO, Type
 
-    from dictdumper.dumper import Dumper
+    from dictdumper.dumper import Dumper as ABCDumper
     from typing_extensions import Literal
 
 
-def make_dumper(output: 'Type[Dumper]') -> 'Type[Dumper]':
+class DumperBase(dictdumper.dumper.Dumper):
+    """Base :class:`~dictdumper.dumper.Dumper` object.
+
+    Note:
+        This class is for internal use only. For customisation, please use
+        :class:`Dumper` instead.
+
+    """
+
+
+class Dumper(DumperBase):
+    """Base :class:`~dictdumper.dumper.Dumper` object.
+
+    This class is a customised :class:`~dictdumper.dumper.Dumper` for the
+    :mod:`pcapkit.dumpkit` implementation, which is generally customised
+    for automatic registration to the
+    :class:`~pcapkit.foundation.extraction.Extraction` and
+    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` output
+    dumper registries.
+
+    """
+
+    def __init_subclass__(cls, /, fmt: 'Optional[str]' = None,
+                          ext: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+        """Initialise subclass.
+
+        This method is used to register the subclass to the
+        :class:`~pcapkit.foundation.extraction.Extraction` and
+        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
+        output dumper registries.
+
+        Args:
+            fmt: Output format to register.
+            ext: Output file extension.
+            *args: Arbitrary positional arguments.
+            **kwargs: Arbitrary keyword arguments.
+
+        If the ``fmt`` is not provided, we will try to get it from the
+        :attr:`~dictdumper.dumper.Dumper.kind` property of the subclass.
+        And if the ``ext`` is not provided, we will infer it from the
+        ``fmt``.
+
+        See Also:
+            - :func:`pcapkit.foundation.registry.foundation.register_dumper`
+            - :func:`pcapkit.foundation.registry.foundation.register_extractor_dumper`
+            - :func:`pcapkit.foundation.registry.foundation.register_traceflow_dumper`
+            - :meth:`pcapkit.foundation.extraction.Extractor.register_dumper`
+            - :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper`
+
+        """
+        if fmt is None:
+            with tempfile.NamedTemporaryFile() as temp:
+                fmt = cls(temp.name).kind
+        fmt = fmt.lower()
+
+        if ext is None:
+            ext = f'.{fmt}'
+
+        from pcapkit.foundation.extraction import Extractor
+        Extractor.register_dumper(fmt, cls, ext)
+
+        from pcapkit.foundation.traceflow.traceflow import TraceFlow
+        TraceFlow.register_dumper(fmt, cls, ext)
+
+        return super().__init_subclass__()
+
+
+def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     """Create a customised :class:`~dictdumper.dumper.Dumper` object.
 
     Args:

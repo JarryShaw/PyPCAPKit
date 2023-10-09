@@ -202,7 +202,7 @@ class MH(Internet[Data_MH, Schema_MH],
     """This class implements Mobility Header.
 
     This class currently supports parsing og the following MH message types,
-    which are resgitered in the :attr:`self.__message__ <pcapkit.protocols.internet.mh.MH.__message__`
+    which are resgitered in the :attr:`self.__message__ <pcapkit.protocols.internet.mh.MH.__message__>`
     attribute:
 
     .. list-table::
@@ -237,7 +237,7 @@ class MH(Internet[Data_MH, Schema_MH],
          - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_be`
 
     This class currently supports parsing the following MH options, which are
-    registered in the :attr:`self.__option__ <pcapkit.protocols.internet.mh.MH.__option__`
+    registered in the :attr:`self.__option__ <pcapkit.protocols.internet.mh.MH.__option__>`
     attribute:
 
     .. list-table::

@@ -20,9 +20,14 @@ construction and analysis library.
 ..    :local:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    pcapkit/index
+
+.. toctree::
+   :maxdepth: 2
+
+   ext
    demo
    pep
 
@@ -46,9 +51,10 @@ About
       :mod:`PyPCAPKit <pcapkit>` project as its CLI support.
 
 Unlike popular PCAP file extractors, such as :mod:`Scapy <scapy>`,
-:mod:`dpkt <dpkt>`, :mod:`PyShark <pyshark>`, and etc, :mod:`pcapkit` uses
-**streaming** strategy to read input files. That is to read frame by frame,
-decrease occupation on memory, as well as enhance efficiency in some way.
+:mod:`dpkt <dpkt>`, :mod:`PyShark <pyshark>`, and etc, :mod:`pcapkit` is
+designed to be much more comprehensive, which means it is able to provide
+more detailed information about the packet, as well as a more *Pythonic*
+interface for users to interact with.
 
 ----------------
 Module Structure

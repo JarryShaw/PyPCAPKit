@@ -33,6 +33,13 @@ class Scapy(Engine['ScapyPacket']):
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     """
+    if TYPE_CHECKING:
+        import scapy.sendrecv
+
+        #: Engine extraction package.
+        _expkg: 'scapy.sendrecv'
+        #: Engine extraction temporary storage.
+        _extmp: 'Iterator[ScapyPacket]'
 
     ##########################################################################
     # Defaults.
@@ -61,16 +68,16 @@ class Scapy(Engine['ScapyPacket']):
     ##########################################################################
 
     def run(self) -> 'None':
-        """Call :func:`scapy.all.sniff` to extract PCAP files.
+        """Call :func:`scapy.sendrecv.sniff` to extract PCAP files.
 
-        This method assigns :attr:`self._expkg <Scapy._expkg>` as :mod:`scapy.all`
-        and :attr:`self._extmp <Scapy._extmp>` as an iterator from
-        :func:`scapy.all.sniff`.
+        This method assigns :attr:`self._expkg <Scapy._expkg>`
+        as :mod:`scapy.sendrecv` and :attr:`self._extmp <Scapy._extmp>`
+        as an iterator from :func:`scapy.sendrecv.sniff`.
 
         Warns:
-            AttributeWarning: If :attr:`self._exlyr <Extractor._exlyr>` and/or
-                :attr:`self._exptl <Extractor._exptl>` is provided as the Scapy
-                engine currently does not support such operations.
+            AttributeWarning: If :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
+                and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
+                is provided as the Scapy engine currently does not support such operations.
 
         """
         ext = self._extractor
@@ -97,7 +104,7 @@ class Scapy(Engine['ScapyPacket']):
             Parsed frame instance.
 
         See Also:
-            Please refer to :meth:`<PCAP.read_frame> pcapkit.foundation.engine.pcap.PCAP.read_frame`
+            Please refer to :meth:`PCAP.read_frame <pcapkit.foundation.engines.pcap.PCAP.read_frame>`
             for more operational information.
 
         """

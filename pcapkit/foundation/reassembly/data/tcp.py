@@ -27,7 +27,7 @@ BufferID: 'TypeAlias' = Tuple[IPAddress, int, IPAddress, int]
 
 @info_final
 class Packet(Info):
-    """Data model for :term:`reasm.tcp.packet`."""
+    """Data model for :term:`TCP <reasm.tcp.packet>` packet representation."""
 
     #: Buffer ID.
     bufid: 'BufferID'
@@ -60,7 +60,7 @@ class Packet(Info):
 
 @info_final
 class DatagramID(Info, Generic[IPAddress]):
-    """Data model for :term:`reasm.tcp.datagram` original packet identifier."""
+    """Data model for :term:`TCP <reasm.tcp.datagram>` original packet identifier."""
 
     #: Source address.
     src: 'tuple[IPAddress, int]'
@@ -75,7 +75,7 @@ class DatagramID(Info, Generic[IPAddress]):
 
 @info_final
 class Datagram(Info, Generic[IPAddress]):
-    """Data model for :term:`reasm.tcp.datagram`."""
+    """Data model for :term:`TCP <reasm.tcp.datagram>`."""
 
     #: Completed flag.
     completed: 'bool'
@@ -102,7 +102,7 @@ class Datagram(Info, Generic[IPAddress]):
 
 @info_final
 class HoleDiscriptor(Info):
-    """Data model for :term:`reasm.tcp.buffer` hole descriptor."""
+    """Data model for :term:`TCP <reasm.tcp.buffer>` hole descriptor."""
 
     #: Start of hole.
     first: 'int'
@@ -115,7 +115,7 @@ class HoleDiscriptor(Info):
 
 @info_final
 class Fragment(Info):
-    """Data model for :term:`reasm.tcp.buffer` ACK list fragment item."""
+    """Data model for :term:`TCP <reasm.tcp.buffer>` ACK list fragment item."""
 
     #: List of reassembled packets.
     ind: 'list[int]'
@@ -132,7 +132,7 @@ class Fragment(Info):
 
 @info_final
 class Buffer(Info):
-    """Data model for :term:`reasm.tcp.buffer`."""
+    """Data model for :term:`TCP <reasm.tcp.buffer>` buffer entry."""
 
     #: Hole descriptor list.
     hdl: 'list[HoleDiscriptor]'

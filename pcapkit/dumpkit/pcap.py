@@ -12,8 +12,7 @@ specifically for PCAP format, which is alike those described in
 import sys
 from typing import TYPE_CHECKING
 
-import dictdumper
-
+from pcapkit.dumpkit.common import DumperBase as Dumper
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
 
@@ -31,7 +30,7 @@ __all__ = [
 ]
 
 
-class PCAPIO(dictdumper.Dumper):
+class PCAPIO(Dumper):
     """PCAP file dumper."""
 
     ##########################################################################

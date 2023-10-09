@@ -14,12 +14,13 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: module
+   .. autoattribute:: __engine_name__
+   .. autoattribute:: __engine_module__
 
    .. autoproperty:: header
    .. autoproperty:: version
    .. autoproperty:: dlink
+   .. autoproperty:: nanosecond
 
    .. automethod:: run
    .. automethod:: read_frame
@@ -36,19 +37,33 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: module
+   .. autoattribute:: __engine_name__
+   .. autoattribute:: __engine_module__
 
    .. automethod:: run
    .. automethod:: read_frame
 
-File Block Context
-------------------
+Internal Definitions
+--------------------
 
 .. autoclass:: pcapkit.foundation.engines.pcapng.Context
-   :members:
-   :undoc-members:
+   :no-members:
    :show-inheritance:
-   
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. important::
+
+      We do not store any packet blocks, e.g.,
+      :class:`~pcapkit.protocols.data.misc.pcapng.PacketBlock`,
+      :class:`~pcapkit.protocols.data.misc.pcapng.SimplePacketBlock`,
+      and :class:`~pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock`,
+      in the :class:`Context` object, as they will be directly
+      stored in the :class:`~pcapkit.foundation.extraction.Extractor`.
+
+   .. autoattribute:: section
+   .. autoattribute:: interfaces
+   .. autoattribute:: names
+   .. autoattribute:: journals
+   .. autoattribute:: secrets
+   .. autoattribute:: custom
+   .. autoattribute:: statistics
+   .. autoattribute:: unknown

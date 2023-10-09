@@ -21,7 +21,7 @@ schema definitions as well as various customisable interfaces.
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    interface/index
    foundation/index
@@ -32,6 +32,16 @@ schema definitions as well as various customisable interfaces.
    utilities/index
    const/index
    vendor/index
+
+Library Index
+=============
+
+.. module:: pcapkit.all
+
+:mod:`pcapkit` has defined various and numerous functions
+and classes, which have different features and purposes.
+To make a simple index for this library, :mod:`pcapkit.all`
+contains all things from :mod:`pcapkit`.
 
 Command Line Tool
 =================
@@ -90,16 +100,6 @@ Command Line Tool
                            Indicate extraction stops after which protocol.
      -L LAYER, --layer LAYER
                            Indicate extract frames until which layer.
-
-Library Index
-=============
-
-.. module:: pcapkit.all
-
-:mod:`pcapkit` has defined various and numerous functions
-and classes, which have different features and purposes.
-To make a simple index for this library, :mod:`pcapkit.all`
-contains all things from :mod:`pcapkit`.
 
 Environment Variables
 =====================

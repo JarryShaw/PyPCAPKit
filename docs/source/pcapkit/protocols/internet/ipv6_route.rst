@@ -49,6 +49,9 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_data_type_2
    .. automethod:: _make_data_type_rpl
 
+   .. autoattribute:: __routing__
+      :no-value:
+
    .. automethod:: __post_init__
    .. automethod:: __index__
 

@@ -15,6 +15,3 @@ Data Models
 .. autoclass:: pcapkit.interface.misc.Stream
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
