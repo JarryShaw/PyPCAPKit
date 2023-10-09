@@ -10,18 +10,16 @@ only, which reconstructs fragmented IPv6 packets back to
 origin. Please refer to :doc:`ip` for more information.
 
 """
-from typing import TYPE_CHECKING
-
 from pcapkit.foundation.reassembly.ip import IP
 from pcapkit.protocols.internet.ipv6 import IPv6 as IPv6_Protocol
-
-if TYPE_CHECKING:
-    from ipaddress import IPv6Address
 
 __all__ = ['IPv6']
 
 
-class IPv6(IP['IPv6Address']):
+# BUG: It is supposed to be ``IP[IPv6Address]``. But somehow Python
+# thinks that ``IP`` should take 4 arguments as in its parent class
+# ``Reassembly``. So we have to drop the type hint here.
+class IPv6(IP):
     """Reassembly for IPv6 payload.
 
     Args:

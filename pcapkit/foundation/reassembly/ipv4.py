@@ -10,18 +10,16 @@ only, which reconstructs fragmented IPv4 packets back to
 origin. Please refer to :doc:`ip` for more information.
 
 """
-from typing import TYPE_CHECKING
-
 from pcapkit.foundation.reassembly.ip import IP
 from pcapkit.protocols.internet.ipv4 import IPv4 as IPv4_Protocol
-
-if TYPE_CHECKING:
-    from ipaddress import IPv4Address
 
 __all__ = ['IPv4']
 
 
-class IPv4(IP['IPv4Address']):
+# BUG: It is supposed to be ``IP[IPv4Address]``. But somehow Python
+# thinks that ``IP`` should take 4 arguments as in its parent class
+# ``Reassembly``. So we have to drop the type hint here.
+class IPv4(IP):
     """Reassembly for IPv4 payload.
 
     Args:

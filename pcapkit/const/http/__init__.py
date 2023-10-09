@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.application.http.HTTP` Constant Enumerations
-=============================================================================
+r""":class:`~pcapkit.protocols.application.http.HTTP` Constant Enumerations
+==============================================================================
 
 .. module:: pcapkit.const.http
 

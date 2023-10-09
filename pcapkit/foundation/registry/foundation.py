@@ -100,7 +100,7 @@ def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dump
         should be as ``{module}.{class_}``.
 
     The function will register the given dumper class to the
-    :data:`pcapkit.foundation.traceflow.TraceFlow.__output__` and
+    :data:`pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__` and
     :data:`pcapkit.foundation.extraction.Extractor.__output__` registry.
 
     Arguments:
@@ -112,7 +112,7 @@ def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dump
 
     See Also:
         * :func:`pcapkit.foundation.registry.foundation.register_extractor_dumper`
-        * :func:`pcapkit.foundation.registry.foundation.register_traceflow`
+        * :func:`pcapkit.foundation.registry.foundation.register_traceflow_dumper`
 
     """
     if isinstance(module, str):

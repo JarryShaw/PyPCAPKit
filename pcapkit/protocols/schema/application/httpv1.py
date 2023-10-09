@@ -12,7 +12,7 @@ __all__ = ['HTTP']
 
 @schema_final
 class HTTP(Schema):
-    """Header schema for HTTP/1.\* packet."""
+    r"""Header schema for HTTP/1.\* packet."""
 
     #: Packet data.
     data: 'bytes' = BytesField(lambda pkt: pkt['__length__'])
