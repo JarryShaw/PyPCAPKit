@@ -39,9 +39,7 @@ which is automatically generating :class:`pcapkit.const.ipx.socket.Socket`.
    :members: FLAG, LINK
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure
 .. [*] https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number

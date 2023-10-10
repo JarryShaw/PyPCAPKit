@@ -9,7 +9,7 @@ Link Layer Protocols
 link layer, with detailed implementation and methods.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    link
    ethernet
@@ -28,4 +28,4 @@ Protocol Registry
 
 .. data:: pcapkit.protocols.link.LINKTYPE
 
-   Alias of :class:`pcapkit.const.reg.linktype.LinkType`.
+   alias of :class:`pcapkit.const.reg.linktype.LinkType`

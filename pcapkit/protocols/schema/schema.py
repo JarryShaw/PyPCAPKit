@@ -127,12 +127,16 @@ class SchemaMeta(abc.ABCMeta):
       .. seealso::
 
          This is implemented thru setting up the initial field dictionary
-         in the :meth:`__prepare__` method, and then inherit the field
+         in the |prepare|_ method, and then inherit the field
          dictionaries from the base classes.
 
-         Later, during the class creation, the :meth:`Field.__set_name__`
+         Later, during the class creation, the
+         :meth:`Field.__set_name__ <pcapkit.corekit.fields.field.FieldBase.__set_name__>`
          method will be called to set the field name for each field object,
          as well as to add the field object to the field dictionary.
+
+         .. |prepare| replace:: :meth:`__prepare__`
+         .. _prepare: https://docs.python.org/3/reference/datamodel.html#preparing-the-class-namespace
 
     * :attr:`Schema.__additional__` and :attr:`Schema.__excluded__` are
       lists of additional and excluded field names, which are used to
@@ -142,8 +146,8 @@ class SchemaMeta(abc.ABCMeta):
 
       .. note::
 
-         This is implemented thru the :meth:`__new__` method, which will
-         inherit the additional and excluded field names from the base
+         This is implemented thru the :meth:`~object.__new__` method, which
+         will inherit the additional and excluded field names from the base
          classes, as well as populating the additional and excluded field
          from the subclass attributes.
 
@@ -161,12 +165,6 @@ class SchemaMeta(abc.ABCMeta):
             print(A.__additional__)  # ['a', 'b']
             print(B.__additional__)  # ['a', 'b', 'c', 'd']
             print(C.__additional__)  # ['a', 'b', 'c', 'd', 'e', 'f']
-
-    Args:
-        name: Schema class name.
-        bases: Schema class bases.
-        attrs: Schema class attributes.
-        **kwargs: Arbitrary keyword arguments in class definition.
 
     """
 
@@ -687,13 +685,7 @@ class EnumMeta(SchemaMeta, Generic[ET]):
 
     * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*
       proxy (similar to :class:`property`, but on class variables) to the
-      :attr:`__enum__` mapping.
-
-    Args:
-        name: Schema class name.
-        bases: Schema class bases.
-        attrs: Schema class attributes.
-        **kwargs: Arbitrary keyword arguments in class definition.
+      :attr:`EnumSchema.__enum__` mapping.
 
     """
 
@@ -765,7 +757,7 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
         """Mapping of enumeration numbers to schemas.
 
         Note:
-            This property is not available as a class
+            This property is also available as a class
             attribute.
 
         """
@@ -785,13 +777,13 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
         not given, the subclass will not be registered.
 
         Notes:
-            If :attr:`~EnumMeta.__enum__` is not yet defined at function call,
+            If :attr:`__enum__` is not yet defined at function call,
             it will automatically be defined as a :class:`collections.defaultdict`
             object, with the default value set to :attr:`__default__`.
 
-            If intended to customise the :attr:`~EnumMeta.__enum__` mapping,
+            If intended to customise the :attr:`__enum__` mapping,
             it is possible to override the :meth:`__init_subclass__` method and
-            define :attr:`~EnumMeta.__enum__` manually.
+            define :attr:`__enum__` manually.
 
         """
         if not hasattr(cls, '__enum__'):

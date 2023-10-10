@@ -193,8 +193,16 @@ if TYPE_CHECKING:
 
 __all__ = ['MH']
 
-NTPTimestamp = collections.namedtuple('NTPTimestamp', 'seconds fraction')
-NTPTimestamp.__doc__ = """NTP timestamp format, c.f., :rfc:`1305`."""
+
+class NTPTimestamp(collections.namedtuple('NTPTimestamp', 'seconds fraction')):
+    """NTP timestamp format, c.f., :rfc:`1305`."""
+
+    __slots__ = ()
+
+    #: Seconds since 1 January 1900.
+    seconds: int
+    #: Fraction of a second.
+    fraction: int
 
 
 class MH(Internet[Data_MH, Schema_MH],
@@ -607,7 +615,7 @@ class MH(Internet[Data_MH, Schema_MH],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction argument, please refer to :meth:`self.make <MH.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.

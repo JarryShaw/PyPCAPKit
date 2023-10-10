@@ -39,9 +39,7 @@ which is automatically generating :class:`pcapkit.const.ftp.return_code.ReturnCo
    :members: FLAG, LINK
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions.xhtml#ftp-commands-extensions-2
 .. [*] https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes

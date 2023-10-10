@@ -30,7 +30,7 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
    flowchart LR
        A{{EngineMeta}} -.->|metaclass| B(EngineBase)
 
-       subgraph built-in
+       subgraph built-in [Built-in Engines]
            %% direction TD
 
            PCAP
@@ -38,7 +38,7 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
        end
        B --> built-in
 
-       subgraph third-party
+       subgraph third-party [3rd Party Engines]
            %% direction TD
 
            Scapy

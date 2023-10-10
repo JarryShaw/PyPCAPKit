@@ -96,8 +96,8 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Routing, str | tuple[TypeParser, TypeConstructor]]:
-    #: Type code to method mapping. Method names are expected to be referred to
+    #: DefaultDict[Enum_Routing, str | tuple[TypeParser, TypeConstructor]]: Type
+    #: code to method mapping. Method names are expected to be referred to
     #: the class by ``_read_data_type_${name}`` and/or ``_make_data_type_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the routing type by itself.
@@ -327,7 +327,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction argument, please refer to :meth:`self.make <IPv6_Route.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.

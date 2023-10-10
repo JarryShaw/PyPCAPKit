@@ -105,9 +105,9 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
 
     #: Layer of protocol, can be one of ``Link``, ``Internet``, ``Transport``
     #: and ``Application``. For example, the layer of
-    #: :class:`~pcapkit.protocols.link.Ethernet` is ``Link``. However, certain
-    #: protocols are not in any layer, such as
-    # :class:`~pcapkit.protocols.misc.raw.Raw`, and thus its layer is :obj:`None`.
+    #: :class:`~pcapkit.protocols.link.ethernet.Ethernet` is ``Link``. However,
+    #: certain protocols are not in any layer, such as
+    #: :class:`~pcapkit.protocols.misc.raw.Raw`, and thus its layer is :obj:`None`.
     __layer__: 'Optional[Literal["Link", "Internet", "Transport", "Application"]]' = None
 
     #: Protocol index mapping for decoding next layer, c.f.
@@ -205,8 +205,9 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
     def id(cls) -> 'tuple[str, ...]':
         """Index ID of the protocol.
 
-        By default, it returns the name of the protocol. In certain cases, the
-        method may return multiple values.
+        Returns:
+            By default, it returns the name of the protocol. In certain cases,
+            the method may return multiple values.
 
         See Also:
             :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
@@ -500,7 +501,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
             length: Length of packet data.
             _layer (str): Parse packet until ``_layer``
                 (:attr:`self._exlayer <pcapkit.protocols.protocol.Protocol._exlayer>`).
-            _protocol (str | ProtocolBase | Type[ProtocolBase]): Parse packet until ``_protocol``
+            _protocol (Union[str, Protocol, Type[Protocol]]): Parse packet until ``_protocol``
                 (:attr:`self._exproto <pcapkit.protocols.protocol.Protocol._exproto>`).
             **kwargs: Arbitrary keyword arguments.
 
@@ -657,7 +658,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         """Subscription (``getitem``) support.
 
         * If ``key`` is a :class:`~pcapkit.protocols.protocol.Protocol` object,
-          the method will fetch its indexes (:meth:`~pcapkit.protocols.protocol.Protocol.id`).
+          the method will fetch its indexes (:meth:`self.id <pcapkit.protocols.protocol.Protocol.id>`).
         * Later, search the packet's chain of protocols with the calculated ``key``.
         * If no matches, then raises :exc:`~pcapkit.utilities.exceptions.ProtocolNotFound`.
 
@@ -760,13 +761,13 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
     ##########################################################################
 
     def _get_payload(self) -> 'bytes':
-        """Get payload of :attr:`self.__header__ <Protocol.__header__>`.
+        """Get payload from :attr:`self.__header__ <Protocol.__header__>`.
 
         Returns:
             Payload of :attr:`self.__header__ <Protocol.__header__>` as :obj:`bytes`.
 
         See Also:
-            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.
+            This is a wrapper function for :meth:`pcapkit.protocols.schema.schema.Schema.get_payload`.
 
         """
         return self.__header__.get_payload()
@@ -883,7 +884,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         * If ``discard`` is set as :data:`True`, returns the packet body (in
           :obj:`bytes`) only.
         * Otherwise, returns the header and payload data as
-          :class:`~pcapkit.protocols.data.protocol.Data_Packet` object.
+          :class:`~pcapkit.protocols.data.protocol.Packet` object.
 
         """
         if header is not None:
@@ -1089,7 +1090,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
             dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`unpack`)
+            packet: packet info (passed from :meth:`self.unpack <Protocol.unpack>`)
 
         Returns:
             Current protocol with next layer extracted.
@@ -1126,7 +1127,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         Arguments:
             proto: next layer protocol index
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`unpack`)
+            packet: packet info (passed from :meth:`self.unpack <Protocol.unpack>`)
 
         Returns:
             Instance of next layer.

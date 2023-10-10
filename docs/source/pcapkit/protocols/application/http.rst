@@ -31,8 +31,6 @@ and :class:`HTTP/2 <pcapkit.protocols.application.application.httpv2>`.
 
    .. automethod:: _guess_version
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol

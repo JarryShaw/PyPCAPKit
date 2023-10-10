@@ -152,9 +152,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.TS`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_ts`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_ts`
-       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.ESEC`
-         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_esec`
-         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_esec`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.E_SEC`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_e_sec`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_e_sec`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.RR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_rr`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_rr`
@@ -800,10 +800,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         )
         return opt
 
-    def _read_opt_esec(self, schema: 'Schema_ESECOption', *, options: 'Option') -> 'Data_ESECOption':  # pylint: disable=unused-argument
-        """Read IPv4 Extended Security (``ESEC``) option.
+    def _read_opt_e_sec(self, schema: 'Schema_ESECOption', *, options: 'Option') -> 'Data_ESECOption':  # pylint: disable=unused-argument
+        """Read IPv4 Extended Security (``E-SEC``) option.
 
-        Structure of IPv4 Extended Security (``ESEC``) option [:rfc:`1108`]:
+        Structure of IPv4 Extended Security (``E-SEC``) option [:rfc:`1108`]:
 
         .. code-block:: text
 
@@ -1477,11 +1477,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             data=ts_list,
         )
 
-    def _make_opt_esec(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_ESECOption]' = None, *,
+    def _make_opt_e_sec(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_ESECOption]' = None, *,
                        format: 'int' = 0,
                        info: 'Optional[bytes]' = None,
                        **kwargs: 'Any') -> 'Schema_ESECOption':
-        """Make IPv4 Extended Security (``ESEC``) option.
+        """Make IPv4 Extended Security (``E-SEC``) option.
 
         Args:
             kind: option type code

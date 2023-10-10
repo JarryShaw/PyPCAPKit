@@ -122,7 +122,7 @@ def locator_value_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     Returns:
         * If ``kind`` is ``0`` and ``size`` is ``16``,
-          returns an :class:`~pcapkit.corekit.fields.ipaddress.IPv6Field` instance.
+          returns an :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` instance.
         * If ``kind`` is ``1`` and ``size`` is ``20``,
           returns a :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
           :class:`~pcapkit.protocols.schema.internet.hip.LocatorData` instance.

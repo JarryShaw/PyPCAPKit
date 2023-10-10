@@ -209,7 +209,7 @@ class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction argument, please refer to :meth:`self.make <IPv6_Frag.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.

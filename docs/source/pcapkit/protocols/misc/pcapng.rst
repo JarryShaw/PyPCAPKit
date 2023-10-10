@@ -1176,8 +1176,6 @@ Data Models
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html

@@ -22,3 +22,7 @@ Miscellaneous Fields
 .. autoclass:: pcapkit.corekit.fields.misc.NoValueField
    :members:
    :show-inheritance:
+
+.. autoclass:: pcapkit.corekit.fields.misc.SchemaField
+   :members:
+   :show-inheritance:

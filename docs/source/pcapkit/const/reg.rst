@@ -70,9 +70,7 @@ which is automatically generated from :class:`pcapkit.vendor.reg.apptype.AppType
    :undoc-members:
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] http://www.tcpdump.org/linktypes.html
 .. [*] https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1

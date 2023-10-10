@@ -226,7 +226,7 @@ class AH(IPsec[Data_AH, Schema_AH],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction argument, please refer to :meth:`self.make <AH.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.

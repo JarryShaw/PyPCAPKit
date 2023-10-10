@@ -48,11 +48,8 @@ as below:
    ======= ===== ===================== ==========================================
 
 .. autoclass:: pcapkit.protocols.link.l2tp.L2TP
-   :members:
+   :no-members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. autoproperty:: name
    .. autoproperty:: length
@@ -74,18 +71,12 @@ Header Schemas
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 Type Stubs
 ~~~~~~~~~~
 
 .. autoclass:: pcapkit.protocols.schema.link.l2tp.FlagsType
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 Data Models
 -----------
@@ -96,18 +87,10 @@ Data Models
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.link.l2tp.Flags
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol

@@ -172,9 +172,9 @@ def smf_i_dpd_tid_selector(pkt: 'dict[str, Any]') -> 'Field':
     Returns:
         * If ``tid_type`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.NoValueField`
           instance.
-        * If ``tid_type`` is ``1``, returns a :class:`~pcapkit.corekit.fields.ipaddress.IPv4Field`
+        * If ``tid_type`` is ``1``, returns a :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField`
           instance.
-        * If ``tid_type`` is ``2``, returns a :class:`~pcapkit.corekit.fields.ipaddress.IPv6Field`
+        * If ``tid_type`` is ``2``, returns a :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`
           instance.
         * Otherwise, returns a :class:`~pcapkit.corekit.fields.strings.BytesField` instance.
 

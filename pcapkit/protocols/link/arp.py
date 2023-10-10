@@ -80,8 +80,8 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
     - Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.ARP`) [:rfc:`826`]
     - Reverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.rarp.RARP`) [:rfc:`903`]
-    - Dynamic Reverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.DRARP`) [:rfc:`1931`]
-    - Inverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.InARP`) [:rfc:`2390`]
+    - Dynamic Reverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.rarp.DRARP`) [:rfc:`1931`]
+    - Inverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.InARP`) [:rfc:`2390`]
 
     """
     #: Name of corresponding protocol.

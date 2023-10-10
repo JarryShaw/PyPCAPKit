@@ -281,9 +281,7 @@ which is automatically generated from :class:`pcapkit.vendor.hip.transport.Trans
    :undoc-members:
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#certificate-types
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-cipher-id

@@ -82,9 +82,7 @@ which is automatically generating :class:`pcapkit.+const+.http.status_code.Statu
    :members: FLAG, LINK
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#error-code
 .. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#frame-type

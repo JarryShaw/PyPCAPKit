@@ -86,9 +86,7 @@ which is automatically generated from :class:`pcapkit.vendor.http.status_code.St
    :undoc-members:
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#error-code
 .. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#frame-type

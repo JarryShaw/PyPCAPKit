@@ -9,7 +9,7 @@ Internet Layer Protocols
 internet layer, with detailed implementation and methods.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    internet
    ip
@@ -34,4 +34,4 @@ Protocol Registry
 
 .. data:: pcapkit.protocols.internet.ETHERTYPE
 
-   Alias of :class:`pcapkit.const.reg.ethertype.EtherType`.
+   alias of :class:`pcapkit.const.reg.ethertype.EtherType`

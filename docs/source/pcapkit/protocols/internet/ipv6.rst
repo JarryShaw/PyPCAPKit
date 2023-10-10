@@ -26,9 +26,6 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
@@ -56,9 +53,6 @@ Header Schemas
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 Type Stubs
 ~~~~~~~~~~
 
@@ -66,8 +60,20 @@ Type Stubs
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
+   .. attribute:: version
+      :type: int
+
+      Version.
+
+   .. attribute:: class
+      :type: int
+
+      Traffic class.
+
+   .. attribute:: label
+      :type: int
+
+      Flow label.
 
 Data Models
 -----------
@@ -77,9 +83,6 @@ Data Models
 .. autoclass:: pcapkit.protocols.data.internet.ipv6.IPv6
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. attribute:: class
       :type: int
@@ -91,8 +94,6 @@ Data Models
          This field is conflict with :keyword:`class` keyword. To access this field,
          directly use :func:`getattr` instead.
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/IPv6_packet

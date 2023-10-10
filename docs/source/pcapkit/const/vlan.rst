@@ -26,8 +26,6 @@ which is automatically generated from :class:`pcapkit.vendor.vlan.priority_level
    :undoc-members:
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels

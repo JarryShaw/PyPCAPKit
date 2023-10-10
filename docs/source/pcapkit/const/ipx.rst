@@ -41,9 +41,7 @@ which is automatically generated from :class:`pcapkit.vendor.ipx.socket.Socket`.
    :undoc-members:
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure
 .. [*] https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number

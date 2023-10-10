@@ -5,10 +5,15 @@
 
 .. module:: pcapkit.protocols.link.link
 
-:mod:`pcapkit.protocols.link.link` contains :class:`~pcapkit.protocols.link.link.Link`,
-which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.link.arp.ARP`/InARP,
-:class:`~pcapkit.protocols.link.ethernet.Ethernet`, :class:`~pcapkit.protocols.link.l2tp.L2TP`,
-:class:`~pcapkit.protocols.link.ospf.OSPF`, :class:`~pcapkit.protocols.link.rarp.RARP`/DRARP and etc.
+:mod:`pcapkit.protocols.link.link` contains
+:class:`~pcapkit.protocols.link.link.Link`,
+which is a base class for link layer protocols, e.g.
+:class:`~pcapkit.protocols.link.arp.ARP`/:class:`~pcapkit.protocols.link.arp.InARP`,
+:class:`~pcapkit.protocols.link.ethernet.Ethernet`,
+:class:`~pcapkit.protocols.link.l2tp.L2TP`,
+:class:`~pcapkit.protocols.link.ospf.OSPF`,
+:class:`~pcapkit.protocols.link.rarp.RARP`/:class:`~pcapkit.protocols.link.rarp.DRARP`
+and etc.
 
 """
 import collections

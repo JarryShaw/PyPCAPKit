@@ -263,9 +263,7 @@ which is automatically generating :class:`pcapkit.const.hip.transport.Transport`
    :members: FLAG, LINK
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#certificate-types
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-cipher-id

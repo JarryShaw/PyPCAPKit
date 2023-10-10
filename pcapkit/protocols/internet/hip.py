@@ -311,7 +311,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
          - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_failed`
        * - :attr:`~pcapkit.const.hip.parameter.Parameter.REG_FROM`
          - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_from`
-       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_SIGNEED`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_SIGNED`
          - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_echo_response_signed`
        * - :attr:`~pcapkit.const.hip.parameter.Parameter.TRANSPORT_FORMAT_LIST`
          - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_transport_format_list`
@@ -611,7 +611,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction argument, please refer to :meth:`self.make <HIP.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.

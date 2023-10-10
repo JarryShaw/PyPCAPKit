@@ -191,8 +191,8 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:
-    #: Option code to method mapping, c.f. :meth:`_read_ipv6_opts` and/or
+    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option
+    #: code to method mapping, c.f. :meth:`_read_ipv6_opts` and/or
     #: :meth:`_make_ipv6_opts`. Method names are expected to be referred to the
     #: class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``, and if such
     #: name not found, the value should then be a method that can parse the
@@ -393,7 +393,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction argument, please refer to :meth:`self.make <IPv6_Opts.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.
@@ -503,7 +503,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -588,7 +587,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -623,7 +621,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -664,7 +661,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -729,7 +725,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -793,7 +788,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -853,7 +847,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -917,7 +910,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -962,7 +954,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -1024,7 +1015,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -1057,7 +1047,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -1089,7 +1078,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -1134,7 +1122,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:
@@ -1173,7 +1160,6 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
         Returns:

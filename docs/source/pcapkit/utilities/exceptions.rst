@@ -411,9 +411,7 @@ when exception raised on user's operation.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] See |tbtrim|_ project for a modern Pythonic implementation.
 
