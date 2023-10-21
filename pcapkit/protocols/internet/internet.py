@@ -17,7 +17,8 @@ from typing import TYPE_CHECKING, Generic, cast
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import PT, ST, ProtocolBase as Protocol
+from pcapkit.protocols.protocol import PT, ST
+from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn

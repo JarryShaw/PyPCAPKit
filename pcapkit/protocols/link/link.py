@@ -16,7 +16,8 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.protocols.protocol import PT, ST, ProtocolBase as Protocol
+from pcapkit.protocols.protocol import PT, ST
+from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 

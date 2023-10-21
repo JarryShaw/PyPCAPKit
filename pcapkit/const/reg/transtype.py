@@ -199,8 +199,8 @@ class TransType(IntEnum):
     #: NBMA Address Resolution Protocol [:rfc:`1735`]
     NARP = 54
 
-    #: IP Mobility [Charlie Perkins]
-    MOBILE = 55
+    #: Minimal IPv4 Encapsulation [:rfc:`2004`][Charlie Perkins]
+    Min_IPv4 = 55
 
     #: Transport Layer Security Protocol using Kryptonet key management [Christer
     #: Oberg]

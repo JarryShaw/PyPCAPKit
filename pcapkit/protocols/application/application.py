@@ -16,7 +16,8 @@ from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.misc.null import NoPayload
-from pcapkit.protocols.protocol import PT, ST, ProtocolBase as Protocol
+from pcapkit.protocols.protocol import PT, ST
+from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
 if TYPE_CHECKING:

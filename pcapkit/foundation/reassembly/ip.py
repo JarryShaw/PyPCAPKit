@@ -21,6 +21,7 @@ from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembl
 
 if TYPE_CHECKING:
     from typing import Type
+
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.protocols.internet.ip import IP as IP_Protocol
 

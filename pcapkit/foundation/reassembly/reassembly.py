@@ -13,10 +13,10 @@ implements datagram reassembly of IP and TCP packets.
 """
 import abc
 from typing import TYPE_CHECKING, Generic, Type, TypeVar, cast
-from pcapkit.protocols.misc.raw import Raw
 
-from pcapkit.utilities.exceptions import UnsupportedCall
 from pcapkit.protocols import __proto__ as protocol_registry
+from pcapkit.protocols.misc.raw import Raw
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Type
