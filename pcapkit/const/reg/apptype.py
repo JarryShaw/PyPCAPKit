@@ -23047,6 +23047,15 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_8666: 'AppType' = 8666, 'reserved', TransportProtocol.get('udp')
 
+    #: [N/A] Unassigned
+    unassigned_8667: 'AppType' = 8667, 'unassigned', TransportProtocol.get('undefined')
+
+    #: [TCP] Spartan management
+    spartan: 'AppType' = 8668, 'spartan', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_8668: 'AppType' = 8668, 'reserved', TransportProtocol.get('udp')
+
     #: [TCP] Motorola Solutions Customer Programming Software for Radio Management
     msi_cps_rm: 'AppType' = 8675, 'msi-cps-rm', TransportProtocol.get('tcp')
 
@@ -31365,7 +31374,7 @@ class AppType(StrEnum):
         if 8616 <= value <= 8664:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 8667 <= value <= 8674:
+        if 8669 <= value <= 8674:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 8676 <= value <= 8685:
