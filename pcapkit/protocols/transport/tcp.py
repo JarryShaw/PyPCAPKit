@@ -302,8 +302,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
+    #: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol
+    #: index mapping for decoding next layer, c.f.
+    #: :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[arg-type,return-value]
@@ -313,8 +314,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         },
     )
 
-    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:
-    #: Option code to method mapping, c.f. :meth:`_read_tcp_options` and
+    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option
+    #: code to method mapping, c.f. :meth:`_read_tcp_options` and
     #: :meth:`_make_tcp_options`. Method names are expected to be referred to
     #: the class by ``_read_mode_${name}`` and ``_make_mode_${name}``, and if
     #: such name not found, the value should then be a method that can parse
@@ -347,8 +348,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         },
     )  # type: DefaultDict[int, str | tuple[OptionParser, OptionConstructor]]
 
-    #: DefaultDict[Enum_MPTCPOption, str | tuple[MPOptionParser, MPOptionConstructor]]:
-    #: Option code to method mapping, c.f. :meth:`_read_mode_mp` and :meth:`_make_mode_mp`.
+    #: DefaultDict[Enum_MPTCPOption, str | tuple[MPOptionParser, MPOptionConstructor]]: Option
+    #: code to method mapping, c.f. :meth:`_read_mode_mp` and :meth:`_make_mode_mp`.
     #: Method names are expected to be referred to the class by ``_read_mptcp_${name}``
     #: and ``_make_mptcp_${name}``, and if such name not found, the value should
     #: then be a method that can parse the option by itself.

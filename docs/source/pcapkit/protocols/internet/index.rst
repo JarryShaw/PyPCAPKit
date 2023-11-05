@@ -1,5 +1,5 @@
-Internet Layer Protocols
-========================
+Internet Layer
+==============
 
 .. module:: pcapkit.protocols.internet
 .. module:: pcapkit.protocols.data.internet

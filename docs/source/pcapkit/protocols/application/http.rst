@@ -14,9 +14,6 @@ and :class:`HTTP/2 <pcapkit.protocols.application.application.httpv2>`.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length

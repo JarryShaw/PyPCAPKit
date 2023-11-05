@@ -532,8 +532,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[Protocol] | Type[Protocol]]
 
-    #: DefaultDict[Enum_BlockType, str | tuple[BlockParser, BlockConstructor]]:
-    #: Block type to method mapping. Method names are expected to be referred
+    #: DefaultDict[Enum_BlockType, str | tuple[BlockParser, BlockConstructor]]: Block
+    #: type to method mapping. Method names are expected to be referred
     #: to the class by ``_read_block_${name}`` and/or ``_make_block_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the block by itself.
@@ -554,8 +554,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_BlockType | int, str | tuple[BlockParser, BlockConstructor]]
 
-    #: DefaultDict[Enum_OptionType, str | tuple[OptionParser, OptionConstructor]]:
-    #: Block option type to method mapping. Method names are expected to be
+    #: DefaultDict[Enum_OptionType, str | tuple[OptionParser, OptionConstructor]]: Block
+    #: option type to method mapping. Method names are expected to be
     #: referred to the class by ``_read_option_${name}`` and/or ``_make_option_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the option by itself.
@@ -605,8 +605,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_OptionType | int, str | tuple[OptionParser, OptionConstructor]]
 
-    #: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]:
-    #: :manpage:`systemd(1)` Journal Export record type to method mapping. Method names are expected
+    #: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]: :manpage:`systemd(1)`
+    #: Journal Export record type to method mapping. Method names are expected
     #: to be referred to the class by ``_read_record_${name}`` and/or ``_make_record_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the name record by itself.
@@ -619,8 +619,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_RecordType | int, str | tuple[RecordParser, RecordConstructor]]
 
-    #: DefaultDict[Enum_SecretsType, str | tuple[SecretsParser, SecretsConstructor]]:
-    #: Decryption secrets type to method mapping. Method names are expected to
+    #: DefaultDict[Enum_SecretsType, str | tuple[SecretsParser, SecretsConstructor]]: Decryption
+    #: secrets type to method mapping. Method names are expected to
     #: be referred to the class by ``_read_secrets_${name}`` and/or ``_make_secrets_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the decryption secrets by itself.

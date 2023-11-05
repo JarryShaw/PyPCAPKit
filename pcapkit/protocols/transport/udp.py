@@ -65,8 +65,9 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
+    #: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol
+    #: index mapping for decoding next layer, c.f.
+    #: :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[arg-type,return-value]

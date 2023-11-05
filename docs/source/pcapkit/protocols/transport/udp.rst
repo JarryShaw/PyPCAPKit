@@ -21,9 +21,6 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: src
@@ -48,9 +45,6 @@ Header Schemas
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 Data Models
 -----------
 
@@ -59,9 +53,6 @@ Data Models
 .. autoclass:: pcapkit.protocols.data.transport.udp.UDP
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. rubric:: Footnotes
 

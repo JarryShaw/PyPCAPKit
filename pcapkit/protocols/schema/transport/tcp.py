@@ -220,9 +220,9 @@ def mptcp_add_address_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
-        * If IP version is 4, a :class:`~pcapkit.corekit.fields.ipaddress.IPv4Field`
+        * If IP version is 4, a :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField`
           instance.
-        * If IP version is 6, a :class:`~pcapkit.corekit.fields.ipaddress.IPv6Field`
+        * If IP version is 6, a :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`
           instance.
 
     """

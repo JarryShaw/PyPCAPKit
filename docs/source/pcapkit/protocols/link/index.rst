@@ -1,5 +1,5 @@
-Link Layer Protocols
-====================
+Link Layer
+==========
 
 .. module:: pcapkit.protocols.link
 .. module:: pcapkit.protocols.data.link
