@@ -41,9 +41,7 @@ which is automatically generated from :class:`pcapkit.vendor.arp.operation.Opera
    :undoc-members:
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml#arp-parameters-2
 .. [*] https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml#arp-parameters-1

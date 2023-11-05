@@ -67,9 +67,7 @@ which is automatically generating :class:`pcapkit.const.tcp.flags.Flags`.
    :members: FLAG, LINK
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-2
 .. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#mptcp-option-subtypes

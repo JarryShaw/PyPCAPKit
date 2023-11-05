@@ -15,13 +15,8 @@ protocol family [*]_, eg.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. automethod:: id
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Internet_Protocol

@@ -24,4 +24,15 @@ functions for :mod:`pcapkit.dumpkit` implementation, which is
 generally the customised hooks for :class:`dictdumper.Dumper`
 classes.
 
+.. autoclass:: pcapkit.dumpkit.common.Dumper
+   :members:
+   :show-inheritance:
+
 .. autofunction:: pcapkit.dumpkit.common.make_dumper
+
+Internal Definitions
+--------------------
+
+.. autoclass:: pcapkit.dumpkit.common.DumperBase
+   :members:
+   :show-inheritance:

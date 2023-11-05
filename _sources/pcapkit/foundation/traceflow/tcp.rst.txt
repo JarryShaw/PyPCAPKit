@@ -1,12 +1,12 @@
-Trace TCP Flows
-===============
+Follow TCP Stream
+=================
 
 .. module:: pcapkit.foundation.traceflow.tcp
 
 :mod:`pcapkit.foundation.traceflow.tcp` is the interface to trace
 TCP flows from a series of packets and connections.
 
-.. autoclass:: pcapkit.foundation.traceflow.TraceFlow
+.. autoclass:: pcapkit.foundation.traceflow.tcp.TCP
    :no-members:
    :show-inheritance:
 
@@ -17,6 +17,9 @@ TCP flows from a series of packets and connections.
    .. automethod:: trace
    .. automethod:: submit
 
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
+
 Terminology
 -----------
 
@@ -24,7 +27,7 @@ Terminology
 
    trace.tcp.packet
        Data structure for **TCP flow tracing**
-       (:meth:`TraceFlow.dump <pcapkit.foundation.traceflow.TraceFlow.dump>`)
+       (:meth:`TraceFlow.dump <pcapkit.foundation.traceflow.traceflow.TraceFlow.dump>`)
        is as following:
 
        .. code-block:: python
@@ -46,7 +49,7 @@ Terminology
 
    trace.tcp.buffer
        Data structure for internal buffering when performing flow tracing algorithms
-       (:attr:`TraceFlow._buffer <pcapkit.foundation.traceflow.TraceFlow._buffer>`)
+       (:attr:`TraceFlow._buffer <pcapkit.foundation.traceflow.traceflow.TraceFlow._buffer>`)
        is as following:
 
        .. code-block:: text
@@ -67,7 +70,7 @@ Terminology
 
    trace.tcp.index
        Data structure for **TCP flow tracing** (element from
-       :attr:`TraceFlow.index <pcapkit.foundation.traceflow.TraceFlow.index>`
+       :attr:`TraceFlow.index <pcapkit.foundation.traceflow.traceflow.TraceFlow.index>`
        *tuple*) is as following:
 
        .. code-block:: text
@@ -91,21 +94,12 @@ Data Structures
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autodata:: pcapkit.foundation.traceflow.data.tcp.BufferID
 
 .. autoclass:: pcapkit.foundation.traceflow.data.tcp.Buffer
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.foundation.traceflow.data.tcp.Index
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.

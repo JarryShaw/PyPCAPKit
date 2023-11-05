@@ -19,9 +19,7 @@ Security (IPsec) protocol family [*]_, eg.
 
    .. automethod:: id
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/IPsec
 .. [*] :class:`~pcapkit.protocols.internet.esp.ESP` class is currently **NOT** implemented.

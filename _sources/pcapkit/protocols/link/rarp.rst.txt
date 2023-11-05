@@ -28,9 +28,6 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. automethod:: id
 
    .. automethod:: __index__
@@ -39,13 +36,8 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. automethod:: id
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] http://en.wikipedia.org/wiki/Address_Resolution_Protocol

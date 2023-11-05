@@ -41,9 +41,7 @@ which is automatically generated from :class:`pcapkit.vendor.ospf.packet.Packet`
    :undoc-members:
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/ospf-authentication-codes/ospf-authentication-codes.xhtml#authentication-codes
 .. [*] https://www.iana.org/assignments/ospfv2-parameters/ospfv2-parameters.xhtml#ospfv2-parameters-3

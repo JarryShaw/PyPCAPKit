@@ -1,5 +1,5 @@
-Extractor for PCAP Files
-========================
+File Extractor
+==============
 
 .. module:: pcapkit.foundation.extraction
 
@@ -17,35 +17,7 @@ extracts parametres from a PCAP file.
    :no-members:
    :show-inheritance:
 
-   :param fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
-   :param fout: file name to be written
-   :param format: file format of output
-
-   :param auto: if automatically run till EOF
-   :param extension: if check and append extensions to output file
-   :param store: if store extracted packet info
-
-   :param files: if split each frame into different files
-   :param nofile: if no output file is to be dumped
-   :param verbose: a :obj:`bool` value or a function takes the :class:`Extractor` instance and current parsed frame (depends on engine selected) as parameters to print verbose output information
-
-   :param engine: extraction engine to be used
-   :param layer: extract til which layer
-   :param protocol: extract til which protocol
-
-   :param reassembly: if perform reassembly
-   :param strict: if set strict flag for reassembly
-
-   :param trace: if trace TCP traffic flows
-   :param trace_fout: path name for flow tracer if necessary
-   :param trace_format: output file format of flow tracer
-   :param trace_byteorder: output file byte order
-   :param trace_nanosecond: output nanosecond-resolution file flag
-
-   :param ip: if record data for IPv4 & IPv6 reassembly
-   :param ipv4: if perform IPv4 reassembly
-   :param ipv6: if perform IPv6 reassembly
-   :param tcp: if perform TCP reassembly and/or flow tracing
+   .. automethod:: __init__
 
    .. autoproperty:: length
    .. autoproperty:: format
@@ -62,29 +34,12 @@ extracts parametres from a PCAP file.
    .. automethod:: register_traceflow
 
    .. automethod:: run
+
+   .. automethod:: import_test
+   .. automethod:: make_name
+
    .. automethod:: record_header
    .. automethod:: record_frames
-
-   .. autoattribute:: _frnum
-   .. autoattribute:: _reasm
-   .. autoattribute:: _trace
-
-   .. autoattribute:: _ifile
-   .. autoattribute:: _ofile
-
-   .. autoattribute:: _exnam
-   .. autoattribute:: _exeng
-
-   .. autoattribute:: _flag_a
-   .. autoattribute:: _flag_d
-   .. autoattribute:: _flag_e
-   .. autoattribute:: _flag_q
-   .. autoattribute:: _flag_t
-   .. autoattribute:: _flag_v
-
-   .. autoattribute:: _ipv4
-   .. autoattribute:: _ipv6
-   .. autoattribute:: _tcp
 
    .. autoattribute:: __output__
       :no-value:
@@ -94,6 +49,30 @@ extracts parametres from a PCAP file.
       :no-value:
    .. autoattribute:: __traceflow__
       :no-value:
+
+   .. automethod:: _cleanup
+
+   .. autoattribute:: _flag_a
+   .. autoattribute:: _flag_d
+   .. autoattribute:: _flag_e
+   .. autoattribute:: _flag_q
+   .. autoattribute:: _flag_t
+   .. autoattribute:: _flag_v
+   .. autoattribute:: _flag_n
+   .. autoattribute:: _flag_s
+
+   .. autoattribute:: _ifile
+   .. autoattribute:: _ofile
+
+   .. autoattribute:: _frnum
+   .. autoattribute:: _reasm
+   .. autoattribute:: _trace
+
+   .. autoattribute:: _exnam
+   .. autoattribute:: _exeng
+
+   .. autoattribute:: _exlyr
+   .. autoattribute:: _exptl
 
    .. automethod:: __iter__
    .. automethod:: __next__

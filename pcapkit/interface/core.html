@@ -7,13 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/interface/core.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.interface.core defines core user-oriented interfaces, variables, and etc., which wraps around the foundation classes from pcapkit.foundation. Miscellaneous Constants: Output File Formats: L..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_interface_core_2fd5a377.png" />
-<meta property="og:image:alt" content="pcapkit.interface.core defines core user-oriented interfaces, variables, and etc., which wraps around the foundation classes from pcapkit.foundation. Miscell..." />
-<meta name="description" content="pcapkit.interface.core defines core user-oriented interfaces, variables, and etc., which wraps around the foundation classes from pcapkit.foundation. Miscellaneous Constants: Output File Formats: L..." />
-<meta name="twitter:card" content="summary_large_image" />
+<meta property="og:description" content="pcapkit.interface.core defines core user-oriented interfaces, variables, and etc., which wraps around the foundation classes from pcapkit.foundation. Constants Defintion: Output File Formats: Layer..." />
+<meta name="description" content="pcapkit.interface.core defines core user-oriented interfaces, variables, and etc., which wraps around the foundation classes from pcapkit.foundation. Constants Defintion: Output File Formats: Layer..." />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Auxiliary Interface" href="misc.html" /><link rel="prev" title="User Interface" href="index.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
@@ -180,10 +175,16 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Library Foundation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../foundation/extraction.html">Extractor for PCAP Files</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/reassembly/index.html">Fragmented Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Fragmented Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/reassembly/index.html">Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/reassembly.html">Base Class</a></li>
-<li class="toctree-l4 has-children"><a class="reference internal" href="../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ip.html">Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
@@ -192,30 +193,17 @@
 <li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Trace Flows</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/traceflow/index.html">Flow Tracing</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Flow Tracing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/traceflow.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/tcp.html">Trace TCP Flows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../foundation/registry.html">Registry Management</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/engine.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/builtin.html">Built-in Engines</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Protocol Family</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../protocols/protocol.html">Root Protocol</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcap.html">PCAP File Headers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/null.html">No-Payload Packet</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Link Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/link/index.html">Link Layer</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Link Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/link.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
@@ -225,7 +213,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Internet Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/internet/index.html">Internet Layer</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Internet Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/internet.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
@@ -241,18 +229,25 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Transport Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Transport Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/transport.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Application Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Application Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/application.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
 </li>
 </ul>
@@ -326,6 +321,9 @@
 </li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pep.html">Help Wanted</a></li>
 </ul>
@@ -391,7 +389,7 @@ if file not exist, raise <code class="xref py py-exc docutils literal notranslat
 <li><p><strong>store</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if store extracted packet info</p></li>
 <li><p><strong>files</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if split each frame into different files</p></li>
 <li><p><strong>nofile</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if no output file is to be dumped</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a>, <a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>, <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2023.10.06)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – a <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> value or a function takes the <code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a>, <a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>, <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2023.11.02)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – a <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> value or a function takes the <code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code>
 instance and current parsed frame (depends on engine selected) as
 parameters to print verbose output information</p></li>
 <li><p><strong>engine</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'default'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pcapkit'</span></code>, <code class="docutils literal notranslate"><span class="pre">'dpkt'</span></code>, <code class="docutils literal notranslate"><span class="pre">'scapy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pyshark'</span></code>]]) – extraction engine to be used</p></li>
@@ -437,7 +435,7 @@ parameters to print verbose output information</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a></p>
+<dd class="field-even"><p><a class="reference internal" href="../foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <a class="reference internal" href="../foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> object of corresponding protocol.</p>
@@ -463,7 +461,7 @@ parameters to print verbose output information</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a></p>
+<dd class="field-even"><p><a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> object.</p>
@@ -474,79 +472,79 @@ parameters to print verbose output information</p></li>
 </dl>
 </dd></dl>
 
-<section id="miscellaneous-constants">
-<h2>Miscellaneous Constants<a class="headerlink" href="#miscellaneous-constants" title="Link to this heading">#</a></h2>
+<section id="constants-defintion">
+<h2>Constants Defintion<a class="headerlink" href="#constants-defintion" title="Link to this heading">#</a></h2>
 <section id="output-file-formats">
 <h3>Output File Formats<a class="headerlink" href="#output-file-formats" title="Link to this heading">#</a></h3>
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.TREE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">TREE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tree'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.TREE" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.TREE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">TREE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tree'</span></em><a class="headerlink" href="#pcapkit.interface.core.TREE" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.JSON">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">JSON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'json'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.JSON" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.JSON">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">JSON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'json'</span></em><a class="headerlink" href="#pcapkit.interface.core.JSON" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.PLIST">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PLIST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'plist'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.PLIST" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.PLIST">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PLIST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'plist'</span></em><a class="headerlink" href="#pcapkit.interface.core.PLIST" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.PCAP">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PCAP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pcap'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.PCAP" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.PCAP">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PCAP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pcap'</span></em><a class="headerlink" href="#pcapkit.interface.core.PCAP" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="layer-thresholds">
 <h3>Layer Thresholds<a class="headerlink" href="#layer-thresholds" title="Link to this heading">#</a></h3>
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.RAW">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">RAW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'none'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.RAW" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.RAW">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">RAW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'none'</span></em><a class="headerlink" href="#pcapkit.interface.core.RAW" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.LINK">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'link'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.LINK" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.LINK">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'link'</span></em><a class="headerlink" href="#pcapkit.interface.core.LINK" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.INET">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">INET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'internet'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.INET" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.INET">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">INET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'internet'</span></em><a class="headerlink" href="#pcapkit.interface.core.INET" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.TRANS">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">TRANS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'transport'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.TRANS" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.TRANS">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">TRANS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'transport'</span></em><a class="headerlink" href="#pcapkit.interface.core.TRANS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.APP">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">APP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'application'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.APP" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.APP">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">APP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'application'</span></em><a class="headerlink" href="#pcapkit.interface.core.APP" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="extration-engines">
 <h3>Extration Engines<a class="headerlink" href="#extration-engines" title="Link to this heading">#</a></h3>
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.DPKT">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">DPKT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'dpkt'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.DPKT" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.DPKT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">DPKT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'dpkt'</span></em><a class="headerlink" href="#pcapkit.interface.core.DPKT" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.Scapy">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">Scapy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scapy'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.Scapy" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.Scapy">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">Scapy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scapy'</span></em><a class="headerlink" href="#pcapkit.interface.core.Scapy" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.PCAPKit">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PCAPKit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'default'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.PCAPKit" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.PCAPKit">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PCAPKit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'default'</span></em><a class="headerlink" href="#pcapkit.interface.core.PCAPKit" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.interface.core.pcapkit.interface.core.PyShark">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PyShark</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyshark'</span></em><a class="headerlink" href="#pcapkit.interface.core.pcapkit.interface.core.PyShark" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.interface.core.PyShark">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PyShark</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyshark'</span></em><a class="headerlink" href="#pcapkit.interface.core.PyShark" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
@@ -609,7 +607,7 @@ parameters to print verbose output information</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Core Interface</a><ul>
-<li><a class="reference internal" href="#miscellaneous-constants">Miscellaneous Constants</a><ul>
+<li><a class="reference internal" href="#constants-defintion">Constants Defintion</a><ul>
 <li><a class="reference internal" href="#output-file-formats">Output File Formats</a></li>
 <li><a class="reference internal" href="#layer-thresholds">Layer Thresholds</a></li>
 <li><a class="reference internal" href="#extration-engines">Extration Engines</a></li>
@@ -626,7 +624,7 @@ parameters to print verbose output information</p></li>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=e3eff1ea"></script>
+</div><script src="../../_static/documentation_options.js?v=6ff1003f"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>

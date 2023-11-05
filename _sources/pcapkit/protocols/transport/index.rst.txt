@@ -1,5 +1,5 @@
-Transport Layer Protocols
-=========================
+Transport Layer
+===============
 
 .. module:: pcapkit.protocols.transport
 .. module:: pcapkit.protocols.data.transport
@@ -9,7 +9,7 @@ Transport Layer Protocols
 transport layer, with detailed implementation and methods.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    transport
    tcp
@@ -24,4 +24,4 @@ Protocol Registry
 
 .. data:: pcapkit.protocols.transport.TRANSTYPE
 
-   Alias of :class:`pcapkit.const.reg.transtype.TransType`.
+   alias of :class:`pcapkit.const.reg.transtype.TransType`

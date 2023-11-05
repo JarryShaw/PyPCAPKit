@@ -7,14 +7,9 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/reassembly/tcp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.reassembly.tcp contains Reassembly only, which reconstructs fragmented TCP packets back to origin. Algorithm:,, DSN, Data Sequence Number,, ACK, TCP Acknowledgement,, SYN, TCP Sy..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_foundation_reassembly_tcp_1f083ffc.png" />
-<meta property="og:image:alt" content="pcapkit.foundation.reassembly.tcp contains Reassembly only, which reconstructs fragmented TCP packets back to origin. Algorithm:,, DSN, Data Sequence Number,..." />
-<meta name="description" content="pcapkit.foundation.reassembly.tcp contains Reassembly only, which reconstructs fragmented TCP packets back to origin. Algorithm:,, DSN, Data Sequence Number,, ACK, TCP Acknowledgement,, SYN, TCP Sy..." />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="Trace Flows" href="../traceflow/index.html" /><link rel="prev" title="IPv6 Datagram Reassembly" href="ip/ipv6.html" />
+<meta property="og:description" content="pcapkit.foundation.reassembly.tcp contains Reassembly only, which reconstructs fragmented TCP packets back to origin. Algorithm:,, Attribute, Definition,,, DSN, Data Sequence Number,, ACK, TCP Ackn..." />
+<meta name="description" content="pcapkit.foundation.reassembly.tcp contains Reassembly only, which reconstructs fragmented TCP packets back to origin. Algorithm:,, Attribute, Definition,,, DSN, Data Sequence Number,, ACK, TCP Ackn..." />
+<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="Flow Tracing" href="../traceflow/index.html" /><link rel="prev" title="IPv6 Datagram Reassembly" href="ip/ipv6.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>TCP Datagram Reassembly - PyPCAPKit</title>
@@ -180,10 +175,16 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Library Foundation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Library Foundation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../extraction.html">Extractor for PCAP Files</a></li>
-<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Fragmented Packets Reassembly</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Fragmented Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Packets Reassembly</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="reassembly.html">Base Class</a></li>
-<li class="toctree-l4 has-children"><a class="reference internal" href="ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="ip/ip.html">Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
@@ -192,30 +193,17 @@
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">TCP Datagram Reassembly</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Trace Flows</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../traceflow/index.html">Flow Tracing</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Flow Tracing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../traceflow/traceflow.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../traceflow/tcp.html">Trace TCP Flows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../registry.html">Registry Management</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../engines/engine.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../engines/builtin.html">Built-in Engines</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../engines/3rdparty.html">3rd-Party Engines</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Protocol Family</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../protocols/protocol.html">Root Protocol</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcap.html">PCAP File Headers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/null.html">No-Payload Packet</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Link Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/link/index.html">Link Layer</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Link Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/link.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
@@ -225,7 +213,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Internet Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/internet/index.html">Internet Layer</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Internet Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/internet.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
@@ -241,18 +229,25 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Transport Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/transport/index.html">Transport Layer</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Transport Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/transport.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Application Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/application/index.html">Application Layer</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Application Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/application.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
 </li>
 </ul>
@@ -326,6 +321,9 @@
 </li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
 </ul>
@@ -385,14 +383,15 @@ which reconstructs fragmented TCP packets back to origin.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if return all datagrams (including those not
 implemented) when submit</p></li>
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+<li><p><strong>store</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if store reassembled datagram in memory, i.e.,
+<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
+(if not, datagram will be discarded after callback)</p></li>
 </ul>
 </dd>
 </dl>
 <div class="admonition-example admonition">
 <p class="admonition-title">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pcapkit.reassembly</span> <span class="kn">import</span> <span class="n">TCP</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly</span> <span class="kn">import</span> <span class="n">TCP</span>
 <span class="go"># Initialise instance:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tcp_reassembly</span> <span class="o">=</span> <span class="n">TCP</span><span class="p">()</span>
 <span class="go"># Call reassembly:</span>
@@ -436,6 +435,18 @@ implemented) when submit</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__protocol_name__">
+<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TCP'</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_name__" title="Link to this definition">#</a></dt>
+<dd><p>Protocol name of current reassembly object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__">
+<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type[Protocol]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.TCP'&gt;</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__" title="Link to this definition">#</a></dt>
+<dd><p>Protocol of current reassembly object.</p>
+</dd></dl>
+
 </dd></dl>
 
 <section id="algorithm">
@@ -447,41 +458,46 @@ implemented) when submit</p></li>
 </div>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Definition</p></th>
+</tr>
+</thead>
 <tbody>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DSN</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DSN</span></code></p></td>
 <td><p>Data Sequence Number</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ACK</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ACK</span></code></p></td>
 <td><p>TCP Acknowledgement</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SYN</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SYN</span></code></p></td>
 <td><p>TCP Synchronisation Flag</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">FIN</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FIN</span></code></p></td>
 <td><p>TCP Finish Flag</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RST</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RST</span></code></p></td>
 <td><p>TCP Reset Connection Flag</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">BUFID</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">BUFID</span></code></p></td>
 <td><p>Buffer Identifier</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">HDL</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">HDL</span></code></p></td>
 <td><p>Hole Discriptor List</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ISN</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ISN</span></code></p></td>
 <td><p>Initial Sequence Number</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">src</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">src</span></code></p></td>
 <td><p>source IP</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dst</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dst</span></code></p></td>
 <td><p>destination IP</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">srcport</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">srcport</span></code></p></td>
 <td><p>source TCP port</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dstport</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dstport</span></code></p></td>
 <td><p>destination TCP port</p></td>
 </tr>
 </tbody>
@@ -664,19 +680,18 @@ is as following:</p>
 </section>
 <section id="module-pcapkit.foundation.reassembly.data.tcp">
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.foundation.reassembly.data.tcp" title="Link to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.BufferID">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">BufferID</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.BufferID" title="Link to this definition">#</a></dt>
+<dd><p>Buffer ID.</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Packet">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/tcp.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Packet" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
-<p>Data model for <a class="reference internal" href="#term-reasm.tcp.packet"><span class="xref std std-term">reasm.tcp.packet</span></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
+<p>Data model for <a class="reference internal" href="#term-reasm.tcp.packet"><span class="xref std std-term">TCP</span></a> packet representation.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Packet.bufid">
 <span class="sig-name descname"><span class="pre">bufid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BufferID</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Packet.bufid" title="Link to this definition">#</a></dt>
@@ -755,15 +770,7 @@ is as following:</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.DatagramID">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">DatagramID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/tcp.html#DatagramID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>]</p>
-<p>Data model for <a class="reference internal" href="#term-reasm.tcp.datagram"><span class="xref std std-term">reasm.tcp.datagram</span></a> original packet identifier.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
+<p>Data model for <a class="reference internal" href="#term-reasm.tcp.datagram"><span class="xref std std-term">TCP</span></a> original packet identifier.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.DatagramID.src">
 <span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple[IPAddress,</span> <span class="pre">int]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID.src" title="Link to this definition">#</a></dt>
@@ -788,15 +795,7 @@ is as following:</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Datagram">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Datagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/tcp.html#Datagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>]</p>
-<p>Data model for <a class="reference internal" href="#term-reasm.tcp.datagram"><span class="xref std std-term">reasm.tcp.datagram</span></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
+<p>Data model for <a class="reference internal" href="#term-reasm.tcp.datagram"><span class="xref std std-term">TCP</span></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Datagram.completed">
 <span class="sig-name descname"><span class="pre">completed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.completed" title="Link to this definition">#</a></dt>
@@ -839,15 +838,7 @@ is as following:</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">HoleDiscriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/tcp.html#HoleDiscriptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
-<p>Data model for <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">reasm.tcp.buffer</span></a> hole descriptor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
+<p>Data model for <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">TCP</span></a> hole descriptor.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor.first">
 <span class="sig-name descname"><span class="pre">first</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor.first" title="Link to this definition">#</a></dt>
@@ -866,15 +857,7 @@ is as following:</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Fragment">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Fragment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/tcp.html#Fragment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Fragment" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
-<p>Data model for <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">reasm.tcp.buffer</span></a> ACK list fragment item.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
+<p>Data model for <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">TCP</span></a> ACK list fragment item.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Fragment.ind">
 <span class="sig-name descname"><span class="pre">ind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[int]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.ind" title="Link to this definition">#</a></dt>
@@ -902,8 +885,8 @@ is as following:</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.BufferID">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">BufferID</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.BufferID" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">BufferID</span></span><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
 <dd><p>Buffer ID.</p>
 <p>alias of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
 </dd></dl>
@@ -912,15 +895,7 @@ is as following:</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Buffer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">Buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/tcp.html#Buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Buffer" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
-<p>Data model for <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">reasm.tcp.buffer</span></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
+<p>Data model for <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">TCP</span></a> buffer entry.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Buffer.hdl">
 <span class="sig-name descname"><span class="pre">hdl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[HoleDiscriptor]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Buffer.hdl" title="Link to this definition">#</a></dt>
@@ -954,7 +929,7 @@ is as following:</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Trace Flows</div>
+                <div class="title">Flow Tracing</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -1014,7 +989,7 @@ is as following:</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=e3eff1ea"></script>
+</div><script src="../../../_static/documentation_options.js?v=6ff1003f"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>

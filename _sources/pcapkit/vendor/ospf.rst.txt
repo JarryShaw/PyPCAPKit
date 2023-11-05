@@ -39,9 +39,7 @@ which is automatically generating :class:`pcapkit.const.ospf.packet.Packet`.
    :members: FLAG, LINK
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/ospf-authentication-codes/ospf-authentication-codes.xhtml#authentication-codes
 .. [*] https://www.iana.org/assignments/ospfv2-parameters/ospfv2-parameters.xhtml#ospfv2-parameters-3

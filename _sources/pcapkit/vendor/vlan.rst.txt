@@ -25,8 +25,6 @@ which is automatically generating :class:`pcapkit.const.vlan.priority_level.Prio
    :members: FLAG, LINK
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels

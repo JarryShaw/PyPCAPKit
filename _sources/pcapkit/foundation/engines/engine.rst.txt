@@ -1,5 +1,5 @@
-Base Class
-==========
+Base Engine
+===========
 
 .. module:: pcapkit.foundation.engines.engine
 
@@ -10,8 +10,32 @@ all engine support functionality.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: module
+   .. seealso::
+
+      For more information on customisation and extension, please
+      refer to :doc:`../../../ext`.
+
+   .. property:: name
+      :type: str
+
+      Engine name.
+
+      .. note::
+
+         This property is also available as a class variable. Its
+         value can be set by :attr:`__engine_name__` class attribute.
+
+
+   .. property:: module
+      :type: str
+
+      Engine module name.
+
+      .. note::
+
+         This property is also available as a class variable. Its
+         value can be set by :attr:`__engine_module__` class attribute.
+
    .. autoproperty:: extractor
 
    .. automethod:: run
@@ -20,6 +44,9 @@ all engine support functionality.
 
    .. automethod:: __call__
    .. automethod:: __init_subclass__
+
+   .. autoattribute:: __engine_name__
+   .. autoattribute:: __engine_module__
 
 Internal Definitions
 --------------------

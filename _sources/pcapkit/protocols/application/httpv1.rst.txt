@@ -27,9 +27,6 @@ as below:
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: alias
    .. autoproperty:: version
 
@@ -50,9 +47,6 @@ Auxiliary Data
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 Header Schemas
 --------------
 
@@ -61,9 +55,6 @@ Header Schemas
 .. autoclass:: pcapkit.protocols.schema.application.httpv1.HTTP
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 Data Models
 -----------
@@ -74,32 +65,18 @@ Data Models
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.application.httpv1.Header
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.application.httpv1.RequestHeader
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.application.httpv1.ResponseHeader
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol

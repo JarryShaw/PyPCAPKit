@@ -14,15 +14,13 @@ and etc.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: layer
 
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
 
    .. autoattribute:: __layer__
+      :no-value:
 
    .. automethod:: __post_init__
    .. automethod:: __index__

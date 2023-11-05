@@ -41,9 +41,7 @@ which is automatically generated from :class:`pcapkit.vendor.ftp.return_code.Ret
    :undoc-members:
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions.xhtml#ftp-commands-extensions-2
 .. [*] https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes

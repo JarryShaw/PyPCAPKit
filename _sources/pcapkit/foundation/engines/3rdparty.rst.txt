@@ -16,11 +16,14 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: module
+   .. autoattribute:: __engine_name__
+   .. autoattribute:: __engine_module__
 
    .. automethod:: run
    .. automethod:: read_frame
+
+   .. autoattribute:: _expkg
+   .. autoattribute:: _extmp
 
 DPKT Support
 ============
@@ -36,11 +39,14 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: module
+   .. autoattribute:: __engine_name__
+   .. autoattribute:: __engine_module__
 
    .. automethod:: run
    .. automethod:: read_frame
+
+   .. autoattribute:: _expkg
+   .. autoattribute:: _extmp
 
 PyShark Support
 ===============
@@ -56,9 +62,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: module
+   .. autoattribute:: __engine_name__
+   .. autoattribute:: __engine_module__
 
    .. automethod:: run
    .. automethod:: read_frame
    .. automethod:: close
+
+   .. autoattribute:: _expkg
+   .. autoattribute:: _extmp

@@ -11,8 +11,32 @@ which is an abstract base class for all flow tracing classes.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: protocol
+   .. seealso::
+
+      For more information on customisation and extension, please
+      refer to :doc:`../../../ext`.
+
+   .. property:: name
+      :type: str
+
+      Protocol name of current class.
+
+      .. note::
+
+         This property is also available as a class variable. Its
+         value can be set by :attr:`__protocol_name__` class attribute.
+
+
+   .. property:: protocol
+      :type: Type[Protocol]
+
+      Protocol of current class.
+
+      .. note::
+
+         This property is also available as a class variable. Its
+         value can be set by :attr:`__protocol_type__` class attribute.
+
    .. autoproperty:: index
 
    .. automethod:: register_dumper
@@ -35,6 +59,9 @@ which is an abstract base class for all flow tracing classes.
 
    .. automethod:: __call__
    .. automethod:: __init_subclass__
+
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
 
 Internal Definitions
 --------------------

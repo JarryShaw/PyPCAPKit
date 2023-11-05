@@ -137,9 +137,7 @@ which is automatically generating :class:`pcapkit.const.ipv6.tagger_id.TaggerID`
    :members: FLAG, LINK
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#extension-header
 .. [*] https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#ipv6-parameters-2

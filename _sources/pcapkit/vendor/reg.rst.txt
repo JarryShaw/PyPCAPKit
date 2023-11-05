@@ -66,9 +66,7 @@ which is automatically generating :class:`pcapkit.const.reg.apptype.AppType`.
    :members: FLAG, LINK
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] http://www.tcpdump.org/linktypes.html
 .. [*] https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1

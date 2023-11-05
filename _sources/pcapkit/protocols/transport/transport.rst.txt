@@ -13,9 +13,6 @@ which is a base class for transport layer protocols, eg.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: layer
 
    .. automethod:: register
@@ -24,7 +21,9 @@ which is a base class for transport layer protocols, eg.
    .. automethod:: _decode_next_layer
 
    .. autoattribute:: __layer__
+      :no-value:
    .. autoattribute:: __proto__
+      :no-value:
 
       .. important::
 

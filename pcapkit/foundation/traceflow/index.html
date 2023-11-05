@@ -3,21 +3,16 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Trace Flows" />
+<meta property="og:title" content="Flow Tracing" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/traceflow/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.traceflow implements flow tracing functions for pcapkit package. Base Class- Internal Definitions., Trace TCP Flows- Terminology, Data Structures.. Auxiliary Data:" />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_foundation_traceflow_index_3e1a9f9a.png" />
-<meta property="og:image:alt" content="pcapkit.traceflow implements flow tracing functions for pcapkit package. Base Class- Internal Definitions., Trace TCP Flows- Terminology, Data Structures.. A..." />
-<meta name="description" content="pcapkit.traceflow implements flow tracing functions for pcapkit package. Base Class- Internal Definitions., Trace TCP Flows- Terminology, Data Structures.. Auxiliary Data:" />
-<meta name="twitter:card" content="summary_large_image" />
+<meta property="og:description" content="pcapkit.traceflow implements flow tracing functions for pcapkit package. Base Class- Internal Definitions., Follow TCP Stream- Terminology, Data Structures.. All flow tracing classes are implemente..." />
+<meta name="description" content="pcapkit.traceflow implements flow tracing functions for pcapkit package. Base Class- Internal Definitions., Follow TCP Stream- Terminology, Data Structures.. All flow tracing classes are implemente..." />
 <link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="Base Class" href="traceflow.html" /><link rel="prev" title="TCP Datagram Reassembly" href="../reassembly/tcp.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>Trace Flows - PyPCAPKit</title>
+        <title>Flow Tracing - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -180,10 +175,16 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Library Foundation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Library Foundation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../extraction.html">Extractor for PCAP Files</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../reassembly/index.html">Fragmented Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Fragmented Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reassembly/index.html">Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../reassembly/reassembly.html">Base Class</a></li>
-<li class="toctree-l4 has-children"><a class="reference internal" href="../reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="../reassembly/ip/ip.html">Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
@@ -192,30 +193,17 @@
 <li class="toctree-l4"><a class="reference internal" href="../reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">Trace Flows</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Trace Flows</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">Flow Tracing</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Flow Tracing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="traceflow.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tcp.html">Trace TCP Flows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../registry.html">Registry Management</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../engines/engine.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../engines/builtin.html">Built-in Engines</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../engines/3rdparty.html">3rd-Party Engines</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Protocol Family</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../protocols/protocol.html">Root Protocol</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcap.html">PCAP File Headers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/null.html">No-Payload Packet</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Link Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/link/index.html">Link Layer</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Link Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/link.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
@@ -225,7 +213,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Internet Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/internet/index.html">Internet Layer</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Internet Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/internet.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
@@ -241,18 +229,25 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Transport Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/transport/index.html">Transport Layer</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Transport Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/transport.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Application Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/application/index.html">Application Layer</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Application Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/application.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
 </li>
 </ul>
@@ -326,6 +321,9 @@
 </li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
 </ul>
@@ -371,13 +369,20 @@
         </div>
         <article role="main">
           <section id="module-pcapkit.foundation.traceflow">
-<span id="trace-flows"></span><h1>Trace Flows<a class="headerlink" href="#module-pcapkit.foundation.traceflow" title="Link to this heading">#</a></h1>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.traceflow</span></code> implements flow tracing functions for
-<a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> package.</p>
+<span id="flow-tracing"></span><h1>Flow Tracing<a class="headerlink" href="#module-pcapkit.foundation.traceflow" title="Link to this heading">#</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This was implemented as the demand of my mate
-<a class="reference external" href="https://github.com/gousaiyang">&#64;gousaiyang</a></p>
+<p>This was implemented at the demand of my mate
+<a class="reference external" href="https://github.com/gousaiyang">&#64;gousaiyang</a>. It is
+a approximate functionality of <em>Follow TCP Streams</em> in
+<a class="reference external" href="https://www.wireshark.org/">Wireshark</a>.</p>
+</div>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.traceflow</span></code> implements flow tracing functions for
+<a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> package.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>For more information on customisation and extension, please
+refer to <a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>.</p>
 </div>
 <div class="toctree-wrapper compound">
 <ul>
@@ -385,28 +390,39 @@
 <li class="toctree-l2"><a class="reference internal" href="traceflow.html#internal-definitions">Internal Definitions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tcp.html">Trace TCP Flows</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="tcp.html">Follow TCP Stream</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tcp.html#terminology">Terminology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tcp.html#module-pcapkit.foundation.traceflow.data.tcp">Data Structures</a></li>
 </ul>
 </li>
 </ul>
 </div>
-<section id="auxiliary-data">
+<p>All flow tracing classes are implemented as <a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>
+subclasses, which are responsible for processing extracted packets and
+follow the flow and/or stream to provide more insights. Below is a brief
+diagram of the class hierarchy of <a class="reference internal" href="#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a>:</p>
+<div class="mermaid">
+            flowchart LR
+    A{{TraceFlowMeta}} -.-&gt;|metaclass| B(TraceFlowBase)
+
+    B --&gt; TCP
+
+    B --&gt; C(TraceFlow)
+    C --&gt; D([user customisation ...])
+
+    click A &quot;/pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta&quot;
+    click B &quot;/pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase&quot;
+    click C &quot;/pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow&quot;
+    click D &quot;/ext.html#traceflow-and-flow-tracing&quot;
+
+    click TCP &quot;/pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP&quot;
+        </div><section id="auxiliary-data">
 <h2>Auxiliary Data<a class="headerlink" href="#auxiliary-data" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.TraceFlowManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.</span></span><span class="sig-name descname"><span class="pre">TraceFlowManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow.html#TraceFlowManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlowManager" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>TraceFlow Manager.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.TraceFlowManager.tcp">
 <span class="sig-name descname"><span class="pre">tcp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TCP_TraceFlow</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlowManager.tcp" title="Link to this definition">#</a></dt>
@@ -420,14 +436,6 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.</span></span><span class="sig-name descname"><span class="pre">TraceFlowData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data.html#TraceFlowData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.TraceFlowData" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>Data storage for flow tracing.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.TraceFlowData.tcp">
 <span class="sig-name descname"><span class="pre">tcp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple[TCP_Index,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.data.TraceFlowData.tcp" title="Link to this definition">#</a></dt>
@@ -494,7 +502,7 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Trace Flows</a><ul>
+<li><a class="reference internal" href="#">Flow Tracing</a><ul>
 <li><a class="reference internal" href="#auxiliary-data">Auxiliary Data</a></li>
 </ul>
 </li>
@@ -507,11 +515,13 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=e3eff1ea"></script>
+</div><script src="../../../_static/documentation_options.js?v=6ff1003f"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
     </body>
 </html>

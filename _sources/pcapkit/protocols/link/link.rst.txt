@@ -12,9 +12,6 @@ which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: layer
 
    .. automethod:: register

@@ -12,8 +12,8 @@ origin. Please refer to :doc:`ip` for more information.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: protocol
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
 
 Terminology
 -----------

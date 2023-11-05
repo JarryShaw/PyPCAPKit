@@ -13,53 +13,53 @@ foundation classes from :mod:`pcapkit.foundation`.
 
 .. autofunction:: pcapkit.interface.core.trace
 
-Miscellaneous Constants
------------------------
+Constants Defintion
+-------------------
 
 Output File Formats
 ~~~~~~~~~~~~~~~~~~~
 
-.. data:: pcapkit.interface.core.TREE
+.. data:: TREE
    :value: 'tree'
 
-.. data:: pcapkit.interface.core.JSON
+.. data:: JSON
    :value: 'json'
 
-.. data:: pcapkit.interface.core.PLIST
+.. data:: PLIST
    :value: 'plist'
 
-.. data:: pcapkit.interface.core.PCAP
+.. data:: PCAP
    :value: 'pcap'
 
 Layer Thresholds
 ~~~~~~~~~~~~~~~~
 
-.. data:: pcapkit.interface.core.RAW
+.. data:: RAW
    :value: 'none'
 
-.. data:: pcapkit.interface.core.LINK
+.. data:: LINK
    :value: 'link'
 
-.. data:: pcapkit.interface.core.INET
+.. data:: INET
    :value: 'internet'
 
-.. data:: pcapkit.interface.core.TRANS
+.. data:: TRANS
    :value: 'transport'
 
-.. data:: pcapkit.interface.core.APP
+.. data:: APP
    :value: 'application'
 
 Extration Engines
 ~~~~~~~~~~~~~~~~~
 
-.. data:: pcapkit.interface.core.DPKT
+.. data:: DPKT
    :value: 'dpkt'
 
-.. data:: pcapkit.interface.core.Scapy
+.. data:: Scapy
    :value: 'scapy'
 
-.. data:: pcapkit.interface.core.PCAPKit
+.. data:: PCAPKit
    :value: 'default'
 
-.. data:: pcapkit.interface.core.PyShark
+.. data:: PyShark
    :value: 'pyshark'

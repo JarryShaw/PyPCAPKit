@@ -13,9 +13,6 @@ object whose payload is recursively
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
@@ -35,9 +32,6 @@ Header Schemas
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 Data Models
 -----------
 
@@ -46,6 +40,3 @@ Data Models
 .. autoclass:: pcapkit.protocols.data.misc.null.NoPayload
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.

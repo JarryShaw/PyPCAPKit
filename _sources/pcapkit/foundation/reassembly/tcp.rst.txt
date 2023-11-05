@@ -10,11 +10,11 @@ which reconstructs fragmented TCP packets back to origin.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: protocol
-
    .. automethod:: reassembly
    .. automethod:: submit
+
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
 
 Algorithm
 =========
@@ -25,6 +25,8 @@ Algorithm
    :rfc:`815`.
 
 +-------------+---------------------------+
+| Attribute   | Definition                |
++=============+===========================+
 | ``DSN``     | Data Sequence Number      |
 +-------------+---------------------------+
 | ``ACK``     | TCP Acknowledgement       |
@@ -236,46 +238,30 @@ Data Models
 
 .. module:: pcapkit.foundation.reassembly.data.tcp
 
+.. autodata:: pcapkit.foundation.reassembly.data.tcp.BufferID
+
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.Packet
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.DatagramID
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.Datagram
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.Fragment
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autodata:: pcapkit.foundation.reassembly.data.tcp.BufferID
 
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.Buffer
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.

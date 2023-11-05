@@ -8,13 +8,8 @@
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.foundation is a collection of foundations for pcapkit, including PCAP file extraction tool Extrator, TCP flow tracer TraceFlow, registry management APIs for pcapkit, and TCP/IP reassembly i..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_foundation_index_d4688c75.png" />
-<meta property="og:image:alt" content="pcapkit.foundation is a collection of foundations for pcapkit, including PCAP file extraction tool Extrator, TCP flow tracer TraceFlow, registry management A..." />
 <meta name="description" content="pcapkit.foundation is a collection of foundations for pcapkit, including PCAP file extraction tool Extrator, TCP flow tracer TraceFlow, registry management APIs for pcapkit, and TCP/IP reassembly i..." />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Extractor for PCAP Files" href="extraction.html" /><link rel="prev" title="Auxiliary Interface" href="../interface/misc.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="File Extractor" href="extraction.html" /><link rel="prev" title="Auxiliary Interface" href="../interface/misc.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Library Foundation - PyPCAPKit</title>
@@ -180,10 +175,16 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Library Foundation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Library Foundation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="extraction.html">Extractor for PCAP Files</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="reassembly/index.html">Fragmented Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Fragmented Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="reassembly/index.html">Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="reassembly/reassembly.html">Base Class</a></li>
-<li class="toctree-l4 has-children"><a class="reference internal" href="reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="reassembly/ip/ip.html">Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
@@ -192,30 +193,17 @@
 <li class="toctree-l4"><a class="reference internal" href="reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Trace Flows</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="traceflow/index.html">Flow Tracing</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Flow Tracing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="traceflow/traceflow.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="traceflow/tcp.html">Trace TCP Flows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="registry.html">Registry Management</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="engines/engine.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="engines/builtin.html">Built-in Engines</a></li>
-<li class="toctree-l4"><a class="reference internal" href="engines/3rdparty.html">3rd-Party Engines</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Protocol Family</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../protocols/protocol.html">Root Protocol</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcap.html">PCAP File Headers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/null.html">No-Payload Packet</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Link Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/link/index.html">Link Layer</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Link Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/link.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
@@ -225,7 +213,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Internet Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/internet/index.html">Internet Layer</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Internet Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/internet.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
@@ -241,18 +229,25 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Transport Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Transport Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/transport.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Application Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Application Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/application.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
 </li>
 </ul>
@@ -326,6 +321,9 @@
 </li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pep.html">Help Wanted</a></li>
 </ul>
@@ -379,29 +377,76 @@
 APIs for <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, and TCP/IP reassembly implementations.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="extraction.html">Extractor for PCAP Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reassembly/index.html">Fragmented Packets Reassembly</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="reassembly/reassembly.html">Base Class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reassembly/ip/index.html">IP Datagram Reassembly</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extraction.html">File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="engines/index.html">Engine Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="engines/engine.html">Base Engine</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="engines/engine.html#internal-definitions">Internal Definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="engines/builtin.html">Built-in Engines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="engines/builtin.html#module-pcapkit.foundation.engines.pcap">PCAP Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engines/builtin.html#module-pcapkit.foundation.engines.pcapng">PCAP-NG Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="engines/3rdparty.html">3rd-Party Engines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="engines/3rdparty.html#module-pcapkit.foundation.engines.scapy">Scapy Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engines/3rdparty.html#module-pcapkit.foundation.engines.dpkt">DPKT Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engines/3rdparty.html#module-pcapkit.foundation.engines.pyshark">PyShark Support</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reassembly/index.html">Packets Reassembly</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reassembly/reassembly.html">Base Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="reassembly/reassembly.html#internal-definitions">Internal Definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="reassembly/ip/index.html">IP Datagram Reassembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reassembly/ip/index.html#algorithm">Algorithm</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="reassembly/tcp.html">TCP Datagram Reassembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="reassembly/tcp.html#algorithm">Algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reassembly/tcp.html#terminology">Terminology</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reassembly/tcp.html#module-pcapkit.foundation.reassembly.data.tcp">Data Models</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="reassembly/index.html#auxiliary-data">Auxiliary Data</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="traceflow/index.html">Trace Flows</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="traceflow/traceflow.html">Base Class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="traceflow/tcp.html">Trace TCP Flows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="traceflow/index.html">Flow Tracing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="traceflow/traceflow.html">Base Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="traceflow/traceflow.html#internal-definitions">Internal Definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="traceflow/tcp.html">Follow TCP Stream</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="traceflow/tcp.html#terminology">Terminology</a></li>
+<li class="toctree-l3"><a class="reference internal" href="traceflow/tcp.html#module-pcapkit.foundation.traceflow.data.tcp">Data Structures</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="traceflow/index.html#auxiliary-data">Auxiliary Data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="registry.html">Registry Management</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="registry.html#module-pcapkit.foundation.registry.protocols">Protocol Registries</a></li>
-<li class="toctree-l2"><a class="reference internal" href="registry.html#module-pcapkit.foundation.registry.foundation">Foundation Registries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#module-pcapkit.foundation.registry.foundation">Foundation Registries</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#engine-registries">Engine Registries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#dumper-registries">Dumper Registries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#callback-registries">Callback Registries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#extractor-registries">Extractor Registries</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="engines/index.html">Engine Support</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="engines/engine.html">Base Class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="engines/builtin.html">Built-in Engines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="engines/3rdparty.html">3rd-Party Engines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#module-pcapkit.foundation.registry.protocols">Protocol Registries</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#top-level-registries">Top-Level Registries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#link-layer-registries">Link Layer Registries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#internet-layer-registries">Internet Layer Registries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#transport-layer-registries">Transport Layer Registries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#application-layer-registries">Application Layer Registries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html#miscellaneous-protocol-registries">Miscellaneous Protocol Registries</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -418,7 +463,7 @@ APIs for <a class="reference internal" href="../index.html#module-pcapkit" title
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Extractor for PCAP Files</div>
+                <div class="title">File Extractor</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -457,7 +502,7 @@ APIs for <a class="reference internal" href="../index.html#module-pcapkit" title
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=e3eff1ea"></script>
+</div><script src="../../_static/documentation_options.js?v=6ff1003f"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>

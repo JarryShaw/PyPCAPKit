@@ -27,9 +27,6 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: payload
@@ -113,6 +110,13 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_ext_none
    .. automethod:: _make_ext_multiprefix
 
+   .. autoattribute:: __message__
+      :no-value:
+   .. autoattribute:: __option__
+      :no-value:
+   .. autoattribute:: __extension__
+      :no-value:
+
    .. automethod:: __post_init__
    .. automethod:: __index__
 
@@ -123,12 +127,12 @@ Auxiliary Data
    :members:
    :show-inheritance:
 
-   .. property:: seconds
+   .. attribute:: seconds
       :type: int
 
       Seconds since 1 January 1900.
 
-   .. property:: fraction
+   .. attribute:: fraction
       :type: int
 
       Fraction of a second.
@@ -142,263 +146,156 @@ Header Schemas
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.Option
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.UnassignedOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.PadOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.BindingRefreshAdviceOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.AlternateCareofAddressOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.NonceIndicesOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.AuthorizationDataOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.MobileNetworkPrefixOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.LinkLayerAddressOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.MNIDOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.AuthOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.MesgIDOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.CGAParametersRequestOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.CGAExtension
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.CGAParameter
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.CGAParametersOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.UnknownExtension
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.MultiPrefixExtension
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.Packet
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.SignatureOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.PermanentHomeKeygenTokenOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.CareofTestInitOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.CareofTestOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.UnknownMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.BindingRefreshRequestMessage
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.HomeTestInitMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.CareofTestInitMessage
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.HomeTestMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.CareofTestMessage
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.BindingUpdateMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.internet.mh.BindingErrorMessage
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 Type Stubs
 ~~~~~~~~~~
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.ANSIKeyLengthTest
    :members:
+   :undoc-members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.MultiPrefixExtensionFlags
    :members:
+   :undoc-members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.BindingUpdateMessageFlags
    :members:
+   :undoc-members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessageFlags
    :members:
+   :undoc-members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
@@ -415,228 +312,130 @@ Data Models
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.Option
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.UnassignedOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.PadOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.BindingRefreshAdviceOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.AlternateCareofAddressOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.NonceIndicesOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.AuthorizationDataOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.MobileNetworkPrefixOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.LinkLayerAddressOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.MNIDOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.AuthOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.MesgIDOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.CGAParametersRequestOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.CGAExtension
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.CGAParameter
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.CGAParametersOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.UnknownExtension
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.MultiPrefixExtension
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.SignatureOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.PermanentHomeKeygenTokenOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.CareofTestInitOption
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.CareofTestOption
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.UnknownMessage
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.BindingRefreshRequestMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.HomeTestInitMessage
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.CareofTestInitMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.HomeTestMessage
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.CareofTestMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.BindingUpdateMessage
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.BindingAcknowledgementMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.internet.mh.BindingErrorMessage
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6

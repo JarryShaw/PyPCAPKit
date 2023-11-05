@@ -1,5 +1,5 @@
-Application Layer Protocols
-===========================
+Application Layer
+=================
 
 .. module:: pcapkit.protocols.application
 .. module:: pcapkit.protocols.data.application
@@ -9,7 +9,7 @@ Application Layer Protocols
 application layer, with detailed implementation and methods.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    application
    http
@@ -21,3 +21,10 @@ application layer, with detailed implementation and methods.
 
    Implements BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP, ONC:RPC,
    POP, RIP, RTP, SIP, SMTP, SNMP, SSH, TELNET, TLS/SSL, XMPP.
+
+Protocol Registry
+-----------------
+
+.. data:: pcapkit.protocols.application.APPTYPE
+
+   alias of :class:`pcapkit.const.reg.apptype.AppType`

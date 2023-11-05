@@ -23,9 +23,6 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: info_name
@@ -48,15 +45,9 @@ Header Schemas
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.schema.link.vlan.TCI
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 Type Stubs
 ~~~~~~~~~~
@@ -64,9 +55,6 @@ Type Stubs
 .. autoclass:: pcapkit.protocols.schema.link.vlan.TCIType
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 Data Models
 -----------
@@ -77,18 +65,10 @@ Data Models
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 .. autoclass:: pcapkit.protocols.data.link.vlan.TCI
    :members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q

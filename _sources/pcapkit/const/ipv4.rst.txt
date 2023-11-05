@@ -191,9 +191,7 @@ which is automatically generated from :class:`pcapkit.vendor.ipv4.ts_flag.TSFlag
    :undoc-members:
    :show-inheritance:
 
-.. raw:: html
-
-   <hr />
+.. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1
 .. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ipv4-router-alert-option-values

@@ -12,9 +12,6 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: layer
 
    .. automethod:: register
@@ -23,5 +20,6 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
    .. automethod:: _import_next_layer
 
    .. autoattribute:: __layer__
+      :no-value:
    .. autoattribute:: __proto__
       :no-value:

@@ -43,6 +43,16 @@ utility arguments and methods of specified protocols.
 
    .. automethod:: expand_comp
 
+   .. autoattribute:: __layer__
+      :no-value:
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __schema__
+      :no-value:
+   .. autoattribute:: __header__
+      :no-value:
+
    .. automethod:: _read_packet
    .. automethod:: _get_payload
 
@@ -53,16 +63,8 @@ utility arguments and methods of specified protocols.
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
 
-   .. autoattribute:: __layer__
-      :no-value:
-   .. autoattribute:: __proto__
-      :no-value:
-
-   .. autoattribute:: __data__
    .. autoattribute:: _info
-
-   .. autoattribute:: __schema__
-   .. autoattribute:: __header__
+   .. autoattribute:: __data__
 
    .. automethod:: __init__
    .. automethod:: __post_init__
@@ -75,15 +77,15 @@ utility arguments and methods of specified protocols.
    .. automethod:: __contains__
    .. automethod:: __index__
 
+   .. autoattribute:: _exlayer
+   .. autoattribute:: _exproto
+
 Data Models
 -----------
 
 .. autoclass:: pcapkit.protocols.data.protocol.Packet
    :members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 Internal Definitions
 --------------------

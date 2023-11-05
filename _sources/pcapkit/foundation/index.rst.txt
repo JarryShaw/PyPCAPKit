@@ -10,10 +10,10 @@ Library Foundation
 APIs for :mod:`pcapkit`, and TCP/IP reassembly implementations.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    extraction
+   engines/index
    reassembly/index
    traceflow/index
    registry
-   engines/index

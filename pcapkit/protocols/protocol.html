@@ -8,13 +8,8 @@
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/protocol.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.protocols.protocol contains Protocol only, which is an abstract base class for all protocol family, with pre-defined utility arguments and methods of specified protocols. Data Models: Inter..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_protocols_protocol_355f5f47.png" />
-<meta property="og:image:alt" content="pcapkit.protocols.protocol contains Protocol only, which is an abstract base class for all protocol family, with pre-defined utility arguments and methods of..." />
 <meta name="description" content="pcapkit.protocols.protocol contains Protocol only, which is an abstract base class for all protocol family, with pre-defined utility arguments and methods of specified protocols. Data Models: Inter..." />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Auxiliary Protocols" href="misc/index.html" /><link rel="prev" title="Protocol Family" href="index.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Link Layer" href="link/index.html" /><link rel="prev" title="Protocol Family" href="index.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Root Protocol - PyPCAPKit</title>
@@ -180,10 +175,16 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Library Foundation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../foundation/extraction.html">Extractor for PCAP Files</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/reassembly/index.html">Fragmented Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Fragmented Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/reassembly/index.html">Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/reassembly.html">Base Class</a></li>
-<li class="toctree-l4 has-children"><a class="reference internal" href="../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ip.html">Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
@@ -192,30 +193,17 @@
 <li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Trace Flows</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/traceflow/index.html">Flow Tracing</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Flow Tracing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/traceflow.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/tcp.html">Trace TCP Flows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../foundation/registry.html">Registry Management</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/engine.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/builtin.html">Built-in Engines</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Protocol Family</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Protocol Family</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Root Protocol</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="misc/pcap.html">PCAP File Headers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="misc/null.html">No-Payload Packet</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Link Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="link/index.html">Link Layer</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Link Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="link/link.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
@@ -225,7 +213,7 @@
 <li class="toctree-l4"><a class="reference internal" href="link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Internet Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="internet/index.html">Internet Layer</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Internet Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="internet/internet.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
@@ -241,18 +229,25 @@
 <li class="toctree-l4"><a class="reference internal" href="internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Transport Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="transport/index.html">Transport Layer</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Transport Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="transport/transport.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Application Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="application/index.html">Application Layer</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Application Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="application/application.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="misc/null.html">No-Payload Packet</a></li>
 </ul>
 </li>
 </ul>
@@ -326,6 +321,9 @@
 </li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pep.html">Help Wanted</a></li>
 </ul>
@@ -451,9 +449,15 @@ utility arguments and methods of specified protocols.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.id">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.id" title="Link to this definition">#</a></dt>
 <dd><p>Index ID of the protocol.</p>
-<p>By default, it returns the name of the protocol. In certain cases, the
-method may return multiple values.
-:rtype: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>By default, it returns the name of the protocol. In certain cases,
+the method may return multiple values.</p>
+</dd>
+</dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__getitem__" title="pcapkit.protocols.protocol.Protocol.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol.__getitem__()</span></code></a></p>
@@ -711,6 +715,38 @@ return the value itself.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__layer__">
+<span class="sig-name descname"><span class="pre">__layer__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'Link'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'Internet'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'Transport'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'Application'</span></code><span class="pre">]]</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__layer__" title="Link to this definition">#</a></dt>
+<dd><p>Layer of protocol, can be one of <code class="docutils literal notranslate"><span class="pre">Link</span></code>, <code class="docutils literal notranslate"><span class="pre">Internet</span></code>, <code class="docutils literal notranslate"><span class="pre">Transport</span></code>
+and <code class="docutils literal notranslate"><span class="pre">Application</span></code>. For example, the layer of
+<a class="reference internal" href="link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet" title="pcapkit.protocols.link.ethernet.Ethernet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ethernet</span></code></a> is <code class="docutils literal notranslate"><span class="pre">Link</span></code>. However,
+certain protocols are not in any layer, such as
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, and thus its layer is <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__proto__">
+<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a><span class="pre">[</span><a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a><span class="pre">[</span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a><span class="pre">],</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a><span class="pre">]]]</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__proto__" title="Link to this definition">#</a></dt>
+<dd><p>Protocol index mapping for decoding next layer, c.f.
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
+&amp; <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
+The values should be a tuple representing the module name and class name,
+or a <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__schema__">
+<span class="sig-name descname"><span class="pre">__schema__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">ST</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Schema)]</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="Link to this definition">#</a></dt>
+<dd><p>Protocol header schema definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__header__">
+<span class="sig-name descname"><span class="pre">__header__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">ST</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Schema)</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__header__" title="Link to this definition">#</a></dt>
+<dd><p>Protocol header schema instance.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._read_packet">
 <span class="sig-name descname"><span class="pre">_read_packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._read_packet" title="Link to this definition">#</a></dt>
@@ -733,14 +769,14 @@ return the value itself.</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">discard</span></code> is set as <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, returns the packet body (in
 <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>) only.</p></li>
 <li><p>Otherwise, returns the header and payload data as
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Data_Packet</span></code> object.</p></li>
+<a class="reference internal" href="#pcapkit.protocols.data.protocol.Packet" title="pcapkit.protocols.data.protocol.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> object.</p></li>
 </ul>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._get_payload">
 <span class="sig-name descname"><span class="pre">_get_payload</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._get_payload" title="Link to this definition">#</a></dt>
-<dd><p>Get payload of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__header__" title="pcapkit.protocols.protocol.Protocol.__header__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__header__</span></code></a>.</p>
+<dd><p>Get payload from <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__header__" title="pcapkit.protocols.protocol.Protocol.__header__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__header__</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
@@ -751,7 +787,7 @@ return the value itself.</p></li>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>This is a wrapper function for <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.Schema.get_payload()</span></code>.</p>
+<p>This is a wrapper function for <a class="reference internal" href="index.html#pcapkit.protocols.schema.schema.Schema.get_payload" title="pcapkit.protocols.schema.schema.Schema.get_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.schema.Schema.get_payload()</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -835,7 +871,7 @@ constructed by <a class="reference internal" href="#pcapkit.protocols.protocol.P
 <li><p><strong>dict_</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">PT</span></code>, bound= Data)) – info buffer</p></li>
 <li><p><strong>proto</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – next layer protocol index</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – valid (<em>non-padding</em>) length</p></li>
-<li><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – packet info (passed from <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a>)</p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – packet info (passed from <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -863,7 +899,7 @@ be included when <a class="reference internal" href="../corekit/infoclass.html#p
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>proto</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – next layer protocol index</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – valid (<em>non-padding</em>) length</p></li>
-<li><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – packet info (passed from <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a>)</p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – packet info (passed from <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -876,42 +912,15 @@ be included when <a class="reference internal" href="../corekit/infoclass.html#p
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__layer__">
-<span class="sig-name descname"><span class="pre">__layer__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'Link'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'Internet'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'Transport'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'Application'</span></code><span class="pre">]]</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__layer__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__proto__">
-<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a><span class="pre">[</span><a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a><span class="pre">[</span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a><span class="pre">],</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a><span class="pre">]]]</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__proto__" title="Link to this definition">#</a></dt>
-<dd><p>Protocol index mapping for decoding next layer, c.f.
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
-&amp; <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
-The values should be a tuple representing the module name and class name,
-or a <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__data__">
-<span class="sig-name descname"><span class="pre">__data__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">PT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Data)]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.data.misc.raw.Raw'&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__data__" title="Link to this definition">#</a></dt>
-<dd><p>Protocol packet data definition.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._info">
 <span class="sig-name descname"><span class="pre">_info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">PT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Data)</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._info" title="Link to this definition">#</a></dt>
 <dd><p>Parsed packet data.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__schema__">
-<span class="sig-name descname"><span class="pre">__schema__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">ST</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Schema)]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.misc.raw.Raw'&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="Link to this definition">#</a></dt>
-<dd><p>Protocol header schema definition.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__header__">
-<span class="sig-name descname"><span class="pre">__header__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">ST</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Schema)</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__header__" title="Link to this definition">#</a></dt>
-<dd><p>Protocol header schema instance.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__data__">
+<span class="sig-name descname"><span class="pre">__data__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">PT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Data)]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.data.misc.raw.Raw'&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__data__" title="Link to this definition">#</a></dt>
+<dd><p>Protocol packet data definition.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -924,9 +933,9 @@ or a <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" t
 <li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Source packet stream.</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
 <li><p><strong>_layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_layer</span></code>
-(<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exlayer</span></code>).</p></li>
-<li><p><strong>_protocol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">ProtocolBase</span> <span class="pre">|</span> <span class="pre">Type[ProtocolBase]</span></code>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_protocol</span></code>
-(<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exproto</span></code>).</p></li>
+(<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exlayer" title="pcapkit.protocols.protocol.Protocol._exlayer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exlayer</span></code></a>).</p></li>
+<li><p><strong>_protocol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">Protocol,</span> <span class="pre">Type[Protocol]]</span></code>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_protocol</span></code>
+(<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exproto" title="pcapkit.protocols.protocol.Protocol._exproto"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exproto</span></code></a>).</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -1033,7 +1042,7 @@ i.e., <a class="reference internal" href="index.html#pcapkit.protocols.__proto__
 <dd><p>Subscription (<code class="docutils literal notranslate"><span class="pre">getitem</span></code>) support.</p>
 <ul class="simple">
 <li><p>If <code class="docutils literal notranslate"><span class="pre">key</span></code> is a <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> object,
-the method will fetch its indexes (<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">id()</span></code></a>).</p></li>
+the method will fetch its indexes (<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.id</span></code></a>).</p></li>
 <li><p>Later, search the packet’s chain of protocols with the calculated <code class="docutils literal notranslate"><span class="pre">key</span></code>.</p></li>
 <li><p>If no matches, then raises <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolNotFound" title="pcapkit.utilities.exceptions.ProtocolNotFound"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolNotFound</span></code></a>.</p></li>
 </ul>
@@ -1090,6 +1099,28 @@ to handle the <code class="docutils literal notranslate"><span class="pre">name<
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._exlayer">
+<span class="sig-name descname"><span class="pre">_exlayer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._exlayer" title="Link to this definition">#</a></dt>
+<dd><p>Parse packet until such layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._exproto">
+<span class="sig-name descname"><span class="pre">_exproto</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a><span class="pre">],</span> <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._exproto" title="Link to this definition">#</a></dt>
+<dd><p>Parse packet until such protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <section id="data-models">
@@ -1099,14 +1130,6 @@ to handle the <code class="docutils literal notranslate"><span class="pre">name<
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.protocol.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/data/protocol.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.protocol.Packet" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Header and payload data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.protocol.Packet.header">
 <span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.protocol.Packet.header" title="Link to this definition">#</a></dt>
@@ -1154,12 +1177,12 @@ registry calls and simplify the customisation process.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="misc/index.html">
+          <a class="next-page" href="link/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Auxiliary Protocols</div>
+                <div class="title">Link Layer</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -1218,7 +1241,7 @@ registry calls and simplify the customisation process.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=e3eff1ea"></script>
+</div><script src="../../_static/documentation_options.js?v=6ff1003f"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>

@@ -8,13 +8,8 @@
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/reassembly/reassembly.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.foundation.reassembly.reassembly contains Reassembly only, which is an abstract base class for all reassembly classes, bases on algorithms described in RFC 791 and RFC 815, implements datag..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_foundation_reassembly_reassembly_ed2fcfcf.png" />
-<meta property="og:image:alt" content="pcapkit.foundation.reassembly.reassembly contains Reassembly only, which is an abstract base class for all reassembly classes, bases on algorithms described..." />
 <meta name="description" content="pcapkit.foundation.reassembly.reassembly contains Reassembly only, which is an abstract base class for all reassembly classes, bases on algorithms described in RFC 791 and RFC 815, implements datag..." />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="IP Datagram Reassembly" href="ip/index.html" /><link rel="prev" title="Fragmented Packets Reassembly" href="index.html" />
+<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="IP Datagram Reassembly" href="ip/index.html" /><link rel="prev" title="Packets Reassembly" href="index.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Base Class - PyPCAPKit</title>
@@ -180,10 +175,16 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Library Foundation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Library Foundation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../extraction.html">Extractor for PCAP Files</a></li>
-<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Fragmented Packets Reassembly</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Fragmented Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Packets Reassembly</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Packets Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">Base Class</a></li>
-<li class="toctree-l4 has-children"><a class="reference internal" href="ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of IP Datagram Reassembly</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="ip/ip.html">Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
@@ -192,30 +193,17 @@
 <li class="toctree-l4"><a class="reference internal" href="tcp.html">TCP Datagram Reassembly</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Trace Flows</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../traceflow/index.html">Flow Tracing</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Flow Tracing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../traceflow/traceflow.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../traceflow/tcp.html">Trace TCP Flows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../registry.html">Registry Management</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Engine Support</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../engines/engine.html">Base Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../engines/builtin.html">Built-in Engines</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../engines/3rdparty.html">3rd-Party Engines</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Protocol Family</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../protocols/protocol.html">Root Protocol</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcap.html">PCAP File Headers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/null.html">No-Payload Packet</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Link Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/link/index.html">Link Layer</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Link Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/link.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
@@ -225,7 +213,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Internet Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/internet/index.html">Internet Layer</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Internet Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/internet.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
@@ -241,18 +229,25 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Transport Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/transport/index.html">Transport Layer</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Transport Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/transport.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Application Layer Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/application/index.html">Application Layer</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Application Layer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/application.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Auxiliary Protocols</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
 </li>
 </ul>
@@ -326,6 +321,9 @@
 </li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
 </ul>
@@ -394,15 +392,41 @@ name at class definition:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fout</strong> – output path</p></li>
-<li><p><strong>format</strong> – output format</p></li>
-<li><p><strong>byteorder</strong> – output file byte order</p></li>
-<li><p><strong>nanosecond</strong> – output nanosecond-resolution file flag</p></li>
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+<li><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if return all datagrams (including those not
+implemented) when submit</p></li>
+<li><p><strong>store</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if store reassembled datagram in memory, i.e.,
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a> (if not, datagram
+will be discarded after callback)</p></li>
 </ul>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>For more information on customisation and extension, please
+refer to <a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>.</p>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.name" title="Link to this definition">#</a></dt>
+<dd><p>Protocol name of current reassembly class.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This property is also available as a class variable. Its
+value can be set by <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__" title="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_name__</span></code></a> class attribute.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.protocol">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">Protocol</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.protocol" title="Link to this definition">#</a></dt>
+<dd><p>Protocol of current reassembly class.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This property is also available as a class variable. Its
+value can be set by <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__" title="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_type__</span></code></a> class attribute.</p>
+</div>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.count">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.count" title="Link to this definition">#</a></dt>
@@ -465,12 +489,13 @@ name at class definition:</p>
 </dd>
 </dl>
 <p>Fetch reassembled datagrams from
-<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a>
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
 and returns a <em>tuple</em> of such datagrams.</p>
 <p>If no cache found, the method will call
-<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.submit" title="pcapkit.foundation.reassembly.reassembly.Reassembly.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> to
-<em>forcedly</em> obtain newly reassembled payload. Otherwise, the
-already calculated <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a>
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.submit" title="pcapkit.foundation.reassembly.reassembly.Reassembly.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.submit</span></code></a>
+to <em>forcedly</em> obtain newly reassembled payload. Otherwise, the
+already calculated
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
 will be returned.</p>
 </dd></dl>
 
@@ -516,7 +541,9 @@ if not found, returns <a class="reference external" href="https://docs.python.or
 <li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">DT</span></code>, bound= Info)]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – callback function, which will be called
 when reassembled datagram is obtained, with the
 list of reassembled datagrams as its only argument</p></li>
-<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – index of datagram to be called</p></li>
+<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – index to be inserted in the callback list,; by
+default, the callback will be appended to the end
+of the list</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -526,31 +553,18 @@ list of reassembled datagrams as its only argument</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer">
-<span class="sig-name descname"><span class="pre">_buffer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">IT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">tuple),</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">BT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Info)]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="Link to this definition">#</a></dt>
-<dd><p>Dict buffer field.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a>[IT, BT]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram">
-<span class="sig-name descname"><span class="pre">_dtgram</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">DT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Info)]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="Link to this definition">#</a></dt>
-<dd><p>List reassembled datagram.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)">list</a>[DT]</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__">
+<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a><span class="pre">[[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">DT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Info)]],</span> <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__" title="Link to this definition">#</a></dt>
+<dd><p>List of callback functions upon reassembled datagram.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_s">
 <span class="sig-name descname"><span class="pre">_flag_s</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_s" title="Link to this definition">#</a></dt>
-<dd><p>Strict mode flag.</p>
+<dd><p>Strict mode flag. If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, all
+data will be returned, including those not completely
+reassembled; otherwise, only completely reassembled
+data will be returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
@@ -561,7 +575,10 @@ list of reassembled datagrams as its only argument</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_d">
 <span class="sig-name descname"><span class="pre">_flag_d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_d" title="Link to this definition">#</a></dt>
-<dd><p>Store mode flag.</p>
+<dd><p>Store mode flag. If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, all
+reassembled datagram will be stored in memory, i.e.,
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>; otherwise, datagram
+will be discarded after callback.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
@@ -572,7 +589,8 @@ list of reassembled datagrams as its only argument</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_n">
 <span class="sig-name descname"><span class="pre">_flag_n</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_n" title="Link to this definition">#</a></dt>
-<dd><p>New datagram flag.</p>
+<dd><p>New datagram flag. If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, the
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a> will be repopulated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
@@ -581,9 +599,27 @@ list of reassembled datagrams as its only argument</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__">
-<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a><span class="pre">[[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">DT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Info)]],</span> <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__" title="Link to this definition">#</a></dt>
-<dd><p>List of callback functions upon reassembled datagram.</p>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer">
+<span class="sig-name descname"><span class="pre">_buffer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">IT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">tuple),</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">BT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Info)]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="Link to this definition">#</a></dt>
+<dd><p>Dict buffer field. This field is used to
+store reassembled packets in the form of <code class="docutils literal notranslate"><span class="pre">{bufid:</span> <span class="pre">buffer}</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a>[IT, BT]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram">
+<span class="sig-name descname"><span class="pre">_dtgram</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">DT</span></code><span class="pre">,</span> <span class="pre">bound=</span> <span class="pre">Info)]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="Link to this definition">#</a></dt>
+<dd><p>List reassembled datagram. This list is used
+to store reassembled datagrams.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)">list</a>[DT]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -622,8 +658,20 @@ list of reassembled datagrams as its only argument</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>For more details, please refer to
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">register_Reassembly()</span></code>.</p>
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.register_reassembly" title="pcapkit.foundation.extraction.Extractor.register_reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor.register_reassembly()</span></code></a>.</p>
 </div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__">
+<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__" title="Link to this definition">#</a></dt>
+<dd><p>Protocol name of current reassembly object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__">
+<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__" title="Link to this definition">#</a></dt>
+<dd><p>Protocol of current reassembly object.</p>
 </dd></dl>
 
 </dd></dl>
@@ -637,8 +685,13 @@ list of reassembled datagrams as its only argument</p></li>
 <p>Base class for reassembly procedure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if return all datagrams (including those not
-implemented) when submit</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if return all datagrams (including those not
+implemented) when submit</p></li>
+<li><p><strong>store</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if store reassembled datagram in memory, i.e.,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code> (if not, datagram
+will be discarded after callback)</p></li>
+</ul>
 </dd>
 </dl>
 <div class="admonition note">
@@ -682,7 +735,7 @@ registry calls and simplify the customisation process.</p>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Fragmented Packets Reassembly</div>
+                <div class="title">Packets Reassembly</div>
                 
               </div>
             </a>
@@ -729,7 +782,7 @@ registry calls and simplify the customisation process.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=e3eff1ea"></script>
+</div><script src="../../../_static/documentation_options.js?v=6ff1003f"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>

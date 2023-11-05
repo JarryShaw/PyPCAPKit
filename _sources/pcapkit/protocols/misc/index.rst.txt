@@ -11,7 +11,7 @@ protocols, the :class:`~pcapkit.protocols.misc.null.NoPayload` class for
 indication of empty payload, and PCAP header classes.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    pcap
    pcapng
