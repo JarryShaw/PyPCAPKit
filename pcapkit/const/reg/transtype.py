@@ -476,7 +476,7 @@ class TransType(IntEnum):
     #: AGGFRAG encapsulation payload for ESP [:rfc:`9347`]
     AGGFRAG = 144
 
-    #: Network Service Header [RFC-ietf-spring-nsh-sr-14]
+    #: Network Service Header [:rfc:`9491`]
     NSH = 145
 
     #: Use for experimentation and testing [:rfc:`3692`]

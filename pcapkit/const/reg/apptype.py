@@ -28897,6 +28897,9 @@ class AppType(StrEnum):
     #: [TCP] A protocol for controlling a microscope
     microdeep: 'AppType' = -1, 'microdeep', TransportProtocol.get('tcp')
 
+    #: [UDP] MIDI 2.0 Device Discovery
+    midi2: 'AppType' = -1, 'midi2', TransportProtocol.get('udp')
+
     #: [TCP] Protocol for connected accessories
     mieleacs: 'AppType' = -1, 'mieleacs', TransportProtocol.get('tcp')
 

@@ -50,7 +50,7 @@ class EtherType(IntEnum):
     #: DLOG [Neil Sembower]
     DLOG_0x0661 = 0x0661
 
-    #: Internet Protocol version 4 (IPv4) [:rfc:`7042`]
+    #: Internet Protocol version 4 (IPv4) [RFC-ietf-intarea-rfc7042bis-11]
     Internet_Protocol_version_4 = 0x0800
 
     #: X.75 Internet [Neil Sembower]
@@ -68,7 +68,7 @@ class EtherType(IntEnum):
     #: X.25 Level 3 [Neil Sembower]
     X_25_Level_3 = 0x0805
 
-    #: Address Resolution Protocol (ARP) [:rfc:`7042`]
+    #: Address Resolution Protocol (ARP) [RFC-ietf-intarea-rfc7042bis-11]
     Address_Resolution_Protocol = 0x0806
 
     #: XNS Compatability [Neil Sembower]
@@ -318,7 +318,7 @@ class EtherType(IntEnum):
     Wellfleet_Communications = 0x80FF
 
     #: Customer VLAN Tag Type (C-Tag, formerly called the Q-Tag) (initially
-    #: Wellfleet) [:rfc:`7042`]
+    #: Wellfleet) [RFC-ietf-intarea-rfc7042bis-11]
     Customer_VLAN_Tag_Type = 0x8100
 
     #: Hayes Microcomputers [Neil Sembower]
@@ -381,7 +381,7 @@ class EtherType(IntEnum):
     #: Delta Controls [Neil Sembower]
     Delta_Controls = 0x86DE
 
-    #: Internet Protocol version 6 (IPv6) [:rfc:`7042`]
+    #: Internet Protocol version 6 (IPv6) [RFC-ietf-intarea-rfc7042bis-11]
     Internet_Protocol_version_6 = 0x86DD
 
     #: ATOMIC [Joe Touch]
@@ -396,16 +396,17 @@ class EtherType(IntEnum):
     #: Secure Data [:rfc:`1701`]
     Secure_Data = 0x876D
 
-    #: IEEE Std 802.3 - Ethernet Passive Optical Network (EPON) [EPON][:rfc:`7042`]
+    #: IEEE Std 802.3 - Ethernet Passive Optical Network (EPON) [EPON][RFC-ietf-
+    #: intarea-rfc7042bis-11]
     IEEE_Std_802_3_Ethernet_Passive_Optical_Network = 0x8808
 
     #: Slow Protocols (Link Aggregation, OAM, etc.) [IEEE]
     Slow_Protocols = 0x8809
 
-    #: Point-to-Point Protocol (PPP) [:rfc:`7042`]
+    #: Point-to-Point Protocol (PPP) [RFC-ietf-intarea-rfc7042bis-11]
     Point_to_Point_Protocol = 0x880B
 
-    #: General Switch Management Protocol (GSMP) [:rfc:`7042`]
+    #: General Switch Management Protocol (GSMP) [RFC-ietf-intarea-rfc7042bis-11]
     General_Switch_Management_Protocol = 0x880C
 
     #: Ethernet NIC hardware and software testing [Wind River]
@@ -417,7 +418,8 @@ class EtherType(IntEnum):
     #: MPLS with upstream-assigned label [:rfc:`5332`]
     MPLS_with_upstream_assigned_label = 0x8848
 
-    #: Multicast Channel Allocation Protocol (MCAP) [:rfc:`7042`]
+    #: Multicast Channel Allocation Protocol (MCAP) [RFC-ietf-intarea-
+    #: rfc7042bis-11]
     Multicast_Channel_Allocation_Protocol = 0x8861
 
     #: PPP over Ethernet (PPPoE) Discovery Stage [:rfc:`2516`]
