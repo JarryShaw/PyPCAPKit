@@ -1306,9 +1306,9 @@ class AppType(StrEnum):
     #: - [UDP] Shrinkwrap
     shrinkwrap: 'AppType' = 358, 'shrinkwrap', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] Network Security Risk Management Protocol
-    #: - [UDP] Network Security Risk Management Protocol
-    nsrmp: 'AppType' = 359, 'nsrmp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] Reserved
+    #: - [UDP] Reserved
+    reserved_359: 'AppType' = 359, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] scoi2odialog
     #: - [UDP] scoi2odialog
