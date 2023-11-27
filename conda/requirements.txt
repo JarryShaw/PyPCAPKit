@@ -8,7 +8,7 @@ dictdumper == 0.8.4.post2
 dpkt == 1.9.8
 emoji == 2.8.0
 html5lib == 1.1
-idna == 3.5
+idna == 3.6
 lxml == 4.9.3
 packaging == 23.2
 pathlib2 ; python_version < "3.5"
