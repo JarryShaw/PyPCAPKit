@@ -24467,11 +24467,9 @@ class AppType(StrEnum):
     #: - [UDP] Blocks
     blocks: 'AppType' = 10288, 'blocks', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: [TCP] Computer Op System Information Report
-    cosir: 'AppType' = 10321, 'cosir', TransportProtocol.get('tcp')
-
-    #: [UDP] Reserved
-    reserved_10321: 'AppType' = 10321, 'reserved', TransportProtocol.get('udp')
+    #: - [TCP] Reserved
+    #: - [UDP] Reserved
+    reserved_10321: 'AppType' = 10321, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [UDP] BalanceNG session table synchronization protocol
     bngsync: 'AppType' = 10439, 'bngsync', TransportProtocol.get('udp')
@@ -27832,6 +27830,10 @@ class AppType(StrEnum):
     #: [N/A] Big Bang Mancala
     bigbangmancala: 'AppType' = -1, 'bigbangmancala', TransportProtocol.get('undefined')
 
+    #: - [TCP] BioSonics Echosounders
+    #: - [UDP] BioSonics Echosounders
+    biosonics: 'AppType' = -1, 'biosonics', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
     #: [TCP] Data transfer service
     bitflit: 'AppType' = -1, 'bitflit', TransportProtocol.get('tcp')
 
@@ -28004,6 +28006,9 @@ class AppType(StrEnum):
 
     #: [N/A] Corroboree Server
     corroboree: 'AppType' = -1, 'corroboree', TransportProtocol.get('undefined')
+
+    #: [TCP] Computer Op System Information Report
+    cosir: 'AppType' = -1, 'cosir', TransportProtocol.get('tcp')
 
     #: - [TCP] Service for coviot branded devices
     #: - [UDP] Service for coviot branded devices
@@ -30020,6 +30025,9 @@ class AppType(StrEnum):
 
     #: [TCP] Vogel's TV mount control
     tvm: 'AppType' = -1, 'tvm', TransportProtocol.get('tcp')
+
+    #: [TCP] Discovery for Twiline systems
+    twiline_disc: 'AppType' = -1, 'twiline-disc', TransportProtocol.get('tcp')
 
     #: [TCP] detect sanitary product
     twinlevel: 'AppType' = -1, 'twinlevel', TransportProtocol.get('tcp')
