@@ -247,6 +247,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
@@ -381,18 +382,18 @@
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
 
-    <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="s1">&#39;DT&#39;</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="s1">&#39;_DT&#39;</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Reassembly&#39;</span><span class="p">]</span>
 
 <span class="c1"># packet</span>
-<span class="n">PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
+<span class="n">_PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
 <span class="c1"># datagram</span>
-<span class="n">DT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;DT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
+<span class="n">_DT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_DT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
 <span class="c1"># buffer ID</span>
-<span class="n">IT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;IT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;tuple&#39;</span><span class="p">)</span>
+<span class="n">_IT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_IT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;tuple&#39;</span><span class="p">)</span>
 <span class="c1"># buffer</span>
-<span class="n">BT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;BT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
+<span class="n">_BT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_BT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ReassemblyMeta">
@@ -429,7 +430,7 @@
 
 <div class="viewcode-block" id="ReassemblyBase">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase">[docs]</a>
-<span class="k">class</span> <span class="nc">ReassemblyBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">DT</span><span class="p">,</span> <span class="n">IT</span><span class="p">,</span> <span class="n">BT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ReassemblyMeta</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ReassemblyBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_DT</span><span class="p">,</span> <span class="n">_IT</span><span class="p">,</span> <span class="n">_BT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ReassemblyMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for reassembly procedure.</span>
 
 <span class="sd">    Args:</span>
@@ -507,7 +508,7 @@
 
     <span class="c1"># reassembled datagram</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">datagram</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[DT, ...]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">datagram</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[_DT, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembled datagram.</span>
 
 <span class="sd">        Raises:</span>
@@ -528,7 +529,7 @@
 
     <span class="c1"># reassembly procedure</span>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
 
 <span class="sd">        Arguments:</span>
@@ -542,7 +543,7 @@
 
     <span class="c1"># submit reassembled payload</span>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;BT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[DT]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;_BT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[_DT]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
 
 <span class="sd">        Arguments:</span>
@@ -552,7 +553,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="c1"># fetch datagram</span>
-    <span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[DT, ...]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[_DT, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch datagram.</span>
 
 <span class="sd">        Returns:</span>
@@ -577,7 +578,7 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fetch&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cached</span>
 
-        <span class="n">temp_dtgram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[DT]</span>
+        <span class="n">temp_dtgram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_DT]</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">bufid</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">temp_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">bufid</span><span class="o">=</span><span class="n">bufid</span><span class="p">)</span>
@@ -606,7 +607,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># run automatically</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;list[PT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;list[_PT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run automatically.</span>
 
 <span class="sd">        Arguments:</span>
@@ -673,14 +674,14 @@
         <span class="c1">#: :attr:`self._dtgram &lt;_dtgram&gt;` will be repopulated.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="c1">#: dict[IT, BT]: Dict buffer field. This field is used to</span>
+        <span class="c1">#: dict[_IT, _BT]: Dict buffer field. This field is used to</span>
         <span class="c1">#: store reassembled packets in the form of ``{bufid: buffer}``.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[IT, BT]</span>
-        <span class="c1">#: list[DT]: List reassembled datagram. This list is used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[_IT, _BT]</span>
+        <span class="c1">#: list[_DT]: List reassembled datagram. This list is used</span>
         <span class="c1">#: to store reassembled datagrams.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[DT]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_DT]</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Call packet reassembly.</span>
 
 <span class="sd">        Arguments:</span>
@@ -705,7 +706,7 @@
 
 <div class="viewcode-block" id="Reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly">[docs]</a>
-<span class="k">class</span> <span class="nc">Reassembly</span><span class="p">(</span><span class="n">ReassemblyBase</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">DT</span><span class="p">,</span> <span class="n">IT</span><span class="p">,</span> <span class="n">BT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">DT</span><span class="p">,</span> <span class="n">IT</span><span class="p">,</span> <span class="n">BT</span><span class="p">]):</span>
+<span class="k">class</span> <span class="nc">Reassembly</span><span class="p">(</span><span class="n">ReassemblyBase</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_DT</span><span class="p">,</span> <span class="n">_IT</span><span class="p">,</span> <span class="n">_BT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_DT</span><span class="p">,</span> <span class="n">_IT</span><span class="p">,</span> <span class="n">_BT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base flow tracing class.</span>
 
 <span class="sd">    Example:</span>

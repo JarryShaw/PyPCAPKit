@@ -7,9 +7,9 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Numerical Fields, Text Fields, IP Address Fields- IP Addresses, IP Interface., Container F..." />
-<meta name="description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Numerical Fields, Text Fields, IP Address Fields- IP Addresses, IP Interface., Container F..." />
-<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="Numerical Fields" href="numbers.html" /><link rel="prev" title="Core Utilities" href="../index.html" />
+<meta property="og:description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Base Fields- Auxiliaries, Internal Definitions, Type Variables., Numerical Fields- Sized F..." />
+<meta name="description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Base Fields- Auxiliaries, Internal Definitions, Type Variables., Numerical Fields- Sized F..." />
+<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="Base Fields" href="field.html" /><link rel="prev" title="Core Utilities" href="../index.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Protocol Fields - PyPCAPKit</title>
@@ -147,7 +147,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -254,6 +254,7 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Core Utilities</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">Protocol Fields</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipaddress.html">IP Address Fields</a></li>
@@ -362,7 +363,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -374,273 +375,150 @@
 descriptive of the structure of protocol headers.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="numbers.html">Numerical Fields</a></li>
-<li class="toctree-l1"><a class="reference internal" href="strings.html">Text Fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="field.html">Base Fields</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="field.html#auxiliaries">Auxiliaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field.html#internal-definitions">Internal Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field.html#type-variables">Type Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="numbers.html">Numerical Fields</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="numbers.html#sized-fields">Sized Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numbers.html#enumeration-fields">Enumeration Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numbers.html#internal-definitions">Internal Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numbers.html#type-variables">Type Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="strings.html">Text Fields</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="strings.html#bytes-based-fields">Bytes-based Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="strings.html#string-based-fields">String-based Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="strings.html#internal-definitions">Internal Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="strings.html#type-variables">Type Variables</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="ipaddress.html">IP Address Fields</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ipaddress.html#ip-addresses">IP Addresses</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ipaddress.html#ip-interface">IP Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipaddress.html#internal-definitions">Internal Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipaddress.html#type-variables">Type Variables</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="collections.html">Container Fields</a></li>
-<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Container Fields</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="collections.html#type-variables">Type Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous Fields</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="misc.html#type-variables">Type Variables</a></li>
+</ul>
+</li>
 </ul>
 </div>
-<section id="module-pcapkit.corekit.fields.field">
-<span id="base-fields"></span><h2>Base Fields<a class="headerlink" href="#module-pcapkit.corekit.fields.field" title="Link to this heading">#</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldMeta">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">FieldMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#FieldMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldMeta" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
-<p>Meta class to add dynamic support to <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>.</p>
-<p>This meta class is used to generate necessary attributes for the
-<a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a> class. It can be useful to reduce unnecessary
-registry calls and simplify the customisation process.</p>
-</dd></dl>
+<p>All field classes are implemented as <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>
+subclasses, which are responsible for parsing and/or formatting the field value
+following the pre-defined mechanisms. Below is a brief diagram of the class
+hierarchy of <a class="reference internal" href="#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>:</p>
+<div class="mermaid">
+            flowchart LR
+    A{{FieldMeta}} -.-&gt;|metaclass| B(FieldBase)
+    B --&gt; C(Field)
 
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">FieldBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#FieldBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
-<p>Internal base class for protocol fields.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>A negative value of <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.length" title="pcapkit.corekit.fields.field.FieldBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> indicates that the field
-is variable-length (i.e., length unspecified) and thus
-<a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.pack" title="pcapkit.corekit.fields.field.FieldBase.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> should be considerate of the template format
-and the actual value provided for packing.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.name" title="Link to this definition">#</a></dt>
-<dd><p>Field name.</p>
-</dd></dl>
+    subgraph numbers [Numerical Fields]
+        %% direction TD
 
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.default">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_T</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><span class="pre">NoValueType</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.default" title="Link to this definition">#</a></dt>
-<dd><p>Field default value.</p>
-</dd></dl>
+        NumberField --&gt; Int64Field &amp; UInt64Field
+        NumberField --&gt; Int32Field &amp; UInt32Field
+        NumberField --&gt; Int16Field &amp; UInt16Field
+        NumberField --&gt; Int8Field &amp; UInt8Field
+        NumberField --&gt; EnumField
+    end
+    C --&gt; NumberField
 
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.template">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.template" title="Link to this definition">#</a></dt>
-<dd><p>Field template.</p>
-</dd></dl>
+    subgraph strings [Text Fields]
+        %% direction TD
 
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.length">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.length" title="Link to this definition">#</a></dt>
-<dd><p>Field size.</p>
-</dd></dl>
+        _TextField --&gt; BytesField &amp; StringField
+        _TextField --&gt; BitField
+        BytesField --&gt; PaddingField
+    end
+    C --&gt; _TextField
 
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.optional">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">optional</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.optional" title="Link to this definition">#</a></dt>
-<dd><p>Field is optional.</p>
-</dd></dl>
+    subgraph ipaddress [IP Address Fields]
+        %% direction TD
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#FieldBase.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.__call__" title="Link to this definition">#</a></dt>
-<dd><p>Update field attributes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Updated field instance.</p>
-</dd>
-</dl>
-<p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a> instead of
-updating the current instance.</p>
-</dd></dl>
+        _IPField --&gt; _IPAddressField &amp; _IPInterfaceField
+        _IPAddressField --&gt; IPv4AddressField &amp; IPv6AddressField
+        _IPInterfaceField --&gt; IPv4InterfaceField &amp; IPv6InterfaceField
+    end
+    C --&gt; _IPField
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.__set_name__">
-<span class="sig-name descname"><span class="pre">__set_name__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">owner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#FieldBase.__set_name__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.__set_name__" title="Link to this definition">#</a></dt>
-<dd><p>Set field name and update field list (if applicable).</p>
-<p>This method is to be called by the metaclass during class creation.
-It is used to set the field name and update the field list, i.e.,
-<a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema.__fields__" title="pcapkit.protocols.schema.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema.__fields__</span></code></a>
-mapping dictionary.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
+    subgraph collections [Container Fields]
+        %% direction TD
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.pre_process">
-<span class="sig-name descname"><span class="pre">pre_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#FieldBase.pre_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.pre_process" title="Link to this definition">#</a></dt>
-<dd><p>Process field value before construction (packing).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>)</span>) – Field value.</p></li>
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Processed field value.</p>
-</dd>
-</dl>
-</dd></dl>
+        ListField --&gt; OptionField
+    end
+    B --&gt; ListField
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.pack">
-<span class="sig-name descname"><span class="pre">pack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#FieldBase.pack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.pack" title="Link to this definition">#</a></dt>
-<dd><p>Pack field value into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>)]</span>) – Field value.</p></li>
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Packed field value.</p>
-</dd>
-</dl>
-</dd></dl>
+    subgraph misc [Miscellaneous Fields]
+        %% direction TD
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.post_process">
-<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#FieldBase.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.post_process" title="Link to this definition">#</a></dt>
-<dd><p>Process field value after parsing (unpacking).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Field value.</p></li>
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>)</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Processed field value.</p>
-</dd>
-</dl>
-</dd></dl>
+        NoValueField &amp; ConditionalField &amp; PayloadField
+        SwitchField &amp; SchemaField &amp; ForwardMatchField
+    end
+    B --&gt; NoValueField &amp; ConditionalField &amp; PayloadField
+    B --&gt; SwitchField &amp; SchemaField &amp; ForwardMatchField
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.unpack">
-<span class="sig-name descname"><span class="pre">unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#FieldBase.unpack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.unpack" title="Link to this definition">#</a></dt>
-<dd><p>Unpack field value from <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>buffer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]]</span>) – Field buffer.</p></li>
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>)</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Unpacked field value.</p>
-</dd>
-</dl>
-</dd></dl>
+    C --&gt; D([user customisation ...])
 
-</dd></dl>
+    click A &quot;/pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldMeta&quot;
+    click B &quot;/pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase&quot;
+    click C &quot;/pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.Field&quot;
 
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.Field">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">Field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">Field.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#Field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.Field" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
-<p>Base class for protocol fields.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span>) – Field size (in bytes); if a callable is given, it should return
-an integer value and accept the current packet as its only argument.</p></li>
-<li><p><strong>default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>), <a class="reference internal" href="#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>]</span>) – Field default value, if any.</p></li>
-<li><p><strong>callback</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Callback function to be called upon
-<a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.__call__" title="pcapkit.corekit.fields.field.FieldBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.Field.template">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.field.Field.template" title="Link to this definition">#</a></dt>
-<dd><p>Field template.</p>
-</dd></dl>
+    click NumberField &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField&quot;
+    click Int64Field &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int64Field&quot;
+    click UInt64Field &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt64Field&quot;
+    click Int32Field &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int32Field&quot;
+    click UInt32Field &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field&quot;
+    click Int16Field &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int16Field&quot;
+    click UInt16Field &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt16Field&quot;
+    click Int8Field &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int8Field&quot;
+    click UInt8Field &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt8Field&quot;
+    click EnumField &quot;/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField&quot;
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.Field.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#Field.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.Field.__call__" title="Link to this definition">#</a></dt>
-<dd><p>Update field attributes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>New instance of <a class="reference internal" href="#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>.</p>
-</dd>
-</dl>
-<p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> instead of
-updating the current instance.</p>
-</dd></dl>
+    click _TextField &quot;/pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings._TextField&quot;
+    click BytesField &quot;/pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.BytesField&quot;
+    click StringField &quot;/pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.StringField&quot;
+    click BitField &quot;/pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField&quot;
+    click PaddingField &quot;/pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField&quot;
 
-</dd></dl>
+    click _IPField &quot;/pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress._IPField&quot;
+    click _IPAddressField &quot;/pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress._IPAddressField&quot;
+    click _IPInterfaceField &quot;/pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress._IPInterfaceField&quot;
+    click IPv4AddressField &quot;/pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv4AddressField&quot;
+    click IPv6AddressField &quot;/pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv6AddressField&quot;
+    click IPv4InterfaceField &quot;/pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField&quot;
+    click IPv6InterfaceField &quot;/pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField&quot;
 
-<section id="auxiliary">
-<h3>Auxiliary<a class="headerlink" href="#auxiliary" title="Link to this heading">#</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.NoValueType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">NoValueType</span></span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#NoValueType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.NoValueType" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Default value for fields.</p>
-</dd></dl>
+    click ListField &quot;/pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField&quot;
+    click OptionField &quot;/pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField&quot;
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.NoValue">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">NoValue</span></span><a class="headerlink" href="#pcapkit.corekit.fields.field.NoValue" title="Link to this definition">#</a></dt>
-<dd><p>Default value for <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType">NoValueType</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
-</section>
-</section>
+    click NoValueField &quot;/pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.NoValueField&quot;
+    click ConditionalField &quot;/pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField&quot;
+    click PayloadField &quot;/pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.PayloadField&quot;
+    click SwitchField &quot;/pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.SwitchField&quot;
+    click SchemaField &quot;/pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField&quot;
+    click ForwardMatchField &quot;/pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.ForwardMatchField&quot;
+        </div></section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="numbers.html">
+          <a class="next-page" href="field.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Numerical Fields</div>
+                <div class="title">Base Fields</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -673,30 +551,8 @@ updating the current instance.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Protocol Fields</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.corekit.fields.field">Base Fields</a><ul>
-<li><a class="reference internal" href="#auxiliary">Auxiliary</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>
@@ -707,5 +563,7 @@ updating the current instance.</p>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
     </body>
 </html>

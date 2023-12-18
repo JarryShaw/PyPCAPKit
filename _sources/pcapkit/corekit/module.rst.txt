@@ -22,3 +22,9 @@ which is originally designed as :obj:`tuple[str, str] <tuple>`.
       :type: str
 
       Class name.
+
+Type Variables
+--------------
+
+.. data:: pcapkit.corekit.module._T
+   :type: typing.Any

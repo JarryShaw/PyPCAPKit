@@ -247,6 +247,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
@@ -360,7 +361,7 @@
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_T</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">NoValue</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">NoValue</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FieldValueError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -377,6 +378,8 @@
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">NoValueType</span>
 
 
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_T&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;IPv4Interface&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Interface&#39;</span><span class="p">)</span>
 <span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_AT&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span>
 <span class="n">_IT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_IT&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Interface&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Interface&#39;</span><span class="p">)</span>
 

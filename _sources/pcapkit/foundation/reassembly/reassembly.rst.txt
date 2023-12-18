@@ -80,3 +80,26 @@ Internal Definitions
 .. autoclass:: pcapkit.foundation.reassembly.reassembly.ReassemblyMeta
    :no-members:
    :show-inheritance:
+
+Type Variables
+--------------
+
+.. data:: pcapkit.foundation.reassembly.reassembly._PT
+   :type: pcapkit.corekit.infoclass.Info
+
+   Packet data structure.
+
+.. data:: pcapkit.foundation.reassembly.reassembly._DT
+   :type: pcapkit.corekit.infoclass.Info
+
+   Datagram data structure.
+
+.. data:: pcapkit.foundation.reassembly.reassembly._IT
+   :type: pcapkit.corekit.infoclass.Info
+
+   Buffer ID data structure.
+
+.. data:: pcapkit.foundation.reassembly.reassembly._BT
+   :type: pcapkit.corekit.infoclass.Info
+
+   Buffer data structure.

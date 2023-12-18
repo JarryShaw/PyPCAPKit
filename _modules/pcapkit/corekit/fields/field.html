@@ -247,6 +247,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
@@ -377,7 +378,7 @@
 
 
 <div class="viewcode-block" id="NoValueType">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.NoValueType">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.NoValueType">[docs]</a>
 <span class="nd">@final</span>
 <span class="k">class</span> <span class="nc">NoValueType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Default value for fields.&quot;&quot;&quot;</span>
@@ -393,7 +394,7 @@
 
 
 <div class="viewcode-block" id="FieldMeta">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.FieldMeta">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldMeta">[docs]</a>
 <span class="k">class</span> <span class="nc">FieldMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support to :class:`FieldBase`.</span>
 
@@ -406,7 +407,7 @@
 
 
 <div class="viewcode-block" id="FieldBase">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.FieldBase">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase">[docs]</a>
 <span class="k">class</span> <span class="nc">FieldBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">FieldMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal base class for protocol fields.</span>
 
@@ -469,7 +470,7 @@
         <span class="k">return</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="FieldBase.__call__">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.FieldBase.__call__">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
 
@@ -503,7 +504,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&gt;&#39;</span>
 
 <div class="viewcode-block" id="FieldBase.__set_name__">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.FieldBase.__set_name__">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.__set_name__">[docs]</a>
     <span class="k">def</span> <span class="nf">__set_name__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">owner</span><span class="p">:</span> <span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set field name and update field list (if applicable).</span>
 
@@ -522,7 +523,7 @@
 
 
 <div class="viewcode-block" id="FieldBase.pre_process">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.FieldBase.pre_process">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.pre_process">[docs]</a>
     <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;_T&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value before construction (packing).</span>
 
@@ -538,7 +539,7 @@
 
 
 <div class="viewcode-block" id="FieldBase.pack">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.FieldBase.pack">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.pack">[docs]</a>
     <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Optional[_T]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pack field value into :obj:`bytes`.</span>
 
@@ -560,7 +561,7 @@
 
 
 <div class="viewcode-block" id="FieldBase.post_process">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.FieldBase.post_process">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.post_process">[docs]</a>
     <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_T&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value after parsing (unpacking).</span>
 
@@ -576,7 +577,7 @@
 
 
 <div class="viewcode-block" id="FieldBase.unpack">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.FieldBase.unpack">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.unpack">[docs]</a>
     <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">&#39;bytes | IO[bytes]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_T&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unpack field value from :obj:`bytes`.</span>
 
@@ -597,7 +598,7 @@
 
 
 <div class="viewcode-block" id="Field">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.Field">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.Field">[docs]</a>
 <span class="k">class</span> <span class="nc">Field</span><span class="p">(</span><span class="n">FieldBase</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for protocol fields.</span>
 
@@ -634,7 +635,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length</span>
 
 <div class="viewcode-block" id="Field.__call__">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/index.html#pcapkit.corekit.fields.field.Field.__call__">[docs]</a>
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.Field.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
 

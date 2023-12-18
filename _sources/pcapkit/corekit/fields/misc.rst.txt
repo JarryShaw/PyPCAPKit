@@ -26,3 +26,18 @@ Miscellaneous Fields
 .. autoclass:: pcapkit.corekit.fields.misc.SchemaField
    :members:
    :show-inheritance:
+
+Type Variables
+~~~~~~~~~~~~~~
+
+.. data:: pcapkit.corekit.fields.misc._TC
+   :type: typing.Any
+
+.. data:: pcapkit.corekit.fields.misc._TS
+   :type: pcapkit.protocols.schema.schema.Schema
+
+.. data:: pcapkit.corekit.fields.misc._TP
+   :type: pcapkit.protocols.protocol.Protocol
+
+.. data:: pcapkit.corekit.fields.misc._TN
+   :type: pcapkit.corekit.fields.field.NoValueType

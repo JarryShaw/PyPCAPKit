@@ -210,6 +210,18 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
+Type Variables
+~~~~~~~~~~~~~~
+
+.. data:: pcapkit.protocols.schema.schema._VT
+   :type: typing.Any
+
+.. data:: pcapkit.protocols.schema.schema._ET
+   :type: enum.Enum
+
+.. data:: pcapkit.protocols.schema.schema._ST
+   :type: typing.Type[pcapkit.protocols.schema.schema.Schema]
+
 Data Model
 ----------
 

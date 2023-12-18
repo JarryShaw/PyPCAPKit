@@ -3,6 +3,7 @@ Root Protocol
 
 .. module:: pcapkit.protocols.protocol
 .. module:: pcapkit.protocols.data.protocol
+.. currentmodule:: pcapkit.protocols.protocol
 
 :mod:`pcapkit.protocols.protocol` contains
 :class:`~pcapkit.protocols.protocol.Protocol` only, which is
@@ -97,3 +98,12 @@ Internal Definitions
 .. autoclass:: pcapkit.protocols.protocol.ProtocolMeta
    :no-members:
    :show-inheritance:
+
+Type Variables
+--------------
+
+.. data:: pcapkit.protocols.protocol._PT
+   :type: pcapkit.protocols.data.data.Data
+
+.. data:: pcapkit.protocols.protocol._ST
+   :type: pcapkit.protocols.schema.schema.Schema

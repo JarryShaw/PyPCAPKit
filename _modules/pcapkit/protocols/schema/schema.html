@@ -247,6 +247,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
@@ -383,14 +384,14 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="s1">&#39;EnumSchema&#39;</span><span class="p">,</span> <span class="s1">&#39;schema_final&#39;</span><span class="p">]</span>
 
-<span class="n">VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;VT&#39;</span><span class="p">)</span>
-<span class="n">ET</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;ET&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Enum&#39;</span><span class="p">)</span>
-<span class="n">ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Type[Schema]&#39;</span><span class="p">)</span>
+<span class="n">_VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_VT&#39;</span><span class="p">)</span>
+<span class="n">_ET</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_ET&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Enum&#39;</span><span class="p">)</span>
+<span class="n">_ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_ST&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Type[Schema]&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="schema_final">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.schema_final">[docs]</a>
-<span class="k">def</span> <span class="nf">schema_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_finalised</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ST&#39;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">schema_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">&#39;_ST&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_finalised</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_ST&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Finalise schema class.</span>
 
 <span class="sd">    This decorator function is used to generate necessary</span>
@@ -582,7 +583,7 @@
 
 <div class="viewcode-block" id="Schema">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema">[docs]</a>
-<span class="k">class</span> <span class="nc">Schema</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">VT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">SchemaMeta</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Schema</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_VT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">SchemaMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for protocol headers.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -613,7 +614,7 @@
 
 <div class="viewcode-block" id="Schema.__new__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.__new__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new instance.</span>
 
 <span class="sd">        The class will try to automatically generate ``__init__`` method with</span>
@@ -649,8 +650,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="c1"># NOTE: Keys with the same names as the class&#39;s builtin methods will be</span>
         <span class="c1"># renamed with the class name prefixed as mangled class variables</span>
         <span class="c1"># implicitly and internally. Such mapping information will be stored</span>
@@ -738,13 +739,13 @@
                 <span class="k">continue</span>
             <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;VT&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
@@ -763,8 +764,8 @@
 <div class="viewcode-block" id="Schema.from_dict">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.from_dict">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a new instance.</span>
 
 <span class="sd">        * If ``dict_`` is present and has a ``.keys()`` method, then does:</span>
@@ -787,7 +788,7 @@
 
 <div class="viewcode-block" id="Schema.to_dict">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.to_dict">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, VT]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, _VT]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert :class:`Schema` into :obj:`dict`.</span>
 
 <span class="sd">        Important:</span>
@@ -1072,7 +1073,7 @@
 
 <div class="viewcode-block" id="EnumMeta">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumMeta">[docs]</a>
-<span class="k">class</span> <span class="nc">EnumMeta</span><span class="p">(</span><span class="n">SchemaMeta</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">ET</span><span class="p">]):</span>
+<span class="k">class</span> <span class="nc">EnumMeta</span><span class="p">(</span><span class="n">SchemaMeta</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_ET</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support for :class:`EnumSchema`.</span>
 
 <span class="sd">    This meta class is used to generate necessary attributes for the</span>
@@ -1087,10 +1088,10 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Mapping of enumeration numbers to schemas (**internal use only**).</span>
-        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[EnumSchema]]&#39;</span>
+        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[_ET, Type[EnumSchema]]&#39;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[ET, Type[EnumSchema]]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[_ET, Type[EnumSchema]]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapping of enumeration numbers to schemas.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span></div>
 
@@ -1098,7 +1099,7 @@
 
 <div class="viewcode-block" id="EnumSchema">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema">[docs]</a>
-<span class="k">class</span> <span class="nc">EnumSchema</span><span class="p">(</span><span class="n">Schema</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">ET</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">EnumMeta</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EnumSchema</span><span class="p">(</span><span class="n">Schema</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_ET</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">EnumMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;:class:`Schema` with enumeration mapping support.</span>
 
 <span class="sd">    Examples:</span>
@@ -1149,10 +1150,10 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Mapping of enumeration numbers to schemas.</span>
-        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span>
+        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[_ET, Type[Self]]&#39;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[_ET, Type[Self]]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapping of enumeration numbers to schemas.</span>
 
 <span class="sd">        Note:</span>
@@ -1164,7 +1165,7 @@
 
 <div class="viewcode-block" id="EnumSchema.__init_subclass__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__">[docs]</a>
-    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[ET | Iterable[ET]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[_ET | Iterable[_ET]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register enumeration to :attr:`registry` mapping.</span>
 
 <span class="sd">        Args:</span>
@@ -1202,7 +1203,7 @@
 <div class="viewcode-block" id="EnumSchema.register">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.register">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;ET&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Type[Self]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;_ET&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Type[Self]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register enumetaion to :attr:`__enum__` mapping.</span>
 
 <span class="sd">        Args:</span>

@@ -247,6 +247,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
@@ -373,16 +374,16 @@
     <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
 
-<span class="n">IPAddress</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span>
+<span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_AT&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span>
 
 <span class="c1">#: Buffer ID.</span>
-<span class="n">BufferID</span><span class="p">:</span> <span class="s1">&#39;TypeAlias&#39;</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="n">BufferID</span><span class="p">:</span> <span class="s1">&#39;TypeAlias&#39;</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Packet">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">]):</span>
+<span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>
@@ -402,9 +403,9 @@
     <span class="c1">#: TCP finish (FIN) flag.</span>
     <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
     <span class="c1">#: Source IP.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;_AT&#39;</span>
     <span class="c1">#: Destination IP.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;_AT&#39;</span>
     <span class="c1">#: TCP source port.</span>
     <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
     <span class="c1">#: TCP destination port.</span>
@@ -413,7 +414,7 @@
     <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Data_Frame | dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Data_Frame | dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;_AT&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;_AT&#39;</span><span class="p">,</span>
                      <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 

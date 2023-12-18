@@ -247,6 +247,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
@@ -424,12 +425,12 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Extractor&#39;</span><span class="p">]</span>
 
-<span class="n">P</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
+<span class="n">_P</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_P&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Extractor">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor">[docs]</a>
-<span class="k">class</span> <span class="nc">Extractor</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">P</span><span class="p">]):</span>
+<span class="k">class</span> <span class="nc">Extractor</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">_P</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extractor for PCAP files.</span>
 
 <span class="sd">    Notes:</span>
@@ -501,7 +502,7 @@
         <span class="c1">#: Extraction engine name.</span>
         <span class="n">_exnam</span><span class="p">:</span> <span class="s1">&#39;Engines&#39;</span>
         <span class="c1">#: Extraction engine instance.</span>
-        <span class="n">_exeng</span><span class="p">:</span> <span class="s1">&#39;Engine[P]&#39;</span>
+        <span class="n">_exeng</span><span class="p">:</span> <span class="s1">&#39;Engine[_P]&#39;</span>
 
         <span class="c1">#: Input file object.</span>
         <span class="n">_ifile</span><span class="p">:</span> <span class="s1">&#39;BufferedReader&#39;</span>
@@ -817,9 +818,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span>  <span class="c1"># using default/pcapkit engine</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAP_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Engine[P]&#39;</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Engine[_P]&#39;</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAPNG_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Engine[P]&#39;</span><span class="p">,</span> <span class="n">PCAPNG_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Engine[_P]&#39;</span><span class="p">,</span> <span class="n">PCAPNG_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
 
@@ -1228,7 +1229,7 @@
 
 <div class="viewcode-block" id="Extractor.__next__">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__next__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_P&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate and parse next PCAP frame.</span>
 
 <span class="sd">        It will call :meth:`self._exeng.read_frame &lt;pcapkit.foundation.engines.engine.Engine.read_frame&gt;`</span>
@@ -1254,7 +1255,7 @@
 
 <div class="viewcode-block" id="Extractor.__call__">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__call__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_P&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Works as a simple wrapper for the iteration protocol.</span>
 
 <span class="sd">        Raises:</span>

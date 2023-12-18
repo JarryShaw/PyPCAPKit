@@ -7,6 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields/collections.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
+<meta property="og:description" content="Type Variables:" />
+<meta name="description" content="Type Variables:" />
 <link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="Miscellaneous Fields" href="misc.html" /><link rel="prev" title="IP Address Fields" href="ipaddress.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
@@ -145,7 +147,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -252,6 +254,7 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Core Utilities</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Protocol Fields</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipaddress.html">IP Address Fields</a></li>
@@ -360,7 +363,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -371,16 +374,16 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.ListField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.collections.</span></span><span class="sig-name descname"><span class="pre">ListField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length=&lt;function</span> <span class="pre">ListField.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">ListField.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/collections.html#ListField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.collections.ListField" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_TL</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_TL</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TL" title="pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TL</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TL" title="pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TL</span></code></a>]</p>
 <p>Field list for protocol fields.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span>) – Field size (in bytes); if a callable is given, it should return
 an integer value and accept the current packet as its only argument.</p></li>
-<li><p><strong>item_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="index.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>]</span>) – Field type of the contained items.</p></li>
+<li><p><strong>item_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>]</span>) – Field type of the contained items.</p></li>
 <li><p><strong>callback</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Callback function to be called upon
-<a class="reference internal" href="index.html#pcapkit.corekit.fields.field.FieldBase.__call__" title="pcapkit.corekit.fields.field.FieldBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
+<a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase.__call__" title="pcapkit.corekit.fields.field.FieldBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -462,7 +465,7 @@ instead of updating the current instance.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.OptionField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.collections.</span></span><span class="sig-name descname"><span class="pre">OptionField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length=&lt;function</span> <span class="pre">OptionField.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_schema=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name='type'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">registry=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eool=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">OptionField.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/collections.html#OptionField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.collections.OptionField" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_TS</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TS" title="pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TS</span></code></a>]</p>
 <p>Field list for protocol options.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -476,7 +479,7 @@ values) to option schemas, with the default value being the unknown
 option schema.</p></li>
 <li><p><strong>eool</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Enumeration of the EOOL (end-of-option-list, or equivalent) option</p></li>
 <li><p><strong>callback</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Callback function to be called upon
-<a class="reference internal" href="index.html#pcapkit.corekit.fields.field.FieldBase.__call__" title="pcapkit.corekit.fields.field.FieldBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
+<a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase.__call__" title="pcapkit.corekit.fields.field.FieldBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -541,6 +544,19 @@ the next fields can be aware of such informations.</p>
 
 </dd></dl>
 
+<section id="type-variables">
+<h2>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TL">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.collections.</span></span><span class="sig-name descname"><span class="pre">_TL</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><span class="pre">pcapkit.protocols.schema.schema.Schema</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><span class="pre">pcapkit.corekit.fields.field.FieldBase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TL" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TS">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.collections.</span></span><span class="sig-name descname"><span class="pre">_TS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><span class="pre">pcapkit.protocols.schema.schema.Schema</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TS" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
 </section>
 
         </article>
@@ -586,8 +602,27 @@ the next fields can be aware of such informations.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Container Fields</a><ul>
+<li><a class="reference internal" href="#type-variables">Type Variables</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

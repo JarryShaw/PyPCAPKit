@@ -237,6 +237,7 @@ Data Models
 ===========
 
 .. module:: pcapkit.foundation.reassembly.data.tcp
+.. currentmodule:: pcapkit.foundation.reassembly.tcp
 
 .. autodata:: pcapkit.foundation.reassembly.data.tcp.BufferID
 
@@ -265,3 +266,14 @@ Data Models
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.Buffer
    :members:
    :show-inheritance:
+
+Type Variables
+==============
+
+.. data:: pcapkit.foundation.reassembly.data.tcp._AT
+   :type: ipaddress.IPv4Address | ipaddress.IPv4Address
+
+.. data:: pcapkit.foundation.reassembly.data.tcp.BufferID
+   :type: typing.Tuple[_AT, int, _AT, int]
+
+   Buffer ID data structure.

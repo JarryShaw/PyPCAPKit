@@ -23,12 +23,16 @@ Data Models
 -----------
 
 .. module:: pcapkit.foundation.reassembly.data.ip
+.. currentmodule:: pcapkit.foundation.reassembly.ip
 
 .. autoclass:: pcapkit.foundation.reassembly.data.ip.Packet
    :members:
    :show-inheritance:
 
-.. autodata:: pcapkit.foundation.reassembly.data.ip.BufferID
+.. data:: pcapkit.foundation.reassembly.data.ip.BufferID
+   :type: typing.Tuple[_AT, _AT, int, pcapkit.const.reg.transtype.TransType]
+
+   Data module for buffer ID.
 
 .. autoclass:: pcapkit.foundation.reassembly.data.ip.Buffer
    :members:
@@ -41,3 +45,9 @@ Data Models
 .. autoclass:: pcapkit.foundation.reassembly.data.ip.Datagram
    :members:
    :show-inheritance:
+
+Type Variables
+--------------
+
+.. data:: pcapkit.foundation.reassembly.data.ip._AT
+   :type: ipaddress.IPv4Address | ipaddress.IPv4Address

@@ -247,6 +247,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
@@ -407,8 +408,8 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ProtocolBase&#39;</span><span class="p">]</span>
 
-<span class="n">PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">)</span>
-<span class="n">ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Schema&#39;</span><span class="p">)</span>
+<span class="n">_PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">)</span>
+<span class="n">_ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_ST&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Schema&#39;</span><span class="p">)</span>
 
 <span class="c1"># readable characters&#39; order list</span>
 <span class="n">readable</span> <span class="o">=</span> <span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">char</span><span class="p">:</span> <span class="ow">not</span> <span class="n">char</span><span class="o">.</span><span class="n">isspace</span><span class="p">(),</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span><span class="p">)]</span>
@@ -429,7 +430,7 @@
 
 <div class="viewcode-block" id="ProtocolBase">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase">[docs]</a>
-<span class="k">class</span> <span class="nc">ProtocolBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">ST</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ProtocolMeta</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ProtocolBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ProtocolMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for all protocol family.</span>
 
 <span class="sd">    Note:</span>
@@ -440,7 +441,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Parsed packet data.</span>
-        <span class="n">_info</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span>
+        <span class="n">_info</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span>
         <span class="c1">#: Raw packet data.</span>
         <span class="n">_data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
         <span class="c1">#: Source packet stream.</span>
@@ -453,11 +454,11 @@
         <span class="c1"># Internal data storage for cached properties.</span>
         <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
         <span class="c1">#: Protocol packet data definition.</span>
-        <span class="n">__data__</span><span class="p">:</span> <span class="s1">&#39;Type[PT]&#39;</span>
+        <span class="n">__data__</span><span class="p">:</span> <span class="s1">&#39;Type[_PT]&#39;</span>
         <span class="c1">#: Protocol header schema definition.</span>
-        <span class="n">__schema__</span><span class="p">:</span> <span class="s1">&#39;Type[ST]&#39;</span>
+        <span class="n">__schema__</span><span class="p">:</span> <span class="s1">&#39;Type[_ST]&#39;</span>
         <span class="c1">#: Protocol header schema instance.</span>
-        <span class="n">__header__</span><span class="p">:</span> <span class="s1">&#39;ST&#39;</span>
+        <span class="n">__header__</span><span class="p">:</span> <span class="s1">&#39;_ST&#39;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -503,7 +504,7 @@
 
     <span class="c1"># info dict of current instance</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PT&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_PT&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Info dict of current instance.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span>
 
@@ -553,7 +554,7 @@
 
     <span class="c1"># schema data</span>
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ST&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_ST&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Schema data of the protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
@@ -576,7 +577,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,)</span>
 
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PT&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_PT&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read (parse) packet data.</span>
 
 <span class="sd">        Args:</span>
@@ -589,7 +590,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ST&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_ST&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
@@ -619,7 +620,7 @@
         <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__packet__&#39;</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PT&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_PT&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unpack (parse) packet data.</span>
 
 <span class="sd">        Args:</span>
@@ -635,9 +636,9 @@
 <span class="sd">            the packet data is not available in the current instance.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Optional[ST]&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Optional[_ST]&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__packet__&#39;</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;_ST&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
@@ -791,7 +792,7 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_schema</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;ST | dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_schema</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;_ST | dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create protocol instance from schema.</span>
 
 <span class="sd">        Args:</span>
@@ -802,7 +803,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
-            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;_ST&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span>
 
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">schema</span>
@@ -813,7 +814,7 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;PT | dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;_PT | dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create protocol instance from data.</span>
 
 <span class="sd">        Args:</span>
@@ -824,7 +825,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data</span><span class="p">):</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -911,8 +912,8 @@
         <span class="c1">#: pcapkit.protocols.data.data.Data: Parsed packet data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[ST]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[PT]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[_ST]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[_PT]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisation for subclasses.</span>
 
 <span class="sd">        Args:</span>
@@ -937,9 +938,9 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[ST]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">schema_module</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">Schema_Raw</span><span class="p">))</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[_ST]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">schema_module</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">Schema_Raw</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[PT]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data_module</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">Data_Raw</span><span class="p">))</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[_PT]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data_module</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">Data_Raw</span><span class="p">))</span>
 
         <span class="bp">cls</span><span class="o">.</span><span class="n">__schema__</span> <span class="o">=</span> <span class="n">schema</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span> <span class="o">=</span> <span class="n">data</span>
@@ -1442,8 +1443,8 @@
 
         <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PT&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_PT&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Decode next layer protocol.</span>
 
 <span class="sd">        Arguments:</span>
@@ -1537,13 +1538,13 @@
 
 <div class="viewcode-block" id="Protocol">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol">[docs]</a>
-<span class="k">class</span> <span class="nc">Protocol</span><span class="p">(</span><span class="n">ProtocolBase</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">ST</span><span class="p">]):</span>
+<span class="k">class</span> <span class="nc">Protocol</span><span class="p">(</span><span class="n">ProtocolBase</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for all protocol family.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Protocol.__init_subclass__">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init_subclass__">[docs]</a>
-    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[ST]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[PT]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[_ST]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[_PT]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisation for subclasses.</span>
 
 <span class="sd">        Args:</span>

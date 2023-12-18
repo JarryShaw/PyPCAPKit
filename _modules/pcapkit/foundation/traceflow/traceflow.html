@@ -247,6 +247,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
@@ -390,12 +391,12 @@
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
 
-    <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;Index&#39;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;_IT&#39;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
 
-<span class="n">BufferID</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;BufferID&#39;</span><span class="p">)</span>
-<span class="n">Buffer</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
-<span class="n">Index</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Index&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
-<span class="n">Packet</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
+<span class="n">_DT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_DT&#39;</span><span class="p">)</span>
+<span class="n">_BT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_BT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
+<span class="n">_IT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_IT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
+<span class="n">_PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="TraceFlowMeta">
@@ -432,7 +433,7 @@
 
 <div class="viewcode-block" id="TraceFlowBase">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase">[docs]</a>
-<span class="k">class</span> <span class="nc">TraceFlowBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">TraceFlowMeta</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">TraceFlowBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">_DT</span><span class="p">,</span> <span class="n">_BT</span><span class="p">,</span> <span class="n">_IT</span><span class="p">,</span> <span class="n">_PT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">TraceFlowMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base flow tracing class.</span>
 
 <span class="sd">    Arguments:</span>
@@ -511,8 +512,8 @@
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">protocol</span>  <span class="c1"># type: ignore[return-value]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index table for traced flow.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[_IT, ...]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_IT table for traced flow.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
@@ -595,7 +596,7 @@
         <span class="k">return</span> <span class="n">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="n">ext</span>
 
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
 
 <span class="sd">        Arguments:</span>
@@ -604,12 +605,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[True]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[True]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper | str&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper | str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Trace packets.</span>
 
 <span class="sd">        Arguments:</span>
@@ -625,7 +626,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[_IT, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit traced TCP flows.</span>
 
 <span class="sd">        Returns:</span>
@@ -666,10 +667,10 @@
         <span class="c1">#: str: Output root path.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span> <span class="o">=</span> <span class="n">fout</span>
 
-        <span class="c1">#: dict[BufferID, Buffer]: Buffer field (:term:`trace.tcp.buffer`).</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[BufferID, Buffer]</span>
-        <span class="c1">#: list[Index]: Stream index (:term:`trace.tcp.index`).</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Index]</span>
+        <span class="c1">#: dict[_DT, _BT]: Buffer field (:term:`trace.tcp.buffer`).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[_DT, _BT]</span>
+        <span class="c1">#: list[_IT]: Stream index (:term:`trace.tcp.index`).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_IT]</span>
 
         <span class="c1">#: Literal[&#39;little&#39;, &#39;big&#39;]: Output file byte order.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">=</span> <span class="n">byteorder</span>
@@ -683,7 +684,7 @@
         <span class="c1">#: Optional[str]: Output file extension.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
 
 <span class="sd">        Arguments:</span>
@@ -707,7 +708,7 @@
 
 <div class="viewcode-block" id="TraceFlow">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow">[docs]</a>
-<span class="k">class</span> <span class="nc">TraceFlow</span><span class="p">(</span><span class="n">TraceFlowBase</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">]):</span>
+<span class="k">class</span> <span class="nc">TraceFlow</span><span class="p">(</span><span class="n">TraceFlowBase</span><span class="p">[</span><span class="n">_DT</span><span class="p">,</span> <span class="n">_BT</span><span class="p">,</span> <span class="n">_IT</span><span class="p">,</span> <span class="n">_PT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_DT</span><span class="p">,</span> <span class="n">_BT</span><span class="p">,</span> <span class="n">_IT</span><span class="p">,</span> <span class="n">_PT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base flow tracing class.</span>
 
 <span class="sd">    Example:</span>

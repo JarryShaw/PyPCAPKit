@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/multidict.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.multidict contains multi-mapping dictionary classes, which are used to store multiple mappings of the same key. The implementation is inspired and based on the Werkzeug project." />
-<meta name="description" content="pcapkit.corekit.multidict contains multi-mapping dictionary classes, which are used to store multiple mappings of the same key. The implementation is inspired and based on the Werkzeug project." />
+<meta property="og:description" content="pcapkit.corekit.multidict contains multi-mapping dictionary classes, which are used to store multiple mappings of the same key. The implementation is inspired and based on the Werkzeug project. Typ..." />
+<meta name="description" content="pcapkit.corekit.multidict contains multi-mapping dictionary classes, which are used to store multiple mappings of the same key. The implementation is inspired and based on the Werkzeug project. Typ..." />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Protocol Chain" href="protochain.html" /><link rel="prev" title="Module Descriptor" href="module.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
@@ -147,7 +147,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -254,6 +254,7 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Core Utilities</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Core Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3 has-children"><a class="reference internal" href="fields/index.html">Protocol Fields</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Protocol Fields</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="fields/strings.html">Text Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="fields/ipaddress.html">IP Address Fields</a></li>
@@ -362,7 +363,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -376,7 +377,7 @@ is inspired and based on the <a class="reference external" href="https://werkzeu
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">MultiDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_KT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">_VT</span></code>]</p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT" title="pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_KT</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT" title="pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_VT</span></code></a>]</p>
 <p>A <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> is a dictionary subclass customized to deal with
 multiple values for the same key.</p>
 <p><a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> implements all standard dictionary methods. Internally,
@@ -667,7 +668,7 @@ of raising an error.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.OrderedMultiDict">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">OrderedMultiDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#OrderedMultiDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.OrderedMultiDict" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_KT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">_VT</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a>[<a class="reference internal" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT" title="pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_KT</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT" title="pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_VT</span></code></a>]</p>
 <p>Works like a regular <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> but preserves the order of the
 fields.</p>
 <dl class="field-list simple">
@@ -690,6 +691,24 @@ objects are exposed.</p>
 </div>
 </dd></dl>
 
+<section id="type-variables">
+<h2>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.corekit.multidict.pcapkit.corekit.multidict._T">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">_T</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></em><a class="headerlink" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._T" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">_KT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></em><a class="headerlink" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">_VT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></em><a class="headerlink" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
 </section>
 
         </article>
@@ -735,8 +754,27 @@ objects are exposed.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Multi-Mapping Dictionary</a><ul>
+<li><a class="reference internal" href="#type-variables">Type Variables</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
