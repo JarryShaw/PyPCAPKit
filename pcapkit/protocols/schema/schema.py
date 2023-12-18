@@ -28,12 +28,12 @@ if TYPE_CHECKING:
 
 __all__ = ['Schema', 'EnumSchema', 'schema_final']
 
-VT = TypeVar('VT')
-ET = TypeVar('ET', bound='Enum')
-ST = TypeVar('ST', bound='Type[Schema]')
+_VT = TypeVar('_VT')
+_ET = TypeVar('_ET', bound='Enum')
+_ST = TypeVar('_ST', bound='Type[Schema]')
 
 
-def schema_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
+def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     """Finalise schema class.
 
     This decorator function is used to generate necessary
@@ -219,7 +219,7 @@ class SchemaMeta(abc.ABCMeta):
         return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
 
 
-class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
+class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
     """Schema for protocol headers."""
 
     if TYPE_CHECKING:
@@ -248,7 +248,7 @@ class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
     #: List of names to be excluded from :obj:`dict` conversion.
     __excluded__: 'list[str]' = []
 
-    def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Self':  # pylint: disable=unused-argument
+    def __new__(cls, *args: '_VT', **kwargs: '_VT') -> 'Self':  # pylint: disable=unused-argument
         """Create a new instance.
 
         The class will try to automatically generate ``__init__`` method with
@@ -283,8 +283,8 @@ class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
                 self.__dict__[name] = field.default
         self.pack(packet)
 
-    def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
-                   **kwargs: 'VT') -> 'None':
+    def __update__(self, dict_: 'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]' = None,
+                   **kwargs: '_VT') -> 'None':
         # NOTE: Keys with the same names as the class's builtin methods will be
         # renamed with the class name prefixed as mangled class variables
         # implicitly and internally. Such mapping information will be stored
@@ -372,13 +372,13 @@ class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
                 continue
             yield self.__map_reverse__.get(key, key)
 
-    def __getitem__(self, name: 'str') -> 'VT':
+    def __getitem__(self, name: 'str') -> '_VT':
         if name in self.__fields__:
             key = self.__map__.get(name, name)
             return self.__dict__[key]
         return super().__getitem__(name)
 
-    def __setattr__(self, name: 'str', value: 'VT') -> 'None':
+    def __setattr__(self, name: 'str', value: '_VT') -> 'None':
         if name in self.__fields__:
             key = self.__map__.get(name, name)
             self.__dict__[key] = value
@@ -395,8 +395,8 @@ class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
         return super().__delattr__(name)
 
     @classmethod
-    def from_dict(cls, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
-                  **kwargs: 'VT') -> 'Self':
+    def from_dict(cls, dict_: 'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]' = None,
+                  **kwargs: '_VT') -> 'Self':
         r"""Create a new instance.
 
         * If ``dict_`` is present and has a ``.keys()`` method, then does:
@@ -416,7 +416,7 @@ class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
         self.__post_init__()
         return self
 
-    def to_dict(self) -> 'dict[str, VT]':
+    def to_dict(self) -> 'dict[str, _VT]':
         """Convert :class:`Schema` into :obj:`dict`.
 
         Important:
@@ -676,7 +676,7 @@ class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
         return self
 
 
-class EnumMeta(SchemaMeta, Generic[ET]):
+class EnumMeta(SchemaMeta, Generic[_ET]):
     """Meta class to add dynamic support for :class:`EnumSchema`.
 
     This meta class is used to generate necessary attributes for the
@@ -691,15 +691,15 @@ class EnumMeta(SchemaMeta, Generic[ET]):
 
     if TYPE_CHECKING:
         #: Mapping of enumeration numbers to schemas (**internal use only**).
-        __enum__: 'DefaultDict[ET, Type[EnumSchema]]'
+        __enum__: 'DefaultDict[_ET, Type[EnumSchema]]'
 
     @property
-    def registry(cls) -> 'DefaultDict[ET, Type[EnumSchema]]':
+    def registry(cls) -> 'DefaultDict[_ET, Type[EnumSchema]]':
         """Mapping of enumeration numbers to schemas."""
         return cls.__enum__
 
 
-class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
+class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
     """:class:`Schema` with enumeration mapping support.
 
     Examples:
@@ -750,10 +750,10 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
 
     if TYPE_CHECKING:
         #: Mapping of enumeration numbers to schemas.
-        __enum__: 'DefaultDict[ET, Type[Self]]'
+        __enum__: 'DefaultDict[_ET, Type[Self]]'
 
     @property
-    def registry(self) -> 'DefaultDict[ET, Type[Self]]':
+    def registry(self) -> 'DefaultDict[_ET, Type[Self]]':
         """Mapping of enumeration numbers to schemas.
 
         Note:
@@ -763,7 +763,7 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
         """
         return self.__enum__
 
-    def __init_subclass__(cls, /, code: 'Optional[ET | Iterable[ET]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+    def __init_subclass__(cls, /, code: 'Optional[_ET | Iterable[_ET]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Register enumeration to :attr:`registry` mapping.
 
         Args:
@@ -798,7 +798,7 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
         super().__init_subclass__()
 
     @classmethod
-    def register(cls, code: 'ET', schema: 'Type[Self]') -> 'None':
+    def register(cls, code: '_ET', schema: 'Type[Self]') -> 'None':
         """Register enumetaion to :attr:`__enum__` mapping.
 
         Args:

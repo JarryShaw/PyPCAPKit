@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.protocols.protocol import PT, ST
+from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 __all__ = ['Link']
 
 
-class Link(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-method
+class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for link layer protocol family.
 
     This class currently supports parsing of the following protocols, which are

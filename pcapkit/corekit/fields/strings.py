@@ -2,7 +2,7 @@
 """text field class"""
 
 import urllib.parse as urllib_parse
-from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 import chardet
 

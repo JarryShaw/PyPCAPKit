@@ -35,12 +35,12 @@ if TYPE_CHECKING:
     from pcapkit.corekit.infoclass import Info
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-    CallbackFn = Callable[['Index'], None]
+    CallbackFn = Callable[['_IT'], None]
 
-BufferID = TypeVar('BufferID')
-Buffer = TypeVar('Buffer', bound='Info')
-Index = TypeVar('Index', bound='Info')
-Packet = TypeVar('Packet', bound='Info')
+_DT = TypeVar('_DT')
+_BT = TypeVar('_BT', bound='Info')
+_IT = TypeVar('_IT', bound='Info')
+_PT = TypeVar('_PT', bound='Info')
 
 
 class TraceFlowMeta(abc.ABCMeta):
@@ -72,7 +72,7 @@ class TraceFlowMeta(abc.ABCMeta):
         return protocol_registry.get(cls.name.upper(), Raw)
 
 
-class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlowMeta):
+class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
     """Base flow tracing class.
 
     Arguments:
@@ -151,8 +151,8 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         return type(self).protocol  # type: ignore[return-value]
 
     @property
-    def index(self) -> 'tuple[Index, ...]':
-        """Index table for traced flow."""
+    def index(self) -> 'tuple[_IT, ...]':
+        """_IT table for traced flow."""
         if self._buffer:
             return self.submit()
         return tuple(self._stream)
@@ -235,7 +235,7 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         return make_dumper(output), ext
 
     @abc.abstractmethod
-    def dump(self, packet: 'Packet') -> 'None':
+    def dump(self, packet: '_PT') -> 'None':
         """Dump frame to output files.
 
         Arguments:
@@ -244,12 +244,12 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         """
 
     @overload
-    def trace(self, packet: 'Packet', *, output: 'Literal[True]' = ...) -> 'Dumper': ...
+    def trace(self, packet: '_PT', *, output: 'Literal[True]' = ...) -> 'Dumper': ...
     @overload
-    def trace(self, packet: 'Packet', *, output: 'Literal[False]' = ...) -> 'str': ...
+    def trace(self, packet: '_PT', *, output: 'Literal[False]' = ...) -> 'str': ...
 
     @abc.abstractmethod
-    def trace(self, packet: 'Packet', *, output: 'bool' = False) -> 'Dumper | str':
+    def trace(self, packet: '_PT', *, output: 'bool' = False) -> 'Dumper | str':
         """Trace packets.
 
         Arguments:
@@ -265,7 +265,7 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         """
 
     @abc.abstractmethod
-    def submit(self) -> 'tuple[Index, ...]':
+    def submit(self) -> 'tuple[_IT, ...]':
         """Submit traced TCP flows.
 
         Returns:
@@ -306,10 +306,10 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         #: str: Output root path.
         self._fproot = fout
 
-        #: dict[BufferID, Buffer]: Buffer field (:term:`trace.tcp.buffer`).
-        self._buffer = {}  # type: dict[BufferID, Buffer]
-        #: list[Index]: Stream index (:term:`trace.tcp.index`).
-        self._stream = []  # type: list[Index]
+        #: dict[_DT, _BT]: Buffer field (:term:`trace.tcp.buffer`).
+        self._buffer = {}  # type: dict[_DT, _BT]
+        #: list[_IT]: Stream index (:term:`trace.tcp.index`).
+        self._stream = []  # type: list[_IT]
 
         #: Literal['little', 'big']: Output file byte order.
         self._endian = byteorder
@@ -323,7 +323,7 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         #: Optional[str]: Output file extension.
         self._fdpext = ext
 
-    def __call__(self, packet: 'Packet') -> 'None':
+    def __call__(self, packet: '_PT') -> 'None':
         """Dump frame to output files.
 
         Arguments:
@@ -344,7 +344,7 @@ class TraceFlowBase(Generic[BufferID, Buffer, Index, Packet], metaclass=TraceFlo
         cls.__callback_fn__ = []
 
 
-class TraceFlow(TraceFlowBase[BufferID, Buffer, Index, Packet], Generic[BufferID, Buffer, Index, Packet]):
+class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
     """Base flow tracing class.
 
     Example:

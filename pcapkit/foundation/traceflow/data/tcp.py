@@ -18,14 +18,14 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
     from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 
-IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
+_AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 
 #: Buffer ID.
-BufferID: 'TypeAlias' = Tuple[IPAddress, int, IPAddress, int]
+BufferID: 'TypeAlias' = Tuple[_AT, int, _AT, int]
 
 
 @info_final
-class Packet(Info, Generic[IPAddress]):
+class Packet(Info, Generic[_AT]):
     """Data structure for **TCP flow tracing**.
 
     See Also:
@@ -45,9 +45,9 @@ class Packet(Info, Generic[IPAddress]):
     #: TCP finish (FIN) flag.
     fin: 'bool'
     #: Source IP.
-    src: 'IPAddress'
+    src: '_AT'
     #: Destination IP.
-    dst: 'IPAddress'
+    dst: '_AT'
     #: TCP source port.
     srcport: 'int'
     #: TCP destination port.
@@ -56,7 +56,7 @@ class Packet(Info, Generic[IPAddress]):
     timestamp: 'float'
 
     if TYPE_CHECKING:
-        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', src: 'IPAddress', dst: 'IPAddress',
+        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', src: '_AT', dst: '_AT',
                      srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 

@@ -69,10 +69,10 @@ if TYPE_CHECKING:
 
 __all__ = ['Extractor']
 
-P = TypeVar('P')
+_P = TypeVar('_P')
 
 
-class Extractor(Generic[P]):
+class Extractor(Generic[_P]):
     """Extractor for PCAP files.
 
     Notes:
@@ -144,7 +144,7 @@ class Extractor(Generic[P]):
         #: Extraction engine name.
         _exnam: 'Engines'
         #: Extraction engine instance.
-        _exeng: 'Engine[P]'
+        _exeng: 'Engine[_P]'
 
         #: Input file object.
         _ifile: 'BufferedReader'
@@ -446,9 +446,9 @@ class Extractor(Generic[P]):
             self._exnam = 'default'  # using default/pcapkit engine
 
         if self._magic in PCAP_Engine.MAGIC_NUMBER:
-            self._exeng = cast('Engine[P]', PCAP_Engine(self))
+            self._exeng = cast('Engine[_P]', PCAP_Engine(self))
         elif self._magic in PCAPNG_Engine.MAGIC_NUMBER:
-            self._exeng = cast('Engine[P]', PCAPNG_Engine(self))
+            self._exeng = cast('Engine[_P]', PCAPNG_Engine(self))
         else:
             raise FormatError(f'unknown file format: {self._magic!r}')
 
@@ -836,7 +836,7 @@ class Extractor(Generic[P]):
             return self
         raise IterableError("'Extractor(auto=True)' object is not iterable")
 
-    def __next__(self) -> 'P':
+    def __next__(self) -> '_P':
         """Iterate and parse next PCAP frame.
 
         It will call :meth:`self._exeng.read_frame <pcapkit.foundation.engines.engine.Engine.read_frame>`
@@ -859,7 +859,7 @@ class Extractor(Generic[P]):
                 self._cleanup()
                 raise
 
-    def __call__(self) -> 'P':
+    def __call__(self) -> '_P':
         """Works as a simple wrapper for the iteration protocol.
 
         Raises:

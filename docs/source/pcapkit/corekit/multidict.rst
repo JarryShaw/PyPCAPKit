@@ -35,3 +35,15 @@ is inspired and based on the `Werkzeug`_ project.
    :no-members:
    :no-special-members: __init__
    :show-inheritance:
+
+Type Variables
+--------------
+
+.. data:: pcapkit.corekit.multidict._T
+   :type: typing.Any
+
+.. data:: pcapkit.corekit.multidict._KT
+   :type: typing.Any
+
+.. data:: pcapkit.corekit.multidict._VT
+   :type: typing.Any

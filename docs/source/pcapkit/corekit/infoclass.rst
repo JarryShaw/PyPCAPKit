@@ -24,9 +24,18 @@ in :pep:`557`.
 
 .. autodecorator:: pcapkit.corekit.infoclass.info_final
 
-Meta Classes
-------------
+Internal Definitions
+--------------------
 
 .. autoclass:: pcapkit.corekit.infoclass.InfoMeta
    :no-members:
    :show-inheritance:
+
+Type Variables
+--------------
+
+.. data:: pcapkit.corekit.infoclass.VT
+   :type: typing.Any
+
+.. data:: pcapkit.corekit.infoclass.ST
+   :type: typing.Type[pcapkit.corekit.infoclass.Info]

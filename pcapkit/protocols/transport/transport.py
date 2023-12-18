@@ -15,7 +15,7 @@ import io
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.protocols.protocol import PT, ST
+from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, logger
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 __all__ = ['Transport']
 
 
-class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-method
+class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for transport layer protocol family."""
 
     if TYPE_CHECKING:
@@ -130,8 +130,8 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, dict_: 'PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None, *,  # type: ignore[override]
-                           packet: 'Optional[dict[str, Any]]' = None) -> 'PT':  # pylint: disable=arguments-renamed
+    def _decode_next_layer(self, dict_: '_PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None, *,  # type: ignore[override]
+                           packet: 'Optional[dict[str, Any]]' = None) -> '_PT':  # pylint: disable=arguments-renamed
         """Decode next layer protocol.
 
         The method will check if the next layer protocol is supported based on

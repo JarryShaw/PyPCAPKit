@@ -1072,10 +1072,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     ##########################################################################
 
     def _get_payload(self) -> 'bytes':
-        """Get payload of :attr:`self.__header__ <Protocol.__header__>`.
+        """Get payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>`.
 
         Returns:
-            Payload of :attr:`self.__header__ <Protocol.__header__>` as :obj:`bytes`.
+            Payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>` as :obj:`bytes`.
 
         See Also:
             This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.

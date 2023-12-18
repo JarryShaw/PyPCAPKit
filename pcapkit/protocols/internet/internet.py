@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Generic, cast
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import PT, ST
+from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import RegistryError
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 __all__ = ['Internet']
 
 
-class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-method
+class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for internet layer protocol family.
 
     This class currently supports parsing of the following protocols, which are
@@ -155,9 +155,9 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
         _prot = Enum_TransType.get(_byte)
         return _prot
 
-    def _decode_next_layer(self, dict_: 'PT', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ
+    def _decode_next_layer(self, dict_: '_PT', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None,
-                           version: 'Literal[4, 6]' = 4, ipv6_exthdr: 'Optional[ProtoChain]' = None) -> 'PT':
+                           version: 'Literal[4, 6]' = 4, ipv6_exthdr: 'Optional[ProtoChain]' = None) -> '_PT':
         r"""Decode next layer extractor.
 
         Arguments:

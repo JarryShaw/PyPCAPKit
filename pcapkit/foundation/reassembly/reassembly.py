@@ -26,18 +26,18 @@ if TYPE_CHECKING:
     from pcapkit.corekit.infoclass import Info
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-    CallbackFn = Callable[[list['DT']], None]
+    CallbackFn = Callable[[list['_DT']], None]
 
 __all__ = ['Reassembly']
 
 # packet
-PT = TypeVar('PT', bound='Info')
+_PT = TypeVar('_PT', bound='Info')
 # datagram
-DT = TypeVar('DT', bound='Info')
+_DT = TypeVar('_DT', bound='Info')
 # buffer ID
-IT = TypeVar('IT', bound='tuple')
+_IT = TypeVar('_IT', bound='tuple')
 # buffer
-BT = TypeVar('BT', bound='Info')
+_BT = TypeVar('_BT', bound='Info')
 
 
 class ReassemblyMeta(abc.ABCMeta):
@@ -69,7 +69,7 @@ class ReassemblyMeta(abc.ABCMeta):
         return protocol_registry.get(cls.name.upper(), Raw)
 
 
-class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
+class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
     """Base class for reassembly procedure.
 
     Args:
@@ -147,7 +147,7 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
 
     # reassembled datagram
     @property
-    def datagram(self) -> 'tuple[DT, ...]':
+    def datagram(self) -> 'tuple[_DT, ...]':
         """Reassembled datagram.
 
         Raises:
@@ -168,7 +168,7 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
 
     # reassembly procedure
     @abc.abstractmethod
-    def reassembly(self, info: 'PT') -> 'None':
+    def reassembly(self, info: '_PT') -> 'None':
         """Reassembly procedure.
 
         Arguments:
@@ -182,7 +182,7 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
 
     # submit reassembled payload
     @abc.abstractmethod
-    def submit(self, buf: 'BT', **kwargs: 'Any') -> 'list[DT]':
+    def submit(self, buf: '_BT', **kwargs: 'Any') -> 'list[_DT]':
         """Submit reassembled payload.
 
         Arguments:
@@ -192,7 +192,7 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
         """
 
     # fetch datagram
-    def fetch(self) -> 'tuple[DT, ...]':
+    def fetch(self) -> 'tuple[_DT, ...]':
         """Fetch datagram.
 
         Returns:
@@ -217,7 +217,7 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
         if (cached := self.__cached__.get('fetch')) is not None:
             return cached
 
-        temp_dtgram = []  # type: list[DT]
+        temp_dtgram = []  # type: list[_DT]
         for (bufid, buffer) in self._buffer.items():
             temp_dtgram.extend(
                 self.submit(buffer, bufid=bufid)
@@ -246,7 +246,7 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
         return None
 
     # run automatically
-    def run(self, packets: 'list[PT]') -> 'None':
+    def run(self, packets: 'list[_PT]') -> 'None':
         """Run automatically.
 
         Arguments:
@@ -313,14 +313,14 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
         #: :attr:`self._dtgram <_dtgram>` will be repopulated.
         self._flag_n = False
 
-        #: dict[IT, BT]: Dict buffer field. This field is used to
+        #: dict[_IT, _BT]: Dict buffer field. This field is used to
         #: store reassembled packets in the form of ``{bufid: buffer}``.
-        self._buffer = {}  # type: dict[IT, BT]
-        #: list[DT]: List reassembled datagram. This list is used
+        self._buffer = {}  # type: dict[_IT, _BT]
+        #: list[_DT]: List reassembled datagram. This list is used
         #: to store reassembled datagrams.
-        self._dtgram = []  # type: list[DT]
+        self._dtgram = []  # type: list[_DT]
 
-    def __call__(self, packet: 'PT') -> 'None':
+    def __call__(self, packet: '_PT') -> 'None':
         """Call packet reassembly.
 
         Arguments:
@@ -342,7 +342,7 @@ class ReassemblyBase(Generic[PT, DT, IT, BT], metaclass=ReassemblyMeta):
         cls.__callback_fn__ = []
 
 
-class Reassembly(ReassemblyBase[PT, DT, IT, BT], Generic[PT, DT, IT, BT]):
+class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]):
     """Base flow tracing class.
 
     Example:

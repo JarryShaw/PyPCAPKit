@@ -89,6 +89,7 @@ Data Structures
 ---------------
 
 .. module:: pcapkit.foundation.traceflow.data.tcp
+.. currentmodule:: pcapkit.foundation.traceflow.tcp
 
 .. autoclass:: pcapkit.foundation.traceflow.data.tcp.Packet
    :members:
@@ -103,3 +104,9 @@ Data Structures
 .. autoclass:: pcapkit.foundation.traceflow.data.tcp.Index
    :members:
    :show-inheritance:
+
+Type Variables
+--------------
+
+.. data:: pcapkit.foundation.traceflow.data.tcp._AT
+   :type: ipaddress.IPv4Address | ipaddress.IPv6Address

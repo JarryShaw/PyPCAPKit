@@ -58,3 +58,9 @@ Internal Definitions
 .. autoclass:: pcapkit.foundation.engines.engine.EngineMeta
    :no-members:
    :show-inheritance:
+
+Type Variables
+--------------
+
+.. data:: pcapkit.foundation.engines.engine._T
+   :type: typing.Any

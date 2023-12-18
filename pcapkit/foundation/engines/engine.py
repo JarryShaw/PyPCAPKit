@@ -18,10 +18,10 @@ if TYPE_CHECKING:
 
     from pcapkit.foundation.extraction import Extractor
 
-T = TypeVar('T')
+_T = TypeVar('_T')
 
 
-class EngineMeta(abc.ABCMeta, Generic[T]):
+class EngineMeta(abc.ABCMeta, Generic[_T]):
     """Meta class to add dynamic support to :class:`EngineBase`.
 
     This meta class is used to generate necessary attributes for the
@@ -50,7 +50,7 @@ class EngineMeta(abc.ABCMeta, Generic[T]):
         return cls.__module__
 
 
-class EngineBase(Generic[T], metaclass=EngineMeta):
+class EngineBase(Generic[_T], metaclass=EngineMeta):
     """Base class for engine support.
 
     Args:
@@ -133,7 +133,7 @@ class EngineBase(Generic[T], metaclass=EngineMeta):
         """
 
     @abc.abstractmethod
-    def read_frame(self) -> 'T':
+    def read_frame(self) -> '_T':
         """Read frame.
 
         This method is to be used for reading a frame from the file. It is to
@@ -151,7 +151,7 @@ class EngineBase(Generic[T], metaclass=EngineMeta):
         """
 
 
-class Engine(EngineBase[T], Generic[T]):
+class Engine(EngineBase[_T], Generic[_T]):
     """Base class for engine support.
 
     Example:

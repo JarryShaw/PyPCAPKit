@@ -78,6 +78,12 @@ extracts parametres from a PCAP file.
    .. automethod:: __next__
    .. automethod:: __call__
 
+Type Variables
+--------------
+
+.. data:: pcapkit.foundation.extraction._P
+   :type: typing.Any
+
 .. |pypcap| replace:: ``pypcap``
 .. _pypcap: https://pypcap.readthedocs.io/en/latest/
 .. |pycapfile| replace:: ``pycapfile``

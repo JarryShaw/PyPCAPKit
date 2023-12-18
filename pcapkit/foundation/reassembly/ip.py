@@ -16,7 +16,7 @@ however, this implement still used the elder one.
 """
 from typing import TYPE_CHECKING, Generic
 
-from pcapkit.foundation.reassembly.data.ip import AT, Buffer, BufferID, Datagram, DatagramID, Packet
+from pcapkit.foundation.reassembly.data.ip import _AT, Buffer, BufferID, Datagram, DatagramID, Packet
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 __all__ = ['IP']
 
 
-class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]):  # pylint: disable=abstract-method
+class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[_AT]):  # pylint: disable=abstract-method
     """Reassembly for IP payload.
 
     Args:
@@ -51,7 +51,7 @@ class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]
     # Methods.
     ##########################################################################
 
-    def reassembly(self, info: 'Packet[AT]') -> 'None':
+    def reassembly(self, info: 'Packet[_AT]') -> 'None':
         """Reassembly procedure.
 
         Arguments:
@@ -117,8 +117,8 @@ class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
             )
 
-    def submit(self, buf: 'Buffer[AT]', *, bufid: 'tuple[AT, AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
-               checked: 'bool' = False) -> 'list[Datagram[AT]]':
+    def submit(self, buf: 'Buffer[_AT]', *, bufid: 'tuple[_AT, _AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
+               checked: 'bool' = False) -> 'list[Datagram[_AT]]':
         """Submit reassembled payload.
 
         Arguments:

@@ -11,7 +11,7 @@ TCP flows from a series of packets and connections.
 """
 from typing import TYPE_CHECKING, Generic, overload
 
-from pcapkit.foundation.traceflow.data.tcp import Buffer, BufferID, Index, IPAddress, Packet
+from pcapkit.foundation.traceflow.data.tcp import Buffer, BufferID, Index, _AT, Packet
 from pcapkit.foundation.traceflow.traceflow import TraceFlowBase as TraceFlow
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
 
-class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddress]):
+class TCP(TraceFlow[BufferID, Buffer, Index, Packet[_AT]], Generic[_AT]):
     """Trace TCP flows.
 
     Args:
@@ -48,7 +48,7 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddre
     # Methods.
     ##########################################################################
 
-    def dump(self, packet: 'Packet[IPAddress]') -> 'None':
+    def dump(self, packet: 'Packet[_AT]') -> 'None':
         """Dump frame to output files.
 
         Arguments:
@@ -62,11 +62,11 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddre
         output(packet.frame, name=f'Frame {packet.index}')  # pylint: disable=not-callable
 
     @overload
-    def trace(self, packet: 'Packet[IPAddress]', *, output: 'Literal[True]' = ...) -> 'Dumper': ...
+    def trace(self, packet: 'Packet[_AT]', *, output: 'Literal[True]' = ...) -> 'Dumper': ...
     @overload
-    def trace(self, packet: 'Packet[IPAddress]', *, output: 'Literal[False]' = ...) -> 'str': ...
+    def trace(self, packet: 'Packet[_AT]', *, output: 'Literal[False]' = ...) -> 'str': ...
 
-    def trace(self, packet: 'Packet[IPAddress]', *, output: 'bool' = False) -> 'Dumper | str':
+    def trace(self, packet: 'Packet[_AT]', *, output: 'bool' = False) -> 'Dumper | str':
         """Trace packets.
 
         Arguments:

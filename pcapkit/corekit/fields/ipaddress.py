@@ -5,7 +5,7 @@ import abc
 import ipaddress
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.field import _T, Field, NoValue
+from pcapkit.corekit.fields.field import Field, NoValue
 from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import NoValueType
 
 
+_T = TypeVar('_T', 'IPv4Address', 'IPv6Address',
+             'IPv4Interface', 'IPv6Interface')
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 _IT = TypeVar('_IT', 'IPv4Interface', 'IPv6Interface')
 

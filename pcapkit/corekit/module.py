@@ -18,10 +18,10 @@ __all__ = ['ModuleDescriptor']
 if TYPE_CHECKING:
     from typing import Type
 
-T = TypeVar('T')
+_T = TypeVar('_T')
 
 
-class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'name']), Generic[T]):
+class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'name']), Generic[_T]):
     """Module descriptor contains module name and class name, the actual
     class can be imported by ``from module import name``."""
 
@@ -33,7 +33,7 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
     name: str
 
     @property
-    def klass(self) -> 'Type[T]':
+    def klass(self) -> 'Type[_T]':
         """Import class from module."""
         module = importlib.import_module(self.module)
         return getattr(module, self.name)

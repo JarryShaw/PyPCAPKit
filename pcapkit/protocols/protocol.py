@@ -52,8 +52,8 @@ if TYPE_CHECKING:
 
 __all__ = ['ProtocolBase']
 
-PT = TypeVar('PT', bound='Data')
-ST = TypeVar('ST', bound='Schema')
+_PT = TypeVar('_PT', bound='Data')
+_ST = TypeVar('_ST', bound='Schema')
 
 # readable characters' order list
 readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
@@ -69,7 +69,7 @@ class ProtocolMeta(abc.ABCMeta):
     """
 
 
-class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
+class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     """Abstract base class for all protocol family.
 
     Note:
@@ -80,7 +80,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
 
     if TYPE_CHECKING:
         #: Parsed packet data.
-        _info: 'PT'
+        _info: '_PT'
         #: Raw packet data.
         _data: 'bytes'
         #: Source packet stream.
@@ -93,11 +93,11 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         # Internal data storage for cached properties.
         __cached__: 'dict[str, Any]'
         #: Protocol packet data definition.
-        __data__: 'Type[PT]'
+        __data__: 'Type[_PT]'
         #: Protocol header schema definition.
-        __schema__: 'Type[ST]'
+        __schema__: 'Type[_ST]'
         #: Protocol header schema instance.
-        __header__: 'ST'
+        __header__: '_ST'
 
     ##########################################################################
     # Defaults.
@@ -143,7 +143,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
 
     # info dict of current instance
     @property
-    def info(self) -> 'PT':
+    def info(self) -> '_PT':
         """Info dict of current instance."""
         return self._info
 
@@ -193,7 +193,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
 
     # schema data
     @cached_property
-    def schema(self) -> 'ST':
+    def schema(self) -> '_ST':
         """Schema data of the protocol."""
         return self.__header__
 
@@ -216,7 +216,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         return (cls.__name__,)
 
     @abc.abstractmethod
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'PT':
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Read (parse) packet data.
 
         Args:
@@ -229,7 +229,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         """
 
     @abc.abstractmethod
-    def make(self, **kwargs: 'Any') -> 'ST':
+    def make(self, **kwargs: 'Any') -> '_ST':
         """Make (construct) packet data.
 
         Args:
@@ -259,7 +259,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         packet = kwargs.get('__packet__', {})  # packet data
         return self.__header__.pack(packet)
 
-    def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'PT':
+    def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Unpack (parse) packet data.
 
         Args:
@@ -275,9 +275,9 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
             the packet data is not available in the current instance.
 
         """
-        if cast('Optional[ST]', self.__header__) is None:
+        if cast('Optional[_ST]', self.__header__) is None:
             packet = kwargs.get('__packet__', {})  # packet data
-            self.__header__ = cast('ST', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
+            self.__header__ = cast('_ST', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         return self.read(length, **kwargs)
 
     @staticmethod
@@ -431,7 +431,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         cls.__proto__[code] = protocol
 
     @classmethod
-    def from_schema(cls, schema: 'ST | dict[str, Any]') -> 'Self':
+    def from_schema(cls, schema: '_ST | dict[str, Any]') -> 'Self':
         """Create protocol instance from schema.
 
         Args:
@@ -442,7 +442,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
 
         """
         if not isinstance(schema, Schema):
-            schema = cast('ST', cls.__schema__.from_dict(schema))
+            schema = cast('_ST', cls.__schema__.from_dict(schema))
 
         self = cls.__new__(cls)
         self.__header__ = schema
@@ -453,7 +453,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         return self
 
     @classmethod
-    def from_data(cls, data: 'PT | dict[str, Any]') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]') -> 'Self':
         """Create protocol instance from data.
 
         Args:
@@ -464,7 +464,7 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
 
         """
         if not isinstance(data, Data):
-            data = cast('PT', cls.__data__.from_dict(data))
+            data = cast('_PT', cls.__data__.from_dict(data))
 
         self = cls.__new__(cls)
         kwargs = self._make_data(data)
@@ -551,8 +551,8 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         #: pcapkit.protocols.data.data.Data: Parsed packet data.
         self._info = self.unpack(length, **kwargs)
 
-    def __init_subclass__(cls, /, schema: 'Optional[Type[ST]]' = None,
-                          data: 'Optional[Type[PT]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+    def __init_subclass__(cls, /, schema: 'Optional[Type[_ST]]' = None,
+                          data: 'Optional[Type[_PT]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialisation for subclasses.
 
         Args:
@@ -577,9 +577,9 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         super().__init_subclass__()
 
         if schema is None:
-            schema = cast('Type[ST]', getattr(schema_module, cls.__name__, Schema_Raw))
+            schema = cast('Type[_ST]', getattr(schema_module, cls.__name__, Schema_Raw))
         if data is None:
-            data = cast('Type[PT]', getattr(data_module, cls.__name__, Data_Raw))
+            data = cast('Type[_PT]', getattr(data_module, cls.__name__, Data_Raw))
 
         cls.__schema__ = schema
         cls.__data__ = data
@@ -1082,8 +1082,8 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
 
         return proto.from_data(data[name])
 
-    def _decode_next_layer(self, dict_: 'PT', proto: 'int', length: 'Optional[int]' = None, *,
-                           packet: 'Optional[dict[str, Any]]' = None) -> 'PT':
+    def _decode_next_layer(self, dict_: '_PT', proto: 'int', length: 'Optional[int]' = None, *,
+                           packet: 'Optional[dict[str, Any]]' = None) -> '_PT':
         r"""Decode next layer protocol.
 
         Arguments:
@@ -1174,11 +1174,11 @@ class ProtocolBase(Generic[PT, ST], metaclass=ProtocolMeta):
         return layer_match or protocol_match
 
 
-class Protocol(ProtocolBase, Generic[PT, ST]):
+class Protocol(ProtocolBase, Generic[_PT, _ST]):
     """Abstract base class for all protocol family."""
 
-    def __init_subclass__(cls, /, schema: 'Optional[Type[ST]]' = None,
-                          data: 'Optional[Type[PT]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+    def __init_subclass__(cls, /, schema: 'Optional[Type[_ST]]' = None,
+                          data: 'Optional[Type[_PT]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialisation for subclasses.
 
         Args:

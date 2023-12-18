@@ -18,7 +18,7 @@ import contextlib
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.protocols.application.application import Application
-from pcapkit.protocols.protocol import PT, ST
+from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 __all__ = ['HTTP']
 
 
-class HTTP(Application[PT, ST], Generic[PT, ST]):
+class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     """This class implements all protocols in HTTP family.
 
     - Hypertext Transfer Protocol (HTTP/1.1) [:rfc:`7230`]
@@ -39,7 +39,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
 
     if TYPE_CHECKING:
         #: Saved subclass protocol data (only for HTTP base class).
-        _http: 'HTTP[PT, ST]'
+        _http: 'HTTP[_PT, _ST]'
 
     ##########################################################################
     # Properties.
@@ -75,7 +75,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
         return ('HTTP', 'HTTPv1', 'HTTPv2')
 
     def read(self, length: 'Optional[int]' = None, *,
-             version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'PT':
+             version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> '_PT':
         """Read (parse) packet data.
 
         Args:
@@ -109,7 +109,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
 
     def make(self,
              version: 'Literal[1, 2]' = 1,
-             **kwargs: 'Any') -> 'ST':
+             **kwargs: 'Any') -> '_ST':
         """Make (construct) packet data.
 
         Args:
@@ -133,7 +133,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
     ##########################################################################
 
     @classmethod
-    def _make_data(cls, data: 'PT') -> 'dict[str, Any]':  # type: ignore[override]
+    def _make_data(cls, data: '_PT') -> 'dict[str, Any]':  # type: ignore[override]
         """Create key-value pairs from ``data`` for protocol construction.
 
         Args:

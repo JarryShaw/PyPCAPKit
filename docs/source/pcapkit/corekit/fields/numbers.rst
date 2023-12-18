@@ -1,11 +1,10 @@
 Numerical Fields
-----------------
+================
 
 .. module:: pcapkit.corekit.fields.numbers
 
-.. autoclass:: pcapkit.corekit.fields.numbers.NumberField
-   :members:
-   :show-inheritance:
+Sized Fields
+------------
 
 .. autoclass:: pcapkit.corekit.fields.numbers.Int32Field
    :members:
@@ -39,6 +38,22 @@ Numerical Fields
    :members:
    :show-inheritance:
 
+Enumeration Fields
+------------------
+
 .. autoclass:: pcapkit.corekit.fields.numbers.EnumField
    :members:
    :show-inheritance:
+
+Internal Definitions
+--------------------
+
+.. autoclass:: pcapkit.corekit.fields.numbers.NumberField
+   :members:
+   :show-inheritance:
+
+Type Variables
+--------------
+
+.. data:: pcapkit.corekit.fields.numbers._T
+   :type: int
