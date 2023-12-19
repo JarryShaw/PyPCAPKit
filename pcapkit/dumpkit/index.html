@@ -7,9 +7,9 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/dumpkit/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.dumpkit is the collection of dumpers for pcapkit implementation, which is alike those described in dictdumper. Null Dumper, PCAP Dumper. Common Utilities: pcapkit.dumpkit.common is the coll..." />
-<meta name="description" content="pcapkit.dumpkit is the collection of dumpers for pcapkit implementation, which is alike those described in dictdumper. Null Dumper, PCAP Dumper. Common Utilities: pcapkit.dumpkit.common is the coll..." />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Null Dumper" href="null.html" /><link rel="prev" title="3rd-Party Support" href="../toolkit/3rdparty.html" />
+<meta property="og:description" content="pcapkit.dumpkit is the collection of dumpers for pcapkit implementation, which is alike those described in dictdumper. PCAP Dumper, Null Dumper, Common Utilities- Internal Definitions.. All dumper ..." />
+<meta name="description" content="pcapkit.dumpkit is the collection of dumpers for pcapkit implementation, which is alike those described in dictdumper. PCAP Dumper, Null Dumper, Common Utilities- Internal Definitions.. All dumper ..." />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="PCAP Dumper" href="pcap.html" /><link rel="prev" title="3rd-Party Support" href="../toolkit/3rdparty.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Dump Utilities - PyPCAPKit</title>
@@ -147,7 +147,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -276,8 +276,9 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Dump Utilities</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of Dump Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="null.html">Null Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html">Common Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -363,7 +364,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -376,112 +377,60 @@
 in <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dictdumper</span></code></a>.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="null.html">Null Dumper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="null.html">Null Dumper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="common.html#internal-definitions">Internal Definitions</a></li>
+</ul>
+</li>
 </ul>
 </div>
-<section id="module-pcapkit.dumpkit.common">
-<span id="common-utilities"></span><h2>Common Utilities<a class="headerlink" href="#module-pcapkit.dumpkit.common" title="Link to this heading">#</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.dumpkit.common" title="pcapkit.dumpkit.common"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common</span></code></a> is the collection of common utility
-functions for <a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> implementation, which is
-generally the customised hooks for <code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.Dumper</span></code>
-classes.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.dumpkit.common.Dumper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">Dumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#Dumper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.Dumper" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pcapkit.dumpkit.common.DumperBase" title="pcapkit.dumpkit.common.DumperBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DumperBase</span></code></a></p>
-<p>Base <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> object.</p>
-<p>This class is a customised <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> for the
-<a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> implementation, which is generally customised
-for automatic registration to the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Extraction</span></code> and
-<a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> output
-dumper registries.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.dumpkit.common.Dumper.__init_subclass__">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#Dumper.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.Dumper.__init_subclass__" title="Link to this definition">#</a></dt>
-<dd><p>Initialise subclass.</p>
-<p>This method is used to register the subclass to the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Extraction</span></code> and
-<a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>
-output dumper registries.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fmt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>) – Output format to register.</p></li>
-<li><p><strong>ext</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>) – Output file extension.</p></li>
-<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
-</dl>
-<p>If the <code class="docutils literal notranslate"><span class="pre">fmt</span></code> is not provided, we will try to get it from the
-<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.kind" title="(in DictDumper)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> property of the subclass.
-And if the <code class="docutils literal notranslate"><span class="pre">ext</span></code> is not provided, we will infer it from the
-<code class="docutils literal notranslate"><span class="pre">fmt</span></code>.</p>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.foundation.register_dumper" title="pcapkit.foundation.registry.foundation.register_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation.register_dumper()</span></code></a></p></li>
-<li><p><a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_dumper" title="pcapkit.foundation.registry.foundation.register_extractor_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation.register_extractor_dumper()</span></code></a></p></li>
-<li><p><a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_dumper" title="pcapkit.foundation.registry.foundation.register_traceflow_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation.register_traceflow_dumper()</span></code></a></p></li>
-<li><p><a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor.register_dumper" title="pcapkit.foundation.extraction.Extractor.register_dumper"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor.register_dumper()</span></code></a></p></li>
-<li><p><a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper()</span></code></a></p></li>
-</ul>
-</div>
-</dd></dl>
+<p>All dumper classes are implemented as <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper</span></code></a>
+subclasses, which are responsible for writing the parsed packet data into
+formatted output files. Below is a brief diagram of the class hierarchy
+of <a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a>:</p>
+<div class="mermaid">
+            flowchart LR
+    A{{Dumper}} --&gt; D([other customisation ...])
 
-</dd></dl>
+    subgraph builtins [Built-in Dumpers]
+        Tree &amp; XML &amp; JSON
+        XML --&gt; PLIST
+        JSON -- deprecated --x VueJS
+    end
+    A --&gt; Tree &amp; XML &amp; JSON
 
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.dumpkit.common.make_dumper">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">make_dumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#make_dumper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.make_dumper" title="Link to this definition">#</a></dt>
-<dd><p>Create a customised <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>output</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a>]</span>) – Output class to customise.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Customised <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> object.</p>
-</dd>
-</dl>
-</dd></dl>
+    subgraph pcapkit [PyPCAPKit Dumpers]
+        DumperBase --&gt; Dumper --&gt; PCAPIO &amp; NotImplementedIO
+        Dumper --&gt; E([user customisation ...])
+    end
+    A --&gt; DumperBase
 
-<section id="internal-definitions">
-<h3>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">#</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.dumpkit.common.DumperBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">DumperBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#DumperBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.DumperBase" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a></p>
-<p>Base <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> object.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This class is for internal use only. For customisation, please use
-<a class="reference internal" href="#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> instead.</p>
-</div>
-</dd></dl>
+    click A &quot;https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper&quot;
 
-</section>
-</section>
-</section>
+    click Tree &quot;https://dictdumper.jarryshaw.me/en/latest/dictdumper.tree.html#dictdumper.tree.Tree&quot;
+    click XML &quot;https://dictdumper.jarryshaw.me/en/latest/dictdumper.xml.html#dictdumper.xml.XML&quot;
+    click JSON &quot;https://dictdumper.jarryshaw.me/en/latest/dictdumper.json.html#dictdumper.json.JSON&quot;
+    click PLIST &quot;https://dictdumper.jarryshaw.me/en/latest/dictdumper.plist.html#dictdumper.plist.PLIST&quot;
+    click VueJS &quot;https://dictdumper.jarryshaw.me/en/latest/dictdumper.vuejs.html#dictdumper.vuejs.VueJS&quot;
+
+    click DumperBase &quot;/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase&quot;
+    click Dumper &quot;/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper&quot;
+    click PCAPIO &quot;/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO&quot;
+    click NotImplementedIO &quot;/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.NotImplementedIO&quot;
+        </div></section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="null.html">
+          <a class="next-page" href="pcap.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Null Dumper</div>
+                <div class="title">PCAP Dumper</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -514,30 +463,8 @@ And if the <code class="docutils literal notranslate"><span class="pre">ext</spa
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Dump Utilities</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.dumpkit.common">Common Utilities</a><ul>
-<li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>
@@ -548,5 +475,7 @@ And if the <code class="docutils literal notranslate"><span class="pre">ext</spa
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
     </body>
 </html>

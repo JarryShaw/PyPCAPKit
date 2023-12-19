@@ -11,28 +11,42 @@ in :mod:`dictdumper`.
 .. toctree::
    :maxdepth: 2
 
-   null
    pcap
+   null
+   common
 
-Common Utilities
-================
+All dumper classes are implemented as :class:`dictdumper.dumper.Dumper`
+subclasses, which are responsible for writing the parsed packet data into
+formatted output files. Below is a brief diagram of the class hierarchy
+of :mod:`pcapkit.dumpkit`:
 
-.. module:: pcapkit.dumpkit.common
+.. mermaid::
 
-:mod:`pcapkit.dumpkit.common` is the collection of common utility
-functions for :mod:`pcapkit.dumpkit` implementation, which is
-generally the customised hooks for :class:`dictdumper.Dumper`
-classes.
+   flowchart LR
+       A{{Dumper}} --> D([other customisation ...])
 
-.. autoclass:: pcapkit.dumpkit.common.Dumper
-   :members:
-   :show-inheritance:
+       subgraph builtins [Built-in Dumpers]
+           Tree & XML & JSON
+           XML --> PLIST
+           JSON -- deprecated --x VueJS
+       end
+       A --> Tree & XML & JSON
 
-.. autofunction:: pcapkit.dumpkit.common.make_dumper
+       subgraph pcapkit [PyPCAPKit Dumpers]
+           DumperBase --> Dumper --> PCAPIO & NotImplementedIO
+           Dumper --> E([user customisation ...])
+       end
+       A --> DumperBase
 
-Internal Definitions
---------------------
+       click A "https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper"
 
-.. autoclass:: pcapkit.dumpkit.common.DumperBase
-   :members:
-   :show-inheritance:
+       click Tree "https://dictdumper.jarryshaw.me/en/latest/dictdumper.tree.html#dictdumper.tree.Tree"
+       click XML "https://dictdumper.jarryshaw.me/en/latest/dictdumper.xml.html#dictdumper.xml.XML"
+       click JSON "https://dictdumper.jarryshaw.me/en/latest/dictdumper.json.html#dictdumper.json.JSON"
+       click PLIST "https://dictdumper.jarryshaw.me/en/latest/dictdumper.plist.html#dictdumper.plist.PLIST"
+       click VueJS "https://dictdumper.jarryshaw.me/en/latest/dictdumper.vuejs.html#dictdumper.vuejs.VueJS"
+
+       click DumperBase "/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase"
+       click Dumper "/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper"
+       click PCAPIO "/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO"
+       click NotImplementedIO "/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.NotImplementedIO"

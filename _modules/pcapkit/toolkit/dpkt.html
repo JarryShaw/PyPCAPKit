@@ -269,8 +269,9 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of Dump Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -488,7 +489,7 @@
 
 <span class="sd">        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled</span>
 <span class="sd">          if it contains IPv4 layer (:class:`dpkt.ip.IP`) and the **DF** (:attr:`dpkt.ip.IP.df`)</span>
-<span class="sd">          flag is ``False``.</span>
+<span class="sd">          flag is :data:`False`.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
 <span class="sd">          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -537,7 +538,7 @@
 
 <span class="sd">        * If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled</span>
 <span class="sd">          if it contains IPv6 layer (:class:`dpkt.ip6.IP6`) and IPv6 Fragment header</span>
-<span class="sd">          (:rfc:`2460#section-4.5`, :class:`dpkt.ip6.IP6FragmentHeader`).</span>
+<span class="sd">          (:rfc:`2460#section-4.5`, i.e., :class:`dpkt.ip6.IP6FragmentHeader`).</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6</span>
 <span class="sd">          reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.</span>
 

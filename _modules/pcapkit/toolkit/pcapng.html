@@ -269,8 +269,9 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of Dump Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -401,8 +402,8 @@
 <span class="sd">       Data for IPv4 reassembly.</span>
 
 <span class="sd">        * If the ``frame`` can be used for IPv4 reassembly. A frame can be reassembled</span>
-<span class="sd">          if it contains IPv4 layer (:class:`pcapkit.protocols.internet.ipv4.IPv4`) and</span>
-<span class="sd">          the **DF** (:attr:`IPv4.flags.df &lt;pcapkit.protocols.internet.ipv4.Data_IPv4_Flags.df&gt;`)</span>
+<span class="sd">          if it contains IPv4 layer (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) and</span>
+<span class="sd">          the **DF** (:attr:`IPv4.flags.df &lt;pcapkit.protocols.data.internet.ipv4.Flags.df&gt;`)</span>
 <span class="sd">          flag is :data:`False`.</span>
 <span class="sd">        * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
 <span class="sd">          reassembly (c.f. :term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
@@ -447,12 +448,12 @@
 <span class="sd">        frame: PCAP-NG frame.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tuple[bool, Dict[str, Any]]: A tuple of data for IPv6 reassembly.</span>
+<span class="sd">        A tuple of data for IPv6 reassembly.</span>
 
 <span class="sd">        * If the ``frame`` can be used for IPv6 reassembly. A frame can be reassembled</span>
-<span class="sd">          if it contains IPv6 layer (:class:`pcapkit.protocols.internet.ipv6.IPv6`) and</span>
-<span class="sd">          IPv6 Fragment header (:rfc:`2460#section-4.5`,</span>
-<span class="sd">          :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`).</span>
+<span class="sd">          if it contains IPv6 layer (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) and</span>
+<span class="sd">          IPv6 Fragment header (:rfc:`2460#section-4.5`, i.e.,</span>
+<span class="sd">          :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`).</span>
 <span class="sd">        * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for IPv6</span>
 <span class="sd">          reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -499,10 +500,10 @@
 <span class="sd">        frame: PCAP-NG frame.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.</span>
+<span class="sd">        A tuple of data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``frame`` can be used for TCP reassembly. A frame can be reassembled</span>
-<span class="sd">          if it contains TCP layer (:class:`pcapkit.protocols.transport.tcp.TCP`).</span>
+<span class="sd">          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`).</span>
 <span class="sd">        * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -556,7 +557,7 @@
 <span class="sd">        Data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A frame can be reassembled</span>
-<span class="sd">          if it contains TCP layer (:class:`pcapkit.protocols.transport.tcp.TCP`).</span>
+<span class="sd">          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`).</span>
 <span class="sd">        * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 

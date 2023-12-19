@@ -269,8 +269,9 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of Dump Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -392,7 +393,7 @@
 
 
 <div class="viewcode-block" id="DumperBase">
-<a class="viewcode-back" href="../../../pcapkit/dumpkit/index.html#pcapkit.dumpkit.common.DumperBase">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase">[docs]</a>
 <span class="k">class</span> <span class="nc">DumperBase</span><span class="p">(</span><span class="n">dictdumper</span><span class="o">.</span><span class="n">dumper</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base :class:`~dictdumper.dumper.Dumper` object.</span>
 
@@ -405,21 +406,21 @@
 
 
 <div class="viewcode-block" id="Dumper">
-<a class="viewcode-back" href="../../../pcapkit/dumpkit/index.html#pcapkit.dumpkit.common.Dumper">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper">[docs]</a>
 <span class="k">class</span> <span class="nc">Dumper</span><span class="p">(</span><span class="n">DumperBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base :class:`~dictdumper.dumper.Dumper` object.</span>
 
 <span class="sd">    This class is a customised :class:`~dictdumper.dumper.Dumper` for the</span>
 <span class="sd">    :mod:`pcapkit.dumpkit` implementation, which is generally customised</span>
 <span class="sd">    for automatic registration to the</span>
-<span class="sd">    :class:`~pcapkit.foundation.extraction.Extraction` and</span>
+<span class="sd">    :class:`~pcapkit.foundation.extraction.Extractor` and</span>
 <span class="sd">    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` output</span>
 <span class="sd">    dumper registries.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Dumper.__init_subclass__">
-<a class="viewcode-back" href="../../../pcapkit/dumpkit/index.html#pcapkit.dumpkit.common.Dumper.__init_subclass__">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper.__init_subclass__">[docs]</a>
     <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise subclass.</span>
@@ -468,7 +469,7 @@
 
 
 <div class="viewcode-block" id="make_dumper">
-<a class="viewcode-back" href="../../../pcapkit/dumpkit/index.html#pcapkit.dumpkit.common.make_dumper">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.make_dumper">[docs]</a>
 <span class="k">def</span> <span class="nf">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Type[ABCDumper]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[ABCDumper]&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a customised :class:`~dictdumper.dumper.Dumper` object.</span>
 

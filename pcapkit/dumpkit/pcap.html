@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.dumpkit.pcap is the dumper for pcapkit implementation, specifically for PCAP format, which is alike those described in dictdumper." />
 <meta name="description" content="pcapkit.dumpkit.pcap is the dumper for pcapkit implementation, specifically for PCAP format, which is alike those described in dictdumper." />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Module Utilities" href="../utilities/index.html" /><link rel="prev" title="Null Dumper" href="null.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Null Dumper" href="null.html" /><link rel="prev" title="Dump Utilities" href="index.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>PCAP Dumper - PyPCAPKit</title>
@@ -276,8 +276,9 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Dump Utilities</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of Dump Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="null.html">Null Dumper</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html">Common Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -377,16 +378,16 @@ specifically for PCAP format, which is alike those described in
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.dumpkit.pcap.PCAPIO">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.pcap.</span></span><span class="sig-name descname"><span class="pre">PCAPIO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'little'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/pcap.html#PCAPIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.pcap.PCAPIO" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.dumpkit.common.DumperBase" title="pcapkit.dumpkit.common.DumperBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DumperBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="common.html#pcapkit.dumpkit.common.DumperBase" title="pcapkit.dumpkit.common.DumperBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DumperBase</span></code></a></p>
 <p>PCAP file dumper.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fname</strong> – output file name</p></li>
-<li><p><strong>protocol</strong> – data link type</p></li>
-<li><p><strong>byteorder</strong> – header byte order</p></li>
-<li><p><strong>nanosecond</strong> – nanosecond-resolution file flag</p></li>
-<li><p><strong>**kwargs</strong> – arbitrary keyword arguments</p></li>
+<li><p><strong>fname</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output file name</p></li>
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – data link type</p></li>
+<li><p><strong>byteorder</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'big'</span></code>, <code class="docutils literal notranslate"><span class="pre">'little'</span></code>]</span>) – header byte order</p></li>
+<li><p><strong>nanosecond</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – nanosecond-resolution file flag</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
 </dl>
@@ -405,23 +406,23 @@ specifically for PCAP format, which is alike those described in
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../utilities/index.html">
+          <a class="next-page" href="null.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Module Utilities</div>
+                <div class="title">Null Dumper</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="null.html">
+          <a class="prev-page" href="index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Null Dumper</div>
+                <div class="title">Dump Utilities</div>
                 
               </div>
             </a>

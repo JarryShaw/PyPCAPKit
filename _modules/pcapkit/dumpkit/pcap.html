@@ -269,8 +269,9 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of Dump Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -389,7 +390,16 @@
 <div class="viewcode-block" id="PCAPIO">
 <a class="viewcode-back" href="../../../pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO">[docs]</a>
 <span class="k">class</span> <span class="nc">PCAPIO</span><span class="p">(</span><span class="n">Dumper</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;PCAP file dumper.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PCAP file dumper.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fname: output file name</span>
+<span class="sd">        protocol: data link type</span>
+<span class="sd">        byteorder: header byte order</span>
+<span class="sd">        nanosecond: nanosecond-resolution file flag</span>
+<span class="sd">        **kwargs: arbitrary keyword arguments</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
