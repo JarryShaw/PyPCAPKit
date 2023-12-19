@@ -40,8 +40,8 @@ def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
        Data for IPv4 reassembly.
 
         * If the ``frame`` can be used for IPv4 reassembly. A frame can be reassembled
-          if it contains IPv4 layer (:class:`pcapkit.protocols.internet.ipv4.IPv4`) and
-          the **DF** (:attr:`IPv4.flags.df <pcapkit.protocols.internet.ipv4.Data_IPv4_Flags.df>`)
+          if it contains IPv4 layer (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) and
+          the **DF** (:attr:`IPv4.flags.df <pcapkit.protocols.data.internet.ipv4.Flags.df>`)
           flag is :data:`False`.
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (c.f. :term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
@@ -82,12 +82,12 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
         frame: PCAP frame.
 
     Returns:
-        Tuple[bool, Dict[str, Any]]: A tuple of data for IPv6 reassembly.
+        A tuple of data for IPv6 reassembly.
 
         * If the ``frame`` can be used for IPv6 reassembly. A frame can be reassembled
-          if it contains IPv6 layer (:class:`pcapkit.protocols.internet.ipv6.IPv6`) and
-          IPv6 Fragment header (:rfc:`2460#section-4.5`,
-          :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`).
+          if it contains IPv6 layer (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) and
+          IPv6 Fragment header (:rfc:`2460#section-4.5`, i.e.,
+          :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`).
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
           reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -130,10 +130,10 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
         frame: PCAP frame.
 
     Returns:
-        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
+        A tuple of data for TCP reassembly.
 
         * If the ``frame`` can be used for TCP reassembly. A frame can be reassembled
-          if it contains TCP layer (:class:`pcapkit.protocols.transport.tcp.TCP`).
+          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`).
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -182,7 +182,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
         Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP flow tracing. A frame can be reassembled
-          if it contains TCP layer (:class:`pcapkit.protocols.transport.tcp.TCP`).
+          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`).
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 

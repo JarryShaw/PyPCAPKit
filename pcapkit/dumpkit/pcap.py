@@ -31,7 +31,16 @@ __all__ = [
 
 
 class PCAPIO(Dumper):
-    """PCAP file dumper."""
+    """PCAP file dumper.
+
+    Args:
+        fname: output file name
+        protocol: data link type
+        byteorder: header byte order
+        nanosecond: nanosecond-resolution file flag
+        **kwargs: arbitrary keyword arguments
+
+    """
 
     ##########################################################################
     # Properties.

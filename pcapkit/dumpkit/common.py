@@ -51,7 +51,7 @@ class Dumper(DumperBase):
     This class is a customised :class:`~dictdumper.dumper.Dumper` for the
     :mod:`pcapkit.dumpkit` implementation, which is generally customised
     for automatic registration to the
-    :class:`~pcapkit.foundation.extraction.Extraction` and
+    :class:`~pcapkit.foundation.extraction.Extractor` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` output
     dumper registries.
 

@@ -3,9 +3,15 @@ Container Fields
 
 .. module:: pcapkit.corekit.fields.collections
 
+Generic List Fields
+~~~~~~~~~~~~~~~~~~~
+
 .. autoclass:: pcapkit.corekit.fields.collections.ListField
    :members:
    :show-inheritance:
+
+Option List Fields
+~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: pcapkit.corekit.fields.collections.OptionField
    :members:

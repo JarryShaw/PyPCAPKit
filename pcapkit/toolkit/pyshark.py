@@ -70,7 +70,7 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.foundation.traceflow.tcp.TCP`
+        :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
     if 'IP' in packet:
