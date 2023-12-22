@@ -50,7 +50,8 @@ def seekset(func: 'Callable[Concatenate[Protocol, P], R_seekset]') -> 'Callable[
     Note:
         The decorated function should have following signature::
 
-            func(self, *args, **kw)
+            func(self: 'pcapkit.protocols.protocol.ProtocolBase',
+                 *args: 'typing.Any', **kwargs: 'typing.Any') -> 'typing.Any'
 
     See Also:
         :meth:`pcapkit.protocols.protocol.Protocol._read_packet`
@@ -91,7 +92,9 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
     Note:
         The decorated function should have following signature::
 
-            func(self, proto, length, *args, **kwargs)
+            func(self: 'pcapkit.protocols.protocol.ProtocolBase',
+                 proto: 'int', length: 'typing.Optional[int]',
+                 *args: 'typing.Any', **kwargs: 'typing.Any') -> 'pcapkit.protocols.protocol.ProtocolBase'
 
     See Also:
         :meth:`pcapkit.protocols.protocol.Protocol._decode_next_layer`
@@ -146,7 +149,11 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
     Note:
         The decorated function should have following signature::
 
-            func(cls, data, length, packet, *args, **kwargs)
+            func(cls: 'typing.Type[pcapkit.protocols.schema.schema.Schema]',
+                 data: 'bytes | typing.IO[bytes]',
+                 length: 'Optional[int],
+                 packet: 'Optional[dict[str, Any]',
+                 *args: 'typing.Any', **kwargs: 'Any') -> 'pcapkit.protocols.schema.schema.Schema'
 
     See Also:
         :meth:`pcapkit.protocols.schema.schema.Schema.unpack`

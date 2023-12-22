@@ -105,13 +105,11 @@ Filter Types
 This module contains the vendor crawler for **Filter Types**,
 which is automatically generating :class:`pcapkit.const.pcapng.filter_type.FilterType`.
 
-.. autoclass:: pcapkit.vendor.pcapng.filter_type
+.. autoclass:: pcapkit.vendor.pcapng.filter_type.FilterType
    :members: FLAG
    :show-inheritance:
 
-.. raw:: html
-
-   <br />
+.. rubric:: Footnotes
 
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options

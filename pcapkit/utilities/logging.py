@@ -25,16 +25,16 @@ BOOLEAN_STATES = {'1': True, '0': False,
                   'true': True, 'false': False,
                   'on': True, 'off': False}
 
-#: Development mode flag.
+#: bool: Development mode flag.
 DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', 'false').casefold(), False)
-#: Verbose output flag.
+#: bool: Verbose output flag.
 VERBOSE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_VERBOSE', 'false').casefold(), False)
 
 ###############################################################################
 # Sphinx Mode
 ###############################################################################
 
-#: This is a workaround for :data:`~typing.TYPE_CHECKING` in Sphinx.
+#: bool: This is a workaround for :data:`typing.TYPE_CHECKING` in Sphinx.
 SPHINX_TYPE_CHECKING = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_SPHINX', 'false').casefold(), False)
 
 ###############################################################################

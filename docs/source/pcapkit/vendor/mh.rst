@@ -548,7 +548,7 @@ This module contains the vendor crawler for **Link-Layer Address (LLA) Option Co
 which is automatically generating :class:`pcapkit.const.mh.lla_code.LLACode`.
 
 .. autoclass:: pcapkit.vendor.mh.lla_code.LLACode
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 CGA Extension Type Tags
@@ -596,7 +596,7 @@ This module contains the vendor crawler for **Binding Error Status Code**,
 which is automatically generating :class:`pcapkit.const.mh.binding_error.BindingError`.
 
 .. autoclass:: pcapkit.vendor.mh.binding_error.BindingError
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 .. rubric:: Footnotes

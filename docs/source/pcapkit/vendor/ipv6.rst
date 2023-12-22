@@ -38,7 +38,7 @@ This module contains the vendor crawler for **IPv6 Extension Header Types**,
 which is automatically generating :class:`pcapkit.const.ipv6.extension_header.ExtensionHeader`.
 
 .. autoclass:: pcapkit.vendor.ipv6.extension_header.ExtensionHeader
-   :members: FLAG, LINK
+   :members: LINK
    :show-inheritance:
 
 Option Actions
@@ -50,7 +50,7 @@ This module contains the vendor crawler for **Option Actions**,
 which is automatically generating :class:`pcapkit.const.ipv6.option_action.OptionAction`.
 
 .. autoclass:: pcapkit.vendor.ipv6.option_action.OptionAction
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 Destination Options and Hop-by-Hop Options
@@ -74,7 +74,7 @@ This module contains the vendor crawler for **QS Functions**,
 which is automatically generating :class:`pcapkit.const.ipv6.qs_function.QSFunction`.
 
 .. autoclass:: pcapkit.vendor.ipv6.qs_function.QSFunction
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 IPv6 Router Alert Option Values
@@ -110,7 +110,7 @@ This module contains the vendor crawler for **Seed-ID Types**,
 which is automatically generating :class:`pcapkit.const.ipv6.seed_id.SeedID`.
 
 .. autoclass:: pcapkit.vendor.ipv6.seed_id.SeedID
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) Options
@@ -122,7 +122,7 @@ This module contains the vendor crawler for **Simplified Multicast Forwarding Du
 which is automatically generating :class:`pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode`.
 
 .. autoclass:: pcapkit.vendor.ipv6.smf_dpd_mode.SMFDPDMode
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 TaggerID Types

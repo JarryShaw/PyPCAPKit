@@ -28,7 +28,7 @@ This module contains the vendor crawler for **TCP Checksum**,
 which is automatically generating :class:`pcapkit.const.tcp.checksum.Checksum`.
 
 .. autoclass:: pcapkit.vendor.tcp.checksum.Checksum
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 Multipath TCP options

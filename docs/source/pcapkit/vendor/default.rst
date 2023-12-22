@@ -10,9 +10,6 @@ only, which is the base meta class for all vendor crawlers.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoattribute:: NAME
    .. autoattribute:: DOCS
    .. autoattribute:: FLAG
@@ -31,12 +28,12 @@ only, which is the base meta class for all vendor crawlers.
    .. automethod:: request
    .. automethod:: _request
 
+Internal Definitions
+--------------------
+
 .. autoclass:: pcapkit.vendor.default.VendorMeta
    :no-members:
    :show-inheritance:
-
-Auxiliary Functions
--------------------
 
 .. function:: pcapkit.vendor.default.LINE(NAME, DOCS, FLAG, ENUM, MISS, MODL)
 

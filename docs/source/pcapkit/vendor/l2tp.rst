@@ -22,5 +22,5 @@ This module contains the vendor crawler for **L2TP Type**,
 which is automatically generating :class:`pcapkit.const.l2tp.type.Type`.
 
 .. autoclass:: pcapkit.vendor.l2tp.type.Type
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:

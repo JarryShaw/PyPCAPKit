@@ -136,14 +136,14 @@ class Vendor(metaclass=VendorMeta):
     # Macros
     ###############
 
-    #: str: Name of constant enumeration.
+    #: Name of constant enumeration.
     NAME: 'str'
-    #: str: Docstring of constant enumeration.
+    #: Docstring of constant enumeration.
     DOCS: 'str'
 
-    #: str: Value limit checker.
+    #: Value limit checker.
     FLAG: 'str' = None  # type: ignore[assignment]
-    #: str: Link to registry.
+    #: Link to registry.
     LINK: 'str' = None  # type: ignore[assignment]
 
     ###############
@@ -334,9 +334,9 @@ class Vendor(metaclass=VendorMeta):
 
     def __init__(self) -> 'None':
         """Generate new constant files."""
-        #: str: Name of constant enumeration.
+        #: Name of constant enumeration.
         self.NAME = type(self).__name__
-        #: str: Docstring of constant enumeration.
+        #: Docstring of constant enumeration.
         self.DOCS = type(self).__doc__  # type: ignore[assignment]
 
         data = self._request()

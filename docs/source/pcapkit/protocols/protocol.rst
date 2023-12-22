@@ -64,6 +64,7 @@ utility arguments and methods of specified protocols.
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
 
+   .. autoattribute:: _file
    .. autoattribute:: _info
    .. autoattribute:: __data__
 
