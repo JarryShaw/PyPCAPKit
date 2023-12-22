@@ -275,6 +275,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/functools.html">Auxiliary Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 </ul>
@@ -501,14 +502,14 @@
     <span class="c1"># Macros</span>
     <span class="c1">###############</span>
 
-    <span class="c1">#: str: Name of constant enumeration.</span>
+    <span class="c1">#: Name of constant enumeration.</span>
     <span class="n">NAME</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
-    <span class="c1">#: str: Docstring of constant enumeration.</span>
+    <span class="c1">#: Docstring of constant enumeration.</span>
     <span class="n">DOCS</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
 
-    <span class="c1">#: str: Value limit checker.</span>
+    <span class="c1">#: Value limit checker.</span>
     <span class="n">FLAG</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
-    <span class="c1">#: str: Link to registry.</span>
+    <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
 
     <span class="c1">###############</span>
@@ -720,9 +721,9 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate new constant files.&quot;&quot;&quot;</span>
-        <span class="c1">#: str: Name of constant enumeration.</span>
+        <span class="c1">#: Name of constant enumeration.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">NAME</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
-        <span class="c1">#: str: Docstring of constant enumeration.</span>
+        <span class="c1">#: Docstring of constant enumeration.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__doc__</span>  <span class="c1"># type: ignore[assignment]</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">()</span>
@@ -894,7 +895,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=87d2418f"></script>
+</div><script src="../../../_static/documentation_options.js?v=4aaf858c"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>

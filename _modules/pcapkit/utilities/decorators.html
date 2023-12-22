@@ -275,6 +275,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/functools.html">Auxiliary Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 </ul>
@@ -394,7 +395,7 @@
 
 
 <div class="viewcode-block" id="seekset">
-<a class="viewcode-back" href="../../../pcapkit/utilities/index.html#pcapkit.utilities.decorators.seekset">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/utilities/functools.html#pcapkit.utilities.decorators.seekset">[docs]</a>
 <span class="k">def</span> <span class="nf">seekset</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="s1">&#39;Callable[Concatenate[Protocol, P], R_seekset]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable[P, R_seekset]&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read file from start then set back to original.</span>
 
@@ -409,7 +410,8 @@
 <span class="sd">    Note:</span>
 <span class="sd">        The decorated function should have following signature::</span>
 
-<span class="sd">            func(self, *args, **kw)</span>
+<span class="sd">            func(self: &#39;pcapkit.protocols.protocol.ProtocolBase&#39;,</span>
+<span class="sd">                 *args: &#39;typing.Any&#39;, **kwargs: &#39;typing.Any&#39;) -&gt; &#39;typing.Any&#39;</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :meth:`pcapkit.protocols.protocol.Protocol._read_packet`</span>
@@ -437,7 +439,7 @@
 
 
 <div class="viewcode-block" id="beholder">
-<a class="viewcode-back" href="../../../pcapkit/utilities/index.html#pcapkit.utilities.decorators.beholder">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/utilities/functools.html#pcapkit.utilities.decorators.beholder">[docs]</a>
 <span class="k">def</span> <span class="nf">beholder</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="s1">&#39;Callable[Concatenate[Protocol, int, Optional[int], P], R_beholder]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable[P, R_beholder]&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Behold extraction procedure.</span>
 
@@ -453,7 +455,9 @@
 <span class="sd">    Note:</span>
 <span class="sd">        The decorated function should have following signature::</span>
 
-<span class="sd">            func(self, proto, length, *args, **kwargs)</span>
+<span class="sd">            func(self: &#39;pcapkit.protocols.protocol.ProtocolBase&#39;,</span>
+<span class="sd">                 proto: &#39;int&#39;, length: &#39;typing.Optional[int]&#39;,</span>
+<span class="sd">                 *args: &#39;typing.Any&#39;, **kwargs: &#39;typing.Any&#39;) -&gt; &#39;pcapkit.protocols.protocol.ProtocolBase&#39;</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :meth:`pcapkit.protocols.protocol.Protocol._decode_next_layer`</span>
@@ -494,7 +498,7 @@
 
 
 <div class="viewcode-block" id="prepare">
-<a class="viewcode-back" href="../../../pcapkit/utilities/index.html#pcapkit.utilities.decorators.prepare">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/utilities/functools.html#pcapkit.utilities.decorators.prepare">[docs]</a>
 <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="s1">&#39;Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Optional[int], Optional[dict[str, Any]], P], R_prepare]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable[P, R_prepare]&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare schema packet data before unpacking.</span>
 
@@ -511,7 +515,11 @@
 <span class="sd">    Note:</span>
 <span class="sd">        The decorated function should have following signature::</span>
 
-<span class="sd">            func(cls, data, length, packet, *args, **kwargs)</span>
+<span class="sd">            func(cls: &#39;typing.Type[pcapkit.protocols.schema.schema.Schema]&#39;,</span>
+<span class="sd">                 data: &#39;bytes | typing.IO[bytes]&#39;,</span>
+<span class="sd">                 length: &#39;Optional[int],</span>
+<span class="sd">                 packet: &#39;Optional[dict[str, Any]&#39;,</span>
+<span class="sd">                 *args: &#39;typing.Any&#39;, **kwargs: &#39;Any&#39;) -&gt; &#39;pcapkit.protocols.schema.schema.Schema&#39;</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :meth:`pcapkit.protocols.schema.schema.Schema.unpack`</span>
@@ -584,7 +592,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=87d2418f"></script>
+</div><script src="../../../_static/documentation_options.js?v=4aaf858c"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>

@@ -282,6 +282,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/functools.html">Auxiliary Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
 </ul>
@@ -396,7 +397,7 @@ vendor crawlers include:</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.pcapng.secrets_type.SecretsType" title="pcapkit.vendor.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_SecretsType</span></code></a></p></td>
 <td><p>Secrets Types <a class="footnote-reference brackets" href="#id13" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>#<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_FilterType</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.pcapng.filter_type.FilterType" title="pcapkit.vendor.pcapng.filter_type.FilterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_FilterType</span></code></a></p></td>
 <td><p>Filter Types <a class="footnote-reference brackets" href="#id14" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>♠<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
@@ -532,13 +533,21 @@ which is automatically generating <a class="reference internal" href="../const/p
 <span id="filter-types"></span><h2>Filter Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.filter_type" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>Filter Types</strong>,
 which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.filter_type.FilterType" title="pcapkit.const.pcapng.filter_type.FilterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.filter_type.FilterType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.filter_type.FilterType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.filter_type.</span></span><span class="sig-name descname"><span class="pre">FilterType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/filter_type.html#FilterType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.filter_type.FilterType" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<p>Filter Types</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.filter_type">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.</span></span><span class="sig-name descname"><span class="pre">filter_type</span></span><a class="headerlink" href="#pcapkit.vendor.pcapng.filter_type" title="Link to this definition">#</a></dt>
-<dd><p>alias of &lt;module ‘pcapkit.vendor.pcapng.filter_type’ from ‘/Users/runner/work/PyPCAPKit/PyPCAPKit/pcapkit/vendor/pcapng/filter_type.py’&gt;</p>
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.filter_type.FilterType.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x00&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFF'</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.filter_type.FilterType.FLAG" title="Link to this definition">#</a></dt>
+<dd><p>Value limit checker.</p>
 </dd></dl>
 
-<br /><aside class="footnote-list brackets">
+</dd></dl>
+
+<p class="rubric">Footnotes</p>
+<aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id8" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod</a></p>
@@ -645,7 +654,7 @@ which is automatically generating <a class="reference internal" href="../const/p
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=87d2418f"></script>
+</div><script src="../../_static/documentation_options.js?v=4aaf858c"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>

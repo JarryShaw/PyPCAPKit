@@ -282,6 +282,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/functools.html">Auxiliary Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
 </ul>
@@ -402,13 +403,13 @@ vendor crawlers include:</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.ipv4.tos_ecn.ToSECN" title="pcapkit.vendor.ipv4.tos_ecn.ToSECN"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_ToSECN</span></code></a></p></td>
 <td><p>ToS ECN Field</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_ToSPrecedence</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.ipv4.tos_pre.ToSPrecedence" title="pcapkit.vendor.ipv4.tos_pre.ToSPrecedence"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_ToSPrecedence</span></code></a></p></td>
 <td><p>ToS (DS Field) Precedence</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_ToSReliability</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.ipv4.tos_rel.ToSReliability" title="pcapkit.vendor.ipv4.tos_rel.ToSReliability"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_ToSReliability</span></code></a></p></td>
 <td><p>ToS (DS Field) Reliability</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_ToSThroughput</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.ipv4.tos_thr.ToSThroughput" title="pcapkit.vendor.ipv4.tos_thr.ToSThroughput"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_ToSThroughput</span></code></a></p></td>
 <td><p>ToS (DS Field) Throughput</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.ipv4.ts_flag.TSFlag" title="pcapkit.vendor.ipv4.ts_flag.TSFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_TSFlag</span></code></a></p></td>
@@ -420,7 +421,7 @@ vendor crawlers include:</p>
 <section id="module-pcapkit.vendor.ipv4.classification_level">
 <span id="classification-level-encodings"></span><h2>Classification Level Encodings<a class="headerlink" href="#module-pcapkit.vendor.ipv4.classification_level" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>Classification Level Encodings</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.classification_level.ClassificationLevel</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.classification_level.ClassificationLevel" title="pcapkit.const.ipv4.classification_level.ClassificationLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.classification_level.ClassificationLevel</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.classification_level.ClassificationLevel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.classification_level.</span></span><span class="sig-name descname"><span class="pre">ClassificationLevel</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/classification_level.html#ClassificationLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.classification_level.ClassificationLevel" title="Link to this definition">#</a></dt>
@@ -432,24 +433,13 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.classification_level.ClassificationLevel.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.classification_level.ClassificationLevel.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="module-pcapkit.vendor.ipv4.option_class">
 <span id="option-classes"></span><h2>Option Classes<a class="headerlink" href="#module-pcapkit.vendor.ipv4.option_class" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>Option Classes</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.option_class.OptionClass</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.option_class.OptionClass" title="pcapkit.const.ipv4.option_class.OptionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.option_class.OptionClass</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.option_class.OptionClass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.option_class.</span></span><span class="sig-name descname"><span class="pre">OptionClass</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/option_class.html#OptionClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.option_class.OptionClass" title="Link to this definition">#</a></dt>
@@ -461,24 +451,13 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dd><p>Value limit checker.s</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.option_class.OptionClass.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.option_class.OptionClass.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="module-pcapkit.vendor.ipv4.option_number">
 <span id="ip-option-numbers"></span><h2>IP Option Numbers<a class="headerlink" href="#module-pcapkit.vendor.ipv4.option_number" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>IP Option Numbers</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.option_number.OptionNumber</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.option_number.OptionNumber</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.option_number.OptionNumber">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.option_number.</span></span><span class="sig-name descname"><span class="pre">OptionNumber</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/option_number.html#OptionNumber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.option_number.OptionNumber" title="Link to this definition">#</a></dt>
@@ -502,7 +481,7 @@ which is automatically generating <code class="xref py py-class docutils literal
 <section id="module-pcapkit.vendor.ipv4.protection_authority">
 <span id="protection-authority-bit-assignments"></span><h2>Protection Authority Bit Assignments<a class="headerlink" href="#module-pcapkit.vendor.ipv4.protection_authority" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>Protection Authority Bit Assignments</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.protection_authority.ProtectionAuthority</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.protection_authority.ProtectionAuthority" title="pcapkit.const.ipv4.protection_authority.ProtectionAuthority"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.protection_authority.ProtectionAuthority</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.protection_authority.</span></span><span class="sig-name descname"><span class="pre">ProtectionAuthority</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/protection_authority.html#ProtectionAuthority"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority" title="Link to this definition">#</a></dt>
@@ -514,24 +493,13 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="module-pcapkit.vendor.ipv4.qs_function">
 <span id="qs-functions"></span><h2>QS Functions<a class="headerlink" href="#module-pcapkit.vendor.ipv4.qs_function" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>QS Functions</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.qs_function.QSFunction</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.qs_function.QSFunction" title="pcapkit.const.ipv4.qs_function.QSFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.qs_function.QSFunction</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.qs_function.QSFunction">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.qs_function.</span></span><span class="sig-name descname"><span class="pre">QSFunction</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/qs_function.html#QSFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.qs_function.QSFunction" title="Link to this definition">#</a></dt>
@@ -543,24 +511,13 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.qs_function.QSFunction.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.qs_function.QSFunction.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="module-pcapkit.vendor.ipv4.router_alert">
 <span id="ipv4-router-alert-option-values"></span><h2>IPv4 Router Alert Option Values<a class="headerlink" href="#module-pcapkit.vendor.ipv4.router_alert" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>IPv4 Router Alert Option Values</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.router_alert.RouterAlert</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.router_alert.RouterAlert" title="pcapkit.const.ipv4.router_alert.RouterAlert"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.router_alert.RouterAlert</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.router_alert.RouterAlert">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.router_alert.</span></span><span class="sig-name descname"><span class="pre">RouterAlert</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/router_alert.html#RouterAlert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.router_alert.RouterAlert" title="Link to this definition">#</a></dt>
@@ -584,7 +541,7 @@ which is automatically generating <code class="xref py py-class docutils literal
 <section id="module-pcapkit.vendor.ipv4.tos_del">
 <span id="tos-ds-field-delay"></span><h2>ToS (DS Field) Delay<a class="headerlink" href="#module-pcapkit.vendor.ipv4.tos_del" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>ToS (DS Field) Delay</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.tos_del.ToSDelay</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.tos_del.ToSDelay" title="pcapkit.const.ipv4.tos_del.ToSDelay"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.tos_del.ToSDelay</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_del.ToSDelay">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.tos_del.</span></span><span class="sig-name descname"><span class="pre">ToSDelay</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/tos_del.html#ToSDelay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_del.ToSDelay" title="Link to this definition">#</a></dt>
@@ -596,24 +553,13 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_del.ToSDelay.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_del.ToSDelay.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="module-pcapkit.vendor.ipv4.tos_ecn">
 <span id="tos-ecn-field"></span><h2>ToS ECN Field<a class="headerlink" href="#module-pcapkit.vendor.ipv4.tos_ecn" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>ToS ECN Field</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.tos_ecn.ToSECN</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.tos_ecn.ToSECN" title="pcapkit.const.ipv4.tos_ecn.ToSECN"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.tos_ecn.ToSECN</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_ecn.ToSECN">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.tos_ecn.</span></span><span class="sig-name descname"><span class="pre">ToSECN</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/tos_ecn.html#ToSECN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_ecn.ToSECN" title="Link to this definition">#</a></dt>
@@ -625,24 +571,13 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_ecn.ToSECN.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_ecn.ToSECN.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="module-pcapkit.vendor.ipv4.tos_pre">
 <span id="tos-ds-field-precedence"></span><h2>ToS (DS Field) Precedence<a class="headerlink" href="#module-pcapkit.vendor.ipv4.tos_pre" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>ToS (DS Field) Precedence</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.tos_pre.ToSPrecedence</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.tos_pre.ToSPrecedence" title="pcapkit.const.ipv4.tos_pre.ToSPrecedence"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.tos_pre.ToSPrecedence</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_pre.ToSPrecedence">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.tos_pre.</span></span><span class="sig-name descname"><span class="pre">ToSPrecedence</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/tos_pre.html#ToSPrecedence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_pre.ToSPrecedence" title="Link to this definition">#</a></dt>
@@ -654,24 +589,13 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_pre.ToSPrecedence.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_pre.ToSPrecedence.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="module-pcapkit.vendor.ipv4.tos_rel">
 <span id="tos-ds-field-reliability"></span><h2>ToS (DS Field) Reliability<a class="headerlink" href="#module-pcapkit.vendor.ipv4.tos_rel" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>ToS (DS Field) Reliability</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.tos_rel.ToSReliability</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.tos_rel.ToSReliability" title="pcapkit.const.ipv4.tos_rel.ToSReliability"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.tos_rel.ToSReliability</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_rel.ToSReliability">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.tos_rel.</span></span><span class="sig-name descname"><span class="pre">ToSReliability</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/tos_rel.html#ToSReliability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_rel.ToSReliability" title="Link to this definition">#</a></dt>
@@ -683,24 +607,13 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_rel.ToSReliability.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_rel.ToSReliability.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="module-pcapkit.vendor.ipv4.tos_thr">
 <span id="tos-ds-field-throughput"></span><h2>ToS (DS Field) Throughput<a class="headerlink" href="#module-pcapkit.vendor.ipv4.tos_thr" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>ToS (DS Field) Throughput</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.tos_thr.ToSThroughput</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.tos_thr.ToSThroughput" title="pcapkit.const.ipv4.tos_thr.ToSThroughput"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.tos_thr.ToSThroughput</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_thr.ToSThroughput">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.tos_thr.</span></span><span class="sig-name descname"><span class="pre">ToSThroughput</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/tos_thr.html#ToSThroughput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_thr.ToSThroughput" title="Link to this definition">#</a></dt>
@@ -710,22 +623,6 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_thr.ToSThroughput.FLAG">
 <span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">1'</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_thr.ToSThroughput.FLAG" title="Link to this definition">#</a></dt>
 <dd><p>Value limit checker.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.tos_thr.ToSThroughput.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.tos_thr.ToSThroughput.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -734,7 +631,7 @@ which is automatically generating <code class="xref py py-class docutils literal
 <section id="module-pcapkit.vendor.ipv4.ts_flag">
 <span id="ts-flag"></span><h2>TS Flag<a class="headerlink" href="#module-pcapkit.vendor.ipv4.ts_flag" title="Link to this heading">#</a></h2>
 <p>This module contains the vendor crawler for <strong>TS Flag</strong>,
-which is automatically generating <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.+vendor+.ipv4.ts_flag.TSFlag</span></code>.</p>
+which is automatically generating <a class="reference internal" href="../const/ipv4.html#pcapkit.const.ipv4.ts_flag.TSFlag" title="pcapkit.const.ipv4.ts_flag.TSFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.ts_flag.TSFlag</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.ts_flag.TSFlag">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipv4.ts_flag.</span></span><span class="sig-name descname"><span class="pre">TSFlag</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipv4/ts_flag.html#TSFlag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipv4.ts_flag.TSFlag" title="Link to this definition">#</a></dt>
@@ -744,17 +641,6 @@ which is automatically generating <code class="xref py py-class docutils literal
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv4.ts_flag.TSFlag.FLAG">
 <span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0b0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0b1111'</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.ts_flag.TSFlag.FLAG" title="Link to this definition">#</a></dt>
 <dd><p>Value limit checker.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipv4.ts_flag.TSFlag.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.ipv4.ts_flag.TSFlag.LINK" title="Link to this definition">#</a></dt>
-<dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -852,7 +738,7 @@ which is automatically generating <code class="xref py py-class docutils literal
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=87d2418f"></script>
+</div><script src="../../_static/documentation_options.js?v=4aaf858c"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>

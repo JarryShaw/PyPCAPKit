@@ -274,6 +274,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/functools.html">Auxiliary Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 </ul>
@@ -752,6 +753,8 @@
           <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy._extmp">(pcapkit.foundation.engines.scapy.Scapy attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file">_file (pcapkit.protocols.protocol.Protocol attribute)</a>
+</li>
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._flag_a">_flag_a (pcapkit.foundation.extraction.Extractor attribute)</a>
 </li>
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._flag_d">_flag_d (pcapkit.foundation.extraction.Extractor attribute)</a>
@@ -1278,10 +1281,10 @@
 </li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_encrypted">_make_param_encrypted() (pcapkit.protocols.internet.hip.HIP method)</a>
 </li>
-        <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_esp_info">_make_param_esp_info() (pcapkit.protocols.internet.hip.HIP method)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_esp_info">_make_param_esp_info() (pcapkit.protocols.internet.hip.HIP method)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_esp_transform">_make_param_esp_transform() (pcapkit.protocols.internet.hip.HIP method)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_from">_make_param_from() (pcapkit.protocols.internet.hip.HIP method)</a>
@@ -4330,7 +4333,7 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.behnke_video">behnke_video (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.decorators.beholder">beholder() (in module pcapkit.utilities.decorators)</a>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.decorators.beholder">beholder() (in module pcapkit.utilities.decorators)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.bender">bender (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -9803,10 +9806,12 @@
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_FilterOption.filter">filter (pcapkit.protocols.schema.misc.pcapng.IF_FilterOption attribute)</a>
 </li>
-        <li><a href="pcapkit/vendor/pcapng.html#pcapkit.vendor.pcapng.filter_type">filter_type (in module pcapkit.vendor.pcapng)</a>
-</li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.filter_type.FilterType">FilterType (class in pcapkit.const.pcapng.filter_type)</a>
+
+        <ul>
+          <li><a href="pcapkit/vendor/pcapng.html#pcapkit.vendor.pcapng.filter_type.FilterType">(class in pcapkit.vendor.pcapng.filter_type)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/tcp.html#pcapkit.const.tcp.flags.Flags.FIN">FIN (pcapkit.const.tcp.flags.Flags attribute)</a>
 </li>
         <li><a href="pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Packet.fin">fin (pcapkit.foundation.reassembly.data.tcp.Packet attribute)</a>
@@ -10010,8 +10015,6 @@
 </li>
           <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.ts_flag.TSFlag.FLAG">(pcapkit.vendor.ipv4.ts_flag.TSFlag attribute)</a>
 </li>
-          <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.extension_header.ExtensionHeader.FLAG">(pcapkit.vendor.ipv6.extension_header.ExtensionHeader attribute)</a>
-</li>
           <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.option.Option.FLAG">(pcapkit.vendor.ipv6.option.Option attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.option_action.OptionAction.FLAG">(pcapkit.vendor.ipv6.option_action.OptionAction attribute)</a>
@@ -10123,6 +10126,8 @@
           <li><a href="pcapkit/vendor/ospf.html#pcapkit.vendor.ospf.packet.Packet.FLAG">(pcapkit.vendor.ospf.packet.Packet attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/pcapng.html#pcapkit.vendor.pcapng.block_type.BlockType.FLAG">(pcapkit.vendor.pcapng.block_type.BlockType attribute)</a>
+</li>
+          <li><a href="pcapkit/vendor/pcapng.html#pcapkit.vendor.pcapng.filter_type.FilterType.FLAG">(pcapkit.vendor.pcapng.filter_type.FilterType attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/pcapng.html#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm.FLAG">(pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm attribute)</a>
 </li>
@@ -14965,6 +14970,8 @@
         </ul></li>
         <li><a href="pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link">Link (class in pcapkit.protocols.link.link)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/interface/core.html#pcapkit.interface.core.LINK">LINK (in module pcapkit.interface.core)</a>
 
         <ul>
@@ -15030,53 +15037,23 @@
 </li>
           <li><a href="pcapkit/vendor/http.html#pcapkit.vendor.http.status_code.StatusCode.LINK">(pcapkit.vendor.http.status_code.StatusCode attribute)</a>
 </li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.classification_level.ClassificationLevel.LINK">(pcapkit.vendor.ipv4.classification_level.ClassificationLevel attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.option_class.OptionClass.LINK">(pcapkit.vendor.ipv4.option_class.OptionClass attribute)</a>
-</li>
           <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.option_number.OptionNumber.LINK">(pcapkit.vendor.ipv4.option_number.OptionNumber attribute)</a>
 </li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority.LINK">(pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.qs_function.QSFunction.LINK">(pcapkit.vendor.ipv4.qs_function.QSFunction attribute)</a>
-</li>
           <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.router_alert.RouterAlert.LINK">(pcapkit.vendor.ipv4.router_alert.RouterAlert attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.tos_del.ToSDelay.LINK">(pcapkit.vendor.ipv4.tos_del.ToSDelay attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.tos_ecn.ToSECN.LINK">(pcapkit.vendor.ipv4.tos_ecn.ToSECN attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.tos_pre.ToSPrecedence.LINK">(pcapkit.vendor.ipv4.tos_pre.ToSPrecedence attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.tos_rel.ToSReliability.LINK">(pcapkit.vendor.ipv4.tos_rel.ToSReliability attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.tos_thr.ToSThroughput.LINK">(pcapkit.vendor.ipv4.tos_thr.ToSThroughput attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.ts_flag.TSFlag.LINK">(pcapkit.vendor.ipv4.ts_flag.TSFlag attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK">(pcapkit.vendor.ipv6.extension_header.ExtensionHeader attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.option.Option.LINK">(pcapkit.vendor.ipv6.option.Option attribute)</a>
 </li>
-          <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.option_action.OptionAction.LINK">(pcapkit.vendor.ipv6.option_action.OptionAction attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.qs_function.QSFunction.LINK">(pcapkit.vendor.ipv6.qs_function.QSFunction attribute)</a>
-</li>
           <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.router_alert.RouterAlert.LINK">(pcapkit.vendor.ipv6.router_alert.RouterAlert attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.routing.Routing.LINK">(pcapkit.vendor.ipv6.routing.Routing attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.seed_id.SeedID.LINK">(pcapkit.vendor.ipv6.seed_id.SeedID attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.smf_dpd_mode.SMFDPDMode.LINK">(pcapkit.vendor.ipv6.smf_dpd_mode.SMFDPDMode attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.tagger_id.TaggerID.LINK">(pcapkit.vendor.ipv6.tagger_id.TaggerID attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/ipx.html#pcapkit.vendor.ipx.packet.Packet.LINK">(pcapkit.vendor.ipx.packet.Packet attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/ipx.html#pcapkit.vendor.ipx.socket.Socket.LINK">(pcapkit.vendor.ipx.socket.Socket attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/l2tp.html#pcapkit.vendor.l2tp.type.Type.LINK">(pcapkit.vendor.l2tp.type.Type attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/mh.html#pcapkit.vendor.mh.access_type.AccessType.LINK">(pcapkit.vendor.mh.access_type.AccessType attribute)</a>
 </li>
@@ -15087,8 +15064,6 @@
           <li><a href="pcapkit/vendor/mh.html#pcapkit.vendor.mh.auth_subtype.AuthSubtype.LINK">(pcapkit.vendor.mh.auth_subtype.AuthSubtype attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/mh.html#pcapkit.vendor.mh.binding_ack_flag.BindingACKFlag.LINK">(pcapkit.vendor.mh.binding_ack_flag.BindingACKFlag attribute)</a>
-</li>
-          <li><a href="pcapkit/vendor/mh.html#pcapkit.vendor.mh.binding_error.BindingError.LINK">(pcapkit.vendor.mh.binding_error.BindingError attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/mh.html#pcapkit.vendor.mh.binding_revocation.BindingRevocation.LINK">(pcapkit.vendor.mh.binding_revocation.BindingRevocation attribute)</a>
 </li>
@@ -15134,8 +15109,6 @@
 </li>
           <li><a href="pcapkit/vendor/mh.html#pcapkit.vendor.mh.home_address_reply.HomeAddressReply.LINK">(pcapkit.vendor.mh.home_address_reply.HomeAddressReply attribute)</a>
 </li>
-          <li><a href="pcapkit/vendor/mh.html#pcapkit.vendor.mh.lla_code.LLACode.LINK">(pcapkit.vendor.mh.lla_code.LLACode attribute)</a>
-</li>
           <li><a href="pcapkit/vendor/mh.html#pcapkit.vendor.mh.lma_mag_suboption.LMAControlledMAGSuboption.LINK">(pcapkit.vendor.mh.lma_mag_suboption.LMAControlledMAGSuboption attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/mh.html#pcapkit.vendor.mh.mn_group_id.MNGroupID.LINK">(pcapkit.vendor.mh.mn_group_id.MNGroupID attribute)</a>
@@ -15180,8 +15153,6 @@
 </li>
           <li><a href="pcapkit/vendor/reg.html#pcapkit.vendor.reg.transtype.TransType.LINK">(pcapkit.vendor.reg.transtype.TransType attribute)</a>
 </li>
-          <li><a href="pcapkit/vendor/tcp.html#pcapkit.vendor.tcp.checksum.Checksum.LINK">(pcapkit.vendor.tcp.checksum.Checksum attribute)</a>
-</li>
           <li><a href="pcapkit/vendor/tcp.html#pcapkit.vendor.tcp.flags.Flags.LINK">(pcapkit.vendor.tcp.flags.Flags attribute)</a>
 </li>
           <li><a href="pcapkit/vendor/tcp.html#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption.LINK">(pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption attribute)</a>
@@ -15191,8 +15162,6 @@
           <li><a href="pcapkit/vendor/vlan.html#pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK">(pcapkit.vendor.vlan.priority_level.PriorityLevel attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.option.Option.Link_local_Address_Option">Link_local_Address_Option (pcapkit.const.mh.option.Option attribute)</a>
 </li>
         <li><a href="pcapkit/const/ospf.html#pcapkit.const.ospf.packet.Packet.Link_State_Ack">Link_State_Ack (pcapkit.const.ospf.packet.Packet attribute)</a>
@@ -17121,7 +17090,7 @@
 </li>
           <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities.compat">pcapkit.utilities.compat</a>
 </li>
-          <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities.decorators">pcapkit.utilities.decorators</a>
+          <li><a href="pcapkit/utilities/functools.html#module-pcapkit.utilities.decorators">pcapkit.utilities.decorators</a>
 </li>
           <li><a href="pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions">pcapkit.utilities.exceptions</a>
 </li>
@@ -23039,8 +23008,6 @@
           <li><a href="pcapkit/protocols/transport/tcp.html#module-pcapkit.protocols.schema.transport.tcp">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.schema.transport.udp
 
@@ -23048,6 +23015,8 @@
           <li><a href="pcapkit/protocols/transport/udp.html#module-pcapkit.protocols.schema.transport.udp">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.transport
 
@@ -23138,9 +23107,15 @@
     pcapkit.utilities.decorators
 
         <ul>
-          <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities.decorators">module</a>
+          <li><a href="pcapkit/utilities/functools.html#module-pcapkit.utilities.decorators">module</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_beholder">pcapkit.utilities.decorators.R_beholder (in module pcapkit.utilities.decorators)</a>
+</li>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_prepare">pcapkit.utilities.decorators.R_prepare (in module pcapkit.utilities.decorators)</a>
+</li>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_seekset">pcapkit.utilities.decorators.R_seekset (in module pcapkit.utilities.decorators)</a>
+</li>
         <li>
     pcapkit.utilities.exceptions
 
@@ -24830,7 +24805,7 @@
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.prelude">prelude (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.decorators.prepare">prepare() (in module pcapkit.utilities.decorators)</a>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.decorators.prepare">prepare() (in module pcapkit.utilities.decorators)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.pres">pres (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -30812,7 +30787,7 @@
 </li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.SeekError">SeekError</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.decorators.seekset">seekset() (in module pcapkit.utilities.decorators)</a>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.decorators.seekset">seekset() (in module pcapkit.utilities.decorators)</a>
 </li>
         <li><a href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.SeekWarning">SeekWarning</a>
 </li>
@@ -32178,7 +32153,7 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.ST">ST (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.exceptions.stacklevel">stacklevel() (in module pcapkit.utilities.exceptions)</a>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.exceptions.stacklevel">stacklevel() (in module pcapkit.utilities.exceptions)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.stanag_5066">stanag_5066 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -35826,7 +35801,7 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.warmux">warmux (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.warnings.warn">warn() (in module pcapkit.utilities.warnings)</a>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.warnings.warn">warn() (in module pcapkit.utilities.warnings)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.warppipe">warppipe (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -36660,7 +36635,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=87d2418f"></script>
+</div><script src="_static/documentation_options.js?v=4aaf858c"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=32e29ea5"></script>

@@ -13,15 +13,9 @@ several user-refined exceptions and warnings.
 .. toctree::
    :maxdepth: 2
 
+   functools
    exceptions
    warnings
-
-Auxiliary Functions
-===================
-
-.. autofunction:: pcapkit.utilities.exceptions.stacklevel
-
-.. autofunction:: pcapkit.utilities.warnings.warn
 
 Logging System
 ==============
@@ -62,28 +56,6 @@ Environment Variables
       This variable can be configured through the environment variable
       :envvar:`PCAPKIT_SPHINX`.
 
-Decorator Functions
-===================
-
-.. module:: pcapkit.utilities.decorators
-
-:mod:`pcapkit.utilities.decorators` contains several useful
-decorators, including :func:`~pcapkit.utilities.decorators.seekset`,
-:func:`~pcapkit.utilities.decorators.beholder` and
-:func:`~pcapkit.utilities.decorators.prepare`.
-
-.. autodecorator:: pcapkit.utilities.decorators.seekset
-
-.. autodecorator:: pcapkit.utilities.decorators.beholder
-
-.. autodecorator:: pcapkit.utilities.decorators.prepare
-
-.. important::
-
-   All three decorators above are designed for decorating *class methods*.
-   For more information, please refer to the documentation of each
-   decorator function.
-
 Version Compatibility
 =====================
 
@@ -93,30 +65,33 @@ Version Compatibility
 following objects and functions:
 
 .. list-table::
+   :header-rows: 1
 
+   * - Compatibility Target
+     - Minimal Required Version
    * - :mod:`pathlib`
-     - ≥ 3.5
+     - Python 3.5
    * - :exc:`ModuleNotFoundError`
-     - ≥ 3.6
+     - Python 3.6
    * - :class:`collections.abc.Collection`
-     - ≥ 3.6
+     - Python 3.6
    * - :func:`functools.cached_property`
-     - ≥ 3.8
+     - Python 3.8
    * - :class:`collections.abc.Mapping[KT, VT] <collections.abc.Mapping>`
-     - ≥ 3.9
+     - Python 3.9
    * - :class:`tuple[T, ...] <tuple>`
-     - ≥ 3.9
+     - Python 3.9
    * - :class:`list[T] <list>`
-     - ≥ 3.9
+     - Python 3.9
    * - :class:`dict[KT, VT] <dict>`
-     - ≥ 3.9
+     - Python 3.9
    * - :class:`enum.StrEnum`
-     - ≥ 3.11
+     - Python 3.11
    * - :func:`typing.final`
-     - ≥ 3.8
+     - Python 3.8
    * - :func:`decimal.localcontext(ctx=None, **kwargs) <decimal.localcontext>`
-     - ≥ 3.11
+     - Python 3.11
    * - :func:`enum.show_flag_values`
-     - ≥ 3.11
+     - Python 3.11
    * - :data:`typing.TypeAlias`
-     - ≥ 3.10
+     - Python 3.10

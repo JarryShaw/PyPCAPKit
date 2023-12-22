@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.utilities contains several useful functions and classes which are fundations of pcapkit, including decorater function seekset() and beholder(), and several user-refined exceptions and warni..." />
 <meta name="description" content="pcapkit.utilities contains several useful functions and classes which are fundations of pcapkit, including decorater function seekset() and beholder(), and several user-refined exceptions and warni..." />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="User Defined Exceptions" href="exceptions.html" /><link rel="prev" title="Common Utilities" href="../dumpkit/common.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Auxiliary Functions" href="functools.html" /><link rel="prev" title="Common Utilities" href="../dumpkit/common.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Module Utilities - PyPCAPKit</title>
@@ -282,6 +282,7 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Module Utilities</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="functools.html">Auxiliary Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
 </ul>
@@ -374,11 +375,16 @@
 <span id="module-utilities"></span><h1>Module Utilities<a class="headerlink" href="#module-pcapkit.utilities" title="Link to this heading">#</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a> contains several useful functions
 and classes which are fundations of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, including
-decorater function <a class="reference internal" href="#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>
-and <a class="reference internal" href="#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, and
+decorater function <a class="reference internal" href="functools.html#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>
+and <a class="reference internal" href="functools.html#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, and
 several user-refined exceptions and warnings.</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="functools.html">Auxiliary Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="functools.html#module-pcapkit.utilities.decorators">Decorators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functools.html#error-handling-utilities">Error Handling Utilities</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#typeerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> Category</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#attributeerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code> Category</a></li>
@@ -403,44 +409,6 @@ several user-refined exceptions and warnings.</p>
 </li>
 </ul>
 </div>
-<section id="auxiliary-functions">
-<h2>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">#</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.stacklevel">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">stacklevel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#stacklevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.stacklevel" title="Link to this definition">#</a></dt>
-<dd><p>Fetch current stack level.</p>
-<p>The function will walk through the straceback stack (<a class="reference external" href="https://docs.python.org/3/library/traceback.html#traceback.extract_stack" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">traceback.extract_stack()</span></code></a>),
-and fetch the stack level where the path contains <code class="docutils literal notranslate"><span class="pre">/pcapkit/</span></code>. So that it won’t
-display any disturbing internal traceback information when raising errors.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Stack level until internal stacks, i.e. contains <code class="docutils literal notranslate"><span class="pre">/pcapkit/</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.warnings.warn">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.warnings.</span></span><span class="sig-name descname"><span class="pre">warn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/warnings.html#warn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.warnings.warn" title="Link to this definition">#</a></dt>
-<dd><p>Wrapper function of <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>message</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></a>]</span>) – Warning message.</p></li>
-<li><p><strong>category</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></a>]</span>) – Warning category.</p></li>
-<li><p><strong>stacklevel</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – Warning stack level.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
 <section id="module-pcapkit.utilities.logging">
 <span id="logging-system"></span><h2>Logging System<a class="headerlink" href="#module-pcapkit.utilities.logging" title="Link to this heading">#</a></h2>
 <p><a class="reference internal" href="#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a> contains naïve integration
@@ -463,6 +431,11 @@ instance as <a class="reference internal" href="#pcapkit.utilities.logging.logge
 <dt class="sig sig-object py" id="pcapkit.utilities.logging.DEVMODE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.logging.</span></span><span class="sig-name descname"><span class="pre">DEVMODE</span></span><a class="headerlink" href="#pcapkit.utilities.logging.DEVMODE" title="Link to this definition">#</a></dt>
 <dd><p>Development mode flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+</dd>
+</dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>This variable can be configured through the environment variable
@@ -474,6 +447,11 @@ instance as <a class="reference internal" href="#pcapkit.utilities.logging.logge
 <dt class="sig sig-object py" id="pcapkit.utilities.logging.VERBOSE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.logging.</span></span><span class="sig-name descname"><span class="pre">VERBOSE</span></span><a class="headerlink" href="#pcapkit.utilities.logging.VERBOSE" title="Link to this definition">#</a></dt>
 <dd><p>Verbose output flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+</dd>
+</dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>This variable can be configured through the environment variable
@@ -484,7 +462,12 @@ instance as <a class="reference internal" href="#pcapkit.utilities.logging.logge
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.utilities.logging.SPHINX_TYPE_CHECKING">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.logging.</span></span><span class="sig-name descname"><span class="pre">SPHINX_TYPE_CHECKING</span></span><a class="headerlink" href="#pcapkit.utilities.logging.SPHINX_TYPE_CHECKING" title="Link to this definition">#</a></dt>
-<dd><p>This is a workaround for <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TYPE_CHECKING" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code></a> in Sphinx.</p>
+<dd><p>This is a workaround for <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TYPE_CHECKING" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.TYPE_CHECKING</span></code></a> in Sphinx.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+</dd>
+</dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>This variable can be configured through the environment variable
@@ -494,166 +477,56 @@ instance as <a class="reference internal" href="#pcapkit.utilities.logging.logge
 
 </section>
 </section>
-<section id="module-pcapkit.utilities.decorators">
-<span id="decorator-functions"></span><h2>Decorator Functions<a class="headerlink" href="#module-pcapkit.utilities.decorators" title="Link to this heading">#</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.utilities.decorators" title="pcapkit.utilities.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.decorators</span></code></a> contains several useful
-decorators, including <a class="reference internal" href="#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>,
-<a class="reference internal" href="#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> and
-<a class="reference internal" href="#pcapkit.utilities.decorators.prepare" title="pcapkit.utilities.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a>.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.decorators.seekset">
-<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.decorators.</span></span><span class="sig-name descname"><span class="pre">seekset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/decorators.html#seekset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.decorators.seekset" title="Link to this definition">#</a></dt>
-<dd><p>Read file from start then set back to original.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>This decorator function is designed for decorating <em>class methods</em>.</p>
-</div>
-<p>The decorator will keep the current offset of <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code>,
-then call the decorated function. Afterwards, it will rewind the  offset of
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code> to the original and returns the return value from
-the decorated function.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The decorated function should have following signature:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._read_packet" title="pcapkit.protocols.protocol.Protocol._read_packet"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._read_packet()</span></code></a></p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>func</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Concatenate</span></code>[<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ParamSpec" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code></a>(<code class="docutils literal notranslate"><span class="pre">P</span></code>)]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R_seekset</span></code>)]</span>) – decorated function</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ParamSpec" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code></a>(<code class="docutils literal notranslate"><span class="pre">P</span></code>)], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R_seekset</span></code>)]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.decorators.beholder">
-<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.decorators.</span></span><span class="sig-name descname"><span class="pre">beholder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/decorators.html#beholder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.decorators.beholder" title="Link to this definition">#</a></dt>
-<dd><p>Behold extraction procedure.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>This decorator function is designed for decorating <em>class methods</em>.</p>
-</div>
-<p>This decorator first keep the current offset of
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code>, then
-try to call the decorated function. Should any exception raised, it will
-re-parse the <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code>
-as <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> protocol.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The decorated function should have following signature:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._decode_next_layer()</span></code></a></p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>func</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Concatenate</span></code>[<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ParamSpec" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code></a>(<code class="docutils literal notranslate"><span class="pre">P</span></code>)]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R_beholder</span></code>, bound= <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>)]</span>) – decorated function</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ParamSpec" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code></a>(<code class="docutils literal notranslate"><span class="pre">P</span></code>)], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R_beholder</span></code>, bound= <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>)]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.decorators.prepare">
-<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.decorators.</span></span><span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/decorators.html#prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.decorators.prepare" title="Link to this definition">#</a></dt>
-<dd><p>Prepare schema packet data before unpacking.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>This decorate function is designed for decorating the
-<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>
-<em>class method</em>.</p>
-</div>
-<p>This decorator will revise the parameter list provided to the original
-<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> method
-and extract necessary information based on the given parameters, then provide
-the revised version of parameter list to the original method.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The decorated function should have following signature:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.schema.Schema.unpack()</span></code></a></p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>func</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Concatenate</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R_prepare</span></code>, bound= <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>)], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ParamSpec" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code></a>(<code class="docutils literal notranslate"><span class="pre">P</span></code>)]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R_prepare</span></code>, bound= <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>)]</span>) – decorated function</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ParamSpec" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code></a>(<code class="docutils literal notranslate"><span class="pre">P</span></code>)], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R_prepare</span></code>, bound= <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>)]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>All three decorators above are designed for decorating <em>class methods</em>.
-For more information, please refer to the documentation of each
-decorator function.</p>
-</div>
-</section>
 <section id="module-pcapkit.utilities.compat">
 <span id="version-compatibility"></span><h2>Version Compatibility<a class="headerlink" href="#module-pcapkit.utilities.compat" title="Link to this heading">#</a></h2>
 <p><a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> further provides a compatibility layer for the
 following objects and functions:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Compatibility Target</p></th>
+<th class="head"><p>Minimal Required Version</p></th>
+</tr>
+</thead>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.12)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pathlib</span></code></a></p></td>
-<td><p>≥ 3.5</p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.12)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pathlib</span></code></a></p></td>
+<td><p>Python 3.5</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ModuleNotFoundError" title="(in Python v3.12)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a></p></td>
-<td><p>≥ 3.6</p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ModuleNotFoundError" title="(in Python v3.12)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a></p></td>
+<td><p>Python 3.6</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Collection" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Collection</span></code></a></p></td>
-<td><p>≥ 3.6</p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Collection" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Collection</span></code></a></p></td>
+<td><p>Python 3.6</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a></p></td>
-<td><p>≥ 3.8</p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a></p></td>
+<td><p>Python 3.8</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping[KT,</span> <span class="pre">VT]</span></code></a></p></td>
-<td><p>≥ 3.9</p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping[KT,</span> <span class="pre">VT]</span></code></a></p></td>
+<td><p>Python 3.9</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple[T,</span> <span class="pre">...]</span></code></a></p></td>
-<td><p>≥ 3.9</p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple[T,</span> <span class="pre">...]</span></code></a></p></td>
+<td><p>Python 3.9</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list[T]</span></code></a></p></td>
-<td><p>≥ 3.9</p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list[T]</span></code></a></p></td>
+<td><p>Python 3.9</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict[KT,</span> <span class="pre">VT]</span></code></a></p></td>
-<td><p>≥ 3.9</p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict[KT,</span> <span class="pre">VT]</span></code></a></p></td>
+<td><p>Python 3.9</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a></p></td>
-<td><p>≥ 3.11</p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a></p></td>
+<td><p>Python 3.11</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a></p></td>
-<td><p>≥ 3.8</p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a></p></td>
+<td><p>Python 3.8</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.localcontext" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">decimal.localcontext(ctx=None,</span> <span class="pre">**kwargs)</span></code></a></p></td>
-<td><p>≥ 3.11</p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.localcontext" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">decimal.localcontext(ctx=None,</span> <span class="pre">**kwargs)</span></code></a></p></td>
+<td><p>Python 3.11</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.show_flag_values" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">enum.show_flag_values()</span></code></a></p></td>
-<td><p>≥ 3.11</p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.show_flag_values" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">enum.show_flag_values()</span></code></a></p></td>
+<td><p>Python 3.11</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeAlias" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.TypeAlias</span></code></a></p></td>
-<td><p>≥ 3.10</p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeAlias" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.TypeAlias</span></code></a></p></td>
+<td><p>Python 3.10</p></td>
 </tr>
 </tbody>
 </table>
@@ -666,12 +539,12 @@ following objects and functions:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="exceptions.html">
+          <a class="next-page" href="functools.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">User Defined Exceptions</div>
+                <div class="title">Auxiliary Functions</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -717,12 +590,10 @@ following objects and functions:</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Module Utilities</a><ul>
-<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
 <li><a class="reference internal" href="#module-pcapkit.utilities.logging">Logging System</a><ul>
 <li><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-pcapkit.utilities.decorators">Decorator Functions</a></li>
 <li><a class="reference internal" href="#module-pcapkit.utilities.compat">Version Compatibility</a></li>
 </ul>
 </li>
@@ -735,7 +606,7 @@ following objects and functions:</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=87d2418f"></script>
+</div><script src="../../_static/documentation_options.js?v=4aaf858c"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>

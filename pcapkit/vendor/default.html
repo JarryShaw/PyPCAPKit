@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/default.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.vendor.default contains Vendor only, which is the base meta class for all vendor crawlers. Auxiliary Functions:" />
-<meta name="description" content="pcapkit.vendor.default contains Vendor only, which is the base meta class for all vendor crawlers. Auxiliary Functions:" />
+<meta property="og:description" content="pcapkit.vendor.default contains Vendor only, which is the base meta class for all vendor crawlers. Internal Definitions:" />
+<meta name="description" content="pcapkit.vendor.default contains Vendor only, which is the base meta class for all vendor crawlers. Internal Definitions:" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Protocol Type Registry Vendor Crawlers" href="reg.html" /><link rel="prev" title="Vendor Crawlers" href="index.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
@@ -282,6 +282,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of Module Utilities</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/functools.html">Auxiliary Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
 </ul>
@@ -382,56 +383,28 @@ only, which is the base meta class for all vendor crawlers.</p>
 <p>Inherit this class with <a class="reference internal" href="#pcapkit.vendor.default.Vendor.FLAG" title="pcapkit.vendor.default.Vendor.FLAG"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FLAG</span></code></a> &amp;
 <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a> attributes, etc., to implement
 a new vendor generator.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.default.Vendor.NAME">
 <span class="sig-name descname"><span class="pre">NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#pcapkit.vendor.default.Vendor.NAME" title="Link to this definition">#</a></dt>
 <dd><p>Name of constant enumeration.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.default.Vendor.DOCS">
 <span class="sig-name descname"><span class="pre">DOCS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#pcapkit.vendor.default.Vendor.DOCS" title="Link to this definition">#</a></dt>
 <dd><p>Docstring of constant enumeration.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.default.Vendor.FLAG">
 <span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#pcapkit.vendor.default.Vendor.FLAG" title="Link to this definition">#</a></dt>
 <dd><p>Value limit checker.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.default.Vendor.LINK">
 <span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#pcapkit.vendor.default.Vendor.LINK" title="Link to this definition">#</a></dt>
 <dd><p>Link to registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -602,6 +575,8 @@ it provides.</p>
 
 </dd></dl>
 
+<section id="internal-definitions">
+<h2>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.default.VendorMeta">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.default.</span></span><span class="sig-name descname"><span class="pre">VendorMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/default.html#VendorMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.default.VendorMeta" title="Link to this definition">#</a></dt>
@@ -612,8 +587,6 @@ it provides.</p>
 registry calls and simplify the customisation process.</p>
 </dd></dl>
 
-<section id="auxiliary-functions">
-<h2>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.vendor.default.pcapkit.vendor.default.LINE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.default.</span></span><span class="sig-name descname"><span class="pre">LINE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NAME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOCS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FLAG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ENUM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MISS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MODL</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.default.pcapkit.vendor.default.LINE" title="Link to this definition">#</a></dt>
@@ -711,7 +684,7 @@ proxy settings of <a class="reference external" href="https://requests.readthedo
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Base Crawler</a><ul>
-<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 </ul>
 </li>
 </ul>
@@ -723,7 +696,7 @@ proxy settings of <a class="reference external" href="https://requests.readthedo
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=87d2418f"></script>
+</div><script src="../../_static/documentation_options.js?v=4aaf858c"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
