@@ -16,7 +16,8 @@ however, this implement still used the elder one.
 """
 from typing import TYPE_CHECKING, Generic
 
-from pcapkit.foundation.reassembly.data.ip import _AT, Buffer, BufferID, Datagram, DatagramID, Packet
+from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
+                                                   Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
 
 if TYPE_CHECKING:

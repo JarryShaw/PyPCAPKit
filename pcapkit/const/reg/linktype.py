@@ -240,7 +240,7 @@ class LinkType(IntEnum):
     #: headers preceding the SCCP packet.
     SCCP = 142
 
-    #: [``DLT_DOCSIS``] DOCSIS MAC frames, as described by the DOCSIS 3.1 MAC and
+    #: [``DLT_DOCSIS``] DOCSIS MAC frames, as described by the DOCSIS 4.0 MAC and
     #: Upper Layer Protocols Interface Specification or earlier specifications for
     #: MAC frames.
     DOCSIS = 143
@@ -385,7 +385,8 @@ class LinkType(IntEnum):
     #: [``DLT_JUNIPER_VP``] Juniper Networks private data link type.
     JUNIPER_VP = 183
 
-    #: [``DLT_A429``] ARINC 429 frames. Every frame contains a 32-bit A429 label.
+    #: [``DLT_A429``] ARINC 429 frames. Every frame contains a 32-bit A429 word, in
+    #: little-endian format.
     A429 = 184
 
     #: [``DLT_A653_ICM``] ARINC 653 interpartition communication messages. Please
@@ -615,8 +616,7 @@ class LinkType(IntEnum):
     #: [``DLT_JUNIPER_FIBRECHANNEL``] Juniper Networks private data link type.
     JUNIPER_FIBRECHANNEL = 234
 
-    #: [``DLT_DVB_CI``] DVB-CI (DVB Common Interface for communication between a PC
-    #: Card module and a DVB receiver), with the message format specified by the
+    #: [``DLT_DVB_CI``] DVB-CI messages, with the message format specified by the
     #: PCAP format for DVB-CI specification.
     DVB_CI = 235
 

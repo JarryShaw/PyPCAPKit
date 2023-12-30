@@ -11,7 +11,7 @@ TCP flows from a series of packets and connections.
 """
 from typing import TYPE_CHECKING, Generic, overload
 
-from pcapkit.foundation.traceflow.data.tcp import Buffer, BufferID, Index, _AT, Packet
+from pcapkit.foundation.traceflow.data.tcp import _AT, Buffer, BufferID, Index, Packet
 from pcapkit.foundation.traceflow.traceflow import TraceFlowBase as TraceFlow
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
