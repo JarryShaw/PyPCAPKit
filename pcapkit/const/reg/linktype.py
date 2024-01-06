@@ -18,16 +18,7 @@ __all__ = ['LinkType']
 class LinkType(IntEnum):
     """[LinkType] Link-Layer Header Type Values"""
 
-    #: [``DLT_NULL``] BSD loopback encapsulation; the link layer header is a 4-byte
-    #: field, in host byte order, containing a value of 2 for IPv4 packets, a value
-    #: of either 24, 28, or 30 for IPv6 packets, a value of 7 for OSI packets, or a
-    #: value of 23 for IPX packets. All of the IPv6 values correspond to IPv6
-    #: packets; code reading files should check for all of them. Note that ``host
-    #: byte order`` is the byte order of the machine on that the packets are
-    #: captured; if a live capture is being done, ``host byte order`` is the byte
-    #: order of the machine capturing the packets, but if a ``savefile`` is being
-    #: read, the byte order is not necessarily that of the machine reading the
-    #: capture file.
+    #: [``DLT_NULL``] BSD loopback encapsulation.
     NULL = 0
 
     #: [``DLT_EN10MB``] IEEE 802.3 Ethernet (10Mb, 100Mb, 1000Mb, and up); the 10MB
@@ -112,11 +103,7 @@ class LinkType(IntEnum):
     #: without an FCS at the end of the frame.
     FRELAY = 107
 
-    #: [``DLT_LOOP``] OpenBSD loopback encapsulation; the link-layer header is a
-    #: 4-byte field, in network byte order, containing a value of 2 for IPv4
-    #: packets, a value of either 24, 28, or 30 for IPv6 packets, a value of 7 for
-    #: OSI packets, or a value of 23 for IPX packets. All of the IPv6 values
-    #: correspond to IPv6 packets; code reading files should check for all of them.
+    #: [``DLT_LOOP``] OpenBSD loopback encapsulation.
     LOOP = 108
 
     #: [``DLT_ENC``] Encapsulated packets for IPsec.
@@ -247,8 +234,7 @@ class LinkType(IntEnum):
 
     #: [``DLT_LINUX_IRDA``] Linux-IrDA packets, with a LINKTYPE\_LINUX\_IRDA
     #: header, with the payload for IrDA frames beginning with by the IrLAP header
-    #: as defined by IrDA Data Specifications, including the IrDA Link Access
-    #: Protocol specification.
+    #: as defined by the IrDA Link Access Protocol specification.
     LINUX_IRDA = 144
 
     #: [``DLT_IBM_SP``] IBM SP switch.
@@ -663,7 +649,8 @@ class LinkType(IntEnum):
     NG40 = 244
 
     #: [``DLT_NFC_LLCP``] Pseudo-header for NFC LLCP packet captures, followed by
-    #: frame data for the LLCP Protocol as specified by NFCForum-TS-LLCP\_1.1.
+    #: frame data for the LLCP Protocol as specified by the Logical Link Control
+    #: Protocol Technical Specification.
     NFC_LLCP = 245
 
     #: Packet filter state syncing.
@@ -671,7 +658,7 @@ class LinkType(IntEnum):
 
     #: [``DLT_INFINIBAND``] Raw InfiniBand frames, starting with the Local Routing
     #: Header, as specified in Chapter 5 "Data packet format" of InfiniBand™
-    #: Architectural Specification Release 1.2.1 Volume 1 - General Specifications.
+    #: Architecture Specification Release 1.2.1 Volume 1 - General Specifications.
     INFINIBAND = 247
 
     #: [``DLT_SCTP``] SCTP packets, as defined by RFC 4960, with no lower-level
@@ -857,8 +844,8 @@ class LinkType(IntEnum):
     #: header.
     ETW = 290
 
-    #: [``DLT_NETANALYZER_NG``] Hilscher Gesellschaft fuer Systemautomation mbH
-    #: netANALYZER NG hardware and software (specification).
+    #: [``DLT_NETANALYZER_NG``] Reserved for Hilscher Gesellschaft fuer
+    #: Systemautomation mbH netANALYZER NG hardware and software.
     NETANALYZER_NG = 291
 
     #: [``DLT_ZBOSS_NCP``] Serial NCP (Network Co-Processor) protocol for Zigbee
@@ -899,6 +886,13 @@ class LinkType(IntEnum):
     #: controller and peripherals inside the vending machine, with the message
     #: format specified by the PCAP format for MDB specification.
     MDB = 300
+
+    #: [``DLT_DECT_NR``] DECT-2020 New Radio (NR) MAC layer specified in ETSI TS
+    #: 103 636-4. The Physical Header Field is always encoded using 80 bits (10
+    #: bytes). Broadcast transmissions using 40 bits (5 bytes) is padded with 40
+    #: zero bits (5 bytes). When padding is used the Receiver Identity value 0x0000
+    #: (reserved address) is used to detect broadcast transmissions.
+    DECT_NR = 301
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'LinkType':

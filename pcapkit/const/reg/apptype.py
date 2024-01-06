@@ -19186,6 +19186,12 @@ class AppType(StrEnum):
     #: - [UDP] Matter Operational Discovery and Communi
     matter: 'AppType' = 5540, 'matter', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
+    #: [TCP] QF-Test License Server
+    qftest_licserve: 'AppType' = 5543, 'qftest-licserve', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_5543: 'AppType' = 5543, 'reserved', TransportProtocol.get('udp')
+
     #: [TCP] Model Railway control using the CBUS message protocol
     cbus: 'AppType' = 5550, 'cbus', TransportProtocol.get('tcp')
 
@@ -22456,13 +22462,9 @@ class AppType(StrEnum):
     #: - [UDP] Gadu-Gadu
     gadugadu: 'AppType' = 8074, 'gadugadu', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: [TCP] Mles is a client-server data distribution protocol targeted to serve
-    #: as a lightweight and reliable distributed publish/subscribe database
-    #: service.
-    mles: 'AppType' = 8077, 'mles', TransportProtocol.get('tcp')
-
-    #: [UDP] Reserved
-    reserved_8077: 'AppType' = 8077, 'reserved', TransportProtocol.get('udp')
+    #: - [TCP] Reserved
+    #: - [UDP] Reserved
+    reserved_8077: 'AppType' = 8077, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] HTTP Alternate (see port 80)
     #: - [UDP] HTTP Alternate (see port 80)
@@ -28921,6 +28923,11 @@ class AppType(StrEnum):
     #: devices providing network interfaces.
     mist: 'AppType' = -1, 'mist', TransportProtocol.get('tcp')
 
+    #: [TCP] Mles is a client-server data distribution protocol targeted to serve
+    #: as a lightweight and reliable distributed publish/subscribe database
+    #: service.
+    mles: 'AppType' = -1, 'mles', TransportProtocol.get('tcp')
+
     #: [TCP] Provides a client with access to the Mathematical Mesh, a user-focused
     #: PKI.
     mmm: 'AppType' = -1, 'mmm', TransportProtocol.get('tcp')
@@ -30671,7 +30678,10 @@ class AppType(StrEnum):
         if 5508 <= value <= 5539:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 5541 <= value <= 5549:
+        if 5541 <= value <= 5542:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 5544 <= value <= 5549:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 5551 <= value <= 5552:
