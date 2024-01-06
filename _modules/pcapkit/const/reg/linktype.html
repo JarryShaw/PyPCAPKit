@@ -600,7 +600,7 @@
     <span class="c1">#: headers preceding the SCCP packet.</span>
     <span class="n">SCCP</span> <span class="o">=</span> <span class="mi">142</span>
 
-    <span class="c1">#: [``DLT_DOCSIS``] DOCSIS MAC frames, as described by the DOCSIS 3.1 MAC and</span>
+    <span class="c1">#: [``DLT_DOCSIS``] DOCSIS MAC frames, as described by the DOCSIS 4.0 MAC and</span>
     <span class="c1">#: Upper Layer Protocols Interface Specification or earlier specifications for</span>
     <span class="c1">#: MAC frames.</span>
     <span class="n">DOCSIS</span> <span class="o">=</span> <span class="mi">143</span>
@@ -745,7 +745,8 @@
     <span class="c1">#: [``DLT_JUNIPER_VP``] Juniper Networks private data link type.</span>
     <span class="n">JUNIPER_VP</span> <span class="o">=</span> <span class="mi">183</span>
 
-    <span class="c1">#: [``DLT_A429``] ARINC 429 frames. Every frame contains a 32-bit A429 label.</span>
+    <span class="c1">#: [``DLT_A429``] ARINC 429 frames. Every frame contains a 32-bit A429 word, in</span>
+    <span class="c1">#: little-endian format.</span>
     <span class="n">A429</span> <span class="o">=</span> <span class="mi">184</span>
 
     <span class="c1">#: [``DLT_A653_ICM``] ARINC 653 interpartition communication messages. Please</span>
@@ -975,8 +976,7 @@
     <span class="c1">#: [``DLT_JUNIPER_FIBRECHANNEL``] Juniper Networks private data link type.</span>
     <span class="n">JUNIPER_FIBRECHANNEL</span> <span class="o">=</span> <span class="mi">234</span>
 
-    <span class="c1">#: [``DLT_DVB_CI``] DVB-CI (DVB Common Interface for communication between a PC</span>
-    <span class="c1">#: Card module and a DVB receiver), with the message format specified by the</span>
+    <span class="c1">#: [``DLT_DVB_CI``] DVB-CI messages, with the message format specified by the</span>
     <span class="c1">#: PCAP format for DVB-CI specification.</span>
     <span class="n">DVB_CI</span> <span class="o">=</span> <span class="mi">235</span>
 
@@ -1303,7 +1303,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2017-2023, Jarry Shaw
+                Copyright &#169; 2017-2024, Jarry Shaw
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -1323,7 +1323,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=4aaf858c"></script>
+</div><script src="../../../../_static/documentation_options.js?v=3ccafa65"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
