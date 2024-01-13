@@ -3051,14 +3051,16 @@ class AppType(StrEnum):
     reserved_914: 'AppType' = 914, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Routing in Fat Trees Link Information Elements (TEMPORARY - registered
-    #: 2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
+    #: 2023-02-17, extension registered 2024-01-12, expires 2025-02-17) [draft-
+    #: ietf-rift-rift-16]
     rift_lies: 'AppType' = 914, 'rift-lies', TransportProtocol.get('udp')
 
     #: [TCP] Reserved
     reserved_915: 'AppType' = 915, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Routing in Fat Trees Topology Information Elements (TEMPORARY -
-    #: registered 2023-02-17, expires 2024-02-17) [draft-ietf-rift-rift-16]
+    #: registered 2023-02-17, extension registered 2024-01-12, expires 2025-02-17)
+    #: [draft-ietf-rift-rift-16]
     rift_ties: 'AppType' = 915, 'rift-ties', TransportProtocol.get('udp')
 
     #: [TCP] BIND9 remote name daemon controller
