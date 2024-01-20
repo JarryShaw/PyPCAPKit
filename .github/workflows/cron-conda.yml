@@ -35,7 +35,7 @@ jobs:
           python util/conda-dist.py
 
       - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v14
+        uses: tj-actions/verify-changed-files@v17
         id: verify-changed-files
 
       - name: Bump Version
