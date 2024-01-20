@@ -27818,6 +27818,9 @@ class AppType(StrEnum):
     #: [N/A] Bender Communication Protocol
     bender: 'AppType' = -1, 'bender', TransportProtocol.get('undefined')
 
+    #: [TCP] Beyond Identity Platform Authenticator S
+    beyondidentity: 'AppType' = -1, 'beyondidentity', TransportProtocol.get('tcp')
+
     #: [N/A] BuildForge Agent
     bfagent: 'AppType' = -1, 'bfagent', TransportProtocol.get('undefined')
 
