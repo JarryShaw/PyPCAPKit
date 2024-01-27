@@ -20636,7 +20636,7 @@ class AppType(StrEnum):
     #: [:rfc:`6773`]
     dccp_udp: 'AppType' = 6511, 'dccp-udp', TransportProtocol.get('udp')
 
-    #: [TCP] NETCONF over TLS [:rfc:`7589`]
+    #: [TCP] NETCONF over TLS [:rfc:`7589`][RFC-ietf-netconf-over-tls13-04]
     netconf_tls: 'AppType' = 6513, 'netconf-tls', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -28902,6 +28902,9 @@ class AppType(StrEnum):
 
     #: [UDP] Thread Mesh Commissioning
     meshcop: 'AppType' = -1, 'meshcop', TransportProtocol.get('udp')
+
+    #: [UDP] Thread Mesh Commissioning Ephemeral-key
+    meshcop_e: 'AppType' = -1, 'meshcop-e', TransportProtocol.get('udp')
 
     #: [N/A] Mental Ray for Maya
     mi_raysat: 'AppType' = -1, 'mi-raysat', TransportProtocol.get('undefined')
