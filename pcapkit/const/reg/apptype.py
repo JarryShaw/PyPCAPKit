@@ -27652,6 +27652,9 @@ class AppType(StrEnum):
     #: [UDP] ASCOM Alpaca Device Discovery
     alpacadiscovery: 'AppType' = -1, 'alpacadiscovery', TransportProtocol.get('udp')
 
+    #: [UDP] Device discovery for Amazon
+    amazon_expiscor: 'AppType' = -1, 'amazon-expiscor', TransportProtocol.get('udp')
+
     #: [UDP] Ambarella Cameras
     amba_cam: 'AppType' = -1, 'amba-cam', TransportProtocol.get('udp')
 
@@ -29343,6 +29346,9 @@ class AppType(StrEnum):
 
     #: [N/A] PTP Initiation Request Protocol
     ptp_req: 'AppType' = -1, 'ptp-req', TransportProtocol.get('undefined')
+
+    #: [TCP] Network service for Pulsar messaging and data sharing mobile app
+    pulsar: 'AppType' = -1, 'pulsar', TransportProtocol.get('tcp')
 
     #: [N/A] Protocol used for puzzle games
     puzzle: 'AppType' = -1, 'puzzle', TransportProtocol.get('undefined')
