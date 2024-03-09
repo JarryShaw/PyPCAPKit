@@ -26086,6 +26086,12 @@ class AppType(StrEnum):
     #: - [UDP] icl-twobase10
     icl_twobase10: 'AppType' = 25009, 'icl-twobase10', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
+    #: [TCP] IBM Db2 Client Interface - Encrypted
+    db2c_tls: 'AppType' = 25100, 'db2c-tls', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_25100: 'AppType' = 25100, 'reserved', TransportProtocol.get('udp')
+
     #: [SCTP] RNSAP User Adaptation for Iurh
     rna: 'AppType' = 25471, 'rna', TransportProtocol.get('sctp')
 
@@ -32237,7 +32243,10 @@ class AppType(StrEnum):
         if 24923 <= value <= 24999:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 25010 <= value <= 25470:
+        if 25010 <= value <= 25099:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 25101 <= value <= 25470:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 25472 <= value <= 25575:
