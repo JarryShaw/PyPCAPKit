@@ -307,7 +307,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     #: :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[arg-type,return-value]
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
             21: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP'),      # FTP
             80: ModuleDescriptor('pcapkit.protocols.application.httpv1', 'HTTP'),  # HTTP/1.*

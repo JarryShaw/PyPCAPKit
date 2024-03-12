@@ -83,7 +83,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.internet.internet.Internet._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.internet.Internet._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[return-value,arg-type]
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
             Enum_TransType.HOPOPT:          ModuleDescriptor('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
             Enum_TransType.IPv4:            ModuleDescriptor('pcapkit.protocols.internet.ipv4',       'IPv4'),

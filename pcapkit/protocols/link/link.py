@@ -72,7 +72,7 @@ class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[arg-type,return-value]
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
             Enum_EtherType.Address_Resolution_Protocol:         ModuleDescriptor('pcapkit.protocols.link.arp',      'ARP'),
             Enum_EtherType.Reverse_Address_Resolution_Protocol: ModuleDescriptor('pcapkit.protocols.link.rarp',     'RARP'),
