@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -38,7 +39,7 @@ class Flags(Data):
         __value__: 'FrameType.Flags'
 
 
-class HTTP(Data):
+class HTTP(Protocol):
     """Data model for HTTP/2 protocol."""
 
     #: Length.

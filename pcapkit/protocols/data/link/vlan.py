@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from pcapkit.const.reg.ethertype import EtherType
@@ -29,7 +30,7 @@ class TCI(Data):
 
 
 @info_final
-class VLAN(Data):
+class VLAN(Protocol):
     """Data model for 802.1Q customer VLAN tag type."""
 
     #: Tag control information.

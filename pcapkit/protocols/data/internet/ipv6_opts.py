@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -50,7 +51,7 @@ class Option(Data):
 
 
 @info_final
-class IPv6_Opts(Data):
+class IPv6_Opts(Protocol):
     """Data model for IPv6-Opts protocol."""
 
     #: Next header.

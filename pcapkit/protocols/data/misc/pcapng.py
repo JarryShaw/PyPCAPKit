@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.corekit.multidict import MultiDict
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 from pcapkit.utilities.compat import localcontext
 
 __all__ = [
@@ -59,7 +60,7 @@ if TYPE_CHECKING:
                                                WireGuardKeyLabel)
 
 
-class PCAPNG(Data):
+class PCAPNG(Protocol):
     """Data model for PCAP-NG file blocks."""
 
     #: Block type.
@@ -145,7 +146,8 @@ class SectionHeaderBlock(PCAPNG):
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', byteorder: 'Literal["big", "little"]', version: 'VersionInfo',  # pylint: disable=unused-argument
+        def __init__(self, type: 'Enum_BlockType', length: 'int', byteorder: 'Literal["big", "little"]',
+                     version: 'VersionInfo',  # pylint: disable=unused-argument
                      section_length: 'int', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> None: ...
 
 
@@ -255,7 +257,8 @@ class IF_FilterOption(Option):
     expression: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', code: 'Enum_FilterType', expression: 'bytes') -> None: ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', code: 'Enum_FilterType',
+                     expression: 'bytes') -> None: ...
 
 
 @info_final
@@ -384,7 +387,8 @@ class EPB_HashOption(Option):
     hash: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', algorithm: 'Enum_HashAlgorithm', hash: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', algorithm: 'Enum_HashAlgorithm',
+                     hash: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -430,7 +434,8 @@ class EPB_VerdictOption(Option):
     value: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', verdict: 'Enum_VerdictType', value: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', verdict: 'Enum_VerdictType',
+                     value: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -623,7 +628,8 @@ class NameResolutionBlock(PCAPNG):
         #: Name resolution mapping (name -> IP address).
         reverse_mapping: 'MultiDict[str, IPv4Address | IPv6Address]'
 
-        def __init__(self, type: 'Enum_BlockType', length: 'int', records: 'OrderedMultiDict[Enum_RecordType, NameResolutionRecord]',
+        def __init__(self, type: 'Enum_BlockType', length: 'int',
+                     records: 'OrderedMultiDict[Enum_RecordType, NameResolutionRecord]',
                      options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
 
 
@@ -736,7 +742,8 @@ class SystemdJournalExportBlock(PCAPNG):
     data: 'tuple[OrderedMultiDict[str, str | bytes], ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', data: 'tuple[OrderedMultiDict[str, str | bytes], ...]') -> 'None': ...
+        def __init__(self, type: 'Enum_BlockType', length: 'int',
+                     data: 'tuple[OrderedMultiDict[str, str | bytes], ...]') -> 'None': ...
 
 
 class DSBSecrets(Data):
@@ -880,7 +887,8 @@ class PACK_HashOption(Option):
     hash: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', algorithm: 'Enum_HashAlgorithm', hash: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', algorithm: 'Enum_HashAlgorithm',
+                     hash: 'bytes') -> 'None': ...
 
 
 @info_final

@@ -4,7 +4,7 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
-from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
@@ -13,7 +13,7 @@ __all__ = ['IPv6_Frag']
 
 
 @info_final
-class IPv6_Frag(Data):
+class IPv6_Frag(Protocol):
     """Data model for IPv6 fragment header."""
 
     #: Next header.

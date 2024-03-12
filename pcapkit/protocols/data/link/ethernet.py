@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from pcapkit.const.reg.ethertype import EtherType
@@ -13,7 +14,7 @@ __all__ = ['Ethernet']
 
 
 @info_final
-class Ethernet(Data):
+class Ethernet(Protocol):
     """Data model for ethernet packet."""
 
     #: Destination MAC address.

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -67,11 +68,12 @@ class Flags(Data):
     fin: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, cwr: 'bool', ece: 'bool', urg: 'bool', ack: 'bool', psh: 'bool', rst: 'bool', syn: 'bool', fin: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, cwr: 'bool', ece: 'bool', urg: 'bool', ack: 'bool',
+                     psh: 'bool', rst: 'bool', syn: 'bool', fin: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
-class TCP(Data):
+class TCP(Protocol):
     """Data model for TCP packet."""
 
     #: Source port.
@@ -99,7 +101,8 @@ class TCP(Data):
         #: Connection control flags.
         connection: 'TCP_Flags'
 
-        def __init__(self, srcport: 'AppType', dstport: 'AppType', seq: 'int', ack: 'int', hdr_len: 'int', flags: 'Flags', window_size: 'int', checksum: 'bytes', urgent_pointer: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, srcport: 'AppType', dstport: 'AppType', seq: 'int', ack: 'int', hdr_len: 'int',
+                     flags: 'Flags', window_size: 'int', checksum: 'bytes', urgent_pointer: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Option(Data):

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -31,7 +32,7 @@ class FrameInfo(Data):
 
 
 @info_final
-class Frame(Data):
+class Frame(Protocol):
     """Frame header of PCAP file."""
 
     #: Metadata information.
@@ -51,4 +52,5 @@ class Frame(Data):
         #: Protocol chain.
         protocols: 'str'
 
-        def __init__(self, frame_info: 'FrameInfo', time: 'datetime', number: 'int', time_epoch: 'Decimal', len: 'int', cap_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,line-too-long,redefined-builtin
+        def __init__(self, frame_info: 'FrameInfo', time: 'datetime', number: 'int', time_epoch: 'Decimal',
+                     len: 'int', cap_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,line-too-long,redefined-builtin

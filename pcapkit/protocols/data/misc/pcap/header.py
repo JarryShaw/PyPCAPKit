@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -31,7 +32,7 @@ class MagicNumber(Data):
 
 
 @info_final
-class Header(Data):
+class Header(Protocol):
     """Global header of PCAP file."""
 
     #: Magic number.

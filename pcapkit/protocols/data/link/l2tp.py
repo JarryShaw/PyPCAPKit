@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -34,7 +35,7 @@ class Flags(Data):
 
 
 @info_final
-class L2TP(Data):
+class L2TP(Protocol):
     """Data model for L2TP packet."""
 
     #: Flags and version info.
@@ -58,4 +59,5 @@ class L2TP(Data):
         #: Header length.
         hdr_len: 'int'
 
-        def __init__(self, flags: 'Flags', version: 'int', length: 'Optional[int]', tunnelid: 'int', sessionid: 'int', ns: 'Optional[int]', nr: 'Optional[int]', offset: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, flags: 'Flags', version: 'int', length: 'Optional[int]', tunnelid: 'int', sessionid: 'int',
+                     ns: 'Optional[int]', nr: 'Optional[int]', offset: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements,line-too-long

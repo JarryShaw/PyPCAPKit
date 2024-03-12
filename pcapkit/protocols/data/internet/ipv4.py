@@ -7,6 +7,7 @@ from pcapkit.const.ipv4.option_class import OptionClass
 from pcapkit.const.ipv4.tos_del import ToSDelay
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -88,7 +89,7 @@ class Flags(Data):
 
 
 @info_final
-class IPv4(Data):
+class IPv4(Protocol):
     """Data model for IPv4 packet."""
 
     #: Version.

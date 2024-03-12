@@ -4,7 +4,7 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
-from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from pcapkit.const.reg.apptype import AppType
@@ -13,7 +13,7 @@ __all__ = ['UDP']
 
 
 @info_final
-class UDP(Data):
+class UDP(Protocol):
     """Data model for UDP protocol."""
 
     #: Source port.

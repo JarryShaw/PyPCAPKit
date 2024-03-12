@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
@@ -84,7 +85,7 @@ __all__ = [
 ]
 
 
-class MH(Data):
+class MH(Protocol):
     """Data model for MH protocol."""
 
     #: Next header.

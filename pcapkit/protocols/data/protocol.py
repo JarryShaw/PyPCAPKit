@@ -11,6 +11,14 @@ __all__ = [
 ]
 
 
+class Protocol(Data):
+    """Root protocol."""
+
+    if TYPE_CHECKING:
+        #: Packet payload.
+        packet: 'bytes'
+
+
 @info_final
 class Packet(Data):
     """Header and payload data."""

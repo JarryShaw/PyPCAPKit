@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from typing import Any
@@ -23,7 +24,7 @@ __all__ = [
 
 
 @info_final
-class HTTP(Data):
+class HTTP(Protocol):
     """Data model for HTTP/1.* protocol."""
 
     #: HTTP receipt.

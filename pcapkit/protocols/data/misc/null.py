@@ -2,13 +2,13 @@
 """data models for no-payload packet"""
 
 from pcapkit.corekit.infoclass import info_final
-from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 __all__ = ['NoPayload']
 
 
 @info_final
-class NoPayload(Data):
+class NoPayload(Protocol):
     """No-payload packet is an empty packet."""
 
     # NOTE: We add this method for both type annotation and to mark that this

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -82,7 +83,7 @@ class Parameter(Data):
 
 
 @info_final
-class HIP(Data):
+class HIP(Protocol):
     """Data model for HIP header."""
 
     #: Next header.

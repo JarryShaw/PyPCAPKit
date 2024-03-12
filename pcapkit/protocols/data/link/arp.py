@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -43,7 +44,7 @@ class Type(Data):
 
 
 @info_final
-class ARP(Data):
+class ARP(Protocol):
     """Data model for ARP packet."""
 
     #: Hardware type.

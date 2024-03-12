@@ -4,7 +4,7 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
-from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
@@ -21,7 +21,7 @@ __all__ = [
 
 
 @info_final
-class IPv6(Data):
+class IPv6(Protocol):
     """Data model for Internet Protocol version 6.
 
     Important:
