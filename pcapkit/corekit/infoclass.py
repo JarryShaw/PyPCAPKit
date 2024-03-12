@@ -325,6 +325,8 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
 
     def __iter__(self) -> 'Iterator[str]':
         for key in self.__dict__:
+            if key in self.__excluded__:
+               continue
             yield self.__map_reverse__.get(key, key)
 
     def __getitem__(self, name: 'str') -> 'VT':
