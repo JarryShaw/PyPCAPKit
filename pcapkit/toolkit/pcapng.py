@@ -22,7 +22,6 @@ from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
 
-    from pcapkit.const.reg.linktype import LinkType
     from pcapkit.protocols.internet.ipv4 import IPv4
     from pcapkit.protocols.internet.ipv6 import IPv6
     from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
@@ -248,4 +247,5 @@ def block2frame(block: 'Packet', *, nanosecond: 'bool' = False) -> 'Data_Frame':
         len=block.original_len,
         cap_len=block.captured_len,
     )
+    frame.__update__(packet=block.packet)
     return frame

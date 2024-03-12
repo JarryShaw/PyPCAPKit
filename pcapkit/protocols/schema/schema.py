@@ -65,7 +65,7 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
             '__payload__', '__finalised__']
     temp.extend(cls.__additional__)
     for obj in cls.mro():
-        temp.extend(dir(obj))
+        temp.extend(el for el in dir(obj) if el not in cls.__fields__)
     cls.__builtin__ = set(temp)
     cls.__excluded__.extend(cls.__builtin__)
 

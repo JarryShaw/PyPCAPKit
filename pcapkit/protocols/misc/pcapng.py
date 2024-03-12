@@ -524,7 +524,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     #: The values should be a tuple representing the module name and class name,
     #: or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
     __proto__ = collections.defaultdict(
-        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[arg-type,return-value]
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
             Enum_LinkType.ETHERNET: ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
             Enum_LinkType.IPV4:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
@@ -862,7 +862,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 self._byte = self._ctx.section.byteorder
                 packet['byteorder'] = self._byte
             self.__header__ = cast('Schema_PCAPNG', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
-        return self.read(length, **kwargs)
+
+        data = self.read(length, **kwargs)
+        data.__update__(packet=self.packet.payload)
+        return data
 
     def read(self, length: 'Optional[int]' = None, *, _read: 'bool' = True,
              _seek_set: 'int' = 0, **kwargs: 'Any') -> 'Data_PCAPNG':

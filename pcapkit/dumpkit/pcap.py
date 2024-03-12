@@ -13,6 +13,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.dumpkit.common import DumperBase as Dumper
+from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
 
@@ -24,6 +25,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+    from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 
 __all__ = [
     'PCAPIO',
@@ -41,6 +43,9 @@ class PCAPIO(Dumper):
         **kwargs: arbitrary keyword arguments
 
     """
+    if TYPE_CHECKING:
+        #: PCAP file global header.
+        _ghdr: 'Data_Header'
 
     ##########################################################################
     # Properties.
@@ -77,7 +82,7 @@ class PCAPIO(Dumper):
 
         super().__init__(fname, protocol=protocol, byteorder=byteorder, nanosecond=nanosecond, **kwargs)
 
-    def __call__(self, value: 'Frame', name: 'Optional[str]' = None) -> 'PCAPIO':
+    def __call__(self, value: 'Data_Frame', name: 'Optional[str]' = None) -> 'PCAPIO':
         """Dump a new frame.
 
         Args:
@@ -108,15 +113,17 @@ class PCAPIO(Dumper):
             **kwargs: arbitrary keyword arguments
 
         """
-        packet = Header(
+        header = Header(
             network=protocol,
             byteorder=byteorder,
             nanosecond=nanosecond,
-        ).data
+        )
+        packet = header.data
         with open(self._file, 'wb') as file:
             file.write(packet)
+        self._ghdr = header.info
 
-    def _append_value(self, value: 'Frame', file: 'IO[bytes]', name: 'str') -> 'None':  # pylint: disable=unused-argument
+    def _append_value(self, value: 'Data_Frame', file: 'IO[bytes]', name: 'str') -> 'None':  # pylint: disable=unused-argument
         """Call this function to write contents.
 
         Args:
@@ -130,7 +137,8 @@ class PCAPIO(Dumper):
             num=self._fnum,
             proto=self._link,
             packet=value.packet,
-            **value.info.frame_info,
+            header=self._ghdr,
+            **value.frame_info,
         ).data
         file.write(packet)
         self._fnum += 1

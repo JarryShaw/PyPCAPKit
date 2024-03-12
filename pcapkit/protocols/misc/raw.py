@@ -79,7 +79,6 @@ class Raw(Protocol[Data_Raw, Schema_Raw],
         """
         raw = Data_Raw(
             protocol=alias,
-            packet=self._data,
             error=error,
         )
 
