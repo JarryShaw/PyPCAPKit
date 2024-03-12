@@ -371,6 +371,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">DumperBase</span> <span class="k">as</span> <span class="n">Dumper</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">Data_Header</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span>
 
@@ -382,6 +383,7 @@
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;PCAPIO&#39;</span><span class="p">,</span>
@@ -401,6 +403,9 @@
 <span class="sd">        **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: PCAP file global header.</span>
+        <span class="n">_ghdr</span><span class="p">:</span> <span class="s1">&#39;Data_Header&#39;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -437,7 +442,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PCAPIO&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Data_Frame&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PCAPIO&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump a new frame.</span>
 
 <span class="sd">        Args:</span>
@@ -468,15 +473,17 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">packet</span> <span class="o">=</span> <span class="n">Header</span><span class="p">(</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">Header</span><span class="p">(</span>
             <span class="n">network</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span>
             <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">data</span>
+        <span class="p">)</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">data</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">info</span>
 
-    <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Data_Frame&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Call this function to write contents.</span>
 
 <span class="sd">        Args:</span>
@@ -490,7 +497,8 @@
             <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="p">,</span>
             <span class="n">proto</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">,</span>
             <span class="n">packet</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">packet</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">value</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span>
+            <span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">value</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">data</span>
         <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span></div>

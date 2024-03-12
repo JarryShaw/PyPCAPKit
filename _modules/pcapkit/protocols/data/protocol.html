@@ -369,6 +369,14 @@
 <span class="p">]</span>
 
 
+<span class="k">class</span> <span class="nc">Protocol</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Root protocol.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Packet payload.</span>
+        <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+
+
 <div class="viewcode-block" id="Packet">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/protocol.html#pcapkit.protocols.data.protocol.Packet">[docs]</a>
 <span class="nd">@info_final</span>

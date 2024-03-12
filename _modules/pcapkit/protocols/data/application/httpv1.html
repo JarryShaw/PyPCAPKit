@@ -363,6 +363,7 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">info_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
@@ -383,7 +384,7 @@
 <div class="viewcode-block" id="HTTP">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.HTTP">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">HTTP</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">HTTP</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/1.* protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">#: HTTP receipt.</span>

@@ -896,7 +896,7 @@
     <span class="c1">#: The values should be a tuple representing the module name and class name,</span>
     <span class="c1">#: or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type,return-value]</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
         <span class="p">{</span>
             <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link&#39;</span><span class="p">,</span> <span class="s1">&#39;Ethernet&#39;</span><span class="p">),</span>
             <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
@@ -1257,7 +1257,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">byteorder</span>
                 <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;byteorder&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Schema_PCAPNG&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG.read">

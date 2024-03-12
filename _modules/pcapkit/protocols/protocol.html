@@ -479,7 +479,7 @@
     <span class="c1">#: The values should be a tuple representing the module name and class name,</span>
     <span class="c1">#: or a :class:`Protocol` subclass.</span>
     <span class="n">__proto__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]&#39;</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>  <span class="c1"># type: ignore[return-value,arg-type]</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
@@ -882,6 +882,9 @@
 
         <span class="c1"># post-init customisations</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+
+        <span class="c1"># inject packet payload to the info dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
 
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes] | bytes&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>

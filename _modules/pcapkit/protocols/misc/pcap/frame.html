@@ -448,7 +448,7 @@
     <span class="c1">#: The values should be a tuple representing the module name and class name, or</span>
     <span class="c1">#: a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>  <span class="c1"># type: ignore[return-value,arg-type]</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
         <span class="p">{</span>
             <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link&#39;</span><span class="p">,</span> <span class="s1">&#39;Ethernet&#39;</span><span class="p">),</span>
             <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>

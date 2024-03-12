@@ -366,6 +366,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">info_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">MultiDict</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">localcontext</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -419,7 +420,7 @@
 
 <div class="viewcode-block" id="PCAPNG">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PCAPNG">[docs]</a>
-<span class="k">class</span> <span class="nc">PCAPNG</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PCAPNG</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for PCAP-NG file blocks.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Block type.</span>
@@ -526,7 +527,8 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;VersionInfo&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span><span class="p">,</span>
+                     <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;VersionInfo&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                      <span class="n">section_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -666,7 +668,8 @@
     <span class="n">expression</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_FilterType&#39;</span><span class="p">,</span> <span class="n">expression</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_FilterType&#39;</span><span class="p">,</span>
+                     <span class="n">expression</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -822,7 +825,8 @@
     <span class="nb">hash</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_HashAlgorithm&#39;</span><span class="p">,</span> <span class="nb">hash</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_HashAlgorithm&#39;</span><span class="p">,</span>
+                     <span class="nb">hash</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -880,7 +884,8 @@
     <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">verdict</span><span class="p">:</span> <span class="s1">&#39;Enum_VerdictType&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">verdict</span><span class="p">:</span> <span class="s1">&#39;Enum_VerdictType&#39;</span><span class="p">,</span>
+                     <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1112,7 +1117,8 @@
         <span class="c1">#: Name resolution mapping (name -&gt; IP address).</span>
         <span class="n">reverse_mapping</span><span class="p">:</span> <span class="s1">&#39;MultiDict[str, IPv4Address | IPv6Address]&#39;</span>
 
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_RecordType, NameResolutionRecord]&#39;</span><span class="p">,</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
+                     <span class="n">records</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_RecordType, NameResolutionRecord]&#39;</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_OptionType, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1252,7 +1258,8 @@
     <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;tuple[OrderedMultiDict[str, str | bytes], ...]&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;tuple[OrderedMultiDict[str, str | bytes], ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
+                     <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;tuple[OrderedMultiDict[str, str | bytes], ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1426,7 +1433,8 @@
     <span class="nb">hash</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_HashAlgorithm&#39;</span><span class="p">,</span> <span class="nb">hash</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_HashAlgorithm&#39;</span><span class="p">,</span>
+                     <span class="nb">hash</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

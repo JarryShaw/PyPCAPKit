@@ -363,6 +363,7 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">info_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
@@ -394,7 +395,7 @@
 <div class="viewcode-block" id="OSPF">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for OSPF packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Version number.</span>
@@ -416,7 +417,8 @@
         <span class="c1">#: Authentication.</span>
         <span class="n">auth</span><span class="p">:</span> <span class="s1">&#39;bytes | CrytographicAuthentication&#39;</span>
 
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">router_id</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="n">area_id</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">autype</span><span class="p">:</span> <span class="s1">&#39;Authentication&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">router_id</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span>
+                     <span class="n">area_id</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">autype</span><span class="p">:</span> <span class="s1">&#39;Authentication&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin</span></div>
 
 </pre></div>
         </article>
