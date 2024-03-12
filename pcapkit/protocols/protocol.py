@@ -116,7 +116,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: The values should be a tuple representing the module name and class name,
     #: or a :class:`Protocol` subclass.
     __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = collections.defaultdict(
-        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[return-value,arg-type]
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )
 
     ##########################################################################
@@ -519,6 +519,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         # post-init customisations
         self.__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
+
+        # inject packet payload to the info dict
+        self._info.__update__(packet=self.packet.payload)
 
     @overload
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...

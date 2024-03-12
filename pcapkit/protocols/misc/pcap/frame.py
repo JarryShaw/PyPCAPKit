@@ -88,7 +88,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
     #: The values should be a tuple representing the module name and class name, or
     #: a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
     __proto__ = collections.defaultdict(
-        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),  # type: ignore[return-value,arg-type]
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
             Enum_LinkType.ETHERNET: ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
             Enum_LinkType.IPV4:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
