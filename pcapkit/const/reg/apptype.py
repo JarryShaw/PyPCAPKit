@@ -11979,9 +11979,9 @@ class AppType(StrEnum):
     #: - [UDP] Indura Collector
     indura: 'AppType' = 3156, 'indura', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] CCC Listener Port
-    #: - [UDP] CCC Listener Port
-    e3consultants: 'AppType' = 3157, 'e3consultants', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] LSA Communicator
+    #: - [UDP] LSA Communicator
+    lsa_comm: 'AppType' = 3157, 'lsa-comm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] SmashTV Protocol
     #: - [UDP] SmashTV Protocol
