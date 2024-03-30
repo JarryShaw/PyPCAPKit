@@ -225,7 +225,7 @@ class RouterAlert(IntEnum):
     #: NSIS NATFW NSLP [:rfc:`5973`]
     NSIS_NATFW_NSLP = 68
 
-    #: MPLS OAM [:rfc:`7506`]
+    #: MPLS OAM (DEPRECATED) [:rfc:`7506`][RFC-ietf-mpls-lspping-norao-08]
     MPLS_OAM = 69
 
     #: Reserved [The Internet Assigned Numbers Authority]
