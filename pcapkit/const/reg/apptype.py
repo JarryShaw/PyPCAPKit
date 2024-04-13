@@ -28144,6 +28144,12 @@ class AppType(StrEnum):
     #: [TCP] DNS Dynamic Update Service over TLS [:rfc:`6281`]
     dns_update_tls: 'AppType' = -1, 'dns-update-tls', TransportProtocol.get('tcp')
 
+    #: [TCP] DNS-SD Service Registration [RFC-ietf-dnssd-srp-25]
+    dnssd_srp: 'AppType' = -1, 'dnssd-srp', TransportProtocol.get('tcp')
+
+    #: [TCP] DNS-SD Service Registration (TLS) [RFC-ietf-dnssd-srp-25]
+    dnssd_srp_tls: 'AppType' = -1, 'dnssd-srp-tls', TransportProtocol.get('tcp')
+
     #: [N/A] Roar (Death of Productivity)
     dop: 'AppType' = -1, 'dop', TransportProtocol.get('undefined')
 
