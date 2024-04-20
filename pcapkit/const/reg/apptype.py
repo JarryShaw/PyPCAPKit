@@ -27563,6 +27563,9 @@ class AppType(StrEnum):
     #: - [UDP] Access Control Gateway
     acs_ctl_gw: 'AppType' = -1, 'acs-ctl-gw', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
+    #: [TCP] AXIS Camera Station Pro Server
+    acsp_server: 'AppType' = -1, 'acsp-server', TransportProtocol.get('tcp')
+
     #: [N/A] ActionItems
     actionitems: 'AppType' = -1, 'actionitems', TransportProtocol.get('undefined')
 
