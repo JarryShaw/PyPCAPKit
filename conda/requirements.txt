@@ -6,7 +6,7 @@ chardet == 5.2.0
 charset-normalizer == 3.3.2
 dictdumper == 0.8.4.post2
 dpkt == 1.9.8
-emoji == 2.11.0
+emoji == 2.11.1
 html5lib == 1.1
 idna == 3.7
 lxml == 5.2.1
