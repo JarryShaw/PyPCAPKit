@@ -233,8 +233,8 @@ class Command(StrEnum):
     #: Rename From [:rfc:`959`]
     RNFR: 'Command' = 'RNFR', FEATCode.base, 'Rename From', CommandType.S | CommandType.P, ConformanceRequirement.M
 
-    #: Rename From [:rfc:`959`]
-    RNTO: 'Command' = 'RNTO', FEATCode.base, 'Rename From', CommandType.S, ConformanceRequirement.M
+    #: Rename To [:rfc:`959`][RFC Errata 5748]
+    RNTO: 'Command' = 'RNTO', FEATCode.base, 'Rename To', CommandType.S, ConformanceRequirement.M
 
     #: Site Parameters [:rfc:`959`][:rfc:`1123`]
     SITE: 'Command' = 'SITE', FEATCode.base, 'Site Parameters', CommandType.S, ConformanceRequirement.M

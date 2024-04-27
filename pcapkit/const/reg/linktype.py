@@ -49,7 +49,7 @@ class LinkType(IntEnum):
     #: 1201; for RFC 1051 frames, ATA 878.2 is not used.
     ARCNET_BSD = 7
 
-    #: [``DLT_SLIP``] SLIP, encapsulated with a LINKTYPE\_SLIP header.
+    #: [``DLT_SLIP``] SLIP, with a header giving packet direction
     SLIP = 8
 
     #: [``DLT_PPP``] PPP, as per RFC 1661 and RFC 1662; if the first 2 bytes are
@@ -232,9 +232,7 @@ class LinkType(IntEnum):
     #: MAC frames.
     DOCSIS = 143
 
-    #: [``DLT_LINUX_IRDA``] Linux-IrDA packets, with a LINKTYPE\_LINUX\_IRDA
-    #: header, with the payload for IrDA frames beginning with by the IrLAP header
-    #: as defined by the IrDA Link Access Protocol specification.
+    #: [``DLT_LINUX_IRDA``] Linux-IrDA packets
     LINUX_IRDA = 144
 
     #: [``DLT_IBM_SP``] IBM SP switch.
@@ -342,10 +340,7 @@ class LinkType(IntEnum):
     #: [``DLT_ERF_POS``] An ERF header followed by Packet-over-SONET.
     ERF_POS = 176
 
-    #: [``DLT_LINUX_LAPD``] Link Access Procedures on the D Channel (LAPD) frames,
-    #: as specified by ITU-T Recommendation Q.920 and ITU-T Recommendation Q.921,
-    #: captured via vISDN, with a LINKTYPE\_LINUX\_LAPD header, followed by the
-    #: Q.921 frame, starting with the address field.
+    #: [``DLT_LINUX_LAPD``] Linux vISDN LAPD frame
     LINUX_LAPD = 177
 
     #: [``DLT_JUNIPER_ETHER``] Juniper Networks private data link type. Ethernet
@@ -492,12 +487,11 @@ class LinkType(IntEnum):
     #: meaning "sent by this host" (DTE->DCE).
     LAPB_WITH_DIR = 207
 
-    #: [``DLT_IPMB_LINUX``] IPMB over an I2C circuit, with a Linux-specific pseudo-
-    #: header.
-    IPMB_LINUX = 209
+    #: [``DLT_I2C_LINUX``] Linux I2C packets.
+    I2C_LINUX = 209
 
     #: [``DLT_FLEXRAY``] FlexRay automotive bus frames or symbols, preceded by a
-    #: pseudo-header.
+    #: pseudo-header
     FLEXRAY = 210
 
     #: [``DLT_MOST``] Media Oriented Systems Transport (MOST) bus for multimedia
@@ -505,7 +499,7 @@ class LinkType(IntEnum):
     MOST = 211
 
     #: [``DLT_LIN``] Local Interconnect Network (LIN) automotive bus, preceded by a
-    #: pseudo-header.
+    #: pseudo-header
     LIN = 212
 
     #: [``DLT_X2E_SERIAL``] X2E-private data link type used for serial line
@@ -570,8 +564,7 @@ class LinkType(IntEnum):
     #: 0xBC 0xB5 0x55 0x55.
     FC_2_WITH_FRAME_DELIMS = 225
 
-    #: [``DLT_IPNET``] Solaris ipnet pseudo-header, followed by an IPv4 or IPv6
-    #: datagram.
+    #: [``DLT_IPNET``] Solaris ipnet
     IPNET = 226
 
     #: [``DLT_CAN_SOCKETCAN``] CAN (Controller Area Network) frames, with a pseudo-
