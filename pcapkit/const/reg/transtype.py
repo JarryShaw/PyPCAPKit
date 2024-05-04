@@ -376,7 +376,7 @@ class TransType(IntEnum):
     #: IPX in IP [CJ Lee]
     IPX_in_IP = 111
 
-    #: Virtual Router Redundancy Protocol [RFC-ietf-rtgwg-vrrp-rfc5798bis-18]
+    #: Virtual Router Redundancy Protocol [:rfc:`9568`]
     VRRP = 112
 
     #: PGM Reliable Transport Protocol [Tony Speakman]

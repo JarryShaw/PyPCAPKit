@@ -475,17 +475,20 @@ class LinkType(IntEnum):
     C_HDLC_WITH_DIR = 205
 
     #: [``DLT_FRELAY_WITH_DIR``] Frame Relay LAPF frames, beginning with a one-byte
-    #: pseudo-header with a zero value meaning "received by this host" (DCE->DTE)
-    #: and a non-zero value meaning "sent by this host" (DTE->DCE), followed by an
+    #: pseudo-header with a zero value meaning "received by this host" (DCE⇒DTE)
+    #: and a non-zero value meaning "sent by this host" (DTE⇒DCE), followed by an
     #: ITU-T Recommendation Q.922 LAPF header starting with the address field, and
     #: without an FCS at the end of the frame.
     FRELAY_WITH_DIR = 206
 
     #: [``DLT_LAPB_WITH_DIR``] Link Access Procedure, Balanced (LAPB), as specified
     #: by ITU-T Recommendation X.25, preceded with a one-byte pseudo-header with a
-    #: zero value meaning "received by this host" (DCE->DTE) and a non-zero value
-    #: meaning "sent by this host" (DTE->DCE).
+    #: zero value meaning "received by this host" (DCE⇒DTE) and a non-zero value
+    #: meaning "sent by this host" (DTE⇒DCE).
     LAPB_WITH_DIR = 207
+
+    #: [``DLT_IPMB_LINUX``] Legacy names (do not use) for Linux I2C below.
+    IPMB_LINUX = 209
 
     #: [``DLT_I2C_LINUX``] Linux I2C packets.
     I2C_LINUX = 209

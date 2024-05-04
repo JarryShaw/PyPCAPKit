@@ -24530,7 +24530,8 @@ class AppType(StrEnum):
     #: - [UDP] LUCIA Pareja Data Group
     lpdg: 'AppType' = 10805, 'lpdg', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: [TCP] Linux Network Block Device
+    #: [TCP] Network Block Device
+    #: [https://github.com/NetworkBlockDevice/nbd/blob/master/doc/proto.md]
     nbd: 'AppType' = 10809, 'nbd', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
