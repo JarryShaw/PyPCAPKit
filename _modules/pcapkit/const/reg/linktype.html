@@ -409,7 +409,7 @@
     <span class="c1">#: 1201; for RFC 1051 frames, ATA 878.2 is not used.</span>
     <span class="n">ARCNET_BSD</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: [``DLT_SLIP``] SLIP, encapsulated with a LINKTYPE\_SLIP header.</span>
+    <span class="c1">#: [``DLT_SLIP``] SLIP, with a header giving packet direction</span>
     <span class="n">SLIP</span> <span class="o">=</span> <span class="mi">8</span>
 
     <span class="c1">#: [``DLT_PPP``] PPP, as per RFC 1661 and RFC 1662; if the first 2 bytes are</span>
@@ -592,9 +592,7 @@
     <span class="c1">#: MAC frames.</span>
     <span class="n">DOCSIS</span> <span class="o">=</span> <span class="mi">143</span>
 
-    <span class="c1">#: [``DLT_LINUX_IRDA``] Linux-IrDA packets, with a LINKTYPE\_LINUX\_IRDA</span>
-    <span class="c1">#: header, with the payload for IrDA frames beginning with by the IrLAP header</span>
-    <span class="c1">#: as defined by the IrDA Link Access Protocol specification.</span>
+    <span class="c1">#: [``DLT_LINUX_IRDA``] Linux-IrDA packets</span>
     <span class="n">LINUX_IRDA</span> <span class="o">=</span> <span class="mi">144</span>
 
     <span class="c1">#: [``DLT_IBM_SP``] IBM SP switch.</span>
@@ -702,10 +700,7 @@
     <span class="c1">#: [``DLT_ERF_POS``] An ERF header followed by Packet-over-SONET.</span>
     <span class="n">ERF_POS</span> <span class="o">=</span> <span class="mi">176</span>
 
-    <span class="c1">#: [``DLT_LINUX_LAPD``] Link Access Procedures on the D Channel (LAPD) frames,</span>
-    <span class="c1">#: as specified by ITU-T Recommendation Q.920 and ITU-T Recommendation Q.921,</span>
-    <span class="c1">#: captured via vISDN, with a LINKTYPE\_LINUX\_LAPD header, followed by the</span>
-    <span class="c1">#: Q.921 frame, starting with the address field.</span>
+    <span class="c1">#: [``DLT_LINUX_LAPD``] Linux vISDN LAPD frame</span>
     <span class="n">LINUX_LAPD</span> <span class="o">=</span> <span class="mi">177</span>
 
     <span class="c1">#: [``DLT_JUNIPER_ETHER``] Juniper Networks private data link type. Ethernet</span>
@@ -852,12 +847,11 @@
     <span class="c1">#: meaning &quot;sent by this host&quot; (DTE-&gt;DCE).</span>
     <span class="n">LAPB_WITH_DIR</span> <span class="o">=</span> <span class="mi">207</span>
 
-    <span class="c1">#: [``DLT_IPMB_LINUX``] IPMB over an I2C circuit, with a Linux-specific pseudo-</span>
-    <span class="c1">#: header.</span>
-    <span class="n">IPMB_LINUX</span> <span class="o">=</span> <span class="mi">209</span>
+    <span class="c1">#: [``DLT_I2C_LINUX``] Linux I2C packets.</span>
+    <span class="n">I2C_LINUX</span> <span class="o">=</span> <span class="mi">209</span>
 
     <span class="c1">#: [``DLT_FLEXRAY``] FlexRay automotive bus frames or symbols, preceded by a</span>
-    <span class="c1">#: pseudo-header.</span>
+    <span class="c1">#: pseudo-header</span>
     <span class="n">FLEXRAY</span> <span class="o">=</span> <span class="mi">210</span>
 
     <span class="c1">#: [``DLT_MOST``] Media Oriented Systems Transport (MOST) bus for multimedia</span>
@@ -865,7 +859,7 @@
     <span class="n">MOST</span> <span class="o">=</span> <span class="mi">211</span>
 
     <span class="c1">#: [``DLT_LIN``] Local Interconnect Network (LIN) automotive bus, preceded by a</span>
-    <span class="c1">#: pseudo-header.</span>
+    <span class="c1">#: pseudo-header</span>
     <span class="n">LIN</span> <span class="o">=</span> <span class="mi">212</span>
 
     <span class="c1">#: [``DLT_X2E_SERIAL``] X2E-private data link type used for serial line</span>
@@ -930,8 +924,7 @@
     <span class="c1">#: 0xBC 0xB5 0x55 0x55.</span>
     <span class="n">FC_2_WITH_FRAME_DELIMS</span> <span class="o">=</span> <span class="mi">225</span>
 
-    <span class="c1">#: [``DLT_IPNET``] Solaris ipnet pseudo-header, followed by an IPv4 or IPv6</span>
-    <span class="c1">#: datagram.</span>
+    <span class="c1">#: [``DLT_IPNET``] Solaris ipnet</span>
     <span class="n">IPNET</span> <span class="o">=</span> <span class="mi">226</span>
 
     <span class="c1">#: [``DLT_CAN_SOCKETCAN``] CAN (Controller Area Network) frames, with a pseudo-</span>
@@ -1317,7 +1310,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=545799fc"></script>
+</div><script src="../../../../_static/documentation_options.js?v=74e60317"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
