@@ -835,17 +835,20 @@
     <span class="n">C_HDLC_WITH_DIR</span> <span class="o">=</span> <span class="mi">205</span>
 
     <span class="c1">#: [``DLT_FRELAY_WITH_DIR``] Frame Relay LAPF frames, beginning with a one-byte</span>
-    <span class="c1">#: pseudo-header with a zero value meaning &quot;received by this host&quot; (DCE-&gt;DTE)</span>
-    <span class="c1">#: and a non-zero value meaning &quot;sent by this host&quot; (DTE-&gt;DCE), followed by an</span>
+    <span class="c1">#: pseudo-header with a zero value meaning &quot;received by this host&quot; (DCE⇒DTE)</span>
+    <span class="c1">#: and a non-zero value meaning &quot;sent by this host&quot; (DTE⇒DCE), followed by an</span>
     <span class="c1">#: ITU-T Recommendation Q.922 LAPF header starting with the address field, and</span>
     <span class="c1">#: without an FCS at the end of the frame.</span>
     <span class="n">FRELAY_WITH_DIR</span> <span class="o">=</span> <span class="mi">206</span>
 
     <span class="c1">#: [``DLT_LAPB_WITH_DIR``] Link Access Procedure, Balanced (LAPB), as specified</span>
     <span class="c1">#: by ITU-T Recommendation X.25, preceded with a one-byte pseudo-header with a</span>
-    <span class="c1">#: zero value meaning &quot;received by this host&quot; (DCE-&gt;DTE) and a non-zero value</span>
-    <span class="c1">#: meaning &quot;sent by this host&quot; (DTE-&gt;DCE).</span>
+    <span class="c1">#: zero value meaning &quot;received by this host&quot; (DCE⇒DTE) and a non-zero value</span>
+    <span class="c1">#: meaning &quot;sent by this host&quot; (DTE⇒DCE).</span>
     <span class="n">LAPB_WITH_DIR</span> <span class="o">=</span> <span class="mi">207</span>
+
+    <span class="c1">#: [``DLT_IPMB_LINUX``] Legacy names (do not use) for Linux I2C below.</span>
+    <span class="n">IPMB_LINUX</span> <span class="o">=</span> <span class="mi">209</span>
 
     <span class="c1">#: [``DLT_I2C_LINUX``] Linux I2C packets.</span>
     <span class="n">I2C_LINUX</span> <span class="o">=</span> <span class="mi">209</span>
@@ -1310,7 +1313,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=74e60317"></script>
+</div><script src="../../../../_static/documentation_options.js?v=dda67771"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
