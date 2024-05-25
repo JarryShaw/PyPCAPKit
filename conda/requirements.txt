@@ -6,7 +6,7 @@ chardet == 5.2.0
 charset-normalizer == 3.3.2
 dictdumper == 0.8.4.post2
 dpkt == 1.9.8
-emoji == 2.11.1
+emoji == 2.12.1
 html5lib == 1.1
 idna == 3.7
 lxml == 5.2.2
@@ -14,12 +14,12 @@ packaging == 24.0
 pathlib2 ; python_version < "3.5"
 pyshark == 0.6
 pysocks == 1.7.1
-requests == 2.31.0
+requests == 2.32.2
 scapy == 2.5.0
 six == 1.16.0
 soupsieve == 2.5
 tbtrim == 0.3.1
 termcolor == 2.4.0
-typing-extensions ; python_version < "3.11"
+typing-extensions == 4.12.0 ; python_version < "3.11"
 urllib3 == 2.2.1
 webencodings == 0.5.1
