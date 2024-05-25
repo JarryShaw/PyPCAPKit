@@ -40,6 +40,9 @@ class Packet(IntEnum):
     #: ``NCP``, NetWare Core Protocol
     NCP = 17
 
+    #: Broadcast[4]
+    Broadcast_4 = 20
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'Packet':
         """Backport support for original codes.

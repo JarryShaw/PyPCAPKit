@@ -48,8 +48,8 @@ class Socket(IntEnum):
     #: Used by Novell NetWare Client
     Used_by_Novell_NetWare_Client = 0x4003
 
-    #: IPX
-    IPX = 0x8060
+    #: LLC [4]
+    LLC_4 = 0x8060
 
     #: TCP over IPXF
     TCP_over_IPXF = 0x9091
