@@ -136,8 +136,8 @@ class LinkType(IntEnum):
     #: [``DLT_CISCO_IOS``] Cisco internal use.
     CISCO_IOS = 118
 
-    #: [``DLT_PRISM_HEADER``] Prism monitor mode information followed by an 802.11
-    #: header.
+    #: [``DLT_PRISM_HEADER``] Prism monitor mode information, followed by an 802.11
+    #: frame.
     IEEE802_11_PRISM = 119
 
     #: [``DLT_AIRONET_HEADER``] Reserved for Aironet 802.11 cards, with an Aironet
@@ -148,8 +148,7 @@ class LinkType(IntEnum):
     #: header being the Network\_Header as described in that RFC.
     IP_OVER_FC = 122
 
-    #: [``DLT_SUNATM``] ATM traffic, encapsulated as per the scheme used by SunATM
-    #: devices.
+    #: [``DLT_SUNATM``] ATM traffic captured from a SunATM device.
     SUNATM = 123
 
     #: [``DLT_RIO``] RapidIO.
@@ -340,7 +339,7 @@ class LinkType(IntEnum):
     #: [``DLT_ERF_POS``] An ERF header followed by Packet-over-SONET.
     ERF_POS = 176
 
-    #: [``DLT_LINUX_LAPD``] Linux vISDN LAPD frame
+    #: [``DLT_LINUX_LAPD``] Linux vISDN LAPD frames
     LINUX_LAPD = 177
 
     #: [``DLT_JUNIPER_ETHER``] Juniper Networks private data link type. Ethernet
@@ -618,14 +617,12 @@ class LinkType(IntEnum):
     #: [``DLT_NFLOG``] Linux netlink NETLINK NFLOG socket log messages.
     NFLOG = 239
 
-    #: [``DLT_NETANALYZER``] Pseudo-header for Hilscher Gesellschaft für
-    #: Systemautomation mbH netANALYZER devices, followed by an Ethernet frame,
-    #: beginning with the MAC header and ending with the FCS.
+    #: [``DLT_NETANALYZER``] Ethernet frames, preceded by a Hilscher netANALYZER
+    #: pseudo-header.
     NETANALYZER = 240
 
-    #: [``DLT_NETANALYZER_TRANSPARENT``] Pseudo-header for Hilscher Gesellschaft
-    #: für Systemautomation mbH netANALYZER devices, followed by an Ethernet frame,
-    #: beginning with the preamble, SFD, and MAC header, and ending with the FCS.
+    #: [``DLT_NETANALYZER_TRANSPARENT``] Ethernet frames, including the preamble
+    #: and SFD, preceded by a Hilscher netANALYZER pseudo-header.
     NETANALYZER_TRANSPARENT = 241
 
     #: [``DLT_IPOIB``] IP-over-InfiniBand, as specified by RFC 4391 section 6.
@@ -636,17 +633,11 @@ class LinkType(IntEnum):
     #: 2.4.3.2 "Transport Stream packet layer").
     MPEG_2_TS = 243
 
-    #: [``DLT_NG40``] Pseudo-header for ng4T GmbH's UMTS Iub/Iur-over-ATM and
-    #: Iub/Iur-over-IP format as used by their ng40 protocol tester, followed by
-    #: frames for the Frame Protocol as specified by 3GPP TS 25.427 for dedicated
-    #: channels and 3GPP TS 25.435 for common/shared channels in the case of ATM
-    #: AAL2 or UDP traffic, by SSCOP packets as specified by ITU-T Recommendation
-    #: Q.2110 for ATM AAL5 traffic, and by NBAP packets for SCTP traffic.
+    #: [``DLT_NG40``] Frames from ng4T GmbH's ng40 protocol tester.
     NG40 = 244
 
-    #: [``DLT_NFC_LLCP``] Pseudo-header for NFC LLCP packet captures, followed by
-    #: frame data for the LLCP Protocol as specified by the Logical Link Control
-    #: Protocol Technical Specification.
+    #: [``DLT_NFC_LLCP``] NFC Logical Link Control Protocol frames, with a pseudo-
+    #: header.
     NFC_LLCP = 245
 
     #: Packet filter state syncing.
@@ -664,9 +655,8 @@ class LinkType(IntEnum):
     #: [``DLT_USBPCAP``] USB packets, beginning with a USBPcap header.
     USBPCAP = 249
 
-    #: [``DLT_RTAC_SERIAL``] Serial-line packet header for the Schweitzer
-    #: Engineering Laboratories "RTAC" product, followed by a payload for one of a
-    #: number of industrial control protocols.
+    #: [``DLT_RTAC_SERIAL``] Serial-line packets from the Schweitzer Engineering
+    #: Laboratories "RTAC" product.
     RTAC_SERIAL = 250
 
     #: [``DLT_BLUETOOTH_LE_LL``] Bluetooth Low Energy air interface Link Layer
@@ -721,9 +711,8 @@ class LinkType(IntEnum):
     #: Recommendation G.9959, with some MAC layer fields moved.
     ZWAVE_R3 = 262
 
-    #: [``DLT_WATTSTOPPER_DLM``] Formats for WattStopper Digital Lighting
-    #: Management (DLM) and Legrand Nitoo Open protocol common packet structure
-    #: captures.
+    #: [``DLT_WATTSTOPPER_DLM``] WattStopper Digital Lighting Management (DLM) and
+    #: Legrand Nitoo Open protocol packets.
     WATTSTOPPER_DLM = 263
 
     #: [``DLT_ISO_14443``] Messages between ISO 14443 contactless smartcards
@@ -732,12 +721,11 @@ class LinkType(IntEnum):
     #: for ISO14443 specification.
     ISO_14443 = 264
 
-    #: [``DLT_RDS``] Radio data system (RDS) groups, as per IEC 62106, encapsulated
-    #: in this form.
+    #: [``DLT_RDS``] IEC 62106 Radio data system (RDS) groups.
     RDS = 265
 
-    #: [``DLT_USB_DARWIN``] USB packets, beginning with a Darwin (macOS, etc.) USB
-    #: header.
+    #: [``DLT_USB_DARWIN``] USB packets captured on a Darwin-based operating system
+    #: (macOS, etc.).
     USB_DARWIN = 266
 
     #: [``DLT_OPENFLOW``] OpenFlow messages with an additional 12-octet header, as
@@ -763,7 +751,7 @@ class LinkType(IntEnum):
     VSOCK = 271
 
     #: [``DLT_NORDIC_BLE``] Messages to and from a Nordic Semiconductor nRF Sniffer
-    #: for Bluetooth LE packets, beginning with a pseudo-header.
+    #: for Bluetooth LE packets.
     NORDIC_BLE = 272
 
     #: [``DLT_DOCSIS31_XRA31``] DOCSIS packets and bursts, preceded by a pseudo-
@@ -774,8 +762,7 @@ class LinkType(IntEnum):
     #: 99-4, starting with the preamble and always ending with a CRC field.
     ETHERNET_MPACKET = 274
 
-    #: [``DLT_DISPLAYPORT_AUX``] DisplayPort AUX channel monitoring data as
-    #: specified by VESA DisplayPort (DP) Standard preceded by a pseudo-header.
+    #: [``DLT_DISPLAYPORT_AUX``] DisplayPort AUX channel monitoring messages.
     DISPLAYPORT_AUX = 275
 
     #: [``DLT_LINUX_SLL2``] Linux "cooked" capture encapsulation v2.
@@ -784,7 +771,7 @@ class LinkType(IntEnum):
     #: [``DLT_SERCOS_MONITOR``] Sercos Monitor.
     SERCOS_MONITOR = 277
 
-    #: [``DLT_OPENVIZSLA``] Openvizsla FPGA-based USB sniffer.
+    #: [``DLT_OPENVIZSLA``] OpenVizsla FPGA-based USB sniffer frames.
     OPENVIZSLA = 278
 
     #: [``DLT_EBHSCR``] Elektrobit High Speed Capture and Replay (EBHSCR) format.
@@ -794,25 +781,23 @@ class LinkType(IntEnum):
     #: dispatch tracer, in the the graph dispatcher trace format.
     VPP_DISPATCH = 280
 
-    #: [``DLT_DSA_TAG_BRCM``] Ethernet frames, with a switch tag inserted between
-    #: the source address field and the type/length field in the Ethernet header.
+    #: [``DLT_DSA_TAG_BRCM``] Ethernet frames, with a Broadcom switch tag inserted.
     DSA_TAG_BRCM = 281
 
-    #: [``DLT_DSA_TAG_BRCM_PREPEND``] Ethernet frames, with a switch tag inserted
-    #: before the destination address in the Ethernet header.
+    #: [``DLT_DSA_TAG_BRCM_PREPEND``] Ethernet frames, with a Broadcom switch tag
+    #: prepended.
     DSA_TAG_BRCM_PREPEND = 282
 
     #: [``DLT_IEEE802_15_4_TAP``] IEEE 802.15.4 Low-Rate Wireless Networks, with a
     #: pseudo-header containing TLVs with metadata preceding the 802.15.4 header.
     IEEE802_15_4_TAP = 283
 
-    #: [``DLT_DSA_TAG_DSA``] Ethernet frames, with a switch tag inserted between
-    #: the source address field and the type/length field in the Ethernet header.
+    #: [``DLT_DSA_TAG_DSA``] Ethernet frames, with a Marvell DSA switch tag
+    #: inserted.
     DSA_TAG_DSA = 284
 
-    #: [``DLT_DSA_TAG_EDSA``] Ethernet frames, with a programmable Ethernet type
-    #: switch tag inserted between the source address field and the type/length
-    #: field in the Ethernet header.
+    #: [``DLT_DSA_TAG_EDSA``] Ethernet frames, with a Marvell EDSA switch tag
+    #: inserted.
     DSA_TAG_EDSA = 285
 
     #: [``DLT_ELEE``] Payload of lawful intercept packets using the ELEE protocol.
@@ -836,8 +821,7 @@ class LinkType(IntEnum):
     #: standards page, beginning with a Base Header.
     ATSC_ALP = 289
 
-    #: [``DLT_ETW``] Event Tracing for Windows messages, beginning with a pseudo-
-    #: header.
+    #: [``DLT_ETW``] Event Tracing for Windows messages.
     ETW = 290
 
     #: [``DLT_NETANALYZER_NG``] Reserved for Hilscher Gesellschaft fuer
