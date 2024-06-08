@@ -828,8 +828,7 @@ class LinkType(IntEnum):
     #: Systemautomation mbH netANALYZER NG hardware and software.
     NETANALYZER_NG = 291
 
-    #: [``DLT_ZBOSS_NCP``] Serial NCP (Network Co-Processor) protocol for Zigbee
-    #: stack ZBOSS by DSR. ZBOSS NCP protocol, beginning with a header.
+    #: [``DLT_ZBOSS_NCP``] ZBOSS NCP Serial Protocol, with a pseudo-header.
     ZBOSS_NCP = 292
 
     #: [``DLT_USB_2_0_LOW_SPEED``] Low-Speed USB 2.0, 1.1, or 1.0 packet, beginning
