@@ -33,12 +33,10 @@ class Routing(IntEnum):
     #: Segment Routing Header (SRH) [:rfc:`8754`]
     Segment_Routing_Header = 4
 
-    #: CRH-16 (TEMPORARY - registered 2021-06-07, extension registered 2024-04-23,
-    #: expires 2025-06-07) [draft-ietf-6man-comp-rtg-hdr-05]
+    #: CRH-16 [RFC-ietf-6man-comp-rtg-hdr-10]
     CRH_16 = 5
 
-    #: CRH-32 (TEMPORARY - registered 2021-06-07, extension registered 2024-04-23,
-    #: expires 2025-06-07) [draft-ietf-6man-comp-rtg-hdr-05]
+    #: CRH-32 [RFC-ietf-6man-comp-rtg-hdr-10]
     CRH_32 = 6
 
     #: RFC3692-style Experiment 1 [:rfc:`4727`]

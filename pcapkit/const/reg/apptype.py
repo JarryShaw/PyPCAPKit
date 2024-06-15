@@ -6405,8 +6405,8 @@ class AppType(StrEnum):
     #: - [UDP] TDP Suite
     tdp_suite: 'AppType' = 1814, 'tdp-suite', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] MMPFT
-    #: - [UDP] MMPFT
+    #: - [TCP] Manufacturing messaging protocol for factory transmission
+    #: - [UDP] Manufacturing messaging protocol for factory transmission
     mmpft: 'AppType' = 1815, 'mmpft', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] HARP
