@@ -11,13 +11,13 @@ jobs:
     name: Update requirements.txt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install and Setup
         run: |
@@ -83,7 +83,7 @@ jobs:
     if: needs.conda-update.outputs.CONDA_CHANGED == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.PYPCAPKIT }}
           fetch-depth: 0
@@ -123,7 +123,7 @@ jobs:
           - "3.10"
           - "3.11"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}+${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
           fetch-depth: 0
@@ -163,7 +163,7 @@ jobs:
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
       - name: Conda environment creation and activation
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}

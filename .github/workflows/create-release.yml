@@ -18,13 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install and Setup
         run: |
@@ -59,7 +59,7 @@ jobs:
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
@@ -96,7 +96,7 @@ jobs:
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.PYPCAPKIT }}
           # ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
@@ -148,22 +148,25 @@ jobs:
     #permissions:
     #  # IMPORTANT: this permission is mandatory for trusted publishing
     #  id-token: write
+    permissions:
+      contents: write
+      id-token: write
     needs: [ github, version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     strategy:
       matrix:
         python-version:
-          # - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
-          # - "pypy3.7"
+          - "3.12"
           - "pypy3.8"
           - "pypy3.9"
+          - "pypy3.10"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
@@ -196,13 +199,13 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          # password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
 
       - name: Publish package to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          # password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
 
@@ -227,13 +230,13 @@ jobs:
           - ubuntu-latest
           # - windows-latest  # skip for now
         python-version:
-          # - "3.7"  # skip for now
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
+          - "3.12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0
           fetch-depth: 0
@@ -273,7 +276,7 @@ jobs:
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
       - name: Conda environment creation and activation
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: "0"
