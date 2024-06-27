@@ -11,10 +11,10 @@
 <meta name="description" content="pcapkit.corekit.multidict contains multi-mapping dictionary classes, which are used to store multiple mappings of the same key. The implementation is inspired and based on the Werkzeug project. Typ..." />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Protocol Chain" href="protochain.html" /><link rel="prev" title="Module Descriptor" href="module.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>Multi-Mapping Dictionary - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=36a5483c" />
     
@@ -81,7 +81,7 @@
   <symbol id="svg-sun" viewBox="0 0 24 24">
     <title>Light mode</title>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
       <circle cx="12" cy="12" r="5"></circle>
       <line x1="12" y1="1" x2="12" y2="3"></line>
       <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -96,7 +96,7 @@
   <symbol id="svg-moon" viewBox="0 0 24 24">
     <title>Dark mode</title>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
       <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
     </svg>
@@ -104,7 +104,7 @@
   <symbol id="svg-sun-half" viewBox="0 0 24 24">
     <title>Auto light/dark mode</title>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <circle cx="12" cy="12" r="9" />
       <path d="M13 12h5" />
@@ -112,6 +112,60 @@
       <path d="M13 18h1" />
       <path d="M13 9h4" />
       <path d="M13 6h1" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" /
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
     </svg>
   </symbol>
 </svg>
@@ -124,6 +178,8 @@
 <label class="overlay toc-overlay" for="__toc">
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
 
 
@@ -142,7 +198,8 @@
       <div class="theme-toggle-container theme-toggle-header">
         <button class="theme-toggle">
           <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
-          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
@@ -348,19 +405,21 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="edit-this-page">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/master/docs/source/pcapkit/corekit/multidict.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
   <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/pcapkit/corekit/multidict.rst" title="Edit this page">
-    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
-      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
-    </svg>
+    <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
 </div><div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
-              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
@@ -370,15 +429,15 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <section id="module-pcapkit.corekit.multidict">
-<span id="multi-mapping-dictionary"></span><h1>Multi-Mapping Dictionary<a class="headerlink" href="#module-pcapkit.corekit.multidict" title="Link to this heading">#</a></h1>
+<span id="multi-mapping-dictionary"></span><h1>Multi-Mapping Dictionary<a class="headerlink" href="#module-pcapkit.corekit.multidict" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.corekit.multidict" title="pcapkit.corekit.multidict"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.multidict</span></code></a> contains multi-mapping dictionary classes,
 which are used to store multiple mappings of the same key. The implementation
 is inspired and based on the <a class="reference external" href="https://werkzeug.palletsprojects.com/">Werkzeug</a> project.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">MultiDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">MultiDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT" title="pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_KT</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT" title="pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_VT</span></code></a>]</p>
 <p>A <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> is a dictionary subclass customized to deal with
 multiple values for the same key.</p>
@@ -403,7 +462,7 @@ only return the first value when multiple values for one key are found.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.add" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.add" title="Link to this definition">¶</a></dt>
 <dd><p>Adds a new value for the key.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -420,7 +479,7 @@ only return the first value when multiple values for one key are found.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.get" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.get" title="Link to this definition">¶</a></dt>
 <dd><p>Return the value for key if key is in the dictionary, else default.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -431,7 +490,7 @@ only return the first value when multiple values for one key are found.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.getlist">
-<span class="sig-name descname"><span class="pre">getlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.getlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.getlist" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">getlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.getlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.getlist" title="Link to this definition">¶</a></dt>
 <dd><p>Return the list of items for a given key.</p>
 <p>If that key is not in the <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a>, the return value
 will be an empty list.</p>
@@ -450,7 +509,7 @@ will be an empty list.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.setlist">
-<span class="sig-name descname"><span class="pre">setlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.setlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.setlist" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">setlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.setlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.setlist" title="Link to this definition">¶</a></dt>
 <dd><p>Remove the old values for a key and add new ones.</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
@@ -473,7 +532,7 @@ are removed first.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.setdefault">
-<span class="sig-name descname"><span class="pre">setdefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.setdefault"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.setdefault" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">setdefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.setdefault"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.setdefault" title="Link to this definition">¶</a></dt>
 <dd><p>If key is in the dictionary, returns its value.</p>
 <p>If not, set it to default and return default.</p>
 <dl class="field-list simple">
@@ -494,7 +553,7 @@ are removed first.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.setlistdefault">
-<span class="sig-name descname"><span class="pre">setlistdefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.setlistdefault"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.setlistdefault" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">setlistdefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.setlistdefault"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.setlistdefault" title="Link to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict.setdefault" title="pcapkit.corekit.multidict.MultiDict.setdefault"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setdefault()</span></code></a> but sets multiple values.</p>
 <p>The list returned is not a copy, but the list that is actually used
 internally. This means that you can put new values into the
@@ -516,7 +575,7 @@ before returned.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.items">
-<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.items" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.items" title="Link to this definition">¶</a></dt>
 <dd><p>Return an interator of <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">value)</span></code> paris.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -532,7 +591,7 @@ pairs for the first value of each key.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.lists">
-<span class="sig-name descname"><span class="pre">lists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.lists" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">lists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.lists" title="Link to this definition">¶</a></dt>
 <dd><p>Return an iterator of <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">values)</span></code> pairs, where <code class="docutils literal notranslate"><span class="pre">values</span></code> is
 the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of all values associated with the key.</p>
 <dl class="field-list simple">
@@ -544,7 +603,7 @@ the <a class="reference external" href="https://docs.python.org/3/library/stdtyp
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.values">
-<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.values" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.values" title="Link to this definition">¶</a></dt>
 <dd><p>Returns an iterator of the first value on every key’s value list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -555,7 +614,7 @@ the <a class="reference external" href="https://docs.python.org/3/library/stdtyp
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.listvalues">
-<span class="sig-name descname"><span class="pre">listvalues</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.listvalues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.listvalues" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">listvalues</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.listvalues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.listvalues" title="Link to this definition">¶</a></dt>
 <dd><p>Return an iterator of all values associated with a key. Zipping
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">keys()</span></code> and this is the same as calling <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict.lists" title="pcapkit.corekit.multidict.MultiDict.lists"><code class="xref py py-meth docutils literal notranslate"><span class="pre">lists()</span></code></a>.</p>
 <dl class="field-list simple">
@@ -567,7 +626,7 @@ the <a class="reference external" href="https://docs.python.org/3/library/stdtyp
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.to_dict" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.to_dict" title="Link to this definition">¶</a></dt>
 <dd><p>Return the contents as regular <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">flat</span></code> is <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> the returned <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> will only have the
 first item present, if <code class="docutils literal notranslate"><span class="pre">flat</span></code> is <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a> all values will be
@@ -586,7 +645,7 @@ the first value for each key.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.update" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.update" title="Link to this definition">¶</a></dt>
 <dd><p><a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict.update" title="pcapkit.corekit.multidict.MultiDict.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code></a> extends rather than replaces existing key lists.</p>
 <p>If the value <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> for a key in <code class="docutils literal notranslate"><span class="pre">other_dict</span></code> is empty, no new
 values will be added to the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> and the key will not be
@@ -605,7 +664,7 @@ regular <a class="reference external" href="https://docs.python.org/3/library/st
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.pop">
-<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=no</span> <span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.pop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.pop" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=no</span> <span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.pop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.pop" title="Link to this definition">¶</a></dt>
 <dd><p>Pop the first item for a <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> on the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <p>Afterwards the <code class="docutils literal notranslate"><span class="pre">key</span></code> is removed from the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>, so additional
 values are discarded.</p>
@@ -625,7 +684,7 @@ dictionary.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.popitem">
-<span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.popitem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.popitem" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.popitem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.popitem" title="Link to this definition">¶</a></dt>
 <dd><p>Pop an item from the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -636,7 +695,7 @@ dictionary.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.poplist">
-<span class="sig-name descname"><span class="pre">poplist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.poplist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.poplist" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">poplist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.poplist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.poplist" title="Link to this definition">¶</a></dt>
 <dd><p>Pop the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> for a key from the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <p>If the key is not in the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> an empty <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> is returned.</p>
 <div class="admonition-notes admonition">
@@ -656,7 +715,7 @@ of raising an error.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.MultiDict.popitemlist">
-<span class="sig-name descname"><span class="pre">popitemlist</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.popitemlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.popitemlist" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">popitemlist</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#MultiDict.popitemlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.MultiDict.popitemlist" title="Link to this definition">¶</a></dt>
 <dd><p>Pop a <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">list)</span></code> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> from the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -669,7 +728,7 @@ of raising an error.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.OrderedMultiDict">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">OrderedMultiDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#OrderedMultiDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.OrderedMultiDict" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">OrderedMultiDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/multidict.html#OrderedMultiDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.multidict.OrderedMultiDict" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a>[<a class="reference internal" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT" title="pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_KT</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT" title="pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_VT</span></code></a>]</p>
 <p>Works like a regular <a class="reference internal" href="#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> but preserves the order of the
 fields.</p>
@@ -694,20 +753,20 @@ objects are exposed.</p>
 </dd></dl>
 
 <section id="type-variables">
-<h2>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">#</a></h2>
+<h2>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">¶</a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.pcapkit.corekit.multidict._T">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">_T</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></em><a class="headerlink" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._T" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">_T</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></em><a class="headerlink" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._T" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">_KT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></em><a class="headerlink" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">_KT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></em><a class="headerlink" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._KT" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">_VT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></em><a class="headerlink" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.multidict.</span></span><span class="sig-name descname"><span class="pre">_VT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></em><a class="headerlink" href="#pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </section>
@@ -782,9 +841,9 @@ objects are exposed.</p>
     </aside>
   </div>
 </div><script src="../../_static/documentation_options.js?v=b7435d6d"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     </body>
