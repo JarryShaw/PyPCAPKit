@@ -20312,6 +20312,15 @@ class AppType(StrEnum):
     #: [UDP] Navtech Radar Sensor Data
     nav_data: 'AppType' = 6317, 'nav-data', TransportProtocol.get('udp')
 
+    #: [TCP] IONA Measurement and control data
+    iona_data: 'AppType' = 6318, 'iona-data', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_6318: 'AppType' = 6318, 'reserved', TransportProtocol.get('udp')
+
+    #: [N/A] Unassigned
+    unassigned_6319: 'AppType' = 6319, 'unassigned', TransportProtocol.get('undefined')
+
     #: - [TCP] Double-Take Replication Service
     #: - [UDP] Double-Take Replication Service
     repsvc: 'AppType' = 6320, 'repsvc', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -30871,9 +30880,6 @@ class AppType(StrEnum):
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 6307 <= value <= 6314:
-            #: [N/A] Unassigned
-            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 6318 <= value <= 6319:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 6327 <= value <= 6342:
