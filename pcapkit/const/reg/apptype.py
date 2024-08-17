@@ -21836,6 +21836,12 @@ class AppType(StrEnum):
     #: [UDP] Oracle Coherence Cluster discovery service
     coherence_disc: 'AppType' = 7574, 'coherence-disc', TransportProtocol.get('udp')
 
+    #: [TCP] Main access port for WTMI Panel
+    wtmi_panel: 'AppType' = 7575, 'wtmi-panel', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_7575: 'AppType' = 7575, 'reserved', TransportProtocol.get('udp')
+
     #: - [TCP] Sun License Manager
     #: - [UDP] Sun License Manager
     sun_lm: 'AppType' = 7588, 'sun-lm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -31173,7 +31179,7 @@ class AppType(StrEnum):
         if 7571 <= value <= 7573:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 7575 <= value <= 7587:
+        if 7576 <= value <= 7587:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 7589 <= value <= 7605:
