@@ -177,8 +177,8 @@ class ReturnCode(IntEnum):
     #: Requested file action was okay, completed.
     CODE_250: 'ReturnCode' = 250, 'Requested file action was okay, completed.'
 
-    #: User name okay, password okay.
-    CODE_331: 'ReturnCode' = 331, 'User name okay, password okay.'
+    #: User name okay, password needed.
+    CODE_331: 'ReturnCode' = 331, 'User name okay, password needed.'
 
     #: No need account for login.
     CODE_332: 'ReturnCode' = 332, 'No need account for login.'
