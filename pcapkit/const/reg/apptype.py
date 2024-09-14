@@ -28459,6 +28459,9 @@ class AppType(StrEnum):
     #: [TCP] An application to communicate with other
     hola: 'AppType' = -1, 'hola', TransportProtocol.get('tcp')
 
+    #: [TCP] Home Assistant
+    home_assistant: 'AppType' = -1, 'home-assistant', TransportProtocol.get('tcp')
+
     #: [N/A] iTunes Home Sharing
     home_sharing: 'AppType' = -1, 'home-sharing', TransportProtocol.get('undefined')
 
