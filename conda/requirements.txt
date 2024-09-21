@@ -6,9 +6,9 @@ chardet == 5.2.0
 charset-normalizer == 3.3.2
 dictdumper == 0.8.4.post3
 dpkt == 1.9.8
-emoji == 2.12.1
+emoji == 2.13.0
 html5lib == 1.1
-idna == 3.9
+idna == 3.10
 lxml == 5.3.0
 packaging == 24.1
 pathlib2 ; python_version < "3.5"
