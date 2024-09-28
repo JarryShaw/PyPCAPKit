@@ -26212,6 +26212,12 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_27010: 'AppType' = 27010, 'reserved', TransportProtocol.get('udp')
 
+    #: [TCP] Cloud hosting environment network
+    chlenix: 'AppType' = 27016, 'chlenix', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_27016: 'AppType' = 27016, 'reserved', TransportProtocol.get('udp')
+
     #: [TCP] Mongo database system
     mongodb: 'AppType' = 27017, 'mongodb', TransportProtocol.get('tcp')
 
@@ -27920,6 +27926,11 @@ class AppType(StrEnum):
 
     #: [TCP] The Bootstrapping Remote Secure Key Infrastructure Proxy [:rfc:`8995`]
     brski_proxy: 'AppType' = -1, 'brski-proxy', TransportProtocol.get('tcp')
+
+    #: [TCP] Bootstrapping Remote Secure Key Infrastructure registrar with CMP
+    #: capabilities according to the Lightweight CMP Profile (LCMPP, [RFC9483])
+    #: [RFC-ietf-anima-brski-ae-13]
+    brski_reg_cmp: 'AppType' = -1, 'brski-reg-cmp', TransportProtocol.get('tcp')
 
     #: [TCP] The Bootstrapping Remote Secure Key Infrastructure Registrar
     #: [:rfc:`8995`]
@@ -32310,7 +32321,7 @@ class AppType(StrEnum):
         if 27000 <= value <= 27009:
             #: [N/A] FLEX LM (1-10)
             return extend_enum(cls, 'flex_lm_%d' % value, value, 'flex-lm', TransportProtocol.get('undefined'))
-        if 27011 <= value <= 27016:
+        if 27011 <= value <= 27015:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 27018 <= value <= 27344:
