@@ -836,7 +836,7 @@ file formats:</p>
 <p>The following code snippet shows how to create a new engine class:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Following is a PoC implementation of a new engine based on <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.6.0.dev5)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a>. For documentation
+<p>Following is a PoC implementation of a new engine based on <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.6.0.dev8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a>. For documentation
 purposes, we use the <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a> engine as an example,
 where the comprehensive implementation can be found in the <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.scapy" title="pcapkit.foundation.engines.scapy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.scapy</span></code></a>
 module.</p>
@@ -1287,7 +1287,7 @@ registry functions:</p>
 </div>
 <p>All callback functions are expected to be a callback function, which
 accepts a single argument, i.e., the list of reassembled datagrams
-and/or flows, and returns <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>. Any return value will be ignored.</p>
+and/or flows, and returns <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>. Any return value will be ignored.</p>
 <p>It is possible to modify the reassembled datagrams and/or flows in the
 callback functions, e.e., to discard certain reassembled datagrams and/or
 flows, etc. However, it is not recommended to modify the reassembled
