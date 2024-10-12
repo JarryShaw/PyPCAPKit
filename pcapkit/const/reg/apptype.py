@@ -29234,6 +29234,9 @@ class AppType(StrEnum):
     #: [N/A] oprofile server protocol
     oprofile: 'AppType' = -1, 'oprofile', TransportProtocol.get('undefined')
 
+    #: [TCP] ORO Core server REST configuration and control API
+    oro: 'AppType' = -1, 'oro', TransportProtocol.get('tcp')
+
     #: [UDP] Open Sound Control Interface Transfer
     oscit: 'AppType' = -1, 'oscit', TransportProtocol.get('udp')
 
