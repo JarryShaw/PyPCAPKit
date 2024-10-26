@@ -479,6 +479,9 @@ class TransType(IntEnum):
     #: Network Service Header [:rfc:`9491`]
     NSH = 145
 
+    #: Homa [HomaModule][John Ousterhout]
+    Homa = 146
+
     #: Use for experimentation and testing [:rfc:`3692`]
     Use_for_experimentation_and_testing_253 = 253
 
@@ -514,7 +517,7 @@ class TransType(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 146 <= value <= 252:
+        if 147 <= value <= 252:
             #: Unassigned [Internet Assigned Numbers Authority]
             return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)
