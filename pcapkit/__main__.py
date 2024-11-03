@@ -120,7 +120,7 @@ def main() -> 'int':
     if args.verbose:
         try:
             print(emoji.emojize(f":police_car_light: Loading file {extractor.input!r}"))
-        except UnicodeEncodeError:
+        except (UnicodeEncodeError, NameError):  # may trigger if emoji not installed
             print(f"[*] Loading file {extractor.input!r}")
 
         for _ in extractor:
@@ -128,7 +128,7 @@ def main() -> 'int':
 
         try:
             print(emoji.emojize(f":beer_mug: Report file{'s' if args.files else ''} stored in {extractor.output!r}"))
-        except UnicodeEncodeError:
+        except (UnicodeEncodeError, NameError):  # may trigger if emoji not installed
             print(f"[*] Report file{'s' if args.files else ''} stored in {extractor.output!r}")
 
     return 0
