@@ -201,6 +201,7 @@ jobs:
         with:
           # password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
+          attestations: false
 
       - name: Publish package to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -208,14 +209,14 @@ jobs:
           # password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
+          attestations: false
 
       - name: Upload package to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           # allowUpdates: true
           files: |
-            dist/pypcapkit-*.whl
-            dist/pypcapkit-*.tar.gz
+            dist/*
           tag_name: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -235,7 +236,6 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
-          - "3.13"
     steps:
       - uses: actions/checkout@v4
         with:
