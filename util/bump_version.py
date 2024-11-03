@@ -5,9 +5,6 @@ from typing import TYPE_CHECKING, cast
 
 import pkg_resources
 
-if TYPE_CHECKING:
-    from packaging.version import Version
-
 try:
     import pcapkit
     version = pcapkit.__version__
@@ -24,7 +21,7 @@ except ImportError:
         raise RuntimeError('cannot find version')
 
 # parse version and bump version
-ver_obj = pkg_resources.parse_version(version)  # type: Version
+ver_obj = pkg_resources.parse_version(version)
 base_version = ver_obj.base_version
 
 if ver_obj.is_devrelease:
