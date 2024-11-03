@@ -4,7 +4,7 @@ beautifulsoup4 == 4.12.3
 certifi == 2024.8.30
 chardet == 5.2.0
 charset-normalizer == 3.4.0
-dictdumper == 0.8.4.post3
+dictdumper == 0.8.4.post4
 dpkt == 1.9.8
 emoji == 2.14.0
 html5lib == 1.1
