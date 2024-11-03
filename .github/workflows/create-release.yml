@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.14'
 
       - name: Install and Setup
         run: |
@@ -156,11 +156,12 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
+          - "3.14"
           - "pypy3.8"
           - "pypy3.9"
           - "pypy3.10"
@@ -192,7 +193,7 @@ jobs:
           python util/wheel_rename.py dist/*.whl
 
       - name: No Source Distribution for Python ${{ matrix.python-version }}
-        if: ${{ matrix.python-version != '3.11' }}
+        if: ${{ matrix.python-version != '3.14' }}
         run: |
           rm dist/*.tar.gz
 
@@ -214,7 +215,8 @@ jobs:
         with:
           # allowUpdates: true
           files: |
-            dist/*
+            dist/pypcapkit-*.whl
+            dist/pypcapkit-*.tar.gz
           tag_name: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -230,11 +232,12 @@ jobs:
           - ubuntu-latest
           # - windows-latest  # skip for now
         python-version:
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
+          - "3.14"
     steps:
       - uses: actions/checkout@v4
         with:
