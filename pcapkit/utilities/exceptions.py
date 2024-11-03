@@ -101,16 +101,16 @@ class BaseError(Exception):
         # log error
         if not quiet:
             if DEVMODE:
-                logger.error('%s: %s', type(self).__name__, str(self),
-                             exc_info=self if VERBOSE else False,
-                             stack_info=VERBOSE, stacklevel=-stacklevel())
+                logger.critical('%s: %s', type(self).__name__, str(self),
+                                exc_info=self if VERBOSE else False,
+                                stack_info=VERBOSE, stacklevel=-stacklevel())
             else:
-                logger.error('%s: %s', type(self).__name__, str(self))
+                logger.critical("%s: %s", type(self).__name__, str(self))
 
             # logger.error('%s: %s', type(self).__name__, str(self), exc_info=self,
             #              stack_info=True, stacklevel=-stacklevel())
         else:
-            logger.warning('%s: %s', type(self).__name__, str(self))
+            logger.error('%s: %s', type(self).__name__, str(self))
 
         if not DEVMODE:
             sys.tracebacklimit = 0

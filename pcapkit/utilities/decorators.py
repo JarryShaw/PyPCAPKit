@@ -14,7 +14,6 @@ decorators, including :func:`~pcapkit.utilities.decorators.seekset`,
 import functools
 import io
 import os
-import traceback
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.utilities.exceptions import StructError, stacklevel
@@ -123,9 +122,7 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
-            logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
-            if VERBOSE:
-               traceback.print_exc()
+            logger.warning(str(exc), exc_info=exc if VERBOSE else None, stack_info=DEVMODE, stacklevel=stacklevel())
 
             file_ = self.__header__.get_payload()
             next_ = protocol(file_, length, error=str(exc))
