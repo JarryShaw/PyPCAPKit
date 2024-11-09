@@ -4,18 +4,18 @@ beautifulsoup4 == 4.12.3
 certifi == 2024.8.30
 chardet == 5.2.0
 charset-normalizer == 3.4.0
-dictdumper == 0.8.4.post4
+dictdumper == 0.8.4.post6
 dpkt == 1.9.8
 emoji == 2.14.0
 html5lib == 1.1
 idna == 3.10
 lxml == 5.3.0
-packaging == 24.1
+packaging == 24.2
 pathlib2 ; python_version < "3.5"
 pyshark == 0.6
 pysocks == 1.7.1
 requests == 2.32.3
-scapy == 2.6.0
+scapy == 2.6.1
 six == 1.16.0
 soupsieve == 2.6
 tbtrim == 0.3.1
