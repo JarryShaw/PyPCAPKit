@@ -31,6 +31,8 @@
 		<integer>262144</integer>
 		<key>network</key>
 		<string>LinkType::ETHERNET [1]</string>
+		<key>packet</key>
+		<data></data>
 	</dict>
 	<key>Frame 1</key>
 	<dict>
@@ -46,7 +48,7 @@
 			<integer>86</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T23:49:05.471719Z</date>
+		<date>2017-11-19T10:49:05.471719Z</date>
 		<key>number</key>
 		<integer>1</integer>
 		<key>time_epoch</key>
@@ -94,10 +96,16 @@
 					<key>packet</key>
 					<data>hwAOqgAAAAD+gAAAAAAAABzNfHe6x0a3AQGkXmDZa5c=</data>
 				</dict>
+				<key>packet</key>
+				<data>hwAOqgAAAAD+gAAAAAAAABzNfHe6x0a3AQGkXmDZa5c=</data>
 			</dict>
+			<key>packet</key>
+			<data>YAAAAAAgOv/+gAAAAAAAAACmh/knkxbu/oAAAAAAAAAczXx3usdGt4cADqoAAAAA/oAAAAAAAAAczXx3usdGtwEBpF5g2WuX</data>
 		</dict>
 		<key>protocols</key>
 		<string>Ethernet:IPv6:IPv6_ICMP</string>
+		<key>packet</key>
+		<data>8acRWh7SCABOAAAATgAAAKReYNlrl0AzGtGFHIbdYAAAAAAYOv/+gAAAAAAAABzNfHe6x0a3/oAAAAAAAAAApof5J5MW7ogAP4JAAAAA/oAAAAAAAAA=</data>
 	</dict>
 	<key>Frame 2</key>
 	<dict>
@@ -113,7 +121,7 @@
 			<integer>78</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T23:49:05.578078Z</date>
+		<date>2017-11-19T10:49:05.578078Z</date>
 		<key>number</key>
 		<integer>2</integer>
 		<key>time_epoch</key>
@@ -161,10 +169,16 @@
 					<key>packet</key>
 					<data>iAA/gkAAAAD+gAAAAAAAABzNfHe6x0a3</data>
 				</dict>
+				<key>packet</key>
+				<data>iAA/gkAAAAD+gAAAAAAAABzNfHe6x0a3</data>
 			</dict>
+			<key>packet</key>
+			<data>YAAAAAAYOv/+gAAAAAAAABzNfHe6x0a3/oAAAAAAAAAApof5J5MW7ogAP4JAAAAA/oAAAAAAAAAczXx3usdGtw==</data>
 		</dict>
 		<key>protocols</key>
 		<string>Ethernet:IPv6:IPv6_ICMP</string>
+		<key>packet</key>
+		<data>9acRWkzeCwA2AAAANgAAAKReYNlrl7j4g6X5RwgARQAAKMU0QAArBnqGe4HSh8CoAWQAUNfA1Z+xVKZ6oP9QEXywfI4AAPWnEVqM3gsA</data>
 	</dict>
 	<key>Frame 3</key>
 	<dict>
@@ -180,7 +194,7 @@
 			<integer>54</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T23:49:09.777804Z</date>
+		<date>2017-11-19T10:49:09.777804Z</date>
 		<key>number</key>
 		<integer>3</integer>
 		<key>time_epoch</key>
@@ -239,71 +253,23 @@
 				<string>123.129.210.135</string>
 				<key>dst</key>
 				<string>192.168.1.100</string>
-				<key>tcp</key>
+				<key>raw</key>
 				<dict>
-					<key>srcport</key>
-					<dict>
-						<key>enum</key>
-						<string>AppType::www_http [www-http [80 - tcp|udp]]</string>
-						<key>svc</key>
-						<string>www-http</string>
-						<key>port</key>
-						<integer>80</integer>
-						<key>proto</key>
-						<string>TransportProtocol::tcp|udp [3]</string>
-					</dict>
-					<key>dstport</key>
-					<dict>
-						<key>enum</key>
-						<string>AppType::PORT_55232_tcp [unknown [55232 - tcp]]</string>
-						<key>svc</key>
-						<string>unknown</string>
-						<key>port</key>
-						<integer>55232</integer>
-						<key>proto</key>
-						<string>TransportProtocol::tcp [1]</string>
-					</dict>
-					<key>seq</key>
-					<integer>3584012628</integer>
-					<key>ack</key>
-					<integer>2793054463</integer>
-					<key>hdr_len</key>
-					<integer>20</integer>
-					<key>flags</key>
-					<dict>
-						<key>cwr</key>
-						<false/>
-						<key>ece</key>
-						<false/>
-						<key>urg</key>
-						<false/>
-						<key>ack</key>
-						<true/>
-						<key>psh</key>
-						<false/>
-						<key>rst</key>
-						<false/>
-						<key>syn</key>
-						<false/>
-						<key>fin</key>
-						<true/>
-					</dict>
-					<key>window_size</key>
-					<integer>31920</integer>
-					<key>checksum</key>
-					<data>fI4=</data>
-					<key>urgent_pointer</key>
-					<integer>0</integer>
-					<key>connection</key>
-					<string>Flags::ACK|FIN [34816]</string>
-					<key>nopayload</key>
-					<dict>
-					</dict>
+					<key>error</key>
+					<string>'int' object has no attribute 'port'</string>
+					<key>packet</key>
+					<data>AFDXwNWfsVSmeqD/UBF8sHyOAAA=</data>
 				</dict>
+				<key>packet</key>
+				<data>AFDXwNWfsVSmeqD/UBF8sHyOAAA=</data>
 			</dict>
+			<key>packet</key>
+			<data>RQAAKMU0QAArBnqGe4HSh8CoAWQAUNfA1Z+xVKZ6oP9QEXywfI4AAA==</data>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:TCP</string>
+		<string>Ethernet:IPv4:Raw</string>
+		<key>packet</key>
+		<data>9acRWozeCwA2AAAANgAAALj4g6X5R6ReYNlrlwgARQAAKAAAQABABiq7wKgBZHuB0ofXwABQ</data>
 	</dict>
 	<key>Frame 4</key>
 	<dict>
@@ -319,7 +285,7 @@
 			<integer>54</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T23:49:09.777868Z</date>
+		<date>2017-11-19T10:49:09.777868Z</date>
 		<key>number</key>
 		<integer>4</integer>
 		<key>time_epoch</key>
@@ -378,71 +344,23 @@
 				<string>192.168.1.100</string>
 				<key>dst</key>
 				<string>123.129.210.135</string>
-				<key>tcp</key>
+				<key>raw</key>
 				<dict>
-					<key>srcport</key>
-					<dict>
-						<key>enum</key>
-						<string>AppType::PORT_55232_tcp [unknown [55232 - tcp]]</string>
-						<key>svc</key>
-						<string>unknown</string>
-						<key>port</key>
-						<integer>55232</integer>
-						<key>proto</key>
-						<string>TransportProtocol::tcp [1]</string>
-					</dict>
-					<key>dstport</key>
-					<dict>
-						<key>enum</key>
-						<string>AppType::www_http [www-http [80 - tcp|udp]]</string>
-						<key>svc</key>
-						<string>www-http</string>
-						<key>port</key>
-						<integer>80</integer>
-						<key>proto</key>
-						<string>TransportProtocol::tcp|udp [3]</string>
-					</dict>
-					<key>seq</key>
-					<integer>2793054463</integer>
-					<key>ack</key>
-					<integer>3584012629</integer>
-					<key>hdr_len</key>
-					<integer>20</integer>
-					<key>flags</key>
-					<dict>
-						<key>cwr</key>
-						<false/>
-						<key>ece</key>
-						<false/>
-						<key>urg</key>
-						<false/>
-						<key>ack</key>
-						<true/>
-						<key>psh</key>
-						<false/>
-						<key>rst</key>
-						<false/>
-						<key>syn</key>
-						<false/>
-						<key>fin</key>
-						<false/>
-					</dict>
-					<key>window_size</key>
-					<integer>65535</integer>
-					<key>checksum</key>
-					<data>+T4=</data>
-					<key>urgent_pointer</key>
-					<integer>0</integer>
-					<key>connection</key>
-					<string>Flags::ACK [2048]</string>
-					<key>nopayload</key>
-					<dict>
-					</dict>
+					<key>error</key>
+					<string>'int' object has no attribute 'port'</string>
+					<key>packet</key>
+					<data>18AAUKZ6oP/Vn7FVUBD///k+AAA=</data>
 				</dict>
+				<key>packet</key>
+				<data>18AAUKZ6oP/Vn7FVUBD///k+AAA=</data>
 			</dict>
+			<key>packet</key>
+			<data>RQAAKAAAQABABiq7wKgBZHuB0ofXwABQpnqg/9WfsVVQEP//+T4AAA==</data>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:TCP</string>
+		<string>Ethernet:IPv4:Raw</string>
+		<key>packet</key>
+		<data>9acRWjjxDQA2AAAANgAAALj4g6X5R6ReYNlrlwgARQAAKAAAQABABiq7wKgBZHuB0ofXsABQ</data>
 	</dict>
 	<key>Frame 5</key>
 	<dict>
@@ -458,7 +376,7 @@
 			<integer>54</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T23:49:09.913720Z</date>
+		<date>2017-11-19T10:49:09.913720Z</date>
 		<key>number</key>
 		<integer>5</integer>
 		<key>time_epoch</key>
@@ -517,71 +435,23 @@
 				<string>192.168.1.100</string>
 				<key>dst</key>
 				<string>123.129.210.135</string>
-				<key>tcp</key>
+				<key>raw</key>
 				<dict>
-					<key>srcport</key>
-					<dict>
-						<key>enum</key>
-						<string>AppType::PORT_55216_tcp [unknown [55216 - tcp]]</string>
-						<key>svc</key>
-						<string>unknown</string>
-						<key>port</key>
-						<integer>55216</integer>
-						<key>proto</key>
-						<string>TransportProtocol::tcp [1]</string>
-					</dict>
-					<key>dstport</key>
-					<dict>
-						<key>enum</key>
-						<string>AppType::www_http [www-http [80 - tcp|udp]]</string>
-						<key>svc</key>
-						<string>www-http</string>
-						<key>port</key>
-						<integer>80</integer>
-						<key>proto</key>
-						<string>TransportProtocol::tcp|udp [3]</string>
-					</dict>
-					<key>seq</key>
-					<integer>768904481</integer>
-					<key>ack</key>
-					<integer>1835365486</integer>
-					<key>hdr_len</key>
-					<integer>20</integer>
-					<key>flags</key>
-					<dict>
-						<key>cwr</key>
-						<false/>
-						<key>ece</key>
-						<false/>
-						<key>urg</key>
-						<false/>
-						<key>ack</key>
-						<true/>
-						<key>psh</key>
-						<false/>
-						<key>rst</key>
-						<false/>
-						<key>syn</key>
-						<false/>
-						<key>fin</key>
-						<true/>
-					</dict>
-					<key>window_size</key>
-					<integer>65535</integer>
-					<key>checksum</key>
-					<data>KvQ=</data>
-					<key>urgent_pointer</key>
-					<integer>0</integer>
-					<key>connection</key>
-					<string>Flags::ACK|FIN [34816]</string>
-					<key>nopayload</key>
-					<dict>
-					</dict>
+					<key>error</key>
+					<string>'int' object has no attribute 'port'</string>
+					<key>packet</key>
+					<data>17AAUC3UjSFtZXRuUBH//yr0AAA=</data>
 				</dict>
+				<key>packet</key>
+				<data>17AAUC3UjSFtZXRuUBH//yr0AAA=</data>
 			</dict>
+			<key>packet</key>
+			<data>RQAAKAAAQABABiq7wKgBZHuB0ofXsABQLdSNIW1ldG5QEf//KvQAAA==</data>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:TCP</string>
+		<string>Ethernet:IPv4:Raw</string>
+		<key>packet</key>
+		<data>96cRWhMFAQCfAAAAnwAAAP///////7j4g6X5RwgARQAAkQAAQABAEXizwKgBAf////+SRBOJ</data>
 	</dict>
 	<key>Frame 6</key>
 	<dict>
@@ -597,7 +467,7 @@
 			<integer>159</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T23:49:11.066835Z</date>
+		<date>2017-11-19T10:49:11.066835Z</date>
 		<key>number</key>
 		<integer>6</integer>
 		<key>time_epoch</key>
@@ -656,44 +526,23 @@
 				<string>192.168.1.1</string>
 				<key>dst</key>
 				<string>255.255.255.255</string>
-				<key>udp</key>
+				<key>raw</key>
 				<dict>
-					<key>srcport</key>
-					<dict>
-						<key>enum</key>
-						<string>AppType::unassigned_37444 [unassigned [37444 - undefined]]</string>
-						<key>svc</key>
-						<string>unassigned</string>
-						<key>port</key>
-						<integer>37444</integer>
-						<key>proto</key>
-						<string>TransportProtocol::undefined [0]</string>
-					</dict>
-					<key>dstport</key>
-					<dict>
-						<key>enum</key>
-						<string>AppType::commplex_link [commplex-link [5001 - tcp|udp]]</string>
-						<key>svc</key>
-						<string>commplex-link</string>
-						<key>port</key>
-						<integer>5001</integer>
-						<key>proto</key>
-						<string>TransportProtocol::tcp|udp [3]</string>
-					</dict>
-					<key>len</key>
-					<integer>125</integer>
-					<key>checksum</key>
-					<data>Y7E=</data>
-					<key>raw</key>
-					<dict>
-						<key>packet</key>
-						<data>AQEOAOErg8f5iwBnAAAABgAKVEwtV0RSNjMwMAALAAM2LjAABwABAQAFABFCOC1GOC04My1BNS1GOS00NwAIAAsxOTIuMTY4LjEuMQAJAAp0cGxvZ2luLmNuAAoADlRMLVdEUjYzMDAgNi4wAAwABTEuNy40</data>
-					</dict>
+					<key>error</key>
+					<string>'int' object has no attribute 'port'</string>
+					<key>packet</key>
+					<data>kkQTiQB9Y7EBAQ4A4SuDx/mLAGcAAAAGAApUTC1XRFI2MzAwAAsAAzYuMAAHAAEBAAUAEUI4LUY4LTgzLUE1LUY5LTQ3AAgACzE5Mi4xNjguMS4xAAkACnRwbG9naW4uY24ACgAOVEwtV0RSNjMwMCA2LjAADAAFMS43LjQ=</data>
 				</dict>
+				<key>packet</key>
+				<data>kkQTiQB9Y7EBAQ4A4SuDx/mLAGcAAAAGAApUTC1XRFI2MzAwAAsAAzYuMAAHAAEBAAUAEUI4LUY4LTgzLUE1LUY5LTQ3AAgACzE5Mi4xNjguMS4xAAkACnRwbG9naW4uY24ACgAOVEwtV0RSNjMwMCA2LjAADAAFMS43LjQ=</data>
 			</dict>
+			<key>packet</key>
+			<data>RQAAkQAAQABAEXizwKgBAf////+SRBOJAH1jsQEBDgDhK4PH+YsAZwAAAAYAClRMLVdEUjYzMDAACwADNi4wAAcAAQEABQARQjgtRjgtODMtQTUtRjktNDcACAALMTkyLjE2OC4xLjEACQAKdHBsb2dpbi5jbgAKAA5UTC1XRFI2MzAwIDYuMAAMAAUxLjcuNA==</data>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:UDP:Raw</string>
+		<string>Ethernet:IPv4:Raw</string>
+		<key>packet</key>
+		<data></data>
 	</dict>
 </dict>
 </plist>
