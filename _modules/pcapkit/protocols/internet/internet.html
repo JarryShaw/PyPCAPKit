@@ -433,8 +433,8 @@
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.module</span> <span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.decorators</span> <span class="kn">import</span> <span class="n">beholder</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -580,7 +580,8 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._decode_next_layer">[docs]</a>
     <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                            <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">ipv6_exthdr</span><span class="p">:</span> <span class="s1">&#39;Optional[ProtoChain]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_PT&#39;</span><span class="p">:</span>
+                           <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">ipv6_exthdr</span><span class="p">:</span> <span class="s1">&#39;Optional[ProtoChain]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_PT&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Decode next layer extractor.</span>
 
 <span class="sd">        Arguments:</span>
@@ -590,6 +591,8 @@
 <span class="sd">            packet: packet info (passed from :meth:`self.unpack &lt;pcapkit.protocols.protocol.Protocol.unpack&gt;`)</span>
 <span class="sd">            version: IP version</span>
 <span class="sd">            ipv6_exthdr: protocol chain of IPv6 extension headers</span>
+<span class="sd">            payload: payload from packet. If not provided, will extract from</span>
+<span class="sd">                :meth:`self.__header__.get_payload &lt;pcapkit.protocols.schema.schema.Schema.get_payload&gt;`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Current protocol with next layer extracted.</span>
@@ -602,7 +605,8 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Protocol&#39;</span><span class="p">,</span>  <span class="c1"># type: ignore[redundant-cast]</span>
-                     <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">))</span>  <span class="c1"># type: ignore[arg-type,misc,call-arg]</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+                                             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">))</span>  <span class="c1"># type: ignore[arg-type,misc,call-arg]</span>
         <span class="n">info</span><span class="p">,</span> <span class="n">chain</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">next_</span><span class="o">.</span><span class="n">protochain</span>
 
         <span class="c1"># make next layer protocol name</span>
@@ -629,8 +633,8 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer">[docs]</a>
     <span class="nd">@beholder</span>  <span class="c1"># type: ignore[arg-type]</span>
     <span class="k">def</span> <span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-                           <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">:</span>
+                           <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+                           <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Import next layer extractor.</span>
 
 <span class="sd">        Arguments:</span>
@@ -639,6 +643,8 @@
 <span class="sd">            packet: packet info (passed from :meth:`self.unpack &lt;pcapkit.protocols.protocol.Protocol.unpack&gt;`)</span>
 <span class="sd">            version: IP protocol version</span>
 <span class="sd">            extension: if is extension header</span>
+<span class="sd">            payload: payload from packet. If not provided, will extract from</span>
+<span class="sd">                :meth:`self.__header__.get_payload &lt;pcapkit.protocols.schema.schema.Schema.get_payload&gt;`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Instance of next layer.</span>
@@ -647,7 +653,10 @@
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
             <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span>
 
-        <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="n">payload</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
 

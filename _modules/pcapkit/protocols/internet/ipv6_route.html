@@ -440,20 +440,21 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">ipaddress</span>
-<span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">os_path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
+<span class="kn">import</span> <span class="nn">math</span>
+
 <span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.routing</span> <span class="kn">import</span> <span class="n">Routing</span> <span class="k">as</span> <span class="n">Enum_Routing</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">RPL</span> <span class="k">as</span> <span class="n">Data_RPL</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">IPv6_Route</span> <span class="k">as</span> <span class="n">Data_IPv6_Route</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">RPL</span> <span class="k">as</span> <span class="n">Data_RPL</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">SourceRoute</span> <span class="k">as</span> <span class="n">Data_SourceRoute</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">Type2</span> <span class="k">as</span> <span class="n">Data_Type2</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">UnknownType</span> <span class="k">as</span> <span class="n">Data_UnknownType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">RPL</span> <span class="k">as</span> <span class="n">Schema_RPL</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">IPv6_Route</span> <span class="k">as</span> <span class="n">Schema_IPv6_Route</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">RPL</span> <span class="k">as</span> <span class="n">Schema_RPL</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">SourceRoute</span> <span class="k">as</span> <span class="n">Schema_SourceRoute</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">Type2</span> <span class="k">as</span> <span class="n">Schema_Type2</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">UnknownType</span> <span class="k">as</span> <span class="n">Schema_UnknownType</span>
@@ -464,14 +465,12 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span> <span class="nn">mypy_extensions</span> <span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">RoutingType</span> <span class="k">as</span> <span class="n">Schema_RoutingType</span>
 
     <span class="n">TypeParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_RoutingType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_IPv6_Route</span><span class="p">,</span> <span class="s1">&#39;header&#39;</span><span class="p">)],</span> <span class="n">Data_IPv6_Route</span><span class="p">]</span>
@@ -840,7 +839,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_UnknownType</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -904,7 +903,7 @@
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_SourceRoute</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span>
@@ -951,7 +950,7 @@
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_Type2</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span>
@@ -994,7 +993,7 @@
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_RPL</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="n">cmpr_i</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cmpr_i</span><span class="p">,</span>
