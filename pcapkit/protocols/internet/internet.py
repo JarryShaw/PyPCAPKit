@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING, Generic, cast
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -157,7 +157,8 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
 
     def _decode_next_layer(self, dict_: '_PT', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None,
-                           version: 'Literal[4, 6]' = 4, ipv6_exthdr: 'Optional[ProtoChain]' = None) -> '_PT':
+                           version: 'Literal[4, 6]' = 4, ipv6_exthdr: 'Optional[ProtoChain]' = None,
+                           payload: 'Optional[bytes]' = None) -> '_PT':
         r"""Decode next layer extractor.
 
         Arguments:
@@ -167,6 +168,8 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
             version: IP version
             ipv6_exthdr: protocol chain of IPv6 extension headers
+            payload: payload from packet. If not provided, will extract from
+                :meth:`self.__header__.get_payload <pcapkit.protocols.schema.schema.Schema.get_payload>`
 
         Returns:
             Current protocol with next layer extracted.
@@ -179,7 +182,8 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
 
         """
         next_ = cast('Protocol',  # type: ignore[redundant-cast]
-                     self._import_next_layer(proto, length, packet=packet, version=version))  # type: ignore[arg-type,misc,call-arg]
+                     self._import_next_layer(proto, length, packet=packet, version=version,
+                                             payload=payload))  # type: ignore[arg-type,misc,call-arg]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -203,8 +207,8 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
 
     @beholder  # type: ignore[arg-type]
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
-                           packet: 'Optional[dict[str, Any]]' = None,
-                           version: 'Literal[4, 6]' = 4, extension: 'bool' = False) -> 'Protocol':
+                           packet: 'Optional[dict[str, Any]]' = None, version: 'Literal[4, 6]' = 4,
+                           extension: 'bool' = False, payload: 'Optional[bytes]' = None) -> 'Protocol':
         """Import next layer extractor.
 
         Arguments:
@@ -213,6 +217,8 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
             version: IP protocol version
             extension: if is extension header
+            payload: payload from packet. If not provided, will extract from
+                :meth:`self.__header__.get_payload <pcapkit.protocols.schema.schema.Schema.get_payload>`
 
         Returns:
             Instance of next layer.
@@ -221,7 +227,10 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         if TYPE_CHECKING:
             protocol: 'Type[Protocol]'
 
-        file_ = self.__header__.get_payload()
+        if payload is not None:
+            file_ = self.__header__.get_payload()
+        else:
+            file_ = payload
         if length is None:
             length = len(file_)
 

@@ -31,11 +31,13 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
+from pcapkit.utilities.decorators import beholder
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -46,7 +48,6 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
-    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['IPv6']
 
@@ -310,6 +311,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         _protos = []                # ProtoChain buffer
 
         # traverse if next header is an extensive header
+        payload = self.__header__.get_payload()
         while True:
             try:
                 ex_proto = Enum_ExtensionHeader(proto)
@@ -322,7 +324,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             #     break
 
             # make protocol name
-            next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True)  # type: ignore[misc,call-arg,arg-type]
+            next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True,
+                                            payload=payload)  # type: ignore[misc,call-arg,arg-type]
             info = next_.info
             name = next_.alias.lstrip('IPv6-').lower()
             ipv6.__update__({
@@ -348,6 +351,9 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 })
                 break
 
+            # update payload for next extension header
+            payload = payload[next_.length:]
+
         # record real header & payload length (headers exclude)
         ipv6.__update__({
             'hdr_len': hdr_len,
@@ -358,4 +364,49 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         })
 
         ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
-        return super()._decode_next_layer(ipv6, proto, raw_len, packet=packet, ipv6_exthdr=ipv6_exthdr)
+        return super()._decode_next_layer(ipv6, proto, raw_len, packet=packet, ipv6_exthdr=ipv6_exthdr, payload=payload)
+
+    @beholder  # type: ignore[arg-type]
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                           packet: 'Optional[dict[str, Any]]' = None, version: 'Literal[4, 6]' = 4,
+                           extension: 'bool' = False, payload: 'Optional[bytes]' = None) -> 'Protocol':
+        """Import next layer extractor.
+
+        Arguments:
+            proto: next layer protocol index
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            version: IP protocol version
+            extension: if is extension header
+            payload: payload from packet. If not provided, will extract from
+                :meth:`self.__header__.get_payload <pcapkit.protocols.schema.schema.Schema.get_payload>`
+
+        Returns:
+            Instance of next layer.
+
+        """
+        if TYPE_CHECKING:
+            protocol: 'Type[Protocol]'
+
+        if payload is None:
+            file_ = self.__header__.get_payload()
+        else:
+            file_ = payload
+        if length is None:
+            length = len(file_)
+
+        if length == 0:
+            from pcapkit.protocols.misc.null import \
+                NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        elif self._sigterm:
+            from pcapkit.protocols.misc.raw import \
+                Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        else:
+            protocol = self.__proto__[proto]  # type: ignore[assignment]
+            if isinstance(protocol, ModuleDescriptor):
+                protocol = protocol.klass  # type: ignore[unreachable]
+                self.__proto__[proto] = protocol  # update mapping upon import
+
+        next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
+                         alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto)
+        return next_

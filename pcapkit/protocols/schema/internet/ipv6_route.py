@@ -24,10 +24,9 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any, Optional
+    from typing import Any
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict
@@ -52,7 +51,7 @@ def ipv6_route_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """
     type = cast('Enum_Routing', pkt['type'])
     schema = RoutingType.registry[type]
-    return SchemaField(length=pkt['length'] * 8 - 4, schema=schema)
+    return SchemaField(length=pkt['length'] * 8, schema=schema)
 
 
 @schema_final
