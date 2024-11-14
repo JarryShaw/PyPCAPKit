@@ -472,6 +472,10 @@
     <span class="c1">#: Early Hints [:rfc:`8297`]</span>
     <span class="n">CODE_103</span> <span class="o">=</span> <span class="mi">103</span><span class="p">,</span> <span class="s1">&#39;Early Hints&#39;</span>
 
+    <span class="c1">#: Upload Resumption Supported (TEMPORARY - registered 2024-11-13, expires</span>
+    <span class="c1">#: 2025-11-13) [draft-ietf-httpbis-resumable-upload-05]</span>
+    <span class="n">CODE_104</span> <span class="o">=</span> <span class="mi">104</span><span class="p">,</span> <span class="s1">&#39;Upload Resumption Supported&#39;</span>
+
     <span class="c1">#: OK [:rfc:`9110#section-15.3.1`]</span>
     <span class="n">CODE_200</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> <span class="s1">&#39;OK&#39;</span>
 
@@ -687,7 +691,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">100</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">599</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="k">if</span> <span class="mi">104</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">199</span><span class="p">:</span>
+        <span class="k">if</span> <span class="mi">105</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">199</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;CODE_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">209</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">225</span><span class="p">:</span>
@@ -746,7 +750,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=d93ed510"></script>
+</div><script src="../../../../_static/documentation_options.js?v=2b7d2ab1"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=4e2eecee"></script>
