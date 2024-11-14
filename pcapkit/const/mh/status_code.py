@@ -94,7 +94,7 @@ class StatusCode(IntEnum):
     #: MIPV6-MESG-ID-REQD [:rfc:`4285`]
     MIPV6_MESG_ID_REQD = 145
 
-    #: MIPV6-AUTH-FAIL [:rfc:`4285`]
+    #: MIPV6-AUTH-FAIL [:rfc:`4285`][RFC Errata 3463]
     MIPV6_AUTH_FAIL = 146
 
     #: Permanent home keygen token unavailable [:rfc:`4866`]

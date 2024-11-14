@@ -24,21 +24,20 @@ Octets      Bits        Name                    Description
 """
 import collections
 import ipaddress
+import math
 import os.path as os_path
 from typing import TYPE_CHECKING, cast, overload
 
-import math
-
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as Data_IPv6_Route
 from pcapkit.protocols.data.internet.ipv6_route import RPL as Data_RPL
+from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as Data_IPv6_Route
 from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as Data_SourceRoute
 from pcapkit.protocols.data.internet.ipv6_route import Type2 as Data_Type2
 from pcapkit.protocols.data.internet.ipv6_route import UnknownType as Data_UnknownType
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route as Schema_IPv6_Route
 from pcapkit.protocols.schema.internet.ipv6_route import RPL as Schema_RPL
+from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route as Schema_IPv6_Route
 from pcapkit.protocols.schema.internet.ipv6_route import SourceRoute as Schema_SourceRoute
 from pcapkit.protocols.schema.internet.ipv6_route import Type2 as Schema_Type2
 from pcapkit.protocols.schema.internet.ipv6_route import UnknownType as Schema_UnknownType

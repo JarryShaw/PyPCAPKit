@@ -54,6 +54,10 @@ class StatusCode(IntEnum):
     #: Early Hints [:rfc:`8297`]
     CODE_103 = 103, 'Early Hints'
 
+    #: Upload Resumption Supported (TEMPORARY - registered 2024-11-13, expires
+    #: 2025-11-13) [draft-ietf-httpbis-resumable-upload-05]
+    CODE_104 = 104, 'Upload Resumption Supported'
+
     #: OK [:rfc:`9110#section-15.3.1`]
     CODE_200 = 200, 'OK'
 
@@ -267,7 +271,7 @@ class StatusCode(IntEnum):
         """
         if not (isinstance(value, int) and 100 <= value <= 599):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 104 <= value <= 199:
+        if 105 <= value <= 199:
             #: Unassigned
             return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
         if 209 <= value <= 225:
