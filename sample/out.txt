@@ -155,12 +155,40 @@ Frame 3
   |     |     |-- checksum -> 7a 86
   |     |     |-- src -> 123.129.210.135
   |     |     |-- dst -> 192.168.1.100
-  |     |     |-- raw 
-  |     |     |     |-- protocol -> NIL
-  |     |     |     |-- error -> 'int' object has no attribute 'port'
-  |     |     |     |-- packet 
-  |     |     |           |--> 00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11 7c b0
-  |     |     |                7c 8e 00 00
+  |     |     |-- tcp 
+  |     |     |     |-- srcport 
+  |     |     |     |     |-- enum 
+  |     |     |     |     |     |--> AppType::www_http [www-http [80 -
+  |     |     |     |     |          tcp|udp]]
+  |     |     |     |     |-- svc -> www-http
+  |     |     |     |     |-- port -> 80
+  |     |     |     |     |-- proto -> TransportProtocol::tcp|udp [3]
+  |     |     |     |-- dstport 
+  |     |     |     |     |-- enum 
+  |     |     |     |     |     |--> AppType::PORT_55232_tcp [unknown [55232
+  |     |     |     |     |          - tcp]]
+  |     |     |     |     |-- svc -> unknown
+  |     |     |     |     |-- port -> 55232
+  |     |     |     |     |-- proto -> TransportProtocol::tcp [1]
+  |     |     |     |-- seq -> 3584012628
+  |     |     |     |-- ack -> 2793054463
+  |     |     |     |-- hdr_len -> 20
+  |     |     |     |-- flags 
+  |     |     |     |     |-- cwr -> False
+  |     |     |     |     |-- ece -> False
+  |     |     |     |     |-- urg -> False
+  |     |     |     |     |-- ack -> True
+  |     |     |     |     |-- psh -> False
+  |     |     |     |     |-- rst -> False
+  |     |     |     |     |-- syn -> False
+  |     |     |     |     |-- fin -> True
+  |     |     |     |-- window_size -> 31920
+  |     |     |     |-- checksum -> 7c 8e
+  |     |     |     |-- urgent_pointer -> 0
+  |     |     |     |-- connection -> Flags::ACK|FIN [34816]
+  |     |     |     |-- nopayload 
+  |     |     |     |     |-- packet  -> NIL
+  |     |     |     |-- packet  -> NIL
   |     |     |-- packet 
   |     |           |--> 00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11 7c b0
   |     |                7c 8e 00 00
@@ -168,7 +196,7 @@ Frame 3
   |           |--> 45 00 00 28 c5 34 40 00 2b 06 7a 86 7b 81 d2 87
   |                c0 a8 01 64 00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff
   |                50 11 7c b0 7c 8e 00 00
-  |-- protocols -> Ethernet:IPv4:Raw
+  |-- protocols -> Ethernet:IPv4:TCP
   |-- packet 
         |--> f5 a7 11 5a 8c de 0b 00 36 00 00 00 36 00 00 00
              b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00 45 00
@@ -212,12 +240,40 @@ Frame 4
   |     |     |-- checksum -> 2a bb
   |     |     |-- src -> 192.168.1.100
   |     |     |-- dst -> 123.129.210.135
-  |     |     |-- raw 
-  |     |     |     |-- protocol -> NIL
-  |     |     |     |-- error -> 'int' object has no attribute 'port'
-  |     |     |     |-- packet 
-  |     |     |           |--> d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10 ff ff
-  |     |     |                f9 3e 00 00
+  |     |     |-- tcp 
+  |     |     |     |-- srcport 
+  |     |     |     |     |-- enum 
+  |     |     |     |     |     |--> AppType::PORT_55232_tcp [unknown [55232
+  |     |     |     |     |          - tcp]]
+  |     |     |     |     |-- svc -> unknown
+  |     |     |     |     |-- port -> 55232
+  |     |     |     |     |-- proto -> TransportProtocol::tcp [1]
+  |     |     |     |-- dstport 
+  |     |     |     |     |-- enum 
+  |     |     |     |     |     |--> AppType::www_http [www-http [80 -
+  |     |     |     |     |          tcp|udp]]
+  |     |     |     |     |-- svc -> www-http
+  |     |     |     |     |-- port -> 80
+  |     |     |     |     |-- proto -> TransportProtocol::tcp|udp [3]
+  |     |     |     |-- seq -> 2793054463
+  |     |     |     |-- ack -> 3584012629
+  |     |     |     |-- hdr_len -> 20
+  |     |     |     |-- flags 
+  |     |     |     |     |-- cwr -> False
+  |     |     |     |     |-- ece -> False
+  |     |     |     |     |-- urg -> False
+  |     |     |     |     |-- ack -> True
+  |     |     |     |     |-- psh -> False
+  |     |     |     |     |-- rst -> False
+  |     |     |     |     |-- syn -> False
+  |     |     |     |     |-- fin -> False
+  |     |     |     |-- window_size -> 65535
+  |     |     |     |-- checksum -> f9 3e
+  |     |     |     |-- urgent_pointer -> 0
+  |     |     |     |-- connection -> Flags::ACK [2048]
+  |     |     |     |-- nopayload 
+  |     |     |     |     |-- packet  -> NIL
+  |     |     |     |-- packet  -> NIL
   |     |     |-- packet 
   |     |           |--> d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10 ff ff
   |     |                f9 3e 00 00
@@ -225,7 +281,7 @@ Frame 4
   |           |--> 45 00 00 28 00 00 40 00 40 06 2a bb c0 a8 01 64
   |                7b 81 d2 87 d7 c0 00 50 a6 7a a0 ff d5 9f b1 55
   |                50 10 ff ff f9 3e 00 00
-  |-- protocols -> Ethernet:IPv4:Raw
+  |-- protocols -> Ethernet:IPv4:TCP
   |-- packet 
         |--> f5 a7 11 5a 38 f1 0d 00 36 00 00 00 36 00 00 00
              b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00 45 00
@@ -269,12 +325,40 @@ Frame 5
   |     |     |-- checksum -> 2a bb
   |     |     |-- src -> 192.168.1.100
   |     |     |-- dst -> 123.129.210.135
-  |     |     |-- raw 
-  |     |     |     |-- protocol -> NIL
-  |     |     |     |-- error -> 'int' object has no attribute 'port'
-  |     |     |     |-- packet 
-  |     |     |           |--> d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11 ff ff
-  |     |     |                2a f4 00 00
+  |     |     |-- tcp 
+  |     |     |     |-- srcport 
+  |     |     |     |     |-- enum 
+  |     |     |     |     |     |--> AppType::PORT_55216_tcp [unknown [55216
+  |     |     |     |     |          - tcp]]
+  |     |     |     |     |-- svc -> unknown
+  |     |     |     |     |-- port -> 55216
+  |     |     |     |     |-- proto -> TransportProtocol::tcp [1]
+  |     |     |     |-- dstport 
+  |     |     |     |     |-- enum 
+  |     |     |     |     |     |--> AppType::www_http [www-http [80 -
+  |     |     |     |     |          tcp|udp]]
+  |     |     |     |     |-- svc -> www-http
+  |     |     |     |     |-- port -> 80
+  |     |     |     |     |-- proto -> TransportProtocol::tcp|udp [3]
+  |     |     |     |-- seq -> 768904481
+  |     |     |     |-- ack -> 1835365486
+  |     |     |     |-- hdr_len -> 20
+  |     |     |     |-- flags 
+  |     |     |     |     |-- cwr -> False
+  |     |     |     |     |-- ece -> False
+  |     |     |     |     |-- urg -> False
+  |     |     |     |     |-- ack -> True
+  |     |     |     |     |-- psh -> False
+  |     |     |     |     |-- rst -> False
+  |     |     |     |     |-- syn -> False
+  |     |     |     |     |-- fin -> True
+  |     |     |     |-- window_size -> 65535
+  |     |     |     |-- checksum -> 2a f4
+  |     |     |     |-- urgent_pointer -> 0
+  |     |     |     |-- connection -> Flags::ACK|FIN [34816]
+  |     |     |     |-- nopayload 
+  |     |     |     |     |-- packet  -> NIL
+  |     |     |     |-- packet  -> NIL
   |     |     |-- packet 
   |     |           |--> d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11 ff ff
   |     |                2a f4 00 00
@@ -282,7 +366,7 @@ Frame 5
   |           |--> 45 00 00 28 00 00 40 00 40 06 2a bb c0 a8 01 64
   |                7b 81 d2 87 d7 b0 00 50 2d d4 8d 21 6d 65 74 6e
   |                50 11 ff ff 2a f4 00 00
-  |-- protocols -> Ethernet:IPv4:Raw
+  |-- protocols -> Ethernet:IPv4:TCP
   |-- packet 
         |--> f7 a7 11 5a 13 05 01 00 9f 00 00 00 9f 00 00 00
              ff ff ff ff ff ff b8 f8 83 a5 f9 47 08 00 45 00
@@ -326,18 +410,44 @@ Frame 6
   |     |     |-- checksum -> 78 b3
   |     |     |-- src -> 192.168.1.1
   |     |     |-- dst -> 255.255.255.255
-  |     |     |-- raw 
-  |     |     |     |-- protocol -> NIL
-  |     |     |     |-- error -> 'int' object has no attribute 'port'
+  |     |     |-- udp 
+  |     |     |     |-- srcport 
+  |     |     |     |     |-- enum 
+  |     |     |     |     |     |--> AppType::unassigned_37444 [unassigned
+  |     |     |     |     |          [37444 - undefined]]
+  |     |     |     |     |-- svc -> unassigned
+  |     |     |     |     |-- port -> 37444
+  |     |     |     |     |-- proto -> TransportProtocol::undefined [0]
+  |     |     |     |-- dstport 
+  |     |     |     |     |-- enum 
+  |     |     |     |     |     |--> AppType::commplex_link [commplex-link
+  |     |     |     |     |          [5001 - tcp|udp]]
+  |     |     |     |     |-- svc -> commplex-link
+  |     |     |     |     |-- port -> 5001
+  |     |     |     |     |-- proto -> TransportProtocol::tcp|udp [3]
+  |     |     |     |-- len -> 125
+  |     |     |     |-- checksum -> 63 b1
+  |     |     |     |-- raw 
+  |     |     |     |     |-- protocol -> NIL
+  |     |     |     |     |-- error -> NIL
+  |     |     |     |     |-- packet 
+  |     |     |     |           |--> 01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06
+  |     |     |     |                00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03
+  |     |     |     |                36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46
+  |     |     |     |                38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00
+  |     |     |     |                0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a
+  |     |     |     |                74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c
+  |     |     |     |                2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05
+  |     |     |     |                31 2e 37 2e 34
   |     |     |     |-- packet 
-  |     |     |           |--> 92 44 13 89 00 7d 63 b1 01 01 0e 00 e1 2b 83 c7
-  |     |     |                f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57 44 52
-  |     |     |                36 33 30 30 00 0b 00 03 36 2e 30 00 07 00 01 01
-  |     |     |                00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41 35 2d
-  |     |     |                46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31 36 38
-  |     |     |                2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69 6e 2e
-  |     |     |                63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33 30 30
-  |     |     |                20 36 2e 30 00 0c 00 05 31 2e 37 2e 34
+  |     |     |           |--> 01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06
+  |     |     |                00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03
+  |     |     |                36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46
+  |     |     |                38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00
+  |     |     |                0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a
+  |     |     |                74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c
+  |     |     |                2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05
+  |     |     |                31 2e 37 2e 34
   |     |     |-- packet 
   |     |           |--> 92 44 13 89 00 7d 63 b1 01 01 0e 00 e1 2b 83 c7
   |     |                f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57 44 52
@@ -358,5 +468,5 @@ Frame 6
   |                67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52
   |                36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e
   |                34
-  |-- protocols -> Ethernet:IPv4:Raw
+  |-- protocols -> Ethernet:IPv4:UDP:Raw
   |-- packet  -> NIL

@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING, Generic, cast
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -227,7 +227,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         if TYPE_CHECKING:
             protocol: 'Type[Protocol]'
 
-        if payload is not None:
+        if payload is None:
             file_ = self.__header__.get_payload()
         else:
             file_ = payload

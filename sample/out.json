@@ -177,13 +177,51 @@
 				},
 				"src": "123.129.210.135",
 				"dst": "192.168.1.100",
-        "raw": {
-          "protocol": null,
-          "error": "'int' object has no attribute 'port'",
+        "tcp": {
+          "srcport": {
+            "enum": "AppType::www_http [www-http [80 - tcp|udp]]",
+            "svc": "www-http",
+            "port": 80,
+            "proto": "TransportProtocol::tcp|udp [3]"
+          },
+          "dstport": {
+            "enum": "AppType::PORT_55232_tcp [unknown [55232 - tcp]]",
+            "svc": "unknown",
+            "port": 55232,
+            "proto": "TransportProtocol::tcp [1]"
+          },
+          "seq": 3584012628,
+          "ack": 2793054463,
+          "hdr_len": 20,
+          "flags": {
+            "cwr": false,
+            "ece": false,
+            "urg": false,
+            "ack": true,
+            "psh": false,
+            "rst": false,
+            "syn": false,
+            "fin": true
+          },
+          "window_size": 31920,
+          "checksum": {
+            "type": "bytes",
+            "value": "|\ufffd",
+            "hex": "7c8e"
+          },
+          "urgent_pointer": 0,
+          "connection": "Flags::ACK|FIN [34816]",
+          "nopayload": {
+            "packet": {
+              "type": "bytes",
+              "value": "",
+              "hex": ""
+            }
+          },
           "packet": {
             "type": "bytes",
-            "value": "\u0000P\ufffd\ufffd\u055f\ufffdT\ufffdz\ufffd\ufffdP\u0011|\ufffd|\ufffd\u0000\u0000",
-            "hex": "0050d7c0d59fb154a67aa0ff50117cb07c8e0000"
+            "value": "",
+            "hex": ""
           }
         },
         "packet": {
@@ -198,7 +236,7 @@
         "hex": "45000028c53440002b067a867b81d287c0a801640050d7c0d59fb154a67aa0ff50117cb07c8e0000"
       }
     },
-    "protocols": "Ethernet:IPv4:Raw",
+    "protocols": "Ethernet:IPv4:TCP",
     "packet": {
       "type": "bytes",
       "value": "\ufffd\ufffd\u0011Z\ufffd\ufffd\u000b\u00006\u0000\u0000\u00006\u0000\u0000\u0000\ufffd\ufffd\ufffd\ufffd\ufffdG\ufffd^`\ufffdk\ufffd\u0008\u0000E\u0000\u0000(\u0000\u0000@\u0000@\u0006*\ufffd\ufffd\ufffd\u0001d{\ufffd\u0487\ufffd\ufffd\u0000P",
@@ -247,13 +285,51 @@
 				},
 				"src": "192.168.1.100",
 				"dst": "123.129.210.135",
-        "raw": {
-          "protocol": null,
-          "error": "'int' object has no attribute 'port'",
+        "tcp": {
+          "srcport": {
+            "enum": "AppType::PORT_55232_tcp [unknown [55232 - tcp]]",
+            "svc": "unknown",
+            "port": 55232,
+            "proto": "TransportProtocol::tcp [1]"
+          },
+          "dstport": {
+            "enum": "AppType::www_http [www-http [80 - tcp|udp]]",
+            "svc": "www-http",
+            "port": 80,
+            "proto": "TransportProtocol::tcp|udp [3]"
+          },
+          "seq": 2793054463,
+          "ack": 3584012629,
+          "hdr_len": 20,
+          "flags": {
+            "cwr": false,
+            "ece": false,
+            "urg": false,
+            "ack": true,
+            "psh": false,
+            "rst": false,
+            "syn": false,
+            "fin": false
+          },
+          "window_size": 65535,
+          "checksum": {
+            "type": "bytes",
+            "value": "\ufffd>",
+            "hex": "f93e"
+          },
+          "urgent_pointer": 0,
+          "connection": "Flags::ACK [2048]",
+          "nopayload": {
+            "packet": {
+              "type": "bytes",
+              "value": "",
+              "hex": ""
+            }
+          },
           "packet": {
             "type": "bytes",
-            "value": "\ufffd\ufffd\u0000P\ufffdz\ufffd\ufffd\u055f\ufffdUP\u0010\ufffd\ufffd\ufffd>\u0000\u0000",
-            "hex": "d7c00050a67aa0ffd59fb1555010fffff93e0000"
+            "value": "",
+            "hex": ""
           }
         },
         "packet": {
@@ -268,7 +344,7 @@
         "hex": "450000280000400040062abbc0a801647b81d287d7c00050a67aa0ffd59fb1555010fffff93e0000"
       }
     },
-    "protocols": "Ethernet:IPv4:Raw",
+    "protocols": "Ethernet:IPv4:TCP",
     "packet": {
       "type": "bytes",
       "value": "\ufffd\ufffd\u0011Z8\ufffd\r\u00006\u0000\u0000\u00006\u0000\u0000\u0000\ufffd\ufffd\ufffd\ufffd\ufffdG\ufffd^`\ufffdk\ufffd\u0008\u0000E\u0000\u0000(\u0000\u0000@\u0000@\u0006*\ufffd\ufffd\ufffd\u0001d{\ufffd\u0487\u05f0\u0000P",
@@ -317,13 +393,51 @@
 				},
 				"src": "192.168.1.100",
 				"dst": "123.129.210.135",
-        "raw": {
-          "protocol": null,
-          "error": "'int' object has no attribute 'port'",
+        "tcp": {
+          "srcport": {
+            "enum": "AppType::PORT_55216_tcp [unknown [55216 - tcp]]",
+            "svc": "unknown",
+            "port": 55216,
+            "proto": "TransportProtocol::tcp [1]"
+          },
+          "dstport": {
+            "enum": "AppType::www_http [www-http [80 - tcp|udp]]",
+            "svc": "www-http",
+            "port": 80,
+            "proto": "TransportProtocol::tcp|udp [3]"
+          },
+          "seq": 768904481,
+          "ack": 1835365486,
+          "hdr_len": 20,
+          "flags": {
+            "cwr": false,
+            "ece": false,
+            "urg": false,
+            "ack": true,
+            "psh": false,
+            "rst": false,
+            "syn": false,
+            "fin": true
+          },
+          "window_size": 65535,
+          "checksum": {
+            "type": "bytes",
+            "value": "*\ufffd",
+            "hex": "2af4"
+          },
+          "urgent_pointer": 0,
+          "connection": "Flags::ACK|FIN [34816]",
+          "nopayload": {
+            "packet": {
+              "type": "bytes",
+              "value": "",
+              "hex": ""
+            }
+          },
           "packet": {
             "type": "bytes",
-            "value": "\u05f0\u0000P-\u050d!metnP\u0011\ufffd\ufffd*\ufffd\u0000\u0000",
-            "hex": "d7b000502dd48d216d65746e5011ffff2af40000"
+            "value": "",
+            "hex": ""
           }
         },
         "packet": {
@@ -338,7 +452,7 @@
         "hex": "450000280000400040062abbc0a801647b81d287d7b000502dd48d216d65746e5011ffff2af40000"
 			}
 		},
-    "protocols": "Ethernet:IPv4:Raw",
+    "protocols": "Ethernet:IPv4:TCP",
     "packet": {
       "type": "bytes",
       "value": "\ufffd\ufffd\u0011Z\u0013\u0005\u0001\u0000\ufffd\u0000\u0000\u0000\ufffd\u0000\u0000\u0000\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdG\u0008\u0000E\u0000\u0000\ufffd\u0000\u0000@\u0000@\u0011x\ufffd\ufffd\ufffd\u0001\u0001\ufffd\ufffd\ufffd\ufffd\ufffdD\u0013\ufffd",
@@ -387,13 +501,38 @@
 				},
 				"src": "192.168.1.1",
 				"dst": "255.255.255.255",
-        "raw": {
-          "protocol": null,
-          "error": "'int' object has no attribute 'port'",
+        "udp": {
+          "srcport": {
+            "enum": "AppType::unassigned_37444 [unassigned [37444 - undefined]]",
+            "svc": "unassigned",
+            "port": 37444,
+            "proto": "TransportProtocol::undefined [0]"
+          },
+          "dstport": {
+            "enum": "AppType::commplex_link [commplex-link [5001 - tcp|udp]]",
+            "svc": "commplex-link",
+            "port": 5001,
+            "proto": "TransportProtocol::tcp|udp [3]"
+          },
+          "len": 125,
+          "checksum": {
+            "type": "bytes",
+            "value": "c\ufffd",
+            "hex": "63b1"
+          },
+          "raw": {
+            "protocol": null,
+            "error": null,
+            "packet": {
+              "type": "bytes",
+              "value": "\u0001\u0001\u000e\u0000\ufffd+\ufffd\ufffd\ufffd\ufffd\u0000g\u0000\u0000\u0000\u0006\u0000\nTL-WDR6300\u0000\u000b\u0000\u00036.0\u0000\u0007\u0000\u0001\u0001\u0000\u0005\u0000\u0011B8-F8-83-A5-F9-47\u0000\u0008\u0000\u000b192.168.1.1\u0000\t\u0000\ntplogin.cn\u0000\n\u0000\u000eTL-WDR6300 6.0\u0000\f\u0000\u00051.7.4",
+              "hex": "01010e00e12b83c7f98b006700000006000a544c2d57445236333030000b0003362e3000070001010005001142382d46382d38332d41352d46392d34370008000b3139322e3136382e312e310009000a74706c6f67696e2e636e000a000e544c2d5744523633303020362e30000c0005312e372e34"
+            }
+          },
           "packet": {
             "type": "bytes",
-            "value": "\ufffdD\u0013\ufffd\u0000}c\ufffd\u0001\u0001\u000e\u0000\ufffd+\ufffd\ufffd\ufffd\ufffd\u0000g\u0000\u0000\u0000\u0006\u0000\nTL-WDR6300\u0000\u000b\u0000\u00036.0\u0000\u0007\u0000\u0001\u0001\u0000\u0005\u0000\u0011B8-F8-83-A5-F9-47\u0000\u0008\u0000\u000b192.168.1.1\u0000\t\u0000\ntplogin.cn\u0000\n\u0000\u000eTL-WDR6300 6.0\u0000\f\u0000\u00051.7.4",
-            "hex": "92441389007d63b101010e00e12b83c7f98b006700000006000a544c2d57445236333030000b0003362e3000070001010005001142382d46382d38332d41352d46392d34370008000b3139322e3136382e312e310009000a74706c6f67696e2e636e000a000e544c2d5744523633303020362e30000c0005312e372e34"
+            "value": "\u0001\u0001\u000e\u0000\ufffd+\ufffd\ufffd\ufffd\ufffd\u0000g\u0000\u0000\u0000\u0006\u0000\nTL-WDR6300\u0000\u000b\u0000\u00036.0\u0000\u0007\u0000\u0001\u0001\u0000\u0005\u0000\u0011B8-F8-83-A5-F9-47\u0000\u0008\u0000\u000b192.168.1.1\u0000\t\u0000\ntplogin.cn\u0000\n\u0000\u000eTL-WDR6300 6.0\u0000\f\u0000\u00051.7.4",
+            "hex": "01010e00e12b83c7f98b006700000006000a544c2d57445236333030000b0003362e3000070001010005001142382d46382d38332d41352d46392d34370008000b3139322e3136382e312e310009000a74706c6f67696e2e636e000a000e544c2d5744523633303020362e30000c0005312e372e34"
           }
         },
         "packet": {
@@ -408,7 +547,7 @@
         "hex": "4500009100004000401178b3c0a80101ffffffff92441389007d63b101010e00e12b83c7f98b006700000006000a544c2d57445236333030000b0003362e3000070001010005001142382d46382d38332d41352d46392d34370008000b3139322e3136382e312e310009000a74706c6f67696e2e636e000a000e544c2d5744523633303020362e30000c0005312e372e34"
 			}
 		},
-    "protocols": "Ethernet:IPv4:Raw",
+    "protocols": "Ethernet:IPv4:UDP:Raw",
     "packet": {
       "type": "bytes",
       "value": "",
