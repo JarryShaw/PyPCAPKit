@@ -93,10 +93,8 @@ else:
     tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
                          exception=BaseError, strict=False)
 
-from pcapkit.foundation.registry import *
 from pcapkit.interface import *
 from pcapkit.protocols import *
-from pcapkit.toolkit import *
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # Interface Functions
@@ -123,4 +121,4 @@ __all__ = [
 ]
 
 #: version number
-__version__ = "1.3.4"
+__version__ = "1.3.5"
