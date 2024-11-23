@@ -19846,6 +19846,11 @@ class AppType(StrEnum):
     #: [SCTP] Automatic Dependent Surveillance
     ads_c: 'AppType' = 5913, 'ads-c', TransportProtocol.get('sctp')
 
+    #: - [TCP] Security for Internet Protocol Suite
+    #: - [UDP] Security for Internet Protocol Suite
+    #: - [SCTP] Security for Internet Protocol Suite
+    ipsdtls: 'AppType' = 5914, 'ipsdtls', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+
     #: - [TCP] Indy Application Server
     #: - [UDP] Indy Application Server
     indy: 'AppType' = 5963, 'indy', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -27599,6 +27604,14 @@ class AppType(StrEnum):
     #: - [UDP] Adam Hall network control and monitoring
     adamhall: 'AppType' = -1, 'adamhall', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
+    #: - [TCP] ARN (Adaptive Routing Notification) is a protocol designed to enable
+    #:   dynamic routing adjustments by sharing network status information between
+    #:   nodes in data center networks, improving efficiency and fault tolerance.
+    #: - [UDP] ARN (Adaptive Routing Notification) is a protocol designed to enable
+    #:   dynamic routing adjustments by sharing network status information between
+    #:   nodes in data center networks, improving efficiency and fault tolerance.
+    adaptive_rn: 'AppType' = -1, 'adaptive-rn', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
     #: [N/A] Address-O-Matic
     addressbook: 'AppType' = -1, 'addressbook', TransportProtocol.get('undefined')
 
@@ -28484,6 +28497,9 @@ class AppType(StrEnum):
 
     #: [TCP] Protocol for home hub communication
     homekit: 'AppType' = -1, 'homekit', TransportProtocol.get('tcp')
+
+    #: [TCP] HomeWizard Local API
+    homewizard: 'AppType' = -1, 'homewizard', TransportProtocol.get('tcp')
 
     #: [UDP] Honeywell Video Systems
     honeywell_vid: 'AppType' = -1, 'honeywell-vid', TransportProtocol.get('udp')
@@ -30839,7 +30855,7 @@ class AppType(StrEnum):
         if 5901 <= value <= 5902:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 5914 <= value <= 5962:
+        if 5915 <= value <= 5962:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 5964 <= value <= 5967:
