@@ -10432,8 +10432,9 @@ class AppType(StrEnum):
     #: - [UDP] initlsmsad
     initlsmsad: 'AppType' = 2793, 'initlsmsad', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: [N/A] Unassigned
-    unassigned_2794: 'AppType' = 2794, 'unassigned', TransportProtocol.get('undefined')
+    #: - [TCP] Uniform Resource Platform
+    #: - [UDP] Uniform Resource Platform
+    urp: 'AppType' = 2794, 'urp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] LiveStats
     #: - [UDP] LiveStats
@@ -25468,6 +25469,9 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_18243: 'AppType' = 18243, 'reserved', TransportProtocol.get('udp')
 
+    #: [N/A] Unassigned
+    unassigned_18259: 'AppType' = 18259, 'unassigned', TransportProtocol.get('undefined')
+
     #: - [TCP] GV NetConfig Service
     #: - [UDP] GV NetConfig Service
     gv_pf: 'AppType' = 18262, 'gv-pf', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -32061,7 +32065,10 @@ class AppType(StrEnum):
         if 18188 <= value <= 18240:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 18244 <= value <= 18261:
+        if 18244 <= value <= 18258:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 18260 <= value <= 18261:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 18263 <= value <= 18462:

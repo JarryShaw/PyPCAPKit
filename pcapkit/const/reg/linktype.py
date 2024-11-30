@@ -31,22 +31,17 @@ class LinkType(IntEnum):
     #: [``DLT_AX25``] AX.25 packet, with nothing preceding it.
     AX25 = 3
 
-    #: [``DLT_PRONET``] Proteon ProNET Token Ring.
+    #: [``DLT_PRONET``] Reserved for Proteon ProNET Token Ring.
     PRONET = 4
 
-    #: [``DLT_CHAOS``] Chaos.
+    #: [``DLT_CHAOS``] Reserved for MIT Chaosnet.
     CHAOS = 5
 
     #: [``DLT_IEEE802``] IEEE 802.5 Token Ring; the IEEE802, without \_5, in the
     #: DLT\_ name is historical.
     IEEE802_5 = 6
 
-    #: [``DLT_ARCNET``] ARCNET Data Packets, as described by the ARCNET Trade
-    #: Association standard ATA 878.1-1999, but without the Starting Delimiter,
-    #: Information Length, or Frame Check Sequence fields, and with only the first
-    #: ISU of the Destination Identifier. For most packet types, ARCNET Trade
-    #: Association draft standard ATA 878.2 is also used. See also RFC 1051 and RFC
-    #: 1201; for RFC 1051 frames, ATA 878.2 is not used.
+    #: [``DLT_ARCNET``] Reserved for ARCNET Data Packets with BSD encapsulation.
     ARCNET_BSD = 7
 
     #: [``DLT_SLIP``] SLIP, with a header giving packet direction
@@ -169,15 +164,8 @@ class LinkType(IntEnum):
     #: the packet, e.g. signal strength and channel for 802.11 packets.
     TZSP = 128
 
-    #: [``DLT_ARCNET_LINUX``] ARCNET Data Packets, as described by the ARCNET Trade
-    #: Association standard ATA 878.1-1999, but without the Starting Delimiter,
-    #: Information Length, or Frame Check Sequence fields, with only the first ISU
-    #: of the Destination Identifier, and with an extra two-ISU offset field
-    #: following the Destination Identifier. For most packet types, ARCNET Trade
-    #: Association draft standard ATA 878.2 is also used; however, no exception
-    #: frames are supplied, and reassembled frames, rather than fragments, are
-    #: supplied. See also RFC 1051 and RFC 1201; for RFC 1051 frames, ATA 878.2 is
-    #: not used.
+    #: [``DLT_ARCNET_LINUX``] Reserved for ARCNET Data Packets with Linux
+    #: encapsulation.
     ARCNET_LINUX = 129
 
     #: [``DLT_JUNIPER_MLPPP``] Juniper Networks private data link type.
