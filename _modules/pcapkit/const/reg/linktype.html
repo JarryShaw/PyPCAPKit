@@ -449,22 +449,17 @@
     <span class="c1">#: [``DLT_AX25``] AX.25 packet, with nothing preceding it.</span>
     <span class="n">AX25</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: [``DLT_PRONET``] Proteon ProNET Token Ring.</span>
+    <span class="c1">#: [``DLT_PRONET``] Reserved for Proteon ProNET Token Ring.</span>
     <span class="n">PRONET</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: [``DLT_CHAOS``] Chaos.</span>
+    <span class="c1">#: [``DLT_CHAOS``] Reserved for MIT Chaosnet.</span>
     <span class="n">CHAOS</span> <span class="o">=</span> <span class="mi">5</span>
 
     <span class="c1">#: [``DLT_IEEE802``] IEEE 802.5 Token Ring; the IEEE802, without \_5, in the</span>
     <span class="c1">#: DLT\_ name is historical.</span>
     <span class="n">IEEE802_5</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: [``DLT_ARCNET``] ARCNET Data Packets, as described by the ARCNET Trade</span>
-    <span class="c1">#: Association standard ATA 878.1-1999, but without the Starting Delimiter,</span>
-    <span class="c1">#: Information Length, or Frame Check Sequence fields, and with only the first</span>
-    <span class="c1">#: ISU of the Destination Identifier. For most packet types, ARCNET Trade</span>
-    <span class="c1">#: Association draft standard ATA 878.2 is also used. See also RFC 1051 and RFC</span>
-    <span class="c1">#: 1201; for RFC 1051 frames, ATA 878.2 is not used.</span>
+    <span class="c1">#: [``DLT_ARCNET``] Reserved for ARCNET Data Packets with BSD encapsulation.</span>
     <span class="n">ARCNET_BSD</span> <span class="o">=</span> <span class="mi">7</span>
 
     <span class="c1">#: [``DLT_SLIP``] SLIP, with a header giving packet direction</span>
@@ -587,15 +582,8 @@
     <span class="c1">#: the packet, e.g. signal strength and channel for 802.11 packets.</span>
     <span class="n">TZSP</span> <span class="o">=</span> <span class="mi">128</span>
 
-    <span class="c1">#: [``DLT_ARCNET_LINUX``] ARCNET Data Packets, as described by the ARCNET Trade</span>
-    <span class="c1">#: Association standard ATA 878.1-1999, but without the Starting Delimiter,</span>
-    <span class="c1">#: Information Length, or Frame Check Sequence fields, with only the first ISU</span>
-    <span class="c1">#: of the Destination Identifier, and with an extra two-ISU offset field</span>
-    <span class="c1">#: following the Destination Identifier. For most packet types, ARCNET Trade</span>
-    <span class="c1">#: Association draft standard ATA 878.2 is also used; however, no exception</span>
-    <span class="c1">#: frames are supplied, and reassembled frames, rather than fragments, are</span>
-    <span class="c1">#: supplied. See also RFC 1051 and RFC 1201; for RFC 1051 frames, ATA 878.2 is</span>
-    <span class="c1">#: not used.</span>
+    <span class="c1">#: [``DLT_ARCNET_LINUX``] Reserved for ARCNET Data Packets with Linux</span>
+    <span class="c1">#: encapsulation.</span>
     <span class="n">ARCNET_LINUX</span> <span class="o">=</span> <span class="mi">129</span>
 
     <span class="c1">#: [``DLT_JUNIPER_MLPPP``] Juniper Networks private data link type.</span>
@@ -1354,7 +1342,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=2c53a2ce"></script>
+</div><script src="../../../../_static/documentation_options.js?v=0ce23825"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=4e2eecee"></script>
