@@ -19979,7 +19979,7 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_6077: 'AppType' = 6077, 'reserved', TransportProtocol.get('udp')
 
-    #: [UDP] Generic UDP Encapsulation [draft-herbert-gue]
+    #: [UDP] Generic UDP Encapsulation [draft-herbert-gue-02]
     gue: 'AppType' = 6080, 'gue', TransportProtocol.get('udp')
 
     #: [TCP] Reserved

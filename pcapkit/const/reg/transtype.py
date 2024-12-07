@@ -407,7 +407,7 @@ class TransType(IntEnum):
     SMP = 121
 
     #: Simple Multicast Protocol (deprecated)) [Jon Crowcroft][draft-perlman-
-    #: simple-multicast]
+    #: simple-multicast-03]
     SM = 122
 
     #: Performance Transparency Protocol [Michael Welzl]
