@@ -116,8 +116,8 @@ class AppType(StrEnum):
     def __hash__(self) -> 'int':
         return hash(self.port)
 
-    #: - [TCP] Reserved
-    #: - [UDP] Reserved
+    #: - [TCP] Reserved [:rfc:`6335`]
+    #: - [UDP] Reserved [:rfc:`6335`]
     reserved_0: 'AppType' = 0, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] TCP Port Service Multiplexer
@@ -3152,12 +3152,12 @@ class AppType(StrEnum):
     #: - [DCCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     exp2: 'AppType' = 1022, 'exp2', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp') | TransportProtocol.get('dccp')
 
-    #: - [TCP] Reserved
-    #: - [UDP] Reserved
+    #: - [TCP] Reserved [:rfc:`6335`]
+    #: - [UDP] Reserved [:rfc:`6335`]
     reserved_1023: 'AppType' = 1023, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] Reserved
-    #: - [UDP] Reserved
+    #: - [TCP] Reserved [:rfc:`6335`]
+    #: - [UDP] Reserved [:rfc:`6335`]
     reserved_1024: 'AppType' = 1024, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] network blackjack
@@ -27266,8 +27266,8 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_49150: 'AppType' = 49150, 'reserved', TransportProtocol.get('udp')
 
-    #: [N/A] IANA Reserved
-    iana_reserved: 'AppType' = 49151, 'iana_reserved', TransportProtocol.get('undefined')
+    #: [N/A] Reserved [:rfc:`6335`]
+    reserved_49151: 'AppType' = 49151, 'reserved', TransportProtocol.get('undefined')
 
     #: [N/A] ARGUS Protocol
     argus: 'AppType' = -1, 'argus', TransportProtocol.get('undefined')
@@ -30455,10 +30455,10 @@ class AppType(StrEnum):
         if value in cls.__members_proto__.get(TransportProtocol.undefined, {}):  # type: ignore[call-overload]
             return cls.__members_proto__[TransportProtocol.undefined][value]  # type: ignore[index]
         if 225 <= value <= 241:
-            #: [N/A] Reserved
+            #: [N/A] Reserved [:rfc:`1060`]
             return extend_enum(cls, 'reserved_%d' % value, value, 'reserved', TransportProtocol.get('undefined'))
         if 249 <= value <= 255:
-            #: [N/A] Reserved
+            #: [N/A] Reserved [:rfc:`1060`]
             return extend_enum(cls, 'reserved_%d' % value, value, 'reserved', TransportProtocol.get('undefined'))
         if 272 <= value <= 279:
             #: [N/A] Unassigned
