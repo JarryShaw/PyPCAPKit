@@ -482,6 +482,9 @@ class TransType(IntEnum):
     #: Homa [HomaModule][John Ousterhout]
     Homa = 146
 
+    #: Bit-stream Emulation [RFC-ietf-pals-ple-14]
+    BIT_EMU = 147
+
     #: Use for experimentation and testing [:rfc:`3692`]
     Use_for_experimentation_and_testing_253 = 253
 
@@ -517,7 +520,7 @@ class TransType(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 147 <= value <= 252:
+        if 148 <= value <= 252:
             #: Unassigned [Internet Assigned Numbers Authority]
             return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

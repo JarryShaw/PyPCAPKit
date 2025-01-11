@@ -45,6 +45,9 @@ class ExtensionHeader(IntEnum):
     #: Shim6, Shim6 Protocol [:rfc:`5533`]
     Shim6 = 140
 
+    #: BIT-EMU, Bit-stream Emulation [RFC-ietf-pals-ple-14]
+    BIT_EMU = 147
+
     #: Use for experimentation and testing [:rfc:`3692`]
     Use_for_experimentation_and_testing_253 = 253
 
