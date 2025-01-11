@@ -13,7 +13,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>How to … - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
@@ -439,7 +439,7 @@ its main interface. Several scenarios are shown as below.</p>
 <ol class="arabic">
 <li><p>extract a PCAP file and dump the result to a specific file
 (with no reassembly)</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pcapkit</span> <span class="kn">import</span> <span class="n">extract</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract</span>
 <span class="c1"># dump to a PLIST file with no frame storage (property frame disabled)</span>
 <span class="n">plist</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out.plist&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;plist&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="c1"># dump to a JSON file with no extension auto-complete</span>
@@ -451,7 +451,7 @@ its main interface. Several scenarios are shown as below.</p>
 </li>
 <li><p>extract a PCAP file and fetch IP packet (both IPv4 and IPv6) from a frame
 (with no output file)</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pcapkit</span> <span class="kn">import</span> <span class="n">IP</span><span class="p">,</span> <span class="n">extract</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span><span class="p">,</span> <span class="n">extract</span>
 <span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">frame0</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="c1"># check if IP (IPv4 or IPv6) in this frame</span>
@@ -464,7 +464,7 @@ its main interface. Several scenarios are shown as below.</p>
 </li>
 <li><p>extract a PCAP file and reassemble TCP payload
 (with no output file nor frame storage)</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pcapkit</span> <span class="kn">import</span> <span class="n">HTTP</span><span class="p">,</span> <span class="n">extract</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span><span class="p">,</span> <span class="n">extract</span>
 <span class="c1"># set strict to make sure full reassembly</span>
 <span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1"># print extracted packet if HTTP in reassembled payloads</span>

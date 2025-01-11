@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.protocols.link.vlan - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -439,34 +439,34 @@
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.vlan.priority_level</span> <span class="kn">import</span> <span class="n">PriorityLevel</span> <span class="k">as</span> <span class="n">Enum_PriorityLevel</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.vlan</span> <span class="kn">import</span> <span class="n">TCI</span> <span class="k">as</span> <span class="n">Data_TCI</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.vlan</span> <span class="kn">import</span> <span class="n">VLAN</span> <span class="k">as</span> <span class="n">Data_VLAN</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.link.link</span> <span class="kn">import</span> <span class="n">Link</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.link.vlan</span> <span class="kn">import</span> <span class="n">TCI</span> <span class="k">as</span> <span class="n">Schema_TCI</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.link.vlan</span> <span class="kn">import</span> <span class="n">VLAN</span> <span class="k">as</span> <span class="n">Schema_VLAN</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.vlan.priority_level</span><span class="w"> </span><span class="kn">import</span> <span class="n">PriorityLevel</span> <span class="k">as</span> <span class="n">Enum_PriorityLevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.vlan</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCI</span> <span class="k">as</span> <span class="n">Data_TCI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.vlan</span><span class="w"> </span><span class="kn">import</span> <span class="n">VLAN</span> <span class="k">as</span> <span class="n">Data_VLAN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.link</span><span class="w"> </span><span class="kn">import</span> <span class="n">Link</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.link.vlan</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCI</span> <span class="k">as</span> <span class="n">Schema_TCI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.link.vlan</span><span class="w"> </span><span class="kn">import</span> <span class="n">VLAN</span> <span class="k">as</span> <span class="n">Schema_VLAN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
-    <span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.link.vlan</span> <span class="kn">import</span> <span class="n">TCIType</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.link.vlan</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCIType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;VLAN&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="VLAN">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN">[docs]</a>
-<span class="k">class</span> <span class="nc">VLAN</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_VLAN</span><span class="p">,</span> <span class="n">Schema_VLAN</span><span class="p">],</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">VLAN</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_VLAN</span><span class="p">,</span> <span class="n">Schema_VLAN</span><span class="p">],</span>
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_VLAN</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_VLAN</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements 802.1Q Customer VLAN Tag Type.&quot;&quot;&quot;</span>
 
@@ -475,27 +475,27 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;802.1Q Customer VLAN Tag Type&quot;]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;802.1Q Customer VLAN Tag Type&quot;]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;802.1Q Customer VLAN Tag Type&#39;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;802.1Q&quot;]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;802.1Q&quot;]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;802.1Q&#39;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">info_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;c_tag&quot;]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">info_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;c_tag&quot;]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Key name of the :attr:`info` dict.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;c_tag&#39;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">4</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>
 
@@ -505,7 +505,7 @@
 
 <div class="viewcode-block" id="VLAN.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.read">[docs]</a>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_VLAN&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_VLAN&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read 802.1Q Customer VLAN Tag Type.</span>
 
 <span class="sd">        Structure of 802.1Q Customer VLAN Tag Type [`IEEE 802.1Q &lt;https://standards.ieee.org/ieee/802.1Q/6844/&gt;`__]:</span>
@@ -548,7 +548,7 @@
 
 <div class="viewcode-block" id="VLAN.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.make">[docs]</a>
-    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">tci</span><span class="p">:</span> <span class="s1">&#39;Optional[Schema_TCI | TCIType]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">pcp</span><span class="p">:</span> <span class="s1">&#39;Enum_PriorityLevel | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_PriorityLevel</span><span class="o">.</span><span class="n">BE</span><span class="p">,</span>
              <span class="n">pcp_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -609,14 +609,14 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">4</span>
 
 <div class="viewcode-block" id="VLAN.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.__index__">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Raises:</span>
@@ -633,7 +633,7 @@
 <div class="viewcode-block" id="VLAN._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_VLAN&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_VLAN&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>

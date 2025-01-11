@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.corekit.io - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -425,26 +425,26 @@
 <span class="sd">implementation to :class:`io.BufferedReader`.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">io</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">SeekError</span><span class="p">,</span> <span class="n">TruncateError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">SeekError</span><span class="p">,</span> <span class="n">TruncateError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span>
                                           <span class="n">UnsupportedOperation</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">SeekWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeekWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span><span class="p">,</span> <span class="n">RawIOBase</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesIO</span><span class="p">,</span> <span class="n">RawIOBase</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Buffer</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Buffer</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SeekableReader&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="SeekableReader">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader">[docs]</a>
-<span class="k">class</span> <span class="nc">SeekableReader</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BufferedReader</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SeekableReader</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BufferedReader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Seekable buffered reader.</span>
 
 <span class="sd">    A buffered binary stream providing higher-level access to a readable, non seekable</span>
@@ -496,22 +496,22 @@
         <span class="n">_buffer_file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes] | None&#39;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">closed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">closed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;:data:`True` if the stream is closed.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RawIOBase&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RawIOBase&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The underlying raw stream (a :class:`~io.RawIOBase` instance) that</span>
 <span class="sd">        :class:`~io.BufferedIOBase` deals with. This is not part of the :class:`~io.BufferedIOBase`</span>
 <span class="sd">        API and may not exist on some implementations.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;RawIOBase&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
 
     <span class="nd">@raw</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">&#39;RawIOBase&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">&#39;RawIOBase&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">&quot;can&#39;t set attribute&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span>
                  <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                  <span class="n">stream_closing</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;RawIOBase&#39;</span><span class="p">,</span> <span class="n">raw</span><span class="p">),</span> <span class="n">buffer_size</span><span class="p">)</span>
@@ -538,7 +538,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">_write_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
@@ -564,7 +564,7 @@
 
 <div class="viewcode-block" id="SeekableReader.close">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.close">[docs]</a>
-    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flush and close this stream. This method has no effect if the file is already closed.</span>
 <span class="sd">        Once the file is closed, any operation on the file (e.g. reading or writing) will raise</span>
 <span class="sd">        a :exc:`ValueError`.</span>
@@ -588,7 +588,7 @@
 
 <div class="viewcode-block" id="SeekableReader.fileno">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.fileno">[docs]</a>
-    <span class="k">def</span> <span class="nf">fileno</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fileno</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the underlying file descriptor (an integer) of the stream if it exists.</span>
 <span class="sd">        An :exc:`OSError` is raised if the IO object does not use a file descriptor.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">fileno</span><span class="p">()</span></div>
@@ -596,7 +596,7 @@
 
 <div class="viewcode-block" id="SeekableReader.flush">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.flush">[docs]</a>
-    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flush the write buffers of the stream if applicable. This does nothing for</span>
 <span class="sd">        read-only and non-blocking streams.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -606,7 +606,7 @@
 
 <div class="viewcode-block" id="SeekableReader.isatty">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.isatty">[docs]</a>
-    <span class="k">def</span> <span class="nf">isatty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">isatty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return :data:`True` if the stream is interactive (i.e., connected to a</span>
 <span class="sd">        terminal/tty device).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">isatty</span><span class="p">()</span></div>
@@ -614,7 +614,7 @@
 
 <div class="viewcode-block" id="SeekableReader.readable">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readable">[docs]</a>
-    <span class="k">def</span> <span class="nf">readable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">readable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return :data:`True` if the stream can be read from. If :data:`False`,</span>
 <span class="sd">        :meth:`read` will raise :exc:`OSError`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">readable</span><span class="p">()</span></div>
@@ -622,7 +622,7 @@
 
 <div class="viewcode-block" id="SeekableReader.readline">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readline">[docs]</a>
-    <span class="k">def</span> <span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Read and return one line from the stream. If ``size`` is specified, at most</span>
 <span class="sd">        ``size`` bytes will be read.</span>
 
@@ -656,7 +656,7 @@
 
 <div class="viewcode-block" id="SeekableReader.readlines">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readlines">[docs]</a>
-    <span class="k">def</span> <span class="nf">readlines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hint</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[bytes]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">readlines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hint</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[bytes]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and return a list of lines from the stream. ``hint`` can be specified to control</span>
 <span class="sd">        the number of lines read: no more lines will be read if the total size (in</span>
 <span class="sd">        bytes/characters) of all lines so far exceeds ``hint``.</span>
@@ -689,7 +689,7 @@
 
 <div class="viewcode-block" id="SeekableReader.seek">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.seek">[docs]</a>
-    <span class="k">def</span> <span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">whence</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">whence</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Change the stream position to the given byte ``offset``. ``offset`` is interpreted</span>
 <span class="sd">        relative to the position indicated by ``whence``. The default value for ``whence`` is</span>
 <span class="sd">        :data:`~io.SEEK_SET`. Values for ``whence`` are:</span>
@@ -745,7 +745,7 @@
 
 <div class="viewcode-block" id="SeekableReader.seekable">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.seekable">[docs]</a>
-    <span class="k">def</span> <span class="nf">seekable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">seekable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return :data:`True` if the stream supports random access. If :data:`False`,</span>
 <span class="sd">        :meth:`seek`, :meth:`tell` and :meth:`truncate` will raise :exc:`OSError`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span></div>
@@ -753,14 +753,14 @@
 
 <div class="viewcode-block" id="SeekableReader.tell">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.tell">[docs]</a>
-    <span class="k">def</span> <span class="nf">tell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the current stream position.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span></div>
 
 
 <div class="viewcode-block" id="SeekableReader.truncate">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.truncate">[docs]</a>
-    <span class="k">def</span> <span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resize the stream to the given ``size`` in bytes (or the current position if ``size`` is</span>
 <span class="sd">        not specified). The current stream position isn&#39;t changed. This resizing can extend or</span>
 <span class="sd">        reduce the current file size. In case of extension, the contents of the new file area</span>
@@ -790,20 +790,20 @@
 
 <div class="viewcode-block" id="SeekableReader.writeable">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.writeable">[docs]</a>
-    <span class="k">def</span> <span class="nf">writeable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">writeable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return :obj:`True` if the stream supports writing. If :obj:`False`, :meth:`write` and</span>
 <span class="sd">        :meth:`truncate` will raise :exc:`OSError`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-    <span class="k">def</span> <span class="nf">writelines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="s1">&#39;Iterable[Buffer]&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">writelines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="s1">&#39;Iterable[Buffer]&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write a list of lines to the stream. Line separators are not added, so it is usual for</span>
 <span class="sd">        each of the lines provided to have a line separator at the end.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s1">&#39;write&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SeekableReader.detach">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.detach">[docs]</a>
-    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RawIOBase&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RawIOBase&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Separate the underlying raw stream from the buffer and return it.</span>
 
 <span class="sd">        After the raw stream has been detached, the buffer is in an unusable state.</span>
@@ -819,7 +819,7 @@
 
 <div class="viewcode-block" id="SeekableReader.read">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.read">[docs]</a>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and return ``size`` bytes, or if ``size`` is not given or negative, until EOF or if</span>
 <span class="sd">        the read call would block in non-blocking mode.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -848,7 +848,7 @@
 
 <div class="viewcode-block" id="SeekableReader.read1">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.read1">[docs]</a>
-    <span class="k">def</span> <span class="nf">read1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int | None&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and return up to ``size`` bytes with only one call on the raw stream. If at least</span>
 <span class="sd">        one byte is buffered, only buffered bytes are returned. Otherwise, one raw stream read call</span>
 <span class="sd">        is made.&quot;&quot;&quot;</span>
@@ -885,7 +885,7 @@
 
 <div class="viewcode-block" id="SeekableReader.readinto">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readinto">[docs]</a>
-    <span class="k">def</span> <span class="nf">readinto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">readinto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read bytes into a pre-allocated, writable :term:`bytes-like object` ``b`` and return the</span>
 <span class="sd">        number of bytes read. For example, ``b`` might be a :obj:`bytearray`.</span>
 
@@ -908,7 +908,7 @@
 
 <div class="viewcode-block" id="SeekableReader.readinto1">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readinto1">[docs]</a>
-    <span class="k">def</span> <span class="nf">readinto1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">readinto1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read bytes into a pre-allocated, writable :term:`bytes-like object` ``b``, using at most</span>
 <span class="sd">        one call to the underlying raw stream&#39;s :meth:`read` (or :meth:`readinto`) method. Return</span>
 <span class="sd">        the number of bytes read.</span>
@@ -929,7 +929,7 @@
 
 <div class="viewcode-block" id="SeekableReader.write">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.write">[docs]</a>
-    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the given :term:`bytes-like object`, ``b``, and return the number of bytes written</span>
 <span class="sd">        (always equal to the length of ``b`` in bytes, since if the write fails an :exc:`OSError`</span>
 <span class="sd">        will be raised).  Depending on the actual implementation, these bytes may be readily written</span>
@@ -947,7 +947,7 @@
 
 <div class="viewcode-block" id="SeekableReader.peek">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.peek">[docs]</a>
-    <span class="k">def</span> <span class="nf">peek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">peek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return bytes from the stream without advancing the position.</span>
 
 <span class="sd">        At most one single read on the raw stream is done to satisfy the call.</span>

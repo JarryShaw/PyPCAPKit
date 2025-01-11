@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.protocols.application.ftp - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -427,24 +427,24 @@
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.ftp.command</span> <span class="kn">import</span> <span class="n">Command</span> <span class="k">as</span> <span class="n">Enum_Command</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.ftp.return_code</span> <span class="kn">import</span> <span class="n">ReturnCode</span> <span class="k">as</span> <span class="n">Enum_ReturnCode</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.application.application</span> <span class="kn">import</span> <span class="n">Application</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.ftp</span> <span class="kn">import</span> <span class="n">FTP</span> <span class="k">as</span> <span class="n">Data_FTP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.ftp</span> <span class="kn">import</span> <span class="n">Request</span> <span class="k">as</span> <span class="n">Data_Request</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.ftp</span> <span class="kn">import</span> <span class="n">Response</span> <span class="k">as</span> <span class="n">Data_Response</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.ftp</span> <span class="kn">import</span> <span class="n">FTP</span> <span class="k">as</span> <span class="n">Schema_FTP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">StrEnum</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ftp.command</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span> <span class="k">as</span> <span class="n">Enum_Command</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ftp.return_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReturnCode</span> <span class="k">as</span> <span class="n">Enum_ReturnCode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ftp</span><span class="w"> </span><span class="kn">import</span> <span class="n">FTP</span> <span class="k">as</span> <span class="n">Data_FTP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ftp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span> <span class="k">as</span> <span class="n">Data_Request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ftp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Response</span> <span class="k">as</span> <span class="n">Data_Response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.ftp</span><span class="w"> </span><span class="kn">import</span> <span class="n">FTP</span> <span class="k">as</span> <span class="n">Schema_FTP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FTP&#39;</span><span class="p">,</span> <span class="s1">&#39;FTP_DATA&#39;</span><span class="p">]</span>
 
@@ -455,7 +455,7 @@
 
 <div class="viewcode-block" id="Type">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.Type">[docs]</a>
-<span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;FTP packet type.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Request packet.</span>
@@ -467,7 +467,7 @@
 
 <div class="viewcode-block" id="FTP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP">[docs]</a>
-<span class="k">class</span> <span class="nc">FTP</span><span class="p">(</span><span class="n">Application</span><span class="p">[</span><span class="n">Data_FTP</span><span class="p">,</span> <span class="n">Schema_FTP</span><span class="p">],</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FTP</span><span class="p">(</span><span class="n">Application</span><span class="p">[</span><span class="n">Data_FTP</span><span class="p">,</span> <span class="n">Schema_FTP</span><span class="p">],</span>
           <span class="n">data</span><span class="o">=</span><span class="n">Data_FTP</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Schema_FTP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements File Transfer Protocol.&quot;&quot;&quot;</span>
 
@@ -476,12 +476,12 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;File Transfer Protocol&quot;]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;File Transfer Protocol&quot;]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;File Transfer Protocol&#39;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.</span>
 
 <span class="sd">        Raises:</span>
@@ -496,7 +496,7 @@
 
 <div class="viewcode-block" id="FTP.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.read">[docs]</a>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_FTP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_FTP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read File Transfer Protocol (FTP).</span>
 
 <span class="sd">        Args:</span>
@@ -548,7 +548,7 @@
 
 <div class="viewcode-block" id="FTP.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.make">[docs]</a>
-    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">cmmd</span><span class="p">:</span> <span class="s1">&#39;Optional[Enum_Command | str | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[Enum_ReturnCode | int | str | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Optional[str | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -603,7 +603,7 @@
 <div class="viewcode-block" id="FTP._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_FTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_FTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>
@@ -625,7 +625,7 @@
 
 <div class="viewcode-block" id="FTP_DATA">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA">[docs]</a>
-<span class="k">class</span> <span class="nc">FTP_DATA</span><span class="p">(</span><span class="n">Raw</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FTP_DATA</span><span class="p">(</span><span class="n">Raw</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements FTP data channel transmission.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -634,7 +634,7 @@
 
     <span class="c1"># name of current protocol</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;FTP_DATA&quot;]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;FTP_DATA&quot;]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;FTP_DATA&#39;</span></div>
 

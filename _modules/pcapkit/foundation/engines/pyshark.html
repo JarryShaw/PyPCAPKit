@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.foundation.engines.pyshark - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -426,25 +426,25 @@
 <span class="sd">.. _PyShark: https://kiminewt.github.io/pyshark</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.engine</span> <span class="kn">import</span> <span class="n">EngineBase</span> <span class="k">as</span> <span class="n">Engine</span>
-<span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly</span> <span class="kn">import</span> <span class="n">ReassemblyManager</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">stacklevel</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span> <span class="k">as</span> <span class="n">Engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PyShark&#39;</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">pyshark.capture.file_capture</span> <span class="kn">import</span> <span class="n">FileCapture</span>
-    <span class="kn">from</span> <span class="nn">pyshark.packet.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">PySharkPacket</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.capture.file_capture</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileCapture</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">PySharkPacket</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
 
 <div class="viewcode-block" id="PyShark">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark">[docs]</a>
-<span class="k">class</span> <span class="nc">PyShark</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">&#39;PySharkPacket&#39;</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PyShark</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">&#39;PySharkPacket&#39;</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;PyShark engine support.</span>
 
 <span class="sd">    Args:</span>
@@ -452,7 +452,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">pyshark</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pyshark</span>
 
         <span class="c1">#: Engine extraction package.</span>
         <span class="n">_expkg</span><span class="p">:</span> <span class="s1">&#39;pyshark&#39;</span>
@@ -473,8 +473,8 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">pyshark</span>  <span class="c1"># isort:skip</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pyshark</span>  <span class="c1"># isort:skip</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">pyshark</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;FileCapture&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -487,7 +487,7 @@
 
 <div class="viewcode-block" id="PyShark.run">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark.run">[docs]</a>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Call :class:`pyshark.FileCapture` to extract PCAP files.</span>
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;PyShark._expkg&gt;`</span>
@@ -531,7 +531,7 @@
 
 <div class="viewcode-block" id="PyShark.read_frame">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark.read_frame">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PySharkPacket&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PySharkPacket&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read frames with PyShark engine.</span>
 
 <span class="sd">        Returns:</span>
@@ -542,7 +542,7 @@
 <span class="sd">            for more operational information.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.pyshark</span> <span class="kn">import</span> <span class="n">packet2dict</span><span class="p">,</span> <span class="n">tcp_traceflow</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pyshark</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2dict</span><span class="p">,</span> <span class="n">tcp_traceflow</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
         <span class="c1"># fetch PyShark packet</span>
@@ -582,7 +582,7 @@
 
 <div class="viewcode-block" id="PyShark.close">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark.close">[docs]</a>
-    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Close engine.</span>
 
 <span class="sd">        This method is to be used for closing the engine instance. It is to</span>

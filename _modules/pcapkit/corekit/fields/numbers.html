@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.corekit.fields.numbers - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -417,14 +417,14 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;numerical field class&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">enum</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">import</span> <span class="nn">aenum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">NoValue</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">IntError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">NoValue</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;NumberField&#39;</span><span class="p">,</span>
@@ -436,20 +436,20 @@
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
-    <span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">NoValueType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValueType</span>
 
 <span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_T&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="NumberField">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField">[docs]</a>
-<span class="k">class</span> <span class="nc">NumberField</span><span class="p">(</span><span class="n">Field</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NumberField</span><span class="p">(</span><span class="n">Field</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Numerical value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -469,11 +469,11 @@
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[bool]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bit_length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bit_length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Field bit length.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int | Callable[[dict[str, Any]], int]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int | Callable[[dict[str, Any]], int]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int | NoValueType&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="s1">&#39;big&#39;</span><span class="p">,</span>
                  <span class="n">bit_length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -503,7 +503,7 @@
 
 <div class="viewcode-block" id="NumberField.__call__">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.__call__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
 
 <span class="sd">        Args:</span>
@@ -531,7 +531,7 @@
 
 <div class="viewcode-block" id="NumberField.build_template">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.build_template">[docs]</a>
-    <span class="k">def</span> <span class="nf">build_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Build template for field.</span>
 
 <span class="sd">        Arguments:</span>
@@ -558,7 +558,7 @@
 
 <div class="viewcode-block" id="NumberField.pre_process">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.pre_process">[docs]</a>
-    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value before construction (packing).</span>
 
 <span class="sd">        Arguments:</span>
@@ -588,7 +588,7 @@
 
 <div class="viewcode-block" id="NumberField.post_process">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.post_process">[docs]</a>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value after parsing (unpacked).</span>
 
 <span class="sd">        Args:</span>
@@ -610,7 +610,7 @@
 
 <div class="viewcode-block" id="Int32Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int32Field">[docs]</a>
-<span class="k">class</span> <span class="nc">Int32Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Int32Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -632,7 +632,7 @@
 
 <div class="viewcode-block" id="UInt32Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field">[docs]</a>
-<span class="k">class</span> <span class="nc">UInt32Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UInt32Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsigned integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -654,7 +654,7 @@
 
 <div class="viewcode-block" id="Int16Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int16Field">[docs]</a>
-<span class="k">class</span> <span class="nc">Int16Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Int16Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Short integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -676,7 +676,7 @@
 
 <div class="viewcode-block" id="UInt16Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt16Field">[docs]</a>
-<span class="k">class</span> <span class="nc">UInt16Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UInt16Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsigned short integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -698,7 +698,7 @@
 
 <div class="viewcode-block" id="Int64Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int64Field">[docs]</a>
-<span class="k">class</span> <span class="nc">Int64Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Int64Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Long integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -720,7 +720,7 @@
 
 <div class="viewcode-block" id="UInt64Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt64Field">[docs]</a>
-<span class="k">class</span> <span class="nc">UInt64Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UInt64Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsigned long integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -742,7 +742,7 @@
 
 <div class="viewcode-block" id="Int8Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int8Field">[docs]</a>
-<span class="k">class</span> <span class="nc">Int8Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Int8Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Byte value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -764,7 +764,7 @@
 
 <div class="viewcode-block" id="UInt8Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt8Field">[docs]</a>
-<span class="k">class</span> <span class="nc">UInt8Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UInt8Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsigned byte value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -786,7 +786,7 @@
 
 <div class="viewcode-block" id="EnumField">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField">[docs]</a>
-<span class="k">class</span> <span class="nc">EnumField</span><span class="p">(</span><span class="n">NumberField</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">]]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EnumField</span><span class="p">(</span><span class="n">NumberField</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">]]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerated value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
@@ -802,7 +802,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span><span class="p">,</span>
                  <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;StdlibEnum | AenumEnum | NoValueType&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="s1">&#39;big&#39;</span><span class="p">,</span>
                  <span class="n">bit_length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -814,7 +814,7 @@
 
 <div class="viewcode-block" id="EnumField.post_process">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField.post_process">[docs]</a>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;StdlibEnum | AenumEnum&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;StdlibEnum | AenumEnum&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value after parsing (unpacked).</span>
 
 <span class="sd">        Args:</span>

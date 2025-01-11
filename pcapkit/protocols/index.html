@@ -13,7 +13,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>Protocol Family - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -873,7 +873,7 @@ shall not convert them into <a class="reference external" href="https://docs.pyt
 <div class="admonition-examples admonition">
 <p class="admonition-title">Examples</p>
 <p>To create an enumeration mapping supported schema, simply</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MySchema</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">MyEnum</span><span class="p">]):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MySchema</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">MyEnum</span><span class="p">]):</span>
 
     <span class="c1"># optional, set the default schema for enumeration mapping</span>
     <span class="c1"># if the enumeration number is not found in the mapping</span>
@@ -882,10 +882,10 @@ shall not convert them into <a class="reference external" href="https://docs.pyt
 </div>
 <p>then, you can use inheritance to create a list of schemas
 for this given enumeration mapping:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">OneSchema</span><span class="p">(</span><span class="n">MySchema</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">MyEnum</span><span class="o">.</span><span class="n">ONE</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">OneSchema</span><span class="p">(</span><span class="n">MySchema</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">MyEnum</span><span class="o">.</span><span class="n">ONE</span><span class="p">):</span>
     <span class="o">...</span>
 
-<span class="k">class</span> <span class="nc">MultipleSchema</span><span class="p">(</span><span class="n">MySchema</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">MyEnum</span><span class="o">.</span><span class="n">TWO</span><span class="p">,</span> <span class="n">MyEnum</span><span class="o">.</span><span class="n">THREE</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MultipleSchema</span><span class="p">(</span><span class="n">MySchema</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">MyEnum</span><span class="o">.</span><span class="n">TWO</span><span class="p">,</span> <span class="n">MyEnum</span><span class="o">.</span><span class="n">THREE</span><span class="p">]):</span>
     <span class="o">...</span>
 </pre></div>
 </div>
@@ -1043,13 +1043,13 @@ attributes of the <a class="reference internal" href="#pcapkit.protocols.schema.
 will inherit the additional and excluded field names from the base
 classes, as well as populating the additional and excluded field
 from the subclass attributes.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">A</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]</span>
 
-<span class="k">class</span> <span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]</span>
 
-<span class="k">class</span> <span class="nc">C</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># [&#39;a&#39;, &#39;b&#39;]</span>

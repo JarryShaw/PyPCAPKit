@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.protocols.data.internet.ipv6_route - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -417,16 +417,16 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;data model for IPv6 Routing Header&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">info_final</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6Address</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.routing</span> <span class="kn">import</span> <span class="n">Routing</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Routing</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;IPv6_Route&#39;</span><span class="p">,</span>
@@ -437,7 +437,7 @@
 
 <div class="viewcode-block" id="IPv6_Route">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route">[docs]</a>
-<span class="k">class</span> <span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv6-Route protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Next header.</span>
@@ -454,14 +454,14 @@
 <div class="viewcode-block" id="UnknownType">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.UnknownType">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">UnknownType</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UnknownType</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv6-Route unknown type.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Data.</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                      <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
 
 
@@ -469,14 +469,14 @@
 <div class="viewcode-block" id="SourceRoute">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.SourceRoute">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">SourceRoute</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SourceRoute</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv6-Route Source Route data type.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Source addresses.</span>
     <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv6Address, ...]&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                      <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv6Address, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
 
 
@@ -484,14 +484,14 @@
 <div class="viewcode-block" id="Type2">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.Type2">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">Type2</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Type2</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv6-Route Type 2 data type.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Address.</span>
     <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                      <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
 
 
@@ -499,7 +499,7 @@
 <div class="viewcode-block" id="RPL">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.RPL">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">RPL</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RPL</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for RPL Source data type.&quot;&quot;&quot;</span>
 
     <span class="c1">#: CmprI.</span>
@@ -512,7 +512,7 @@
     <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv6Address | bytes, ...]&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                      <span class="n">cmpr_i</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cmpr_e</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pad</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv6Address | bytes, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
 
 </pre></div>

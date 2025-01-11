@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.protocols.data.application.httpv1 - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -417,19 +417,19 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;data model for HTTP/1.* protocol&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">info_final</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.const.http.method</span> <span class="kn">import</span> <span class="n">Method</span> <span class="k">as</span> <span class="n">Enum_Method</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.const.http.status_code</span> <span class="kn">import</span> <span class="n">StatusCode</span> <span class="k">as</span> <span class="n">Enum_StatusCode</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv1</span> <span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">HTTP_Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.method</span><span class="w"> </span><span class="kn">import</span> <span class="n">Method</span> <span class="k">as</span> <span class="n">Enum_Method</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.status_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatusCode</span> <span class="k">as</span> <span class="n">Enum_StatusCode</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">HTTP_Type</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;HTTP&#39;</span><span class="p">,</span>
@@ -442,7 +442,7 @@
 <div class="viewcode-block" id="HTTP">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.HTTP">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">HTTP</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HTTP</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/1.* protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">#: HTTP receipt.</span>
@@ -453,13 +453,13 @@
     <span class="n">body</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">receipt</span><span class="p">:</span> <span class="s1">&#39;Header&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[str, str]&#39;</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">receipt</span><span class="p">:</span> <span class="s1">&#39;Header&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[str, str]&#39;</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
 <div class="viewcode-block" id="Header">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.Header">[docs]</a>
-<span class="k">class</span> <span class="nc">Header</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Header</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/1.* header line.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Receipt type.</span>
@@ -470,7 +470,7 @@
 <div class="viewcode-block" id="RequestHeader">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.RequestHeader">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">RequestHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RequestHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/1.* request header line.&quot;&quot;&quot;</span>
 
     <span class="c1">#: HTTP request header line.</span>
@@ -483,14 +483,14 @@
     <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;HTTP_Type&#39;</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="s1">&#39;Enum_Method&#39;</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;HTTP_Type&#39;</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="s1">&#39;Enum_Method&#39;</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
 <div class="viewcode-block" id="ResponseHeader">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.ResponseHeader">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">ResponseHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ResponseHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/1.* response header line.&quot;&quot;&quot;</span>
 
     <span class="c1">#: HTTP response header line.</span>
@@ -503,7 +503,7 @@
     <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;HTTP_Type&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">&#39;Enum_StatusCode&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;HTTP_Type&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">&#39;Enum_StatusCode&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

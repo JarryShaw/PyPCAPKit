@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.interface.misc - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -425,21 +425,21 @@
 <span class="sd">generally provided per user&#39;s requests.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
-<span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
-<span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.tcp</span> <span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">stacklevel</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Packet</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
     <span class="n">ByteOrder</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;little&#39;</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">]</span>
     <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;pcap&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="s1">&#39;plist&#39;</span><span class="p">]</span>
@@ -455,7 +455,7 @@
 <div class="viewcode-block" id="Stream">
 <a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.Stream">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">Stream</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Stream</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP streams.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Output filename.</span>
@@ -466,13 +466,13 @@
     <span class="n">conversations</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes | tuple[bytes, ...], ...]&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;tuple[Packet, ...]&#39;</span><span class="p">,</span> <span class="n">conversations</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes | tuple[bytes, ...], ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;tuple[Packet, ...]&#39;</span><span class="p">,</span> <span class="n">conversations</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes | tuple[bytes, ...], ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 
 
 <div class="viewcode-block" id="follow_tcp_stream">
 <a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.follow_tcp_stream">[docs]</a>
-<span class="k">def</span> <span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extrator options</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extrator options</span>
                       <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">&#39;Optional[Engines]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TraceFlow options # pylint: disable=redefined-builtin</span>
                       <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;ByteOrder&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Stream, ...]&#39;</span><span class="p">:</span>
@@ -506,11 +506,11 @@
 
     <span class="n">fallback</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;dpkt&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.dpkt</span> <span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
     <span class="k">elif</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;scapy&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.scapy</span> <span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.pcap</span> <span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="n">fallback</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">streams</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Stream]</span>

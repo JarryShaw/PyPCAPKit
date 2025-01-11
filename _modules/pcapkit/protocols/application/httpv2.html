@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.protocols.application.httpv2 - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -440,61 +440,61 @@
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/HTTP/2</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.http.error_code</span> <span class="kn">import</span> <span class="n">ErrorCode</span> <span class="k">as</span> <span class="n">Enum_ErrorCode</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.http.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Enum_Frame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.http.setting</span> <span class="kn">import</span> <span class="n">Setting</span> <span class="k">as</span> <span class="n">Enum_Setting</span>
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.application.http</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPBase</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">ContinuationFrame</span> <span class="k">as</span> <span class="n">Data_ContinuationFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> \
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.error_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorCode</span> <span class="k">as</span> <span class="n">Enum_ErrorCode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Enum_Frame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.setting</span><span class="w"> </span><span class="kn">import</span> <span class="n">Setting</span> <span class="k">as</span> <span class="n">Enum_Setting</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContinuationFrame</span> <span class="k">as</span> <span class="n">Data_ContinuationFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">ContinuationFrameFlags</span> <span class="k">as</span> <span class="n">Data_ContinuationFrameFlags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">Data_DataFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">DataFrameFlags</span> <span class="k">as</span> <span class="n">Data_DataFrameFlags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">GoawayFrame</span> <span class="k">as</span> <span class="n">Data_GoawayFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">HeadersFrame</span> <span class="k">as</span> <span class="n">Data_HeadersFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">HeadersFrameFlags</span> <span class="k">as</span> <span class="n">Data_HeadersFrameFlags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">PingFrame</span> <span class="k">as</span> <span class="n">Data_PingFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">PingFrameFlags</span> <span class="k">as</span> <span class="n">Data_PingFrameFlags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">PriorityFrame</span> <span class="k">as</span> <span class="n">Data_PriorityFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">PushPromiseFrame</span> <span class="k">as</span> <span class="n">Data_PushPromiseFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> \
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">Data_DataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrameFlags</span> <span class="k">as</span> <span class="n">Data_DataFrameFlags</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">GoawayFrame</span> <span class="k">as</span> <span class="n">Data_GoawayFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HeadersFrame</span> <span class="k">as</span> <span class="n">Data_HeadersFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HeadersFrameFlags</span> <span class="k">as</span> <span class="n">Data_HeadersFrameFlags</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">PingFrame</span> <span class="k">as</span> <span class="n">Data_PingFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">PingFrameFlags</span> <span class="k">as</span> <span class="n">Data_PingFrameFlags</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">PriorityFrame</span> <span class="k">as</span> <span class="n">Data_PriorityFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">PushPromiseFrame</span> <span class="k">as</span> <span class="n">Data_PushPromiseFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">PushPromiseFrameFlags</span> <span class="k">as</span> <span class="n">Data_PushPromiseFrameFlags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">RSTStreamFrame</span> <span class="k">as</span> <span class="n">Data_RSTStreamFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">SettingsFrame</span> <span class="k">as</span> <span class="n">Data_SettingsFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">SettingsFrameFlags</span> <span class="k">as</span> <span class="n">Data_SettingsFrameFlags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">UnassignedFrame</span> <span class="k">as</span> <span class="n">Data_UnassignedFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">WindowUpdateFrame</span> <span class="k">as</span> <span class="n">Data_WindowUpdateFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Schema_HTTP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> \
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">RSTStreamFrame</span> <span class="k">as</span> <span class="n">Data_RSTStreamFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">SettingsFrame</span> <span class="k">as</span> <span class="n">Data_SettingsFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">SettingsFrameFlags</span> <span class="k">as</span> <span class="n">Data_SettingsFrameFlags</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnassignedFrame</span> <span class="k">as</span> <span class="n">Data_UnassignedFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">WindowUpdateFrame</span> <span class="k">as</span> <span class="n">Data_WindowUpdateFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Schema_HTTP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">ContinuationFrame</span> <span class="k">as</span> <span class="n">Schema_ContinuationFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">Schema_DataFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">FrameType</span> <span class="k">as</span> <span class="n">Schema_FrameType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">GoawayFrame</span> <span class="k">as</span> <span class="n">Schema_GoawayFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">HeadersFrame</span> <span class="k">as</span> <span class="n">Schema_HeadersFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">PingFrame</span> <span class="k">as</span> <span class="n">Schema_PingFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">PriorityFrame</span> <span class="k">as</span> <span class="n">Schema_PriorityFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">PushPromiseFrame</span> <span class="k">as</span> <span class="n">Schema_PushPromiseFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">RSTStreamFrame</span> <span class="k">as</span> <span class="n">Schema_RSTStreamFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">SettingPair</span> <span class="k">as</span> <span class="n">Schema_SettingPair</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">SettingsFrame</span> <span class="k">as</span> <span class="n">Schema_SettingsFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> <span class="n">UnassignedFrame</span> <span class="k">as</span> <span class="n">Schema_UnassignedFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv2</span> <span class="kn">import</span> \
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">Schema_DataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameType</span> <span class="k">as</span> <span class="n">Schema_FrameType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">GoawayFrame</span> <span class="k">as</span> <span class="n">Schema_GoawayFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HeadersFrame</span> <span class="k">as</span> <span class="n">Schema_HeadersFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">PingFrame</span> <span class="k">as</span> <span class="n">Schema_PingFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">PriorityFrame</span> <span class="k">as</span> <span class="n">Schema_PriorityFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">PushPromiseFrame</span> <span class="k">as</span> <span class="n">Schema_PushPromiseFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">RSTStreamFrame</span> <span class="k">as</span> <span class="n">Schema_RSTStreamFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">SettingPair</span> <span class="k">as</span> <span class="n">Schema_SettingPair</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">SettingsFrame</span> <span class="k">as</span> <span class="n">Schema_SettingsFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnassignedFrame</span> <span class="k">as</span> <span class="n">Schema_UnassignedFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">WindowUpdateFrame</span> <span class="k">as</span> <span class="n">Schema_WindowUpdateFrame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span>
 
-    <span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
-    <span class="kn">from</span> <span class="nn">mypy_extensions</span> <span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="n">Flags</span> <span class="o">=</span> <span class="n">Schema_FrameType</span><span class="o">.</span><span class="n">Flags</span>
 
@@ -507,7 +507,7 @@
 
 <div class="viewcode-block" id="HTTP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP">[docs]</a>
-<span class="k">class</span> <span class="nc">HTTP</span><span class="p">(</span><span class="n">HTTPBase</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">,</span> <span class="n">Schema_HTTP</span><span class="p">],</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HTTP</span><span class="p">(</span><span class="n">HTTPBase</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">,</span> <span class="n">Schema_HTTP</span><span class="p">],</span>
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_HTTP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Hypertext Transfer Protocol (HTTP/2).</span>
 
@@ -584,17 +584,17 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;HTTP/2&quot;]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;HTTP/2&quot;]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;HTTP/2&#39;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[9]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[9]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">9</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;2&quot;]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;2&quot;]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Version of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;2&#39;</span>
 
@@ -604,7 +604,7 @@
 
 <div class="viewcode-block" id="HTTP.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.read">[docs]</a>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HTTP&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HTTP&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Hypertext Transfer Protocol (HTTP/2).</span>
 
 <span class="sd">        Structure of HTTP/2 packet [:rfc:`7540`]:</span>
@@ -655,7 +655,7 @@
 
 <div class="viewcode-block" id="HTTP.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.make">[docs]</a>
-    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="c1"># type: ignore[override]</span>
              <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Frame | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">,</span>
              <span class="n">type_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -725,7 +725,7 @@
 <div class="viewcode-block" id="HTTP.id">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.id">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;HTTP&quot;], Literal[&quot;HTTPv2&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;HTTP&quot;], Literal[&quot;HTTPv2&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -738,7 +738,7 @@
 <div class="viewcode-block" id="HTTP.register_frame">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.register_frame">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register_frame</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Frame&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[FrameParser, FrameConstructor]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_frame</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Frame&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[FrameParser, FrameConstructor]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register a frame parser.</span>
 
 <span class="sd">        Args:</span>
@@ -755,7 +755,7 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[9]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[9]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Total length of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">9</span>
 
@@ -766,7 +766,7 @@
 <div class="viewcode-block" id="HTTP._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>
@@ -787,7 +787,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_none">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_none">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_UnassignedFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_UnassignedFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UnassignedFrame&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP packet with unassigned type.</span>
 
@@ -818,7 +818,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_DataFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_DataFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_DataFrame&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``DATA`` frames.</span>
 
@@ -872,7 +872,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_headers">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_headers">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_HeadersFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_HeadersFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HeadersFrame&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``HEADERS`` frames.</span>
 
@@ -935,7 +935,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_priority">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_priority">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PriorityFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PriorityFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PriorityFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PRIORITY`` frames.</span>
 
@@ -983,7 +983,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_rst_stream">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_rst_stream">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_RSTStreamFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_RSTStreamFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                               <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_RSTStreamFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``RST_STREAM`` frames.</span>
 
@@ -1027,7 +1027,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_settings">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_settings">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_SettingsFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_SettingsFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_SettingsFrame&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``SETTINGS`` frames.</span>
 
@@ -1088,7 +1088,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_push_promise">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_push_promise">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_push_promise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PushPromiseFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_push_promise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PushPromiseFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                 <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PushPromiseFrame&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PUSH_PROMISE`` frames.</span>
 
@@ -1149,7 +1149,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_ping">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_ping">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PingFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PingFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PingFrame&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PING`` frames.</span>
 
@@ -1202,7 +1202,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_goaway">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_goaway">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_GoawayFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_GoawayFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_GoawayFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``GOAWAY`` frames.</span>
 
@@ -1249,7 +1249,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_window_update">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_window_update">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_window_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_WindowUpdateFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_window_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_WindowUpdateFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                  <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_WindowUpdateFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``WINDOW_UPDATE`` frames.</span>
 
@@ -1293,7 +1293,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_continuation">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_continuation">[docs]</a>
-    <span class="k">def</span> <span class="nf">_read_http_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_ContinuationFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_ContinuationFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                 <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_ContinuationFrame&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``CONTINUATION`` frames.</span>
 
@@ -1341,7 +1341,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_none">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_none">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_UnassignedFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_UnassignedFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_UnassignedFrame, Flags]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 unassigned frame type.</span>
@@ -1365,7 +1365,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_DataFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_DataFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">end_stream</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                         <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                         <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
@@ -1400,7 +1400,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_headers">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_headers">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_HeadersFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_HeadersFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">end_stream</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                            <span class="n">end_headers</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                            <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -1462,7 +1462,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_priority">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_priority">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PriorityFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PriorityFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">sid_dep</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                             <span class="n">excl_dep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -1496,7 +1496,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_rst_stream">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_rst_stream">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_RSTStreamFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_RSTStreamFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                               <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;Enum_ErrorCode | str | int | StdlibEnum | AenumEnum&#39;</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">HTTP_1_1_REQUIRED</span><span class="p">,</span>
                               <span class="n">error_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                               <span class="n">error_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -1526,7 +1526,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_settings">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_settings">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_SettingsFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_SettingsFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="n">settings</span><span class="p">:</span> <span class="s1">&#39;Optional[OrderedMultiDict[Enum_Setting, int] | bytes | list[Schema_SettingPair | tuple[Enum_Setting, int]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_SettingsFrame, Flags]&#39;</span><span class="p">:</span>
@@ -1581,7 +1581,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_push_promise">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_push_promise">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_push_promise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PushPromiseFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_push_promise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PushPromiseFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                 <span class="n">end_headers</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                 <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                 <span class="n">promised_sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -1624,7 +1624,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_ping">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_ping">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PingFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PingFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                         <span class="n">opaque_data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_PingFrame, Flags]&#39;</span><span class="p">:</span>
@@ -1655,7 +1655,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_goaway">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_goaway">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_GoawayFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_GoawayFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">last_sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;Enum_ErrorCode | str | int | StdlibEnum | AenumEnum&#39;</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">HTTP_1_1_REQUIRED</span><span class="p">,</span>
                           <span class="n">error_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1698,7 +1698,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_window_update">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_window_update">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_window_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_WindowUpdateFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_window_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_WindowUpdateFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                  <span class="n">incr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_WindowUpdateFrame, Flags]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``WINDOW_UPDATE`` frame.</span>
@@ -1724,7 +1724,7 @@
 
 <div class="viewcode-block" id="HTTP._make_http_continuation">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_continuation">[docs]</a>
-    <span class="k">def</span> <span class="nf">_make_http_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_ContinuationFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_ContinuationFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                 <span class="n">end_headers</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                 <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_ContinuationFrame, Flags]&#39;</span><span class="p">:</span>

@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>pcapkit.protocols.link.rarp - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -443,22 +443,22 @@
 <span class="sd">.. [*] http://en.wikipedia.org/wiki/Address_Resolution_Protocol</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.arp</span> <span class="kn">import</span> <span class="n">ARP</span> <span class="k">as</span> <span class="n">Data_ARP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.link.arp</span> <span class="kn">import</span> <span class="n">ARP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.link.arp</span> <span class="kn">import</span> <span class="n">ARP</span> <span class="k">as</span> <span class="n">Schema_ARP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.arp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARP</span> <span class="k">as</span> <span class="n">Data_ARP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.arp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.link.arp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARP</span> <span class="k">as</span> <span class="n">Schema_ARP</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RARP&#39;</span><span class="p">,</span> <span class="s1">&#39;DRARP&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="RARP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP">[docs]</a>
-<span class="k">class</span> <span class="nc">RARP</span><span class="p">(</span><span class="n">ARP</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Schema_ARP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_ARP</span><span class="p">):</span>  <span class="c1"># pylint: disable=abstract-method</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RARP</span><span class="p">(</span><span class="n">ARP</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Schema_ARP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_ARP</span><span class="p">):</span>  <span class="c1"># pylint: disable=abstract-method</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Reverse Address Resolution Protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -468,7 +468,7 @@
 <div class="viewcode-block" id="RARP.id">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP.id">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;RARP&quot;], Literal[&quot;DRARP&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;RARP&quot;], Literal[&quot;DRARP&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;RARP&#39;</span><span class="p">,</span> <span class="s1">&#39;DRARP&#39;</span><span class="p">)</span></div>
 
@@ -480,7 +480,7 @@
 <div class="viewcode-block" id="RARP.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP.__index__">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -496,7 +496,7 @@
 
 <div class="viewcode-block" id="DRARP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/rarp.html#pcapkit.protocols.link.rarp.DRARP">[docs]</a>
-<span class="k">class</span> <span class="nc">DRARP</span><span class="p">(</span><span class="n">RARP</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DRARP</span><span class="p">(</span><span class="n">RARP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Dynamic Reverse Address Resolution Protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -506,7 +506,7 @@
 <div class="viewcode-block" id="DRARP.id">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/rarp.html#pcapkit.protocols.link.rarp.DRARP.id">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;DRARP&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;DRARP&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;DRARP&#39;</span><span class="p">,)</span></div>
 </div>

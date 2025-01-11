@@ -13,7 +13,7 @@
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>Customisation &amp; Extensions - PyPCAPKit</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
@@ -630,24 +630,24 @@ demonstration purpose, we use the IPv4 protocol as an example, where the
 comprehensive implementation can be found in the
 <a class="reference internal" href="pcapkit/protocols/internet/ipv4.html#module-pcapkit.protocols.internet.ipv4" title="pcapkit.protocols.internet.ipv4"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv4</span></code></a> module.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>  <span class="c1"># import base class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>  <span class="c1"># import base class</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>  <span class="c1"># import data class</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>  <span class="c1"># import schema class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>  <span class="c1"># import data class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>  <span class="c1"># import schema class</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.ipaddress</span> <span class="kn">import</span> <span class="n">IPv4AddressField</span>  <span class="c1"># import field class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4AddressField</span>  <span class="c1"># import field class</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span>  <span class="c1"># import protocol code registry</span>
-<span class="kn">from</span> <span class="nn">pcapkit.foundation.registry.protocols</span> <span class="kn">import</span> <span class="n">register_ethertype</span>  <span class="c1"># import protocol registry API</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span>  <span class="c1"># import protocol code registry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_ethertype</span>  <span class="c1"># import protocol registry API</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
 
-<span class="k">class</span> <span class="nc">IPv4Data</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>  <span class="c1"># define data model</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPv4Data</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>  <span class="c1"># define data model</span>
 
     <span class="o">...</span>
     <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span>  <span class="c1"># source address</span>
@@ -655,7 +655,7 @@ comprehensive implementation can be found in the
     <span class="o">...</span>
 
 
-<span class="k">class</span> <span class="nc">IPv4Schema</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>  <span class="c1"># define fields</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPv4Schema</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>  <span class="c1"># define fields</span>
 
     <span class="o">...</span>
     <span class="n">src</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
@@ -663,17 +663,17 @@ comprehensive implementation can be found in the
     <span class="o">...</span>
 
 
-<span class="k">class</span> <span class="nc">MyIPv4</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">IPv4Data</span><span class="p">,</span> <span class="n">IPv4Schema</span><span class="p">],</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyIPv4</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">IPv4Data</span><span class="p">,</span> <span class="n">IPv4Schema</span><span class="p">],</span>
              <span class="n">schema</span><span class="o">=</span><span class="n">IPv4Schema</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">IPv4Data</span><span class="p">):</span>  <span class="c1"># define protocol class</span>
 
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Data&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Data&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># infer length of packet from data</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>  <span class="c1"># get schema</span>
 
         <span class="k">return</span> <span class="n">IPv4Data</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Schema&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Schema&#39;</span><span class="p">:</span>
         <span class="o">...</span>
 
         <span class="k">return</span> <span class="n">IPv4Schema</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
@@ -836,31 +836,31 @@ file formats:</p>
 <p>The following code snippet shows how to create a new engine class:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Following is a PoC implementation of a new engine based on <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.6.1.dev20)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a>. For documentation
+<p>Following is a PoC implementation of a new engine based on <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.6.1.dev23)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a>. For documentation
 purposes, we use the <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a> engine as an example,
 where the comprehensive implementation can be found in the <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.scapy" title="pcapkit.foundation.engines.scapy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.scapy</span></code></a>
 module.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.engine</span> <span class="kn">import</span> <span class="n">Engine</span>  <span class="c1"># import base class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span>  <span class="c1"># import base class</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
-    <span class="kn">from</span> <span class="nn">scapy.packet</span> <span class="kn">import</span> <span class="n">Packet</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
 
-<span class="k">class</span> <span class="nc">MyScapy</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">&#39;Packet&#39;</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyScapy</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">&#39;Packet&#39;</span><span class="p">]):</span>
 
     <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">&#39;Scapy&#39;</span>  <span class="c1"># friendly name of the engine</span>
     <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">&#39;scapy&#39;</span>  <span class="c1"># module name that the engine is based on</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="c1"># NOTE: the API entry point of the underlying engine module should</span>
         <span class="c1"># be imported here, instead of at the top of the module, to avoid</span>
         <span class="c1"># dependency issues.</span>
-        <span class="kn">from</span> <span class="nn">scapy</span> <span class="kn">import</span> <span class="n">sendrecv</span>  <span class="c1"># import API entry point</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sendrecv</span>  <span class="c1"># import API entry point</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">sendrecv</span>  <span class="c1"># store API entry point</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># intermediate storage for the interator</span>
@@ -874,7 +874,7 @@ module.</p>
     <span class="c1"># iterator instance that yields the network packets, and store it in</span>
     <span class="c1"># the intermediate storage, i.e., self._extmp for further processing,</span>
     <span class="c1"># using the API entry point as in the self._expkg attribute.</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>  <span class="c1"># get extractor instance</span>
 
         <span class="c1"># NOTE: You may wish to do some pre-processing here, e.g., to</span>
@@ -888,7 +888,7 @@ module.</p>
             <span class="c1"># third-party libraries, e.g., the `packet2chain` function is</span>
             <span class="c1"># to convert a given Packet instance of the Scapy library to a</span>
             <span class="c1"># human-readable string, which is used for verbose output.</span>
-            <span class="kn">from</span> <span class="nn">pcapkit.toolkit.scapy</span> <span class="kn">import</span> <span class="n">pack2chain</span>  <span class="c1"># import utility function</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">pack2chain</span>  <span class="c1"># import utility function</span>
 
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">extractor</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">extractor</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">pack2chain</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -907,8 +907,8 @@ module.</p>
     <span class="c1"># network packets for further processing. It is also expected to handle</span>
     <span class="c1"># necessary actions, including but not limited to, verbose output, file</span>
     <span class="c1"># output, reassembly and flow tracing, etc.</span>
-    <span class="k">def</span> <span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Packet&#39;</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.scapy</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Packet&#39;</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span>
                                            <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>  <span class="c1"># import utility functions</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>  <span class="c1"># get extractor instance</span>
 
@@ -1037,34 +1037,34 @@ documentation purposes, we use the <a class="reference internal" href="pcapkit/d
 dumper as an example, where the comprehensive implementation can be found
 in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit.pcap</span></code> module.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">Dumper</span>  <span class="c1"># import base class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>  <span class="c1"># import base class</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span>  <span class="c1"># import PCAP header class</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span>  <span class="c1"># import PCAP frame class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span>  <span class="c1"># import PCAP header class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>  <span class="c1"># import PCAP frame class</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 
 <span class="c1"># NOTE: We need to specify the output file format and extension here at the</span>
 <span class="c1"># class definition, as in the following code snippet. Such that PyPCAPKit</span>
 <span class="c1"># will be able to automatically register our dumper class to the corresponding</span>
 <span class="c1"># dumper registries, and use it to dump the extracted network packets.</span>
-<span class="k">class</span> <span class="nc">MyDumper</span><span class="p">(</span><span class="n">Dumper</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;pcap&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;.pcap&#39;</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyDumper</span><span class="p">(</span><span class="n">Dumper</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;pcap&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;.pcap&#39;</span><span class="p">):</span>
 
     <span class="c1"># NOTE: This property is to define the file format of the dumper.</span>
     <span class="c1"># It is expected to be a string, which is used as the file extension</span>
     <span class="c1"># of the output file.</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">&#39;pcap&#39;</span>
 
     <span class="c1"># NOTE: We need to collect some necessary information here thru the necessary</span>
     <span class="c1"># arguments, e.g., the file name, link-layer protocol, etc., which will be</span>
     <span class="c1"># used to generate the top-level header of the output file.</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="c1"># NOTE: We can do some pre-processing here if necessary, e.g., to</span>
         <span class="c1"># save the nanosecond-resolution flag, link-layer protocol type, etc.,</span>
         <span class="c1"># such that we can use them later when dumping the network packets.</span>
@@ -1076,7 +1076,7 @@ in the <code class="xref py py-mod docutils literal notranslate"><span class="pr
     <span class="c1"># NOTE: We need to overwrite the original ``__call__`` method, cause the</span>
     <span class="c1"># PCAP file format is a binary format, thus we need to re-open the output</span>
     <span class="c1"># file in binary mode, instead of the default text mode.</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;MyDumper&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;MyDumper&#39;</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_append_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># append value to the file</span>
          <span class="k">return</span> <span class="bp">self</span>
@@ -1084,7 +1084,7 @@ in the <code class="xref py py-mod docutils literal notranslate"><span class="pr
     <span class="c1"># NOTE: The following method will be called at the initialisation of the</span>
     <span class="c1"># dumper class, which is expected to write the top-level header of the</span>
     <span class="c1"># output file.</span>
-    <span class="k">def</span> <span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">Header</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># create PCAP header instance based on the given arguments</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
@@ -1094,7 +1094,7 @@ in the <code class="xref py py-mod docutils literal notranslate"><span class="pr
     <span class="c1"># file. It is expected to convert the network packet to a tailored format,</span>
     <span class="c1"># i.e., a Frame instance, which is then converted to the binary format and</span>
     <span class="c1"># written to the output file.</span>
-    <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># create PCAP frame instance based on the given arguments</span>
 
         <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># write the frame to the output file</span>
@@ -1166,15 +1166,15 @@ protocol. For documentation purposes, we use the
 example, where the comprehensive implementation can be found in the
 <a class="reference internal" href="pcapkit/foundation/reassembly/ip/ipv4.html#module-pcapkit.foundation.reassembly.ipv4" title="pcapkit.foundation.reassembly.ipv4"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ipv4</span></code></a> module.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>  <span class="c1"># import Info class for data model definitions</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ipv4</span> <span class="kn">import</span> <span class="n">IPv4</span>  <span class="c1"># import protocol class for attribute definitions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>  <span class="c1"># import Info class for data model definitions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span>  <span class="c1"># import protocol class for attribute definitions</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.reassembly</span> <span class="kn">import</span> <span class="n">Reassembly</span>  <span class="c1"># import base class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">Reassembly</span>  <span class="c1"># import base class</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypeAlias</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeAlias</span>
 
 <span class="c1"># NOTE: We need to specify some useful data structure before creating the</span>
 <span class="c1"># reassembly class, e.g., the data model for the reassembled packet, the</span>
@@ -1187,7 +1187,7 @@ example, where the comprehensive implementation can be found in the
 
 
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 
     <span class="c1"># NOTE: This is the data model for the extracted packet, which is</span>
     <span class="c1"># expected to be a dict-like object, and will be used to store the</span>
@@ -1196,7 +1196,7 @@ example, where the comprehensive implementation can be found in the
 
 
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 
     <span class="c1"># NOTE: This is the data model for the reassembled datagram&#39;s ID,</span>
     <span class="c1"># which is expected to be a dict-like object, and will be used to</span>
@@ -1205,7 +1205,7 @@ example, where the comprehensive implementation can be found in the
 
 
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">Datagram</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Datagram</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 
     <span class="c1"># NOTE: This is the data model for the reassembled datagram, which</span>
     <span class="c1"># is expected to be a dict-like object, and will be used to store</span>
@@ -1214,7 +1214,7 @@ example, where the comprehensive implementation can be found in the
 
 
 <span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 
     <span class="c1"># NOTE: This is the data model for the reassembly table, which is</span>
     <span class="c1"># expected to be a dict-like object, and will be used to store the</span>
@@ -1227,7 +1227,7 @@ example, where the comprehensive implementation can be found in the
 <span class="c1"># a subclass of the base class, i.e., Reassembly, and implement the core</span>
 <span class="c1"># methods, i.e., reassembly and submit, for reassembling the fragmented</span>
 <span class="c1"># packets and submitting the reassembled datagram, respectively.</span>
-<span class="k">class</span> <span class="nc">MyReassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyReassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">]):</span>
 
     <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">&#39;IPv4&#39;</span>  <span class="c1"># name of the protocol</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv4</span>  <span class="c1"># type of the protocol</span>
@@ -1236,7 +1236,7 @@ example, where the comprehensive implementation can be found in the
     <span class="c1"># ``info`` formatted as a ``Packet`` instance, into the reassembly</span>
     <span class="c1"># table, i.e., ``self._buffer`` formatted as a dict of ``BufferID``</span>
     <span class="c1"># mapped to ``Buffer`` instances.</span>
-    <span class="k">def</span> <span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="o">...</span>  <span class="c1"># reassembly algorithm implementation</span>
 
         <span class="c1"># NOTE: Once the fragmented packets are reassembled, we need to</span>
@@ -1250,7 +1250,7 @@ example, where the comprehensive implementation can be found in the
     <span class="c1"># ``buf`` formatted as a ``Buffer`` instance, to a ``Datagram``</span>
     <span class="c1"># instance, which is then submitted to the storage, i.e.,</span>
     <span class="c1"># ``self._dtgram``.</span>
-    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">*</span> <span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;BufferID&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Datagram]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">*</span> <span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;BufferID&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Datagram]&#39;</span><span class="p">:</span>
         <span class="n">datagram</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># submit algorithm implementation, e.g., to convert</span>
                         <span class="c1"># the reassembled datagram to a list of ``Datagram``</span>
                         <span class="c1"># instances, which is then returned for further</span>
