@@ -29298,6 +29298,9 @@ class AppType(StrEnum):
     #: - [UDP] Local and remote file transfers
     payload_app: 'AppType' = -1, 'payload-app', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
+    #: [TCP] Peblar EV charger
+    pblr: 'AppType' = -1, 'pblr', TransportProtocol.get('tcp')
+
     #: [N/A] Horowitz Key Protocol (HKP)
     pgpkey_hkp: 'AppType' = -1, 'pgpkey-hkp', TransportProtocol.get('undefined')
 
