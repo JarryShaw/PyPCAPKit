@@ -12479,7 +12479,7 @@ class AppType(StrEnum):
 
     #: - [TCP] Net Assistant
     #: - [UDP] Net Assistant
-    apple_remote_desktop: 'AppType' = 3283, 'apple remote desktop (net assistant)', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    net_assistant: 'AppType' = 3283, 'net-assistant', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] 4Talk
     #: - [UDP] 4Talk
@@ -14060,7 +14060,7 @@ class AppType(StrEnum):
 
     #: - [TCP] Newton Dock
     #: - [UDP] Newton Dock
-    escale: 'AppType' = 3679, 'escale (newton dock)', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    newton_dock: 'AppType' = 3679, 'newton-dock', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] NPDS Tracker
     #: - [UDP] NPDS Tracker
