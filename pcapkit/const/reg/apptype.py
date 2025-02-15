@@ -124,13 +124,13 @@ class AppType(StrEnum):
     #: - [UDP] TCP Port Service Multiplexer
     tcpmux: 'AppType' = 1, 'tcpmux', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] Management Utility
-    #: - [UDP] Management Utility
-    compressnet_2: 'AppType' = 2, 'compressnet', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] Reserved
+    #: - [UDP] Reserved
+    reserved_2: 'AppType' = 2, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] Compression Process
-    #: - [UDP] Compression Process
-    compressnet_3: 'AppType' = 3, 'compressnet', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] Reserved
+    #: - [UDP] Reserved
+    reserved_3: 'AppType' = 3, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
@@ -28038,6 +28038,10 @@ class AppType(StrEnum):
 
     #: [N/A] ElectraStar media centre control protocol
     com_ocs_es_mcc: 'AppType' = -1, 'com-ocs-es-mcc', TransportProtocol.get('undefined')
+
+    #: - [TCP] Management Utility/Compression Process
+    #: - [UDP] Management Utility/Compression Process
+    compressnet: 'AppType' = -1, 'compressnet', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [UDP] DNS SRV service for smarthome server
     conecube: 'AppType' = -1, 'conecube', TransportProtocol.get('udp')
