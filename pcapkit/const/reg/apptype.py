@@ -27946,7 +27946,7 @@ class AppType(StrEnum):
 
     #: [TCP] Bootstrapping Remote Secure Key Infrastructure registrar with CMP
     #: capabilities according to the Lightweight CMP Profile (LCMPP) [RFC9483]
-    #: [RFC-ietf-anima-brski-ae-13]
+    #: [:rfc:`9733`]
     brski_reg_cmp: 'AppType' = -1, 'brski-reg-cmp', TransportProtocol.get('tcp')
 
     #: [TCP] The Bootstrapping Remote Secure Key Infrastructure Registrar
