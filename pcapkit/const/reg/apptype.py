@@ -27100,6 +27100,10 @@ class AppType(StrEnum):
     #: - [UDP] InVision AG
     invision_ag: 'AppType' = 45054, 'invision-ag', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
+    #: - [TCP] Wire and Wireless transfer on synchroniz
+    #: - [UDP] Wire and Wireless transfer on synchroniz
+    witsnet: 'AppType' = 45185, 'witsnet', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
     #: [TCP] ASSIA CloudCheck WiFi Management System
     cloudcheck: 'AppType' = 45514, 'cloudcheck', TransportProtocol.get('tcp')
 
@@ -32675,7 +32679,10 @@ class AppType(StrEnum):
         if 45046 <= value <= 45053:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 45055 <= value <= 45513:
+        if 45055 <= value <= 45184:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 45186 <= value <= 45513:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 45515 <= value <= 45677:
