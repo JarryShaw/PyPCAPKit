@@ -375,15 +375,7 @@ class LinkType(IntEnum):
     #: [``DLT_IEEE802_16_MAC_CPS``] IEEE 802.16 MAC Common Part Sublayer.
     IEEE802_16_MAC_CPS = 188
 
-    #: [``DLT_USB_LINUX``] USB packets, beginning with a Linux USB header, as
-    #: specified by the struct usbmon\_packet in the Documentation/usb/usbmon.txt
-    #: file in the Linux source tree. Only the first 48 bytes of that header are
-    #: present. All fields in the header are in host byte order. When performing a
-    #: live capture, the host byte order is the byte order of the machine on that
-    #: the packets are captured. When reading a pcap file, the byte order is the
-    #: byte order for the file, as specified by the file's magic number; when
-    #: reading a pcapng file, the byte order is the byte order for the section of
-    #: the pcapng file, as specified by the Section Header Block.
+    #: [``DLT_USB_LINUX``] USB packets, beginning with a Linux USB header.
     USB_LINUX = 189
 
     #: [``DLT_CAN20B``] Controller Area Network (CAN) v. 2.0B.
@@ -519,17 +511,8 @@ class LinkType(IntEnum):
     #: [``DLT_MPLS``] MPLS, with an MPLS label as the link-layer header.
     MPLS = 219
 
-    #: [``DLT_USB_LINUX_MMAPPED``] USB packets, beginning with a Linux USB header,
-    #: as specified by the struct usbmon\_packet in the
-    #: Documentation/usb/usbmon.txt file in the Linux source tree. All 64 bytes of
-    #: the header are present. All fields in the header are in host byte order.
-    #: When performing a live capture, the host byte order is the byte order of the
-    #: machine on that the packets are captured. When reading a pcap file, the byte
-    #: order is the byte order for the file, as specified by the file's magic
-    #: number; when reading a pcapng file, the byte order is the byte order for the
-    #: section of the pcapng file, as specified by the Section Header Block. For
-    #: isochronous transfers, the ndesc field specifies the number of isochronous
-    #: descriptors that follow.
+    #: [``DLT_USB_LINUX_MMAPPED``] USB packets, beginning with an memory-mapped
+    #: Linux USB header.
     USB_LINUX_MMAPPED = 220
 
     #: [``DLT_DECT``] DECT packets, with a pseudo-header.

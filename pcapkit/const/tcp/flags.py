@@ -31,8 +31,8 @@ class Flags(IntFlag):
     #: Reserved for future use [:rfc:`9293`]
     Reserved_6 = 1 << 6
 
-    #: Reserved for future use [:rfc:`8311`]
-    Reserved_7 = 1 << 7
+    #: AE (Accurate ECN) [RFC-ietf-tcpm-accurate-ecn-34]
+    AE = 1 << 7
 
     #: CWR (Congestion Window Reduced) [:rfc:`3168`]
     CWR = 1 << 8

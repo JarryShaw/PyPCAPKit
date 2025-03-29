@@ -21912,6 +21912,13 @@ class AppType(StrEnum):
     #: - [UDP] Proprietary immutable distributed data storage
     rome: 'AppType' = 7663, 'rome', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
+    #: [TCP] AuthorityGate Secure API communication for Orchestrated task
+    #: sequencing
+    authoritygate: 'AppType' = 7668, 'authoritygate', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_7668: 'AppType' = 7668, 'reserved', TransportProtocol.get('udp')
+
     #: [TCP] iMQ STOMP Server
     imqstomp: 'AppType' = 7672, 'imqstomp', TransportProtocol.get('tcp')
 
@@ -31242,7 +31249,10 @@ class AppType(StrEnum):
         if 7649 <= value <= 7662:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 7664 <= value <= 7671:
+        if 7664 <= value <= 7667:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 7669 <= value <= 7671:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 7678 <= value <= 7679:
