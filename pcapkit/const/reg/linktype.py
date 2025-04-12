@@ -28,7 +28,7 @@ class LinkType(IntEnum):
     #: [``DLT_EN3MB``] Experimental Ethernet (3Mb).
     EXP_ETHERNET = 2
 
-    #: [``DLT_AX25``] AX.25 packet, with nothing preceding it.
+    #: [``DLT_AX25``] AX.25 layer 2 packets,
     AX25 = 3
 
     #: [``DLT_PRONET``] Reserved for Proteon ProNET Token Ring.
@@ -66,8 +66,7 @@ class LinkType(IntEnum):
     #: [``DLT_SYMANTEC_FIREWALL``] Symantec Enterprise (ex-Axent Raptor) firewall.
     SYMANTEC_FIREWALL = 99
 
-    #: [``DLT_ATM_RFC1483``] RFC 1483 LLC/SNAP-encapsulated ATM; the packet begins
-    #: with an ISO 8802-2 (formerly known as IEEE 802.2) LLC header.
+    #: [``DLT_ATM_RFC1483``] LLC/SNAP-encapsulated ATM
     ATM_RFC1483 = 100
 
     #: [``DLT_RAW``] Raw IP; the packet begins with an IPv4 or IPv6 header, with
@@ -99,9 +98,7 @@ class LinkType(IntEnum):
     #: [``DLT_LINUX_SLL``] Linux "cooked" capture encapsulation.
     LINUX_SLL = 113
 
-    #: [``DLT_LTALK``] Apple LocalTalk; the packet begins with an AppleTalk
-    #: LocalTalk Link Access Protocol header, as described in chapter 1 of Inside
-    #: AppleTalk, Second Edition.
+    #: [``DLT_LTALK``] Apple LocalTalk packets.
     LTALK = 114
 
     #: [``DLT_ECONET``] Acorn Econet.
@@ -183,12 +180,10 @@ class LinkType(IntEnum):
     #: [``DLT_APPLE_IP_OVER_IEEE1394``] Apple IP-over-IEEE 1394 cooked header.
     APPLE_IP_OVER_IEEE1394 = 138
 
-    #: [``DLT_MTP2_WITH_PHDR``] Signaling System 7 Message Transfer Part Level 2,
-    #: as specified by ITU-T Recommendation Q.703, preceded by a pseudo-header.
+    #: [``DLT_MTP2_WITH_PHDR``] SS7 MTP2 packets, with a pseudo-header.
     MTP2_WITH_PHDR = 139
 
-    #: [``DLT_MTP2``] Signaling System 7 Message Transfer Part Level 2, as
-    #: specified by ITU-T Recommendation Q.703.
+    #: [``DLT_MTP2``] SS7 MTP2 packets.
     MTP2 = 140
 
     #: [``DLT_MTP3``] Signaling System 7 Message Transfer Part Level 3, as
@@ -367,7 +362,7 @@ class LinkType(IntEnum):
     #: is done by Linux drivers.
     IEEE802_15_4_LINUX = 191
 
-    #: [``DLT_PPI``] Per-Packet Information header precending packet data.
+    #: [``DLT_PPI``] Per-Packet Information header preceding packet data.
     PPI = 192
 
     #: [``DLT_IEEE802_16_MAC_CPS_RADIO``] IEEE 802.16 MAC Common Part Sublayer plus
@@ -402,8 +397,7 @@ class LinkType(IntEnum):
     #: packets with a direction pseudo-header.
     BLUETOOTH_HCI_H4_WITH_PHDR = 201
 
-    #: [``DLT_AX25_KISS``] AX.25 packet, with a 1-byte KISS header containing a
-    #: type indicator.
+    #: [``DLT_AX25_KISS``] KISS frames between a host and an AX.25 TNC.
     AX25_KISS = 202
 
     #: [``DLT_LAPD``] Q.921 LAPD frames.
@@ -538,9 +532,7 @@ class LinkType(IntEnum):
     #: [``DLT_IPOIB``] IP-over-InfiniBand, as specified by RFC 4391 section 6.
     IPOIB = 242
 
-    #: [``DLT_MPEG_2_TS``] MPEG-2 Transport Stream transport packets, as specified
-    #: by ISO 13818-1/ITU-T Recommendation H.222.0 (see table 2-2 of section
-    #: 2.4.3.2 "Transport Stream packet layer").
+    #: [``DLT_MPEG_2_TS``] MPEG-2 Transport Stream transport packets.
     MPEG_2_TS = 243
 
     #: [``DLT_NG40``] Frames from ng4T GmbH's ng40 protocol tester.
@@ -553,9 +545,7 @@ class LinkType(IntEnum):
     #: Packet filter state syncing.
     PFSYNC = 246
 
-    #: [``DLT_INFINIBAND``] Raw InfiniBand frames, starting with the Local Routing
-    #: Header, as specified in Chapter 5 "Data packet format" of InfiniBand™
-    #: Architecture Specification Release 1.2.1 Volume 1 - General Specifications.
+    #: [``DLT_INFINIBAND``] InfiniBand data packets.
     INFINIBAND = 247
 
     #: [``DLT_SCTP``] SCTP packets, as defined by RFC 4960, with no lower-level
@@ -569,10 +559,7 @@ class LinkType(IntEnum):
     #: Laboratories "RTAC" product.
     RTAC_SERIAL = 250
 
-    #: [``DLT_BLUETOOTH_LE_LL``] Bluetooth Low Energy air interface Link Layer
-    #: packets, in the format described in section 2.1 "PACKET FORMAT" of volume 6
-    #: of the Bluetooth Specification Version 4.0 (see PDF page 2200), but without
-    #: the Preamble.
+    #: [``DLT_BLUETOOTH_LE_LL``] Bluetooth Low Energy link-layer packets.
     BLUETOOTH_LE_LL = 251
 
     #: [``DLT_WIRESHARK_UPPER_PDU``] Upper-protocol layer PDU saves from Wireshark;
@@ -590,26 +577,21 @@ class LinkType(IntEnum):
     #: baseband packets.
     BLUETOOTH_BREDR_BB = 255
 
-    #: [``DLT_BLUETOOTH_LE_LL_WITH_PHDR``] Bluetooth Low Energy link-layer packets.
+    #: [``DLT_BLUETOOTH_LE_LL_WITH_PHDR``] Bluetooth Low Energy link-layer packets,
+    #: with a pseudo-header.
     BLUETOOTH_LE_LL_WITH_PHDR = 256
 
-    #: [``DLT_PROFIBUS_DL``] PROFIBUS data link layer packets, as specified by IEC
-    #: standard 61158-4-3, beginning with the start delimiter, ending with the end
-    #: delimiter, and including all octets between them.
+    #: [``DLT_PROFIBUS_DL``] PROFIBUS data link layer packets.
     PROFIBUS_DL = 257
 
     #: [``DLT_PKTAP``] Apple PKTAP capture encapsulation.
     PKTAP = 258
 
-    #: [``DLT_EPON``] Ethernet-over-passive-optical-network packets, starting with
-    #: the last 6 octets of the modified preamble as specified by 65.1.3.2
-    #: "Transmit" in Clause 65 of Section 5 of IEEE 802.3, followed immediately by
-    #: an Ethernet frame.
+    #: [``DLT_EPON``] Ethernet-over-passive-optical-network packets, including
+    #: preamble octets.
     EPON = 259
 
-    #: [``DLT_IPMI_HPM_2``] IPMI trace packets, as specified by Table 3-20 "Trace
-    #: Data Block Format" in the PICMG HPM.2 specification. The time stamps for
-    #: packets in this format must match the time stamps in the Trace Data Blocks.
+    #: [``DLT_IPMI_HPM_2``] IPMI HPM.2 trace packets.
     IPMI_HPM_2 = 260
 
     #: [``DLT_ZWAVE_R1_R2``] Z-Wave RF profile R1 and R2 packets.
@@ -639,11 +621,7 @@ class LinkType(IntEnum):
     #: used in OpenBSD switch interface monitoring.
     OPENFLOW = 267
 
-    #: [``DLT_SDLC``] SDLC packets, as specified by Chapter 1, "DLC Links", section
-    #: "Synchronous Data Link Control (SDLC)" of Systems Network Architecture
-    #: Formats, GA27-3136-20, without the flag fields, zero-bit insertion, or Frame
-    #: Check Sequence field, containing SNA path information units (PIUs) as the
-    #: payload.
+    #: [``DLT_SDLC``] SNA SDLC packets
     SDLC = 268
 
     #: [``DLT_TI_LLN_SNIFFER``] TI LLN sniffer frames.
@@ -664,8 +642,7 @@ class LinkType(IntEnum):
     #: header giving metadata about the packet.
     DOCSIS31_XRA31 = 273
 
-    #: [``DLT_ETHERNET_MPACKET``] mPackets, as specified by IEEE 802.3br Figure
-    #: 99-4, starting with the preamble and always ending with a CRC field.
+    #: [``DLT_ETHERNET_MPACKET``] IEEE 802.3 mPackets.
     ETHERNET_MPACKET = 274
 
     #: [``DLT_DISPLAYPORT_AUX``] DisplayPort AUX channel monitoring messages.
@@ -706,9 +683,7 @@ class LinkType(IntEnum):
     #: inserted.
     DSA_TAG_EDSA = 285
 
-    #: [``DLT_ELEE``] Payload of lawful intercept packets using the ELEE protocol.
-    #: The packet begins with the ELEE header; it does not include any transport-
-    #: layer or lower-layer headers for protocols used to transport ELEE packets.
+    #: [``DLT_ELEE``] Reserved for ELEE lawful intercept protocol.
     ELEE = 286
 
     #: [``DLT_Z_WAVE_SERIAL``] Serial frames transmitted between a host and a

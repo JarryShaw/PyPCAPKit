@@ -3050,14 +3050,13 @@ class AppType(StrEnum):
     #: [TCP] Reserved
     reserved_914: 'AppType' = 914, 'reserved', TransportProtocol.get('tcp')
 
-    #: [UDP] Routing in Fat Trees Link Information Element [RFC-ietf-rift-rift-24]
+    #: [UDP] Routing in Fat Trees Link Information Element [:rfc:`9692`]
     rift_lies: 'AppType' = 914, 'rift-lies', TransportProtocol.get('udp')
 
     #: [TCP] Reserved
     reserved_915: 'AppType' = 915, 'reserved', TransportProtocol.get('tcp')
 
-    #: [UDP] Routing in Fat Trees Topology Information Element [RFC-ietf-rift-
-    #: rift-24]
+    #: [UDP] Routing in Fat Trees Topology Information Element [:rfc:`9692`]
     rift_ties: 'AppType' = 915, 'rift-ties', TransportProtocol.get('udp')
 
     #: [TCP] BIND9 remote name daemon controller
