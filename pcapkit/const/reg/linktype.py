@@ -59,8 +59,7 @@ class LinkType(IntEnum):
     #: [``DLT_PPP_SERIAL``] PPP in HDLC-like framing.
     PPP_HDLC = 50
 
-    #: [``DLT_PPP_ETHER``] PPPoE; the packet begins with a PPPoE header, as per RFC
-    #: 2516.
+    #: [``DLT_PPP_ETHER``] PPPoE session packets.
     PPP_ETHER = 51
 
     #: [``DLT_SYMANTEC_FIREWALL``] Symantec Enterprise (ex-Axent Raptor) firewall.
@@ -125,7 +124,7 @@ class LinkType(IntEnum):
     #: link-layer header.
     AIRONET_HEADER = 120
 
-    #: [``DLT_IP_OVER_FC``] IP and ATM over Fibre Channel, as per RFC 4338.
+    #: [``DLT_IP_OVER_FC``] IP and ATM over Fibre Channel.
     IP_OVER_FC = 122
 
     #: [``DLT_SUNATM``] ATM traffic captured from a SunATM device.
@@ -186,15 +185,10 @@ class LinkType(IntEnum):
     #: [``DLT_MTP2``] SS7 MTP2 packets.
     MTP2 = 140
 
-    #: [``DLT_MTP3``] Signaling System 7 Message Transfer Part Level 3, as
-    #: specified by ITU-T Recommendation Q.704, with no MTP2 header preceding the
-    #: MTP3 packet.
+    #: [``DLT_MTP3``] SS7 MTP3 packets.
     MTP3 = 141
 
-    #: [``DLT_SCCP``] Signaling System 7 Signalling Connection Control Part, as
-    #: specified by ITU-T Recommendation Q.711, ITU-T Recommendation Q.712, ITU-T
-    #: Recommendation Q.713, and ITU-T Recommendation Q.714, with no MTP3 or MTP2
-    #: headers preceding the SCCP packet.
+    #: [``DLT_SCCP``] SS7 SCCP packets.
     SCCP = 142
 
     #: [``DLT_DOCSIS``] DOCSIS MAC frames, as described by the DOCSIS 4.0 MAC and
@@ -266,15 +260,11 @@ class LinkType(IntEnum):
     #: [``DLT_JUNIPER_MONITOR``] Juniper Networks private data link type.
     JUNIPER_MONITOR = 164
 
-    #: [``DLT_BACNET_MS_TP``] BACnet MS/TP frames, as specified by section 9.3
-    #: MS/TP Frame Format of ANSI/ASHRAE Standard 135, BACnet® - A Data
-    #: Communication Protocol for Building Automation and Control Networks,
-    #: including the preamble and, if present, the Data CRC.
+    #: [``DLT_BACNET_MS_TP``] BACnet MS/TP frames.
     BACNET_MS_TP = 165
 
-    #: [``DLT_PPP_PPPD``] PPP in HDLC-like encapsulation, like LINKTYPE\_PPP\_HDLC,
-    #: but with the 0xff address byte replaced by a direction indication—0x00 for
-    #: incoming and 0x01 for outgoing.
+    #: [``DLT_PPP_PPPD``] PPP preceded by a direction octet and an HDLC-like
+    #: control field.
     PPP_PPPD = 166
 
     #: [``DLT_JUNIPER_PPPOE``] Juniper Networks private data link type.
@@ -304,10 +294,10 @@ class LinkType(IntEnum):
     #: [``DLT_JUNIPER_PIC_PEER``] Juniper Networks private data link type.
     JUNIPER_PIC_PEER = 174
 
-    #: [``DLT_ERF_ETH``] An ERF header followed by Ethernet.
+    #: [``DLT_ERF_ETH``] Endace ERF records of type TYPE\_ETH.
     ERF_ETH = 175
 
-    #: [``DLT_ERF_POS``] An ERF header followed by Packet-over-SONET.
+    #: [``DLT_ERF_POS``] Endace ERF records of type TYPE\_POS\_HDLC.
     ERF_POS = 176
 
     #: [``DLT_LINUX_LAPD``] Linux vISDN LAPD frames
@@ -378,8 +368,7 @@ class LinkType(IntEnum):
     #: [``DLT_SITA``] Various link-layer types, with a pseudo-header, for SITA.
     SITA = 196
 
-    #: [``DLT_ERF``] Various link-layer types, with a pseudo-header, for Endace DAG
-    #: cards; encapsulates Endace ERF records.
+    #: [``DLT_ERF``] Endace ERF records.
     ERF = 197
 
     #: [``DLT_RAIF1``] Special header prepended to Ethernet packets when capturing
@@ -505,8 +494,7 @@ class LinkType(IntEnum):
     #: [``DLT_JUNIPER_FIBRECHANNEL``] Juniper Networks private data link type.
     JUNIPER_FIBRECHANNEL = 234
 
-    #: [``DLT_DVB_CI``] DVB-CI messages, with the message format specified by the
-    #: PCAP format for DVB-CI specification.
+    #: [``DLT_DVB_CI``] DVB-CI messages, with a pseudo-header.
     DVB_CI = 235
 
     #: [``DLT_MUX27010``] Variant of 3GPP TS 27.010 multiplexing protocol.
@@ -529,7 +517,7 @@ class LinkType(IntEnum):
     #: header, preamble and SFD, preceded by a Hilscher.
     NETANALYZER_TRANSPARENT = 241
 
-    #: [``DLT_IPOIB``] IP-over-InfiniBand, as specified by RFC 4391 section 6.
+    #: [``DLT_IPOIB``] IP-over-InfiniBand.
     IPOIB = 242
 
     #: [``DLT_MPEG_2_TS``] MPEG-2 Transport Stream transport packets.
@@ -691,15 +679,10 @@ class LinkType(IntEnum):
     #: 5 of the Z-Wave Serial API Host Application Programming Guide.
     Z_WAVE_SERIAL = 287
 
-    #: [``DLT_USB_2_0``] USB 2.0, 1.1, or 1.0 packet, beginning with a PID, as
-    #: described by Chapter 8 "Protocol Layer" of the the Universal Serial Bus
-    #: Specification Revision 2.0. Deprecated in favor of speed specific USB 2.0,
-    #: 1.1, or 1.0 linktypes.
+    #: [``DLT_USB_2_0``] USB 2.0, 1.1, or 1.0 packets.
     USB_2_0 = 288
 
-    #: [``DLT_ATSC_ALP``] ATSC Link-Layer Protocol frames, as described in section
-    #: 5 of the A/330 Link-Layer Protocol specification, found at the ATSC 3.0
-    #: standards page, beginning with a Base Header.
+    #: [``DLT_ATSC_ALP``] ATSC Link-Layer Protocol frames.
     ATSC_ALP = 289
 
     #: [``DLT_ETW``] Event Tracing for Windows messages.
@@ -712,23 +695,16 @@ class LinkType(IntEnum):
     #: [``DLT_ZBOSS_NCP``] ZBOSS NCP Serial Protocol, with a pseudo-header.
     ZBOSS_NCP = 292
 
-    #: [``DLT_USB_2_0_LOW_SPEED``] Low-Speed USB 2.0, 1.1, or 1.0 packet, beginning
-    #: with a PID, as described by Chapter 8 "Protocol Layer" of the the Universal
-    #: Serial Bus Specification Revision 2.0.
+    #: [``DLT_USB_2_0_LOW_SPEED``] Low-Speed USB 2.0, 1.1, or 1.0 packets..
     USB_2_0_LOW_SPEED = 293
 
-    #: [``DLT_USB_2_0_FULL_SPEED``] Full-Speed USB 2.0, 1.1, or 1.0 packet,
-    #: beginning with a PID, as described by Chapter 8 "Protocol Layer" of the the
-    #: Universal Serial Bus Specification Revision 2.0.
+    #: [``DLT_USB_2_0_FULL_SPEED``] Full-Speed USB 2.0, 1.1, or 1.0 packets.
     USB_2_0_FULL_SPEED = 294
 
-    #: [``DLT_USB_2_0_HIGH_SPEED``] High-Speed USB 2.0 packet, beginning with a
-    #: PID, as described by Chapter 8 "Protocol Layer" of the the Universal Serial
-    #: Bus Specification Revision 2.0.
+    #: [``DLT_USB_2_0_HIGH_SPEED``] High-Speed USB 2.0 packets.
     USB_2_0_HIGH_SPEED = 295
 
-    #: [``DLT_AUERSWALD_LOG``] Auerswald Logger Protocol, as described in this
-    #: document.
+    #: [``DLT_AUERSWALD_LOG``] Auerswald Logger Protocol packets.
     AUERSWALD_LOG = 296
 
     #: [``DLT_ZWAVE_TAP``] Z-Wave packets, with a metadata header.
@@ -741,7 +717,7 @@ class LinkType(IntEnum):
     #: [``DLT_FIRA_UCI``] Ultra-wideband (UWB) controller interface protocol (UCI).
     FIRA_UCI = 299
 
-    #: [``DLT_MDB``] MDB (Multi-Drop Bus) vending machine protocol.
+    #: [``DLT_MDB``] MDB (Multi-Drop Bus) messages, with a pseudo-header.
     MDB = 300
 
     #: [``DLT_DECT_NR``] DECT-2020 New Radio (NR) MAC layer.
