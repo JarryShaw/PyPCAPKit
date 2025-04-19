@@ -1,6 +1,6 @@
 aenum == 3.1.15
 appdirs == 1.4.4
-beautifulsoup4 == 4.13.3
+beautifulsoup4 == 4.13.4
 certifi == 2025.1.31
 chardet == 5.2.0
 charset-normalizer == 3.4.1
