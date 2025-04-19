@@ -446,7 +446,7 @@
     <span class="c1">#: [``DLT_EN3MB``] Experimental Ethernet (3Mb).</span>
     <span class="n">EXP_ETHERNET</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: [``DLT_AX25``] AX.25 packet, with nothing preceding it.</span>
+    <span class="c1">#: [``DLT_AX25``] AX.25 layer 2 packets,</span>
     <span class="n">AX25</span> <span class="o">=</span> <span class="mi">3</span>
 
     <span class="c1">#: [``DLT_PRONET``] Reserved for Proteon ProNET Token Ring.</span>
@@ -484,8 +484,7 @@
     <span class="c1">#: [``DLT_SYMANTEC_FIREWALL``] Symantec Enterprise (ex-Axent Raptor) firewall.</span>
     <span class="n">SYMANTEC_FIREWALL</span> <span class="o">=</span> <span class="mi">99</span>
 
-    <span class="c1">#: [``DLT_ATM_RFC1483``] RFC 1483 LLC/SNAP-encapsulated ATM; the packet begins</span>
-    <span class="c1">#: with an ISO 8802-2 (formerly known as IEEE 802.2) LLC header.</span>
+    <span class="c1">#: [``DLT_ATM_RFC1483``] LLC/SNAP-encapsulated ATM</span>
     <span class="n">ATM_RFC1483</span> <span class="o">=</span> <span class="mi">100</span>
 
     <span class="c1">#: [``DLT_RAW``] Raw IP; the packet begins with an IPv4 or IPv6 header, with</span>
@@ -517,9 +516,7 @@
     <span class="c1">#: [``DLT_LINUX_SLL``] Linux &quot;cooked&quot; capture encapsulation.</span>
     <span class="n">LINUX_SLL</span> <span class="o">=</span> <span class="mi">113</span>
 
-    <span class="c1">#: [``DLT_LTALK``] Apple LocalTalk; the packet begins with an AppleTalk</span>
-    <span class="c1">#: LocalTalk Link Access Protocol header, as described in chapter 1 of Inside</span>
-    <span class="c1">#: AppleTalk, Second Edition.</span>
+    <span class="c1">#: [``DLT_LTALK``] Apple LocalTalk packets.</span>
     <span class="n">LTALK</span> <span class="o">=</span> <span class="mi">114</span>
 
     <span class="c1">#: [``DLT_ECONET``] Acorn Econet.</span>
@@ -601,12 +598,10 @@
     <span class="c1">#: [``DLT_APPLE_IP_OVER_IEEE1394``] Apple IP-over-IEEE 1394 cooked header.</span>
     <span class="n">APPLE_IP_OVER_IEEE1394</span> <span class="o">=</span> <span class="mi">138</span>
 
-    <span class="c1">#: [``DLT_MTP2_WITH_PHDR``] Signaling System 7 Message Transfer Part Level 2,</span>
-    <span class="c1">#: as specified by ITU-T Recommendation Q.703, preceded by a pseudo-header.</span>
+    <span class="c1">#: [``DLT_MTP2_WITH_PHDR``] SS7 MTP2 packets, with a pseudo-header.</span>
     <span class="n">MTP2_WITH_PHDR</span> <span class="o">=</span> <span class="mi">139</span>
 
-    <span class="c1">#: [``DLT_MTP2``] Signaling System 7 Message Transfer Part Level 2, as</span>
-    <span class="c1">#: specified by ITU-T Recommendation Q.703.</span>
+    <span class="c1">#: [``DLT_MTP2``] SS7 MTP2 packets.</span>
     <span class="n">MTP2</span> <span class="o">=</span> <span class="mi">140</span>
 
     <span class="c1">#: [``DLT_MTP3``] Signaling System 7 Message Transfer Part Level 3, as</span>
@@ -785,7 +780,7 @@
     <span class="c1">#: is done by Linux drivers.</span>
     <span class="n">IEEE802_15_4_LINUX</span> <span class="o">=</span> <span class="mi">191</span>
 
-    <span class="c1">#: [``DLT_PPI``] Per-Packet Information header precending packet data.</span>
+    <span class="c1">#: [``DLT_PPI``] Per-Packet Information header preceding packet data.</span>
     <span class="n">PPI</span> <span class="o">=</span> <span class="mi">192</span>
 
     <span class="c1">#: [``DLT_IEEE802_16_MAC_CPS_RADIO``] IEEE 802.16 MAC Common Part Sublayer plus</span>
@@ -820,8 +815,7 @@
     <span class="c1">#: packets with a direction pseudo-header.</span>
     <span class="n">BLUETOOTH_HCI_H4_WITH_PHDR</span> <span class="o">=</span> <span class="mi">201</span>
 
-    <span class="c1">#: [``DLT_AX25_KISS``] AX.25 packet, with a 1-byte KISS header containing a</span>
-    <span class="c1">#: type indicator.</span>
+    <span class="c1">#: [``DLT_AX25_KISS``] KISS frames between a host and an AX.25 TNC.</span>
     <span class="n">AX25_KISS</span> <span class="o">=</span> <span class="mi">202</span>
 
     <span class="c1">#: [``DLT_LAPD``] Q.921 LAPD frames.</span>
@@ -956,9 +950,7 @@
     <span class="c1">#: [``DLT_IPOIB``] IP-over-InfiniBand, as specified by RFC 4391 section 6.</span>
     <span class="n">IPOIB</span> <span class="o">=</span> <span class="mi">242</span>
 
-    <span class="c1">#: [``DLT_MPEG_2_TS``] MPEG-2 Transport Stream transport packets, as specified</span>
-    <span class="c1">#: by ISO 13818-1/ITU-T Recommendation H.222.0 (see table 2-2 of section</span>
-    <span class="c1">#: 2.4.3.2 &quot;Transport Stream packet layer&quot;).</span>
+    <span class="c1">#: [``DLT_MPEG_2_TS``] MPEG-2 Transport Stream transport packets.</span>
     <span class="n">MPEG_2_TS</span> <span class="o">=</span> <span class="mi">243</span>
 
     <span class="c1">#: [``DLT_NG40``] Frames from ng4T GmbH&#39;s ng40 protocol tester.</span>
@@ -971,9 +963,7 @@
     <span class="c1">#: Packet filter state syncing.</span>
     <span class="n">PFSYNC</span> <span class="o">=</span> <span class="mi">246</span>
 
-    <span class="c1">#: [``DLT_INFINIBAND``] Raw InfiniBand frames, starting with the Local Routing</span>
-    <span class="c1">#: Header, as specified in Chapter 5 &quot;Data packet format&quot; of InfiniBand™</span>
-    <span class="c1">#: Architecture Specification Release 1.2.1 Volume 1 - General Specifications.</span>
+    <span class="c1">#: [``DLT_INFINIBAND``] InfiniBand data packets.</span>
     <span class="n">INFINIBAND</span> <span class="o">=</span> <span class="mi">247</span>
 
     <span class="c1">#: [``DLT_SCTP``] SCTP packets, as defined by RFC 4960, with no lower-level</span>
@@ -987,10 +977,7 @@
     <span class="c1">#: Laboratories &quot;RTAC&quot; product.</span>
     <span class="n">RTAC_SERIAL</span> <span class="o">=</span> <span class="mi">250</span>
 
-    <span class="c1">#: [``DLT_BLUETOOTH_LE_LL``] Bluetooth Low Energy air interface Link Layer</span>
-    <span class="c1">#: packets, in the format described in section 2.1 &quot;PACKET FORMAT&quot; of volume 6</span>
-    <span class="c1">#: of the Bluetooth Specification Version 4.0 (see PDF page 2200), but without</span>
-    <span class="c1">#: the Preamble.</span>
+    <span class="c1">#: [``DLT_BLUETOOTH_LE_LL``] Bluetooth Low Energy link-layer packets.</span>
     <span class="n">BLUETOOTH_LE_LL</span> <span class="o">=</span> <span class="mi">251</span>
 
     <span class="c1">#: [``DLT_WIRESHARK_UPPER_PDU``] Upper-protocol layer PDU saves from Wireshark;</span>
@@ -1008,26 +995,21 @@
     <span class="c1">#: baseband packets.</span>
     <span class="n">BLUETOOTH_BREDR_BB</span> <span class="o">=</span> <span class="mi">255</span>
 
-    <span class="c1">#: [``DLT_BLUETOOTH_LE_LL_WITH_PHDR``] Bluetooth Low Energy link-layer packets.</span>
+    <span class="c1">#: [``DLT_BLUETOOTH_LE_LL_WITH_PHDR``] Bluetooth Low Energy link-layer packets,</span>
+    <span class="c1">#: with a pseudo-header.</span>
     <span class="n">BLUETOOTH_LE_LL_WITH_PHDR</span> <span class="o">=</span> <span class="mi">256</span>
 
-    <span class="c1">#: [``DLT_PROFIBUS_DL``] PROFIBUS data link layer packets, as specified by IEC</span>
-    <span class="c1">#: standard 61158-4-3, beginning with the start delimiter, ending with the end</span>
-    <span class="c1">#: delimiter, and including all octets between them.</span>
+    <span class="c1">#: [``DLT_PROFIBUS_DL``] PROFIBUS data link layer packets.</span>
     <span class="n">PROFIBUS_DL</span> <span class="o">=</span> <span class="mi">257</span>
 
     <span class="c1">#: [``DLT_PKTAP``] Apple PKTAP capture encapsulation.</span>
     <span class="n">PKTAP</span> <span class="o">=</span> <span class="mi">258</span>
 
-    <span class="c1">#: [``DLT_EPON``] Ethernet-over-passive-optical-network packets, starting with</span>
-    <span class="c1">#: the last 6 octets of the modified preamble as specified by 65.1.3.2</span>
-    <span class="c1">#: &quot;Transmit&quot; in Clause 65 of Section 5 of IEEE 802.3, followed immediately by</span>
-    <span class="c1">#: an Ethernet frame.</span>
+    <span class="c1">#: [``DLT_EPON``] Ethernet-over-passive-optical-network packets, including</span>
+    <span class="c1">#: preamble octets.</span>
     <span class="n">EPON</span> <span class="o">=</span> <span class="mi">259</span>
 
-    <span class="c1">#: [``DLT_IPMI_HPM_2``] IPMI trace packets, as specified by Table 3-20 &quot;Trace</span>
-    <span class="c1">#: Data Block Format&quot; in the PICMG HPM.2 specification. The time stamps for</span>
-    <span class="c1">#: packets in this format must match the time stamps in the Trace Data Blocks.</span>
+    <span class="c1">#: [``DLT_IPMI_HPM_2``] IPMI HPM.2 trace packets.</span>
     <span class="n">IPMI_HPM_2</span> <span class="o">=</span> <span class="mi">260</span>
 
     <span class="c1">#: [``DLT_ZWAVE_R1_R2``] Z-Wave RF profile R1 and R2 packets.</span>
@@ -1057,11 +1039,7 @@
     <span class="c1">#: used in OpenBSD switch interface monitoring.</span>
     <span class="n">OPENFLOW</span> <span class="o">=</span> <span class="mi">267</span>
 
-    <span class="c1">#: [``DLT_SDLC``] SDLC packets, as specified by Chapter 1, &quot;DLC Links&quot;, section</span>
-    <span class="c1">#: &quot;Synchronous Data Link Control (SDLC)&quot; of Systems Network Architecture</span>
-    <span class="c1">#: Formats, GA27-3136-20, without the flag fields, zero-bit insertion, or Frame</span>
-    <span class="c1">#: Check Sequence field, containing SNA path information units (PIUs) as the</span>
-    <span class="c1">#: payload.</span>
+    <span class="c1">#: [``DLT_SDLC``] SNA SDLC packets</span>
     <span class="n">SDLC</span> <span class="o">=</span> <span class="mi">268</span>
 
     <span class="c1">#: [``DLT_TI_LLN_SNIFFER``] TI LLN sniffer frames.</span>
@@ -1082,8 +1060,7 @@
     <span class="c1">#: header giving metadata about the packet.</span>
     <span class="n">DOCSIS31_XRA31</span> <span class="o">=</span> <span class="mi">273</span>
 
-    <span class="c1">#: [``DLT_ETHERNET_MPACKET``] mPackets, as specified by IEEE 802.3br Figure</span>
-    <span class="c1">#: 99-4, starting with the preamble and always ending with a CRC field.</span>
+    <span class="c1">#: [``DLT_ETHERNET_MPACKET``] IEEE 802.3 mPackets.</span>
     <span class="n">ETHERNET_MPACKET</span> <span class="o">=</span> <span class="mi">274</span>
 
     <span class="c1">#: [``DLT_DISPLAYPORT_AUX``] DisplayPort AUX channel monitoring messages.</span>
@@ -1124,9 +1101,7 @@
     <span class="c1">#: inserted.</span>
     <span class="n">DSA_TAG_EDSA</span> <span class="o">=</span> <span class="mi">285</span>
 
-    <span class="c1">#: [``DLT_ELEE``] Payload of lawful intercept packets using the ELEE protocol.</span>
-    <span class="c1">#: The packet begins with the ELEE header; it does not include any transport-</span>
-    <span class="c1">#: layer or lower-layer headers for protocols used to transport ELEE packets.</span>
+    <span class="c1">#: [``DLT_ELEE``] Reserved for ELEE lawful intercept protocol.</span>
     <span class="n">ELEE</span> <span class="o">=</span> <span class="mi">286</span>
 
     <span class="c1">#: [``DLT_Z_WAVE_SERIAL``] Serial frames transmitted between a host and a</span>
@@ -1253,7 +1228,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=9cb29449"></script>
+</div><script src="../../../../_static/documentation_options.js?v=7491d5f9"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=4e2eecee"></script>
