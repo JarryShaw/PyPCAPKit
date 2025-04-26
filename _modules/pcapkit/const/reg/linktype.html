@@ -477,8 +477,7 @@
     <span class="c1">#: [``DLT_PPP_SERIAL``] PPP in HDLC-like framing.</span>
     <span class="n">PPP_HDLC</span> <span class="o">=</span> <span class="mi">50</span>
 
-    <span class="c1">#: [``DLT_PPP_ETHER``] PPPoE; the packet begins with a PPPoE header, as per RFC</span>
-    <span class="c1">#: 2516.</span>
+    <span class="c1">#: [``DLT_PPP_ETHER``] PPPoE session packets.</span>
     <span class="n">PPP_ETHER</span> <span class="o">=</span> <span class="mi">51</span>
 
     <span class="c1">#: [``DLT_SYMANTEC_FIREWALL``] Symantec Enterprise (ex-Axent Raptor) firewall.</span>
@@ -543,7 +542,7 @@
     <span class="c1">#: link-layer header.</span>
     <span class="n">AIRONET_HEADER</span> <span class="o">=</span> <span class="mi">120</span>
 
-    <span class="c1">#: [``DLT_IP_OVER_FC``] IP and ATM over Fibre Channel, as per RFC 4338.</span>
+    <span class="c1">#: [``DLT_IP_OVER_FC``] IP and ATM over Fibre Channel.</span>
     <span class="n">IP_OVER_FC</span> <span class="o">=</span> <span class="mi">122</span>
 
     <span class="c1">#: [``DLT_SUNATM``] ATM traffic captured from a SunATM device.</span>
@@ -604,15 +603,10 @@
     <span class="c1">#: [``DLT_MTP2``] SS7 MTP2 packets.</span>
     <span class="n">MTP2</span> <span class="o">=</span> <span class="mi">140</span>
 
-    <span class="c1">#: [``DLT_MTP3``] Signaling System 7 Message Transfer Part Level 3, as</span>
-    <span class="c1">#: specified by ITU-T Recommendation Q.704, with no MTP2 header preceding the</span>
-    <span class="c1">#: MTP3 packet.</span>
+    <span class="c1">#: [``DLT_MTP3``] SS7 MTP3 packets.</span>
     <span class="n">MTP3</span> <span class="o">=</span> <span class="mi">141</span>
 
-    <span class="c1">#: [``DLT_SCCP``] Signaling System 7 Signalling Connection Control Part, as</span>
-    <span class="c1">#: specified by ITU-T Recommendation Q.711, ITU-T Recommendation Q.712, ITU-T</span>
-    <span class="c1">#: Recommendation Q.713, and ITU-T Recommendation Q.714, with no MTP3 or MTP2</span>
-    <span class="c1">#: headers preceding the SCCP packet.</span>
+    <span class="c1">#: [``DLT_SCCP``] SS7 SCCP packets.</span>
     <span class="n">SCCP</span> <span class="o">=</span> <span class="mi">142</span>
 
     <span class="c1">#: [``DLT_DOCSIS``] DOCSIS MAC frames, as described by the DOCSIS 4.0 MAC and</span>
@@ -684,15 +678,11 @@
     <span class="c1">#: [``DLT_JUNIPER_MONITOR``] Juniper Networks private data link type.</span>
     <span class="n">JUNIPER_MONITOR</span> <span class="o">=</span> <span class="mi">164</span>
 
-    <span class="c1">#: [``DLT_BACNET_MS_TP``] BACnet MS/TP frames, as specified by section 9.3</span>
-    <span class="c1">#: MS/TP Frame Format of ANSI/ASHRAE Standard 135, BACnet® - A Data</span>
-    <span class="c1">#: Communication Protocol for Building Automation and Control Networks,</span>
-    <span class="c1">#: including the preamble and, if present, the Data CRC.</span>
+    <span class="c1">#: [``DLT_BACNET_MS_TP``] BACnet MS/TP frames.</span>
     <span class="n">BACNET_MS_TP</span> <span class="o">=</span> <span class="mi">165</span>
 
-    <span class="c1">#: [``DLT_PPP_PPPD``] PPP in HDLC-like encapsulation, like LINKTYPE\_PPP\_HDLC,</span>
-    <span class="c1">#: but with the 0xff address byte replaced by a direction indication—0x00 for</span>
-    <span class="c1">#: incoming and 0x01 for outgoing.</span>
+    <span class="c1">#: [``DLT_PPP_PPPD``] PPP preceded by a direction octet and an HDLC-like</span>
+    <span class="c1">#: control field.</span>
     <span class="n">PPP_PPPD</span> <span class="o">=</span> <span class="mi">166</span>
 
     <span class="c1">#: [``DLT_JUNIPER_PPPOE``] Juniper Networks private data link type.</span>
@@ -722,10 +712,10 @@
     <span class="c1">#: [``DLT_JUNIPER_PIC_PEER``] Juniper Networks private data link type.</span>
     <span class="n">JUNIPER_PIC_PEER</span> <span class="o">=</span> <span class="mi">174</span>
 
-    <span class="c1">#: [``DLT_ERF_ETH``] An ERF header followed by Ethernet.</span>
+    <span class="c1">#: [``DLT_ERF_ETH``] Endace ERF records of type TYPE\_ETH.</span>
     <span class="n">ERF_ETH</span> <span class="o">=</span> <span class="mi">175</span>
 
-    <span class="c1">#: [``DLT_ERF_POS``] An ERF header followed by Packet-over-SONET.</span>
+    <span class="c1">#: [``DLT_ERF_POS``] Endace ERF records of type TYPE\_POS\_HDLC.</span>
     <span class="n">ERF_POS</span> <span class="o">=</span> <span class="mi">176</span>
 
     <span class="c1">#: [``DLT_LINUX_LAPD``] Linux vISDN LAPD frames</span>
@@ -796,8 +786,7 @@
     <span class="c1">#: [``DLT_SITA``] Various link-layer types, with a pseudo-header, for SITA.</span>
     <span class="n">SITA</span> <span class="o">=</span> <span class="mi">196</span>
 
-    <span class="c1">#: [``DLT_ERF``] Various link-layer types, with a pseudo-header, for Endace DAG</span>
-    <span class="c1">#: cards; encapsulates Endace ERF records.</span>
+    <span class="c1">#: [``DLT_ERF``] Endace ERF records.</span>
     <span class="n">ERF</span> <span class="o">=</span> <span class="mi">197</span>
 
     <span class="c1">#: [``DLT_RAIF1``] Special header prepended to Ethernet packets when capturing</span>
@@ -923,8 +912,7 @@
     <span class="c1">#: [``DLT_JUNIPER_FIBRECHANNEL``] Juniper Networks private data link type.</span>
     <span class="n">JUNIPER_FIBRECHANNEL</span> <span class="o">=</span> <span class="mi">234</span>
 
-    <span class="c1">#: [``DLT_DVB_CI``] DVB-CI messages, with the message format specified by the</span>
-    <span class="c1">#: PCAP format for DVB-CI specification.</span>
+    <span class="c1">#: [``DLT_DVB_CI``] DVB-CI messages, with a pseudo-header.</span>
     <span class="n">DVB_CI</span> <span class="o">=</span> <span class="mi">235</span>
 
     <span class="c1">#: [``DLT_MUX27010``] Variant of 3GPP TS 27.010 multiplexing protocol.</span>
@@ -947,7 +935,7 @@
     <span class="c1">#: header, preamble and SFD, preceded by a Hilscher.</span>
     <span class="n">NETANALYZER_TRANSPARENT</span> <span class="o">=</span> <span class="mi">241</span>
 
-    <span class="c1">#: [``DLT_IPOIB``] IP-over-InfiniBand, as specified by RFC 4391 section 6.</span>
+    <span class="c1">#: [``DLT_IPOIB``] IP-over-InfiniBand.</span>
     <span class="n">IPOIB</span> <span class="o">=</span> <span class="mi">242</span>
 
     <span class="c1">#: [``DLT_MPEG_2_TS``] MPEG-2 Transport Stream transport packets.</span>
@@ -1109,15 +1097,10 @@
     <span class="c1">#: 5 of the Z-Wave Serial API Host Application Programming Guide.</span>
     <span class="n">Z_WAVE_SERIAL</span> <span class="o">=</span> <span class="mi">287</span>
 
-    <span class="c1">#: [``DLT_USB_2_0``] USB 2.0, 1.1, or 1.0 packet, beginning with a PID, as</span>
-    <span class="c1">#: described by Chapter 8 &quot;Protocol Layer&quot; of the the Universal Serial Bus</span>
-    <span class="c1">#: Specification Revision 2.0. Deprecated in favor of speed specific USB 2.0,</span>
-    <span class="c1">#: 1.1, or 1.0 linktypes.</span>
+    <span class="c1">#: [``DLT_USB_2_0``] USB 2.0, 1.1, or 1.0 packets.</span>
     <span class="n">USB_2_0</span> <span class="o">=</span> <span class="mi">288</span>
 
-    <span class="c1">#: [``DLT_ATSC_ALP``] ATSC Link-Layer Protocol frames, as described in section</span>
-    <span class="c1">#: 5 of the A/330 Link-Layer Protocol specification, found at the ATSC 3.0</span>
-    <span class="c1">#: standards page, beginning with a Base Header.</span>
+    <span class="c1">#: [``DLT_ATSC_ALP``] ATSC Link-Layer Protocol frames.</span>
     <span class="n">ATSC_ALP</span> <span class="o">=</span> <span class="mi">289</span>
 
     <span class="c1">#: [``DLT_ETW``] Event Tracing for Windows messages.</span>
@@ -1130,23 +1113,16 @@
     <span class="c1">#: [``DLT_ZBOSS_NCP``] ZBOSS NCP Serial Protocol, with a pseudo-header.</span>
     <span class="n">ZBOSS_NCP</span> <span class="o">=</span> <span class="mi">292</span>
 
-    <span class="c1">#: [``DLT_USB_2_0_LOW_SPEED``] Low-Speed USB 2.0, 1.1, or 1.0 packet, beginning</span>
-    <span class="c1">#: with a PID, as described by Chapter 8 &quot;Protocol Layer&quot; of the the Universal</span>
-    <span class="c1">#: Serial Bus Specification Revision 2.0.</span>
+    <span class="c1">#: [``DLT_USB_2_0_LOW_SPEED``] Low-Speed USB 2.0, 1.1, or 1.0 packets..</span>
     <span class="n">USB_2_0_LOW_SPEED</span> <span class="o">=</span> <span class="mi">293</span>
 
-    <span class="c1">#: [``DLT_USB_2_0_FULL_SPEED``] Full-Speed USB 2.0, 1.1, or 1.0 packet,</span>
-    <span class="c1">#: beginning with a PID, as described by Chapter 8 &quot;Protocol Layer&quot; of the the</span>
-    <span class="c1">#: Universal Serial Bus Specification Revision 2.0.</span>
+    <span class="c1">#: [``DLT_USB_2_0_FULL_SPEED``] Full-Speed USB 2.0, 1.1, or 1.0 packets.</span>
     <span class="n">USB_2_0_FULL_SPEED</span> <span class="o">=</span> <span class="mi">294</span>
 
-    <span class="c1">#: [``DLT_USB_2_0_HIGH_SPEED``] High-Speed USB 2.0 packet, beginning with a</span>
-    <span class="c1">#: PID, as described by Chapter 8 &quot;Protocol Layer&quot; of the the Universal Serial</span>
-    <span class="c1">#: Bus Specification Revision 2.0.</span>
+    <span class="c1">#: [``DLT_USB_2_0_HIGH_SPEED``] High-Speed USB 2.0 packets.</span>
     <span class="n">USB_2_0_HIGH_SPEED</span> <span class="o">=</span> <span class="mi">295</span>
 
-    <span class="c1">#: [``DLT_AUERSWALD_LOG``] Auerswald Logger Protocol, as described in this</span>
-    <span class="c1">#: document.</span>
+    <span class="c1">#: [``DLT_AUERSWALD_LOG``] Auerswald Logger Protocol packets.</span>
     <span class="n">AUERSWALD_LOG</span> <span class="o">=</span> <span class="mi">296</span>
 
     <span class="c1">#: [``DLT_ZWAVE_TAP``] Z-Wave packets, with a metadata header.</span>
@@ -1159,7 +1135,7 @@
     <span class="c1">#: [``DLT_FIRA_UCI``] Ultra-wideband (UWB) controller interface protocol (UCI).</span>
     <span class="n">FIRA_UCI</span> <span class="o">=</span> <span class="mi">299</span>
 
-    <span class="c1">#: [``DLT_MDB``] MDB (Multi-Drop Bus) vending machine protocol.</span>
+    <span class="c1">#: [``DLT_MDB``] MDB (Multi-Drop Bus) messages, with a pseudo-header.</span>
     <span class="n">MDB</span> <span class="o">=</span> <span class="mi">300</span>
 
     <span class="c1">#: [``DLT_DECT_NR``] DECT-2020 New Radio (NR) MAC layer.</span>
@@ -1228,7 +1204,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=7491d5f9"></script>
+</div><script src="../../../../_static/documentation_options.js?v=ddd1a19f"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=4e2eecee"></script>
