@@ -214,8 +214,8 @@ class AppType(StrEnum):
     #: - [UDP] any private mail system
     any_private_mail_system: 'AppType' = 24, 'any_private_mail_system', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] Simple Mail Transfer [:rfc:`5321`]
-    #: - [UDP] Simple Mail Transfer [:rfc:`5321`]
+    #: - [TCP] Simple Mail Transfer [RFC-ietf-emailcore-rfc5321bis-43]
+    #: - [UDP] Simple Mail Transfer [RFC-ietf-emailcore-rfc5321bis-43]
     smtp: 'AppType' = 25, 'smtp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Unassigned
