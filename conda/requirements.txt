@@ -3,7 +3,7 @@ appdirs == 1.4.4
 beautifulsoup4 == 4.13.4
 certifi == 2025.4.26
 chardet == 5.2.0
-charset-normalizer == 3.4.1
+charset-normalizer == 3.4.2
 dictdumper == 0.8.4.post6
 dpkt == 1.9.8
 emoji == 2.14.1
@@ -19,7 +19,7 @@ scapy == 2.6.1
 six == 1.17.0
 soupsieve == 2.7
 tbtrim == 0.3.1
-termcolor == 3.0.1
+termcolor == 3.1.0
 typing-extensions == 4.13.2 ; python_version < "3.11"
 urllib3 == 2.4.0
 webencodings == 0.5.1
