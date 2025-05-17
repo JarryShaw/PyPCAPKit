@@ -148,8 +148,7 @@ class LinkType(IntEnum):
     #: the packet, e.g. signal strength and channel for 802.11 packets.
     TZSP = 128
 
-    #: [``DLT_ARCNET_LINUX``] Reserved for ARCNET Data Packets with Linux
-    #: encapsulation.
+    #: [``DLT_ARCNET_LINUX``] ARCnet Data Packets with Linux encapsulation.
     ARCNET_LINUX = 129
 
     #: [``DLT_JUNIPER_MLPPP``] Juniper Networks private data link type.
