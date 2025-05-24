@@ -36,7 +36,8 @@ class Option(IntEnum):
     #: Tunnel Encapsulation Limit [:rfc:`2473`]
     Tunnel_Encapsulation_Limit = 0x04
 
-    #: Router Alert [:rfc:`2711`]
+    #: Router Alert (DEPRECATED for New Protocols) [:rfc:`2711`][RFC-ietf-6man-
+    #: deprecate-router-alert-13]
     Router_Alert = 0x05
 
     #: Quick-Start [:rfc:`4782`][RFC Errata 2034]

@@ -16945,6 +16945,12 @@ class AppType(StrEnum):
     a25_fap_fgw: 'AppType' = 4502, 'a25-fap-fgw', TransportProtocol.get('sctp')
 
     #: [TCP] Reserved
+    reserved_4503: 'AppType' = 4503, 'reserved', TransportProtocol.get('tcp')
+
+    #: [UDP] M-Bus-OMS over UDP
+    m_bus_oms: 'AppType' = 4503, 'm-bus-oms', TransportProtocol.get('udp')
+
+    #: [TCP] Reserved
     reserved_4534: 'AppType' = 4534, 'reserved', TransportProtocol.get('tcp')
 
     #: [UDP] Armagetron Advanced Game Server
@@ -30582,7 +30588,7 @@ class AppType(StrEnum):
         if 4489 <= value <= 4499:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 4503 <= value <= 4533:
+        if 4504 <= value <= 4533:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 4539 <= value <= 4544:
