@@ -190,9 +190,9 @@ class ReturnCode(IntEnum):
     #: Username okay, password okay. Challenge is ". . . . ".
     CODE_336: 'ReturnCode' = 336, 'Username okay, password okay.'
 
-    #: Service available, closing control connection. This may be a reply to any
-    #: command if the service knows it must shut down.
-    CODE_421: 'ReturnCode' = 421, 'Service available, closing control connection.'
+    #: Service NOT available, closing control connection. This may be a reply to
+    #: any command if the service knows it must shut down.
+    CODE_421: 'ReturnCode' = 421, 'Service NOT available, closing control connection.'
 
     #: Can't open data connection.
     CODE_425: 'ReturnCode' = 425, "Can't open data connection."
