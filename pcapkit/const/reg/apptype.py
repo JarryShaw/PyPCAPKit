@@ -2078,11 +2078,11 @@ class AppType(StrEnum):
     appleqtcsrvr: 'AppType' = 545, 'appleqtcsrvr', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] DHCPv6 Client
-    #: - [UDP] DHCPv6 Client [:rfc:`8415`]
+    #: - [UDP] DHCPv6 Client [RFC-ietf-dhc-rfc8415bis-12]
     dhcpv6_client: 'AppType' = 546, 'dhcpv6-client', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] DHCPv6 Server [:rfc:`5460`]
-    #: - [UDP] DHCPv6 Server [:rfc:`8415`]
+    #: - [UDP] DHCPv6 Server [RFC-ietf-dhc-rfc8415bis-12]
     dhcpv6_server: 'AppType' = 547, 'dhcpv6-server', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] AFP over TCP
