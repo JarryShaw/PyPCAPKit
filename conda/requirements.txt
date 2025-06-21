@@ -1,7 +1,7 @@
 aenum == 3.1.16
 appdirs == 1.4.4
 beautifulsoup4 == 4.13.4
-certifi == 2025.4.26
+certifi == 2025.6.15
 chardet == 5.2.0
 charset-normalizer == 3.4.2
 dictdumper == 0.8.4.post6
@@ -21,5 +21,5 @@ soupsieve == 2.7
 tbtrim == 0.3.1
 termcolor == 3.1.0
 typing-extensions == 4.14.0 ; python_version < "3.11"
-urllib3 == 2.4.0
+urllib3 == 2.5.0
 webencodings == 0.5.1
