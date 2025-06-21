@@ -17535,6 +17535,12 @@ class AppType(StrEnum):
     #: - [UDP] IP Routable Unified Bus
     unified_bus: 'AppType' = 4792, 'unified-bus', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
+    #: [TCP] Reserved
+    reserved_4793: 'AppType' = 4793, 'reserved', TransportProtocol.get('tcp')
+
+    #: [UDP] Ultra Ethernet Transport
+    uet: 'AppType' = 4793, 'uet', TransportProtocol.get('udp')
+
     #: - [TCP] Icona Instant Messenging System
     #: - [UDP] Icona Instant Messenging System
     iims: 'AppType' = 4800, 'iims', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -28208,10 +28214,10 @@ class AppType(StrEnum):
     #: [TCP] DNS Dynamic Update Service over TLS [:rfc:`6281`]
     dns_update_tls: 'AppType' = -1, 'dns-update-tls', TransportProtocol.get('tcp')
 
-    #: [TCP] DNS-Based Service Discovery [RFC-ietf-dnssd-srp-25]
+    #: [TCP] DNS-Based Service Discovery [:rfc:`9665`]
     dnssd_srp: 'AppType' = -1, 'dnssd-srp', TransportProtocol.get('tcp')
 
-    #: [TCP] DNS-Based Service Discovery (TLS) [RFC-ietf-dnssd-srp-25]
+    #: [TCP] DNS-Based Service Discovery (TLS) [:rfc:`9665`]
     dnssd_srp_tls: 'AppType' = -1, 'dnssd-srp-tls', TransportProtocol.get('tcp')
 
     #: [N/A] Roar (Death of Productivity)
@@ -28471,6 +28477,9 @@ class AppType(StrEnum):
 
     #: [TCP] Groovesquid Democratic Music Control Protocol
     groovesquid: 'AppType' = -1, 'groovesquid', TransportProtocol.get('tcp')
+
+    #: [TCP] Mobile device cluster
+    groupthink: 'AppType' = -1, 'groupthink', TransportProtocol.get('tcp')
 
     #: [N/A] Growl
     growl: 'AppType' = -1, 'growl', TransportProtocol.get('undefined')
@@ -30636,7 +30645,7 @@ class AppType(StrEnum):
         if 4775 <= value <= 4783:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 4793 <= value <= 4799:
+        if 4794 <= value <= 4799:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 4805 <= value <= 4826:
