@@ -261,6 +261,6 @@ class RouterAlert(IntEnum):
             #: Unassigned
             return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 65503 <= value <= 65534:
-            #: Reserved [RFC-ietf-6man-deprecate-router-alert-13]
+            #: Reserved [:rfc:`9805`]
             return extend_enum(cls, 'Reserved_%d' % value, value)
         return super()._missing_(value)
