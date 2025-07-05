@@ -20,6 +20,6 @@ six == 1.17.0
 soupsieve == 2.7
 tbtrim == 0.3.1
 termcolor == 3.1.0
-typing-extensions == 4.14.0 ; python_version < "3.11"
+typing-extensions == 4.14.1 ; python_version < "3.11"
 urllib3 == 2.5.0
 webencodings == 0.5.1
