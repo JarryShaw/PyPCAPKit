@@ -482,7 +482,7 @@ class TransType(IntEnum):
     #: Homa [HomaModule][John Ousterhout]
     Homa = 146
 
-    #: Bit-stream Emulation [RFC-ietf-pals-ple-14]
+    #: Bit-stream Emulation [:rfc:`9801`]
     BIT_EMU = 147
 
     #: Use for experimentation and testing [:rfc:`3692`]
