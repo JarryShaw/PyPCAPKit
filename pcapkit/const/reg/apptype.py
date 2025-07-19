@@ -1170,6 +1170,13 @@ class AppType(StrEnum):
     #: - [UDP] K-BLOCK
     k_block: 'AppType' = 287, 'k-block', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
+    #: [TCP] TLS Secure Login Host Protocol (TACACSS) [RFC-ietf-opsawg-tacacs-
+    #: tls13-24]
+    tacacss: 'AppType' = 300, 'tacacss', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_300: 'AppType' = 300, 'reserved', TransportProtocol.get('udp')
+
     #: - [TCP] Novastor Backup
     #: - [UDP] Novastor Backup
     novastorbakcup: 'AppType' = 308, 'novastorbakcup', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -29748,6 +29755,9 @@ class AppType(StrEnum):
     #: [TCP] SHIP (Smart Home IP)
     ship: 'AppType' = -1, 'ship', TransportProtocol.get('tcp')
 
+    #: [TCP] Authenticated SHIP pairing request
+    shippairing: 'AppType' = -1, 'shippairing', TransportProtocol.get('tcp')
+
     #: [N/A] Swift Office Ships
     shipsgm: 'AppType' = -1, 'shipsgm', TransportProtocol.get('undefined')
 
@@ -30495,7 +30505,10 @@ class AppType(StrEnum):
         if 272 <= value <= 279:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 288 <= value <= 307:
+        if 288 <= value <= 299:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 301 <= value <= 307:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 325 <= value <= 332:
