@@ -28178,6 +28178,9 @@ class AppType(StrEnum):
     #: [N/A] EyeHome
     difi: 'AppType' = -1, 'difi', TransportProtocol.get('undefined')
 
+    #: [TCP] Digital Electricity Transmitter
+    digitalelectric: 'AppType' = -1, 'digitalelectric', TransportProtocol.get('tcp')
+
     #: [N/A] DisConnect Peer to Peer Game Protocol
     disconnect: 'AppType' = -1, 'disconnect', TransportProtocol.get('undefined')
 
