@@ -9,4 +9,4 @@ sphinxcontrib-mermaid==1.0.0
 
 # auxiliary
 typing-extensions==4.14.1
-mypy-extensions==1.0.0
+mypy-extensions==1.1.0
