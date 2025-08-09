@@ -1,9 +1,9 @@
 aenum == 3.1.16
 appdirs == 1.4.4
 beautifulsoup4 == 4.13.4
-certifi == 2025.7.14
+certifi == 2025.8.3
 chardet == 5.2.0
-charset-normalizer == 3.4.2
+charset-normalizer == 3.4.3
 dictdumper == 0.8.4.post6
 dpkt == 1.9.8
 emoji == 2.14.1
