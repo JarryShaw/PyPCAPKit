@@ -29485,6 +29485,9 @@ class AppType(StrEnum):
     #: [N/A] Rakket Client Protocol
     rakket: 'AppType' = -1, 'rakket', TransportProtocol.get('undefined')
 
+    #: [N/A] Radicle peer to peer network
+    radicle_node: 'AppType' = -1, 'radicle-node', TransportProtocol.get('undefined')
+
     #: [N/A] RadioTAG: Event tagging for radio services
     radiotag: 'AppType' = -1, 'radiotag', TransportProtocol.get('undefined')
 
