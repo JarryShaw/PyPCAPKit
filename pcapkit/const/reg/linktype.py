@@ -68,9 +68,7 @@ class LinkType(IntEnum):
     #: [``DLT_ATM_RFC1483``] LLC/SNAP-encapsulated ATM
     ATM_RFC1483 = 100
 
-    #: [``DLT_RAW``] Raw IP; the packet begins with an IPv4 or IPv6 header, with
-    #: the version field of the header indicating whether it's an IPv4 or IPv6
-    #: header.
+    #: [``DLT_RAW``] IPv4 or IPv6 packets with no link-layer header.
     RAW = 101
 
     #: [``DLT_C_HDLC``] Cisco PPP with HDLC framing.
@@ -472,10 +470,10 @@ class LinkType(IntEnum):
     #: metadata header.
     CAN_SOCKETCAN = 227
 
-    #: [``DLT_IPV4``] Raw IPv4; the packet begins with an IPv4 header.
+    #: [``DLT_IPV4``] IPv4 packets with no link-layer header.
     IPV4 = 228
 
-    #: [``DLT_IPV6``] Raw IPv6; the packet begins with an IPv6 header.
+    #: [``DLT_IPV6``] IPv6 packets with no link-layer header.
     IPV6 = 229
 
     #: [``DLT_IEEE802_15_4_NOFCS``] IEEE 802.15.4 packets without FCS.
