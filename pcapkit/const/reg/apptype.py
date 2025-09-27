@@ -4389,8 +4389,8 @@ class AppType(StrEnum):
     #: - [UDP] delta-mcp
     delta_mcp: 'AppType' = 1324, 'delta-mcp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] DX-Instrument
-    #: - [UDP] DX-Instrument
+    #: - [TCP] Thermo Fisher Scientific Instrumentation (Formally Dionex)
+    #: - [UDP] Thermo Fisher Scientific Instrumentation (Formally Dionex)
     dx_instrument: 'AppType' = 1325, 'dx-instrument', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] WIMSIC
@@ -26048,6 +26048,13 @@ class AppType(StrEnum):
     #: [UDP] bilobit Service Update
     bilobit_update: 'AppType' = 24577, 'bilobit-update', TransportProtocol.get('udp')
 
+    #: [UDP] UDP-based IP-Layer Capacity and performance measurement protocol [RFC-
+    #: ietf-ippm-capacity-protocol-25]
+    udpstp: 'AppType' = 24601, 'udpstp', TransportProtocol.get('udp')
+
+    #: [TCP] Reserved
+    reserved_24601: 'AppType' = 24601, 'reserved', TransportProtocol.get('tcp')
+
     #: [TCP] Service used by SmarDTV to communicate between a CAM and a second
     #: screen application
     sdtvwcam: 'AppType' = 24666, 'sdtvwcam', TransportProtocol.get('tcp')
@@ -27045,9 +27052,9 @@ class AppType(StrEnum):
     #: - [UDP] PCP server (pmcd)
     pmcd: 'AppType' = 44321, 'pmcd', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] PCP server (pmcd) proxy
-    #: - [UDP] PCP server (pmcd) proxy
-    pmcdproxy: 'AppType' = 44322, 'pmcdproxy', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] PCP proxy (pmproxy)
+    #: - [UDP] PCP proxy (pmproxy)
+    pmproxy: 'AppType' = 44322, 'pmproxy', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] HTTP binding for Performance Co-Pilot client API
     pmwebapi: 'AppType' = 44323, 'pmwebapi', TransportProtocol.get('tcp')
@@ -32335,7 +32342,10 @@ class AppType(StrEnum):
         if 24555 <= value <= 24576:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 24578 <= value <= 24665:
+        if 24578 <= value <= 24600:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 24602 <= value <= 24665:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 24667 <= value <= 24675:
