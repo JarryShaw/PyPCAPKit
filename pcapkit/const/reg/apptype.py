@@ -2954,17 +2954,17 @@ class AppType(StrEnum):
     #: - [UDP] NETCONF over SSH [:rfc:`6242`]
     netconf_ssh: 'AppType' = 830, 'netconf-ssh', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] NETCONF over BEEP [:rfc:`4744`]
-    #: - [UDP] NETCONF over BEEP [:rfc:`4744`]
-    netconf_beep: 'AppType' = 831, 'netconf-beep', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] Reserved
+    #: - [UDP] Reserved
+    reserved_831: 'AppType' = 831, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] NETCONF for SOAP over HTTPS [:rfc:`4743`]
-    #: - [UDP] NETCONF for SOAP over HTTPS [:rfc:`4743`]
-    netconfsoaphttp: 'AppType' = 832, 'netconfsoaphttp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] Reserved
+    #: - [UDP] Reserved
+    reserved_832: 'AppType' = 832, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] NETCONF for SOAP over BEEP [:rfc:`4743`]
-    #: - [UDP] NETCONF for SOAP over BEEP [:rfc:`4743`]
-    netconfsoapbeep: 'AppType' = 833, 'netconfsoapbeep', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] Reserved
+    #: - [UDP] Reserved
+    reserved_833: 'AppType' = 833, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] dhcp-failover 2
     #: - [UDP] dhcp-failover 2
@@ -27487,6 +27487,17 @@ class AppType(StrEnum):
 
     #: [N/A] Remote Job Service
     netrjs: 'AppType' = -1, 'netrjs', TransportProtocol.get('undefined')
+
+    #: [N/A] NETCONF over BEEP [:rfc:`4744`][RFC-ietf-netconf-port-numbers-07]
+    netconf_beep: 'AppType' = -1, 'netconf-beep', TransportProtocol.get('undefined')
+
+    #: [N/A] NETCONF for SOAP over BEEP [:rfc:`4743`][RFC-ietf-netconf-port-
+    #: numbers-07]
+    netconfsoapbeep: 'AppType' = -1, 'netconfsoapbeep', TransportProtocol.get('undefined')
+
+    #: [N/A] NETCONF for SOAP over HTTPS [:rfc:`4743`][RFC-ietf-netconf-port-
+    #: numbers-07]
+    netconfsoaphttp: 'AppType' = -1, 'netconfsoaphttp', TransportProtocol.get('undefined')
 
     #: [N/A] A File Access Protocol
     nfile: 'AppType' = -1, 'nfile', TransportProtocol.get('undefined')
