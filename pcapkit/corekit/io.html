@@ -434,42 +434,42 @@
 <span id="seekable-i-o-object"></span><h1>Seekable I/O Object<a class="headerlink" href="#module-pcapkit.corekit.io" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.corekit.io" title="pcapkit.corekit.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.io</span></code></a> contains seekable I/O object
 <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>, which is a customised
-implementation to <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a>.</p>
+implementation to <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">SeekableReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream_closing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></p>
 <p>Seekable buffered reader.</p>
 <p>A buffered binary stream providing higher-level access to a readable, non seekable
-<a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> raw binary stream. It inherits <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedIOBase" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a>.</p>
+<a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> raw binary stream. It inherits <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedIOBase" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a>.</p>
 <p>When reading data from this object, a larger amount of data may be requested from the
 underlying raw stream, and kept in an internal buffer. The buffered data can then be returned
 directly on subsequent reads.</p>
-<p>The constructor creates a <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> for the given readable <code class="docutils literal notranslate"><span class="pre">raw</span></code> stream and
-<code class="docutils literal notranslate"><span class="pre">buffer_size</span></code>. If <code class="docutils literal notranslate"><span class="pre">buffer_size</span></code> is omitted, <a class="reference external" href="https://docs.python.org/3/library/io.html#io.DEFAULT_BUFFER_SIZE" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_BUFFER_SIZE</span></code></a> is used.</p>
+<p>The constructor creates a <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> for the given readable <code class="docutils literal notranslate"><span class="pre">raw</span></code> stream and
+<code class="docutils literal notranslate"><span class="pre">buffer_size</span></code>. If <code class="docutils literal notranslate"><span class="pre">buffer_size</span></code> is omitted, <a class="reference external" href="https://docs.python.org/3/library/io.html#io.DEFAULT_BUFFER_SIZE" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_BUFFER_SIZE</span></code></a> is used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>raw</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – Underlying raw stream.</p></li>
-<li><p><strong>buffer_size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Buffer size.</p></li>
-<li><p><strong>buffer_save</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to save buffer to file.</p></li>
-<li><p><strong>buffer_path</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>) – Path to save buffer.</p></li>
-<li><p><strong>stream_closing</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the stream should be closed upon exiting.</p></li>
+<li><p><strong>raw</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – Underlying raw stream.</p></li>
+<li><p><strong>buffer_size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Buffer size.</p></li>
+<li><p><strong>buffer_save</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to save buffer to file.</p></li>
+<li><p><strong>buffer_path</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>) – Path to save buffer.</p></li>
+<li><p><strong>stream_closing</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the stream should be closed upon exiting.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.raw">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase" title="(in Python v3.13)"><span class="pre">RawIOBase</span></a></em><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.raw" title="Link to this definition">¶</a></dt>
-<dd><p>The underlying raw stream (a <a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> instance) that
-<a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedIOBase" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> deals with. This is not part of the <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedIOBase" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase" title="(in Python v3.14)"><span class="pre">RawIOBase</span></a></em><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.raw" title="Link to this definition">¶</a></dt>
+<dd><p>The underlying raw stream (a <a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a> instance) that
+<a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedIOBase" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a> deals with. This is not part of the <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedIOBase" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedIOBase</span></code></a>
 API and may not exist on some implementations.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.closed">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">closed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.closed" title="Link to this definition">¶</a></dt>
-<dd><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> if the stream is closed.</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">closed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.closed" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> if the stream is closed.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -479,7 +479,7 @@ API and may not exist on some implementations.</p>
 the read call would block in non-blocking mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -492,7 +492,7 @@ one byte is buffered, only buffered bytes are returned. Otherwise, one raw strea
 is made.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -500,15 +500,15 @@ is made.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.readinto">
 <span class="sig-name descname"><span class="pre">readinto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.readinto"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.readinto" title="Link to this definition">¶</a></dt>
-<dd><p>Read bytes into a pre-allocated, writable <a class="reference external" href="https://docs.python.org/3/glossary.html#term-bytes-like-object" title="(in Python v3.13)"><span class="xref std std-term">bytes-like object</span></a> <code class="docutils literal notranslate"><span class="pre">b</span></code> and return the
-number of bytes read. For example, <code class="docutils literal notranslate"><span class="pre">b</span></code> might be a <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytearray</span></code></a>.</p>
+<dd><p>Read bytes into a pre-allocated, writable <a class="reference external" href="https://docs.python.org/3/glossary.html#term-bytes-like-object" title="(in Python v3.14)"><span class="xref std std-term">bytes-like object</span></a> <code class="docutils literal notranslate"><span class="pre">b</span></code> and return the
+number of bytes read. For example, <code class="docutils literal notranslate"><span class="pre">b</span></code> might be a <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytearray</span></code></a>.</p>
 <p>Like <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.read" title="pcapkit.corekit.io.SeekableReader.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>, multiple reads may be issued to the underlying raw stream, unless the
 latter is interactive.</p>
-<p>A <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BlockingIOError" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> is raised if the underlying raw stream is in non blocking-mode,
+<p>A <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BlockingIOError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> is raised if the underlying raw stream is in non blocking-mode,
 and has no data available at the moment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -516,14 +516,14 @@ and has no data available at the moment.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.readinto1">
 <span class="sig-name descname"><span class="pre">readinto1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.readinto1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.readinto1" title="Link to this definition">¶</a></dt>
-<dd><p>Read bytes into a pre-allocated, writable <a class="reference external" href="https://docs.python.org/3/glossary.html#term-bytes-like-object" title="(in Python v3.13)"><span class="xref std std-term">bytes-like object</span></a> <code class="docutils literal notranslate"><span class="pre">b</span></code>, using at most
+<dd><p>Read bytes into a pre-allocated, writable <a class="reference external" href="https://docs.python.org/3/glossary.html#term-bytes-like-object" title="(in Python v3.14)"><span class="xref std std-term">bytes-like object</span></a> <code class="docutils literal notranslate"><span class="pre">b</span></code>, using at most
 one call to the underlying raw stream’s <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.read" title="pcapkit.corekit.io.SeekableReader.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> (or <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.readinto" title="pcapkit.corekit.io.SeekableReader.readinto"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readinto()</span></code></a>) method. Return
 the number of bytes read.</p>
-<p>A <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BlockingIOError" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> is raised if the underlying raw stream is in non blocking-mode,
+<p>A <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BlockingIOError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> is raised if the underlying raw stream is in non blocking-mode,
 and has no data available at the moment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -531,11 +531,11 @@ and has no data available at the moment.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.readable">
 <span class="sig-name descname"><span class="pre">readable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.readable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.readable" title="Link to this definition">¶</a></dt>
-<dd><p>Return <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> if the stream can be read from. If <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>,
-<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.read" title="pcapkit.corekit.io.SeekableReader.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>.</p>
+<dd><p>Return <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> if the stream can be read from. If <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>,
+<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.read" title="pcapkit.corekit.io.SeekableReader.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -546,11 +546,11 @@ and has no data available at the moment.</p>
 <dd><p>Read and return one line from the stream. If <code class="docutils literal notranslate"><span class="pre">size</span></code> is specified, at most
 <code class="docutils literal notranslate"><span class="pre">size</span></code> bytes will be read.</p>
 <p>The line terminator is always <code class="docutils literal notranslate"><span class="pre">b'\n'</span></code> for binary files; for text files, the
-<code class="docutils literal notranslate"><span class="pre">newline</span></code> argument to <a class="reference external" href="https://docs.python.org/3/library/functions.html#open" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> can be used to select the line
+<code class="docutils literal notranslate"><span class="pre">newline</span></code> argument to <a class="reference external" href="https://docs.python.org/3/library/functions.html#open" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> can be used to select the line
 terminator(s) recognized.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -561,12 +561,12 @@ terminator(s) recognized.</p>
 <dd><p>Read and return a list of lines from the stream. <code class="docutils literal notranslate"><span class="pre">hint</span></code> can be specified to control
 the number of lines read: no more lines will be read if the total size (in
 bytes/characters) of all lines so far exceeds <code class="docutils literal notranslate"><span class="pre">hint</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">hint</span></code> values of <code class="docutils literal notranslate"><span class="pre">0</span></code> or less, as well as <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, are treated as no hint.</p>
+<p><code class="docutils literal notranslate"><span class="pre">hint</span></code> values of <code class="docutils literal notranslate"><span class="pre">0</span></code> or less, as well as <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, are treated as no hint.</p>
 <p>Note that it’s already possible to iterate on file objects using <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">line</span> <span class="pre">in</span> <span class="pre">file:</span> <span class="pre">...</span></code>
 without calling <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.readlines" title="pcapkit.corekit.io.SeekableReader.readlines"><code class="xref py py-meth docutils literal notranslate"><span class="pre">file.readlines()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -574,11 +574,11 @@ without calling <a class="reference internal" href="#pcapkit.corekit.io.Seekable
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.writeable">
 <span class="sig-name descname"><span class="pre">writeable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.writeable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.writeable" title="Link to this definition">¶</a></dt>
-<dd><p>Return <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if the stream supports writing. If <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> and
-<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.truncate" title="pcapkit.corekit.io.SeekableReader.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>.</p>
+<dd><p>Return <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if the stream supports writing. If <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> and
+<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.truncate" title="pcapkit.corekit.io.SeekableReader.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -586,17 +586,17 @@ without calling <a class="reference internal" href="#pcapkit.corekit.io.Seekable
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.write">
 <span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.write" title="Link to this definition">¶</a></dt>
-<dd><p>Write the given <a class="reference external" href="https://docs.python.org/3/glossary.html#term-bytes-like-object" title="(in Python v3.13)"><span class="xref std std-term">bytes-like object</span></a>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, and return the number of bytes written
-(always equal to the length of <code class="docutils literal notranslate"><span class="pre">b</span></code> in bytes, since if the write fails an <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>
+<dd><p>Write the given <a class="reference external" href="https://docs.python.org/3/glossary.html#term-bytes-like-object" title="(in Python v3.14)"><span class="xref std std-term">bytes-like object</span></a>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, and return the number of bytes written
+(always equal to the length of <code class="docutils literal notranslate"><span class="pre">b</span></code> in bytes, since if the write fails an <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>
 will be raised).  Depending on the actual implementation, these bytes may be readily written
 to the underlying stream, or held in a buffer for performance and latency reasons.</p>
-<p>When in non-blocking mode, a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BlockingIOError" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> is raised if the data needed to be
+<p>When in non-blocking mode, a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BlockingIOError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BlockingIOError</span></code></a> is raised if the data needed to be
 written to the raw stream but it couldn’t accept all the data without blocking.</p>
 <p>The caller may release or mutate <code class="docutils literal notranslate"><span class="pre">b</span></code> after this method returns, so the implementation
 should only access <code class="docutils literal notranslate"><span class="pre">b</span></code> during the method call.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -604,11 +604,11 @@ should only access <code class="docutils literal notranslate"><span class="pre">
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.seekable">
 <span class="sig-name descname"><span class="pre">seekable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.seekable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.seekable" title="Link to this definition">¶</a></dt>
-<dd><p>Return <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> if the stream supports random access. If <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>,
-<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.tell" title="pcapkit.corekit.io.SeekableReader.tell"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tell()</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.truncate" title="pcapkit.corekit.io.SeekableReader.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>.</p>
+<dd><p>Return <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> if the stream supports random access. If <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>,
+<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.tell" title="pcapkit.corekit.io.SeekableReader.tell"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tell()</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.truncate" title="pcapkit.corekit.io.SeekableReader.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -619,7 +619,7 @@ should only access <code class="docutils literal notranslate"><span class="pre">
 <dd><p>Change the stream position to the given byte <code class="docutils literal notranslate"><span class="pre">offset</span></code>. <code class="docutils literal notranslate"><span class="pre">offset</span></code> is interpreted
 relative to the position indicated by <code class="docutils literal notranslate"><span class="pre">whence</span></code>. The default value for <code class="docutils literal notranslate"><span class="pre">whence</span></code> is
 <code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code>. Values for <code class="docutils literal notranslate"><span class="pre">whence</span></code> are:
-:rtype: <span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+:rtype: <span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 <ul class="simple">
 <li><p><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code> - start of the stream (the default); <code class="docutils literal notranslate"><span class="pre">offset</span></code> should
 be zero or positive</p></li>
@@ -635,7 +635,7 @@ be zero or positive</p></li>
 <dd><p>Return the current stream position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -650,7 +650,7 @@ depend on the platform (on most systems, additional bytes are zero-filled). The 
 size is returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -660,12 +660,12 @@ size is returned.</p>
 <span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.close" title="Link to this definition">¶</a></dt>
 <dd><p>Flush and close this stream. This method has no effect if the file is already closed.
 Once the file is closed, any operation on the file (e.g. reading or writing) will raise
-a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
+a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
 <p>As a convenience, it is allowed to call this method more than once; only the first call,
 however, will have an effect.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -677,7 +677,7 @@ however, will have an effect.</p>
 read-only and non-blocking streams.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -690,7 +690,7 @@ read-only and non-blocking streams.</p>
 The number of bytes returned may be less or more than requested.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -700,11 +700,11 @@ The number of bytes returned may be less or more than requested.</p>
 <span class="sig-name descname"><span class="pre">detach</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.detach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.detach" title="Link to this definition">¶</a></dt>
 <dd><p>Separate the underlying raw stream from the buffer and return it.</p>
 <p>After the raw stream has been detached, the buffer is in an unusable state.</p>
-<p>Some buffers, like <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a>, do not have the concept of a single raw stream to
-return from this method. They raise <a class="reference external" href="https://docs.python.org/3/library/io.html#io.UnsupportedOperation" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedOperation</span></code></a>.</p>
+<p>Some buffers, like <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesIO</span></code></a>, do not have the concept of a single raw stream to
+return from this method. They raise <a class="reference external" href="https://docs.python.org/3/library/io.html#io.UnsupportedOperation" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedOperation</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawIOBase</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -713,10 +713,10 @@ return from this method. They raise <a class="reference external" href="https://
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.fileno">
 <span class="sig-name descname"><span class="pre">fileno</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.fileno"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.fileno" title="Link to this definition">¶</a></dt>
 <dd><p>Return the underlying file descriptor (an integer) of the stream if it exists.
-An <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.13)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> is raised if the IO object does not use a file descriptor.</p>
+An <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> is raised if the IO object does not use a file descriptor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -724,11 +724,11 @@ An <a class="reference external" href="https://docs.python.org/3/library/excepti
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.isatty">
 <span class="sig-name descname"><span class="pre">isatty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.isatty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.isatty" title="Link to this definition">¶</a></dt>
-<dd><p>Return <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> if the stream is interactive (i.e., connected to a
+<dd><p>Return <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> if the stream is interactive (i.e., connected to a
 terminal/tty device).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -786,7 +786,7 @@ terminal/tty device).</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=68ef4059"></script>
+</div><script src="../../_static/documentation_options.js?v=2f8300d1"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
