@@ -25752,6 +25752,12 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_21221: 'AppType' = 21221, 'reserved', TransportProtocol.get('udp')
 
+    #: [TCP] Xahau P2P network protocol [https://xahau.network]
+    xahaud: 'AppType' = 21337, 'xahaud', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_21337: 'AppType' = 21337, 'reserved', TransportProtocol.get('udp')
+
     #: [TCP] Raima RDM TFS
     rdm_tfs: 'AppType' = 21553, 'rdm-tfs', TransportProtocol.get('tcp')
 
@@ -32248,7 +32254,10 @@ class AppType(StrEnum):
         if 21214 <= value <= 21220:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 21222 <= value <= 21552:
+        if 21222 <= value <= 21336:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 21338 <= value <= 21552:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 21555 <= value <= 21589:
