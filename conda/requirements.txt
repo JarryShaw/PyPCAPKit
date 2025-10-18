@@ -3,12 +3,12 @@ appdirs == 1.4.4
 beautifulsoup4 == 4.14.2
 certifi == 2025.10.5
 chardet == 5.2.0
-charset-normalizer == 3.4.3
+charset-normalizer == 3.4.4
 dictdumper == 0.8.4.post6
 dpkt == 1.9.8
 emoji == 2.15.0
 html5lib == 1.1
-idna == 3.10
+idna == 3.11
 lxml == 6.0.2
 packaging == 25.0
 pathlib2 ; python_version < "3.5"
