@@ -16353,9 +16353,9 @@ class AppType(StrEnum):
     #: [N/A] Unassigned
     unassigned_4318: 'AppType' = 4318, 'unassigned', TransportProtocol.get('undefined')
 
-    #: - [TCP] Fox SkyTale encrypted communication
-    #: - [UDP] Fox SkyTale encrypted communication
-    fox_skytale: 'AppType' = 4319, 'fox-skytale', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] Sentyron SkyTale encrypted communication
+    #: - [UDP] Sentyron SkyTale encrypted communication
+    skytale: 'AppType' = 4319, 'skytale', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] FDT Remote Categorization Protocol
     #: - [UDP] FDT Remote Categorization Protocol
@@ -24251,6 +24251,13 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_9981: 'AppType' = 9981, 'reserved', TransportProtocol.get('udp')
 
+    #: [TCP] KAOS secure message transport protocol for safety-critical
+    #: environments
+    kaostransport: 'AppType' = 9986, 'kaostransport', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_9986: 'AppType' = 9986, 'reserved', TransportProtocol.get('udp')
+
     #: - [TCP] DSM/SCM Target Interface
     #: - [UDP] DSM/SCM Target Interface
     dsm_scm_target: 'AppType' = 9987, 'dsm-scm-target', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -31786,7 +31793,7 @@ class AppType(StrEnum):
         if 9967 <= value <= 9977:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 9982 <= value <= 9986:
+        if 9982 <= value <= 9985:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 9989 <= value <= 9989:
