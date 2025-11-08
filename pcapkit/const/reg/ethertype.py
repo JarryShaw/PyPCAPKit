@@ -140,8 +140,8 @@ class EtherType(IntEnum):
     #: DEC LAVC, SCA [Neil Sembower]
     DEC_LAVC_SCA = 0x6007
 
-    #: Trans Ether Bridging [:rfc:`1701`]
-    Trans_Ether_Bridging = 0x6558
+    #: Transparent Ethernet Bridging [:rfc:`1701`]
+    Transparent_Ethernet_Bridging = 0x6558
 
     #: Raw Frame Relay [:rfc:`1701`]
     Raw_Frame_Relay = 0x6559
