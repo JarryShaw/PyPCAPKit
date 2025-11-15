@@ -16717,11 +16717,11 @@ class AppType(StrEnum):
     #: [UDP] SmallChat
     smallchat: 'AppType' = 4412, 'smallchat', TransportProtocol.get('udp')
 
-    #: [TCP] AVI Systems NMS
-    avi_nms: 'AppType' = 4413, 'avi-nms', TransportProtocol.get('tcp')
+    #: [TCP] FORTÉ Vision Monitoring platform
+    vision_mon: 'AppType' = 4413, 'vision-mon', TransportProtocol.get('tcp')
 
-    #: [UDP] AVI Systems NMS
-    avi_nms_disc: 'AppType' = 4413, 'avi-nms-disc', TransportProtocol.get('udp')
+    #: [UDP] FORTÉ Vision Monitoring platform
+    vision_mon_disc: 'AppType' = 4413, 'vision-mon-disc', TransportProtocol.get('udp')
 
     #: [TCP] Updog Monitoring and Status Framework
     updog: 'AppType' = 4414, 'updog', TransportProtocol.get('tcp')
