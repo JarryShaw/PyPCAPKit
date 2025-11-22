@@ -50,10 +50,10 @@ class Method(StrEnum):
     #: BIND [:rfc:`5842#section-4`]
     BIND = 'BIND', False, True
 
-    #: CHECKIN [:rfc:`3253#section-4.4,-section-9.4`]
+    #: CHECKIN [:rfc:`3253#section-9.4`]
     CHECKIN = 'CHECKIN', False, True
 
-    #: CHECKOUT [:rfc:`3253#section-4.3,-section-8.8`]
+    #: CHECKOUT [:rfc:`3253#section-8.8`]
     CHECKOUT = 'CHECKOUT', False, True
 
     #: CONNECT [:rfc:`9110#section-9.3.6`]
@@ -125,6 +125,9 @@ class Method(StrEnum):
 
     #: PUT [:rfc:`9110#section-9.3.4`]
     PUT = 'PUT', False, True
+
+    #: QUERY [RFC-ietf-httpbis-safe-method-w-body-14, Section 2]
+    QUERY = 'QUERY', True, True
 
     #: REBIND [:rfc:`5842#section-6`]
     REBIND = 'REBIND', False, True

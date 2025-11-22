@@ -7067,9 +7067,9 @@ class AppType(StrEnum):
     #: - [UDP] UniSQL Java
     unisql_java: 'AppType' = 1979, 'unisql-java', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: - [TCP] PearlDoc XACT
-    #: - [UDP] PearlDoc XACT
-    pearldoc_xact: 'AppType' = 1980, 'pearldoc-xact', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+    #: - [TCP] PanQuest XACT
+    #: - [UDP] PanQuest XACT
+    panquest_xact: 'AppType' = 1980, 'panquest-xact', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] p2pQ
     #: - [UDP] p2pQ
