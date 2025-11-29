@@ -720,6 +720,9 @@ class LinkType(IntEnum):
     #: [``DLT_DECT_NR``] DECT-2020 New Radio (NR) MAC layer.
     DECT_NR = 301
 
+    #: [``DLT_EDK2_MM``] edk2 mm request serialization protocol.
+    EDK2_MM = 302
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'LinkType':
         """Backport support for original codes.
