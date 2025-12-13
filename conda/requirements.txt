@@ -21,5 +21,5 @@ soupsieve == 2.8
 tbtrim == 0.3.1
 termcolor == 3.2.0
 typing-extensions == 4.15.0 ; python_version < "3.11"
-urllib3 == 2.6.0
+urllib3 == 2.6.2
 webencodings == 0.5.1
