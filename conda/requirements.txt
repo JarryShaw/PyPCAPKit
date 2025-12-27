@@ -15,7 +15,7 @@ pathlib2 ; python_version < "3.5"
 pyshark == 0.6
 pysocks == 1.7.1
 requests == 2.32.5
-scapy == 2.6.1
+scapy == 2.7.0
 six == 1.17.0
 soupsieve == 2.8.1
 tbtrim == 0.3.1
