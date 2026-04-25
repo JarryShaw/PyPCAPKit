@@ -1,16 +1,16 @@
 aenum == 3.1.17
 appdirs == 1.4.4
 beautifulsoup4 == 4.14.3
-certifi == 2026.2.25
+certifi == 2026.4.22
 chardet == 7.4.3
 charset-normalizer == 3.4.7
 dictdumper == 0.8.4.post6
 dpkt == 1.9.8
 emoji == 2.15.0
 html5lib == 1.1
-idna == 3.11
+idna == 3.13
 lxml == 6.1.0
-packaging == 26.1
+packaging == 26.2
 pathlib2 ; python_version < "3.5"
 pyshark == 0.6
 pysocks == 1.7.1
