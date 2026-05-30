@@ -8,7 +8,7 @@ dictdumper == 0.8.4.post6
 dpkt == 1.9.8
 emoji == 2.15.0
 html5lib == 1.1
-idna == 3.16
+idna == 3.17
 lxml == 6.1.1
 packaging == 26.2
 pathlib2 ; python_version < "3.5"
@@ -17,7 +17,7 @@ pysocks == 1.7.1
 requests == 2.34.2
 scapy == 2.7.0
 six == 1.17.0
-soupsieve == 2.8.3
+soupsieve == 2.8.4
 tbtrim == 0.3.1
 termcolor == 3.3.0
 typing-extensions == 4.15.0 ; python_version < "3.11"
