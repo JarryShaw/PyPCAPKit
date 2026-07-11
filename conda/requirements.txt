@@ -3,7 +3,7 @@ appdirs == 1.4.4
 beautifulsoup4 == 4.15.0
 certifi == 2026.6.17
 chardet == 7.4.3
-charset-normalizer == 3.4.7
+charset-normalizer == 3.4.9
 dictdumper == 0.8.4.post6
 dpkt == 1.9.8
 emoji == 2.15.0
