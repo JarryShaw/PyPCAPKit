@@ -18,13 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v7
         with:
-          python-version: '3.13'
+          python-version: '3.14'
 
       - name: Install and Setup
         run: |
@@ -59,7 +59,7 @@ jobs:
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
@@ -96,7 +96,7 @@ jobs:
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.PYPCAPKIT }}
           # ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
@@ -156,22 +156,21 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
-          - "pypy3.8"
-          - "pypy3.9"
+          - "3.14"
           - "pypy3.10"
+          - "pypy3.11"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -192,7 +191,7 @@ jobs:
           python util/wheel_rename.py dist/*.whl
 
       - name: No Source Distribution for Python ${{ matrix.python-version }}
-        if: ${{ matrix.python-version != '3.13' }}
+        if: ${{ matrix.python-version != '3.14' }}
         run: |
           rm dist/*.tar.gz
 
@@ -232,17 +231,18 @@ jobs:
           - ubuntu-latest
           # - windows-latest  # skip for now
         python-version:
-          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
+          - "3.14"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0
           fetch-depth: 0
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
