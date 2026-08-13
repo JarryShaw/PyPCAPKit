@@ -489,6 +489,12 @@
     <span class="c1">#: [``DLT_RAW``] IPv4 or IPv6 packets with no link-layer header.</span>
     <span class="n">RAW</span> <span class="o">=</span> <span class="mi">101</span>
 
+    <span class="c1">#: [``DLT_SLIP_BSDOS``] BSD/OS Serial Line IP</span>
+    <span class="n">SLIP_BSDOS</span> <span class="o">=</span> <span class="mi">102</span>
+
+    <span class="c1">#: [``DLT_PPP_BSDOS``] BSD/OS Point-to-point Protocol</span>
+    <span class="n">PPP_BSDOS</span> <span class="o">=</span> <span class="mi">103</span>
+
     <span class="c1">#: [``DLT_C_HDLC``] Cisco PPP with HDLC framing.</span>
     <span class="n">C_HDLC</span> <span class="o">=</span> <span class="mi">104</span>
 
@@ -506,6 +512,12 @@
 
     <span class="c1">#: [``DLT_ENC``] Encapsulated packets for IPsec.</span>
     <span class="n">ENC</span> <span class="o">=</span> <span class="mi">109</span>
+
+    <span class="c1">#: ATM LANE + IEEE 802.3</span>
+    <span class="n">LANE8023</span> <span class="o">=</span> <span class="mi">110</span>
+
+    <span class="c1">#: [``DLT_HIPPI``] NetBSD HIPPI</span>
+    <span class="n">HIPPI</span> <span class="o">=</span> <span class="mi">111</span>
 
     <span class="c1">#: [``DLT_HDLC``] Cisco HDLC.</span>
     <span class="n">NETBSD_HDLC</span> <span class="o">=</span> <span class="mi">112</span>
@@ -819,6 +831,10 @@
 
     <span class="c1">#: [``DLT_LAPB_WITH_DIR``] X.25 LAPB, with a direction header.</span>
     <span class="n">LAPB_WITH_DIR</span> <span class="o">=</span> <span class="mi">207</span>
+
+    <span class="c1">#: Originally reserved for Will Barker, never completely assigned or</span>
+    <span class="c1">#: documented.</span>
+    <span class="n">Unassigned_208</span> <span class="o">=</span> <span class="mi">208</span>
 
     <span class="c1">#: [``DLT_IPMB_LINUX``] Legacy names (do not use) for Linux I2C below.</span>
     <span class="n">IPMB_LINUX</span> <span class="o">=</span> <span class="mi">209</span>
@@ -1141,6 +1157,13 @@
     <span class="c1">#: [``DLT_EDK2_MM``] edk2 mm request serialization protocol.</span>
     <span class="n">EDK2_MM</span> <span class="o">=</span> <span class="mi">302</span>
 
+    <span class="c1">#: [``DLT_DEBUG_ONLY``] Unstructured data for manual debugging only.</span>
+    <span class="n">DEBUG_ONLY</span> <span class="o">=</span> <span class="mi">303</span>
+
+    <span class="c1">#: [``DLT_DECT_NR_TAP``] DECT-2020 New Radio (NR) TAP with a custom metadata</span>
+    <span class="c1">#: header prepended to a standard DLT\_DECT\_NR MAC-layer frame.</span>
+    <span class="n">DECT_NR_TAP</span> <span class="o">=</span> <span class="mi">304</span>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
@@ -1204,7 +1227,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6ee03507"></script>
+</div><script src="../../../../_static/documentation_options.js?v=c7a04161"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=4e2eecee"></script>
