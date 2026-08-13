@@ -55,6 +55,8 @@ jobs:
   github:
     name: GitHub Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: [ version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     steps:
