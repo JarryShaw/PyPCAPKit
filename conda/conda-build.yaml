@@ -3,6 +3,5 @@ channels:    # write here the list of channels to look for your library dependen
   - conda-forge
   - defaults
 
-dependencies:   # Keep this block with only these two packages
-  - anaconda-client
+dependencies:   # Keep this block with only the conda build tools
   - conda-build
