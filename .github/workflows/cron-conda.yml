@@ -1,5 +1,8 @@
 name: "Conda Update"
 
+permissions:
+  contents: read
+
 on:
   schedule:
     - cron: '0 10 * * 6' # everyday at 10am
@@ -10,6 +13,8 @@ jobs:
   conda-update:
     name: Update requirements.txt
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
         with:
