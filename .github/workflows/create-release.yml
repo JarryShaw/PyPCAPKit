@@ -16,6 +16,8 @@ jobs:
   version_check:
     name: Check Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -55,6 +57,8 @@ jobs:
   github:
     name: GitHub Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: [ version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     steps:
@@ -83,6 +87,8 @@ jobs:
   tag:
     name: Conda Tag
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: [ version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     steps:
@@ -213,6 +219,8 @@ jobs:
   conda:
     name: Conda deployment of package for platform ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     needs: [ tag, github, version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     strategy:
