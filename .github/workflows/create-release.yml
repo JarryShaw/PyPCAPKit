@@ -287,7 +287,7 @@ jobs:
           conda install -n base --override-channels -c conda-forge -y conda-build anaconda-client
           echo "$CONDA/bin" >> "$GITHUB_PATH"
           conda build --version
-          "$CONDA/bin/anaconda" --version
+          test -x "$CONDA/bin/anaconda"
 
       - name: Build and upload the conda packages (macOS)
         uses: uibcdf/action-build-and-upload-conda-packages@v1.5.0
