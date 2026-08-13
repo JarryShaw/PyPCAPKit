@@ -495,6 +495,8 @@
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">temp</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Unassigned_</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">&#39;</span>
 
                 <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="k">if</span> <span class="n">desc</span><span class="p">:</span>
