@@ -67,7 +67,7 @@ jobs:
           set -ex
 
           echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_OUTPUT
-          echo "PCAPKIT_CONDA_LABEL=$(python -c 'import pcapkit, pkg_resources; print("dev" if pkg_resources.parse_version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
+          echo "PCAPKIT_CONDA_LABEL=$(python -c 'from packaging.version import Version; import pcapkit; print("dev" if Version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
           echo "PCAPKIT_BUILD=$(cat conda/build)" >> $GITHUB_OUTPUT
 
     outputs:

@@ -28,7 +28,7 @@ jobs:
 
       - name: Install and Setup
         run: |
-          python -m pip install -U pip setuptools wheel
+          python -m pip install -U pip setuptools wheel packaging
 
       - name: Get Version
         id: get_version
@@ -38,8 +38,8 @@ jobs:
           python -m pip install -e .
 
           echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_OUTPUT
-          echo "PCAPKIT_PRERELEASE=$(python -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_OUTPUT
-          echo "PCAPKIT_CONDA_LABEL=$(python -c 'import pcapkit, pkg_resources; print("dev" if pkg_resources.parse_version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
+          echo "PCAPKIT_PRERELEASE=$(python -c 'from packaging.version import Version; import pcapkit; print(str(Version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_OUTPUT
+          echo "PCAPKIT_CONDA_LABEL=$(python -c 'from packaging.version import Version; import pcapkit; print("dev" if Version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
 
       - uses: mukunku/tag-exists-action@v1.2.0
         id: check_tag
