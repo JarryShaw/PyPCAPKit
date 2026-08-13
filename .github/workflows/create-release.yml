@@ -41,7 +41,7 @@ jobs:
           echo "PCAPKIT_PRERELEASE=$(python -c 'from packaging.version import Version; import pcapkit; print(str(Version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_OUTPUT
           echo "PCAPKIT_CONDA_LABEL=$(python -c 'from packaging.version import Version; import pcapkit; print("dev" if Version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
 
-      - uses: mukunku/tag-exists-action@v1.2.0
+      - uses: mukunku/tag-exists-action@v1.7.0
         id: check_tag
         with:
           tag: "v${{ steps.get_version.outputs.PCAPKIT_VERSION }}"
@@ -64,25 +64,16 @@ jobs:
           # ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
 
-      - name: Changelog
-        uses: Bullrich/generate-release-changelog@master
-        id: changelog
-        env:
-          REPO: ${{ github.repository }}
-
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           # allowUpdates: true
           # artifacts: |
           #   dist/*
-          # body: ${{ env.PCAPKIT_CHANGELOG }}
-          body: |
-            ${{ steps.changelog.outputs.changelog }}
-          # generateReleaseNotes: true
+          generate_release_notes: true
           # makeLatest: true
           name: PyPCAPKit v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           prerelease: ${{ needs.version_check.outputs.PCAPKIT_PRERELEASE }}
@@ -211,7 +202,7 @@ jobs:
           attestations: false
 
       - name: Upload package to GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           # allowUpdates: true
           files: |
@@ -225,6 +216,7 @@ jobs:
     needs: [ tag, github, version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - macos-latest
@@ -277,54 +269,62 @@ jobs:
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
       - name: Conda environment creation and activation
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4.0.1
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: "0"
         with:
           python-version: ${{ matrix.python-version }}
-          environment-file: conda/conda-build.yaml    # Path to the build conda environment
+          activate-environment: base
           auto-update-conda: false
-          auto-activate-base: false
+          auto-activate: true
+          channels: conda-forge,defaults
+          conda-remove-defaults: false
           show-channel-urls: true
 
+      - name: Install conda build tools
+        run: |
+          conda install -n base --override-channels -c conda-forge -y conda-build anaconda-client
+          conda build --version
+          anaconda --version
+
       - name: Build and upload the conda packages (macOS)
-        uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.5.0
         if: ${{ matrix.os == 'macos-latest' }}
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: "0"
         with:
           meta_yaml_dir: conda/pypcapkit
-          python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
+          conda_build_args: --python ${{ matrix.python-version }}
           platform_osx-64: true
           user: jarryshaw
           label: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
 
       - name: Build and upload the conda packages (Ubuntu)
-        uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.5.0
         if: ${{ matrix.os == 'ubuntu-latest' }}
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: "0"
         with:
           meta_yaml_dir: conda/pypcapkit
-          python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
+          conda_build_args: --python ${{ matrix.python-version }}
           platform_linux-64: true
           user: jarryshaw
           label: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
 
       - name: Build and upload the conda packages (Windows)
-        uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.5.0
         if: ${{ matrix.os == 'windows-latest' }}
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: "0"
         with:
           meta_yaml_dir: conda/pypcapkit
-          python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
+          conda_build_args: --python ${{ matrix.python-version }}
           platform_win-64: true
           user: jarryshaw
           label: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
@@ -332,7 +332,7 @@ jobs:
 
       - name: Upload package to GitHub Release
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           # allowUpdates: true
           files: |
