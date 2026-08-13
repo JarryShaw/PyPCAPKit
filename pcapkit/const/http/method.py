@@ -126,7 +126,7 @@ class Method(StrEnum):
     #: PUT [:rfc:`9110#section-9.3.4`]
     PUT = 'PUT', False, True
 
-    #: QUERY [RFC-ietf-httpbis-safe-method-w-body-14, Section 2]
+    #: QUERY [:rfc:`10008#section-2`]
     QUERY = 'QUERY', True, True
 
     #: REBIND [:rfc:`5842#section-6`]

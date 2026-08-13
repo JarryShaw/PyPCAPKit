@@ -1170,8 +1170,7 @@ class AppType(StrEnum):
     #: - [UDP] K-BLOCK
     k_block: 'AppType' = 287, 'k-block', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: [TCP] TLS Secure Login Host Protocol (TACACSS) [RFC-ietf-opsawg-tacacs-
-    #: tls13-24]
+    #: [TCP] TLS Secure Login Host Protocol (TACACSS) [:rfc:`9887`]
     tacacss: 'AppType' = 300, 'tacacss', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -2085,11 +2084,11 @@ class AppType(StrEnum):
     appleqtcsrvr: 'AppType' = 545, 'appleqtcsrvr', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] DHCPv6 Client
-    #: - [UDP] DHCPv6 Client [RFC-ietf-dhc-rfc8415bis-12]
+    #: - [UDP] DHCPv6 Client [:rfc:`9915`]
     dhcpv6_client: 'AppType' = 546, 'dhcpv6-client', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] DHCPv6 Server [:rfc:`5460`]
-    #: - [UDP] DHCPv6 Server [RFC-ietf-dhc-rfc8415bis-12]
+    #: - [UDP] DHCPv6 Server [:rfc:`9915`]
     dhcpv6_server: 'AppType' = 547, 'dhcpv6-server', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] AFP over TCP
@@ -11512,7 +11511,7 @@ class AppType(StrEnum):
     brp: 'AppType' = 3043, 'brp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Extensible Provisioning Protocol [:rfc:`5734`]
-    #: - [UDP] Extensible Provisioning Protocol [:rfc:`5734`]
+    #: - [UDP] EPP running over QUIC [:rfc:`5734`][RFC-ietf-regext-epp-quic-12]
     epp_700: 'AppType' = 700, 'epp', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] EndPoint Protocol
@@ -16917,6 +16916,12 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_4460: 'AppType' = 4460, 'reserved', TransportProtocol.get('udp')
 
+    #: [TCP] Agent Transfer Protocol
+    agtp: 'AppType' = 4480, 'agtp', TransportProtocol.get('tcp')
+
+    #: [UDP] Agent Transfer Protocol over QUIC
+    agtp_quic: 'AppType' = 4480, 'agtp-quic', TransportProtocol.get('udp')
+
     #: - [TCP] hpssmgmt service
     #: - [UDP] hpssmgmt service
     hpssmgmt: 'AppType' = 4484, 'hpssmgmt', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -17547,6 +17552,12 @@ class AppType(StrEnum):
 
     #: [UDP] Ultra Ethernet Transport
     uet: 'AppType' = 4793, 'uet', TransportProtocol.get('udp')
+
+    #: [TCP] Reserved
+    reserved_4794: 'AppType' = 4794, 'reserved', TransportProtocol.get('tcp')
+
+    #: [UDP] veRoCE Transport Protocol
+    veroce: 'AppType' = 4794, 'veroce', TransportProtocol.get('udp')
 
     #: - [TCP] Icona Instant Messenging System
     #: - [UDP] Icona Instant Messenging System
@@ -18795,14 +18806,15 @@ class AppType(StrEnum):
     #: [UDP] Reserved
     reserved_5317: 'AppType' = 5317, 'reserved', TransportProtocol.get('udp')
 
-    #: [TCP] PKIX Certificate Management using CMS (CMC) [:rfc:`6402`]
+    #: [TCP] PKIX Certificate Management using CMS (CMC) [:rfc:`10003`]
     pkix_cmc: 'AppType' = 5318, 'pkix-cmc', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
     reserved_5318: 'AppType' = 5318, 'reserved', TransportProtocol.get('udp')
 
-    #: [N/A] Unassigned
-    unassigned_5319: 'AppType' = 5319, 'unassigned', TransportProtocol.get('undefined')
+    #: - [TCP] Roughtime time synchronization [RFC-ietf-ntp-roughtime-19]
+    #: - [UDP] Roughtime time synchronization [RFC-ietf-ntp-roughtime-19]
+    roughtime: 'AppType' = 5319, 'roughtime', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] Webservices-based Zn interface of BSF
     bsfserver_zn: 'AppType' = 5320, 'bsfserver-zn', TransportProtocol.get('tcp')
@@ -20666,7 +20678,7 @@ class AppType(StrEnum):
     #: [:rfc:`6773`]
     dccp_udp: 'AppType' = 6511, 'dccp-udp', TransportProtocol.get('udp')
 
-    #: [TCP] NETCONF over TLS [:rfc:`7589`][RFC-ietf-netconf-over-tls13-04]
+    #: [TCP] NETCONF over TLS [:rfc:`7589`][:rfc:`9918`]
     netconf_tls: 'AppType' = 6513, 'netconf-tls', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
@@ -20777,6 +20789,10 @@ class AppType(StrEnum):
 
     #: [UDP] Reserved
     reserved_6602: 'AppType' = 6602, 'reserved', TransportProtocol.get('udp')
+
+    #: - [TCP] Bencher API
+    #: - [UDP] Bencher API
+    bencher: 'AppType' = 6610, 'bencher', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] ODETTE-FTP over TLS/SSL [:rfc:`5024`]
     #: - [UDP] ODETTE-FTP over TLS/SSL [:rfc:`5024`]
@@ -21417,11 +21433,10 @@ class AppType(StrEnum):
     #: [N/A] Unassigned
     unassigned_7122: 'AppType' = 7122, 'unassigned', TransportProtocol.get('undefined')
 
-    #: [TCP] End-to-end TLS Relay Control Connection
-    snif: 'AppType' = 7123, 'snif', TransportProtocol.get('tcp')
-
-    #: [UDP] Reserved
-    reserved_7123: 'AppType' = 7123, 'reserved', TransportProtocol.get('udp')
+    #: - [TCP] SNIF End-to-End TLS Relay Control Connection [draft-zubov-snif-05,
+    #:   Section 4.3]
+    #: - [UDP] SNIF End-to-End TLS Relay over QUIC [draft-zubov-snif-05, Section 4.4]
+    snif: 'AppType' = 7123, 'snif', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] intelligent data manager
     #: - [UDP] intelligent data manager
@@ -23245,7 +23260,7 @@ class AppType(StrEnum):
     #: [TCP] Reserved
     reserved_8809: 'AppType' = 8809, 'reserved', TransportProtocol.get('tcp')
 
-    #: [UDP] MCPTT Off-Network Protocol (MONP)
+    #: [UDP] MCPTT Off-Network Protocol (MONP) [3GPP TS 24.379 v13.5.0s]
     AppType_3gpp_monp: 'AppType' = 8809, '3gpp-monp', TransportProtocol.get('udp')
 
     #: - [TCP] dxspider linking protocol
@@ -23644,6 +23659,10 @@ class AppType(StrEnum):
     #: - [TCP] apani5
     #: - [UDP] apani5
     apani5: 'AppType' = 9164, 'apani5', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
+    #: - [TCP] Sirius Configuration Agent
+    #: - [UDP] Sirius Configuration Agent
+    sirius_agent: 'AppType' = 9183, 'sirius-agent', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: - [TCP] Sun AppSvr JPDA
     #: - [UDP] Sun AppSvr JPDA
@@ -24776,6 +24795,12 @@ class AppType(StrEnum):
 
     #: [TCP] Reserved
     reserved_11430: 'AppType' = 11430, 'reserved', TransportProtocol.get('tcp')
+
+    #: [TCP] Ollama
+    ollama: 'AppType' = 11434, 'ollama', TransportProtocol.get('tcp')
+
+    #: [UDP] Reserved
+    reserved_11434: 'AppType' = 11434, 'reserved', TransportProtocol.get('udp')
 
     #: [TCP] ASG Cypress Secure Only
     asgcypresstcps: 'AppType' = 11489, 'asgcypresstcps', TransportProtocol.get('tcp')
@@ -26061,8 +26086,8 @@ class AppType(StrEnum):
     #: [UDP] bilobit Service Update
     bilobit_update: 'AppType' = 24577, 'bilobit-update', TransportProtocol.get('udp')
 
-    #: [UDP] UDP-based IP-Layer Capacity and performance measurement protocol [RFC-
-    #: ietf-ippm-capacity-protocol-25]
+    #: [UDP] UDP-based IP-Layer Capacity and Performance Measurement protocol
+    #: [:rfc:`9946`]
     udpstp: 'AppType' = 24601, 'udpstp', TransportProtocol.get('udp')
 
     #: [TCP] Reserved
@@ -26426,6 +26451,11 @@ class AppType(StrEnum):
     #: [TCP] Reserved
     reserved_30832: 'AppType' = 30832, 'reserved', TransportProtocol.get('tcp')
 
+    #: - [TCP] Persistent peer-to-peer connections for block propagation, transaction
+    #:   relay, and BFT consensus message exchange.
+    #: - [UDP] Kademlia DHT peer discovery and routing table maintenance.
+    dilithium3: 'AppType' = 30939, 'dilithium3', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
     #: - [TCP] OpenView Service Desk Client
     #: - [UDP] OpenView Service Desk Client
     ovobs: 'AppType' = 30999, 'ovobs', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -26666,6 +26696,17 @@ class AppType(StrEnum):
     #: - [TCP] PROFInet Context Manager
     #: - [UDP] PROFInet Context Manager
     profinet_cm: 'AppType' = 34964, 'profinet-cm', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
+    #: - [TCP] PROFINET secure connection management and key provisioning
+    #: - [UDP] PROFINET secure connection management and key provisioning
+    profinet_cm_sec: 'AppType' = 34965, 'profinet-cm-sec', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
+    #: [TCP] Reserved
+    reserved_34966: 'AppType' = 34966, 'reserved', TransportProtocol.get('tcp')
+
+    #: [UDP] PROFINET secure real-time data transfer over UDP (unicast and
+    #: multicast)
+    profinet_rt_sec: 'AppType' = 34966, 'profinet-rt-sec', TransportProtocol.get('udp')
 
     #: - [TCP] EtherCAT Port
     #: - [UDP] EtherCAT Port
@@ -27501,15 +27542,13 @@ class AppType(StrEnum):
     #: [N/A] Remote Job Service
     netrjs: 'AppType' = -1, 'netrjs', TransportProtocol.get('undefined')
 
-    #: [N/A] NETCONF over BEEP [:rfc:`4744`][RFC-ietf-netconf-port-numbers-07]
+    #: [N/A] NETCONF over BEEP [:rfc:`4744`][:rfc:`9900`]
     netconf_beep: 'AppType' = -1, 'netconf-beep', TransportProtocol.get('undefined')
 
-    #: [N/A] NETCONF for SOAP over BEEP [:rfc:`4743`][RFC-ietf-netconf-port-
-    #: numbers-07]
+    #: [N/A] NETCONF for SOAP over BEEP [:rfc:`4743`][:rfc:`9900`]
     netconfsoapbeep: 'AppType' = -1, 'netconfsoapbeep', TransportProtocol.get('undefined')
 
-    #: [N/A] NETCONF for SOAP over HTTPS [:rfc:`4743`][RFC-ietf-netconf-port-
-    #: numbers-07]
+    #: [N/A] NETCONF for SOAP over HTTPS [:rfc:`4743`][:rfc:`9900`]
     netconfsoaphttp: 'AppType' = -1, 'netconfsoaphttp', TransportProtocol.get('undefined')
 
     #: [N/A] A File Access Protocol
@@ -27628,6 +27667,10 @@ class AppType(StrEnum):
     #: [N/A] Applied Biosystems Universal Instrument Framework
     abi_instrument: 'AppType' = -1, 'abi-instrument', TransportProtocol.get('undefined')
 
+    #: - [TCP] AB Secure Protocol
+    #: - [UDP] AB Secure Protocol
+    ab_secure: 'AppType' = -1, 'ab-secure', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
     #: [N/A] FTK2 Database Discovery Service
     accessdata_f2d: 'AppType' = -1, 'accessdata-f2d', TransportProtocol.get('undefined')
 
@@ -27718,6 +27761,9 @@ class AppType(StrEnum):
 
     #: [TCP] Affinity content sharing
     affinity_cntent: 'AppType' = -1, 'affinity-cntent', TransportProtocol.get('tcp')
+
+    #: [TCP] AI Agent Discovery Protocol (ADP) [draft-pro-adp-agent-discovery-00]
+    ai_adp: 'AppType' = -1, 'ai-adp', TransportProtocol.get('tcp')
 
     #: [TCP] Airdrop
     airdrop: 'AppType' = -1, 'airdrop', TransportProtocol.get('tcp')
@@ -27961,6 +28007,11 @@ class AppType(StrEnum):
     #: [UDP] BlueVertise Network Protocol (BNP)
     bluevertise: 'AppType' = -1, 'bluevertise', TransportProtocol.get('udp')
 
+    #: [TCP] Two-player board game play
+    #: [https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame-
+    #: protocol.md]
+    boardgame: 'AppType' = -1, 'boardgame', TransportProtocol.get('tcp')
+
     #: [TCP] board plus application transfer protocol
     boardplus: 'AppType' = -1, 'boardplus', TransportProtocol.get('tcp')
 
@@ -28000,6 +28051,13 @@ class AppType(StrEnum):
 
     #: [TCP] JSON RPC Bridge Protocol
     bridgeprotocol: 'AppType' = -1, 'bridgeprotocol', TransportProtocol.get('tcp')
+
+    #: [TCP] brocoliconcert telecom
+    brocoli_concert: 'AppType' = -1, 'brocoli-concert', TransportProtocol.get('tcp')
+
+    #: [TCP] The Bootstrapping Remote Secure Key Infrastructure Pledge [RFC-ietf-
+    #: anima-brski-prm-23]
+    brski_pledge: 'AppType' = -1, 'brski-pledge', TransportProtocol.get('tcp')
 
     #: [TCP] The Bootstrapping Remote Secure Key Infrastructure Proxy [:rfc:`8995`]
     brski_proxy: 'AppType' = -1, 'brski-proxy', TransportProtocol.get('tcp')
@@ -29075,6 +29133,9 @@ class AppType(StrEnum):
     #: PKI.
     mmm: 'AppType' = -1, 'mmm', TransportProtocol.get('tcp')
 
+    #: [TCP] Maritime Messaging Service Edge Router
+    mms_edgerouter: 'AppType' = -1, 'mms-edgerouter', TransportProtocol.get('tcp')
+
     #: - [TCP] A Remote Control Application service used to control Computers on a
     #:   Local Area Network
     #: - [UDP] A Remote Control Application service used to control Computers on a
@@ -29509,6 +29570,9 @@ class AppType(StrEnum):
     #: [N/A] Quinn Game Server
     quinn: 'AppType' = -1, 'quinn', TransportProtocol.get('undefined')
 
+    #: [TCP] Encrypted nearby Peer media exchange
+    qwady_peer: 'AppType' = -1, 'qwady-peer', TransportProtocol.get('tcp')
+
     #: [TCP] Broadcast of Qwizdom Presentation sessions for joining by a client,
     #: such as Qwizdom Notes+.
     qwizcollab: 'AppType' = -1, 'qwizcollab', TransportProtocol.get('tcp')
@@ -29650,6 +29714,9 @@ class AppType(StrEnum):
 
     #: [TCP] Raymarine remote control protocol
     rym_rrc: 'AppType' = -1, 'rym-rrc', TransportProtocol.get('tcp')
+
+    #: [TCP] S2 Connect energy management protocol
+    s2connect: 'AppType' = -1, 's2connect', TransportProtocol.get('tcp')
 
     #: [N/A] Safari Menu
     safarimenu: 'AppType' = -1, 'safarimenu', TransportProtocol.get('undefined')
@@ -29875,15 +29942,15 @@ class AppType(StrEnum):
     #: [N/A] Syncellence file synchronization protocol
     smsync: 'AppType' = -1, 'smsync', TransportProtocol.get('undefined')
 
-    #: [TCP] End-to-end TLS Relay Client Connection [https://snif.host/relay-
-    #: proto#snif-cln]
+    #: [TCP] SNIF End-to-End TLS Relay Client Connection [draft-zubov-snif-05,
+    #: Section 4.5]
     snif_cln: 'AppType' = -1, 'snif-cln', TransportProtocol.get('tcp')
 
-    #: [TCP] End-to-end TLS Relay Cluster [https://snif.host/relay-proto#snif-fifo]
+    #: [TCP] SNIF End-to-End TLS Relay Cluster [draft-zubov-snif-05, Section 4.6]
     snif_fifo: 'AppType' = -1, 'snif-fifo', TransportProtocol.get('tcp')
 
-    #: [TCP] End-to-end TLS Relay Service Connection [https://snif.host/relay-
-    #: proto#snif-srv]
+    #: [TCP] SNIF End-to-End TLS Relay Service Connection [draft-zubov-snif-05,
+    #: Section 4.3]
     snif_srv: 'AppType' = -1, 'snif-srv', TransportProtocol.get('tcp')
 
     #: [N/A] Simple Object Access Protocol
@@ -30138,6 +30205,10 @@ class AppType(StrEnum):
     #: [N/A] 2Do Sync Helper Tool for Mac OS X and PCs
     todogwa: 'AppType' = -1, 'todogwa', TransportProtocol.get('undefined')
 
+    #: - [TCP] AI token usage and billing metering
+    #: - [UDP] AI token usage and billing metering
+    tokenlens: 'AppType' = -1, 'tokenlens', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
+
     #: [N/A] Tomboy
     tomboy: 'AppType' = -1, 'tomboy', TransportProtocol.get('undefined')
 
@@ -30330,6 +30401,9 @@ class AppType(StrEnum):
     #: [N/A] Walkie Talkie
     walkietalkie: 'AppType' = -1, 'walkietalkie', TransportProtocol.get('undefined')
 
+    #: [UDP] Powered wheelchair command protocol
+    wchr: 'AppType' = -1, 'wchr', TransportProtocol.get('udp')
+
     #: [TCP] NAS Service Protocol
     wd_2go: 'AppType' = -1, 'wd-2go', TransportProtocol.get('tcp')
 
@@ -30363,6 +30437,9 @@ class AppType(StrEnum):
 
     #: [N/A] Honeywell Video Systems
     whistler: 'AppType' = -1, 'whistler', TransportProtocol.get('undefined')
+
+    #: [TCP] Session-based protocol for embedded unit
+    wico: 'AppType' = -1, 'wico', TransportProtocol.get('tcp')
 
     #: [UDP] WiFi Control Platform
     wicop: 'AppType' = -1, 'wicop', TransportProtocol.get('udp')
@@ -30641,7 +30718,10 @@ class AppType(StrEnum):
         if 4434 <= value <= 4440:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 4461 <= value <= 4483:
+        if 4461 <= value <= 4479:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 4481 <= value <= 4483:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 4489 <= value <= 4499:
@@ -30695,7 +30775,7 @@ class AppType(StrEnum):
         if 4775 <= value <= 4783:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 4794 <= value <= 4799:
+        if 4795 <= value <= 4799:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 4805 <= value <= 4826:
@@ -31088,7 +31168,10 @@ class AppType(StrEnum):
         if 6589 <= value <= 6599:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 6603 <= value <= 6618:
+        if 6603 <= value <= 6609:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 6611 <= value <= 6618:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 6637 <= value <= 6639:
@@ -31655,7 +31738,10 @@ class AppType(StrEnum):
         if 9132 <= value <= 9159:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 9165 <= value <= 9190:
+        if 9165 <= value <= 9182:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 9184 <= value <= 9190:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 9192 <= value <= 9199:
@@ -31925,7 +32011,10 @@ class AppType(StrEnum):
         if 11372 <= value <= 11429:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 11431 <= value <= 11488:
+        if 11431 <= value <= 11433:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 11435 <= value <= 11488:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 11490 <= value <= 11599:
@@ -32501,7 +32590,10 @@ class AppType(StrEnum):
         if 30401 <= value <= 30831:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 30833 <= value <= 30998:
+        if 30833 <= value <= 30938:
+            #: [N/A] Unassigned
+            return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
+        if 30940 <= value <= 30998:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 31000 <= value <= 31015:
@@ -32597,7 +32689,7 @@ class AppType(StrEnum):
         if 34568 <= value <= 34961:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 34965 <= value <= 34979:
+        if 34967 <= value <= 34979:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
         if 34981 <= value <= 34999:

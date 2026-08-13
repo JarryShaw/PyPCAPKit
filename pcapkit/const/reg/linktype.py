@@ -71,6 +71,12 @@ class LinkType(IntEnum):
     #: [``DLT_RAW``] IPv4 or IPv6 packets with no link-layer header.
     RAW = 101
 
+    #: [``DLT_SLIP_BSDOS``] BSD/OS Serial Line IP
+    SLIP_BSDOS = 102
+
+    #: [``DLT_PPP_BSDOS``] BSD/OS Point-to-point Protocol
+    PPP_BSDOS = 103
+
     #: [``DLT_C_HDLC``] Cisco PPP with HDLC framing.
     C_HDLC = 104
 
@@ -88,6 +94,12 @@ class LinkType(IntEnum):
 
     #: [``DLT_ENC``] Encapsulated packets for IPsec.
     ENC = 109
+
+    #: ATM LANE + IEEE 802.3
+    LANE8023 = 110
+
+    #: [``DLT_HIPPI``] NetBSD HIPPI
+    HIPPI = 111
 
     #: [``DLT_HDLC``] Cisco HDLC.
     NETBSD_HDLC = 112
@@ -401,6 +413,10 @@ class LinkType(IntEnum):
 
     #: [``DLT_LAPB_WITH_DIR``] X.25 LAPB, with a direction header.
     LAPB_WITH_DIR = 207
+
+    #: Originally reserved for Will Barker, never completely assigned or
+    #: documented.
+    Unassigned_208 = 208
 
     #: [``DLT_IPMB_LINUX``] Legacy names (do not use) for Linux I2C below.
     IPMB_LINUX = 209
@@ -722,6 +738,13 @@ class LinkType(IntEnum):
 
     #: [``DLT_EDK2_MM``] edk2 mm request serialization protocol.
     EDK2_MM = 302
+
+    #: [``DLT_DEBUG_ONLY``] Unstructured data for manual debugging only.
+    DEBUG_ONLY = 303
+
+    #: [``DLT_DECT_NR_TAP``] DECT-2020 New Radio (NR) TAP with a custom metadata
+    #: header prepended to a standard DLT\_DECT\_NR MAC-layer frame.
+    DECT_NR_TAP = 304
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'LinkType':
