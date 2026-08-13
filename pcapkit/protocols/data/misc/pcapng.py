@@ -611,9 +611,9 @@ class NameResolutionBlock(PCAPNG):
         mapping = MultiDict()  # type: MultiDict[IPv4Address | IPv6Address, str]
         reverse_mapping = MultiDict()  # type: MultiDict[str, IPv4Address | IPv6Address]
 
-        for record in self.records:
+        for record in self.records.values():
             if isinstance(record, (IPv4Record, IPv6Record)):
-                for name in record.names:
+                for name in record.records:
                     mapping.add(record.ip, name)
                     reverse_mapping.add(name, record.ip)
 

@@ -19,6 +19,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, Pa
                                          SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
@@ -42,10 +43,9 @@ if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, Type
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class VerIHLField(TypedDict):
@@ -263,7 +263,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
                 self.data.append(ts)
 
                 if ts >> 31:
-                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts}', ProtocolWarning)
                     ts_val = ts & 0x7FFFFFFF  # type: int | timedelta
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)
@@ -279,7 +279,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
                 self.data.add(ip_val, ts)
 
                 if ts >> 31:
-                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts}', ProtocolWarning)
                     ts_val = ts & 0x7FFFFFFF
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)
@@ -294,7 +294,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
                 self.data.add(ip_val, ts)
 
                 if ts >> 31:
-                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts}', ProtocolWarning)
                     ts_val = ts & 0x7FFFFFFF
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)

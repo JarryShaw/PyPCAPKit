@@ -488,9 +488,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         return self
 
-    @overload
+    @overload  # pragma: no cover
     def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
-    @overload
+    @overload  # pragma: no cover
     def __init__(self, **kwargs: 'Any') -> 'None': ...
 
     def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
@@ -523,9 +523,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # inject packet payload to the info dict
         self._info.__update__(packet=self.packet.payload)
 
-    @overload
+    @overload  # pragma: no cover
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
-    @overload
+    @overload  # pragma: no cover
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...
 
     def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
@@ -865,11 +865,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             bin_.append(bin(ord(byte))[2:].zfill(8))
         return ''.join(bin_)
 
-    @overload
+    @overload  # pragma: no cover
     def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'None' = ...) -> 'bytes': ...
-    @overload
+    @overload  # pragma: no cover
     def _read_packet(self, *, header: 'int', payload: 'Optional[int]' = ..., discard: 'Literal[True]') -> 'bytes': ...
-    @overload
+    @overload  # pragma: no cover
     def _read_packet(self, *, header: 'int', payload: 'Optional[int]' = ..., discard: 'Literal[False]' = ...) -> 'Data_Packet': ...  # pylint: disable=line-too-long
 
     @seekset  # type: ignore[misc]
@@ -942,45 +942,45 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 raise StructError(f'{cls.__name__}: pack failed') from error
         return buf
 
-    @overload
+    @overload  # pragma: no cover
     @classmethod
     def _make_index(cls, name: 'int | StdlibEnum | AenumEnum', *, pack: 'Literal[False]' = ...) -> 'int': ...
-    @overload
+    @overload  # pragma: no cover
     @classmethod
     def _make_index(cls, name: 'int | StdlibEnum | AenumEnum', *, pack: 'Literal[True]',
                     size: 'int' = ..., signed: 'bool' = ..., lilendian: 'bool' = ...) -> 'bytes': ...
-    @overload
+    @overload  # pragma: no cover
     @classmethod
     def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *,
                     namespace: 'Type[StdlibEnum] | Type[AenumEnum]', pack: 'Literal[False]' = ...) -> 'int': ...
-    @overload
+    @overload  # pragma: no cover
     @classmethod
     def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *,
                     namespace: 'Type[StdlibEnum] | Type[AenumEnum]', pack: 'Literal[True]',
                     size: 'int' = ..., signed: 'bool' = ..., lilendian: 'bool' = ...) -> 'bytes': ...
-    @overload
+    @overload  # pragma: no cover
     @classmethod
     def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[int, str]',
                     reversed: 'Literal[False]' = ...,  # pylint: disable=redefined-builtin
                     pack: 'Literal[False]' = ...) -> 'int': ...
-    @overload
+    @overload  # pragma: no cover
     @classmethod
     def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[int, str]',
                     reversed: 'Literal[False]' = ...,  # pylint: disable=redefined-builtin
                     pack: 'Literal[True]', size: 'int' = ..., signed: 'bool' = ...,
                     lilendian: 'bool' = ...) -> 'bytes': ...
-    @overload
+    @overload  # pragma: no cover
     @classmethod
     def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[str, int]',
                     reversed: 'Literal[True]',  # pylint: disable=redefined-builtin
                     pack: 'Literal[False]' = ...) -> 'int': ...
-    @overload
+    @overload  # pragma: no cover
     @classmethod
     def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[str, int]',
                     reversed: 'Literal[True]',  # pylint: disable=redefined-builtin
                     pack: 'Literal[True]', size: 'int' = ..., signed: 'bool' = ...,
                     lilendian: 'bool' = ...) -> 'bytes': ...
-    @overload
+    @overload  # pragma: no cover
     @classmethod
     def _make_index(cls, name: 'str | int | StdlibEnum | AenumEnum', default: 'Optional[int]' = ..., *,
                     namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = ...,

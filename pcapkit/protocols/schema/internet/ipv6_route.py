@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import FieldBase as Field
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class PadInfo(TypedDict):
@@ -153,7 +153,7 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
             Revised schema.
 
         """
-        buffer = cast('bytes', self.ip)
+        buffer = cast('bytes', self.addresses)
         dst_val = cast('Optional[IPv6Address]', packet.get('dst'))
         dst = dst_val.packed if dst_val is not None else None
 

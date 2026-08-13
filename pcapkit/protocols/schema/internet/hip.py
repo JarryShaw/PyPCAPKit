@@ -66,7 +66,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import Literal, TypedDict
 
     class PacketType(TypedDict):
@@ -476,7 +476,7 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
         if 'options' in packet:
             cipher_list = cast('list[Data_HIPCipherParameter]',
                             packet['options'].getlist(Enum_Parameter.HIP_CIPHER))
-            if cipher_list:
+            if not cipher_list:
                 warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
                     'missing HIP_CIPHER parameter', ProtocolWarning)
                 # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')

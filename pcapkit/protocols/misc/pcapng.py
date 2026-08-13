@@ -12,6 +12,8 @@ which implements extractor for PCAP-NG file format [*]_.
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html
 
 """
+import builtins
+import base64
 import collections
 import datetime
 import decimal
@@ -171,6 +173,7 @@ from pcapkit.protocols.schema.misc.pcapng import UnknownSecrets as Schema_Unknow
 from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireGuardKeyLog
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
+from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
 from pcapkit.utilities.exceptions import ProtocolError, RegistryError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
@@ -994,10 +997,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     # Data models.
     ##########################################################################
 
-    @overload
+    @overload  # pragma: no cover
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       num: 'int', sct: 'int', ctx: 'Context', **kwargs: 'Any') -> 'None': ...
-    @overload
+    @overload  # pragma: no cover
     def __post_init__(self, *, num: 'int', sct: 'int',  ctx: 'Context',  # pylint: disable=arguments-differ
                       **kwargs: 'Any') -> 'None': ...
 
@@ -1154,7 +1157,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'")
             warn(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'",
                  AttributeWarning, stacklevel=stacklevel())
-            return self._get_timezone()
+            return self._get_local_timezone()
 
         options = self._ctx.interfaces[interface_id].options
         tzone = cast('Optional[Data_IF_TZoneOption]',
@@ -1885,8 +1888,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             drop_count=schema.drop_count,
             timestamp=timestamp,
             timestamp_epoch=timestamp_epoch,
-            captured_length=schema.captured_length,
-            original_length=schema.original_length,
+            captured_len=schema.captured_length,
+            original_len=schema.original_length,
             options=self._read_pcapng_options(schema.options),
         )
         return self._decode_next_layer(data, self.linktype, schema.captured_length)  # type: ignore[return-value]
@@ -4236,7 +4239,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             tzone_val = int(tzone.utcoffset(None).total_seconds())
         else:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option timezone must be int, timedelta or timezone, '
-                                f'but {type(tzone).__name__} found.')
+                                f'but {builtins.type(tzone).__name__} found.')
 
         return Schema_IF_TZoneOption(
             type=type,
@@ -4551,8 +4554,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             type=type,
             length=4,
             flags={
-                'direction': direction_val.value,
-                'reception': reception_val.value,
+                'direction': getattr(direction_val, 'value', direction_val),
+                'reception': getattr(reception_val, 'value', reception_val),
                 'fcs_len': fcs_len,
                 'crc_error': int(crc_error),
                 'too_long': int(too_long),
@@ -5133,8 +5136,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             type=type,
             length=4,
             flags={
-                'direction': direction_val.value,
-                'reception': reception_val.value,
+                'direction': getattr(direction_val, 'value', direction_val),
+                'reception': getattr(reception_val, 'value', reception_val),
                 'fcs_len': fcs_len,
                 'crc_error': int(crc_error),
                 'too_long': int(too_long),
@@ -5271,7 +5274,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             records_list.append(nrb_record_end)
         return records_list, total_length
 
-    def _make_record_unknown(self, type: 'Enum_RecordType', record: 'Optional[Data_UnknownRecord]', *,
+    def _make_record_unknown(self, type: 'Enum_RecordType', record: 'Optional[Data_UnknownRecord]' = None, *,
                              data: 'bytes' = b'',
                              **kwargs: 'Any') -> 'Schema_UnknownRecord':
         """Make PCAP-NG unknown :manpage:`systemd(1)` journal export record.
@@ -5313,7 +5316,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             length=0,
         )
 
-    def _make_record_ipv4(self, type: 'Enum_RecordType', record: 'Optional[Data_IPv4Record]', *,
+    def _make_record_ipv4(self, type: 'Enum_RecordType', record: 'Optional[Data_IPv4Record]' = None, *,
                           ip: 'IPv4Address | str | bytes | int' = '127.0.0.1',
                           names: 'Optional[list[str]]' = None,
                           **kwargs: 'Any') -> 'Schema_IPv4Record':
@@ -5345,7 +5348,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             resol=records,
         )
 
-    def _make_record_ipv6(self, type: 'Enum_RecordType', record: 'Optional[Data_IPv6Record]', *,
+    def _make_record_ipv6(self, type: 'Enum_RecordType', record: 'Optional[Data_IPv6Record]' = None, *,
                           ip: 'IPv6Address | str | bytes | int' = '127.0.0.1',
                           names: 'Optional[list[str]]' = None,
                           **kwargs: 'Any') -> 'Schema_IPv6Record':
@@ -5455,8 +5458,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             entries = OrderedMultiDict()
 
         data = [f'# generated by PyPCAPKit v{__version__} at {datetime.datetime.now().isoformat()}{os.sep}']  # type: list[str]
-        for label, value in entries:
-            data.append(f'{label} = {value}{os.sep}')
+        for label, value in entries.items(multi=True):
+            data.append(f'{label.name} = {base64.b64encode(value).decode()}{os.sep}')
 
         return Schema_WireGuardKeyLog(
             data=''.join(data),

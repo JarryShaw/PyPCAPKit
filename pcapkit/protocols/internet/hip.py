@@ -31,6 +31,7 @@ Octets      Bits        Name                    Description
 
 """
 import datetime
+from datetime import timedelta
 import ipaddress
 import math
 from typing import TYPE_CHECKING, cast, overload
@@ -230,7 +231,7 @@ if TYPE_CHECKING:
 __all__ = ['HIP']
 
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class Locator(TypedDict):

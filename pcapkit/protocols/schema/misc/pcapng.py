@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class ByteorderTest(TypedDict):
@@ -1387,7 +1387,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
                     key, value = line_split
                     entry.add(key.decode('utf-8'), value.decode('utf-8'))
                 else:
-                    length = struct.unpack('<Q', entry_data.read(4))[0]  # type: int
+                    length = struct.unpack('<Q', entry_data.read(8))[0]  # type: int
                     entry.add(line.decode('utf-8'), entry_data.read(length))
                     entry_data.read()  # Skip trailing newline.
 

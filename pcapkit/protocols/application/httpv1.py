@@ -180,7 +180,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             if uri is None:
                 raise ProtocolError('HTTP request must have URI.')
 
-            if isinstance(method, bytes):
+            if isinstance(method, Enum_Method):
+                meth = method.value.encode()
+            elif isinstance(method, bytes):
                 meth = method
             elif isinstance(method, str):
                 meth = method.encode()
@@ -195,11 +197,15 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             status_code_val = int(status_code)
 
             if message is None:
-                msg = getattr(status_code, 'message', b'') or b''
+                msg = getattr(status, 'message', None) or getattr(status_code, 'message', b'') or b''
             else:
                 msg = message.encode() if isinstance(message, str) else message
+            if isinstance(msg, str):
+                msg = msg.encode()
 
             header_line = b'HTTP/%s %s %s\r\n' % (version, str(status_code_val).encode(), msg)
+        else:
+            raise ProtocolError('HTTP packet must be either request or response.')
 
         header_fields = []  # type: list[bytes]
         if headers is not None:

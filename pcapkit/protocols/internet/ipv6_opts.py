@@ -307,7 +307,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         """
         if length is None:
             length = len(self)
-        schema = self.__schema__
+        schema = self.__header__
 
         ipv6_opts = Data_IPv6_Opts(
             next=schema.next,
@@ -490,7 +490,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             raise ProtocolError('IPv6-Opts: invalid format')
         return options
 
-    def _read_opt_none(self, schema: 'Schema_UnassignedOption', option: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
+    def _read_opt_none(self, schema: 'Schema_UnassignedOption', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts unassigned options.
 
         Structure of IPv6-Opts unassigned options [:rfc:`8200`]:
@@ -518,7 +518,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_pad(self, schema: 'Schema_PadOption', option: 'Option') -> 'Data_PadOption':  # pylint: disable=unused-argument
+    def _read_opt_pad(self, schema: 'Schema_PadOption', *, options: 'Option') -> 'Data_PadOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts padding options.
 
         Structure of IPv6-Opts padding options [:rfc:`8200`]:
@@ -572,7 +572,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_tun(self, schema: 'Schema_TunnelEncapsulationLimitOption', option: 'Option') -> 'Data_TunnelEncapsulationLimitOption':  # pylint: disable=unused-argument
+    def _read_opt_tun(self, schema: 'Schema_TunnelEncapsulationLimitOption', *, options: 'Option') -> 'Data_TunnelEncapsulationLimitOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Tunnel Encapsulation Limit option.
 
         Structure of IPv6-Opts Tunnel Encapsulation Limit option [:rfc:`2473`]:
@@ -608,7 +608,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_ra(self, schema: 'Schema_RouterAlertOption', option: 'Option') -> 'Data_RouterAlertOption':  # pylint: disable=unused-argument
+    def _read_opt_ra(self, schema: 'Schema_RouterAlertOption', *, options: 'Option') -> 'Data_RouterAlertOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Router Alert option.
 
         Structure of IPv6-Opts Router Alert option [:rfc:`2711`]:
@@ -642,7 +642,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_calipso(self, schema: 'Schema_CALIPSOOption', option: 'Option') -> 'Data_CALIPSOOption':  # pylint: disable=unused-argument
+    def _read_opt_calipso(self, schema: 'Schema_CALIPSOOption', *, options: 'Option') -> 'Data_CALIPSOOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Common Architecture Label IPv6 Security Option (CALIPSO) option.
 
         Structure of IPv6-Opts CALIPSO option [:rfc:`5570`]:
@@ -692,7 +692,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ])
         return opt
 
-    def _read_opt_smf_dpd(self, schema: 'Schema_SMFDPDOption', option: 'Option') -> 'Data_SMFDPDOption':  # pylint: disable=unused-argument,line-too-long
+    def _read_opt_smf_dpd(self, schema: 'Schema_SMFDPDOption', *, options: 'Option') -> 'Data_SMFDPDOption':  # pylint: disable=unused-argument,line-too-long
         """Read IPv6-Opts Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.
 
         Structure of IPv6-Opts ``SMF_DPD`` option [:rfc:`6621`]:
@@ -769,7 +769,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid DPD mode: {mode}')
         return opt
 
-    def _read_opt_pdm(self, schema: 'Schema_PDMOption', option: 'Option') -> 'Data_PDMOption':  # pylint: disable=unused-argument
+    def _read_opt_pdm(self, schema: 'Schema_PDMOption', *, options: 'Option') -> 'Data_PDMOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Performance and Diagnostic Metrics (PDM) option.
 
         Structure of IPv6-Opts PDM option [:rfc:`8250`]:
@@ -814,7 +814,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_qs(self, schema: 'Schema_QuickStartOption', option: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument  # pylint: disable=unused-argument
+    def _read_opt_qs(self, schema: 'Schema_QuickStartOption', *, options: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument  # pylint: disable=unused-argument
         """Read IPv6-Opts Quick Start option.
 
         Structure of IPv6-Opts Quick-Start option [:rfc:`4782`]:
@@ -891,7 +891,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
         return opt
 
-    def _read_opt_rpl(self, schema: 'Schema_RPLOption', option: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
+    def _read_opt_rpl(self, schema: 'Schema_RPLOption', *, options: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.
 
         Structure of IPv6-Opts RPL option [:rfc:`6553`]:
@@ -937,7 +937,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_mpl(self, schema: 'Schema_MPLOption', option: 'Option') -> 'Data_MPLOption':  # pylint: disable=unused-argument
+    def _read_opt_mpl(self, schema: 'Schema_MPLOption', *, options: 'Option') -> 'Data_MPLOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Multicast Protocol for Low-Power and Lossy Networks (MPL) option.
 
         Structure of IPv6-Opts MPL option [:rfc:`7731`]:
@@ -998,7 +998,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_ilnp(self, schema: 'Schema_ILNPOption', option: 'Option') -> 'Data_ILNPOption':  # pylint: disable=unused-argument
+    def _read_opt_ilnp(self, schema: 'Schema_ILNPOption', *, options: 'Option') -> 'Data_ILNPOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Identifier-Locator Network Protocol (ILNP) Nonce option.
 
         Structure of IPv6-Opts ILNP Nonce option [:rfc:`6744`]:
@@ -1030,7 +1030,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_lio(self, schema: 'Schema_LineIdentificationOption', option: 'Option') -> 'Data_LineIdentificationOption':  # pylint: disable=unused-argument
+    def _read_opt_lio(self, schema: 'Schema_LineIdentificationOption', *, options: 'Option') -> 'Data_LineIdentificationOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Line-Identification option.
 
         Structure of IPv6-Opts Line-Identification option [:rfc:`6788`]:
@@ -1063,7 +1063,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_jumbo(self, schema: 'Schema_JumboPayloadOption', option: 'Option') -> 'Data_JumboPayloadOption':  # pylint: disable=unused-argument
+    def _read_opt_jumbo(self, schema: 'Schema_JumboPayloadOption', *, options: 'Option') -> 'Data_JumboPayloadOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Jumbo Payload option.
 
         Structure of IPv6-Opts Jumbo Payload option [:rfc:`2675`]:
@@ -1099,7 +1099,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_home(self, schema: 'Schema_HomeAddressOption', option: 'Option') -> 'Data_HomeAddressOption':  # pylint: disable=unused-argument
+    def _read_opt_home(self, schema: 'Schema_HomeAddressOption', *, options: 'Option') -> 'Data_HomeAddressOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Home Address option.
 
         Structure of IPv6-Opts Home Address option [:rfc:`6275`]:
@@ -1143,7 +1143,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_ip_dff(self, schema: 'Schema_IPDFFOption', option: 'Option') -> 'Data_IPDFFOption':  # pylint: disable=unused-argument
+    def _read_opt_ip_dff(self, schema: 'Schema_IPDFFOption', *, options: 'Option') -> 'Data_IPDFFOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Depth-First Forwarding (``IP_DFF``) option.
 
         Structure of IPv6-Opts ``IP_DFF`` option [:rfc:`6971`]:
@@ -1418,6 +1418,8 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             level = opt.level
             checksum = opt.checksum
             bitmap = opt.cmpt_bitmap if hasattr(opt, 'cmpt_bitmap') else None
+        else:
+            cmpt_len = len(bitmap) if bitmap is not None else 0
 
         return Schema_CALIPSOOption(
             type=code,

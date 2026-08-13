@@ -62,6 +62,6 @@ class IPv6(Protocol):
 
         # NOTE: We cannot define ``class`` due to preserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
-        self.__annotations__['class'] = int  # pylint: disable=no-member
+        cls.__annotations__['class'] = int
 
         return self

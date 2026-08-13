@@ -141,10 +141,10 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
             ),
             num=count,                                 # original packet range number
             fo=ipv4.frag,                              # fragment offset
-            ihl=ipv4.ihl,                              # internet header length
+            ihl=ipv4.ihl * 4,                          # internet header length
             mf=bool(ipv4.flags.MF),                    # more fragment flag
             tl=ipv4.len,                               # total length, header includes
-            header=ipv4.raw_packet_cache,              # raw bytes type header
+            header=bytes(ipv4)[:ipv4.ihl * 4],         # raw bytes type header
             payload=bytearray(bytes(ipv4.payload)),    # raw bytearray type payload
         )
         return data
@@ -248,7 +248,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
             syn=bool(tcp.flags.S),                  # synchronise flag
             fin=bool(tcp.flags.F),                  # finish flag
             rst=bool(tcp.flags.R),                  # reset connection flag
-            header=tcp.raw_packet_cache,            # raw bytes type header
+            header=bytes(tcp)[:tcp.dataofs * 4],    # raw bytes type header
             payload=bytearray(bytes(tcp.payload)),  # raw bytearray type payload
             first=tcp.seq,                          # this sequence number
             last=tcp.seq + raw_len,                 # next (wanted) sequence number

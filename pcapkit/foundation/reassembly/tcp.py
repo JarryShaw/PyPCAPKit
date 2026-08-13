@@ -117,7 +117,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                 )
             else:
                 # put header into header buffer
-                if SYN:
+                if SYN:  # pragma: no cover - existing sessions are flushed before this branch.
                     self._buffer[BUFID].__update__(hdr=info.header)
 
                 # append packet index
@@ -132,7 +132,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     if GAP >= 0:    # if fragment goes after existing payload
                         RAW += bytearray(GAP) + info.payload
                     else:           # if fragment partially overlaps existing payload
-                        RAW[DSN-ISN:] = info.payload
+                        RAW[DSN-ISN:DSN-ISN+info.len] = info.payload
                 else:           # if fragment exceeds existing payload
                     LEN = info.len
                     GAP = ISN - (DSN + LEN)     # gap length between payloads
@@ -142,7 +142,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     if GAP >= 0:    # if fragment exceeds existing payload
                         RAW = info.payload + bytearray(GAP) + RAW
                     else:           # if fragment partially overlaps existing payload
-                        RAW = info.payload + RAW[ISN-GAP:]
+                        RAW = info.payload + RAW[-GAP:]
                 #self._buffer[BUFID].ack[ACK].raw = RAW       # update payload datagram
                 #self._buffer[BUFID].ack[ACK].len = len(RAW)  # update payload length
                 self._buffer[BUFID].ack[ACK].__update__(
@@ -204,7 +204,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                 for hole in HDL:
                     stop = hole.first
                     byte = buffer.raw[start:stop]
-                    start = hole.last
+                    start = hole.last + 1
                     if byte:    # strip empty payload
                         data.append(byte)
                 byte = buffer.raw[start:]

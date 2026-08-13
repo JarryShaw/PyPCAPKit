@@ -17,7 +17,7 @@ __all__ = ['VLAN', 'TCI']
 if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class TCIType(TypedDict):

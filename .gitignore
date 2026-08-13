@@ -155,6 +155,8 @@ celerybeat-schedule
 # Environments
 .env
 .venv
+.pip-cache/
+.pipenv-cache/
 env/
 venv/
 ENV/

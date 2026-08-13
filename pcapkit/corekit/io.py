@@ -322,17 +322,13 @@ class SeekableReader(io.BufferedReader):
             raise TruncateError(f'negative size value {size}')
         self._buffer_view.release()
 
+        temp = self._buffer.getvalue()
         if size > self._buffer_size:
-            self._buffer = io.BytesIO(self._buffer.getvalue().zfill(size - self._buffer_size))
-            self._buffer_view = self._buffer.getbuffer()
+            self._buffer = io.BytesIO(temp.rjust(size, b'\x00'))
         else:
             # keep the last ``size`` bytes
-            temp = self._buffer.getvalue()
-
-            self._buffer.truncate(size)
-            self._buffer_view = self._buffer.getbuffer()
-
-            self._buffer_view[:] = temp[-size:]
+            self._buffer = io.BytesIO(temp[-size:] if size else b'')
+        self._buffer_view = self._buffer.getbuffer()
 
         self._buffer_size = size
         return self._buffer_size
@@ -407,7 +403,7 @@ class SeekableReader(io.BufferedReader):
             else:
                 buf = self._buffer.read1(min(size, self._buffer_cur - 1))
 
-            if not buf:  # only if the buffer is empty
+            if not buf:  # pragma: no cover  # defensive: buffer state should normally prevent this
                 size_rem = -1
                 if size < 0 or (size_rem := size - len(buf)) > 0:
                     if hasattr(self._stream, 'read1'):
@@ -494,7 +490,7 @@ class SeekableReader(io.BufferedReader):
             else:
                 buf = self._buffer.read(min(size, self._buffer_cur - 1))
 
-            if not buf and len(buf) < size:  # only if the buffer is empty and/or not enough
+            if not buf and len(buf) < size:  # pragma: no cover  # defensive: buffer state should normally prevent this
                 size_rem = -1
                 if size < 0 or (size_rem := size - len(buf)) > 0:
                     if hasattr(self._stream, 'peek'):

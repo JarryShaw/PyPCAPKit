@@ -262,7 +262,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                                          reversed=type_reversed, pack=False))
 
         if isinstance(frame, bytes):
-            length = len(frame) + 9
             frame_val = frame  # type: bytes | Schema_FrameType
         elif isinstance(frame, (dict, Data_HTTP)):
             name = self.__frame__[type_val]
@@ -274,19 +273,19 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 meth = name[1]
 
             if isinstance(frame, dict):
-                frame_val, flags = meth(type_val, **frame)
+                frame_val, flags = meth(**frame)
             else:
-                frame_val, flags = meth(type_val, frame)
-            length = len(frame_val.pack()) + 9
+                frame_val, flags = meth(frame)
         elif isinstance(frame, Schema):
-            length = len(frame.pack()) + 9
             frame_val = frame
         else:
             raise ProtocolError(f'HTTP/2: [Type {type_val}] invalid format')
 
         flags_val = {}  # type: dict[str, int]
         for bit in range(8):
-            flags_val[f'bit_{bit}'] = (flags & (1 << bit)) >> bit
+            flags_val[f'bit_{bit}'] = (int(flags) & (1 << bit)) >> bit
+
+        length = self._make_http_length(frame_val, flags) + 9
 
         return Schema_HTTP(
             length=length,
@@ -297,6 +296,48 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             },
             frame=frame_val,
         )
+
+    @staticmethod
+    def _make_http_length(frame: 'bytes | Schema_FrameType', flags: 'Flags') -> 'int':
+        """Calculate HTTP/2 frame payload length for construction.
+
+        Several frame payload schemas use conditional fields keyed by the
+        containing HTTP/2 header flags, so packing them without that context can
+        produce incorrect lengths or fail outright.
+        """
+        if isinstance(frame, bytes):
+            return len(frame)
+
+        flags_int = int(flags)
+        if isinstance(frame, Schema_UnassignedFrame):
+            return len(frame.data)
+        if isinstance(frame, Schema_DataFrame):
+            pad_len = frame.pad_len if flags_int & int(Schema_DataFrame.Flags.PADDED) else 0
+            return len(frame.data) + (pad_len + 1 if pad_len else 0)
+        if isinstance(frame, Schema_HeadersFrame):
+            pad_len = frame.pad_len if flags_int & int(Schema_HeadersFrame.Flags.PADDED) else 0
+            priority_len = 5 if flags_int & int(Schema_HeadersFrame.Flags.PRIORITY) else 0
+            return len(frame.fragment) + priority_len + (pad_len + 1 if pad_len else 0)
+        if isinstance(frame, Schema_PriorityFrame):
+            return 5
+        if isinstance(frame, Schema_RSTStreamFrame):
+            return 4
+        if isinstance(frame, Schema_SettingsFrame):
+            if isinstance(frame.settings, bytes):
+                return len(frame.settings)
+            return len(frame.settings) * 6
+        if isinstance(frame, Schema_PushPromiseFrame):
+            pad_len = frame.pad_len if flags_int & int(Schema_PushPromiseFrame.Flags.PADDED) else 0
+            return len(frame.fragment) + 4 + (pad_len + 1 if pad_len else 0)
+        if isinstance(frame, Schema_PingFrame):
+            return 8
+        if isinstance(frame, Schema_GoawayFrame):
+            return len(frame.debug) + 8
+        if isinstance(frame, Schema_WindowUpdateFrame):
+            return 4
+        if isinstance(frame, Schema_ContinuationFrame):
+            return len(frame.fragment)
+        return len(frame.pack())
 
     @classmethod
     def id(cls) -> 'tuple[Literal["HTTP"], Literal["HTTPv2"]]':  # type: ignore[override]
@@ -892,7 +933,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         return Schema_UnassignedFrame(
             data=data,
-        ), Schema_UnassignedFrame.Flags(0)
+        ), 0
 
     def _make_http_data(self, frame: 'Optional[Data_DataFrame]' = None, *,
                         end_stream: 'bool' = False,
@@ -1014,7 +1055,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 'sid': sid_dep,
             },
             weight=weight - 1 if weight else 0,
-        ), Schema_PriorityFrame.Flags(0)
+        ), 0
 
     def _make_http_rst_stream(self, frame: 'Optional[Data_RSTStreamFrame]' = None, *,
                               error: 'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum' = Enum_ErrorCode.HTTP_1_1_REQUIRED,
@@ -1041,7 +1082,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         return Schema_RSTStreamFrame(
             error=error_val,
-        ), Schema_RSTStreamFrame.Flags(0)
+        ), 0
 
     def _make_http_settings(self, frame: 'Optional[Data_SettingsFrame]' = None, *,
                             ack: 'bool' = False,
@@ -1194,6 +1235,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         else:
             error_val = self._make_index(error, error_default, namespace=error_namespace,  # type: ignore[assignment]
                                          reversed=error_reversed, pack=False)
+            debug = debug_data
 
         return Schema_GoawayFrame(
             stream={
@@ -1201,7 +1243,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             },
             error=error_val,
             debug=debug,
-        ), Schema_GoawayFrame.Flags(0)
+        ), 0
 
     def _make_http_window_update(self, frame: 'Optional[Data_WindowUpdateFrame]' = None, *,
                                  incr: 'int' = 0,
@@ -1224,7 +1266,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             size={
                 'incr': incr,
             }
-        ), Schema_WindowUpdateFrame.Flags(0)
+        ), 0
 
     def _make_http_continuation(self, frame: 'Optional[Data_ContinuationFrame]' = None, *,
                                 end_headers: 'bool' = False,

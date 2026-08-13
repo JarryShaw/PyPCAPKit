@@ -102,7 +102,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         # set RCVBT bits (in 8 octets)
         start = FO // 8
         stop = FO // 8 + (TL - IHL + 7) // 8
-        self._buffer[BUFID].RCVBT[start:stop] = b'\x01' * (stop - start + 1)
+        self._buffer[BUFID].RCVBT[start:stop] = b'\x01' * (stop - start)
 
         # get total data length (header excludes)
         TDL = 0
@@ -139,7 +139,9 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
 
         start = 0
         stop = (TDL + 7) // 8
-        flag = checked or (TDL and all(RCVBT[start:stop]))
+        flag = checked or (TDL > 0 and all(RCVBT[start:stop]))
+        ret = []  # type: list[Datagram[_AT]]
+
         # if datagram is not implemented
         if not flag and self._flag_s:
             data = []  # type: list[bytes]
@@ -169,6 +171,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                     payload=tuple(data),
                     packet=None,
                 )
+                ret.append(packet)
         # if datagram is reassembled in whole
         else:
             payload = datagram[:TDL]
@@ -185,8 +188,8 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 payload=bytes(payload),
                 packet=self.protocol.analyze(bufid[3], bytes(payload)),
             )
+            ret.append(packet)
 
-        ret = [packet]
         for callback in self.__callback_fn__:
             callback(ret)
         return ret

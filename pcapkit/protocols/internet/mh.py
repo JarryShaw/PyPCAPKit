@@ -73,6 +73,7 @@ from pcapkit.const.mh.upa_status import \
     UpdateNotificationACKStatus as Enum_UpdateNotificationACKStatus
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as Enum_UpdateNotificationReason
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.mh import MH as Data_MH
 from pcapkit.protocols.data.internet.mh import \
     AlternateCareofAddressOption as Data_AlternateCareofAddressOption
@@ -150,10 +151,12 @@ from pcapkit.protocols.schema.internet.mh import NonceIndicesOption as Schema_No
 from pcapkit.protocols.schema.internet.mh import PadOption as Schema_PadOption
 from pcapkit.protocols.schema.internet.mh import \
     PermanentHomeKeygenTokenOption as Schema_PermanentHomeKeygenTokenOption
+from pcapkit.protocols.schema.internet.mh import Packet as Schema_Packet
 from pcapkit.protocols.schema.internet.mh import SignatureOption as Schema_SignatureOption
 from pcapkit.protocols.schema.internet.mh import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.internet.mh import UnknownExtension as Schema_UnknownExtension
 from pcapkit.protocols.schema.internet.mh import UnknownMessage as Schema_UnknownMessage
+from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
@@ -1060,7 +1063,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         return options
 
-    def _read_opt_none(self, schema: 'Schema_UnassignedOption', *
+    def _read_opt_none(self, schema: 'Schema_UnassignedOption', *,
                              options: 'Option') -> 'Data_UnassignedOption':
         """Read MH unassigned option.
 
@@ -1792,7 +1795,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
     # TODO: Implement other CGA extensions.
 
-    def _make_msg_unknown(self, message: 'Optional[Data_UnknownMessage]', *,
+    def _make_msg_unknown(self, message: 'Optional[Data_UnknownMessage]' = None, *,
                           data: 'bytes' = b'',
                           **kwargs: 'Any') -> 'Schema_UnknownMessage':
         """Make MH unknown message type.
@@ -1813,7 +1816,7 @@ class MH(Internet[Data_MH, Schema_MH],
             data=data,
         )
 
-    def _make_msg_brr(self, message: 'Optional[Data_BindingRefreshRequestMessage]', *,
+    def _make_msg_brr(self, message: 'Optional[Data_BindingRefreshRequestMessage]' = None, *,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
                       **kwargs: 'Any') -> 'Schema_BindingRefreshRequestMessage':
         """Make MH binding refresh request (BRR) message type.
@@ -1836,7 +1839,7 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._make_mh_options(options),
         )
 
-    def _make_msg_hoti(self, message: 'Optional[Data_HomeTestInitMessage]', *,
+    def _make_msg_hoti(self, message: 'Optional[Data_HomeTestInitMessage]' = None, *,
                        cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
                        **kwargs: 'Any') -> 'Schema_HomeTestInitMessage':
@@ -1863,7 +1866,7 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._make_mh_options(options),
         )
 
-    def _make_msg_coti(self, message: 'Optional[Data_CareofTestInitMessage]', *,
+    def _make_msg_coti(self, message: 'Optional[Data_CareofTestInitMessage]' = None, *,
                        cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
                        **kwargs: 'Any') -> 'Schema_CareofTestInitMessage':
@@ -1890,7 +1893,7 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._make_mh_options(options),
         )
 
-    def _make_msg_hot(self, message: 'Optional[Data_HomeTestMessage]', *,
+    def _make_msg_hot(self, message: 'Optional[Data_HomeTestMessage]' = None, *,
                       nonce_index: 'int' = 0,
                       cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
                       token: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
@@ -1925,7 +1928,7 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._make_mh_options(options),
         )
 
-    def _make_msg_cot(self, message: 'Optional[Data_CareofTestMessage]', *,
+    def _make_msg_cot(self, message: 'Optional[Data_CareofTestMessage]' = None, *,
                       nonce_index: 'int' = 0,
                       cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
                       token: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
@@ -1960,7 +1963,7 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._make_mh_options(options),
         )
 
-    def _make_msg_bu(self, message: 'Optional[Data_BindingUpdateMessage]', *,
+    def _make_msg_bu(self, message: 'Optional[Data_BindingUpdateMessage]' = None, *,
                      seq: 'int' = 0,
                      ack: 'bool' = False,
                      home: 'bool' = False,
@@ -2010,7 +2013,7 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._make_mh_options(options),
         )
 
-    def _make_msg_ba(self, message: 'Optional[Data_BindingAcknowledgementMessage]', *,
+    def _make_msg_ba(self, message: 'Optional[Data_BindingAcknowledgementMessage]' = None, *,
                      status: 'Enum_StatusCode | StdlibEnum | AenumEnum | str | int' = Enum_StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted,
                      status_default: 'Optional[int]' = None,
                      status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
@@ -2060,7 +2063,7 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._make_mh_options(options),
         )
 
-    def _make_msg_be(self, message: 'Optional[Data_BindingErrorMessage]', *,
+    def _make_msg_be(self, message: 'Optional[Data_BindingErrorMessage]' = None, *,
                      status: 'Enum_StatusCode | StdlibEnum | AenumEnum | str | int' = Enum_StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted,
                      status_default: 'Optional[int]' = None,
                      status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
@@ -2534,10 +2537,13 @@ class MH(Internet[Data_MH, Schema_MH],
                 length += len(data)
                 param.append(data)
             elif isinstance(data, Schema_CGAParameter):
-                length += len(data)
+                if not hasattr(data, 'public_key_test'):
+                    data.public_key_test = {'len': max(len(data.public_key) - 2, 0)}
+                _, ext_len = self._make_cga_extensions(data.extensions)
+                length += 25 + len(data.public_key) + ext_len
                 param.append(data)
             elif isinstance(data, Data_CGAParameter):
-                ext, _ = self._make_cga_extensions(data.extensions)
+                ext, ext_len = self._make_cga_extensions(data.extensions)
                 schema = Schema_CGAParameter(
                     modifier=data.modifier,
                     prefix=data.prefix,
@@ -2545,8 +2551,9 @@ class MH(Internet[Data_MH, Schema_MH],
                     public_key=data.public_key,
                     extensions=ext,
                 )
+                schema.public_key_test = {'len': max(len(data.public_key) - 2, 0)}
 
-                length += len(schema)
+                length += 25 + len(data.public_key) + ext_len
                 param.append(schema)
             else:
                 raise ProtocolError(f'{self.alias}: [OptNo {type}] unknown CGA parameter format: {data}')

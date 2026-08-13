@@ -138,7 +138,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
 
     def __init__(self, mapping: 'Optional[dict[_KT, _VT] | Iterable[tuple[_KT, _VT]]]' = None) -> 'None':  # pylint: disable=line-too-long
         if isinstance(mapping, MultiDict):
-            dict.__init__(self, ((k, v[:]) for k, v in mapping.items()))
+            dict.__init__(self, ((k, v[:]) for k, v in mapping.lists()))
         elif isinstance(mapping, dict):
             tmp = {}  # type: dict[_KT, list[_VT]]
             for key, value in mapping.items():

@@ -44,10 +44,9 @@ pybind11 = {extras = ["global"],version = "*"}
 snakeviz = "*"
 tuna = "*"
 build = "*"
+setuptools = "*"
+wheel = "*"
 twine = "*"
-
-[requires]
-python_version = "3"
 
 [pipenv]
 #allow_prereleases = true

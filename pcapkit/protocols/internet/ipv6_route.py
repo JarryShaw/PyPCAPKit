@@ -575,7 +575,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         if route is not None:
             data = route.data
 
-        pad_len = 8 - (len(data) + 4) % 8
+        pad_len = (8 - (len(data) + 4) % 8) % 8
         if pad_len:
             data += bytes(pad_len)
 

@@ -70,7 +70,7 @@ class ToSField(Data):
 
         # NOTE: We cannot define ``del`` due to preserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
-        self.__annotations__['del'] = ToSDelay  # pylint: disable=no-member
+        cls.__annotations__['del'] = ToSDelay
 
         return self
 
@@ -139,7 +139,7 @@ class OptionType(Data):
 
         # NOTE: We cannot define ``class`` due to preserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
-        self.__annotations__['class'] = OptionClass  # pylint: disable=no-member
+        cls.__annotations__['class'] = OptionClass
 
         return self
 
@@ -320,7 +320,7 @@ class TROption(Option):
 
         # NOTE: We cannot define ``return`` due to preserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
-        self.__annotations__['return'] = int  # pylint: disable=no-member
+        cls.__annotations__['return'] = int
 
         return self
 

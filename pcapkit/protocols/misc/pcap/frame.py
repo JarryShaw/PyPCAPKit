@@ -311,10 +311,10 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pragma: no cover # pylint: disable=arguments-differ
                       num: 'int', header: 'Data_Header', **kwargs: 'Any') -> 'None': ...
     @overload
-    def __post_init__(self, *, num: 'int', header: 'Data_Header',  # pylint: disable=arguments-differ
+    def __post_init__(self, *, num: 'int', header: 'Data_Header',  # pragma: no cover # pylint: disable=arguments-differ
                       **kwargs: 'Any') -> 'None': ...
 
     def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ

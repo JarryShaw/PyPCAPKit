@@ -95,6 +95,9 @@ docs = [
     "sphinx-autodoc-typehints", "sphinx-opengraph", "sphinx-copybutton",
     "typing-extensions", "mypy-extensions",
 ]
+test = [
+    "pytest>=8",
+]
 
 # setuptools specific
 
@@ -113,3 +116,20 @@ exclude = [
 
 [tool.setuptools.dynamic]
 version = { attr="pcapkit.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+python_files = [
+    "test_*.py",
+]
+
+[tool.coverage.run]
+source = [
+    "pcapkit",
+]
+branch = true
+
+[tool.coverage.report]
+show_missing = true

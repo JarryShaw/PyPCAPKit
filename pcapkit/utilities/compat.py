@@ -36,7 +36,7 @@ if sys.version_info <= (3, 5):
     def _check_methods(C: 'Type[Any]', *methods: 'str') -> 'bool | Any':
         mro = C.__mro__
         for method in methods:
-            for B in mro:
+            for B in mro:  # pragma: no branch
                 if method in B.__dict__:
                     if B.__dict__[method] is None:
                         return NotImplemented
@@ -53,11 +53,11 @@ if sys.version_info <= (3, 5):
         def __subclasshook__(cls, C: 'Type[Any]') -> 'bool | Any':
             if cls is Collection:
                 return _check_methods(C, "__len__", "__iter__", "__contains__")
-            return NotImplemented
+            return NotImplemented  # pragma: no cover
 else:
     from collections.abc import Collection
 
-if sys.version_info <= (3, 4):
+if sys.version_info <= (3, 4):  # pragma: no cover
     import pathlib2 as pathlib  # pylint: disable=import-error
 else:
     import pathlib
@@ -92,7 +92,7 @@ if sys.version_info < (3, 8):
                     owner: 'Optional[Type[Any]]' = None) -> 'Union[cached_property[_T], _T]':
             if instance is None:
                 return self
-            if self.attrname is None:
+            if self.attrname is None:  # pragma: no cover
                 raise TypeError(
                     "Cannot use cached_property instance without calling __set_name__ on it.")
             try:
@@ -108,11 +108,11 @@ if sys.version_info < (3, 8):
                 with self.lock:
                     # check if another thread filled cache while we awaited lock
                     val = cache.get(self.attrname, _NOT_FOUND)
-                    if val is _NOT_FOUND:
+                    if val is _NOT_FOUND:  # pragma: no branch
                         val = self.func(instance)
                         try:
                             cache[self.attrname] = val
-                        except TypeError:
+                        except TypeError:  # pragma: no cover
                             msg = (
                                 f"The '__dict__' attribute on {type(instance).__name__!r} instance "
                                 f"does not support item assignment for caching {self.attrname!r} property."

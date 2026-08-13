@@ -387,7 +387,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             options_value, total_length = [], 0
 
         ihl = 5 + math.ceil(total_length / 4)
-        len = ihl * 4 + len(payload)
+        total_len = ihl * 4 + len(payload)
 
         return Schema_IPv4(
             vihl={
@@ -401,7 +401,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 'rel': tos_rel_val,
                 'ecn': tos_ecn_val,
             },
-            length=len,
+            length=total_len,
             id=id,
             flags={
                 'df': df,

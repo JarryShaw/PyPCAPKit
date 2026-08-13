@@ -77,6 +77,8 @@ class ProtoChain(collections.abc.Sequence):
             if isinstance(proto, Protocol):
                 alias = proto.alias
                 proto = type(proto)
+            else:
+                alias = proto.__name__
 
             temp_data.append((alias, proto))
 

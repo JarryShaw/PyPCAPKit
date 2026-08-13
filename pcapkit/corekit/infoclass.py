@@ -83,7 +83,7 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
         args_ = []  # type: list[str]
         dict_ = []  # type: list[str]
 
-        for cls_ in cls.mro():
+        for cls_ in cls.mro():  # pragma: no branch
             # NOTE: We skip the ``Info`` class itself, to avoid superclass
             # type annotations being considered.
             if cls_ is Info:
