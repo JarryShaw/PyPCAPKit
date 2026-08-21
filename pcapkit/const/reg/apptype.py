@@ -29342,6 +29342,12 @@ class AppType(StrEnum):
     #: [N/A] OmniFocus document synchronization
     ofocus_sync: 'AppType' = -1, 'ofocus-sync', TransportProtocol.get('undefined')
 
+    #: [TCP] Peer-to-peer nearby audio communication
+    ok_connect: 'AppType' = -1, 'ok-connect', TransportProtocol.get('tcp')
+
+    #: [TCP] Peer control and application data
+    ok_control: 'AppType' = -1, 'ok-control', TransportProtocol.get('tcp')
+
     #: [TCP] Web Interface for the Open Lighting Architecture Software
     ola: 'AppType' = -1, 'ola', TransportProtocol.get('tcp')
 
