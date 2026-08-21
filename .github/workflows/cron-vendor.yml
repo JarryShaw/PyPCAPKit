@@ -9,6 +9,9 @@ on:
 jobs:
   vendor-update:
     runs-on: macos-latest
+    concurrency:
+      group: repository-maintenance
+      cancel-in-progress: false
     permissions:
       contents: write
     steps:
@@ -66,6 +69,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
+          pull: rebase
 
       # - name: Create Tag
       #   if: steps.verify-changed-files.outputs.files_changed == 'true'
