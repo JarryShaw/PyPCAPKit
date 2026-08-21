@@ -8,8 +8,8 @@ dictdumper==0.8.4.post6
 dpkt==1.9.8
 emoji==2.15.0
 html5lib==1.1
-idna==3.18
-lxml==6.1.1
+idna==3.19
+lxml==6.1.2
 packaging==26.3
 pathlib2; python_version < "3.5"
 pyshark==0.6
@@ -22,4 +22,4 @@ tbtrim==0.3.1
 termcolor==3.3.0
 typing-extensions==4.16.0; python_version < "3.11"
 urllib3==2.7.0
-webencodings==0.5.1
+webencodings==0.6.1
