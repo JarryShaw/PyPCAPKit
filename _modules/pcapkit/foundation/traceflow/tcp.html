@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.foundation.traceflow.tcp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=import-outside-toplevel</span>
-<span class="sd">&quot;&quot;&quot;Follow TCP Streams</span>
+<span class="sd">"""Follow TCP Streams</span>
 <span class="sd">========================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.traceflow.tcp</span>
@@ -401,14 +401,14 @@
 <span class="sd">:mod:`pcapkit.foundation.traceflow.tcp` is the interface to trace</span>
 <span class="sd">TCP flows from a series of packets and connections.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">_AT</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowBase</span> <span class="k">as</span> <span class="n">TraceFlow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Protocol</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TCP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TCP'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
@@ -418,7 +418,7 @@
 <div class="viewcode-block" id="TCP">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TCP</span><span class="p">(</span><span class="n">TraceFlow</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">[</span><span class="n">_AT</span><span class="p">]],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace TCP flows.</span>
+<span class="w">    </span><span class="sd">"""Trace TCP flows.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        fout: output path</span>
@@ -428,14 +428,14 @@
 <span class="sd">        *args: Arbitrary positional arguments.</span>
 <span class="sd">        **kwargs: Arbitrary keyword arguments.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: Protocol name of current reassembly object.</span>
-    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">&#39;TCP&#39;</span>
+    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'TCP'</span>
     <span class="c1">#: Protocol of current reassembly object.</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">TCP_Protocol</span>
 
@@ -445,29 +445,29 @@
 
 <div class="viewcode-block" id="TCP.dump">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.dump">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet[_AT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Dump frame to output files.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            packet: a flow packet (:term:`trace.tcp.packet`)</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># fetch flow label</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># dump files</span>
-        <span class="n">output</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span></div>
+        <span class="n">output</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span></div>
 
 
     <span class="nd">@overload</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet[_AT]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[True]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">'Literal[True]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Dumper'</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet[_AT]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">'Literal[False]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span> <span class="o">...</span>
 
 <div class="viewcode-block" id="TCP.trace">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.trace">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet[_AT]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper | str&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Trace packets.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Dumper | str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Trace packets.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            packet: a flow packet (:term:`trace.tcp.packet`)</span>
@@ -484,11 +484,11 @@
 
 <span class="sd">            .. code-block:: python</span>
 
-<span class="sd">               f&#39;{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}&#39;</span>
+<span class="sd">               f'{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}'</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># clear cache</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;submit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Buffer Identifier</span>
         <span class="n">BUFID</span> <span class="o">=</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="p">)</span>  <span class="c1"># type: BufferID</span>
@@ -498,18 +498,18 @@
         <span class="c1"># # when SYN is set, reset buffer of this seesion</span>
         <span class="c1"># if SYN and BUFID in self._buffer:</span>
         <span class="c1">#     temp = self._buffer.pop(BUFID)</span>
-        <span class="c1">#     temp[&#39;fpout&#39;] = (self._fproot, self._fdpext)</span>
-        <span class="c1">#     temp[&#39;index&#39;] = tuple(temp[&#39;index&#39;])</span>
+        <span class="c1">#     temp['fpout'] = (self._fproot, self._fdpext)</span>
+        <span class="c1">#     temp['index'] = tuple(temp['index'])</span>
         <span class="c1">#     self._stream.append(Info(temp))</span>
 
         <span class="c1"># initialise buffer with BUFID</span>
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">'.'</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
-                <span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
+                <span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">""</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
                                    <span class="n">byteorder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nnsecd</span><span class="p">),</span>
                 <span class="n">index</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
@@ -523,10 +523,10 @@
         <span class="c1"># when FIN is set, submit buffer of this session</span>
         <span class="k">if</span> <span class="n">FIN</span><span class="p">:</span>
             <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
-            <span class="c1"># fpout, label = buf[&#39;fpout&#39;], buf[&#39;label&#39;]</span>
+            <span class="c1"># fpout, label = buf['fpout'], buf['label']</span>
 
             <span class="n">index</span> <span class="o">=</span> <span class="n">Index</span><span class="p">(</span>
-                <span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
                 <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
             <span class="p">)</span>
@@ -540,25 +540,25 @@
 
 <div class="viewcode-block" id="TCP.submit">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.submit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit traced TCP flows.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Index, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Submit traced TCP flows.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Traced TCP flow (:term:`trace.tcp.index`).</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;submit&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'submit'</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cached</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Index]</span>
         <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Index</span><span class="p">(</span><span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Index</span><span class="p">(</span><span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
                              <span class="n">label</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">,))</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
         <span class="n">ret_submit</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;submit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret_submit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret_submit</span>
         <span class="k">return</span> <span class="n">ret_submit</span></div>
 </div>
 

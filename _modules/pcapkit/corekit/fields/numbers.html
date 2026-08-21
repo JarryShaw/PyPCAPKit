@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.corekit.fields.numbers</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;numerical field class&quot;&quot;&quot;</span>
+<span class="sd">"""numerical field class"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
@@ -404,12 +404,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;NumberField&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Int32Field&#39;</span><span class="p">,</span> <span class="s1">&#39;UInt32Field&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Int16Field&#39;</span><span class="p">,</span> <span class="s1">&#39;UInt16Field&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Int64Field&#39;</span><span class="p">,</span> <span class="s1">&#39;UInt64Field&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Int8Field&#39;</span><span class="p">,</span> <span class="s1">&#39;UInt8Field&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;EnumField&#39;</span><span class="p">,</span>
+    <span class="s1">'NumberField'</span><span class="p">,</span>
+    <span class="s1">'Int32Field'</span><span class="p">,</span> <span class="s1">'UInt32Field'</span><span class="p">,</span>
+    <span class="s1">'Int16Field'</span><span class="p">,</span> <span class="s1">'UInt16Field'</span><span class="p">,</span>
+    <span class="s1">'Int64Field'</span><span class="p">,</span> <span class="s1">'UInt64Field'</span><span class="p">,</span>
+    <span class="s1">'Int8Field'</span><span class="p">,</span> <span class="s1">'UInt8Field'</span><span class="p">,</span>
+    <span class="s1">'EnumField'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -421,13 +421,13 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValueType</span>
 
-<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_T&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_T'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'int'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="NumberField">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NumberField</span><span class="p">(</span><span class="n">Field</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Numerical value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Numerical value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
@@ -439,25 +439,25 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[int]</span>
     <span class="n">__template__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[str]</span>
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[bool]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">bit_length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Field bit length.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bit_length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Field bit length."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int | Callable[[dict[str, Any]], int]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int | NoValueType&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="s1">&#39;big&#39;</span><span class="p">,</span>
-                 <span class="n">bit_length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int | Callable[[dict[str, Any]], int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">default</span><span class="p">:</span> <span class="s1">'int | NoValueType'</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["little", "big"]'</span> <span class="o">=</span> <span class="s1">'big'</span><span class="p">,</span>
+                 <span class="n">bit_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__length__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">IntError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Field has no length.&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">IntError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Field has no length.'</span><span class="p">)</span>
             <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__length__</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 
@@ -471,17 +471,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">byteorder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">endian</span> <span class="o">=</span> <span class="s1">&#39;&gt;&#39;</span> <span class="k">if</span> <span class="n">byteorder</span> <span class="o">==</span> <span class="s1">&#39;big&#39;</span> <span class="k">else</span> <span class="s1">&#39;&lt;&#39;</span>
+        <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&gt;'</span> <span class="k">if</span> <span class="n">byteorder</span> <span class="o">==</span> <span class="s1">'big'</span> <span class="k">else</span> <span class="s1">'&lt;'</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__template__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__template__</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="n">signed</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">'</span>
 
 <div class="viewcode-block" id="NumberField.__call__">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.__call__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Update field attributes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Packet data.</span>
@@ -492,24 +492,24 @@
 <span class="sd">        This method will return a new instance of :class:`NumberField` instead of</span>
 <span class="sd">        updating the current instance.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">new_self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">*</span> <span class="mi">8</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_length</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
-        <span class="n">endian</span> <span class="o">=</span> <span class="s1">&#39;&gt;&#39;</span> <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">==</span> <span class="s1">&#39;big&#39;</span> <span class="k">else</span> <span class="s1">&#39;&lt;&#39;</span>
+        <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&gt;'</span> <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">==</span> <span class="s1">'big'</span> <span class="k">else</span> <span class="s1">'&lt;'</span>
         <span class="n">struct_fmt</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_signed</span><span class="p">)</span>
 
-        <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">return</span> <span class="n">new_self</span></div>
 
 
 <div class="viewcode-block" id="NumberField.build_template">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.build_template">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">build_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build template for field.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build template for field.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            length: Field size (in bytes)</span>
@@ -518,25 +518,25 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Template for field.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>       <span class="c1"># unpack to 8-byte integer (long long)</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">&#39;Q&#39;</span>
+            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">'q'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'Q'</span>
         <span class="k">elif</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>     <span class="c1"># unpack to 4-byte integer (int / long)</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">&#39;i&#39;</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">&#39;I&#39;</span>
+            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">'i'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'I'</span>
         <span class="k">elif</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>     <span class="c1"># unpack to 2-byte integer (short)</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">&#39;h&#39;</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">&#39;H&#39;</span>
+            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">'h'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'H'</span>
         <span class="k">elif</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>     <span class="c1"># unpack to 1-byte integer (char)</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">&#39;B&#39;</span>
+            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">'b'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'B'</span>
         <span class="k">else</span><span class="p">:</span>                 <span class="c1"># do not unpack</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1">s&#39;</span>
+            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1">s'</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">struct_fmt</span></div>
 
 
 <div class="viewcode-block" id="NumberField.pre_process">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.pre_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value before construction (packing).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int | bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Process field value before construction (packing).</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            value: Field value.</span>
@@ -545,7 +545,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">value</span>
@@ -553,10 +553,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span>
 
-            <span class="n">endian</span> <span class="o">=</span> <span class="s1">&#39;&gt;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">==</span> <span class="s1">&#39;big&#39;</span> <span class="k">else</span> <span class="s1">&#39;&lt;&#39;</span>
+            <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&gt;'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">==</span> <span class="s1">'big'</span> <span class="k">else</span> <span class="s1">'&lt;'</span>
             <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">'</span>
 
         <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_signed</span>
@@ -565,8 +565,8 @@
 
 <div class="viewcode-block" id="NumberField.post_process">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value after parsing (unpacked).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int | bytes'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Process field value after parsing (unpacked).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Field value.</span>
@@ -575,11 +575,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
         <span class="k">return</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span>
-            <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_signed</span>
+            <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_signed</span>
         <span class="p">)</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span></div>
 </div>
 
@@ -588,7 +588,7 @@
 <div class="viewcode-block" id="Int32Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int32Field">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Int32Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Integer value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
@@ -599,10 +599,10 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="mi">4</span>
-    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">&#39;i&#39;</span>
+    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">'i'</span>
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
@@ -610,7 +610,7 @@
 <div class="viewcode-block" id="UInt32Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UInt32Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsigned integer value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Unsigned integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
@@ -621,10 +621,10 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="mi">4</span>
-    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">&#39;I&#39;</span>
+    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">'I'</span>
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
@@ -632,7 +632,7 @@
 <div class="viewcode-block" id="Int16Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int16Field">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Int16Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Short integer value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Short integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
@@ -643,10 +643,10 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="mi">2</span>
-    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">&#39;h&#39;</span>
+    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">'h'</span>
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
@@ -654,7 +654,7 @@
 <div class="viewcode-block" id="UInt16Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt16Field">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UInt16Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsigned short integer value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Unsigned short integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
@@ -665,10 +665,10 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="mi">2</span>
-    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">&#39;H&#39;</span>
+    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">'H'</span>
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
@@ -676,7 +676,7 @@
 <div class="viewcode-block" id="Int64Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int64Field">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Int64Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Long integer value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Long integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
@@ -687,10 +687,10 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="mi">8</span>
-    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span>
+    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">'q'</span>
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
@@ -698,7 +698,7 @@
 <div class="viewcode-block" id="UInt64Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt64Field">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UInt64Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsigned long integer value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Unsigned long integer value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
@@ -709,10 +709,10 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="mi">8</span>
-    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">&#39;Q&#39;</span>
+    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">'Q'</span>
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
@@ -720,7 +720,7 @@
 <div class="viewcode-block" id="Int8Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int8Field">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Int8Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Byte value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Byte value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
@@ -731,10 +731,10 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
+    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">'b'</span>
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
@@ -742,7 +742,7 @@
 <div class="viewcode-block" id="UInt8Field">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt8Field">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UInt8Field</span><span class="p">(</span><span class="n">NumberField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsigned byte value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Unsigned byte value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
@@ -753,10 +753,10 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">&#39;B&#39;</span>
+    <span class="n">__template__</span> <span class="o">=</span> <span class="s1">'B'</span>
     <span class="n">__signed__</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
@@ -764,7 +764,7 @@
 <div class="viewcode-block" id="EnumField">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EnumField</span><span class="p">(</span><span class="n">NumberField</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">]]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerated value for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Enumerated value for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
@@ -777,22 +777,22 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span><span class="p">,</span>
-                 <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;StdlibEnum | AenumEnum | NoValueType&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="s1">&#39;big&#39;</span><span class="p">,</span>
-                 <span class="n">bit_length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span><span class="p">,</span>
+                 <span class="n">default</span><span class="p">:</span> <span class="s1">'StdlibEnum | AenumEnum | NoValueType'</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["little", "big"]'</span> <span class="o">=</span> <span class="s1">'big'</span><span class="p">,</span>
+                 <span class="n">bit_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">namespace</span><span class="p">:</span> <span class="s1">'Optional[Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">signed</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">,</span> <span class="n">bit_length</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span> <span class="o">=</span> <span class="n">namespace</span>
 
 <div class="viewcode-block" id="EnumField.post_process">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;StdlibEnum | AenumEnum&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value after parsing (unpacked).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int | bytes'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'StdlibEnum | AenumEnum'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Process field value after parsing (unpacked).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Field value.</span>
@@ -801,13 +801,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">unknown</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">(</span><span class="s1">&#39;&lt;unknown&gt;&#39;</span><span class="p">,</span> <span class="p">{</span>
-                <span class="s1">&#39;&lt;unassigned&gt;&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
-            <span class="p">},</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;pcapkit.const&#39;</span><span class="p">,</span> <span class="n">qualname</span><span class="o">=</span><span class="s1">&#39;pcapkit.const.&lt;unknown&gt;&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">unknown</span><span class="p">,</span> <span class="s1">&#39;&lt;unassigned&gt;&#39;</span><span class="p">)</span>
+            <span class="n">unknown</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">(</span><span class="s1">'&lt;unknown&gt;'</span><span class="p">,</span> <span class="p">{</span>
+                <span class="s1">'&lt;unassigned&gt;'</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+            <span class="p">},</span> <span class="n">module</span><span class="o">=</span><span class="s1">'pcapkit.const'</span><span class="p">,</span> <span class="n">qualname</span><span class="o">=</span><span class="s1">'pcapkit.const.&lt;unknown&gt;'</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">unknown</span><span class="p">,</span> <span class="s1">'&lt;unassigned&gt;'</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>
 

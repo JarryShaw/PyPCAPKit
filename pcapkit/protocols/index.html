@@ -1025,17 +1025,17 @@ will inherit the additional and excluded field names from the base
 classes, as well as populating the additional and excluded field
 from the subclass attributes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]</span>
+    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">]</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">B</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
-    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]</span>
+    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'c'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">]</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">C</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
-    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">]</span>
+    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'e'</span><span class="p">,</span> <span class="s1">'f'</span><span class="p">]</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># [&#39;a&#39;, &#39;b&#39;]</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;]</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;f&#39;]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># ['a', 'b']</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># ['a', 'b', 'c', 'd']</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># ['a', 'b', 'c', 'd', 'e', 'f']</span>
 </pre></div>
 </div>
 </div>

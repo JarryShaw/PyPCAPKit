@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.internet.ipv6_frag</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data models for IPv6 Fragment Header&quot;&quot;&quot;</span>
+<span class="sd">"""data models for IPv6 Fragment Header"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -402,26 +402,26 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IPv6_Frag&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6_Frag'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="IPv6_Frag">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">IPv6_Frag</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv6 fragment header.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv6 fragment header."""</span>
 
     <span class="c1">#: Next header.</span>
-    <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span>
+    <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span>
     <span class="c1">#: Fragment offset.</span>
-    <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: More flag.</span>
-    <span class="n">mf</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Identification.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements</span></div>
 
 </pre></div>
         </article>

@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.const.ipv6.extension_header</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
-<span class="sd">&quot;&quot;&quot;IPv6 Extension Header Types</span>
+<span class="sd">"""IPv6 Extension Header Types</span>
 <span class="sd">=================================</span>
 
 <span class="sd">.. module:: pcapkit.const.ipv6.extension_header</span>
@@ -401,17 +401,17 @@
 <span class="sd">This module contains the constant enumeration for **IPv6 Extension Header Types**,</span>
 <span class="sd">which is automatically generated from :class:`pcapkit.vendor.ipv6.extension_header.ExtensionHeader`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ExtensionHeader&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ExtensionHeader'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="ExtensionHeader">
 <a class="viewcode-back" href="../../../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExtensionHeader</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;[ExtensionHeader] IPv6 Extension Header Types&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""[ExtensionHeader] IPv6 Extension Header Types"""</span>
 
     <span class="c1">#: HOPOPT, IPv6 Hop-by-Hop Option [:rfc:`8200`]</span>
     <span class="n">HOPOPT</span> <span class="o">=</span> <span class="mi">0</span>
@@ -450,15 +450,15 @@
     <span class="n">Use_for_experimentation_and_testing_254</span> <span class="o">=</span> <span class="mi">254</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ExtensionHeader&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ExtensionHeader'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item.</span>
 <span class="sd">            default: Default value if not found.</span>
 
 <span class="sd">        :meta private:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">ExtensionHeader</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ExtensionHeader</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>

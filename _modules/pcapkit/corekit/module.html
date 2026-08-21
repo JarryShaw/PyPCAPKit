@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.corekit.module</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Module Descriptor</span>
+<span class="sd">"""Module Descriptor</span>
 <span class="sd">=======================</span>
 
 <span class="sd">.. module:: pcapkit.corekit.module</span>
@@ -401,24 +401,24 @@
 <span class="sd">like class :class:`~pcapkit.corekit.module.ModuleDescriptor`,</span>
 <span class="sd">which is originally designed as :obj:`tuple[str, str] &lt;tuple&gt;`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ModuleDescriptor&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ModuleDescriptor'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span>
 
-<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_T&#39;</span><span class="p">)</span>
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_T'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ModuleDescriptor">
 <a class="viewcode-back" href="../../../pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ModuleDescriptor</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">]),</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Module descriptor contains module name and class name, the actual</span>
-<span class="sd">    class can be imported by ``from module import name``.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ModuleDescriptor</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">'ModuleDescriptor'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'module'</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">]),</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""Module descriptor contains module name and class name, the actual</span>
+<span class="sd">    class can be imported by ``from module import name``."""</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
@@ -428,8 +428,8 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">klass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[_T]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Import class from module.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">klass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[_T]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Import class from module."""</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 

@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.link.vlan</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data models for 802.1Q customer VLAN tag type&quot;&quot;&quot;</span>
+<span class="sd">"""data models for 802.1Q customer VLAN tag type"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -404,24 +404,24 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.vlan.priority_level</span><span class="w"> </span><span class="kn">import</span> <span class="n">PriorityLevel</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;VLAN&#39;</span><span class="p">,</span> <span class="s1">&#39;TCI&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'VLAN'</span><span class="p">,</span> <span class="s1">'TCI'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="TCI">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.TCI">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TCI</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for tag control information.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for tag control information."""</span>
 
     <span class="c1">#: Priority code point.</span>
-    <span class="n">pcp</span><span class="p">:</span> <span class="s1">&#39;PriorityLevel&#39;</span>
+    <span class="n">pcp</span><span class="p">:</span> <span class="s1">'PriorityLevel'</span>
     <span class="c1">#: Drop eligible indicator.</span>
-    <span class="n">dei</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">dei</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: VLAN identifier.</span>
-    <span class="n">vid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">vid</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcp</span><span class="p">:</span> <span class="s1">&#39;PriorityLevel&#39;</span><span class="p">,</span> <span class="n">dei</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">vid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcp</span><span class="p">:</span> <span class="s1">'PriorityLevel'</span><span class="p">,</span> <span class="n">dei</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">vid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 
 
@@ -429,15 +429,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.VLAN">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">VLAN</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for 802.1Q customer VLAN tag type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for 802.1Q customer VLAN tag type."""</span>
 
     <span class="c1">#: Tag control information.</span>
-    <span class="n">tci</span><span class="p">:</span> <span class="s1">&#39;TCI&#39;</span>
+    <span class="n">tci</span><span class="p">:</span> <span class="s1">'TCI'</span>
     <span class="c1">#: Protocol (Internet Layer).</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'EtherType'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tci</span><span class="p">:</span> <span class="s1">&#39;TCI&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tci</span><span class="p">:</span> <span class="s1">'TCI'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
 
 </pre></div>
         </article>

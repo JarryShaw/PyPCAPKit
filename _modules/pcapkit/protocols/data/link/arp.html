@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.link.arp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data models for address resolution protocol family&quot;&quot;&quot;</span>
+<span class="sd">"""data models for address resolution protocol family"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -407,22 +407,22 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.arp.operation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Operation</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Address&#39;</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="s1">&#39;ARP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Address'</span><span class="p">,</span> <span class="s1">'Type'</span><span class="p">,</span> <span class="s1">'ARP'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Address">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.Address">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Address</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for ARP addresses.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for ARP addresses."""</span>
 
     <span class="c1">#: Hardware address.</span>
-    <span class="n">hardware</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">hardware</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Protocol address.</span>
-    <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span>
+    <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str | IPv4Address | IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hardware</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hardware</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str | IPv4Address | IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements</span></div>
 
 
 
@@ -430,15 +430,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.Type">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for ARP type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for ARP type."""</span>
 
     <span class="c1">#: Hardware type.</span>
-    <span class="n">hardware</span><span class="p">:</span> <span class="s1">&#39;Hardware&#39;</span>
+    <span class="n">hardware</span><span class="p">:</span> <span class="s1">'Hardware'</span>
     <span class="c1">#: Protocol type.</span>
-    <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;EtherType | str&#39;</span>
+    <span class="n">protocol</span><span class="p">:</span> <span class="s1">'EtherType | str'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hardware</span><span class="p">:</span> <span class="s1">&#39;Hardware&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;EtherType | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hardware</span><span class="p">:</span> <span class="s1">'Hardware'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'EtherType | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements</span></div>
 
 
 
@@ -446,33 +446,33 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.ARP">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ARP</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for ARP packet.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for ARP packet."""</span>
 
     <span class="c1">#: Hardware type.</span>
-    <span class="n">htype</span><span class="p">:</span> <span class="s1">&#39;Hardware&#39;</span>
+    <span class="n">htype</span><span class="p">:</span> <span class="s1">'Hardware'</span>
     <span class="c1">#: Protocol type.</span>
-    <span class="n">ptype</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span>
+    <span class="n">ptype</span><span class="p">:</span> <span class="s1">'EtherType'</span>
     <span class="c1">#: Hardware address length.</span>
-    <span class="n">hlen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">hlen</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Protocol address length.</span>
-    <span class="n">plen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">plen</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Operation code.</span>
-    <span class="n">oper</span><span class="p">:</span> <span class="s1">&#39;Operation&#39;</span>
+    <span class="n">oper</span><span class="p">:</span> <span class="s1">'Operation'</span>
     <span class="c1">#: Sender hardware address.</span>
-    <span class="n">sha</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">sha</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Sender protocol address.</span>
-    <span class="n">spa</span><span class="p">:</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span>
+    <span class="n">spa</span><span class="p">:</span> <span class="s1">'str | IPv4Address | IPv6Address'</span>
     <span class="c1">#: Target hardware address.</span>
-    <span class="n">tha</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">tha</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Target protocol address.</span>
-    <span class="n">tpa</span><span class="p">:</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span>
+    <span class="n">tpa</span><span class="p">:</span> <span class="s1">'str | IPv4Address | IPv6Address'</span>
     <span class="c1">#: Header length.</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">&#39;Hardware&#39;</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">hlen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">plen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements</span>
-                     <span class="n">oper</span><span class="p">:</span> <span class="s1">&#39;Operation&#39;</span><span class="p">,</span> <span class="n">sha</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">spa</span><span class="p">:</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                     <span class="n">tha</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">tpa</span><span class="p">:</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">'Hardware'</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">,</span> <span class="n">hlen</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">plen</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements</span>
+                     <span class="n">oper</span><span class="p">:</span> <span class="s1">'Operation'</span><span class="p">,</span> <span class="n">sha</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">spa</span><span class="p">:</span> <span class="s1">'str | IPv4Address | IPv6Address'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                     <span class="n">tha</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">tpa</span><span class="p">:</span> <span class="s1">'str | IPv4Address | IPv6Address'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,redefined-builtin</span></div>
 
 </pre></div>
         </article>

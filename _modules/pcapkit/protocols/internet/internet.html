@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.protocols.internet.internet</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># mypy: disable-error-code=dict-item</span>
-<span class="sd">&quot;&quot;&quot;Base Protocol</span>
+<span class="sd">"""Base Protocol</span>
 <span class="sd">===================</span>
 
 <span class="sd">.. module:: pcapkit.protocols.internet.internet</span>
@@ -403,7 +403,7 @@
 <span class="sd">:class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv6.IPv6`, :class:`~pcapkit.protocols.internet.ipx.IPX`, and etc.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -421,13 +421,13 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Internet&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Internet'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Internet">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Internet</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for internet layer protocol family.</span>
+<span class="w">    </span><span class="sd">"""Abstract base class for internet layer protocol family.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
 <span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`</span>
@@ -465,34 +465,34 @@
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.HIP`</span>
 <span class="sd">         - :class:`pcapkit.protocols.internet.hip.HIP`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: Layer of protocol.</span>
-    <span class="n">__layer__</span> <span class="o">=</span> <span class="s1">&#39;Internet&#39;</span>  <span class="c1"># type: Literal[&#39;Internet&#39;]</span>
+    <span class="n">__layer__</span> <span class="o">=</span> <span class="s1">'Internet'</span>  <span class="c1"># type: Literal['Internet']</span>
 
     <span class="c1">#: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,</span>
     <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.internet.internet.Internet._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">:</span>          <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.hopopt&#39;</span><span class="p">,</span>     <span class="s1">&#39;HOPOPT&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv4&#39;</span><span class="p">,</span>       <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.transport.tcp&#39;</span><span class="p">,</span>       <span class="s1">&#39;TCP&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.transport.udp&#39;</span><span class="p">,</span>       <span class="s1">&#39;UDP&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6&#39;</span><span class="p">,</span>       <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6_route&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6_Route&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6_frag&#39;</span><span class="p">,</span>  <span class="s1">&#39;IPv6_Frag&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>              <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ah&#39;</span><span class="p">,</span>         <span class="s1">&#39;AH&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_NoNxt</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span>            <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6_opts&#39;</span><span class="p">,</span>  <span class="s1">&#39;IPv6_Opts&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipx&#39;</span><span class="p">,</span>        <span class="s1">&#39;IPX&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.mh&#39;</span><span class="p">,</span>         <span class="s1">&#39;MH&#39;</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HIP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.hip&#39;</span><span class="p">,</span>        <span class="s1">&#39;HIP&#39;</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">:</span>          <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.hopopt'</span><span class="p">,</span>     <span class="s1">'HOPOPT'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv4'</span><span class="p">,</span>       <span class="s1">'IPv4'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.tcp'</span><span class="p">,</span>       <span class="s1">'TCP'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.udp'</span><span class="p">,</span>       <span class="s1">'UDP'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6'</span><span class="p">,</span>       <span class="s1">'IPv6'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_route'</span><span class="p">,</span> <span class="s1">'IPv6_Route'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_frag'</span><span class="p">,</span>  <span class="s1">'IPv6_Frag'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>              <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ah'</span><span class="p">,</span>         <span class="s1">'AH'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_NoNxt</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span>            <span class="s1">'Raw'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_opts'</span><span class="p">,</span>  <span class="s1">'IPv6_Opts'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipx'</span><span class="p">,</span>        <span class="s1">'IPX'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.mh'</span><span class="p">,</span>         <span class="s1">'MH'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HIP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.hip'</span><span class="p">,</span>        <span class="s1">'HIP'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -502,8 +502,8 @@
 
     <span class="c1"># protocol layer</span>
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Internet&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol layer.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["Internet"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Protocol layer."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__layer__</span>
 
     <span class="c1">##########################################################################</span>
@@ -513,8 +513,8 @@
 <div class="viewcode-block" id="Internet.register">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet.register">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_TransType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new protocol class</span>
@@ -525,13 +525,13 @@
 <span class="sd">            protocol: module descriptor or a</span>
 <span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
 
@@ -539,27 +539,27 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_TransType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read next layer protocol type.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            size: buffer size</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Next layer&#39;s protocol enumeration.</span>
+<span class="sd">            Next layer's protocol enumeration.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
         <span class="n">_prot</span> <span class="o">=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_prot</span>
 
 <div class="viewcode-block" id="Internet._decode_next_layer">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._decode_next_layer">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;_PT&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-                           <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">ipv6_exthdr</span><span class="p">:</span> <span class="s1">&#39;Optional[ProtoChain]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_PT&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Decode next layer extractor.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'_PT'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+                           <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[4, 6]'</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">ipv6_exthdr</span><span class="p">:</span> <span class="s1">'Optional[ProtoChain]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">payload</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Decode next layer extractor.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            dict\_: info buffer</span>
@@ -580,8 +580,8 @@
 <span class="sd">            store the next layer protocol name. These two keys will **NOT**</span>
 <span class="sd">            be included when :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` is called.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Protocol&#39;</span><span class="p">,</span>  <span class="c1"># type: ignore[redundant-cast]</span>
+<span class="sd">        """</span>
+        <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Protocol'</span><span class="p">,</span>  <span class="c1"># type: ignore[redundant-cast]</span>
                      <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
                                              <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">))</span>  <span class="c1"># type: ignore[arg-type,misc,call-arg]</span>
         <span class="n">info</span><span class="p">,</span> <span class="n">chain</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">next_</span><span class="o">.</span><span class="n">protochain</span>
@@ -593,8 +593,8 @@
         <span class="c1"># write info and protocol chain into dict</span>
         <span class="n">dict_</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
             <span class="n">layer</span><span class="p">:</span> <span class="n">info</span><span class="p">,</span>
-            <span class="s1">&#39;__next_type__&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">next_</span><span class="p">),</span>
-            <span class="s1">&#39;__next_name__&#39;</span><span class="p">:</span> <span class="n">layer</span><span class="p">,</span>
+            <span class="s1">'__next_type__'</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">next_</span><span class="p">),</span>
+            <span class="s1">'__next_name__'</span><span class="p">:</span> <span class="n">layer</span><span class="p">,</span>
         <span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">next_</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
         <span class="k">if</span> <span class="n">ipv6_exthdr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -609,10 +609,10 @@
 <div class="viewcode-block" id="Internet._import_next_layer">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer">[docs]</a>
     <span class="nd">@beholder</span>  <span class="c1"># type: ignore[arg-type]</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-                           <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-                           <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Import next layer extractor.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+                           <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[4, 6]'</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+                           <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Protocol'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Import next layer extractor.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            proto: next layer protocol index</span>
@@ -626,9 +626,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Instance of next layer.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span>
+            <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[Protocol]'</span>
 
         <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>

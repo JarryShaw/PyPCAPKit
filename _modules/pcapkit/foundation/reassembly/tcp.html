@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.reassembly.tcp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;TCP Datagram Reassembly</span>
+<span class="sd">"""TCP Datagram Reassembly</span>
 <span class="sd">=============================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.reassembly.tcp</span>
@@ -401,7 +401,7 @@
 <span class="sd">:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,</span>
 <span class="sd">which reconstructs fragmented TCP packets back to origin.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -413,13 +413,13 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TCP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TCP'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="TCP">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TCP</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reassembly for TCP payload.</span>
+<span class="w">    </span><span class="sd">"""Reassembly for TCP payload.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        strict: if return all datagrams (including those not</span>
@@ -437,16 +437,16 @@
 <span class="sd">        # Fetch result:</span>
 <span class="sd">        &gt;&gt;&gt; result = tcp_reassembly.datagram</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[TCP_Protocol]&#39;</span>
+        <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[TCP_Protocol]'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: Protocol name of current reassembly object.</span>
-    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">&#39;TCP&#39;</span>
+    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'TCP'</span>
     <span class="c1">#: Protocol of current reassembly object.</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">TCP_Protocol</span>
 
@@ -456,13 +456,13 @@
 
 <div class="viewcode-block" id="TCP.reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.reassembly">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reassembly procedure.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            info: :term:`info &lt;reasm.tcp.packet&gt;` dict of packets to be reassembled</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># clear cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -489,7 +489,7 @@
                         <span class="n">last</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">,</span>
                     <span class="p">),</span>
                 <span class="p">],</span>
-                <span class="n">hdr</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">header</span> <span class="k">if</span> <span class="n">SYN</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                <span class="n">hdr</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">header</span> <span class="k">if</span> <span class="n">SYN</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                 <span class="n">ack</span><span class="o">=</span><span class="p">{</span>
                     <span class="n">ACK</span><span class="p">:</span> <span class="n">Fragment</span><span class="p">(</span>
                         <span class="n">ind</span><span class="o">=</span><span class="p">[</span>
@@ -580,8 +580,8 @@
 
 <div class="viewcode-block" id="TCP.submit">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;BufferID&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Datagram]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+<span class="w">        </span><span class="sd">"""Submit reassembled payload.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            buf: :term:`buffer &lt;reasm.tcp.buffer&gt;` dict of reassembled packets</span>
@@ -590,7 +590,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Reassembled :term:`packets &lt;reasm.tcp.datagram&gt;`.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">datagram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Datagram] # reassembled datagram</span>
         <span class="n">HDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">hdl</span>                         <span class="c1"># hole descriptor list</span>
 

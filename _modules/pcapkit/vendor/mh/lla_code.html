@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.vendor.mh.lla_code</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Link-Layer Address (LLA) Option Code</span>
+<span class="sd">"""Link-Layer Address (LLA) Option Code</span>
 <span class="sd">==========================================</span>
 
 <span class="sd">.. module:: pcapkit.vendor.mh.lla_code</span>
@@ -400,7 +400,7 @@
 <span class="sd">This module contains the vendor crawler for **Link-Layer Address (LLA) Option Code**,</span>
 <span class="sd">which is automatically generating :class:`pcapkit.const.mh.lla_code.LLACode`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -411,30 +411,30 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LLACode&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'LLACode'</span><span class="p">]</span>
 
 <span class="c1">#: LLA option codes.</span>
 <span class="n">DATA</span> <span class="o">=</span> <span class="p">{</span>
     <span class="c1">#: Wildcard requesting resolution for all nearby access points.</span>
-    <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;Wilcard&#39;</span><span class="p">,</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="s1">'Wilcard'</span><span class="p">,</span>
     <span class="c1">#: Link-Layer Address of the New Access Point.</span>
-    <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;New Access Point&#39;</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s1">'New Access Point'</span><span class="p">,</span>
     <span class="c1">#: Link-Layer Address of the MN.</span>
-    <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;MH&#39;</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s1">'MH'</span><span class="p">,</span>
     <span class="c1">#: Link-Layer Address of the NAR (i.e., Proxied Originator).</span>
-    <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;NAR&#39;</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s1">'NAR'</span><span class="p">,</span>
     <span class="c1">#: Link-Layer Address of the source of RtSolPr or PrRtAdv.</span>
     <span class="c1">#: message.</span>
-    <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;RtSolPr or PrRtAdv&#39;</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s1">'RtSolPr or PrRtAdv'</span><span class="p">,</span>
     <span class="c1">#: The access point identified by the LLA belongs to the</span>
     <span class="c1">#: current interface of the router.</span>
-    <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;access point&#39;</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="s1">'access point'</span><span class="p">,</span>
     <span class="c1">#: No prefix information available for the access point</span>
     <span class="c1">#: identified by the LLA.</span>
-    <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;no prefix information&#39;</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="s1">'no prefix information'</span><span class="p">,</span>
     <span class="c1">#: No fast handover support available for the access point</span>
     <span class="c1">#: identified by the LLA.</span>
-    <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;no fast handover support&#39;</span><span class="p">,</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="s1">'no fast handover support'</span><span class="p">,</span>
 <span class="p">}</span>  <span class="c1"># type: dict[int, str]</span>
 
 
@@ -442,22 +442,22 @@
 <div class="viewcode-block" id="LLACode">
 <a class="viewcode-back" href="../../../../pcapkit/vendor/mh.html#pcapkit.vendor.mh.lla_code.LLACode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LLACode</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Link-Layer Address (LLA) Option Code&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Link-Layer Address (LLA) Option Code"""</span>
 
     <span class="c1">#: Value limit checker.</span>
-    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">&#39;isinstance(value, int) and 0 &lt;= value &lt;= 255&#39;</span>
+    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0 &lt;= value &lt;= 255'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch registry data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[int, str]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+<span class="w">        </span><span class="sd">"""Fetch registry data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Registry data (:data:`~pcapkit.vendor.ipv4.qs_function.DATA`).</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">DATA</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Count field records.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'dict[int, str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Count field records.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Registry data.</span>
@@ -465,11 +465,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Field recordings.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process registry data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'dict[int, str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[str], list[str]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Process registry data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Registry data.</span>
@@ -477,19 +477,19 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Enumeration fields and missing fields.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;return extend_enum(cls, &#39;Unassigned_</span><span class="si">%d</span><span class="s2">&#39; % value, value)&quot;</span><span class="p">,</span>
+            <span class="s2">"return extend_enum(cls, 'Unassigned_</span><span class="si">%d</span><span class="s2">' % value, value)"</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">DATA</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">76</span><span class="p">))</span>
+            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">76</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">LLACode</span><span class="p">())</span>  <span class="c1"># type: ignore[arg-type]</span>
 </pre></div>
         </article>

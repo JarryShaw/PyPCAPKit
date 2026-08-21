@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.internet.ipv6_route</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;IPv6-Route - Routing Header for IPv6</span>
+<span class="sd">"""IPv6-Route - Routing Header for IPv6</span>
 <span class="sd">==========================================</span>
 
 <span class="sd">.. module:: pcapkit.protocols.internet.ipv6_route</span>
@@ -414,7 +414,7 @@
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/IPv6_packet#Routing</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
@@ -449,18 +449,18 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">RoutingType</span> <span class="k">as</span> <span class="n">Schema_RoutingType</span>
 
-    <span class="n">TypeParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_RoutingType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_IPv6_Route</span><span class="p">,</span> <span class="s1">&#39;header&#39;</span><span class="p">)],</span> <span class="n">Data_IPv6_Route</span><span class="p">]</span>
+    <span class="n">TypeParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_RoutingType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_IPv6_Route</span><span class="p">,</span> <span class="s1">'header'</span><span class="p">)],</span> <span class="n">Data_IPv6_Route</span><span class="p">]</span>
     <span class="n">TypeConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Routing</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_IPv6_Route</span><span class="p">]),</span>
-                                <span class="n">NamedArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">IPv6Address</span><span class="p">],</span> <span class="s1">&#39;dst&#39;</span><span class="p">),</span> <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_RoutingType</span><span class="p">]</span>
+                                <span class="n">NamedArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">IPv6Address</span><span class="p">],</span> <span class="s1">'dst'</span><span class="p">),</span> <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_RoutingType</span><span class="p">]</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IPv6_Route&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6_Route'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="IPv6_Route">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_IPv6_Route</span><span class="p">,</span> <span class="n">Schema_IPv6_Route</span><span class="p">],</span>
                  <span class="n">schema</span><span class="o">=</span><span class="n">Schema_IPv6_Route</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_IPv6_Route</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Routing Header for IPv6.</span>
+<span class="w">    </span><span class="sd">"""This class implements Routing Header for IPv6.</span>
 
 <span class="sd">    This class currently supports parsing of the following Routing Header for IPv6</span>
 <span class="sd">    routing data types, which are registered in the</span>
@@ -483,7 +483,7 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_rpl`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -495,11 +495,11 @@
     <span class="c1">#: and if such name not found, the value should then be a method that can</span>
     <span class="c1">#: parse the routing type by itself.</span>
     <span class="n">__routing__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
         <span class="p">{</span>
-            <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Source_Route</span><span class="p">:</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span>             <span class="c1"># [RFC 5095] DEPRECATED</span>
-            <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Type_2_Routing_Header</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 6275]</span>
-            <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">RPL_Source_Route_Header</span><span class="p">:</span> <span class="s1">&#39;rpl&#39;</span><span class="p">,</span>  <span class="c1"># [RFC 6554]</span>
+            <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Source_Route</span><span class="p">:</span> <span class="s1">'src'</span><span class="p">,</span>             <span class="c1"># [RFC 5095] DEPRECATED</span>
+            <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Type_2_Routing_Header</span><span class="p">:</span> <span class="s1">'2'</span><span class="p">,</span>      <span class="c1"># [RFC 6275]</span>
+            <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">RPL_Source_Route_Header</span><span class="p">:</span> <span class="s1">'rpl'</span><span class="p">,</span>  <span class="c1"># [RFC 6554]</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Routing | int, str | tuple[TypeParser, TypeConstructor]]</span>
 
@@ -508,55 +508,55 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Routing Header for IPv6&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;Routing Header for IPv6&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["Routing Header for IPv6"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of current protocol."""</span>
+        <span class="k">return</span> <span class="s1">'Routing Header for IPv6'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;IPv6-Route&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;IPv6-Route&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["IPv6-Route"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Acronym of corresponding protocol."""</span>
+        <span class="k">return</span> <span class="s1">'IPv6-Route'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header length of current protocol."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol | NoReturn&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Payload of current instance.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Protocol | NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Payload of current instance.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
 
 <span class="sd">        :rtype: pcapkit.protocols.protocol.Protocol</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extf</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;payload&#39;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute 'payload'"</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[str] | NoReturn&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol (if any).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str] | NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of next layer protocol (if any).</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extf</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;protocol&#39;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute 'protocol'"</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">protocol</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtoChain | NoReturn&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol chain of current instance.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtoChain | NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Protocol chain of current instance.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extf</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;protochain&#39;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute 'protochain'"</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">protochain</span>
 
     <span class="c1">##########################################################################</span>
@@ -565,9 +565,9 @@
 
 <div class="viewcode-block" id="IPv6_Route.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_IPv6_Route&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Routing Header for IPv6.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv6_Route'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read Routing Header for IPv6.</span>
 
 <span class="sd">        Structure of IPv6-Route header [:rfc:`8200`][:rfc:`5095`]:</span>
 
@@ -591,15 +591,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__routing__</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_read_data_type_</span><span class="si">{</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;TypeParser&#39;</span><span class="p">,</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_data_type_</span><span class="si">{</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TypeParser'</span><span class="p">,</span>
                             <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_data_type_none</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -613,20 +613,20 @@
 <div class="viewcode-block" id="IPv6_Route.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;Optional[IPv6Address | str | int| bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">,</span>
-             <span class="n">next_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">next_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-             <span class="n">next_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Routing | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Source_Route</span><span class="p">,</span>
-             <span class="n">type_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-             <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-             <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes | Data_IPv6_Route | Schema_RoutingType | dict[str, Any]&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
-             <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Protocol | Schema | bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_IPv6_Route&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+             <span class="n">dst</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address | str | int| bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="nb">next</span><span class="p">:</span> <span class="s1">'Enum_TransType | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">,</span>
+             <span class="n">next_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">next_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+             <span class="n">next_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Routing | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Source_Route</span><span class="p">,</span>
+             <span class="n">type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+             <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">seg_left</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | Data_IPv6_Route | Schema_RoutingType | dict[str, Any]'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
+             <span class="n">payload</span><span class="p">:</span> <span class="s1">'Protocol | Schema | bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv6_Route'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            dst: Destination address.</span>
@@ -646,27 +646,27 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">next_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span>
+<span class="sd">        """</span>
+        <span class="n">next_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_TransType'</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">next_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">next_namespace</span><span class="p">,</span>
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">next_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-        <span class="n">type_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Enum_Routing&#39;</span><span class="p">,</span>
+        <span class="n">type_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Routing'</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">type_namespace</span><span class="p">,</span>
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
-            <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># type: bytes | Schema_RoutingType</span>
+            <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>  <span class="c1"># type: bytes | Schema_RoutingType</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Data_IPv6_Route</span><span class="p">)):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__routing__</span><span class="p">[</span><span class="n">type_val</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_make_data_type_</span><span class="si">{</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;TypeConstructor&#39;</span><span class="p">,</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_data_type_</span><span class="si">{</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TypeConstructor'</span><span class="p">,</span>
                             <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_data_type_none</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-            <span class="n">dst_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">dst</span><span class="p">))</span> <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">dst_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">dst</span><span class="p">))</span> <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="n">data_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">type_val</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">dst_val</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -676,7 +676,7 @@
             <span class="n">length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
             <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid routing data type: </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid routing data type: </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv6_Route</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_val</span><span class="p">,</span>
@@ -691,16 +691,16 @@
 <div class="viewcode-block" id="IPv6_Route.register_routing">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.register_routing">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">register_routing</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Routing&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[TypeParser, TypeConstructor]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register an routing data parser.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_routing</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Routing'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[TypeParser, TypeConstructor]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register an routing data parser.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: IPv6-Route data type code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__routing__</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;routing </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'routing </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__routing__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
 
@@ -709,18 +709,18 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes] | bytes&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-                      <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">src_ip</span><span class="p">:</span> <span class="s1">&#39;Optional[IPv6Address]&#39;</span><span class="o">=</span> <span class="o">...</span><span class="p">,</span>
-                      <span class="n">dst_ip</span><span class="p">:</span> <span class="s1">&#39;Optional[IPv6Address]&#39;</span><span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+                      <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">src_ip</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span><span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                      <span class="n">dst_ip</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span><span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 
 <div class="viewcode-block" id="IPv6_Route.__post_init__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__post_init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes] | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-                      <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+                      <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Post initialisation hook.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: Source packet stream.</span>
@@ -733,7 +733,7 @@
 <span class="sd">        See Also:</span>
 <span class="sd">            For construction argument, please refer to :meth:`self.make &lt;IPv6_Route.make&gt;`.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1">#: bool: If the protocol is used as an IPv6 extension header.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extf</span> <span class="o">=</span> <span class="n">extension</span>
 
@@ -741,22 +741,22 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[4]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
         <span class="k">return</span> <span class="mi">4</span>
 
 <div class="viewcode-block" id="IPv6_Route.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__index__">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_TransType'</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+<span class="w">        </span><span class="sd">"""Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
 
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
@@ -767,8 +767,8 @@
 <div class="viewcode-block" id="IPv6_Route._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_IPv6_Route&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_IPv6_Route'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
@@ -776,20 +776,20 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">&#39;next&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="s1">&#39;seg_left&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
-            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
-            <span class="s1">&#39;payload&#39;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="s1">'next'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s1">'seg_left'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
+            <span class="s1">'data'</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+            <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="IPv6_Route._read_data_type_none">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_none">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_data_type_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_UnknownType&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_IPv6_Route&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UnknownType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Route unknown type data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_data_type_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnknownType'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_IPv6_Route'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnknownType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read IPv6-Route unknown type data.</span>
 
 <span class="sd">        Structure of IPv6-Route unknown type data [:rfc:`8200`][:rfc:`5095`]:</span>
 
@@ -812,7 +812,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed route data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_UnknownType</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
@@ -825,8 +825,8 @@
 
 <div class="viewcode-block" id="IPv6_Route._read_data_type_src">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_data_type_src</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_SourceRoute&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_IPv6_Route&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_SourceRoute&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Route Source Route data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_data_type_src</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SourceRoute'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_IPv6_Route'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_SourceRoute'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read IPv6-Route Source Route data.</span>
 
 <span class="sd">        Structure of IPv6-Route Source Route data [:rfc:`5095`]:</span>
 
@@ -873,9 +873,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed route data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1"> [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">]: invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1"> [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">]: invalid format'</span><span class="p">)</span>
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_SourceRoute</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
@@ -889,8 +889,8 @@
 
 <div class="viewcode-block" id="IPv6_Route._read_data_type_2">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_data_type_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_Type2&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_IPv6_Route&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Type2&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Route Type 2 data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_data_type_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_Type2'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_IPv6_Route'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Type2'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read IPv6-Route Type 2 data.</span>
 
 <span class="sd">        Structure of IPv6-Route Type 2 data [:rfc:`6275`]:</span>
 
@@ -920,9 +920,9 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``length`` is **NOT** ``24``.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">24</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_Type2</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
@@ -936,8 +936,8 @@
 
 <div class="viewcode-block" id="IPv6_Route._read_data_type_rpl">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_data_type_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_RPL&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_IPv6_Route&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_RPL&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Route RPL Source data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_data_type_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RPL'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_IPv6_Route'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RPL'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read IPv6-Route RPL Source data.</span>
 
 <span class="sd">        Structure of IPv6-Route RPL Source data [:rfc:`6554`]:</span>
 
@@ -963,9 +963,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed route data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_RPL</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
@@ -974,7 +974,7 @@
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="n">cmpr_i</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cmpr_i</span><span class="p">,</span>
             <span class="n">cmpr_e</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cmpr_e</span><span class="p">,</span>
-            <span class="n">pad</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">&#39;pad_len&#39;</span><span class="p">],</span>
+            <span class="n">pad</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">],</span>
             <span class="n">ip</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ipv6_route</span></div>
@@ -982,11 +982,11 @@
 
 <div class="viewcode-block" id="IPv6_Route._make_data_type_none">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_none">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Routing&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_UnknownType]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                             <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;Optional[IPv6Address]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                             <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
-                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_UnknownType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make IPv6-Route unknown type data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Routing'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[Data_UnknownType]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                             <span class="n">dst</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
+                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UnknownType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make IPv6-Route unknown type data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: routing type</span>
@@ -998,7 +998,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed route data schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">route</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">data</span>
 
@@ -1013,11 +1013,11 @@
 
 <div class="viewcode-block" id="IPv6_Route._make_data_type_src">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_src">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_src</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Routing&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_SourceRoute]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                            <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;Optional[IPv6Address]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                            <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;Optional[list[IPv6Address | str | bytes | int]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_SourceRoute&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make IPv6-Route Source Route data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_src</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Routing'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[Data_SourceRoute]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">dst</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">ip</span><span class="p">:</span> <span class="s1">'Optional[list[IPv6Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SourceRoute'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make IPv6-Route Source Route data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: routing type</span>
@@ -1029,9 +1029,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed route data schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">route</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;list[IPv6Address | str | bytes | int]&#39;</span><span class="p">,</span> <span class="n">route</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[IPv6Address | str | bytes | int]'</span><span class="p">,</span> <span class="n">route</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ip</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ip</span>
 
@@ -1042,11 +1042,11 @@
 
 <div class="viewcode-block" id="IPv6_Route._make_data_type_2">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_2">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Routing&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_Type2]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;Optional[IPv6Address]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | str | bytes | int&#39;</span> <span class="o">=</span> <span class="s1">&#39;::&#39;</span><span class="p">,</span>
-                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_Type2&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make IPv6-Route Type 2 data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Routing'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[Data_Type2]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">dst</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Type2'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make IPv6-Route Type 2 data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: routing type</span>
@@ -1058,9 +1058,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed route data schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">route</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address | str | bytes | int&#39;</span><span class="p">,</span> <span class="n">route</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address | str | bytes | int'</span><span class="p">,</span> <span class="n">route</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_Type2</span><span class="p">(</span>
             <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
@@ -1069,11 +1069,11 @@
 
 <div class="viewcode-block" id="IPv6_Route._make_data_type_rpl">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_rpl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Routing&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_RPL]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                            <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;Optional[IPv6Address]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                            <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;Optional[list[IPv6Address | str | bytes | int]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_RPL&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make IPv6-Route RPL Source data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Routing'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[Data_RPL]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">dst</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">ip</span><span class="p">:</span> <span class="s1">'Optional[list[IPv6Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RPL'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make IPv6-Route RPL Source data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: routing type</span>
@@ -1085,7 +1085,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed route data schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">route</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cmpr_i</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">cmpr_i</span>
             <span class="n">cmpr_e</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">cmpr_e</span>
@@ -1101,7 +1101,7 @@
                 <span class="n">cmpr_i</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">cmpr_e</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">ip_val</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">addr</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span> <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">ip</span>
+                    <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">addr</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span> <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">ip</span>
                 <span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">test_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">dst</span><span class="o">.</span><span class="n">packed</span><span class="p">]</span>  <span class="c1"># type: list[bytes]</span>
@@ -1109,7 +1109,7 @@
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                         <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">item</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
+                        <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">item</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
                 <span class="n">prefix_i</span> <span class="o">=</span> <span class="n">os_path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">test_list</span><span class="p">)</span>
                 <span class="n">cmpr_i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix_i</span><span class="p">)</span>
 
@@ -1117,7 +1117,7 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
+                    <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
                 <span class="n">prefix_e</span> <span class="o">=</span> <span class="n">os_path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">test_list</span><span class="p">)</span>
                 <span class="n">cmpr_e</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix_e</span><span class="p">)</span>
 
@@ -1128,17 +1128,17 @@
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                         <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="n">cmpr_i</span><span class="p">:])</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">item</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">[</span><span class="n">cmpr_i</span><span class="p">:])</span>
+                        <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">item</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">[</span><span class="n">cmpr_i</span><span class="p">:])</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">cmpr_e</span><span class="p">:])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">packed</span><span class="p">[</span><span class="n">cmpr_e</span><span class="p">:])</span>
+                    <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">packed</span><span class="p">[</span><span class="n">cmpr_e</span><span class="p">:])</span>
 
         <span class="k">return</span> <span class="n">Schema_RPL</span><span class="p">(</span>
             <span class="n">cmpr_i</span><span class="o">=</span><span class="n">cmpr_i</span><span class="p">,</span>
             <span class="n">cmpr_e</span><span class="o">=</span><span class="n">cmpr_e</span><span class="p">,</span>
             <span class="n">pad</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;pad_len&#39;</span><span class="p">:</span> <span class="n">pad</span><span class="p">,</span>
+                <span class="s1">'pad_len'</span><span class="p">:</span> <span class="n">pad</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">addresses</span><span class="o">=</span><span class="n">ip_val</span><span class="p">,</span>
         <span class="p">)</span></div>

@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.const.mh.binding_ack_flag</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
-<span class="sd">&quot;&quot;&quot;Binding Acknowledgment Flags</span>
+<span class="sd">"""Binding Acknowledgment Flags</span>
 <span class="sd">==================================</span>
 
 <span class="sd">.. module:: pcapkit.const.mh.binding_ack_flag</span>
@@ -401,17 +401,17 @@
 <span class="sd">This module contains the constant enumeration for **Binding Acknowledgment Flags**,</span>
 <span class="sd">which is automatically generated from :class:`pcapkit.vendor.mh.binding_ack_flag.BindingACKFlag`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntFlag</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;BindingACKFlag&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'BindingACKFlag'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="BindingACKFlag">
 <a class="viewcode-back" href="../../../../pcapkit/const/mh.html#pcapkit.const.mh.binding_ack_flag.BindingACKFlag">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BindingACKFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;[BindingACKFlag] Binding Acknowledgment Flags&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""[BindingACKFlag] Binding Acknowledgment Flags"""</span>
 
     <span class="c1">#: K [:rfc:`6275`]</span>
     <span class="n">K</span> <span class="o">=</span> <span class="mh">0x80</span>
@@ -435,15 +435,15 @@
     <span class="n">D</span> <span class="o">=</span> <span class="mh">0x02</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;BindingACKFlag&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'BindingACKFlag'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item.</span>
 <span class="sd">            default: Default value if not found.</span>
 
 <span class="sd">        :meta private:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">BindingACKFlag</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">BindingACKFlag</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
@@ -451,15 +451,15 @@
 <div class="viewcode-block" id="BindingACKFlag._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/const/mh.html#pcapkit.const.mh.binding_ack_flag.BindingACKFlag._missing_">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;BindingACKFlag&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'BindingACKFlag'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to get enum item.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>
 

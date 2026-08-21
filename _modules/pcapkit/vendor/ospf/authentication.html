@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.vendor.ospf.authentication</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Authentication Types</span>
+<span class="sd">"""Authentication Types</span>
 <span class="sd">==========================</span>
 
 <span class="sd">.. module:: pcapkit.vendor.ospf.authentication</span>
@@ -400,28 +400,28 @@
 <span class="sd">This module contains the vendor crawler for **Authentication Types**,</span>
 <span class="sd">which is automatically generating :class:`pcapkit.const.ospf.authentication.Authentication`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.vendor.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vendor</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Authentication&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Authentication'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Authentication">
 <a class="viewcode-back" href="../../../../pcapkit/vendor/ospf.html#pcapkit.vendor.ospf.authentication.Authentication">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Authentication</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Authentication Types&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Authentication Types"""</span>
 
     <span class="c1">#: Value limit checker.</span>
-    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">&#39;isinstance(value, int) and 0 &lt;= value &lt;= 65535&#39;</span>
+    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0 &lt;= value &lt;= 65535'</span>
     <span class="c1">#: Link to registry.</span>
-    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://www.iana.org/assignments/ospf-authentication-codes/authentication-codes.csv&#39;</span></div>
+    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.iana.org/assignments/ospf-authentication-codes/authentication-codes.csv'</span></div>
 
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">Authentication</span><span class="p">())</span>  <span class="c1"># type: ignore[arg-type]</span>
 </pre></div>
         </article>

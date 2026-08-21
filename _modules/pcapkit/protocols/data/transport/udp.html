@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.transport.udp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data model for UDP protocol&quot;&quot;&quot;</span>
+<span class="sd">"""data model for UDP protocol"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -402,26 +402,26 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;UDP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'UDP'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="UDP">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.data.transport.udp.UDP">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UDP</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for UDP protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for UDP protocol."""</span>
 
     <span class="c1">#: Source port.</span>
-    <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;AppType&#39;</span>
+    <span class="n">srcport</span><span class="p">:</span> <span class="s1">'AppType'</span>
     <span class="c1">#: Destination port.</span>
-    <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;AppType&#39;</span>
+    <span class="n">dstport</span><span class="p">:</span> <span class="s1">'AppType'</span>
     <span class="c1">#: Length (header includes).</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Checksum.</span>
-    <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;AppType&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;AppType&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">'AppType'</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">'AppType'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
 
 </pre></div>
         </article>

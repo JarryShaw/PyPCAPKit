@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.const.http.method</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
-<span class="sd">&quot;&quot;&quot;HTTP Method</span>
+<span class="sd">"""HTTP Method</span>
 <span class="sd">=================</span>
 
 <span class="sd">.. module:: pcapkit.const.http.method</span>
@@ -401,7 +401,7 @@
 <span class="sd">This module contains the constant enumeration for **HTTP Method**,</span>
 <span class="sd">which is automatically generated from :class:`pcapkit.vendor.http.method.Method`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -410,21 +410,21 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Method&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Method'</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Method">
 <a class="viewcode-back" href="../../../../pcapkit/const/http.html#pcapkit.const.http.method.Method">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Method</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;[Method] HTTP Method&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""[Method] HTTP Method"""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Safe method.</span>
-        <span class="n">safe</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="n">safe</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Idempotent method.</span>
-        <span class="n">idempotent</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="n">idempotent</span><span class="p">:</span> <span class="s1">'bool'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">safe</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="n">idempotent</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Method]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">safe</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="n">idempotent</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Method]'</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -433,140 +433,140 @@
 
         <span class="k">return</span> <span class="n">obj</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"&lt;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&gt;"</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_</span><span class="p">)</span>
 
     <span class="c1">#: ACL [:rfc:`3744#section-8.1`]</span>
-    <span class="n">ACL</span> <span class="o">=</span> <span class="s1">&#39;ACL&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">ACL</span> <span class="o">=</span> <span class="s1">'ACL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: BASELINE-CONTROL [:rfc:`3253#section-12.6`]</span>
-    <span class="n">BASELINE_CONTROL</span> <span class="o">=</span> <span class="s1">&#39;BASELINE-CONTROL&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">BASELINE_CONTROL</span> <span class="o">=</span> <span class="s1">'BASELINE-CONTROL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: BIND [:rfc:`5842#section-4`]</span>
-    <span class="n">BIND</span> <span class="o">=</span> <span class="s1">&#39;BIND&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">BIND</span> <span class="o">=</span> <span class="s1">'BIND'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: CHECKIN [:rfc:`3253#section-9.4`]</span>
-    <span class="n">CHECKIN</span> <span class="o">=</span> <span class="s1">&#39;CHECKIN&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">CHECKIN</span> <span class="o">=</span> <span class="s1">'CHECKIN'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: CHECKOUT [:rfc:`3253#section-8.8`]</span>
-    <span class="n">CHECKOUT</span> <span class="o">=</span> <span class="s1">&#39;CHECKOUT&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">CHECKOUT</span> <span class="o">=</span> <span class="s1">'CHECKOUT'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: CONNECT [:rfc:`9110#section-9.3.6`]</span>
-    <span class="n">CONNECT</span> <span class="o">=</span> <span class="s1">&#39;CONNECT&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="n">CONNECT</span> <span class="o">=</span> <span class="s1">'CONNECT'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
     <span class="c1">#: COPY [:rfc:`4918#section-9.8`]</span>
-    <span class="n">COPY</span> <span class="o">=</span> <span class="s1">&#39;COPY&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">COPY</span> <span class="o">=</span> <span class="s1">'COPY'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: DELETE [:rfc:`9110#section-9.3.5`]</span>
-    <span class="n">DELETE</span> <span class="o">=</span> <span class="s1">&#39;DELETE&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">DELETE</span> <span class="o">=</span> <span class="s1">'DELETE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: GET [:rfc:`9110#section-9.3.1`]</span>
-    <span class="n">GET</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">GET</span> <span class="o">=</span> <span class="s1">'GET'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: HEAD [:rfc:`9110#section-9.3.2`]</span>
-    <span class="n">HEAD</span> <span class="o">=</span> <span class="s1">&#39;HEAD&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">HEAD</span> <span class="o">=</span> <span class="s1">'HEAD'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: LABEL [:rfc:`3253#section-8.2`]</span>
-    <span class="n">LABEL</span> <span class="o">=</span> <span class="s1">&#39;LABEL&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">LABEL</span> <span class="o">=</span> <span class="s1">'LABEL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: LINK [:rfc:`2068#section-19.6.1.2`]</span>
-    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;LINK&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'LINK'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: LOCK [:rfc:`4918#section-9.10`]</span>
-    <span class="n">LOCK</span> <span class="o">=</span> <span class="s1">&#39;LOCK&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="n">LOCK</span> <span class="o">=</span> <span class="s1">'LOCK'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
     <span class="c1">#: MERGE [:rfc:`3253#section-11.2`]</span>
-    <span class="n">MERGE</span> <span class="o">=</span> <span class="s1">&#39;MERGE&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">MERGE</span> <span class="o">=</span> <span class="s1">'MERGE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: MKACTIVITY [:rfc:`3253#section-13.5`]</span>
-    <span class="n">MKACTIVITY</span> <span class="o">=</span> <span class="s1">&#39;MKACTIVITY&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">MKACTIVITY</span> <span class="o">=</span> <span class="s1">'MKACTIVITY'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: MKCALENDAR [:rfc:`4791#section-5.3.1`][:rfc:`8144#section-2.3`]</span>
-    <span class="n">MKCALENDAR</span> <span class="o">=</span> <span class="s1">&#39;MKCALENDAR&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">MKCALENDAR</span> <span class="o">=</span> <span class="s1">'MKCALENDAR'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: MKCOL</span>
     <span class="c1">#: [:rfc:`4918#section-9.3`][:rfc:`5689#section-3`][:rfc:`8144#section-2.3`]</span>
-    <span class="n">MKCOL</span> <span class="o">=</span> <span class="s1">&#39;MKCOL&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">MKCOL</span> <span class="o">=</span> <span class="s1">'MKCOL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: MKREDIRECTREF [:rfc:`4437#section-6`]</span>
-    <span class="n">MKREDIRECTREF</span> <span class="o">=</span> <span class="s1">&#39;MKREDIRECTREF&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">MKREDIRECTREF</span> <span class="o">=</span> <span class="s1">'MKREDIRECTREF'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: MKWORKSPACE [:rfc:`3253#section-6.3`]</span>
-    <span class="n">MKWORKSPACE</span> <span class="o">=</span> <span class="s1">&#39;MKWORKSPACE&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">MKWORKSPACE</span> <span class="o">=</span> <span class="s1">'MKWORKSPACE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: MOVE [:rfc:`4918#section-9.9`]</span>
-    <span class="n">MOVE</span> <span class="o">=</span> <span class="s1">&#39;MOVE&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">MOVE</span> <span class="o">=</span> <span class="s1">'MOVE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: OPTIONS [:rfc:`9110#section-9.3.7`]</span>
-    <span class="n">OPTIONS</span> <span class="o">=</span> <span class="s1">&#39;OPTIONS&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">OPTIONS</span> <span class="o">=</span> <span class="s1">'OPTIONS'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: ORDERPATCH [:rfc:`3648#section-7`]</span>
-    <span class="n">ORDERPATCH</span> <span class="o">=</span> <span class="s1">&#39;ORDERPATCH&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">ORDERPATCH</span> <span class="o">=</span> <span class="s1">'ORDERPATCH'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: PATCH [:rfc:`5789#section-2`]</span>
-    <span class="n">PATCH</span> <span class="o">=</span> <span class="s1">&#39;PATCH&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="n">PATCH</span> <span class="o">=</span> <span class="s1">'PATCH'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
     <span class="c1">#: POST [:rfc:`9110#section-9.3.3`]</span>
-    <span class="n">POST</span> <span class="o">=</span> <span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="n">POST</span> <span class="o">=</span> <span class="s1">'POST'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
     <span class="c1">#: PRI [:rfc:`9113#section-3.4`]</span>
-    <span class="n">PRI</span> <span class="o">=</span> <span class="s1">&#39;PRI&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">PRI</span> <span class="o">=</span> <span class="s1">'PRI'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: PROPFIND [:rfc:`4918#section-9.1`][:rfc:`8144#section-2.1`]</span>
-    <span class="n">PROPFIND</span> <span class="o">=</span> <span class="s1">&#39;PROPFIND&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">PROPFIND</span> <span class="o">=</span> <span class="s1">'PROPFIND'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: PROPPATCH [:rfc:`4918#section-9.2`][:rfc:`8144#section-2.2`]</span>
-    <span class="n">PROPPATCH</span> <span class="o">=</span> <span class="s1">&#39;PROPPATCH&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">PROPPATCH</span> <span class="o">=</span> <span class="s1">'PROPPATCH'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: PUT [:rfc:`9110#section-9.3.4`]</span>
-    <span class="n">PUT</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">PUT</span> <span class="o">=</span> <span class="s1">'PUT'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: QUERY [:rfc:`10008#section-2`]</span>
-    <span class="n">QUERY</span> <span class="o">=</span> <span class="s1">&#39;QUERY&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">QUERY</span> <span class="o">=</span> <span class="s1">'QUERY'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: REBIND [:rfc:`5842#section-6`]</span>
-    <span class="n">REBIND</span> <span class="o">=</span> <span class="s1">&#39;REBIND&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">REBIND</span> <span class="o">=</span> <span class="s1">'REBIND'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: REPORT [:rfc:`3253#section-3.6`][:rfc:`8144#section-2.1`]</span>
-    <span class="n">REPORT</span> <span class="o">=</span> <span class="s1">&#39;REPORT&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">REPORT</span> <span class="o">=</span> <span class="s1">'REPORT'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: SEARCH [:rfc:`5323#section-2`]</span>
-    <span class="n">SEARCH</span> <span class="o">=</span> <span class="s1">&#39;SEARCH&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">SEARCH</span> <span class="o">=</span> <span class="s1">'SEARCH'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: TRACE [:rfc:`9110#section-9.3.8`]</span>
-    <span class="n">TRACE</span> <span class="o">=</span> <span class="s1">&#39;TRACE&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">TRACE</span> <span class="o">=</span> <span class="s1">'TRACE'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: UNBIND [:rfc:`5842#section-5`]</span>
-    <span class="n">UNBIND</span> <span class="o">=</span> <span class="s1">&#39;UNBIND&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">UNBIND</span> <span class="o">=</span> <span class="s1">'UNBIND'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: UNCHECKOUT [:rfc:`3253#section-4.5`]</span>
-    <span class="n">UNCHECKOUT</span> <span class="o">=</span> <span class="s1">&#39;UNCHECKOUT&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">UNCHECKOUT</span> <span class="o">=</span> <span class="s1">'UNCHECKOUT'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: UNLINK [:rfc:`2068#section-19.6.1.3`]</span>
-    <span class="n">UNLINK</span> <span class="o">=</span> <span class="s1">&#39;UNLINK&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">UNLINK</span> <span class="o">=</span> <span class="s1">'UNLINK'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: UNLOCK [:rfc:`4918#section-9.11`]</span>
-    <span class="n">UNLOCK</span> <span class="o">=</span> <span class="s1">&#39;UNLOCK&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">UNLOCK</span> <span class="o">=</span> <span class="s1">'UNLOCK'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: UPDATE [:rfc:`3253#section-7.1`]</span>
-    <span class="n">UPDATE</span> <span class="o">=</span> <span class="s1">&#39;UPDATE&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">UPDATE</span> <span class="o">=</span> <span class="s1">'UPDATE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: UPDATEREDIRECTREF [:rfc:`4437#section-7`]</span>
-    <span class="n">UPDATEREDIRECTREF</span> <span class="o">=</span> <span class="s1">&#39;UPDATEREDIRECTREF&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">UPDATEREDIRECTREF</span> <span class="o">=</span> <span class="s1">'UPDATEREDIRECTREF'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="c1">#: VERSION-CONTROL [:rfc:`3253#section-3.5`]</span>
-    <span class="n">VERSION_CONTROL</span> <span class="o">=</span> <span class="s1">&#39;VERSION-CONTROL&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="n">VERSION_CONTROL</span> <span class="o">=</span> <span class="s1">'VERSION-CONTROL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Method&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Method'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item.</span>
 <span class="sd">            default: Default value if not found.</span>
 
 <span class="sd">        :meta private:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Method</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="n">Method</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Method</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
@@ -574,13 +574,13 @@
 <div class="viewcode-block" id="Method._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/const/http.html#pcapkit.const.http.method.Method._missing_">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Method&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Method'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to get enum item.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">value</span><span class="p">)</span></div>
 </div>
 

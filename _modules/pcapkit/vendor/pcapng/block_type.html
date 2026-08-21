@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.vendor.pcapng.block_type</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Block Types</span>
+<span class="sd">"""Block Types</span>
 <span class="sd">=================</span>
 
 <span class="sd">.. module:: pcapkit.vendor.pcapng.block_type</span>
@@ -400,7 +400,7 @@
 <span class="sd">This module contains the vendor crawler for **Block Types**,</span>
 <span class="sd">which is automatically generating :class:`pcapkit.const.pcapng.block_type.BlockType`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -410,7 +410,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.vendor.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vendor</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;BlockType&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'BlockType'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
@@ -421,19 +421,19 @@
 <div class="viewcode-block" id="BlockType">
 <a class="viewcode-back" href="../../../../pcapkit/vendor/pcapng.html#pcapkit.vendor.pcapng.block_type.BlockType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BlockType</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Block Types&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Block Types"""</span>
 
     <span class="c1">#: Value limit checker.</span>
-    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">&#39;isinstance(value, int) and 0 &lt;= value &lt;= 0xFFFFFFFF&#39;</span>
+    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0 &lt;= value &lt;= 0xFFFFFFFF'</span>
     <span class="c1">#: Link to registry.</span>
-    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html&#39;</span>
+    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Count field records.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Count field records."""</span>
         <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Tag]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch registry table.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Tag]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
+<span class="w">        </span><span class="sd">"""Fetch registry table.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            text: Context from :attr:`~LinkType.LINK`.</span>
@@ -441,13 +441,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Rows (``tr``) from registry table (``table``).</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">soup</span> <span class="o">=</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html5lib&#39;</span><span class="p">)</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;table#table-9&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">table</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="sd">        """</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">'html5lib'</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">'table#table-9'</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">table</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">'tr'</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[Tag]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process registry data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[Tag]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[str], list[str]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Process registry data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Registry data.</span>
@@ -455,38 +455,38 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Enumeration fields and missing fields.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-            <span class="n">temp</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">'td'</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">'td'</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="s1">&#39;Reserved&#39;</span> <span class="ow">in</span> <span class="n">desc</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Reserved&#39;</span>
+            <span class="k">if</span> <span class="s1">'Reserved'</span> <span class="ow">in</span> <span class="n">desc</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="s1">'Reserved'</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">desc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">desc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'.'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'('</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Reserved&#39;</span><span class="p">:</span>
-                    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Reserved_0x</span><span class="si">{</span><span class="n">code</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'Reserved'</span><span class="p">:</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'Reserved_0x</span><span class="si">{</span><span class="n">code</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1">'</span>
 
-                <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> = 0x</span><span class="si">{</span><span class="n">code</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> = 0x</span><span class="si">{</span><span class="n">code</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1">'</span>
                 <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
 
-                <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span> <span class="n">temp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">))</span>
+                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span> <span class="n">temp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'-'</span><span class="p">))</span>
 
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;if 0x</span><span class="si">{</span><span class="n">start</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= 0x</span><span class="si">{</span><span class="n">stop</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    return extend_enum(cls, &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_%08x&#39; % value, value)&quot;</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if 0x</span><span class="si">{</span><span class="n">start</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= 0x</span><span class="si">{</span><span class="n">stop</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_%08x' % value, value)"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">BlockType</span><span class="p">())</span>  <span class="c1"># type: ignore[arg-type]</span>
 </pre></div>
         </article>

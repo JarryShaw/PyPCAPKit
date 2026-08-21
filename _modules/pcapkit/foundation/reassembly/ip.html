@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.reassembly.ip</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;IP Datagram Reassembly</span>
+<span class="sd">"""IP Datagram Reassembly</span>
 <span class="sd">============================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.reassembly.ip</span>
@@ -406,7 +406,7 @@
 <span class="sd">algorithm is explained in :rfc:`815`, replacing ``RCVBT``,</span>
 <span class="sd">however, this implement still used the elder one.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_AT</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">DatagramID</span><span class="p">,</span>
@@ -419,13 +419,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span> <span class="k">as</span> <span class="n">IP_Protocol</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IP'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="IP">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IP</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">[</span><span class="n">_AT</span><span class="p">],</span> <span class="n">Datagram</span><span class="p">[</span><span class="n">_AT</span><span class="p">],</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">[</span><span class="n">_AT</span><span class="p">]],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reassembly for IP payload.</span>
+<span class="w">    </span><span class="sd">"""Reassembly for IP payload.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        strict: if return all datagrams (including those not</span>
@@ -439,9 +439,9 @@
 <span class="sd">        but rather used as a base class for the protocol-aware</span>
 <span class="sd">        reassembly classes.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[IP_Protocol]&#39;</span>
+        <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[IP_Protocol]'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -449,13 +449,13 @@
 
 <div class="viewcode-block" id="IP.reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP.reassembly">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;Packet[_AT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reassembly procedure.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            info: info dict of packets to be reassembled</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># clear cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -480,7 +480,7 @@
                 <span class="n">TDL</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>                              <span class="c1"># Total Data Length</span>
                 <span class="n">RCVBT</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">8191</span><span class="p">),</span>              <span class="c1"># Fragment Received Bit Table</span>
                 <span class="n">index</span><span class="o">=</span><span class="p">[],</span>                           <span class="c1"># index record</span>
-                <span class="n">header</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">FO</span> <span class="k">else</span> <span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>  <span class="c1"># header buffer</span>
+                <span class="n">header</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">FO</span> <span class="k">else</span> <span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>  <span class="c1"># header buffer</span>
                 <span class="n">datagram</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">65535</span><span class="p">),</span>          <span class="c1"># data buffer</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -499,7 +499,7 @@
         <span class="c1"># set RCVBT bits (in 8 octets)</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">//</span> <span class="mi">8</span>
         <span class="n">stop</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">+</span> <span class="p">(</span><span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x01</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">stop</span> <span class="o">-</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x01</span><span class="s1">'</span> <span class="o">*</span> <span class="p">(</span><span class="n">stop</span> <span class="o">-</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># get total data length (header excludes)</span>
         <span class="n">TDL</span> <span class="o">=</span> <span class="mi">0</span>
@@ -518,9 +518,9 @@
 
 <div class="viewcode-block" id="IP.submit">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP.submit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;Buffer[_AT]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;tuple[_AT, _AT, int, TransType]&#39;</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
-               <span class="n">checked</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Datagram[_AT]]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'tuple[_AT, _AT, int, TransType]'</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+               <span class="n">checked</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram[_AT]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Submit reassembled payload.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            buf: buffer dict of reassembled packets</span>
@@ -530,7 +530,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Reassembled packets.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">TDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">TDL</span>
         <span class="n">RCVBT</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">index</span>

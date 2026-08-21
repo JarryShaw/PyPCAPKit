@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.link.ethernet</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data models for ethernet protocol&quot;&quot;&quot;</span>
+<span class="sd">"""data models for ethernet protocol"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -403,24 +403,24 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Ethernet&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Ethernet'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Ethernet">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.data.link.ethernet.Ethernet">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Ethernet</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for ethernet packet.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for ethernet packet."""</span>
 
     <span class="c1">#: Destination MAC address.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Source MAC address.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Protocol (internet layer).</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'EtherType'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements</span></div>
 
 </pre></div>
         </article>

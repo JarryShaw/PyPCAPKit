@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.protocols.schema.internet.ipv6_opts</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># mypy: disable-error-code=assignment</span>
-<span class="sd">&quot;&quot;&quot;header schema for IPv6 destination options&quot;&quot;&quot;</span>
+<span class="sd">"""header schema for IPv6 destination options"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -418,15 +418,15 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;IPv6_Opts&#39;</span><span class="p">,</span>
+    <span class="s1">'IPv6_Opts'</span><span class="p">,</span>
 
-    <span class="s1">&#39;SMFDPDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;QuickStartOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;UnassignedOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PadOption&#39;</span><span class="p">,</span> <span class="s1">&#39;TunnelEncapsulationLimitOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;RouterAlertOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CALIPSOOption&#39;</span><span class="p">,</span> <span class="s1">&#39;SMFIdentificationBasedDPDOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SMFHashBasedDPDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PDMOption&#39;</span><span class="p">,</span> <span class="s1">&#39;QuickStartRequestOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;QuickStartReportOption&#39;</span><span class="p">,</span> <span class="s1">&#39;RPLOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MPLOption&#39;</span><span class="p">,</span> <span class="s1">&#39;ILNPOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;LineIdentificationOption&#39;</span><span class="p">,</span> <span class="s1">&#39;JumboPayloadOption&#39;</span><span class="p">,</span> <span class="s1">&#39;HomeAddressOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;IPDFFOption&#39;</span><span class="p">,</span>
+    <span class="s1">'SMFDPDOption'</span><span class="p">,</span> <span class="s1">'QuickStartOption'</span><span class="p">,</span>
+    <span class="s1">'UnassignedOption'</span><span class="p">,</span> <span class="s1">'PadOption'</span><span class="p">,</span> <span class="s1">'TunnelEncapsulationLimitOption'</span><span class="p">,</span>
+    <span class="s1">'RouterAlertOption'</span><span class="p">,</span> <span class="s1">'CALIPSOOption'</span><span class="p">,</span> <span class="s1">'SMFIdentificationBasedDPDOption'</span><span class="p">,</span>
+    <span class="s1">'SMFHashBasedDPDOption'</span><span class="p">,</span> <span class="s1">'PDMOption'</span><span class="p">,</span> <span class="s1">'QuickStartRequestOption'</span><span class="p">,</span>
+    <span class="s1">'QuickStartReportOption'</span><span class="p">,</span> <span class="s1">'RPLOption'</span><span class="p">,</span> <span class="s1">'MPLOption'</span><span class="p">,</span> <span class="s1">'ILNPOption'</span><span class="p">,</span>
+    <span class="s1">'LineIdentificationOption'</span><span class="p">,</span> <span class="s1">'JumboPayloadOption'</span><span class="p">,</span> <span class="s1">'HomeAddressOption'</span><span class="p">,</span>
+    <span class="s1">'IPDFFOption'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -442,7 +442,7 @@
 <div class="viewcode-block" id="TaggerIDInfo">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.TaggerIDInfo">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">TaggerIDInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;TaggerID information.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""TaggerID information."""</span>
 
         <span class="c1">#: SMF mode.</span>
         <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span>
@@ -455,7 +455,7 @@
 <div class="viewcode-block" id="QuickStartFlags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartFlags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Quick-Start flags.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Quick-Start flags."""</span>
 
         <span class="c1">#: QS function.</span>
         <span class="n">func</span><span class="p">:</span> <span class="nb">int</span>
@@ -466,7 +466,7 @@
 <div class="viewcode-block" id="RPLFlags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.RPLFlags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">RPLFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;RPL flags.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""RPL flags."""</span>
 
         <span class="c1">#: Down flag.</span>
         <span class="n">down</span><span class="p">:</span> <span class="nb">int</span>
@@ -479,7 +479,7 @@
 <div class="viewcode-block" id="MPLFlags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">MPLFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;MPL flags.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""MPL flags."""</span>
 
         <span class="c1">#: Seed-ID type. Identifies the length of the</span>
         <span class="c1">#: Seed-ID.</span>
@@ -496,7 +496,7 @@
 <div class="viewcode-block" id="DFFFlags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">DFFFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;``IP_DFF`` flags.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""``IP_DFF`` flags."""</span>
 
         <span class="c1">#: Version.</span>
         <span class="n">ver</span><span class="p">:</span> <span class="nb">int</span>
@@ -509,7 +509,7 @@
 <div class="viewcode-block" id="SMFDPDTestFlag">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDTestFlag">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">SMFDPDTestFlag</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;``SMF_DPD`` test flag.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""``SMF_DPD`` test flag."""</span>
 
         <span class="c1">#: Length.</span>
         <span class="nb">len</span><span class="p">:</span> <span class="nb">int</span>
@@ -520,7 +520,7 @@
 <div class="viewcode-block" id="QSTestFlags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.QSTestFlags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">QSTestFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Quick start test flag.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Quick start test flag."""</span>
 
         <span class="c1">#: QS function.</span>
         <span class="n">func</span><span class="p">:</span> <span class="nb">int</span></div>
@@ -529,7 +529,7 @@
 <div class="viewcode-block" id="QSNonce">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.QSNonce">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">QSNonce</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Quick start nonce.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Quick start nonce."""</span>
 
         <span class="c1">#: Nonce.</span>
         <span class="n">nonce</span><span class="p">:</span> <span class="nb">int</span></div>
@@ -538,8 +538,8 @@
 
 <div class="viewcode-block" id="mpl_opt_seed_id_len">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.mpl_opt_seed_id_len">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return MPL Seed-ID length.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return MPL Seed-ID length.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pkt: MPL option unpacked schema.</span>
@@ -547,8 +547,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        MPL Seed-ID length.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">s_type</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+<span class="sd">    """</span>
+    <span class="n">s_type</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">s_type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="n">s_type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -557,14 +557,14 @@
         <span class="k">return</span> <span class="mi">8</span>
     <span class="k">if</span> <span class="n">s_type</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">16</span>
-    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv6-Opts: invalid MPL Seed-ID type: </span><span class="si">{</span><span class="n">s_type</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid MPL Seed-ID type: </span><span class="si">{</span><span class="n">s_type</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="smf_dpd_data_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.smf_dpd_data_selector">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">smf_dpd_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`_SMFDPDOption.data` field.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">smf_dpd_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Selector function for :attr:`_SMFDPDOption.data` field.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pkt: Packet data.</span>
@@ -577,19 +577,19 @@
 <span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.SMFHashBasedDPDOption`</span>
 <span class="sd">          instance.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">])</span>
+<span class="sd">    """</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'mode'</span><span class="p">])</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">SMFDPDOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv6-Opts: invalid SMF DPD mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid SMF DPD mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="smf_i_dpd_tid_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_tid_selector">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">smf_i_dpd_tid_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`SMFIdentificationBasedDPDOption.tid` field.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">smf_i_dpd_tid_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Selector function for :attr:`SMFIdentificationBasedDPDOption.tid` field.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pkt: Packet data.</span>
@@ -603,24 +603,24 @@
 <span class="sd">          instance.</span>
 <span class="sd">        * Otherwise, returns a :class:`~pcapkit.corekit.fields.strings.BytesField` instance.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
-    <span class="n">tid_len</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">]</span>
+<span class="sd">    """</span>
+    <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">])</span>
+    <span class="n">tid_len</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span>
 
     <span class="c1"># update type</span>
-    <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tid_type</span>
+    <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">=</span> <span class="n">tid_type</span>
 
     <span class="k">if</span> <span class="n">tid_type</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">NULL</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">tid_len</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv6-Opts: invalid TaggerID length: </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid TaggerID length: </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">NoValueField</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">tid_type</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">tid_len</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv6-Opts: invalid TaggerID length: </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid TaggerID length: </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">tid_type</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">tid_len</span> <span class="o">!=</span> <span class="mi">15</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv6-Opts: invalid TaggerID length: </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid TaggerID length: </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">tid_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
 
@@ -628,8 +628,8 @@
 
 <div class="viewcode-block" id="quick_start_data_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.quick_start_data_selector">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">quick_start_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`_QuickStartOption.data` field.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">quick_start_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Selector function for :attr:`_QuickStartOption.data` field.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pkt: Packet data.</span>
@@ -642,13 +642,13 @@
 <span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption`</span>
 <span class="sd">          instance.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">])</span>
-    <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
+<span class="sd">    """</span>
+    <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">])</span>
+    <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
 
     <span class="n">schema</span> <span class="o">=</span> <span class="n">QuickStartOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv6-Opts: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
@@ -656,22 +656,22 @@
 <div class="viewcode-block" id="Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.Option">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Option</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_Option</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts options."""</span>
 
     <span class="n">__default__</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedOption</span>
 
     <span class="c1">#: Option type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Option</span><span class="p">)</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Option</span><span class="p">)</span>
     <span class="c1">#: Option length (conditional in case of ``Pad1`` option).</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt8Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span>
     <span class="p">)</span>
 
 <div class="viewcode-block" id="Option.post_process">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.Option.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Unpacked data.</span>
@@ -679,7 +679,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># for Pad1 option, length is always 0</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="mi">0</span>
@@ -692,13 +692,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts unassigned options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts unassigned options."""</span>
 
     <span class="c1">#: Option data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -707,13 +707,13 @@
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span>
                               <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts padding options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts padding options."""</span>
 
     <span class="c1">#: Padding.</span>
-    <span class="n">pad</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;len&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">pad</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'len'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -721,13 +721,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.TunnelEncapsulationLimitOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TunnelEncapsulationLimitOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Tunnel_Encapsulation_Limit</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts tunnel encapsulation limit options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts tunnel encapsulation limit options."""</span>
 
     <span class="c1">#: Tunnel encapsulation limit.</span>
-    <span class="n">limit</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -735,13 +735,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.RouterAlertOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RouterAlertOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Router_Alert</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts router alert options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts router alert options."""</span>
 
     <span class="c1">#: Router alert.</span>
-    <span class="n">alert</span><span class="p">:</span> <span class="s1">&#39;Enum_RouterAlert&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_RouterAlert</span><span class="p">)</span>
+    <span class="n">alert</span><span class="p">:</span> <span class="s1">'Enum_RouterAlert'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_RouterAlert</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">alert</span><span class="p">:</span> <span class="s1">&#39;Enum_RouterAlert&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">alert</span><span class="p">:</span> <span class="s1">'Enum_RouterAlert'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -749,46 +749,46 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.CALIPSOOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CALIPSOOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">CALIPSO</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts common architecture label IPv6 security options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts common architecture label IPv6 security options."""</span>
 
     <span class="c1">#: CALIPSO domain of interpretation.</span>
-    <span class="n">domain</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
     <span class="c1">#: Compartment length.</span>
-    <span class="n">cmpt_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="n">cmpt_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Sens level.</span>
-    <span class="n">level</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="n">level</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Checksum (CRC-16).</span>
-    <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="c1">#: Compartment bitmap.</span>
-    <span class="n">bitmap</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
-        <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;cmpt_len&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;cmpt_len&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">bitmap</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'cmpt_len'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'cmpt_len'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">pad</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">8</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;cmpt_len&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">pad</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">8</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'cmpt_len'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cmpt_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
-                     <span class="n">level</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">bitmap</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cmpt_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">level</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">bitmap</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">_SMFDPDOption</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts SMF DPD options with generic representation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts SMF DPD options with generic representation."""</span>
 
     <span class="c1">#: SMF DPD mode.</span>
-    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;SMFDPDTestFlag&#39;</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;len&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
-        <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">'SMFDPDTestFlag'</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'len'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+        <span class="s1">'mode'</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">}))</span>
     <span class="c1">#: SMF DPD data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SMFIdentificationBasedDPDOption | SMFHashBasedDPDOption&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'SMFIdentificationBasedDPDOption | SMFHashBasedDPDOption'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">smf_dpd_data_selector</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SMFDPDOption&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'SMFDPDOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Unpacked data.</span>
@@ -796,7 +796,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="k">return</span> <span class="n">ret</span>
 
@@ -808,13 +808,13 @@
 <div class="viewcode-block" id="SMFDPDOption">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDOption">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SMFDPDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_SMFDPDMode</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts simplified multicast forwarding duplicate packet</span>
-<span class="sd">    detection (``SMF_DPD``) options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts simplified multicast forwarding duplicate packet</span>
+<span class="sd">    detection (``SMF_DPD``) options."""</span>
 
-    <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[Enum_SMFDPDMode, Type[SMFDPDOption]]&#39;</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type,return-value]</span>
+    <span class="n">__enum__</span><span class="p">:</span> <span class="s1">'DefaultDict[Enum_SMFDPDMode, Type[SMFDPDOption]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type,return-value]</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;Enum_SMFDPDMode&#39;</span></div>
+        <span class="n">mode</span><span class="p">:</span> <span class="s1">'Enum_SMFDPDMode'</span></div>
 
 
 
@@ -822,31 +822,31 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SMFIdentificationBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">I_DPD</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts SMF identification-based DPD options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts SMF identification-based DPD options."""</span>
 
-    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;SMFDPDTestFlag&#39;</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">'SMFDPDTestFlag'</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'mode'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">}))</span>
     <span class="c1">#: TaggerID information.</span>
-    <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;TaggerIDInfo&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-        <span class="s1">&#39;len&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="n">info</span><span class="p">:</span> <span class="s1">'TaggerIDInfo'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'mode'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'type'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s1">'len'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: TaggerID.</span>
-    <span class="n">tid</span><span class="p">:</span> <span class="s1">&#39;bytes | IPv4Address | IPv6Address&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">tid</span><span class="p">:</span> <span class="s1">'bytes | IPv4Address | IPv6Address'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">smf_i_dpd_tid_selector</span><span class="p">),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Identifier.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
-        <span class="mi">1</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
     <span class="p">))</span>
 
 <div class="viewcode-block" id="SMFIdentificationBasedDPDOption.post_process">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SMFIdentificationBasedDPDOption&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'SMFIdentificationBasedDPDOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Unpacked data.</span>
@@ -854,15 +854,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: SMFIdentificationBasedDPDOption</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">I_DPD</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;TaggerIDInfo&#39;</span><span class="p">,</span>
-                     <span class="n">tid</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'TaggerIDInfo'</span><span class="p">,</span>
+                     <span class="n">tid</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -870,15 +870,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.SMFHashBasedDPDOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SMFHashBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">H_DPD</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts SMF hash-based DPD options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts SMF hash-based DPD options."""</span>
 
     <span class="c1">#: Hash assist value (HAV).</span>
-    <span class="n">hav</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">])</span>
+    <span class="n">hav</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">])</span>
 
 <div class="viewcode-block" id="SMFHashBasedDPDOption.post_process">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.SMFHashBasedDPDOption.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SMFIdentificationBasedDPDOption&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'SMFIdentificationBasedDPDOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Unpacked data.</span>
@@ -886,14 +886,14 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: SMFIdentificationBasedDPDOption</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">H_DPD</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hav</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">hav</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -901,24 +901,24 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.PDMOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PDMOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">PDM</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts performance and diagnostic metrics (PDM) options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts performance and diagnostic metrics (PDM) options."""</span>
 
     <span class="c1">#: Scale delta time last received (DTLR).</span>
-    <span class="n">scaledtlr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="n">scaledtlr</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Scale delta time last sent (DTLS).</span>
-    <span class="n">scaledtls</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="n">scaledtls</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Packet sequence number (PSN) this packet.</span>
-    <span class="n">psntp</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">psntp</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Packet sequence number (PSN) last received.</span>
-    <span class="n">psnlr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">psnlr</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Delta time last received (DTLR).</span>
-    <span class="n">deltatlr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">deltatlr</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Delta time last sent (DTLS).</span>
-    <span class="n">deltatls</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">deltatls</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">scaledtlr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">scaledtls</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
-                     <span class="n">psntp</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">psnlr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">deltatlr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">deltatls</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">scaledtlr</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">scaledtls</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">psntp</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">psnlr</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">deltatlr</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">deltatls</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -926,21 +926,21 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts._QuickStartOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">_QuickStartOption</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts quick start options in generic representation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts quick start options in generic representation."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;QSTestFlags&#39;</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'QSTestFlags'</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'func'</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">}))</span>
     <span class="c1">#: QS data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;QuickStartRequestOption | QuickStartReportOption&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'QuickStartRequestOption | QuickStartReportOption'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">quick_start_data_selector</span><span class="p">,</span>
     <span class="p">)</span>
 
 <div class="viewcode-block" id="_QuickStartOption.post_process">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts._QuickStartOption.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;QuickStartOption&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'QuickStartOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Unpacked data.</span>
@@ -948,9 +948,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">])</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'func'</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 </div>
 
@@ -963,16 +963,16 @@
 <div class="viewcode-block" id="QuickStartOption">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_QSFunction</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts quick start options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts quick start options."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;QuickStartFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-        <span class="s1">&#39;rate&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'QuickStartFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'func'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'rate'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="n">func</span><span class="p">:</span> <span class="s1">&#39;Enum_QSFunction&#39;</span></div>
+        <span class="n">func</span><span class="p">:</span> <span class="s1">'Enum_QSFunction'</span></div>
 
 
 
@@ -980,18 +980,18 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartRequestOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartRequestOption</span><span class="p">(</span><span class="n">QuickStartOption</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts quick start request options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts quick start request options."""</span>
 
     <span class="c1">#: QS time-to-live (TTL).</span>
-    <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="n">ttl</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: QS nonce.</span>
-    <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QSNonce&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;nonce&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+    <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'nonce'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;QuickStartFlags&#39;</span><span class="p">,</span>
-                     <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QSNonce&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'QuickStartFlags'</span><span class="p">,</span>
+                     <span class="n">ttl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -999,18 +999,18 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartReportOption</span><span class="p">(</span><span class="n">QuickStartOption</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts quick start report of approved rate options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts quick start report of approved rate options."""</span>
 
     <span class="c1">#: Reserved.</span>
-    <span class="n">reserved</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1">#: QS nonce.</span>
-    <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QSNonce&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;nonce&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+    <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'nonce'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;QuickStartFlags&#39;</span><span class="p">,</span>
-                     <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QSNonce&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'QuickStartFlags'</span><span class="p">,</span>
+                     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1019,22 +1019,22 @@
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RPLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">RPL_Option_0x23</span><span class="p">,</span>
                               <span class="n">Enum_Option</span><span class="o">.</span><span class="n">RPL_Option_0x63</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts routing protocol for low-power and lossy networks (RPL) options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts routing protocol for low-power and lossy networks (RPL) options."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;RPLFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;down&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;rank_err&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;fwd_err&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'RPLFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'down'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'rank_err'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'fwd_err'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: RPL instance ID.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Sender rank.</span>
-    <span class="n">rank</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">rank</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;RPLFlags&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
-                     <span class="n">rank</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'RPLFlags'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">rank</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1042,30 +1042,30 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.MPLOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MPLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPL_Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts multicast protocol for low-power and lossy networks (MPL) options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts multicast protocol for low-power and lossy networks (MPL) options."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;MPLFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-        <span class="s1">&#39;max&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;drop&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'MPLFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'type'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s1">'max'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'drop'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: MPL sequence number.</span>
-    <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: MPL Seed-ID.</span>
-    <span class="n">seed</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">NumberField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">mpl_opt_seed_id_len</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Reserved data (padding).</span>
-    <span class="n">pad</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="p">(</span>
-        <span class="mi">0</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
+    <span class="n">pad</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="p">(</span>
+        <span class="mi">0</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
     <span class="p">))</span>
 
 <div class="viewcode-block" id="MPLOption.post_process">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.MPLOption.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Unpacked data.</span>
@@ -1073,15 +1073,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="n">NoValue</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'src'</span><span class="p">,</span> <span class="n">NoValue</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;MPLFlags&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
-                     <span class="n">seed</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'MPLFlags'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">seed</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1089,13 +1089,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ILNPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">ILNP_Nonce</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts identifier-locator network protocol (ILNP) options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts identifier-locator network protocol (ILNP) options."""</span>
 
     <span class="c1">#: Nonce value.</span>
-    <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">],</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">],</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1103,15 +1103,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.LineIdentificationOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">LineIdentificationOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Line_Identification_Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts line-identification options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts line-identification options."""</span>
 
     <span class="c1">#: Line ID length.</span>
-    <span class="n">id_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="n">id_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Line ID.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;id_len&#39;</span><span class="p">])</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'id_len'</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">id_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">id_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1119,13 +1119,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.JumboPayloadOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">JumboPayloadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Jumbo_Payload</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts jumbo payload options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts jumbo payload options."""</span>
 
     <span class="c1">#: Jumbo payload length.</span>
-    <span class="n">jumbo_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="n">jumbo_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">jumbo_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">jumbo_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1133,13 +1133,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.HomeAddressOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HomeAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Home_Address</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts home address options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts home address options."""</span>
 
     <span class="c1">#: Home address.</span>
-    <span class="n">addr</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
+    <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPv6Address'</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | int | str | bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPv6Address | int | str | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1147,19 +1147,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.IPDFFOption">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">IPDFFOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">IP_DFF</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts depth-first forwarding (``IP_DFF``) options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts depth-first forwarding (``IP_DFF``) options."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;DFFFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;ver&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-        <span class="s1">&#39;dup&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;ret&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'DFFFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'ver'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s1">'dup'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'ret'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Sequence number.</span>
-    <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;DFFFlags&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'DFFFlags'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1167,26 +1167,26 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.IPv6_Opts">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">IPv6_Opts</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv6-Opts packet.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts packet."""</span>
 
     <span class="c1">#: Next header.</span>
-    <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_TransType</span><span class="p">)</span>
+    <span class="nb">next</span><span class="p">:</span> <span class="s1">'Enum_TransType'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_TransType</span><span class="p">)</span>
     <span class="c1">#: Header length.</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
-        <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Payload.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;bytes | list[bytes | Option]&#39;</span><span class="p">,</span>
-                     <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'Enum_TransType'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">'bytes | list[bytes | Option]'</span><span class="p">,</span>
+                     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | Protocol | Schema'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 </pre></div>
         </article>

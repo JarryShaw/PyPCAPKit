@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.link.vlan</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;VLAN - 802.1Q Customer VLAN Tag Type</span>
+<span class="sd">"""VLAN - 802.1Q Customer VLAN Tag Type</span>
 <span class="sd">==========================================</span>
 
 <span class="sd">.. module:: pcapkit.protocols.link.vlan</span>
@@ -415,7 +415,7 @@
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
@@ -438,42 +438,42 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.link.vlan</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCIType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;VLAN&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'VLAN'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="VLAN">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">VLAN</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_VLAN</span><span class="p">,</span> <span class="n">Schema_VLAN</span><span class="p">],</span>
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_VLAN</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_VLAN</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements 802.1Q Customer VLAN Tag Type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""This class implements 802.1Q Customer VLAN Tag Type."""</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;802.1Q Customer VLAN Tag Type&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;802.1Q Customer VLAN Tag Type&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["802.1Q Customer VLAN Tag Type"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of current protocol."""</span>
+        <span class="k">return</span> <span class="s1">'802.1Q Customer VLAN Tag Type'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;802.1Q&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;802.1Q&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["802.1Q"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Acronym of corresponding protocol."""</span>
+        <span class="k">return</span> <span class="s1">'802.1Q'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">info_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;c_tag&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Key name of the :attr:`info` dict.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;c_tag&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">info_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["c_tag"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Key name of the :attr:`info` dict."""</span>
+        <span class="k">return</span> <span class="s1">'c_tag'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[4]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header length of current protocol."""</span>
         <span class="k">return</span> <span class="mi">4</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_EtherType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of next layer protocol."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>
 
     <span class="c1">##########################################################################</span>
@@ -482,8 +482,8 @@
 
 <div class="viewcode-block" id="VLAN.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_VLAN&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read 802.1Q Customer VLAN Tag Type.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_VLAN'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read 802.1Q Customer VLAN Tag Type.</span>
 
 <span class="sd">        Structure of 802.1Q Customer VLAN Tag Type [`IEEE 802.1Q &lt;https://standards.ieee.org/ieee/802.1Q/6844/&gt;`__]:</span>
 
@@ -506,7 +506,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
@@ -514,9 +514,9 @@
         <span class="n">tci</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">tci</span>
         <span class="n">vlan</span> <span class="o">=</span> <span class="n">Data_VLAN</span><span class="p">(</span>
             <span class="n">tci</span><span class="o">=</span><span class="n">Data_TCI</span><span class="p">(</span>
-                <span class="n">pcp</span><span class="o">=</span><span class="n">Enum_PriorityLevel</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tci</span><span class="p">[</span><span class="s1">&#39;pcp&#39;</span><span class="p">]),</span>
-                <span class="n">dei</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tci</span><span class="p">[</span><span class="s1">&#39;pcp&#39;</span><span class="p">]),</span>
-                <span class="n">vid</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tci</span><span class="p">[</span><span class="s1">&#39;vid&#39;</span><span class="p">]),</span>
+                <span class="n">pcp</span><span class="o">=</span><span class="n">Enum_PriorityLevel</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tci</span><span class="p">[</span><span class="s1">'pcp'</span><span class="p">]),</span>
+                <span class="n">dei</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tci</span><span class="p">[</span><span class="s1">'pcp'</span><span class="p">]),</span>
+                <span class="n">vid</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tci</span><span class="p">[</span><span class="s1">'vid'</span><span class="p">]),</span>
             <span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
         <span class="p">)</span>
@@ -526,20 +526,20 @@
 <div class="viewcode-block" id="VLAN.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">tci</span><span class="p">:</span> <span class="s1">&#39;Optional[Schema_TCI | TCIType]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">pcp</span><span class="p">:</span> <span class="s1">&#39;Enum_PriorityLevel | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_PriorityLevel</span><span class="o">.</span><span class="n">BE</span><span class="p">,</span>
-             <span class="n">pcp_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">pcp_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-             <span class="n">pcp_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">dei</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">vid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-             <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_EtherType | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">,</span>
-             <span class="n">type_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-             <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_VLAN&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+             <span class="n">tci</span><span class="p">:</span> <span class="s1">'Optional[Schema_TCI | TCIType]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">pcp</span><span class="p">:</span> <span class="s1">'Enum_PriorityLevel | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_PriorityLevel</span><span class="o">.</span><span class="n">BE</span><span class="p">,</span>
+             <span class="n">pcp_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">pcp_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+             <span class="n">pcp_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">dei</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">vid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_EtherType | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">,</span>
+             <span class="n">type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+             <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | Protocol | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_VLAN'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            tci: TCI field.</span>
@@ -559,11 +559,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">tci</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">pcp_value</span> <span class="o">=</span> <span class="n">tci</span><span class="p">[</span><span class="s1">&#39;pcp&#39;</span><span class="p">]</span>
-            <span class="n">dei</span> <span class="o">=</span> <span class="n">tci</span><span class="p">[</span><span class="s1">&#39;dei&#39;</span><span class="p">]</span>  <span class="c1"># type: ignore[assignment]</span>
-            <span class="n">vid</span> <span class="o">=</span> <span class="n">tci</span><span class="p">[</span><span class="s1">&#39;vid&#39;</span><span class="p">]</span>
+            <span class="n">pcp_value</span> <span class="o">=</span> <span class="n">tci</span><span class="p">[</span><span class="s1">'pcp'</span><span class="p">]</span>
+            <span class="n">dei</span> <span class="o">=</span> <span class="n">tci</span><span class="p">[</span><span class="s1">'dei'</span><span class="p">]</span>  <span class="c1"># type: ignore[assignment]</span>
+            <span class="n">vid</span> <span class="o">=</span> <span class="n">tci</span><span class="p">[</span><span class="s1">'vid'</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pcp_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">pcp</span><span class="p">,</span> <span class="n">pcp_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">pcp_namespace</span><span class="p">,</span>
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">pcp_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -573,9 +573,9 @@
 
         <span class="k">return</span> <span class="n">Schema_VLAN</span><span class="p">(</span>
             <span class="n">tci</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;pcp&#39;</span><span class="p">:</span> <span class="n">pcp_value</span><span class="p">,</span>
-                <span class="s1">&#39;dei&#39;</span><span class="p">:</span> <span class="n">dei</span><span class="p">,</span>
-                <span class="s1">&#39;vid&#39;</span><span class="p">:</span> <span class="n">vid</span><span class="p">,</span>
+                <span class="s1">'pcp'</span><span class="p">:</span> <span class="n">pcp_value</span><span class="p">,</span>
+                <span class="s1">'dei'</span><span class="p">:</span> <span class="n">dei</span><span class="p">,</span>
+                <span class="s1">'vid'</span><span class="p">:</span> <span class="n">vid</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">type_value</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
@@ -586,21 +586,21 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[4]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
         <span class="k">return</span> <span class="mi">4</span>
 
 <div class="viewcode-block" id="VLAN.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.__index__">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+<span class="w">        </span><span class="sd">"""Numeral registry index of the protocol.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer&#39;</span><span class="p">)</span></div>
+<span class="sd">        """</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer'</span><span class="p">)</span></div>
 
 
     <span class="c1">##########################################################################</span>
@@ -610,8 +610,8 @@
 <div class="viewcode-block" id="VLAN._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_VLAN&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_VLAN'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
@@ -619,15 +619,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">&#39;tci&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;pcp&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tci</span><span class="o">.</span><span class="n">pcp</span><span class="p">,</span>
-                <span class="s1">&#39;dei&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tci</span><span class="o">.</span><span class="n">dei</span><span class="p">,</span>
-                <span class="s1">&#39;vid&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tci</span><span class="o">.</span><span class="n">vid</span><span class="p">,</span>
+            <span class="s1">'tci'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">'pcp'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tci</span><span class="o">.</span><span class="n">pcp</span><span class="p">,</span>
+                <span class="s1">'dei'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tci</span><span class="o">.</span><span class="n">dei</span><span class="p">,</span>
+                <span class="s1">'vid'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tci</span><span class="o">.</span><span class="n">vid</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="s1">&#39;payload&#39;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 </div>
 

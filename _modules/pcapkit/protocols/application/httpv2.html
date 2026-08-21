@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.application.httpv2</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;HTTP/2 - Hypertext Transfer Protocol</span>
+<span class="sd">"""HTTP/2 - Hypertext Transfer Protocol</span>
 <span class="sd">==========================================</span>
 
 <span class="sd">.. module:: pcapkit.protocols.application.httpv2</span>
@@ -416,7 +416,7 @@
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/HTTP/2</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -475,18 +475,18 @@
 
     <span class="n">Flags</span> <span class="o">=</span> <span class="n">Schema_FrameType</span><span class="o">.</span><span class="n">Flags</span>
 
-    <span class="n">FrameParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="s1">&#39;header&#39;</span><span class="p">)],</span> <span class="n">Data_HTTP</span><span class="p">]</span>
+    <span class="n">FrameParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="s1">'header'</span><span class="p">)],</span> <span class="n">Data_HTTP</span><span class="p">]</span>
     <span class="n">FrameConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Frame</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">]),</span>
-                                 <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="s1">&#39;Flags&#39;</span><span class="p">]]</span>
+                                 <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="s1">'Flags'</span><span class="p">]]</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;HTTP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HTTP'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="HTTP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HTTP</span><span class="p">(</span><span class="n">HTTPBase</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">,</span> <span class="n">Schema_HTTP</span><span class="p">],</span>
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Hypertext Transfer Protocol (HTTP/2).</span>
+<span class="w">    </span><span class="sd">"""This class implements Hypertext Transfer Protocol (HTTP/2).</span>
 
 <span class="sd">    This class currently supports parsing of the following HTTP/2 frames,</span>
 <span class="sd">    which are directly mapped to the :class:`pcapkit.const.http.frame.Frame`</span>
@@ -529,7 +529,7 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_continuation`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_continuation`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -541,18 +541,18 @@
     <span class="c1">#: such name not found, the value should then be a method that can parse the</span>
     <span class="c1">#: frame by itself.</span>
     <span class="n">__frame__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
         <span class="p">{</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">:</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span>                    <span class="c1"># DATA</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">HEADERS</span><span class="p">:</span> <span class="s1">&#39;headers&#39;</span><span class="p">,</span>              <span class="c1"># HEADERS</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">:</span> <span class="s1">&#39;priority&#39;</span><span class="p">,</span>            <span class="c1"># PRIORITY</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">RST_STREAM</span><span class="p">:</span> <span class="s1">&#39;rst_stream&#39;</span><span class="p">,</span>        <span class="c1"># RST_STREAM</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">:</span> <span class="s1">&#39;settings&#39;</span><span class="p">,</span>            <span class="c1"># SETTINGS</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PUSH_PROMISE</span><span class="p">:</span> <span class="s1">&#39;push_promise&#39;</span><span class="p">,</span>    <span class="c1"># PUSH_PROMISE</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">:</span> <span class="s1">&#39;ping&#39;</span><span class="p">,</span>                    <span class="c1"># PING</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">GOAWAY</span><span class="p">:</span> <span class="s1">&#39;goaway&#39;</span><span class="p">,</span>                <span class="c1"># GOAWAY</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">WINDOW_UPDATE</span><span class="p">:</span> <span class="s1">&#39;window_update&#39;</span><span class="p">,</span>  <span class="c1"># WINDOW_UPDATE</span>
-            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">CONTINUATION</span><span class="p">:</span> <span class="s1">&#39;continuation&#39;</span><span class="p">,</span>    <span class="c1"># CONTINUATION</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">:</span> <span class="s1">'data'</span><span class="p">,</span>                    <span class="c1"># DATA</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">HEADERS</span><span class="p">:</span> <span class="s1">'headers'</span><span class="p">,</span>              <span class="c1"># HEADERS</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">:</span> <span class="s1">'priority'</span><span class="p">,</span>            <span class="c1"># PRIORITY</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">RST_STREAM</span><span class="p">:</span> <span class="s1">'rst_stream'</span><span class="p">,</span>        <span class="c1"># RST_STREAM</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">:</span> <span class="s1">'settings'</span><span class="p">,</span>            <span class="c1"># SETTINGS</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PUSH_PROMISE</span><span class="p">:</span> <span class="s1">'push_promise'</span><span class="p">,</span>    <span class="c1"># PUSH_PROMISE</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">:</span> <span class="s1">'ping'</span><span class="p">,</span>                    <span class="c1"># PING</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">GOAWAY</span><span class="p">:</span> <span class="s1">'goaway'</span><span class="p">,</span>                <span class="c1"># GOAWAY</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">WINDOW_UPDATE</span><span class="p">:</span> <span class="s1">'window_update'</span><span class="p">,</span>  <span class="c1"># WINDOW_UPDATE</span>
+            <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">CONTINUATION</span><span class="p">:</span> <span class="s1">'continuation'</span><span class="p">,</span>    <span class="c1"># CONTINUATION</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Frame | int, str | tuple[FrameParser, FrameConstructor]]</span>
 
@@ -561,19 +561,19 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;HTTP/2&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of current protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;HTTP/2&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["HTTP/2"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Acronym of current protocol."""</span>
+        <span class="k">return</span> <span class="s1">'HTTP/2'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[9]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[9]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header length of current protocol."""</span>
         <span class="k">return</span> <span class="mi">9</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;2&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Version of current protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;2&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["2"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Version of current protocol."""</span>
+        <span class="k">return</span> <span class="s1">'2'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -581,8 +581,8 @@
 
 <div class="viewcode-block" id="HTTP.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HTTP&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Hypertext Transfer Protocol (HTTP/2).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HTTP'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read Hypertext Transfer Protocol (HTTP/2).</span>
 
 <span class="sd">        Structure of HTTP/2 packet [:rfc:`7540`]:</span>
 
@@ -608,20 +608,20 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">,</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">,</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__frame__</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_read_http_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;FrameParser&#39;</span><span class="p">,</span>
+            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_http_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'FrameParser'</span><span class="p">,</span>
                         <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_http_none</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -633,15 +633,15 @@
 <div class="viewcode-block" id="HTTP.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="c1"># type: ignore[override]</span>
-             <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Frame | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">,</span>
-             <span class="n">type_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-             <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
-             <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-             <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;bytes | Data_HTTP | Schema_FrameType | dict[str, Any]&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+             <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Frame | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">,</span>
+             <span class="n">type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+             <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
+             <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">frame</span><span class="p">:</span> <span class="s1">'bytes | Data_HTTP | Schema_FrameType | dict[str, Any]'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HTTP'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Type of HTTP/2 frame.</span>
@@ -656,8 +656,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">type_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Enum_Frame&#39;</span><span class="p">,</span>
+<span class="sd">        """</span>
+        <span class="n">type_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Frame'</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">type_namespace</span><span class="p">,</span>
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
@@ -667,8 +667,8 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Data_HTTP</span><span class="p">)):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__frame__</span><span class="p">[</span><span class="n">type_val</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_make_http_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;FrameConstructor&#39;</span><span class="p">,</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_http_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'FrameConstructor'</span><span class="p">,</span>
                             <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_http_none</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -682,18 +682,18 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span> <span class="o">+</span> <span class="mi">9</span>
             <span class="n">frame_val</span> <span class="o">=</span> <span class="n">frame</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">flags_val</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, int]</span>
         <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
-            <span class="n">flags_val</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bit_</span><span class="si">{</span><span class="n">bit</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="n">bit</span>
+            <span class="n">flags_val</span><span class="p">[</span><span class="sa">f</span><span class="s1">'bit_</span><span class="si">{</span><span class="n">bit</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="n">bit</span>
 
         <span class="k">return</span> <span class="n">Schema_HTTP</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">type_val</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">flags_val</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">stream</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="n">sid</span><span class="p">,</span>
+                <span class="s1">'sid'</span><span class="p">:</span> <span class="n">sid</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">frame</span><span class="o">=</span><span class="n">frame_val</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -702,29 +702,29 @@
 <div class="viewcode-block" id="HTTP.id">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.id">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;HTTP&quot;], Literal[&quot;HTTPv2&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Literal["HTTP"], Literal["HTTPv2"]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Index ID of the protocol.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;HTTPv2&#39;</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">'HTTPv2'</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
 <div class="viewcode-block" id="HTTP.register_frame">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.register_frame">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">register_frame</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Frame&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[FrameParser, FrameConstructor]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register a frame parser.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_frame</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Frame'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[FrameParser, FrameConstructor]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register a frame parser.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: HTTP frame type code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the frame.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__frame__</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] frame already registered&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] frame already registered'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__frame__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
 
@@ -732,8 +732,8 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[9]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total length of corresponding protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[9]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Total length of corresponding protocol."""</span>
         <span class="k">return</span> <span class="mi">9</span>
 
     <span class="c1">##########################################################################</span>
@@ -743,8 +743,8 @@
 <div class="viewcode-block" id="HTTP._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
@@ -752,21 +752,21 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="s1">&#39;flags&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">__value__</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span>
-            <span class="s1">&#39;frame&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+            <span class="s1">'length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s1">'flags'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">__value__</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s1">'sid'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span>
+            <span class="s1">'frame'</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
         <span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="HTTP._read_http_none">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_none">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_UnassignedFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UnassignedFrame&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP packet with unassigned type.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnassignedFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnassignedFrame'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read HTTP packet with unassigned type.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed frame schema.</span>
@@ -778,16 +778,16 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">):</span>
-            <span class="c1">#raise ProtocolError(f&#39;HTTP/2: [Type {frame}] invalid format&#39;)</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+            <span class="c1">#raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnassignedFrame</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -795,9 +795,9 @@
 
 <div class="viewcode-block" id="HTTP._read_http_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_DataFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_DataFrame&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``DATA`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_DataFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DataFrame'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``DATA`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``DATA`` frame [:rfc:`7540`]:</span>
 
@@ -827,13 +827,13 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">flag</span> <span class="o">=</span> <span class="n">Data_DataFrameFlags</span><span class="p">(</span>
-            <span class="n">END_STREAM</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_0&#39;</span><span class="p">]),</span>  <span class="c1"># bit 0</span>
-            <span class="n">PADDED</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_3&#39;</span><span class="p">]),</span>      <span class="c1"># bit 3</span>
+            <span class="n">END_STREAM</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_0'</span><span class="p">]),</span>  <span class="c1"># bit 0</span>
+            <span class="n">PADDED</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_3'</span><span class="p">]),</span>      <span class="c1"># bit 3</span>
         <span class="p">)</span>
         <span class="n">flag</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-            <span class="s1">&#39;__value__&#39;</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
+            <span class="s1">'__value__'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
         <span class="p">})</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_DataFrame</span><span class="p">(</span>
@@ -841,7 +841,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span>
             <span class="n">pad_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pad_len</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PADDED</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -849,9 +849,9 @@
 
 <div class="viewcode-block" id="HTTP._read_http_headers">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_headers">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_HeadersFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HeadersFrame&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``HEADERS`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HeadersFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HeadersFrame'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``HEADERS`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``HEADERS`` frame [:rfc:`7540`]:</span>
 
@@ -885,15 +885,15 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">flag</span> <span class="o">=</span> <span class="n">Data_HeadersFrameFlags</span><span class="p">(</span>
-            <span class="n">END_STREAM</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_0&#39;</span><span class="p">]),</span>   <span class="c1"># bit 0</span>
-            <span class="n">END_HEADERS</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_2&#39;</span><span class="p">]),</span>  <span class="c1"># bit 2</span>
-            <span class="n">PADDED</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_3&#39;</span><span class="p">]),</span>       <span class="c1"># bit 3</span>
-            <span class="n">PRIORITY</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_5&#39;</span><span class="p">]),</span>     <span class="c1"># bit 5</span>
+            <span class="n">END_STREAM</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_0'</span><span class="p">]),</span>   <span class="c1"># bit 0</span>
+            <span class="n">END_HEADERS</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_2'</span><span class="p">]),</span>  <span class="c1"># bit 2</span>
+            <span class="n">PADDED</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_3'</span><span class="p">]),</span>       <span class="c1"># bit 3</span>
+            <span class="n">PRIORITY</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_5'</span><span class="p">]),</span>     <span class="c1"># bit 5</span>
         <span class="p">)</span>
         <span class="n">flag</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-            <span class="s1">&#39;__value__&#39;</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
+            <span class="s1">'__value__'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
         <span class="p">})</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HeadersFrame</span><span class="p">(</span>
@@ -901,9 +901,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span>
             <span class="n">pad_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pad_len</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PADDED</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
-            <span class="n">excl_dependency</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">stream_dep</span><span class="p">[</span><span class="s1">&#39;exclusive&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PRIORITY</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">stream_dependency</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream_dep</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PRIORITY</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
+            <span class="n">excl_dependency</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">stream_dep</span><span class="p">[</span><span class="s1">'exclusive'</span><span class="p">])</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PRIORITY</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">stream_dependency</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream_dep</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PRIORITY</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">weight</span><span class="o">=</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">weight</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PRIORITY</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">fragment</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fragment</span><span class="p">,</span>
         <span class="p">)</span>
@@ -912,9 +912,9 @@
 
 <div class="viewcode-block" id="HTTP._read_http_priority">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_priority">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PriorityFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                            <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PriorityFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PRIORITY`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_PriorityFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_PriorityFrame'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``PRIORITY`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``PRIORITY`` frame [:rfc:`7540`]:</span>
 
@@ -942,17 +942,17 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PriorityFrame</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
-            <span class="n">excl_dependency</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;exclusive&#39;</span><span class="p">]),</span>
-            <span class="n">stream_dependency</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
+            <span class="n">excl_dependency</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'exclusive'</span><span class="p">]),</span>
+            <span class="n">stream_dependency</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">weight</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">weight</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -960,9 +960,9 @@
 
 <div class="viewcode-block" id="HTTP._read_http_rst_stream">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_rst_stream">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_RSTStreamFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                              <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_RSTStreamFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``RST_STREAM`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RSTStreamFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                              <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RSTStreamFrame'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``RST_STREAM`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``RST_STREAM`` frame [:rfc:`7540`]:</span>
 
@@ -988,15 +988,15 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">13</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_RSTStreamFrame</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">error</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -1004,9 +1004,9 @@
 
 <div class="viewcode-block" id="HTTP._read_http_settings">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_settings">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_SettingsFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                            <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_SettingsFrame&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``SETTINGS`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SettingsFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_SettingsFrame'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``SETTINGS`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``SETTINGS`` frame [:rfc:`7540`]:</span>
 
@@ -1035,19 +1035,19 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">9</span><span class="p">)</span> <span class="o">%</span> <span class="mi">6</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">9</span><span class="p">)</span> <span class="o">%</span> <span class="mi">6</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">flag</span> <span class="o">=</span> <span class="n">Data_SettingsFrameFlags</span><span class="p">(</span>
-            <span class="n">ACK</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_0&#39;</span><span class="p">]),</span>  <span class="c1"># bit 0</span>
+            <span class="n">ACK</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_0'</span><span class="p">]),</span>  <span class="c1"># bit 0</span>
         <span class="p">)</span>
         <span class="n">flag</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-            <span class="s1">&#39;__value__&#39;</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
+            <span class="s1">'__value__'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
         <span class="p">})</span>
 
         <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">ACK</span> <span class="ow">and</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">9</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">sets</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[Enum_Setting, int]</span>
         <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
@@ -1057,7 +1057,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">settings</span><span class="o">=</span><span class="n">sets</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -1065,9 +1065,9 @@
 
 <div class="viewcode-block" id="HTTP._read_http_push_promise">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_push_promise">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_push_promise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PushPromiseFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PushPromiseFrame&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PUSH_PROMISE`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_push_promise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_PushPromiseFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_PushPromiseFrame'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``PUSH_PROMISE`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``PUSH_PROMISE`` frame [:rfc:`7540`]:</span>
 
@@ -1099,25 +1099,25 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">13</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">flag</span> <span class="o">=</span> <span class="n">Data_PushPromiseFrameFlags</span><span class="p">(</span>
-            <span class="n">END_HEADERS</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_2&#39;</span><span class="p">]),</span>  <span class="c1"># bit 2</span>
-            <span class="n">PADDED</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_3&#39;</span><span class="p">]),</span>       <span class="c1"># bit 3</span>
+            <span class="n">END_HEADERS</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_2'</span><span class="p">]),</span>  <span class="c1"># bit 2</span>
+            <span class="n">PADDED</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_3'</span><span class="p">]),</span>       <span class="c1"># bit 3</span>
         <span class="p">)</span>
         <span class="n">flag</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-            <span class="s1">&#39;__value__&#39;</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
+            <span class="s1">'__value__'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
         <span class="p">})</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PushPromiseFrame</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">pad_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pad_len</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PADDED</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="n">promised_sid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">promised_sid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">fragment</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fragment</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -1126,9 +1126,9 @@
 
 <div class="viewcode-block" id="HTTP._read_http_ping">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_ping">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PingFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PingFrame&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PING`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_PingFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_PingFrame'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``PING`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``PING`` frame [:rfc:`7540`]:</span>
 
@@ -1156,22 +1156,22 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">17</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">flag</span> <span class="o">=</span> <span class="n">Data_PingFrameFlags</span><span class="p">(</span>
-            <span class="n">ACK</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_0&#39;</span><span class="p">]),</span>  <span class="c1"># bit 0</span>
+            <span class="n">ACK</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_0'</span><span class="p">]),</span>  <span class="c1"># bit 0</span>
         <span class="p">)</span>
         <span class="n">flag</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-            <span class="s1">&#39;__value__&#39;</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
+            <span class="s1">'__value__'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
         <span class="p">})</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PingFrame</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -1179,9 +1179,9 @@
 
 <div class="viewcode-block" id="HTTP._read_http_goaway">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_goaway">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_GoawayFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_GoawayFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``GOAWAY`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_GoawayFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_GoawayFrame'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``GOAWAY`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``GOAWAY`` frame [:rfc:`7540`]:</span>
 
@@ -1211,13 +1211,13 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_GoawayFrame</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
-            <span class="n">last_sid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
+            <span class="n">last_sid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">error</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
             <span class="n">debug_data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">debug</span><span class="p">,</span>
         <span class="p">)</span>
@@ -1226,9 +1226,9 @@
 
 <div class="viewcode-block" id="HTTP._read_http_window_update">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_window_update">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_window_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_WindowUpdateFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                 <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_WindowUpdateFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``WINDOW_UPDATE`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_window_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_WindowUpdateFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                 <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_WindowUpdateFrame'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``WINDOW_UPDATE`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``WINDOW_UPDATE`` frame [:rfc:`7540`]:</span>
 
@@ -1254,25 +1254,25 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">13</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_WindowUpdateFrame</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
-            <span class="n">increment</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="s1">&#39;incr&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
+            <span class="n">increment</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="s1">'incr'</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="HTTP._read_http_continuation">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_continuation">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_ContinuationFrame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_HTTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_ContinuationFrame&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``CONTINUATION`` frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ContinuationFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_HTTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ContinuationFrame'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read HTTP/2 ``CONTINUATION`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``CONTINUATION`` frame [:rfc:`7540`]:</span>
 
@@ -1298,19 +1298,19 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">flag</span> <span class="o">=</span> <span class="n">Data_ContinuationFrameFlags</span><span class="p">(</span>
-            <span class="n">END_HEADERS</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;bit_2&#39;</span><span class="p">]),</span>  <span class="c1"># bit 2</span>
+            <span class="n">END_HEADERS</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'bit_2'</span><span class="p">]),</span>  <span class="c1"># bit 2</span>
         <span class="p">)</span>
         <span class="n">flag</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-            <span class="s1">&#39;__value__&#39;</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
+            <span class="s1">'__value__'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
         <span class="p">})</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ContinuationFrame</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span>
-            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">&#39;sid&#39;</span><span class="p">],</span>
+            <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">fragment</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fragment</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -1318,10 +1318,10 @@
 
 <div class="viewcode-block" id="HTTP._make_http_none">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_none">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_UnassignedFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_UnassignedFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 unassigned frame type.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_UnassignedFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_UnassignedFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 unassigned frame type.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1331,7 +1331,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">data</span>
 
@@ -1342,12 +1342,12 @@
 
 <div class="viewcode-block" id="HTTP._make_http_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_DataFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">end_stream</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                        <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_DataFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``DATA`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_DataFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">end_stream</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_DataFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``DATA`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1358,7 +1358,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">pad_len</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">data</span>
@@ -1377,16 +1377,16 @@
 
 <div class="viewcode-block" id="HTTP._make_http_headers">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_headers">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_HeadersFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">end_stream</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                           <span class="n">end_headers</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                           <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                           <span class="n">excl_dep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                           <span class="n">sid_dep</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                           <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_HeadersFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``HEADERS`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_HeadersFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">end_stream</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                           <span class="n">end_headers</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                           <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                           <span class="n">excl_dep</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                           <span class="n">sid_dep</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                           <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_HeadersFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``HEADERS`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1401,7 +1401,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">priority</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">PRIORITY</span>
             <span class="n">end_headers</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">END_HEADERS</span>
@@ -1429,8 +1429,8 @@
         <span class="k">return</span> <span class="n">Schema_HeadersFrame</span><span class="p">(</span>
             <span class="n">pad_len</span><span class="o">=</span><span class="n">pad_len</span><span class="p">,</span>
             <span class="n">stream_dep</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;exclusive&#39;</span><span class="p">:</span> <span class="n">excl_dep</span><span class="p">,</span>
-                <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="n">sid_dep</span><span class="p">,</span>
+                <span class="s1">'exclusive'</span><span class="p">:</span> <span class="n">excl_dep</span><span class="p">,</span>
+                <span class="s1">'sid'</span><span class="p">:</span> <span class="n">sid_dep</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">weight</span><span class="o">=</span><span class="n">weight</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">weight</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span>
@@ -1439,12 +1439,12 @@
 
 <div class="viewcode-block" id="HTTP._make_http_priority">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_priority">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PriorityFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                            <span class="n">sid_dep</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                            <span class="n">excl_dep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                            <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_PriorityFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``PRIORITY`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_PriorityFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">sid_dep</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">excl_dep</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_PriorityFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``PRIORITY`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1456,7 +1456,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">excl_dep</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">excl_dependency</span>
             <span class="n">sid_dep</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">stream_dependency</span>
@@ -1464,8 +1464,8 @@
 
         <span class="k">return</span> <span class="n">Schema_PriorityFrame</span><span class="p">(</span>
             <span class="n">stream</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;exclusive&#39;</span><span class="p">:</span> <span class="n">excl_dep</span><span class="p">,</span>
-                <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="n">sid_dep</span><span class="p">,</span>
+                <span class="s1">'exclusive'</span><span class="p">:</span> <span class="n">excl_dep</span><span class="p">,</span>
+                <span class="s1">'sid'</span><span class="p">:</span> <span class="n">sid_dep</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">weight</span><span class="o">=</span><span class="n">weight</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">weight</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
         <span class="p">),</span> <span class="n">Schema_PriorityFrame</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
@@ -1473,13 +1473,13 @@
 
 <div class="viewcode-block" id="HTTP._make_http_rst_stream">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_rst_stream">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_RSTStreamFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                              <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;Enum_ErrorCode | str | int | StdlibEnum | AenumEnum&#39;</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">HTTP_1_1_REQUIRED</span><span class="p">,</span>
-                              <span class="n">error_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                              <span class="n">error_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-                              <span class="n">error_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_RSTStreamFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``RST_STREAM`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_RSTStreamFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                              <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum'</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">HTTP_1_1_REQUIRED</span><span class="p">,</span>
+                              <span class="n">error_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="n">error_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                              <span class="n">error_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_RSTStreamFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``RST_STREAM`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1489,7 +1489,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">error_val</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">error</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1503,11 +1503,11 @@
 
 <div class="viewcode-block" id="HTTP._make_http_settings">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_settings">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_SettingsFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                            <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                            <span class="n">settings</span><span class="p">:</span> <span class="s1">&#39;Optional[OrderedMultiDict[Enum_Setting, int] | bytes | list[Schema_SettingPair | tuple[Enum_Setting, int]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_SettingsFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``SETTINGS`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_SettingsFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="n">settings</span><span class="p">:</span> <span class="s1">'Optional[OrderedMultiDict[Enum_Setting, int] | bytes | list[Schema_SettingPair | tuple[Enum_Setting, int]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_SettingsFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``SETTINGS`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1518,7 +1518,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ack</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">ACK</span>
             <span class="n">settings</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">settings</span>
@@ -1549,7 +1549,7 @@
                     <span class="p">)</span>
                 <span class="n">settings_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HTTP/2 : [Type </span><span class="si">{</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="si">}</span><span class="s1">] invalid settings&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2 : [Type </span><span class="si">{</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="si">}</span><span class="s1">] invalid settings'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_SettingsFrame</span><span class="p">(</span>
             <span class="n">settings</span><span class="o">=</span><span class="n">settings_val</span><span class="p">,</span>
@@ -1558,13 +1558,13 @@
 
 <div class="viewcode-block" id="HTTP._make_http_push_promise">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_push_promise">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_push_promise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PushPromiseFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                <span class="n">end_headers</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                                <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                                <span class="n">promised_sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                                <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_PushPromiseFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``PUSH_PROMISE`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_push_promise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_PushPromiseFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                <span class="n">end_headers</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                <span class="n">promised_sid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_PushPromiseFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``PUSH_PROMISE`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1577,7 +1577,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">end_headers</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">END_HEADERS</span>
             <span class="n">pad_len</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span>
@@ -1593,7 +1593,7 @@
         <span class="k">return</span> <span class="n">Schema_PushPromiseFrame</span><span class="p">(</span>
             <span class="n">pad_len</span><span class="o">=</span><span class="n">pad_len</span><span class="p">,</span>
             <span class="n">stream</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="n">promised_sid</span><span class="p">,</span>
+                <span class="s1">'sid'</span><span class="p">:</span> <span class="n">promised_sid</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span>
         <span class="p">),</span> <span class="n">flags</span></div>
@@ -1601,11 +1601,11 @@
 
 <div class="viewcode-block" id="HTTP._make_http_ping">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_ping">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PingFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="n">opaque_data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_PingFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``PING`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_PingFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">opaque_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_PingFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``PING`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1616,7 +1616,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ack</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">ACK</span>
             <span class="n">opaque_data</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">data</span>
@@ -1632,15 +1632,15 @@
 
 <div class="viewcode-block" id="HTTP._make_http_goaway">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_goaway">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_GoawayFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">last_sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                          <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;Enum_ErrorCode | str | int | StdlibEnum | AenumEnum&#39;</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">HTTP_1_1_REQUIRED</span><span class="p">,</span>
-                          <span class="n">error_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">error_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-                          <span class="n">error_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">debug_data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_GoawayFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``GOAWAY`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_GoawayFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">last_sid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                          <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum'</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">HTTP_1_1_REQUIRED</span><span class="p">,</span>
+                          <span class="n">error_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">error_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                          <span class="n">error_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">debug_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_GoawayFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``GOAWAY`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1655,7 +1655,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">last_sid</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">last_sid</span>
             <span class="n">error_val</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">error</span>
@@ -1666,7 +1666,7 @@
 
         <span class="k">return</span> <span class="n">Schema_GoawayFrame</span><span class="p">(</span>
             <span class="n">stream</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="n">last_sid</span><span class="p">,</span>
+                <span class="s1">'sid'</span><span class="p">:</span> <span class="n">last_sid</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">error</span><span class="o">=</span><span class="n">error_val</span><span class="p">,</span>
             <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
@@ -1675,10 +1675,10 @@
 
 <div class="viewcode-block" id="HTTP._make_http_window_update">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_window_update">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_window_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_WindowUpdateFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                 <span class="n">incr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_WindowUpdateFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``WINDOW_UPDATE`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_window_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_WindowUpdateFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                 <span class="n">incr</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_WindowUpdateFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``WINDOW_UPDATE`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1688,24 +1688,24 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">incr</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">increment</span>
 
         <span class="k">return</span> <span class="n">Schema_WindowUpdateFrame</span><span class="p">(</span>
             <span class="n">size</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;incr&#39;</span><span class="p">:</span> <span class="n">incr</span><span class="p">,</span>
+                <span class="s1">'incr'</span><span class="p">:</span> <span class="n">incr</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="p">),</span> <span class="n">Schema_WindowUpdateFrame</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP._make_http_continuation">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_continuation">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_ContinuationFrame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                <span class="n">end_headers</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                                <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Schema_ContinuationFrame, Flags]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make HTTP/2 ``CONTINUATION`` frame.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_ContinuationFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                <span class="n">end_headers</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_ContinuationFrame, Flags]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HTTP/2 ``CONTINUATION`` frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
@@ -1716,7 +1716,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">end_headers</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">END_HEADERS</span>
             <span class="n">fragment</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">fragment</span>

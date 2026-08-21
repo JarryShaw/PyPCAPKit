@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.reassembly.data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data models for reassembly&quot;&quot;&quot;</span>
+<span class="sd">"""data models for reassembly"""</span>
 
 <span class="c1"># IP reassembly</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Buffer</span> <span class="k">as</span> <span class="n">IP_Buffer</span>
@@ -411,11 +411,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;IP_Packet&#39;</span><span class="p">,</span> <span class="s1">&#39;IP_DatagramID&#39;</span><span class="p">,</span> <span class="s1">&#39;IP_Datagram&#39;</span><span class="p">,</span> <span class="s1">&#39;IP_Buffer&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;IP_BufferID&#39;</span><span class="p">,</span>
+    <span class="s1">'IP_Packet'</span><span class="p">,</span> <span class="s1">'IP_DatagramID'</span><span class="p">,</span> <span class="s1">'IP_Datagram'</span><span class="p">,</span> <span class="s1">'IP_Buffer'</span><span class="p">,</span>
+    <span class="s1">'IP_BufferID'</span><span class="p">,</span>
 
-    <span class="s1">&#39;TCP_Packet&#39;</span><span class="p">,</span> <span class="s1">&#39;TCP_DatagramID&#39;</span><span class="p">,</span> <span class="s1">&#39;TCP_Datagram&#39;</span><span class="p">,</span> <span class="s1">&#39;TCP_Buffer&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;TCP_Fragment&#39;</span><span class="p">,</span> <span class="s1">&#39;TCP_HoleDiscriptor&#39;</span><span class="p">,</span> <span class="s1">&#39;TCP_BufferID&#39;</span><span class="p">,</span>
+    <span class="s1">'TCP_Packet'</span><span class="p">,</span> <span class="s1">'TCP_DatagramID'</span><span class="p">,</span> <span class="s1">'TCP_Datagram'</span><span class="p">,</span> <span class="s1">'TCP_Buffer'</span><span class="p">,</span>
+    <span class="s1">'TCP_Fragment'</span><span class="p">,</span> <span class="s1">'TCP_HoleDiscriptor'</span><span class="p">,</span> <span class="s1">'TCP_BufferID'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -430,17 +430,17 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.ReassemblyData">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ReassemblyData</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data storage for reassembly.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data storage for reassembly."""</span>
 
     <span class="c1">#: IPv4 reassembled data.</span>
-    <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;tuple[IP_Datagram, ...]&#39;</span>
+    <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'tuple[IP_Datagram, ...]'</span>
     <span class="c1">#: IPv6 reassembled data.</span>
-    <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;tuple[IP_Datagram, ...]&#39;</span>
+    <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'tuple[IP_Datagram, ...]'</span>
     <span class="c1">#: TCP reassembled data.</span>
-    <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;tuple[TCP_Datagram, ...]&#39;</span>
+    <span class="n">tcp</span><span class="p">:</span> <span class="s1">'tuple[TCP_Datagram, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[IP_Datagram, ...]]&#39;</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[IP_Datagram, ...]]&#39;</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[TCP_Datagram, ...]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'Optional[tuple[IP_Datagram, ...]]'</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'Optional[tuple[IP_Datagram, ...]]'</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'Optional[tuple[TCP_Datagram, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 </pre></div>
         </article>

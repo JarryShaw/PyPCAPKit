@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.schema.schema</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;schema for protocol headers&quot;&quot;&quot;</span>
+<span class="sd">"""schema for protocol headers"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
@@ -419,17 +419,17 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="s1">&#39;EnumSchema&#39;</span><span class="p">,</span> <span class="s1">&#39;schema_final&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Schema'</span><span class="p">,</span> <span class="s1">'EnumSchema'</span><span class="p">,</span> <span class="s1">'schema_final'</span><span class="p">]</span>
 
-<span class="n">_VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_VT&#39;</span><span class="p">)</span>
-<span class="n">_ET</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_ET&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Enum&#39;</span><span class="p">)</span>
-<span class="n">_ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_ST&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Type[Schema]&#39;</span><span class="p">)</span>
+<span class="n">_VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_VT'</span><span class="p">)</span>
+<span class="n">_ET</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_ET'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Enum'</span><span class="p">)</span>
+<span class="n">_ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_ST'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Type[Schema]'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="schema_final">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.schema_final">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">schema_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">&#39;_ST&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_finalised</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_ST&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finalise schema class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">schema_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'_ST'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_finalised</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_ST'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Finalise schema class.</span>
 
 <span class="sd">    This decorator function is used to generate necessary</span>
 <span class="sd">    attributes and methods for the decorated :class:`Schema`</span>
@@ -449,53 +449,53 @@
 <span class="sd">        Finalised schema class.</span>
 
 <span class="sd">    :meta decorator:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">FINAL</span><span class="p">:</span>
-        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: schema has been finalised; now skipping&#39;</span><span class="p">,</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: schema has been finalised; now skipping'</span><span class="p">,</span>
              <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="bp">cls</span>
 
-    <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__map__&#39;</span><span class="p">,</span> <span class="s1">&#39;__map_reverse__&#39;</span><span class="p">,</span> <span class="s1">&#39;__builtin__&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;__fields__&#39;</span><span class="p">,</span> <span class="s1">&#39;__buffer__&#39;</span><span class="p">,</span> <span class="s1">&#39;__updated__&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;__payload__&#39;</span><span class="p">,</span> <span class="s1">&#39;__finalised__&#39;</span><span class="p">]</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__map__'</span><span class="p">,</span> <span class="s1">'__map_reverse__'</span><span class="p">,</span> <span class="s1">'__builtin__'</span><span class="p">,</span>
+            <span class="s1">'__fields__'</span><span class="p">,</span> <span class="s1">'__buffer__'</span><span class="p">,</span> <span class="s1">'__updated__'</span><span class="p">,</span>
+            <span class="s1">'__payload__'</span><span class="p">,</span> <span class="s1">'__finalised__'</span><span class="p">]</span>
     <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
         <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">if</span> <span class="n">el</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">__excluded__</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">)</span>
 
-    <span class="n">args_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=NoValue&#39;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
-    <span class="n">dict_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
+    <span class="n">args_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=NoValue'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
+    <span class="n">dict_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
 
     <span class="c1"># NOTE: We shall only attempt to generate ``__init__`` method</span>
     <span class="c1"># if the class does not define such method.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__init__&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'__init__'</span><span class="p">):</span>
         <span class="c1"># NOTE: We only generate typed ``__init__`` method if only the class</span>
         <span class="c1"># has field definition from any of itself and its base classes.</span>
         <span class="k">if</span> <span class="n">args_</span><span class="p">:</span>
             <span class="c1"># NOTE: The following code is to make the ``__init__`` method work.</span>
             <span class="c1"># It is inspired from the :func:`dataclasses._create_fn` function.</span>
             <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;    def __init__(self, </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">, *, __packet__=None):</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;        self.__update__(</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;        self.__post_init__(__packet__)</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">'def __create_fn__():</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="sa">f</span><span class="s1">'    def __init__(self, </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">, *, __packet__=None):</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="sa">f</span><span class="s1">'        self.__update__(</span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="sa">f</span><span class="s1">'        self.__post_init__(__packet__)</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="sa">f</span><span class="s1">'    return __init__</span><span class="se">\n</span><span class="s1">'</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="s1">&#39;    def __init__(self, dict_=None, *, __packet__=None, **kwargs):</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="s1">&#39;        self.__update__(dict_, **kwargs)</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="s1">&#39;        self.__post_init__(__packet__)</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">'def __create_fn__():</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="s1">'    def __init__(self, dict_=None, *, __packet__=None, **kwargs):</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="s1">'        self.__update__(dict_, **kwargs)</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="s1">'        self.__post_init__(__packet__)</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="s1">'    return __init__</span><span class="se">\n</span><span class="s1">'</span>
             <span class="p">)</span>
 
         <span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
         <span class="n">exec</span><span class="p">(</span><span class="n">init_</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>  <span class="c1"># pylint: disable=exec-used # nosec</span>
 
-        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;__create_fn__&#39;</span><span class="p">]()</span>  <span class="c1"># type: ignore[misc]</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__&#39;</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="s1">'__create_fn__'</span><span class="p">]()</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__'</span>  <span class="c1"># type: ignore[misc]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_finalised</span><span class="p">:</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">BASE</span>
@@ -509,7 +509,7 @@
 <div class="viewcode-block" id="SchemaMeta">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.SchemaMeta">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SchemaMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support to :class:`Schema`.</span>
+<span class="w">    </span><span class="sd">"""Meta class to add dynamic support to :class:`Schema`.</span>
 
 <span class="sd">    This meta class is used to generate necessary attributes for the</span>
 <span class="sd">    :class:`Schema` class. It can be useful to reduce runtime generation</span>
@@ -552,23 +552,23 @@
 <span class="sd">         .. code-block:: python</span>
 
 <span class="sd">            class A(Schema):</span>
-<span class="sd">                __additional__ = [&#39;a&#39;, &#39;b&#39;]</span>
+<span class="sd">                __additional__ = ['a', 'b']</span>
 
 <span class="sd">            class B(A):</span>
-<span class="sd">                __additional__ = [&#39;c&#39;, &#39;d&#39;]</span>
+<span class="sd">                __additional__ = ['c', 'd']</span>
 
 <span class="sd">            class C(B):</span>
-<span class="sd">                __additional__ = [&#39;e&#39;, &#39;f&#39;]</span>
+<span class="sd">                __additional__ = ['e', 'f']</span>
 
-<span class="sd">            print(A.__additional__)  # [&#39;a&#39;, &#39;b&#39;]</span>
-<span class="sd">            print(B.__additional__)  # [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;]</span>
-<span class="sd">            print(C.__additional__)  # [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;f&#39;]</span>
+<span class="sd">            print(A.__additional__)  # ['a', 'b']</span>
+<span class="sd">            print(B.__additional__)  # ['a', 'b', 'c', 'd']</span>
+<span class="sd">            print(C.__additional__)  # ['a', 'b', 'c', 'd', 'e', 'f']</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__prepare__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">&#39;tuple[type, ...]&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Mapping[str, object]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the namespace for the schema class.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__prepare__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">'tuple[type, ...]'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Mapping[str, object]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Prepare the namespace for the schema class.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name: Name of the schema class.</span>
@@ -578,15 +578,15 @@
 <span class="sd">        This method is used to create the initial field dictionary</span>
 <span class="sd">        :attr:`~Schema.__fields__` for the schema class.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__fields__&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">'__fields__'</span><span class="p">):</span>
                 <span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">__fields__</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">&#39;tuple[type, ...]&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Schema]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the schema class.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">'tuple[type, ...]'</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Schema]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the schema class.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name: Schema class name.</span>
@@ -598,17 +598,17 @@
 <span class="sd">        :attr:`~Schema.__excluded__` fields from the base classes, as well as</span>
 <span class="sd">        populating both fields from the subclass attributes.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s1">&#39;__additional__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
-            <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__additional__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="s1">&#39;__excluded__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
-            <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="s1">'__additional__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s1">'__additional__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s1">'__excluded__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__additional__&#39;</span><span class="p">):</span>
-                <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__additional__&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__additional__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__additional__&#39;</span><span class="p">])</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__excluded__&#39;</span><span class="p">):</span>
-                <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__excluded__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">'__additional__'</span><span class="p">):</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s1">'__additional__'</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__additional__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">'__additional__'</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">'__excluded__'</span><span class="p">):</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__excluded__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">])</span>
 
         <span class="c1"># NOTE: for unknown reason, the following code will cause an error</span>
         <span class="c1"># for duplicated keyword arguments in class definition.</span>
@@ -621,48 +621,48 @@
 <div class="viewcode-block" id="Schema">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Schema</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_VT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">SchemaMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for protocol headers.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Schema for protocol headers."""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Mapping of name conflicts with builtin methods (original names to</span>
         <span class="c1">#: transformed names).</span>
-        <span class="n">__map__</span><span class="p">:</span> <span class="s1">&#39;dict[str, str]&#39;</span>
+        <span class="n">__map__</span><span class="p">:</span> <span class="s1">'dict[str, str]'</span>
         <span class="c1">#: Mapping of name conflicts with builtin methods (transformed names to</span>
         <span class="c1">#: original names).</span>
-        <span class="n">__map_reverse__</span><span class="p">:</span> <span class="s1">&#39;dict[str, str]&#39;</span>
+        <span class="n">__map_reverse__</span><span class="p">:</span> <span class="s1">'dict[str, str]'</span>
         <span class="c1">#: List of builtin methods.</span>
-        <span class="n">__builtin__</span><span class="p">:</span> <span class="s1">&#39;set[str]&#39;</span>
+        <span class="n">__builtin__</span><span class="p">:</span> <span class="s1">'set[str]'</span>
         <span class="c1">#: Mapping of fields.</span>
-        <span class="n">__fields__</span><span class="p">:</span> <span class="s1">&#39;OrderedDict[str, FieldBase]&#39;</span>
+        <span class="n">__fields__</span><span class="p">:</span> <span class="s1">'OrderedDict[str, FieldBase]'</span>
         <span class="c1">#: Mapping of field names to packed values.</span>
-        <span class="n">__buffer__</span><span class="p">:</span> <span class="s1">&#39;dict[str, bytes]&#39;</span>
+        <span class="n">__buffer__</span><span class="p">:</span> <span class="s1">'dict[str, bytes]'</span>
         <span class="c1">#: Flag for whether the schema is recently updated.</span>
-        <span class="n">__updated__</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="n">__updated__</span><span class="p">:</span> <span class="s1">'bool'</span>
 
     <span class="c1">#: Flag for finalised class initialisation.</span>
-    <span class="n">__finalised__</span><span class="p">:</span> <span class="s1">&#39;FinalisedState&#39;</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">__finalised__</span><span class="p">:</span> <span class="s1">'FinalisedState'</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span>
 
     <span class="c1">#: Field name of the payload.</span>
-    <span class="n">__payload__</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;payload&#39;</span>
+    <span class="n">__payload__</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="s1">'payload'</span>
     <span class="c1">#: List of additional built-in names.</span>
-    <span class="n">__additional__</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">__additional__</span><span class="p">:</span> <span class="s1">'list[str]'</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1">#: List of names to be excluded from :obj:`dict` conversion.</span>
-    <span class="n">__excluded__</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">__excluded__</span><span class="p">:</span> <span class="s1">'list[str]'</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="Schema.__new__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.__new__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new instance.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Create a new instance.</span>
 
 <span class="sd">        The class will try to automatically generate ``__init__`` method with</span>
-<span class="sd">        the same signature as specified in class variables&#39; type annotations,</span>
+<span class="sd">        the same signature as specified in class variables' type annotations,</span>
 <span class="sd">        which is inspired by :pep:`557` (:mod:`dataclasses`).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
             <span class="bp">cls</span> <span class="o">=</span> <span class="n">schema_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_finalised</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -670,26 +670,26 @@
         <span class="c1"># NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes</span>
         <span class="c1"># here under ``self`` to avoid them being considered as class variables</span>
         <span class="c1"># and thus being shared by all instances.</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__map__&#39;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__map_reverse__&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__map__'</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__map_reverse__'</span><span class="p">,</span> <span class="p">{})</span>
 
         <span class="c1"># NOTE: We only create the attributes for the instance itself,</span>
         <span class="c1"># to avoid creating shared attributes for the class.</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__buffer__&#39;</span><span class="p">,</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">keys</span><span class="p">()})</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__updated__&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__buffer__'</span><span class="p">,</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">keys</span><span class="p">()})</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__updated__'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">NoValue</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="c1"># NOTE: Keys with the same names as the class&#39;s builtin methods will be</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="c1"># NOTE: Keys with the same names as the class's builtin methods will be</span>
         <span class="c1"># renamed with the class name prefixed as mangled class variables</span>
         <span class="c1"># implicitly and internally. Such mapping information will be stored</span>
         <span class="c1"># within: attr: `__map__` attribute.</span>
@@ -705,11 +705,11 @@
 
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_iter</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">:</span>
-                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s1"> is not a valid field name&#39;</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">)</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s1"> is not a valid field name'</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">:</span>
-                <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span>
 
                 <span class="c1"># NOTE: We keep record of the mapping bidirectionally.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_key</span>
@@ -718,32 +718,32 @@
                 <span class="n">key</span> <span class="o">=</span> <span class="n">new_key</span>
 
             <span class="c1"># if key in self.__dict__:</span>
-            <span class="c1">#     raise KeyExists(f&#39;{key!r} already exists&#39;)</span>
+            <span class="c1">#     raise KeyExists(f'{key!r} already exists')</span>
 
-            <span class="c1"># NOTE: We don&#39;t rewrite the key names here, just keep the</span>
+            <span class="c1"># NOTE: We don't rewrite the key names here, just keep the</span>
             <span class="c1"># original ones, even though they might break on the ``.``</span>
             <span class="c1"># (:obj:`getattr`) operator.</span>
 
             <span class="c1"># if isinstance(key, str):</span>
-            <span class="c1">#     key = re.sub(r&#39;\W&#39;, &#39;_&#39;, key)</span>
+            <span class="c1">#     key = re.sub(r'\W', '_', key)</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="fm">__init__</span> <span class="o">=</span> <span class="n">__update__</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">:</span>
                 <span class="k">continue</span>
 
             <span class="n">out_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-            <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">out_key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s1">)&#39;</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">out_key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s1">)'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">:</span>
@@ -751,13 +751,13 @@
 
             <span class="n">out_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
-                <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">out_key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(...)&#39;</span><span class="p">)</span>
+                <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">out_key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(...)'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">out_key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s1">)&#39;</span>
+                <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">out_key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s1">)'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__bytes__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__bytes__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__updated__</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
 
@@ -765,24 +765,24 @@
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
             <span class="n">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__bytes__</span><span class="p">())</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterator[str]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[str]'</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_VT&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_VT'</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
@@ -790,7 +790,7 @@
             <span class="k">return</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -801,9 +801,9 @@
 <div class="viewcode-block" id="Schema.from_dict">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.from_dict">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;_VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a new instance.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Create a new instance.</span>
 
 <span class="sd">        * If ``dict_`` is present and has a ``.keys()`` method, then does:</span>
 <span class="sd">          ``for k in dict_: self[k] = dict_[k]``.</span>
@@ -816,7 +816,7 @@
 <span class="sd">            dict\_: Source data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">()</span>
@@ -825,17 +825,17 @@
 
 <div class="viewcode-block" id="Schema.to_dict">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.to_dict">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, _VT]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert :class:`Schema` into :obj:`dict`.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, _VT]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Convert :class:`Schema` into :obj:`dict`.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            We only convert nested :class:`Schema` objects into :obj:`dict` if</span>
-<span class="sd">            they are the direct value of the :class:`Schema` object&#39;s attribute.</span>
+<span class="sd">            they are the direct value of the :class:`Schema` object's attribute.</span>
 <span class="sd">            Should such :class:`Schema` objects be nested within other data,</span>
 <span class="sd">            types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we</span>
 <span class="sd">            shall not convert them into :obj:`dict` and remain them intact.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">dict_</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">:</span>
@@ -851,15 +851,15 @@
 
 <div class="viewcode-block" id="Schema.to_bytes">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.to_bytes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert :class:`Schema` into :obj:`bytes`.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Convert :class:`Schema` into :obj:`bytes`."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__bytes__</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Schema.get_payload">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.get_payload">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get payload of :class:`Schema`.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Get payload of :class:`Schema`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name: Name of the payload field.</span>
@@ -867,22 +867,22 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Payload of :class:`Schema` as :obj:`bytes`.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__payload__</span>
 
         <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown field: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown field: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;not a payload field: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">'not a payload field: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="Schema.pack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.pack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pack :class:`Schema` into :obj:`bytes`.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Pack :class:`Schema` into :obj:`bytes`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Packet data.</span>
@@ -899,15 +899,15 @@
 <span class="sd">            If you want to pack the packet with the correct length,</span>
 <span class="sd">            please provide the ``__length__`` value before packing.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pre_unpack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="s1">&#39;__length__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-            <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># reasonable default value</span>
+        <span class="k">if</span> <span class="s1">'__length__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+            <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># reasonable default value</span>
 
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
@@ -918,7 +918,7 @@
 
                 <span class="n">data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
@@ -926,19 +926,19 @@
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unsupported type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ListField</span><span class="p">):</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unsupported type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PaddingField</span><span class="p">):</span>
@@ -947,12 +947,12 @@
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ConditionalField</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                     <span class="k">continue</span>
                 <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                 <span class="k">continue</span>
 
             <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -969,8 +969,8 @@
 
 <div class="viewcode-block" id="Schema.pre_pack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.pre_pack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">pre_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare ``packet`` data for packing process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pre_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Prepare ``packet`` data for packing process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: packet data</span>
@@ -979,17 +979,17 @@
 <span class="sd">            This method is expected to directly modify any data stored</span>
 <span class="sd">            in the ``packet`` and thus no return is required.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        """</span></div>
 
 
 <div class="viewcode-block" id="Schema.unpack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="nd">@prepare</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes | IO[bytes]&#39;</span><span class="p">,</span>
-               <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-               <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unpack :obj:`bytes` into :class:`Schema`.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | IO[bytes]'</span><span class="p">,</span>
+               <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpack :obj:`bytes` into :class:`Schema`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Packed data.</span>
@@ -1010,24 +1010,24 @@
 <span class="sd">            is used to potentially determine the length of the remaining</span>
 <span class="sd">            padding field data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># force cast arg type since decorator changed their signatures</span>
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
-            <span class="n">packet</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">):</span>
-                <span class="n">payload_length</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">])</span>
+                <span class="n">payload_length</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">])</span>
 
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">payload_length</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
 
-                <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
                 <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
 
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
@@ -1038,14 +1038,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
 
                 <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
-                <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
 
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">byte</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ConditionalField</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                     <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">NoValue</span>
                     <span class="k">continue</span>
@@ -1060,15 +1060,15 @@
             <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">OptionField</span><span class="p">):</span>
-                <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__option_padding__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
 
-            <span class="k">if</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;packet length &lt; 0: </span><span class="si">{</span><span class="n">packet</span><span class="p">[</span><span class="s2">&quot;__length__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="k">if</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'packet length &lt; 0: </span><span class="si">{</span><span class="n">packet</span><span class="p">[</span><span class="s2">"__length__"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
                      <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1078,8 +1078,8 @@
 <div class="viewcode-block" id="Schema.pre_unpack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.pre_unpack">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">pre_unpack</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare ``packet`` data for unpacking process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pre_unpack</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Prepare ``packet`` data for unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: packet data</span>
@@ -1088,13 +1088,13 @@
 <span class="sd">            This method is expected to directly modify any data stored</span>
 <span class="sd">            in the ``packet`` and thus no return is required.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        """</span></div>
 
 
 <div class="viewcode-block" id="Schema.post_process">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after packing and/or unpacking process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after packing and/or unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Unpacked data.</span>
@@ -1102,7 +1102,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 </div>
 
@@ -1111,7 +1111,7 @@
 <div class="viewcode-block" id="EnumMeta">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumMeta">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EnumMeta</span><span class="p">(</span><span class="n">SchemaMeta</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_ET</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support for :class:`EnumSchema`.</span>
+<span class="w">    </span><span class="sd">"""Meta class to add dynamic support for :class:`EnumSchema`.</span>
 
 <span class="sd">    This meta class is used to generate necessary attributes for the</span>
 <span class="sd">    :class:`SchemaMeta` class. It can be useful to reduce runtime generation</span>
@@ -1121,15 +1121,15 @@
 <span class="sd">      proxy (similar to :class:`property`, but on class variables) to the</span>
 <span class="sd">      :attr:`EnumSchema.__enum__` mapping.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Mapping of enumeration numbers to schemas (**internal use only**).</span>
-        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[_ET, Type[EnumSchema]]&#39;</span>
+        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">'DefaultDict[_ET, Type[EnumSchema]]'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[_ET, Type[EnumSchema]]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapping of enumeration numbers to schemas.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'DefaultDict[_ET, Type[EnumSchema]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Mapping of enumeration numbers to schemas."""</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span></div>
 
 
@@ -1137,7 +1137,7 @@
 <div class="viewcode-block" id="EnumSchema">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EnumSchema</span><span class="p">(</span><span class="n">Schema</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_ET</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">EnumMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;:class:`Schema` with enumeration mapping support.</span>
+<span class="w">    </span><span class="sd">""":class:`Schema` with enumeration mapping support.</span>
 
 <span class="sd">    Examples:</span>
 
@@ -1176,34 +1176,34 @@
 
 <span class="sd">           &gt;&gt;&gt; MySchema.registry[MyEnum.ONE]  # OneSchema</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">,</span> <span class="s1">&#39;__default__&#39;</span><span class="p">]</span>
-    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">,</span> <span class="s1">&#39;__default__&#39;</span><span class="p">]</span>
+    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__enum__'</span><span class="p">,</span> <span class="s1">'__default__'</span><span class="p">]</span>
+    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__enum__'</span><span class="p">,</span> <span class="s1">'__default__'</span><span class="p">]</span>
 
     <span class="c1">#: Callback to return the default schema for enumeration mapping,</span>
     <span class="c1">#: by default is a ``lambda: None`` statement.</span>
-    <span class="n">__default__</span><span class="p">:</span> <span class="s1">&#39;Callable[[], Type[Self]]&#39;</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment,return-value]</span>
+    <span class="n">__default__</span><span class="p">:</span> <span class="s1">'Callable[[], Type[Self]]'</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment,return-value]</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Mapping of enumeration numbers to schemas.</span>
-        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[_ET, Type[Self]]&#39;</span>
+        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">'DefaultDict[_ET, Type[Self]]'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[_ET, Type[Self]]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapping of enumeration numbers to schemas.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'DefaultDict[_ET, Type[Self]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Mapping of enumeration numbers to schemas.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            This property is also available as a class</span>
 <span class="sd">            attribute.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__enum__</span>
 
 <div class="viewcode-block" id="EnumSchema.__init_subclass__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[_ET | Iterable[_ET]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register enumeration to :attr:`registry` mapping.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Optional[_ET | Iterable[_ET]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register enumeration to :attr:`registry` mapping.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: Enumeration code. It can be either a single enumeration</span>
@@ -1224,8 +1224,8 @@
 <span class="sd">            it is possible to override the :meth:`__init_subclass__` method and</span>
 <span class="sd">            define :attr:`__enum__` manually.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__enum__&#39;</span><span class="p">):</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'__enum__'</span><span class="p">):</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__default__</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1240,14 +1240,14 @@
 <div class="viewcode-block" id="EnumSchema.register">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.register">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;_ET&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Type[Self]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register enumetaion to :attr:`__enum__` mapping.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'_ET'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Type[Self]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register enumetaion to :attr:`__enum__` mapping.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: Enumetaion code.</span>
 <span class="sd">            schema: Enumetaion schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>  <span class="c1"># type: ignore[index]</span></div>
 </div>
 

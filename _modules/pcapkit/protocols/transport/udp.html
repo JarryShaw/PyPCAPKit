@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.protocols.transport.udp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># mypy: disable-error-code=dict-item</span>
-<span class="sd">&quot;&quot;&quot;UDP - User Datagram Protocol</span>
+<span class="sd">"""UDP - User Datagram Protocol</span>
 <span class="sd">==================================</span>
 
 <span class="sd">.. module:: pcapkit.protocols.transport.udp</span>
@@ -414,7 +414,7 @@
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/User_Datagram_Protocol</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -433,14 +433,14 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;UDP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'UDP'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="UDP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UDP</span><span class="p">(</span><span class="n">Transport</span><span class="p">[</span><span class="n">Data_UDP</span><span class="p">,</span> <span class="n">Schema_UDP</span><span class="p">],</span>
           <span class="n">schema</span><span class="o">=</span><span class="n">Schema_UDP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_UDP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements User Datagram Protocol.</span>
+<span class="w">    </span><span class="sd">"""This class implements User Datagram Protocol.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
 <span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.transport.udp.UDP.__proto__&gt;`</span>
@@ -454,7 +454,7 @@
 <span class="sd">       * - 80</span>
 <span class="sd">         - :class:`pcapkit.protocols.application.http.HTTP`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -465,9 +465,9 @@
     <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.transport.transport.Transport._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
-            <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.application.http&#39;</span><span class="p">,</span> <span class="s1">&#39;HTTP&#39;</span><span class="p">),</span>  <span class="c1"># HTTP</span>
+            <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>  <span class="c1"># HTTP</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -476,23 +476,23 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;User Datagram Protocol&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;User Datagram Protocol&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["User Datagram Protocol"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of current protocol."""</span>
+        <span class="k">return</span> <span class="s1">'User Datagram Protocol'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[8]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[8]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header length of current protocol."""</span>
         <span class="k">return</span> <span class="mi">8</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Source port.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_AppType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Source port."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">srcport</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destination port.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_AppType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Destination port."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dstport</span>
 
     <span class="c1">##########################################################################</span>
@@ -501,8 +501,8 @@
 
 <div class="viewcode-block" id="UDP.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UDP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read User Datagram Protocol (UDP).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UDP'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read User Datagram Protocol (UDP).</span>
 
 <span class="sd">        Structure of UDP header [:rfc:`768`]:</span>
 
@@ -527,7 +527,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
@@ -545,12 +545,12 @@
 <div class="viewcode-block" id="UDP.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType | int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-             <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType | int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-             <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
-             <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Schema | Protocol&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_UDP&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+             <span class="n">srcport</span><span class="p">:</span> <span class="s1">'Enum_AppType | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">dstport</span><span class="p">:</span> <span class="s1">'Enum_AppType | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
+             <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | Schema | Protocol'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UDP'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            srcport: Source port.</span>
@@ -562,7 +562,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Schema_UDP</span><span class="p">(</span>
             <span class="n">srcport</span><span class="o">=</span><span class="n">srcport</span><span class="p">,</span>
             <span class="n">dstport</span><span class="o">=</span><span class="n">dstport</span><span class="p">,</span>
@@ -576,22 +576,22 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[8]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[8]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
         <span class="k">return</span> <span class="mi">8</span>
 
 <div class="viewcode-block" id="UDP.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__index__">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_TransType'</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+<span class="w">        </span><span class="sd">"""Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
 
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
@@ -602,8 +602,8 @@
 <div class="viewcode-block" id="UDP._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_UDP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_UDP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
@@ -611,12 +611,12 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">&#39;srcport&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>
-            <span class="s1">&#39;dstport&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>
-            <span class="s1">&#39;checksum&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
-            <span class="s1">&#39;payload&#39;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="s1">'srcport'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>
+            <span class="s1">'dstport'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>
+            <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
+            <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 </div>
 

@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.application.httpv1</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data model for HTTP/1.* protocol&quot;&quot;&quot;</span>
+<span class="sd">"""data model for HTTP/1.* protocol"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -409,10 +409,10 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">HTTP_Type</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;HTTP&#39;</span><span class="p">,</span>
+    <span class="s1">'HTTP'</span><span class="p">,</span>
 
-    <span class="s1">&#39;Header&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;RequestHeader&#39;</span><span class="p">,</span> <span class="s1">&#39;ResponseHeader&#39;</span><span class="p">,</span>
+    <span class="s1">'Header'</span><span class="p">,</span>
+    <span class="s1">'RequestHeader'</span><span class="p">,</span> <span class="s1">'ResponseHeader'</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -420,27 +420,27 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.HTTP">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HTTP</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/1.* protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/1.* protocol."""</span>
 
     <span class="c1">#: HTTP receipt.</span>
-    <span class="n">receipt</span><span class="p">:</span> <span class="s1">&#39;Header&#39;</span>
+    <span class="n">receipt</span><span class="p">:</span> <span class="s1">'Header'</span>
     <span class="c1">#: HTTP header.</span>
-    <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[str, str]&#39;</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[str, str]'</span>
     <span class="c1">#: HTTP body.</span>
-    <span class="n">body</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+    <span class="n">body</span><span class="p">:</span> <span class="s1">'Any'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">receipt</span><span class="p">:</span> <span class="s1">&#39;Header&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[str, str]&#39;</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">receipt</span><span class="p">:</span> <span class="s1">'Header'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[str, str]'</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
 <div class="viewcode-block" id="Header">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.Header">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Header</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/1.* header line.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/1.* header line."""</span>
 
     <span class="c1">#: Receipt type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;HTTP_Type&#39;</span></div>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span></div>
 
 
 
@@ -448,19 +448,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.RequestHeader">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RequestHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/1.* request header line.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/1.* request header line."""</span>
 
     <span class="c1">#: HTTP request header line.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;HTTP_Type&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span>
     <span class="c1">#: HTTP method.</span>
-    <span class="n">method</span><span class="p">:</span> <span class="s1">&#39;Enum_Method&#39;</span>
+    <span class="n">method</span><span class="p">:</span> <span class="s1">'Enum_Method'</span>
     <span class="c1">#: HTTP request URI.</span>
-    <span class="n">uri</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">uri</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: HTTP request version.</span>
-    <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;HTTP_Type&#39;</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="s1">&#39;Enum_Method&#39;</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="s1">'Enum_Method'</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -468,19 +468,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.ResponseHeader">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ResponseHeader</span><span class="p">(</span><span class="n">Header</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/1.* response header line.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/1.* response header line."""</span>
 
     <span class="c1">#: HTTP response header line.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;HTTP_Type&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span>
     <span class="c1">#: HTTP response version.</span>
-    <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: HTTP response status.</span>
-    <span class="n">status</span><span class="p">:</span> <span class="s1">&#39;Enum_StatusCode&#39;</span>
+    <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode'</span>
     <span class="c1">#: HTTP response status message.</span>
-    <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">message</span><span class="p">:</span> <span class="s1">'str'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;HTTP_Type&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">&#39;Enum_StatusCode&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode'</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

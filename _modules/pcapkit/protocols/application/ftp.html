@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.application.ftp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;file transfer protocol</span>
+<span class="sd">"""file transfer protocol</span>
 
 <span class="sd">.. module:: pcapkit.protocols.application.ftp</span>
 
@@ -403,7 +403,7 @@
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -423,22 +423,22 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FTP&#39;</span><span class="p">,</span> <span class="s1">&#39;FTP_DATA&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'FTP'</span><span class="p">,</span> <span class="s1">'FTP_DATA'</span><span class="p">]</span>
 
 <span class="c1"># regex for FTP</span>
-<span class="n">FTP_REQUEST</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">&#39;^(?P&lt;cmmd&gt;[A-Z]{3,4})( +(?P&lt;args&gt;.*))?\r\n$&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
-<span class="n">FTP_RESPONSE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">&#39;^(?P&lt;code&gt;[0-9]</span><span class="si">{3}</span><span class="s1">)(?P&lt;more&gt;\-)?( +(?P&lt;args&gt;.*))?\r\n$&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+<span class="n">FTP_REQUEST</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'^(?P&lt;cmmd&gt;[A-Z]{3,4})( +(?P&lt;args&gt;.*))?\r\n$'</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+<span class="n">FTP_RESPONSE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'^(?P&lt;code&gt;[0-9]</span><span class="si">{3}</span><span class="s1">)(?P&lt;more&gt;\-)?( +(?P&lt;args&gt;.*))?\r\n$'</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Type">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.Type">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;FTP packet type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""FTP packet type."""</span>
 
     <span class="c1">#: Request packet.</span>
-    <span class="n">REQUEST</span> <span class="o">=</span> <span class="s1">&#39;request&#39;</span>
+    <span class="n">REQUEST</span> <span class="o">=</span> <span class="s1">'request'</span>
     <span class="c1">#: Response packet.</span>
-    <span class="n">RESPONSE</span> <span class="o">=</span> <span class="s1">&#39;response&#39;</span></div>
+    <span class="n">RESPONSE</span> <span class="o">=</span> <span class="s1">'response'</span></div>
 
 
 
@@ -446,26 +446,26 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FTP</span><span class="p">(</span><span class="n">Application</span><span class="p">[</span><span class="n">Data_FTP</span><span class="p">,</span> <span class="n">Schema_FTP</span><span class="p">],</span>
           <span class="n">data</span><span class="o">=</span><span class="n">Data_FTP</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Schema_FTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements File Transfer Protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""This class implements File Transfer Protocol."""</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;File Transfer Protocol&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;File Transfer Protocol&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["File Transfer Protocol"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of current protocol."""</span>
+        <span class="k">return</span> <span class="s1">'File Transfer Protocol'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header length of current protocol.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            UnsupportedCall: This protocol doesn&#39;t support :attr:`length`.</span>
+<span class="sd">            UnsupportedCall: This protocol doesn't support :attr:`length`.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;length&#39;&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute 'length'"</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -473,8 +473,8 @@
 
 <div class="viewcode-block" id="FTP.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_FTP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read File Transfer Protocol (FTP).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_FTP'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read File Transfer Protocol (FTP).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
@@ -486,15 +486,15 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">match</span> <span class="o">:=</span> <span class="n">FTP_REQUEST</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cmmd</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;cmmd&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
-            <span class="n">args</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;args&#39;</span><span class="p">)</span>
+            <span class="n">cmmd</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'cmmd'</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'args'</span><span class="p">)</span>
 
             <span class="n">cmmd_val</span> <span class="o">=</span> <span class="n">Enum_Command</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cmmd</span><span class="p">)</span>
             <span class="n">args_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -505,9 +505,9 @@
                 <span class="n">args</span><span class="o">=</span><span class="n">args_val</span><span class="p">,</span>
             <span class="p">)</span>  <span class="c1"># type: Data_FTP</span>
         <span class="k">elif</span> <span class="p">(</span><span class="n">match</span> <span class="o">:=</span> <span class="n">FTP_RESPONSE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;code&#39;</span><span class="p">))</span>
-            <span class="n">more</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;more&#39;</span><span class="p">))</span>
-            <span class="n">args</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;args&#39;</span><span class="p">)</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'code'</span><span class="p">))</span>
+            <span class="n">more</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'more'</span><span class="p">))</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'args'</span><span class="p">)</span>
 
             <span class="n">code_val</span> <span class="o">=</span> <span class="n">Enum_ReturnCode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
             <span class="n">args_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -519,19 +519,19 @@
                 <span class="n">args</span><span class="o">=</span><span class="n">args_val</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">&#39;FTP: invalid packet format&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'FTP: invalid packet format'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ftp</span></div>
 
 
 <div class="viewcode-block" id="FTP.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">cmmd</span><span class="p">:</span> <span class="s1">&#39;Optional[Enum_Command | str | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[Enum_ReturnCode | int | str | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Optional[str | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">more</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_FTP&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+             <span class="n">cmmd</span><span class="p">:</span> <span class="s1">'Optional[Enum_Command | str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">code</span><span class="p">:</span> <span class="s1">'Optional[Enum_ReturnCode | int | str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">more</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_FTP'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            cmmd: FTP command.</span>
@@ -543,7 +543,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">cmmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">code</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cmmd</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                 <span class="n">prefix</span> <span class="o">=</span> <span class="n">cmmd</span>
@@ -552,24 +552,24 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">prefix</span> <span class="o">=</span> <span class="n">cmmd</span><span class="o">.</span><span class="n">value</span>
 
-            <span class="n">mf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+            <span class="n">mf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
         <span class="k">elif</span> <span class="n">cmmd</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">code_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
             <span class="n">prefix</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">code_val</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
 
-            <span class="n">mf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;-&#39;</span> <span class="k">if</span> <span class="n">more</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+            <span class="n">mf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'-'</span> <span class="k">if</span> <span class="n">more</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">&#39;FTP: invalid packet type&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'FTP: invalid packet type'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">suffix</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">suffix</span> <span class="o">=</span> <span class="n">args</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">suffix</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">Schema_FTP</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">mf</span><span class="p">,</span> <span class="n">suffix</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="si">%s%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">mf</span><span class="p">,</span> <span class="n">suffix</span><span class="p">),</span>
         <span class="p">)</span></div>
 
 
@@ -580,8 +580,8 @@
 <div class="viewcode-block" id="FTP._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_FTP&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_FTP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
@@ -589,12 +589,12 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">&#39;cmmd&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;cmmd&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="s1">&#39;more&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;more&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+            <span class="s1">'cmmd'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'cmmd'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'code'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'code'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'args'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'args'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'more'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'more'</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
         <span class="p">}</span></div>
 </div>
 
@@ -603,7 +603,7 @@
 <div class="viewcode-block" id="FTP_DATA">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FTP_DATA</span><span class="p">(</span><span class="n">Raw</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements FTP data channel transmission.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""This class implements FTP data channel transmission."""</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -611,9 +611,9 @@
 
     <span class="c1"># name of current protocol</span>
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;FTP_DATA&quot;]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;FTP_DATA&#39;</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["FTP_DATA"]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Name of current protocol."""</span>
+        <span class="k">return</span> <span class="s1">'FTP_DATA'</span></div>
 
 </pre></div>
         </article>

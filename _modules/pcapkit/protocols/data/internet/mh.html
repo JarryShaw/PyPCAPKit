@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.internet.mh</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data model for MH protocol&quot;&quot;&quot;</span>
+<span class="sd">"""data model for MH protocol"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -458,22 +458,22 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">NTPTimestamp</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;MH&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;UnknownMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingRefreshRequestMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;HomeTestInitMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestInitMessage&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;HomeTestMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingUpdateMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingAcknowledgementMessage&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;BindingErrorMessage&#39;</span><span class="p">,</span>
+    <span class="s1">'MH'</span><span class="p">,</span>
+    <span class="s1">'UnknownMessage'</span><span class="p">,</span> <span class="s1">'BindingRefreshRequestMessage'</span><span class="p">,</span> <span class="s1">'HomeTestInitMessage'</span><span class="p">,</span> <span class="s1">'CareofTestInitMessage'</span><span class="p">,</span>
+    <span class="s1">'HomeTestMessage'</span><span class="p">,</span> <span class="s1">'CareofTestMessage'</span><span class="p">,</span> <span class="s1">'BindingUpdateMessage'</span><span class="p">,</span> <span class="s1">'BindingAcknowledgementMessage'</span><span class="p">,</span>
+    <span class="s1">'BindingErrorMessage'</span><span class="p">,</span>
 
-    <span class="s1">&#39;Option&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;UnassignedOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PadOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingRefreshAdviceOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AlternateCareofAddressOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;NonceIndicesOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AuthorizationDataOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MobileNetworkPrefixOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;LinkLayerAddressOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MNIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AuthOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MesgIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CGAParametersRequestOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;CGAParametersOption&#39;</span><span class="p">,</span> <span class="s1">&#39;SignatureOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PermanentHomeKeygenTokenOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestInitOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;CareofTestOption&#39;</span><span class="p">,</span>
+    <span class="s1">'Option'</span><span class="p">,</span>
+    <span class="s1">'UnassignedOption'</span><span class="p">,</span> <span class="s1">'PadOption'</span><span class="p">,</span> <span class="s1">'BindingRefreshAdviceOption'</span><span class="p">,</span> <span class="s1">'AlternateCareofAddressOption'</span><span class="p">,</span>
+    <span class="s1">'NonceIndicesOption'</span><span class="p">,</span> <span class="s1">'AuthorizationDataOption'</span><span class="p">,</span> <span class="s1">'MobileNetworkPrefixOption'</span><span class="p">,</span>
+    <span class="s1">'LinkLayerAddressOption'</span><span class="p">,</span> <span class="s1">'MNIDOption'</span><span class="p">,</span> <span class="s1">'AuthOption'</span><span class="p">,</span> <span class="s1">'MesgIDOption'</span><span class="p">,</span> <span class="s1">'CGAParametersRequestOption'</span><span class="p">,</span>
+    <span class="s1">'CGAParametersOption'</span><span class="p">,</span> <span class="s1">'SignatureOption'</span><span class="p">,</span> <span class="s1">'PermanentHomeKeygenTokenOption'</span><span class="p">,</span> <span class="s1">'CareofTestInitOption'</span><span class="p">,</span>
+    <span class="s1">'CareofTestOption'</span><span class="p">,</span>
 
-    <span class="s1">&#39;CGAParameter&#39;</span><span class="p">,</span>
+    <span class="s1">'CGAParameter'</span><span class="p">,</span>
 
-    <span class="s1">&#39;CGAExtension&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;UnknownExtension&#39;</span><span class="p">,</span> <span class="s1">&#39;MultiPrefixExtension&#39;</span><span class="p">,</span>
+    <span class="s1">'CGAExtension'</span><span class="p">,</span>
+    <span class="s1">'UnknownExtension'</span><span class="p">,</span> <span class="s1">'MultiPrefixExtension'</span><span class="p">,</span>
 
 <span class="p">]</span>
 
@@ -481,16 +481,16 @@
 <div class="viewcode-block" id="MH">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.MH">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MH</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH protocol."""</span>
 
     <span class="c1">#: Next header.</span>
-    <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span>
+    <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span>
     <span class="c1">#: Header length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility header type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span>
     <span class="c1">#: Checksum.</span>
-    <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span></div>
+    <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
 
@@ -498,13 +498,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.UnknownMessage">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnknownMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH unknown message type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH unknown message type."""</span>
 
     <span class="c1">#: Message data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span></div>
 
 
 
@@ -512,14 +512,14 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.BindingRefreshRequestMessage">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BindingRefreshRequestMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Binding Refresh Request (BRR) message type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Binding Refresh Request (BRR) message type."""</span>
 
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span></div>
 
 
 
@@ -527,16 +527,16 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.HomeTestInitMessage">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HomeTestInitMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data modelf for MH Home Test Init (HoTI) message type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data modelf for MH Home Test Init (HoTI) message type."""</span>
 
     <span class="c1">#: Home init cookie.</span>
-    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -544,16 +544,16 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.CareofTestInitMessage">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CareofTestInitMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Care-of Test Init (CoTI) message type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Care-of Test Init (CoTI) message type."""</span>
 
     <span class="c1">#: Care-of init cookie.</span>
-    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -561,21 +561,21 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.HomeTestMessage">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HomeTestMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Home Test (HoT) message type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Home Test (HoT) message type."""</span>
 
     <span class="c1">#: Home nonce index.</span>
-    <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Home init cookie.</span>
-    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Home keygen token.</span>
-    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -583,21 +583,21 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.CareofTestMessage">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CareofTestMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Care-of Test (CoT) message type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Care-of Test (CoT) message type."""</span>
 
     <span class="c1">#: Care-of nonce index.</span>
-    <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Care-of init cookie.</span>
-    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Care-of keygen token.</span>
-    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -605,27 +605,27 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.BindingUpdateMessage">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BindingUpdateMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Binding Update message type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Binding Update message type."""</span>
 
     <span class="c1">#: Sequence number.</span>
-    <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Acknowledge flag.</span>
-    <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: home registration flag.</span>
-    <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">home</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Link-local address compability flag.</span>
-    <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Key management mobility capability flag.</span>
-    <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Lifetime.</span>
-    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span>
+    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span>
-                     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -633,23 +633,23 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.BindingAcknowledgementMessage">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BindingAcknowledgementMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Binding Acknowledge (BA) message type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Binding Acknowledge (BA) message type."""</span>
 
     <span class="c1">#: Status.</span>
-    <span class="n">status</span><span class="p">:</span> <span class="s1">&#39;Enum_StatusCode&#39;</span>
+    <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode'</span>
     <span class="c1">#: Key management mobility capability flag.</span>
-    <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Sequence number.</span>
-    <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Lifetime.</span>
-    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span>
+    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">status</span><span class="p">:</span> <span class="s1">&#39;Enum_StatusCode&#39;</span><span class="p">,</span> <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode'</span><span class="p">,</span> <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -657,19 +657,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.BindingErrorMessage">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BindingErrorMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Binding Error (BE) message type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Binding Error (BE) message type."""</span>
 
     <span class="c1">#: Status.</span>
-    <span class="n">status</span><span class="p">:</span> <span class="s1">&#39;Enum_BindingError&#39;</span>
+    <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_BindingError'</span>
     <span class="c1">#: Home address.</span>
-    <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span>
+    <span class="n">home</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">status</span><span class="p">:</span> <span class="s1">&#39;Enum_BindingError&#39;</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_BindingError'</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -679,12 +679,12 @@
 <div class="viewcode-block" id="Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.Option">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Option</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH options."""</span>
 
     <span class="c1">#: Option type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span>
     <span class="c1">#: Option length (incl. type and length fields).</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 
@@ -692,13 +692,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.UnassignedOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for unassigned MH options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for unassigned MH options."""</span>
 
     <span class="c1">#: Option data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -706,10 +706,10 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.PadOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Pad option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Pad option."""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -717,13 +717,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.BindingRefreshAdviceOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BindingRefreshAdviceOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Binding Refresh Advice option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Binding Refresh Advice option."""</span>
 
     <span class="c1">#: Refresh interval.</span>
-    <span class="n">interval</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -731,13 +731,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.AlternateCareofAddressOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AlternateCareofAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Alternate Care-of Address option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Alternate Care-of Address option."""</span>
 
     <span class="c1">#: Alternate care-of address.</span>
-    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span>
+    <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -745,15 +745,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.NonceIndicesOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NonceIndicesOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Nonce Indices option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Nonce Indices option."""</span>
 
     <span class="c1">#: Home nonce index.</span>
-    <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">home</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Care-of nonce index.</span>
-    <span class="n">careof</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">careof</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">careof</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">careof</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -761,13 +761,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.AuthorizationDataOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AuthorizationDataOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Binding Authorization Data option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Binding Authorization Data option."""</span>
 
     <span class="c1">#: Authenticator.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -775,13 +775,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.MobileNetworkPrefixOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MobileNetworkPrefixOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Mobile Network Prefix option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Mobile Network Prefix option."""</span>
 
     <span class="c1">#: Mobile Network Prefix.</span>
-    <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;IPv6Network&#39;</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Network'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;IPv6Network&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Network'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -789,15 +789,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.LinkLayerAddressOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">LinkLayerAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Link-Layer Address (MH-LLA) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Link-Layer Address (MH-LLA) option."""</span>
 
     <span class="c1">#: Option code.</span>
-    <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_LLACode&#39;</span>
+    <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_LLACode'</span>
     <span class="c1">#: Link-layer address (LLA).</span>
-    <span class="n">lla</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">lla</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_LLACode&#39;</span><span class="p">,</span> <span class="n">lla</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_LLACode'</span><span class="p">,</span> <span class="n">lla</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -805,15 +805,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.MNIDOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MNIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MN-ID option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MN-ID option."""</span>
 
     <span class="c1">#: Subtype.</span>
-    <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_MNIDSubtype&#39;</span>
+    <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MNIDSubtype'</span>
     <span class="c1">#: Identifier.</span>
-    <span class="n">identifier</span><span class="p">:</span> <span class="s1">&#39;bytes | str | IPv6Address&#39;</span>
+    <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes | str | IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_MNIDSubtype&#39;</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="s1">&#39;bytes | str | IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MNIDSubtype'</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes | str | IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -821,17 +821,17 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.AuthOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AuthOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Mobility Message Authentication option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Mobility Message Authentication option."""</span>
 
     <span class="c1">#: Subtype.</span>
-    <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_AuthSubtype&#39;</span>
+    <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_AuthSubtype'</span>
     <span class="c1">#: Mobility SPI.</span>
-    <span class="n">spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">spi</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Authentication data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_AuthSubtype&#39;</span><span class="p">,</span> <span class="n">spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_AuthSubtype'</span><span class="p">,</span> <span class="n">spi</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -839,15 +839,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.MesgIDOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MesgIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Mobility Message Replay Protection option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Mobility Message Replay Protection option."""</span>
 
     <span class="c1">#: Timestamp.</span>
-    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;dt_type&#39;</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'dt_type'</span>
     <span class="c1">#: NTP timestamp, c.f., :rfc:`1305`.</span>
-    <span class="n">ntp_timestamp</span><span class="p">:</span> <span class="s1">&#39;NTPTimestamp&#39;</span>
+    <span class="n">ntp_timestamp</span><span class="p">:</span> <span class="s1">'NTPTimestamp'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;dt_type&#39;</span><span class="p">,</span> <span class="n">ntp_timestamp</span><span class="p">:</span> <span class="s1">&#39;NTPTimestamp&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'dt_type'</span><span class="p">,</span> <span class="n">ntp_timestamp</span><span class="p">:</span> <span class="s1">'NTPTimestamp'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -855,22 +855,22 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.CGAParametersRequestOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CGAParametersRequestOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for CGA Parameters Request option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for CGA Parameters Request option."""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
 <div class="viewcode-block" id="CGAExtension">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.CGAExtension">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CGAExtension</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for CGA extension.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for CGA extension."""</span>
 
     <span class="c1">#: Extension type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAExtension&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_CGAExtension'</span>
     <span class="c1">#: Extension length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 
@@ -878,13 +878,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.UnknownExtension">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnknownExtension</span><span class="p">(</span><span class="n">CGAExtension</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for unknown CGA extensions.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for unknown CGA extensions."""</span>
 
     <span class="c1">#: Extension data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAExtension&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_CGAExtension'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -892,16 +892,16 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.MultiPrefixExtension">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MultiPrefixExtension</span><span class="p">(</span><span class="n">CGAExtension</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Multi-Prefix CGA extension.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Multi-Prefix CGA extension."""</span>
 
     <span class="c1">#: P flag. Set if a public key is included in the Public Key field of</span>
     <span class="c1">#: the CGA Parameter Data Structure, reset otherwise.</span>
-    <span class="n">flag</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">flag</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Prefixes.</span>
-    <span class="n">prefixes</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span>
+    <span class="n">prefixes</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAExtension&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">prefixes</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_CGAExtension'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">prefixes</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -909,22 +909,22 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.CGAParameter">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CGAParameter</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for CGA parameter.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for CGA parameter."""</span>
 
     <span class="c1">#: Modifier.</span>
-    <span class="n">modifier</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAType&#39;</span>
+    <span class="n">modifier</span><span class="p">:</span> <span class="s1">'Enum_CGAType'</span>
     <span class="c1">#: Subnet prefix.</span>
-    <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Collision count.</span>
-    <span class="n">collision_count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">collision_count</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Publick key (ASN.1 encoded).</span>
-    <span class="n">public_key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Extension fields.</span>
-    <span class="n">extensions</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_CGAExtension, CGAExtension]&#39;</span>
+    <span class="n">extensions</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_CGAExtension, CGAExtension]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modifier</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAType&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">collision_count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">public_key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
-                     <span class="n">extensions</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_CGAExtension, CGAExtension]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modifier</span><span class="p">:</span> <span class="s1">'Enum_CGAType'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">collision_count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">extensions</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_CGAExtension, CGAExtension]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -932,13 +932,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.CGAParametersOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CGAParametersOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for CGA Parameters option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for CGA Parameters option."""</span>
 
     <span class="c1">#: CGA parameters, c.f., :rfc:`3972`.</span>
-    <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;tuple[CGAParameter, ...]&#39;</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="s1">'tuple[CGAParameter, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;tuple[CGAParameter, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'tuple[CGAParameter, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -946,13 +946,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.SignatureOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SignatureOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Signature option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Signature option."""</span>
 
     <span class="c1">#: Signature.</span>
-    <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">signature</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -960,13 +960,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.PermanentHomeKeygenTokenOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PermanentHomeKeygenTokenOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Permanent Home Keygen Token option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Permanent Home Keygen Token option."""</span>
 
     <span class="c1">#: Permanent home keygen token.</span>
-    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -974,10 +974,10 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.CareofTestInitOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CareofTestInitOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Care-of Test Init options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Care-of Test Init options."""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -985,13 +985,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.CareofTestOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CareofTestOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Care-of Test options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Care-of Test options."""</span>
 
     <span class="c1">#: Care-of keygen token.</span>
-    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

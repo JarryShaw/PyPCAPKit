@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.internet.ip</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;IP - Internet Protocol</span>
+<span class="sd">"""IP - Internet Protocol</span>
 <span class="sd">============================</span>
 
 <span class="sd">.. module:: pcapkit.protocols.internet.ip</span>
@@ -407,7 +407,7 @@
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Internet_Protocol</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
@@ -416,20 +416,20 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IP'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="IP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IP</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements all protocols in IP family.</span>
+<span class="w">    </span><span class="sd">"""This class implements all protocols in IP family.</span>
 
 <span class="sd">    - Internet Protocol version 4 (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) [:rfc:`791`]</span>
 <span class="sd">    - Internet Protocol version 6 (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) [:rfc:`2460`]</span>
 <span class="sd">    - Authentication Header (:class:`~pcapkit.protocols.internet.ah.AH`) [:rfc:`4302`]</span>
 <span class="sd">    - Encapsulating Security Payload (:class:`~pcapkit.protocols.internet.esp.ESP`) [:rfc:`4303`]</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -438,14 +438,14 @@
 <div class="viewcode-block" id="IP.id">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP.id">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;IPv4&quot;], Literal[&quot;IPv6&quot;]]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Literal["IPv4"], Literal["IPv6"]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Index ID of the protocol.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;IPv4&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">)</span></div>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">'IPv4'</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

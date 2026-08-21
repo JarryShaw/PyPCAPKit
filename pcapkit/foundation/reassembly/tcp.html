@@ -570,14 +570,14 @@ update HDL: {
       delete the current entry from HDL;
 
       IF (fragment.first &gt;= hole.first) {
-         create new entry &quot;new_hole&quot; in HDL;
+         create new entry "new_hole" in HDL;
          new_hole.first &lt;- hole.first;
          new_hole.last &lt;- fragment.first - 1;
          BREAK.
       }
 
       IF (fragment.last &lt;= hole.last) {
-         create new entry &quot;new_hole&quot; in HDL;
+         create new entry "new_hole" in HDL;
          new_hole.first &lt;- fragment.last + 1;
          new_hole.last &lt;- hole.last;
          BREAK.
@@ -644,39 +644,39 @@ is as following:</p>
 <em>tuple</em>) is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) datagram
  |--&gt; (Info) data
- |     |--&gt; &#39;completed&#39; : (bool) True --&gt; implemented
- |     |--&gt; &#39;id&#39; : (Info) original packet identifier
- |     |            |--&gt; &#39;src&#39; --&gt; (tuple)
+ |     |--&gt; 'completed' : (bool) True --&gt; implemented
+ |     |--&gt; 'id' : (Info) original packet identifier
+ |     |            |--&gt; 'src' --&gt; (tuple)
  |     |            |               |--&gt; (IPv4Address) ip.src
  |     |            |               |--&gt; (int) tcp.srcport
- |     |            |--&gt; &#39;dst&#39; --&gt; (tuple)
+ |     |            |--&gt; 'dst' --&gt; (tuple)
  |     |            |               |--&gt; (IPv4Address) ip.dst
  |     |            |               |--&gt; (int) tcp.dstport
- |     |            |--&gt; &#39;ack&#39; --&gt; (int) original packet ACK number
- |     |--&gt; &#39;index&#39; : (tuple) packet numbers
+ |     |            |--&gt; 'ack' --&gt; (int) original packet ACK number
+ |     |--&gt; 'index' : (tuple) packet numbers
  |     |               |--&gt; (int) original packet range number
  |     |               |--&gt; ...
- |     |--&gt; &#39;header&#39; : (bytes) initial TCP header
- |     |--&gt; &#39;payload&#39; : (bytes) reassembled payload
- |     |--&gt; &#39;packet&#39; : (Protocol) parsed reassembled payload
+ |     |--&gt; 'header' : (bytes) initial TCP header
+ |     |--&gt; 'payload' : (bytes) reassembled payload
+ |     |--&gt; 'packet' : (Protocol) parsed reassembled payload
  |--&gt; (Info) data
- |     |--&gt; &#39;completed&#39; : (bool) False --&gt; not implemented
- |     |--&gt; &#39;id&#39; : (Info) original packet identifier
- |     |            |--&gt; &#39;src&#39; --&gt; (tuple)
+ |     |--&gt; 'completed' : (bool) False --&gt; not implemented
+ |     |--&gt; 'id' : (Info) original packet identifier
+ |     |            |--&gt; 'src' --&gt; (tuple)
  |     |            |               |--&gt; (IPv4Address) ip.src
  |     |            |               |--&gt; (int) tcp.srcport
- |     |            |--&gt; &#39;dst&#39; --&gt; (tuple)
+ |     |            |--&gt; 'dst' --&gt; (tuple)
  |     |            |               |--&gt; (IPv4Address) ip.dst
  |     |            |               |--&gt; (int) tcp.dstport
- |     |            |--&gt; &#39;ack&#39; --&gt; (int) original packet ACK number
- |     |--&gt; &#39;index&#39; : (tuple) packet numbers
+ |     |            |--&gt; 'ack' --&gt; (int) original packet ACK number
+ |     |--&gt; 'index' : (tuple) packet numbers
  |     |               |--&gt; (int) original packet range number
  |     |               |--&gt; ...
- |     |--&gt; &#39;header&#39; : (bytes) initial TCP header
- |     |--&gt; &#39;payload&#39; : (tuple) partially reassembled payload
+ |     |--&gt; 'header' : (bytes) initial TCP header
+ |     |--&gt; 'payload' : (tuple) partially reassembled payload
  |     |                 |--&gt; (bytes) payload fragment
  |     |                 |--&gt; ...
- |     |--&gt; &#39;packet&#39; : (None) not implemented
+ |     |--&gt; 'packet' : (None) not implemented
  |--&gt; (Info) data ...
 </pre></div>
 </div>
@@ -690,19 +690,19 @@ is as following:</p>
  |       |--&gt; ip.dst      |
  |       |--&gt; tcp.srcport |
  |       |--&gt; tcp.dstport |
- |                        |--&gt; &#39;hdl&#39; : (list) hole descriptor list
+ |                        |--&gt; 'hdl' : (list) hole descriptor list
  |                        |             |--&gt; (Info) hole --&gt; hole descriptor
- |                        |                   |--&gt; &quot;first&quot; --&gt; (int) start of hole
- |                        |                   |--&gt; &quot;last&quot; --&gt; (int) stop of hole
- |                        |--&gt; &#39;hdr&#39; : (bytes) initial TCP header
- |                        |--&gt; &#39;ack&#39; : (dict) ACK list
+ |                        |                   |--&gt; "first" --&gt; (int) start of hole
+ |                        |                   |--&gt; "last" --&gt; (int) stop of hole
+ |                        |--&gt; 'hdr' : (bytes) initial TCP header
+ |                        |--&gt; 'ack' : (dict) ACK list
  |                                      |--&gt; (int) ACK : (dict)
- |                                      |                 |--&gt; &#39;ind&#39; : (list) list of reassembled packets
+ |                                      |                 |--&gt; 'ind' : (list) list of reassembled packets
  |                                      |                 |             |--&gt; (int) packet range number
- |                                      |                 |--&gt; &#39;isn&#39; : (int) ISN of payload buffer
- |                                      |                 |--&gt; &#39;len&#39; : (int) length of payload buffer
- |                                      |                 |--&gt; &#39;raw&#39; : (bytearray) reassembled payload,
- |                                      |                                          holes set to b&#39;\x00&#39;
+ |                                      |                 |--&gt; 'isn' : (int) ISN of payload buffer
+ |                                      |                 |--&gt; 'len' : (int) length of payload buffer
+ |                                      |                 |--&gt; 'raw' : (bytearray) reassembled payload,
+ |                                      |                                          holes set to b'\x00'
  |                                      |--&gt; (int) ACK ...
  |                                      |--&gt; ...
  |--&gt; (tuple) BUFID ...

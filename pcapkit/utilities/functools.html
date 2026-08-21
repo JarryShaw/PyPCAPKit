@@ -430,8 +430,8 @@ the decorated function.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The decorated function should have following signature:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">&#39;pcapkit.protocols.protocol.ProtocolBase&#39;</span><span class="p">,</span>
-     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;typing.Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;typing.Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;typing.Any&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">'pcapkit.protocols.protocol.ProtocolBase'</span><span class="p">,</span>
+     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'typing.Any'</span>
 </pre></div>
 </div>
 </div>
@@ -465,9 +465,9 @@ as <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protoc
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The decorated function should have following signature:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">&#39;pcapkit.protocols.protocol.ProtocolBase&#39;</span><span class="p">,</span>
-     <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;typing.Optional[int]&#39;</span><span class="p">,</span>
-     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;typing.Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;typing.Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;pcapkit.protocols.protocol.ProtocolBase&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">'pcapkit.protocols.protocol.ProtocolBase'</span><span class="p">,</span>
+     <span class="n">proto</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'typing.Optional[int]'</span><span class="p">,</span>
+     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'pcapkit.protocols.protocol.ProtocolBase'</span>
 </pre></div>
 </div>
 </div>
@@ -502,11 +502,11 @@ the revised version of parameter list to the original method.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The decorated function should have following signature:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">&#39;typing.Type[pcapkit.protocols.schema.schema.Schema]&#39;</span><span class="p">,</span>
-     <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes | typing.IO[bytes]&#39;</span><span class="p">,</span>
-     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int],</span>
-     <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]&#39;</span><span class="p">,</span>
-     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;typing.Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;pcapkit.protocols.schema.schema.Schema&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'typing.Type[pcapkit.protocols.schema.schema.Schema]'</span><span class="p">,</span>
+     <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | typing.IO[bytes]'</span><span class="p">,</span>
+     <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int],</span>
+     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]'</span><span class="p">,</span>
+     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'pcapkit.protocols.schema.schema.Schema'</span>
 </pre></div>
 </div>
 </div>

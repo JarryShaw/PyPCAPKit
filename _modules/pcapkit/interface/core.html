@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.interface.core</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Core Interface</span>
+<span class="sd">"""Core Interface</span>
 <span class="sd">====================</span>
 
 <span class="sd">.. module:: pcapkit.interface.core</span>
@@ -401,7 +401,7 @@
 <span class="sd">interfaces, variables, and etc., which wraps around the</span>
 <span class="sd">foundation classes from :mod:`pcapkit.foundation`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -424,46 +424,46 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowBase</span> <span class="k">as</span> <span class="n">TraceFlow</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;extract&#39;</span><span class="p">,</span> <span class="s1">&#39;reassemble&#39;</span><span class="p">,</span> <span class="s1">&#39;trace&#39;</span><span class="p">,</span>                       <span class="c1"># interface functions</span>
-    <span class="s1">&#39;TREE&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON&#39;</span><span class="p">,</span> <span class="s1">&#39;PLIST&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAP&#39;</span><span class="p">,</span>                        <span class="c1"># format macros</span>
-    <span class="s1">&#39;LINK&#39;</span><span class="p">,</span> <span class="s1">&#39;INET&#39;</span><span class="p">,</span> <span class="s1">&#39;TRANS&#39;</span><span class="p">,</span> <span class="s1">&#39;APP&#39;</span><span class="p">,</span> <span class="s1">&#39;RAW&#39;</span><span class="p">,</span>                  <span class="c1"># layer macros</span>
-    <span class="s1">&#39;DPKT&#39;</span><span class="p">,</span> <span class="s1">&#39;Scapy&#39;</span><span class="p">,</span> <span class="s1">&#39;PyShark&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAPKit&#39;</span><span class="p">,</span>                  <span class="c1"># engine macros</span>
+    <span class="s1">'extract'</span><span class="p">,</span> <span class="s1">'reassemble'</span><span class="p">,</span> <span class="s1">'trace'</span><span class="p">,</span>                       <span class="c1"># interface functions</span>
+    <span class="s1">'TREE'</span><span class="p">,</span> <span class="s1">'JSON'</span><span class="p">,</span> <span class="s1">'PLIST'</span><span class="p">,</span> <span class="s1">'PCAP'</span><span class="p">,</span>                        <span class="c1"># format macros</span>
+    <span class="s1">'LINK'</span><span class="p">,</span> <span class="s1">'INET'</span><span class="p">,</span> <span class="s1">'TRANS'</span><span class="p">,</span> <span class="s1">'APP'</span><span class="p">,</span> <span class="s1">'RAW'</span><span class="p">,</span>                  <span class="c1"># layer macros</span>
+    <span class="s1">'DPKT'</span><span class="p">,</span> <span class="s1">'Scapy'</span><span class="p">,</span> <span class="s1">'PyShark'</span><span class="p">,</span> <span class="s1">'PCAPKit'</span><span class="p">,</span>                  <span class="c1"># engine macros</span>
 <span class="p">]</span>
 
 <span class="c1"># output file formats</span>
-<span class="n">TREE</span> <span class="o">=</span> <span class="s1">&#39;tree&#39;</span>
-<span class="n">JSON</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span>
-<span class="n">PLIST</span> <span class="o">=</span> <span class="s1">&#39;plist&#39;</span>
-<span class="n">PCAP</span> <span class="o">=</span> <span class="s1">&#39;pcap&#39;</span>
+<span class="n">TREE</span> <span class="o">=</span> <span class="s1">'tree'</span>
+<span class="n">JSON</span> <span class="o">=</span> <span class="s1">'json'</span>
+<span class="n">PLIST</span> <span class="o">=</span> <span class="s1">'plist'</span>
+<span class="n">PCAP</span> <span class="o">=</span> <span class="s1">'pcap'</span>
 
 <span class="c1"># layer thresholds</span>
-<span class="n">RAW</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
-<span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;link&#39;</span>
-<span class="n">INET</span> <span class="o">=</span> <span class="s1">&#39;internet&#39;</span>
-<span class="n">TRANS</span> <span class="o">=</span> <span class="s1">&#39;transport&#39;</span>
-<span class="n">APP</span> <span class="o">=</span> <span class="s1">&#39;application&#39;</span>
+<span class="n">RAW</span> <span class="o">=</span> <span class="s1">'none'</span>
+<span class="n">LINK</span> <span class="o">=</span> <span class="s1">'link'</span>
+<span class="n">INET</span> <span class="o">=</span> <span class="s1">'internet'</span>
+<span class="n">TRANS</span> <span class="o">=</span> <span class="s1">'transport'</span>
+<span class="n">APP</span> <span class="o">=</span> <span class="s1">'application'</span>
 
 <span class="c1"># extraction engines</span>
-<span class="n">DPKT</span> <span class="o">=</span> <span class="s1">&#39;dpkt&#39;</span>
-<span class="n">Scapy</span> <span class="o">=</span> <span class="s1">&#39;scapy&#39;</span>
-<span class="n">PCAPKit</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span>
-<span class="n">PyShark</span> <span class="o">=</span> <span class="s1">&#39;pyshark&#39;</span>
+<span class="n">DPKT</span> <span class="o">=</span> <span class="s1">'dpkt'</span>
+<span class="n">Scapy</span> <span class="o">=</span> <span class="s1">'scapy'</span>
+<span class="n">PCAPKit</span> <span class="o">=</span> <span class="s1">'default'</span>
+<span class="n">PyShark</span> <span class="o">=</span> <span class="s1">'pyshark'</span>
 
 
 <div class="viewcode-block" id="extract">
 <a class="viewcode-back" href="../../../pcapkit/interface/core.html#pcapkit.interface.core.extract">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">extract</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;Optional[str | IO[bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>     <span class="c1"># basic settings # pylint: disable=redefined-builtin</span>
-            <span class="n">auto</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                                           <span class="c1"># internal settings # pylint: disable=line-too-long</span>
-            <span class="n">files</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">&#39;bool | VerboseHandler&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                       <span class="c1"># output settings # pylint: disable=line-too-long</span>
-            <span class="n">engine</span><span class="p">:</span> <span class="s1">&#39;Optional[Engines]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="s1">&#39;Optional[Layers] | Type[Protocol]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                         <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
-            <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Optional[Protocols]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                                                                        <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
-            <span class="n">reassembly</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reasm_store</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
-            <span class="n">trace</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-            <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-            <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
-            <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># buffer settings # pylint: disable=line-too-long</span>
-            <span class="n">no_eof</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract a PCAP file.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'Optional[str | IO[bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>     <span class="c1"># basic settings # pylint: disable=redefined-builtin</span>
+            <span class="n">auto</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                                           <span class="c1"># internal settings # pylint: disable=line-too-long</span>
+            <span class="n">files</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool | VerboseHandler'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                       <span class="c1"># output settings # pylint: disable=line-too-long</span>
+            <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[Layers] | Type[Protocol]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                         <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
+            <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Protocols]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                                                                        <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
+            <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reasm_store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
+            <span class="n">trace</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
+            <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
+            <span class="n">ip</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
+            <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># buffer settings # pylint: disable=line-too-long</span>
+            <span class="n">no_eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Extractor'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Extract a PCAP file.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        fin: file name to be read or a binary IO object;</span>
@@ -510,9 +510,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        An :class:`~pcapkit.foundation.extraction.Extractor` object.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="n">layer</span> <span class="o">=</span> <span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">__layer__</span> <span class="ow">or</span> <span class="s1">&#39;none&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># type: ignore[assignment]</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">__layer__</span> <span class="ow">or</span> <span class="s1">'none'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># type: ignore[assignment]</span>
 
     <span class="k">return</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
                      <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="n">nofile</span><span class="p">,</span>
@@ -529,8 +529,8 @@
 
 <div class="viewcode-block" id="reassemble">
 <a class="viewcode-back" href="../../../pcapkit/interface/core.html#pcapkit.interface.core.reassemble">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">reassemble</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;str | Type[Protocol]&#39;</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Reassembly&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reassemble fragmented datagrams.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reassemble</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str | Type[Protocol]'</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Reassembly'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Reassemble fragmented datagrams.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol to be reassembled</span>
@@ -542,27 +542,27 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        FormatError: If ``protocol`` is **NOT** any of IPv4, IPv6 or TCP.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">id</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">'IPv4'</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">IPv4_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">'IPv6'</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">IPv6_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">&#39;TCP&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">'TCP'</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
-    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unsupported reassembly protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Unsupported reassembly protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="trace">
 <a class="viewcode-back" href="../../../pcapkit/interface/core.html#pcapkit.interface.core.trace">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;str | Type[Protocol]&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span>
-          <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-          <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
-          <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TraceFlow&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace flows.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str | Type[Protocol]'</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span>
+          <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+          <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["little", "big"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+          <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TraceFlow'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Trace flows.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol to be reassembled</span>
@@ -577,13 +577,13 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        FormatError: If ``protocol`` is **NOT** TCP.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">id</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">&#39;TCP&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">'TCP'</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">TCP_TraceFlow</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">)</span>
-    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unsupported flow tracing protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Unsupported flow tracing protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

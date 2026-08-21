@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.protocols.schema.link.l2tp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># mypy: disable-error-code=assignment</span>
-<span class="sd">&quot;&quot;&quot;header schema for L2TP protocol&quot;&quot;&quot;</span>
+<span class="sd">"""header schema for L2TP protocol"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -403,7 +403,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;L2TP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'L2TP'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
@@ -416,7 +416,7 @@
 <div class="viewcode-block" id="FlagsType">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.schema.link.l2tp.FlagsType">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">FlagsType</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags of L2TP packet.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Flags of L2TP packet."""</span>
 
         <span class="c1">#: Type of L2TP packet.</span>
         <span class="nb">type</span><span class="p">:</span> <span class="nb">int</span>
@@ -437,53 +437,53 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.schema.link.l2tp.L2TP">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">L2TP</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for L2TP packet.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for L2TP packet."""</span>
 
     <span class="c1">#: Flags and version of L2TP packet.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;FlagsType&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;len&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;seq&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;offset&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;prio&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'FlagsType'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'type'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'len'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'seq'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'offset'</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'prio'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'version'</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Length of L2TP packet.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt16Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">],</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Tunnel ID of L2TP packet.</span>
-    <span class="n">tunnel_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">tunnel_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Session ID of L2TP packet.</span>
-    <span class="n">session_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Sequence number of L2TP packet.</span>
-    <span class="n">ns</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">ns</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt16Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;seq&#39;</span><span class="p">],</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'seq'</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Next sequence number of L2TP packet.</span>
-    <span class="n">nr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">nr</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt16Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;seq&#39;</span><span class="p">],</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'seq'</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Offset size of L2TP packet.</span>
-    <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt16Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;offset&#39;</span><span class="p">],</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'offset'</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Padding of L2TP packet.</span>
-    <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
-        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;offset&#39;</span><span class="p">],</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">]),</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'offset'</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Payload of L2TP packet.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;FlagsType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">tunnel_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
-                     <span class="n">session_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ns</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">nr</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span>
-                     <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'FlagsType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">tunnel_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">session_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ns</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">nr</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span>
+                     <span class="n">offset</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | Protocol | Schema'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 </pre></div>
         </article>

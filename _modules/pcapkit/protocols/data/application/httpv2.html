@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.application.httpv2</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data model for HTTP/2 protocol&quot;&quot;&quot;</span>
+<span class="sd">"""data model for HTTP/2 protocol"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -412,42 +412,42 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameType</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;HTTP&#39;</span><span class="p">,</span>
+    <span class="s1">'HTTP'</span><span class="p">,</span>
 
-    <span class="s1">&#39;Flags&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;DataFrameFlags&#39;</span><span class="p">,</span> <span class="s1">&#39;HeadersFrameFlags&#39;</span><span class="p">,</span> <span class="s1">&#39;SettingsFrameFlags&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;PushPromiseFrameFlags&#39;</span><span class="p">,</span> <span class="s1">&#39;PingFrameFlags&#39;</span><span class="p">,</span> <span class="s1">&#39;ContinuationFrameFlags&#39;</span><span class="p">,</span>
+    <span class="s1">'Flags'</span><span class="p">,</span>
+    <span class="s1">'DataFrameFlags'</span><span class="p">,</span> <span class="s1">'HeadersFrameFlags'</span><span class="p">,</span> <span class="s1">'SettingsFrameFlags'</span><span class="p">,</span>
+    <span class="s1">'PushPromiseFrameFlags'</span><span class="p">,</span> <span class="s1">'PingFrameFlags'</span><span class="p">,</span> <span class="s1">'ContinuationFrameFlags'</span><span class="p">,</span>
 
-    <span class="s1">&#39;UnassignedFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;DataFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;HeadersFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;PriorityFrame&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;RSTStreamFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;SettingsFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;PushPromiseFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;PingFrame&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;GoawayFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;WindowUpdateFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;ContinuationFrame&#39;</span><span class="p">,</span>
+    <span class="s1">'UnassignedFrame'</span><span class="p">,</span> <span class="s1">'DataFrame'</span><span class="p">,</span> <span class="s1">'HeadersFrame'</span><span class="p">,</span> <span class="s1">'PriorityFrame'</span><span class="p">,</span>
+    <span class="s1">'RSTStreamFrame'</span><span class="p">,</span> <span class="s1">'SettingsFrame'</span><span class="p">,</span> <span class="s1">'PushPromiseFrame'</span><span class="p">,</span> <span class="s1">'PingFrame'</span><span class="p">,</span>
+    <span class="s1">'GoawayFrame'</span><span class="p">,</span> <span class="s1">'WindowUpdateFrame'</span><span class="p">,</span> <span class="s1">'ContinuationFrame'</span><span class="p">,</span>
 <span class="p">]</span>
 
 
 <div class="viewcode-block" id="Flags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.Flags">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 flags."""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Flags as in combination value.</span>
-        <span class="n">__value__</span><span class="p">:</span> <span class="s1">&#39;FrameType.Flags&#39;</span></div>
+        <span class="n">__value__</span><span class="p">:</span> <span class="s1">'FrameType.Flags'</span></div>
 
 
 
 <div class="viewcode-block" id="HTTP">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.HTTP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HTTP</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 protocol."""</span>
 
     <span class="c1">#: Length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Frame type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span>
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Optional[Flags]&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'Optional[Flags]'</span>
     <span class="c1">#: Stream ID.</span>
-    <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
+    <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 
@@ -455,15 +455,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.UnassignedFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnassignedFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 unassigned frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 unassigned frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'Literal[None]'</span>
     <span class="c1">#: Frame payload.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Literal[None]'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -471,15 +471,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.DataFrameFlags">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DataFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``DATA`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``DATA`` frame flags."""</span>
 
     <span class="c1">#: ``END_STREAM`` flag.</span>
-    <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 0</span>
+    <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">'bool'</span>  <span class="c1"># bit 0</span>
     <span class="c1">#: ``PADDED`` flag.</span>
-    <span class="n">PADDED</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>      <span class="c1"># bit 3</span>
+    <span class="n">PADDED</span><span class="p">:</span> <span class="s1">'bool'</span>      <span class="c1"># bit 3</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">PADDED</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">PADDED</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -487,17 +487,17 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.DataFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DataFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``DATA`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``DATA`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;DataFrameFlags&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'DataFrameFlags'</span>
     <span class="c1">#: Padded length.</span>
-    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Frame payload.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;DataFrameFlags&#39;</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'DataFrameFlags'</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -505,19 +505,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HeadersFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``HEADERS`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``HEADERS`` frame flags."""</span>
 
     <span class="c1">#: ``END_STREAM`` flag.</span>
-    <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>   <span class="c1"># bit 0</span>
+    <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">'bool'</span>   <span class="c1"># bit 0</span>
     <span class="c1">#: ``END_HEADERS`` flag.</span>
-    <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 2</span>
+    <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">'bool'</span>  <span class="c1"># bit 2</span>
     <span class="c1">#: ``PADDED`` flag.</span>
-    <span class="n">PADDED</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>       <span class="c1"># bit 3</span>
+    <span class="n">PADDED</span><span class="p">:</span> <span class="s1">'bool'</span>       <span class="c1"># bit 3</span>
     <span class="c1">#: ``PRIORITY`` flag.</span>
-    <span class="n">PRIORITY</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>     <span class="c1"># bit 5</span>
+    <span class="n">PRIORITY</span><span class="p">:</span> <span class="s1">'bool'</span>     <span class="c1"># bit 5</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">PADDED</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">PRIORITY</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">PADDED</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">PRIORITY</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -525,23 +525,23 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.HeadersFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HeadersFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``HEADERS`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``HEADERS`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;HeadersFrameFlags&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'HeadersFrameFlags'</span>
     <span class="c1">#: Padded length.</span>
-    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Exclusive dependency.</span>
-    <span class="n">excl_dependency</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">excl_dependency</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Stream dependency.</span>
-    <span class="n">stream_dependency</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">stream_dependency</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Weight.</span>
-    <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Header block fragment.</span>
-    <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;HeadersFrameFlags&#39;</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">excl_dependency</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">stream_dependency</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'HeadersFrameFlags'</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">excl_dependency</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">stream_dependency</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -549,19 +549,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PriorityFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PriorityFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PRIORITY`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``PRIORITY`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'Literal[None]'</span>
     <span class="c1">#: Exclusive dependency.</span>
-    <span class="n">excl_dependency</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">excl_dependency</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Stream dependency.</span>
-    <span class="n">stream_dependency</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">stream_dependency</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Weight.</span>
-    <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">excl_dependency</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">stream_dependency</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Literal[None]'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">excl_dependency</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">stream_dependency</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -569,15 +569,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.RSTStreamFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RSTStreamFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``RST_STREAM`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``RST_STREAM`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'Literal[None]'</span>
     <span class="c1">#: Error code.</span>
-    <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;ErrorCode&#39;</span>
+    <span class="n">error</span><span class="p">:</span> <span class="s1">'ErrorCode'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Literal[None]'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -585,13 +585,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.SettingsFrameFlags">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SettingsFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``SETTINGS`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``SETTINGS`` frame flags."""</span>
 
     <span class="c1">#: ``ACK`` flag.</span>
-    <span class="n">ACK</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 0</span>
+    <span class="n">ACK</span><span class="p">:</span> <span class="s1">'bool'</span>  <span class="c1"># bit 0</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ACK</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ACK</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -599,15 +599,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.SettingsFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SettingsFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``SETTINGS`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``SETTINGS`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;SettingsFrameFlags&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'SettingsFrameFlags'</span>
     <span class="c1">#: Settings.</span>
-    <span class="n">settings</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Setting, int]&#39;</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Setting, int]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Optional[Flags]&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Setting, int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Optional[Flags]'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Setting, int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -615,15 +615,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PushPromiseFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PUSH_PROMISE`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``PUSH_PROMISE`` frame flags."""</span>
 
     <span class="c1">#: ``END_HEADERS`` flag.</span>
-    <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 2</span>
+    <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">'bool'</span>  <span class="c1"># bit 2</span>
     <span class="c1">#: ``PADDED`` flag.</span>
-    <span class="n">PADDED</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>       <span class="c1"># bit 3</span>
+    <span class="n">PADDED</span><span class="p">:</span> <span class="s1">'bool'</span>       <span class="c1"># bit 3</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">PADDED</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">PADDED</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -631,19 +631,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PushPromiseFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PushPromiseFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PUSH_PROMISE`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``PUSH_PROMISE`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;PushPromiseFrameFlags&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'PushPromiseFrameFlags'</span>
     <span class="c1">#: Padded length.</span>
-    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Promised stream ID.</span>
-    <span class="n">promised_sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">promised_sid</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Header block fragment.</span>
-    <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Optional[Flags]&#39;</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">promised_sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Optional[Flags]'</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">promised_sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -651,13 +651,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PingFrameFlags">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PingFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PING`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``PING`` frame flags."""</span>
 
     <span class="c1">#: ``ACK`` flag.</span>
-    <span class="n">ACK</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 0</span>
+    <span class="n">ACK</span><span class="p">:</span> <span class="s1">'bool'</span>  <span class="c1"># bit 0</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ACK</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ACK</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -665,15 +665,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PingFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PingFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PING`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``PING`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;PingFrameFlags&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'PingFrameFlags'</span>
     <span class="c1">#: Opaque data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Optional[Flags]&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Optional[Flags]'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -681,19 +681,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.GoawayFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">GoawayFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``GOAWAY`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``GOAWAY`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'Literal[None]'</span>
     <span class="c1">#: Last stream ID.</span>
-    <span class="n">last_sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">last_sid</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Error code.</span>
-    <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;ErrorCode&#39;</span>
+    <span class="n">error</span><span class="p">:</span> <span class="s1">'ErrorCode'</span>
     <span class="c1">#: Additional debug data.</span>
-    <span class="n">debug_data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">debug_data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Optional[Flags]&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">last_sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">debug_data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Optional[Flags]'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last_sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">debug_data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -701,15 +701,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.WindowUpdateFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">WindowUpdateFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data moddel for HTTP/2 ``WINDOW_UPDATE`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data moddel for HTTP/2 ``WINDOW_UPDATE`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'Literal[None]'</span>
     <span class="c1">#: Window size increment.</span>
-    <span class="n">increment</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">increment</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Optional[Flags]&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">increment</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Optional[Flags]'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">increment</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -717,13 +717,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ContinuationFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``CONTINUATION`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``CONTINUATION`` frame flags."""</span>
 
     <span class="c1">#: ``END_HEADERS`` flag.</span>
-    <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 2</span>
+    <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">'bool'</span>  <span class="c1"># bit 2</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -731,15 +731,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.ContinuationFrame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ContinuationFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``CONTINUATION`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for HTTP/2 ``CONTINUATION`` frame."""</span>
 
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;ContinuationFrameFlags&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'ContinuationFrameFlags'</span>
     <span class="c1">#: Header block fragment.</span>
-    <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Optional[Flags]&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Optional[Flags]'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

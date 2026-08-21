@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.reassembly.data.tcp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data models for TCP reassembly&quot;&quot;&quot;</span>
+<span class="sd">"""data models for TCP reassembly"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
@@ -400,8 +400,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="s1">&#39;DatagramID&#39;</span><span class="p">,</span> <span class="s1">&#39;Datagram&#39;</span><span class="p">,</span> <span class="s1">&#39;HoleDiscriptor&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Fragment&#39;</span><span class="p">,</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="s1">&#39;BufferID&#39;</span><span class="p">,</span>
+    <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'DatagramID'</span><span class="p">,</span> <span class="s1">'Datagram'</span><span class="p">,</span> <span class="s1">'HoleDiscriptor'</span><span class="p">,</span>
+    <span class="s1">'Fragment'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'BufferID'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -412,45 +412,45 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
 
-<span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_AT&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span>
+<span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_AT'</span><span class="p">,</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="s1">'IPv6Address'</span><span class="p">)</span>
 
 <span class="c1">#: Buffer ID.</span>
-<span class="n">BufferID</span><span class="p">:</span> <span class="s1">&#39;TypeAlias&#39;</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Packet">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Packet">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`TCP &lt;reasm.tcp.packet&gt;` packet representation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.packet&gt;` packet representation."""</span>
 
     <span class="c1">#: Buffer ID.</span>
-    <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;BufferID&#39;</span>
+    <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span>
     <span class="c1">#: Data sequence number.</span>
-    <span class="n">dsn</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Acknowledgment number.</span>
-    <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Original packet range number.</span>
-    <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Synchronise flag.</span>
-    <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Finish flag.</span>
-    <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Reset connection flag.</span>
-    <span class="n">rst</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Payload length, header excluded.</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: This sequence number.</span>
-    <span class="n">first</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Next (wanted) sequence number.</span>
-    <span class="n">last</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Raw :obj:`bytes` type header.</span>
-    <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Raw :obj:`bytearray` type payload.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;BufferID&#39;</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -458,17 +458,17 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.DatagramID">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`TCP &lt;reasm.tcp.datagram&gt;` original packet identifier.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.datagram&gt;` original packet identifier."""</span>
 
     <span class="c1">#: Source address.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;tuple[_AT, int]&#39;</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span>
     <span class="c1">#: Destination address.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;tuple[_AT, int]&#39;</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span>
     <span class="c1">#: Original packet ACK number.</span>
-    <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;tuple[_AT, int]&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;tuple[_AT, int]&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -476,29 +476,29 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Datagram</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`TCP &lt;reasm.tcp.datagram&gt;`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.datagram&gt;`."""</span>
 
     <span class="c1">#: Completed flag.</span>
-    <span class="n">completed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">completed</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Original packet identifier.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;DatagramID[_AT]&#39;</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span>
     <span class="c1">#: Packet numbers.</span>
-    <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
     <span class="c1">#: Initial TCP header.</span>
-    <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Reassembled payload (application layer data).</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | tuple[bytes, ...]&#39;</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span>
     <span class="c1">#: Parsed reassembled payload.</span>
-    <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[Protocol]&#39;</span>
+    <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="nd">@overload</span>  <span class="c1"># pylint: disable=used-before-assignment</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">&#39;Literal[True]&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;DatagramID[_AT]&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Literal[True]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Protocol'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 
         <span class="nd">@overload</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;DatagramID[_AT]&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes, ...]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;None&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Literal[False]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'None'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;DatagramID[_AT]&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | tuple[bytes, ...]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -506,15 +506,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HoleDiscriptor</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` hole descriptor.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` hole descriptor."""</span>
 
     <span class="c1">#: Start of hole.</span>
-    <span class="n">first</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Stop of hole.</span>
-    <span class="n">last</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -522,19 +522,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Fragment">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Fragment</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` ACK list fragment item.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` ACK list fragment item."""</span>
 
     <span class="c1">#: List of reassembled packets.</span>
-    <span class="n">ind</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span>
+    <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span>
     <span class="c1">#: ISN of payload buffer.</span>
-    <span class="n">isn</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">isn</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Length of payload buffer.</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
-    <span class="c1">#: Reassembled payload holes set to b&#39;\x00&#39;.</span>
-    <span class="n">raw</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reassembled payload holes set to b'\x00'.</span>
+    <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytearray'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">,</span> <span class="n">isn</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">isn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -542,17 +542,17 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Buffer">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` buffer entry.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` buffer entry."""</span>
 
     <span class="c1">#: Hole descriptor list.</span>
-    <span class="n">hdl</span><span class="p">:</span> <span class="s1">&#39;list[HoleDiscriptor]&#39;</span>
+    <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDiscriptor]'</span>
     <span class="c1">#: Initial TCP header.</span>
-    <span class="n">hdr</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">hdr</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: ACK list.</span>
-    <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;dict[int, Fragment]&#39;</span>
+    <span class="n">ack</span><span class="p">:</span> <span class="s1">'dict[int, Fragment]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdl</span><span class="p">:</span> <span class="s1">&#39;list[HoleDiscriptor]&#39;</span><span class="p">,</span> <span class="n">hdr</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;dict[int, Fragment]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDiscriptor]'</span><span class="p">,</span> <span class="n">hdr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'dict[int, Fragment]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

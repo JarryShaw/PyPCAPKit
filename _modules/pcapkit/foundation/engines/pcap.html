@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.engines.pcap</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;PCAP Support</span>
+<span class="sd">"""PCAP Support</span>
 <span class="sd">==================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.engines.pcap</span>
@@ -400,14 +400,14 @@
 <span class="sd">This module contains the implementation for PCAP file extraction</span>
 <span class="sd">support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span> <span class="k">as</span> <span class="n">Engine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PCAP&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'PCAP'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
@@ -417,28 +417,28 @@
 <div class="viewcode-block" id="PCAP">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcap.PCAP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PCAP</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="n">Frame</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;PCAP file extraction support.</span>
+<span class="w">    </span><span class="sd">"""PCAP file extraction support.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Global header.</span>
-        <span class="n">_gbhdr</span><span class="p">:</span> <span class="s1">&#39;Header&#39;</span>
+        <span class="n">_gbhdr</span><span class="p">:</span> <span class="s1">'Header'</span>
         <span class="c1">#: Version info.</span>
-        <span class="n">_vinfo</span><span class="p">:</span> <span class="s1">&#39;VersionInfo&#39;</span>
+        <span class="n">_vinfo</span><span class="p">:</span> <span class="s1">'VersionInfo'</span>
         <span class="c1">#: Data link layer protocol.</span>
-        <span class="n">_dlink</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span>
+        <span class="n">_dlink</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span>
         <span class="c1">#: Nanosecond flag.</span>
-        <span class="n">_nnsec</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="n">_nnsec</span><span class="p">:</span> <span class="s1">'bool'</span>
 
     <span class="n">MAGIC_NUMBER</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xa1\xb2\x3c\x4d</span><span class="s1">&#39;</span><span class="p">,</span>
-        <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xa1\xb2\xc3\xd4</span><span class="s1">&#39;</span><span class="p">,</span>
-        <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x4d\x3c\xb2\xa1</span><span class="s1">&#39;</span><span class="p">,</span>
-        <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xd4\xc3\xb2\xa1</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\x3c\x4d</span><span class="s1">'</span><span class="p">,</span>
+        <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\xc3\xd4</span><span class="s1">'</span><span class="p">,</span>
+        <span class="sa">b</span><span class="s1">'</span><span class="se">\x4d\x3c\xb2\xa1</span><span class="s1">'</span><span class="p">,</span>
+        <span class="sa">b</span><span class="s1">'</span><span class="se">\xd4\xc3\xb2\xa1</span><span class="s1">'</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
@@ -446,33 +446,33 @@
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: Engine name.</span>
-    <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">&#39;PCAP&#39;</span>
+    <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">'PCAP'</span>
 
     <span class="c1">#: Engine module name.</span>
-    <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">&#39;pcapkit.protocols.misc.pcap&#39;</span>
+    <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">'pcapkit.protocols.misc.pcap'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Header&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Global header.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Header'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Global header."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;VersionInfo&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Version of input PCAP file.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'VersionInfo'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Version of input PCAP file."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vinfo</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">dlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Data link layer protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_LinkType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Data link layer protocol."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">nanosecond</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Nanosecond flag.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nanosecond</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Nanosecond flag."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nnsec</span>
 
     <span class="c1">##########################################################################</span>
@@ -481,8 +481,8 @@
 
 <div class="viewcode-block" id="PCAP.run">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcap.PCAP.run">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start extraction.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Start extraction.</span>
 
 <span class="sd">        This method is the entry point for PCAP file extraction. It will start</span>
 <span class="sd">        the extraction process by parsing the PCAP global header and then halt</span>
@@ -498,7 +498,7 @@
 <span class="sd">        For output, the method will dump the parsed PCAP global header under</span>
 <span class="sd">        the name of ``Global Header``.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># pylint: disable=attribute-defined-outside-init,protected-access</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
@@ -511,18 +511,18 @@
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
-            <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/Global Header.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Global Header&#39;</span><span class="p">)</span>
+            <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/Global Header.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">'Global Header'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Global Header&#39;</span><span class="p">)</span>
+            <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">'Global Header'</span><span class="p">)</span>
             <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_offmt</span> <span class="o">=</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span></div>
 
 
 <div class="viewcode-block" id="PCAP.read_frame">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcap.PCAP.read_frame">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Frame&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read frames.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Frame'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read frames.</span>
 
 <span class="sd">        This method performs following operations:</span>
 
@@ -536,7 +536,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed frame instance.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">tcp_reassembly</span><span class="p">,</span>
                                           <span class="n">tcp_traceflow</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
@@ -550,10 +550,10 @@
         <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
 
         <span class="c1"># write plist</span>
-        <span class="n">frnum</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">frnum</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
-                <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">frnum</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">frnum</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="n">ofile</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>

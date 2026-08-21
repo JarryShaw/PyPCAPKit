@@ -392,13 +392,13 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;base class for data models&quot;&quot;&quot;</span>
+<span class="sd">"""base class for data models"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Data&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Data'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span>
@@ -409,15 +409,15 @@
 <div class="viewcode-block" id="Data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.data.data.Data">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for data models.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Base class for data models."""</span>
 
-    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__next_name__&#39;</span><span class="p">,</span> <span class="s1">&#39;__next_type__&#39;</span><span class="p">]</span>
+    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__next_name__'</span><span class="p">,</span> <span class="s1">'__next_type__'</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Next field name, i.e., the name of the payload field.</span>
-        <span class="n">__next_name__</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="n">__next_name__</span><span class="p">:</span> <span class="s1">'str'</span>
         <span class="c1">#: Next field type, i.e., the type of the payload field.</span>
-        <span class="n">__next_type__</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span></div>
+        <span class="n">__next_type__</span><span class="p">:</span> <span class="s1">'Type[Protocol]'</span></div>
 
 </pre></div>
         </article>

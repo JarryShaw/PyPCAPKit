@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.const.tcp.flags</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
-<span class="sd">&quot;&quot;&quot;TCP Header Flags</span>
+<span class="sd">"""TCP Header Flags</span>
 <span class="sd">======================</span>
 
 <span class="sd">.. module:: pcapkit.const.tcp.flags</span>
@@ -401,7 +401,7 @@
 <span class="sd">This module contains the constant enumeration for **TCP Header Flags**,</span>
 <span class="sd">which is automatically generated from :class:`pcapkit.vendor.tcp.flags.Flags`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -410,12 +410,12 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Flags&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Flags'</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Flags">
 <a class="viewcode-back" href="../../../../pcapkit/const/tcp.html#pcapkit.const.tcp.flags.Flags">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;[Flags] TCP Header Flags&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""[Flags] TCP Header Flags"""</span>
 
     <span class="c1">#: Reserved for future use [:rfc:`9293`]</span>
     <span class="n">Reserved_4</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
@@ -454,15 +454,15 @@
     <span class="n">FIN</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">15</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Flags&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Flags'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item.</span>
 <span class="sd">            default: Default value if not found.</span>
 
 <span class="sd">        :meta private:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">Flags</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Flags</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>

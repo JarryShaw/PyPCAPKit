@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.const.reg.transtype</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
-<span class="sd">&quot;&quot;&quot;Transport Layer Protocol Numbers</span>
+<span class="sd">"""Transport Layer Protocol Numbers</span>
 <span class="sd">======================================</span>
 
 <span class="sd">.. module:: pcapkit.const.reg.transtype</span>
@@ -401,17 +401,17 @@
 <span class="sd">This module contains the constant enumeration for **Transport Layer Protocol Numbers**,</span>
 <span class="sd">which is automatically generated from :class:`pcapkit.vendor.reg.transtype.TransType`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TransType&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TransType'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="TransType">
 <a class="viewcode-back" href="../../../../pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TransType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;[TransType] Transport Layer Protocol Numbers&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""[TransType] Transport Layer Protocol Numbers"""</span>
 
     <span class="c1">#: IPv6 Hop-by-Hop Option [:rfc:`8200`]</span>
     <span class="n">HOPOPT</span> <span class="o">=</span> <span class="mi">0</span>
@@ -450,8 +450,8 @@
     <span class="c1">#: Network Voice Protocol [:rfc:`741`][Steve Casner]</span>
     <span class="n">NVP_II</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: PUP [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, &quot;PUP: An Internetwork</span>
-    <span class="c1">#: Architecture&quot;, XEROX Palo Alto Research Center, CSL-79-10, July 1979; also</span>
+    <span class="c1">#: PUP [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, "PUP: An Internetwork</span>
+    <span class="c1">#: Architecture", XEROX Palo Alto Research Center, CSL-79-10, July 1979; also</span>
     <span class="c1">#: in IEEE Transactions on Communication, Volume COM-28, Number 4, April</span>
     <span class="c1">#: 1980.][XEROX]</span>
     <span class="n">PUP</span> <span class="o">=</span> <span class="mi">12</span>
@@ -462,8 +462,8 @@
     <span class="c1">#: EMCON [Bich Nguyen]</span>
     <span class="n">EMCON</span> <span class="o">=</span> <span class="mi">14</span>
 
-    <span class="c1">#: Cross Net Debugger [Haverty, J., &quot;XNET Formats for Internet Protocol Version</span>
-    <span class="c1">#: 4&quot;, IEN 158, October 1980.][Jack Haverty]</span>
+    <span class="c1">#: Cross Net Debugger [Haverty, J., "XNET Formats for Internet Protocol Version</span>
+    <span class="c1">#: 4", IEN 158, October 1980.][Jack Haverty]</span>
     <span class="n">XNET</span> <span class="o">=</span> <span class="mi">15</span>
 
     <span class="c1">#: Chaos [J Noel Chiappa]</span>
@@ -472,7 +472,7 @@
     <span class="c1">#: User Datagram [:rfc:`768`][Jon Postel]</span>
     <span class="n">UDP</span> <span class="o">=</span> <span class="mi">17</span>
 
-    <span class="c1">#: Multiplexing [Cohen, D. and J. Postel, &quot;Multiplexing Protocol&quot;, IEN 90,</span>
+    <span class="c1">#: Multiplexing [Cohen, D. and J. Postel, "Multiplexing Protocol", IEN 90,</span>
     <span class="c1">#: USC/Information Sciences Institute, May 1979.][Jon Postel]</span>
     <span class="n">MUX</span> <span class="o">=</span> <span class="mi">18</span>
 
@@ -485,14 +485,14 @@
     <span class="c1">#: Packet Radio Measurement [Zaw Sing Su]</span>
     <span class="n">PRM</span> <span class="o">=</span> <span class="mi">21</span>
 
-    <span class="c1">#: XEROX NS IDP [&quot;The Ethernet, A Local Area Network: Data Link Layer and</span>
-    <span class="c1">#: Physical Layer Specification&quot;, AA-K759B-TK, Digital Equipment Corporation,</span>
-    <span class="c1">#: Maynard, MA. Also as: &quot;The Ethernet - A Local Area Network&quot;, Version 1.0,</span>
+    <span class="c1">#: XEROX NS IDP ["The Ethernet, A Local Area Network: Data Link Layer and</span>
+    <span class="c1">#: Physical Layer Specification", AA-K759B-TK, Digital Equipment Corporation,</span>
+    <span class="c1">#: Maynard, MA. Also as: "The Ethernet - A Local Area Network", Version 1.0,</span>
     <span class="c1">#: Digital Equipment Corporation, Intel Corporation, Xerox Corporation,</span>
-    <span class="c1">#: September 1980. And: &quot;The Ethernet, A Local Area Network: Data Link Layer</span>
-    <span class="c1">#: and Physical Layer Specifications&quot;, Digital, Intel and Xerox, November 1982.</span>
-    <span class="c1">#: And: XEROX, &quot;The Ethernet, A Local Area Network: Data Link Layer and</span>
-    <span class="c1">#: Physical Layer Specification&quot;, X3T51/80-50, Xerox Corporation, Stamford,</span>
+    <span class="c1">#: September 1980. And: "The Ethernet, A Local Area Network: Data Link Layer</span>
+    <span class="c1">#: and Physical Layer Specifications", Digital, Intel and Xerox, November 1982.</span>
+    <span class="c1">#: And: XEROX, "The Ethernet, A Local Area Network: Data Link Layer and</span>
+    <span class="c1">#: Physical Layer Specification", X3T51/80-50, Xerox Corporation, Stamford,</span>
     <span class="c1">#: CT., October 1980.][XEROX]</span>
     <span class="n">XNS_IDP</span> <span class="o">=</span> <span class="mi">22</span>
 
@@ -520,8 +520,8 @@
     <span class="c1">#: Bulk Data Transfer Protocol [:rfc:`969`][David Clark]</span>
     <span class="n">NETBLT</span> <span class="o">=</span> <span class="mi">30</span>
 
-    <span class="c1">#: MFE Network Services Protocol [Shuttleworth, B., &quot;A Documentary of MFENet, a</span>
-    <span class="c1">#: National Computer Network&quot;, UCRL-52317, Lawrence Livermore Labs, Livermore,</span>
+    <span class="c1">#: MFE Network Services Protocol [Shuttleworth, B., "A Documentary of MFENet, a</span>
+    <span class="c1">#: National Computer Network", UCRL-52317, Lawrence Livermore Labs, Livermore,</span>
     <span class="c1">#: California, June 1977.][Barry Howard]</span>
     <span class="n">MFE_NSP</span> <span class="o">=</span> <span class="mi">31</span>
 
@@ -616,7 +616,7 @@
     <span class="c1">#: any host internal protocol [Internet Assigned Numbers Authority]</span>
     <span class="n">any_host_internal_protocol</span> <span class="o">=</span> <span class="mi">61</span>
 
-    <span class="c1">#: CFTP [Forsdick, H., &quot;CFTP&quot;, Network Message, Bolt Beranek and Newman,</span>
+    <span class="c1">#: CFTP [Forsdick, H., "CFTP", Network Message, Bolt Beranek and Newman,</span>
     <span class="c1">#: January 1982.][Harry Forsdick]</span>
     <span class="n">CFTP</span> <span class="o">=</span> <span class="mi">62</span>
 
@@ -689,8 +689,8 @@
     <span class="c1">#: NSFNET-IGP [Hans Werner Braun]</span>
     <span class="n">NSFNET_IGP</span> <span class="o">=</span> <span class="mi">85</span>
 
-    <span class="c1">#: Dissimilar Gateway Protocol [M/A-COM Government Systems, &quot;Dissimilar Gateway</span>
-    <span class="c1">#: Protocol Specification, Draft Version&quot;, Contract no. CS901145, November 16,</span>
+    <span class="c1">#: Dissimilar Gateway Protocol [M/A-COM Government Systems, "Dissimilar Gateway</span>
+    <span class="c1">#: Protocol Specification, Draft Version", Contract no. CS901145, November 16,</span>
     <span class="c1">#: 1987.][Mike Little]</span>
     <span class="n">DGP</span> <span class="o">=</span> <span class="mi">86</span>
 
@@ -703,7 +703,7 @@
     <span class="c1">#: OSPFIGP [:rfc:`1583`][:rfc:`2328`][:rfc:`5340`][John Moy]</span>
     <span class="n">OSPFIGP</span> <span class="o">=</span> <span class="mi">89</span>
 
-    <span class="c1">#: Sprite RPC Protocol [Welch, B., &quot;The Sprite Remote Procedure Call System&quot;,</span>
+    <span class="c1">#: Sprite RPC Protocol [Welch, B., "The Sprite Remote Procedure Call System",</span>
     <span class="c1">#: Technical Report, UCB/Computer Science Dept., 86/302, University of</span>
     <span class="c1">#: California at Berkeley, June 1986.][Bruce Willins]</span>
     <span class="n">Sprite_RPC</span> <span class="o">=</span> <span class="mi">90</span>
@@ -890,15 +890,15 @@
     <span class="n">Reserved_255</span> <span class="o">=</span> <span class="mi">255</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TransType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TransType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item.</span>
 <span class="sd">            default: Default value if not found.</span>
 
 <span class="sd">        :meta private:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">TransType</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TransType</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
@@ -908,18 +908,18 @@
 <div class="viewcode-block" id="TransType._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType._missing_">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TransType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TransType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to get enum item.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">if</span> <span class="mi">148</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">252</span><span class="p">:</span>
             <span class="c1">#: Unassigned [Internet Assigned Numbers Authority]</span>
-            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>
 

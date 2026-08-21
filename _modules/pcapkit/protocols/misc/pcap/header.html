@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.misc.pcap.header</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Global Header</span>
+<span class="sd">"""Global Header</span>
 <span class="sd">===================</span>
 
 <span class="sd">.. module:: pcapkit.protocols.misc.pcap.header</span>
@@ -416,7 +416,7 @@
 
 <span class="sd">.. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Global_Header</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -437,7 +437,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Header&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Header'</span><span class="p">]</span>
 
 <span class="c1">#: dict[tuple[str, bool], bytes]: Mapping of PCAP file magic numbers. The key</span>
 <span class="c1">#: is a :obj:`tuple` of endianness (``big`` or ``little``) and nanosecond-</span>
@@ -445,10 +445,10 @@
 <span class="c1">#: timestamp, :data:`False` refers to microsecond-resolution timestamp); the</span>
 <span class="c1">#: value is the corresponding PCAP file magic number sequence.</span>
 <span class="n">_MAGIC_NUM</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="p">(</span><span class="s1">&#39;big&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>      <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xa1\xb2\x3c\x4d</span><span class="s1">&#39;</span><span class="p">,</span>
-    <span class="p">(</span><span class="s1">&#39;big&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>     <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xa1\xb2\xc3\xd4</span><span class="s1">&#39;</span><span class="p">,</span>
-    <span class="p">(</span><span class="s1">&#39;little&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>   <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x4d\x3c\xb2\xa1</span><span class="s1">&#39;</span><span class="p">,</span>
-    <span class="p">(</span><span class="s1">&#39;little&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>  <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xd4\xc3\xb2\xa1</span><span class="s1">&#39;</span><span class="p">,</span>
+    <span class="p">(</span><span class="s1">'big'</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>      <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\x3c\x4d</span><span class="s1">'</span><span class="p">,</span>
+    <span class="p">(</span><span class="s1">'big'</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>     <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\xc3\xd4</span><span class="s1">'</span><span class="p">,</span>
+    <span class="p">(</span><span class="s1">'little'</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>   <span class="sa">b</span><span class="s1">'</span><span class="se">\x4d\x3c\xb2\xa1</span><span class="s1">'</span><span class="p">,</span>
+    <span class="p">(</span><span class="s1">'little'</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>  <span class="sa">b</span><span class="s1">'</span><span class="se">\xd4\xc3\xb2\xa1</span><span class="s1">'</span><span class="p">,</span>
 <span class="p">}</span>
 
 
@@ -456,60 +456,60 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Header</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">Data_Header</span><span class="p">,</span> <span class="n">Schema_Header</span><span class="p">],</span>
              <span class="n">schema</span><span class="o">=</span><span class="n">Schema_Header</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_Header</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;PCAP file global header extractor.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""PCAP file global header extractor."""</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Global Header&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;Global Header&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["Global Header"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of corresponding protocol."""</span>
+        <span class="k">return</span> <span class="s1">'Global Header'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[24]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of corresponding protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[24]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header length of corresponding protocol."""</span>
         <span class="k">return</span> <span class="mi">24</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;VersionInfo&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Version information of input PCAP file.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'VersionInfo'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Version information of input PCAP file."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">version</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Payload of current instance.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Payload of current instance.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            UnsupportedCall: This protocol doesn&#39;t support :attr:`payload`.</span>
+<span class="sd">            UnsupportedCall: This protocol doesn't support :attr:`payload`.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">&quot;&#39;Header&#39; object has no attribute &#39;payload&#39;&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Header' object has no attribute 'payload'"</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Data link type.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_LinkType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Data link type."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">network</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol chain of current instance.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Protocol chain of current instance.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            UnsupportedCall: This protocol doesn&#39;t support :attr:`protochain`.</span>
+<span class="sd">            UnsupportedCall: This protocol doesn't support :attr:`protochain`.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">&quot;&#39;Header&#39; object has no attribute &#39;protochain&#39;&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Header' object has no attribute 'protochain'"</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">byteorder</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header byte order.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">byteorder</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["big", "little"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header byte order."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">nanosecond</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Nanosecond-resolution flag.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Nanosecond-resolution flag."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span>
 
     <span class="c1">##########################################################################</span>
@@ -518,8 +518,8 @@
 
 <div class="viewcode-block" id="Header.read">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Header&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read global header of PCAP file.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Header'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read global header of PCAP file.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            PCAP file has **four** different valid magic numbers.</span>
@@ -539,26 +539,26 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            FileError: If the magic number is invalid.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="n">_magn</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">magic_number</span>
-        <span class="k">if</span> <span class="n">_magn</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xd4\xc3\xb2\xa1</span><span class="s1">&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_magn</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\xd4\xc3\xb2\xa1</span><span class="s1">'</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="s1">&#39;little&#39;</span>
-        <span class="k">elif</span> <span class="n">_magn</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xa1\xb2\xc3\xd4</span><span class="s1">&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="s1">'little'</span>
+        <span class="k">elif</span> <span class="n">_magn</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\xc3\xd4</span><span class="s1">'</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="s1">&#39;big&#39;</span>
-        <span class="k">elif</span> <span class="n">_magn</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x4d\x3c\xb2\xa1</span><span class="s1">&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="s1">'big'</span>
+        <span class="k">elif</span> <span class="n">_magn</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x4d\x3c\xb2\xa1</span><span class="s1">'</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="s1">&#39;little&#39;</span>
-        <span class="k">elif</span> <span class="n">_magn</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xa1\xb2\x3c\x4d</span><span class="s1">&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="s1">'little'</span>
+        <span class="k">elif</span> <span class="n">_magn</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\x3c\x4d</span><span class="s1">'</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="s1">&#39;big&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="s1">'big'</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FileError</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;Unknown file format&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="k">raise</span> <span class="n">FileError</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">'Unknown file format'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span>
 
         <span class="n">header</span> <span class="o">=</span> <span class="n">Data_Header</span><span class="p">(</span>
             <span class="n">magic_number</span><span class="o">=</span><span class="n">Data_MagicNumber</span><span class="p">(</span>
@@ -579,21 +579,21 @@
 <div class="viewcode-block" id="Header.make">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
-             <span class="n">lilendian</span><span class="p">:</span> <span class="s1">&#39;Optional[bool]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">bigendian</span><span class="p">:</span> <span class="s1">&#39;Optional[bool]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+             <span class="n">lilendian</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">bigendian</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;tuple[int, int] | VersionInfo&#39;</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-             <span class="n">version_major</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">version_minor</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">version</span><span class="p">:</span> <span class="s1">'tuple[int, int] | VersionInfo'</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+             <span class="n">version_major</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">version_minor</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">thiszone</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigfigs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">snaplen</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x40_000</span><span class="p">,</span>
-             <span class="n">network</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NULL</span><span class="p">,</span>
-             <span class="n">network_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">network_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">network</span><span class="p">:</span> <span class="s1">'Enum_LinkType | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NULL</span><span class="p">,</span>
+             <span class="n">network_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">network_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">network_reversed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_Header&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Header'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            byteorder: header byte order</span>
@@ -615,7 +615,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># make magic number</span>
         <span class="n">magic_number</span><span class="p">,</span> <span class="n">lilendian</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_magic</span><span class="p">(</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">lilendian</span><span class="p">,</span> <span class="n">bigendian</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)</span>
 
@@ -641,15 +641,15 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes] | bytes&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 
 <div class="viewcode-block" id="Header.__post_init__">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header.__post_init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes] | bytes]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                      <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Post initialisation hook.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: Source packet stream.</span>
@@ -659,7 +659,7 @@
 <span class="sd">        See Also:</span>
 <span class="sd">            For construction argument, please refer to :meth:`make`.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -669,31 +669,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_data</span>
         <span class="c1">#: io.BytesIO: Source packet stream.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">):</span>  <span class="c1"># set back source filename</span>
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">):</span>  <span class="c1"># set back source filename</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span>
         <span class="c1">#: pcapkit.corekit.infoclass.Info: Parsed packet data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[24]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total length of corresponding protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[24]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Total length of corresponding protocol."""</span>
         <span class="k">return</span> <span class="mi">24</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[24]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[24]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
         <span class="k">return</span> <span class="mi">24</span>
 
 <div class="viewcode-block" id="Header.__index__">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header.__index__">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Numeral registry index of the protocol.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer&#39;</span><span class="p">)</span></div>
+<span class="sd">        """</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer'</span><span class="p">)</span></div>
 
 
     <span class="c1">##########################################################################</span>
@@ -703,8 +703,8 @@
 <div class="viewcode-block" id="Header._make_data">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_Header&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_Header'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
@@ -712,20 +712,20 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">&#39;magic_number&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-            <span class="s1">&#39;version_major&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">major</span><span class="p">,</span>
-            <span class="s1">&#39;version_minor&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">minor</span><span class="p">,</span>
-            <span class="s1">&#39;thiszone&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">thiszone</span><span class="p">,</span>
-            <span class="s1">&#39;sigfigs&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sigfigs</span><span class="p">,</span>
-            <span class="s1">&#39;snaplen&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">snaplen</span><span class="p">,</span>
-            <span class="s1">&#39;network&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
+            <span class="s1">'magic_number'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="s1">'version_major'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">major</span><span class="p">,</span>
+            <span class="s1">'version_minor'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">minor</span><span class="p">,</span>
+            <span class="s1">'thiszone'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">thiszone</span><span class="p">,</span>
+            <span class="s1">'sigfigs'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sigfigs</span><span class="p">,</span>
+            <span class="s1">'snaplen'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">snaplen</span><span class="p">,</span>
+            <span class="s1">'network'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
         <span class="p">}</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_LinkType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read next layer protocol type.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            size: buffer size</span>
@@ -733,15 +733,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Link layer protocol enumeration.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">_prot</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_prot</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_magic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
-                    <span class="n">lilendian</span><span class="p">:</span> <span class="s1">&#39;Optional[bool]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bigendian</span><span class="p">:</span> <span class="s1">&#39;Optional[bool]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[bytes, bool]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate magic number.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_magic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+                    <span class="n">lilendian</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bigendian</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[bytes, bool]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Generate magic number.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            byteorder: header byte order</span>
@@ -752,20 +752,20 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Magic number and little-endian flag.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">lilendian</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bigendian</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">lilendian</span> <span class="o">==</span> <span class="n">bigendian</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="s1">&#39;unresolved byte order&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="s1">'unresolved byte order'</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">bigendian</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">&#39;big&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)],</span> <span class="kc">False</span>
+                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">'big'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)],</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">lilendian</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">&#39;little&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)],</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">'little'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)],</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="n">byteorder</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;little&#39;</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown byte order: </span><span class="si">{</span><span class="n">byteorder</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">byteorder</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'little'</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown byte order: </span><span class="si">{</span><span class="n">byteorder</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="n">magic_number</span> <span class="o">=</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="n">magic_number</span><span class="p">,</span> <span class="p">(</span><span class="n">byteorder</span> <span class="o">==</span> <span class="s1">&#39;little&#39;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">magic_number</span><span class="p">,</span> <span class="p">(</span><span class="n">byteorder</span> <span class="o">==</span> <span class="s1">'little'</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

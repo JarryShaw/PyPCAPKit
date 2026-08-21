@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.vendor.http.method</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;HTTP Method</span>
+<span class="sd">"""HTTP Method</span>
 <span class="sd">=================</span>
 
 <span class="sd">.. module:: pcapkit.vendor.http.method</span>
@@ -400,7 +400,7 @@
 <span class="sd">This module contains the vendor crawler for **HTTP Method**,</span>
 <span class="sd">which is automatically generating :class:`pcapkit.const.http.method.Method`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -411,21 +411,21 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Method&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Method'</span><span class="p">]</span>
 
 <span class="c1">#: Default constant template of enumerate registry from IANA CSV.</span>
-<span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'''</span><span class="se">\</span>
 <span class="s1"># -*- coding: utf-8 -*-</span>
 <span class="s1"># pylint: disable=line-too-long,consider-using-f-string</span>
-<span class="s1">&quot;&quot;&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; [&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span>
-<span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
+<span class="s1">"""</span><span class="si">{</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' ['</span><span class="p">,</span><span class="w"> </span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span>
+<span class="si">{</span><span class="s1">'='</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
 
-<span class="s1">.. module:: </span><span class="si">{</span><span class="n">MODL</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;vendor&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;const&#39;</span><span class="p">)</span><span class="si">}</span>
+<span class="s1">.. module:: </span><span class="si">{</span><span class="n">MODL</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'vendor'</span><span class="p">,</span><span class="w"> </span><span class="s1">'const'</span><span class="p">)</span><span class="si">}</span>
 
 <span class="s1">This module contains the constant enumeration for **</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">**,</span>
 <span class="s1">which is automatically generated from :class:`</span><span class="si">{</span><span class="n">MODL</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">`.</span>
 
-<span class="s1">&quot;&quot;&quot;</span>
+<span class="s1">"""</span>
 
 <span class="s1">from typing import TYPE_CHECKING</span>
 
@@ -434,19 +434,19 @@
 <span class="s1">if TYPE_CHECKING:</span>
 <span class="s1">    from typing import Optional, Type</span>
 
-<span class="s1">__all__ = [&#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;]</span>
+<span class="s1">__all__ = ['</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(StrEnum):</span>
-<span class="s1">    &quot;&quot;&quot;[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">&quot;&quot;&quot;</span>
+<span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">"""</span>
 
 <span class="s1">    if TYPE_CHECKING:</span>
 <span class="s1">        #: Safe method.</span>
-<span class="s1">        safe: &#39;bool&#39;</span>
+<span class="s1">        safe: 'bool'</span>
 <span class="s1">        #: Idempotent method.</span>
-<span class="s1">        idempotent: &#39;bool&#39;</span>
+<span class="s1">        idempotent: 'bool'</span>
 
-<span class="s1">    def __new__(cls, value: &#39;str&#39;, safe: &#39;bool&#39; = False,</span>
-<span class="s1">                idempotent: &#39;bool&#39; = False) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
+<span class="s1">    def __new__(cls, value: 'str', safe: 'bool' = False,</span>
+<span class="s1">                idempotent: 'bool' = False) -&gt; 'Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]':</span>
 <span class="s1">        obj = str.__new__(cls)</span>
 <span class="s1">        obj._value_ = value</span>
 
@@ -455,47 +455,47 @@
 
 <span class="s1">        return obj</span>
 
-<span class="s1">    def __repr__(self) -&gt; &#39;str&#39;:</span>
-<span class="s1">        return &quot;&lt;%s.%s&gt;&quot; % (self.__class__.__name__, self._value_)</span>
+<span class="s1">    def __repr__(self) -&gt; 'str':</span>
+<span class="s1">        return "&lt;%s.%s&gt;" % (self.__class__.__name__, self._value_)</span>
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
 <span class="s1">    @staticmethod</span>
-<span class="s1">    def get(key: &#39;str&#39;, default: &#39;Optional[str]&#39; = None) -&gt; &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;:</span>
-<span class="s1">        &quot;&quot;&quot;Backport support for original codes.</span>
+<span class="s1">    def get(key: 'str', default: 'Optional[str]' = None) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Backport support for original codes.</span>
 
 <span class="s1">        Args:</span>
 <span class="s1">            key: Key to get enum item.</span>
 <span class="s1">            default: Default value if not found.</span>
 
 <span class="s1">        :meta private:</span>
-<span class="s1">        &quot;&quot;&quot;</span>
+<span class="s1">        """</span>
 <span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
 <span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key.upper(), default if default is not None else key)</span>
 <span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
 
 <span class="s1">    @classmethod</span>
-<span class="s1">    def _missing_(cls, value: &#39;str&#39;) -&gt; &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;:</span>
-<span class="s1">        &quot;&quot;&quot;Lookup function used when value is not found.</span>
+<span class="s1">    def _missing_(cls, value: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Lookup function used when value is not found.</span>
 
 <span class="s1">        Args:</span>
 <span class="s1">            value: Value to get enum item.</span>
 
-<span class="s1">        &quot;&quot;&quot;</span>
+<span class="s1">        """</span>
 <span class="s1">        return extend_enum(cls, value.upper(), value)</span>
-<span class="s1">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str], str]</span>
+<span class="s1">'''</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str], str]</span>
 
 
 <div class="viewcode-block" id="Method">
 <a class="viewcode-back" href="../../../../pcapkit/vendor/http.html#pcapkit.vendor.http.method.Method">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Method</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;HTTP Method&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""HTTP Method"""</span>
 
     <span class="c1">#: Link to registry.</span>
-    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://www.iana.org/assignments/http-methods/methods.csv&#39;</span>
+    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.iana.org/assignments/http-methods/methods.csv'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process CSV data.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[str]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Process CSV data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: CSV data.</span>
@@ -503,14 +503,14 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Enumeration fields.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>  <span class="c1"># header</span>
 
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">meth</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">meth</span> <span class="o">==</span> <span class="s1">'*'</span><span class="p">:</span>
                 <span class="k">continue</span>
 
             <span class="n">safe</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -518,32 +518,32 @@
             <span class="n">rfcs</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
 
             <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-            <span class="k">for</span> <span class="n">rfc</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\[|\]&#39;</span><span class="p">,</span> <span class="n">rfcs</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="s1">&#39;RFC&#39;</span> <span class="ow">in</span> <span class="n">rfc</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]):</span>
-                    <span class="c1">#temp.append(f&#39;[{rfc[:3]} {rfc[3:]}]&#39;)</span>
-                    <span class="n">temp_split</span> <span class="o">=</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">rfc</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[|\]'</span><span class="p">,</span> <span class="n">rfcs</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="s1">'RFC'</span> <span class="ow">in</span> <span class="n">rfc</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\d+'</span><span class="p">,</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]):</span>
+                    <span class="c1">#temp.append(f'[{rfc[:3]} {rfc[3:]}]')</span>
+                    <span class="n">temp_split</span> <span class="o">=</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">', '</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp_split</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[:rfc:`</span><span class="si">{</span><span class="n">temp_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">#</span><span class="si">{</span><span class="n">temp_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">`]&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">))</span>
+                        <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[:rfc:`</span><span class="si">{</span><span class="n">temp_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">#</span><span class="si">{</span><span class="n">temp_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">`]'</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' '</span><span class="p">,</span> <span class="s1">'-'</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[:rfc:`</span><span class="si">{</span><span class="n">temp_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">`]&#39;</span><span class="p">)</span>
+                        <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[:rfc:`</span><span class="si">{</span><span class="n">temp_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">`]'</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">rfc</span><span class="si">}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">))</span>
-            <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\r*\n&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>  <span class="c1"># pylint: disable=consider-using-f-string</span>
-                <span class="n">meth</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="k">if</span> <span class="n">rfcs</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                    <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[</span><span class="si">{</span><span class="n">rfc</span><span class="si">}</span><span class="s1">]'</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'_'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">))</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\r*\n'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">,</span> <span class="s1">'</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span>  <span class="c1"># pylint: disable=consider-using-f-string</span>
+                <span class="n">meth</span><span class="p">,</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="k">if</span> <span class="n">rfcs</span> <span class="k">else</span> <span class="s1">''</span><span class="p">,</span>
             <span class="p">),</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">))</span>
 
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-            <span class="n">safe_flag</span> <span class="o">=</span> <span class="s1">&#39;True&#39;</span> <span class="k">if</span> <span class="n">safe</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span> <span class="k">else</span> <span class="s1">&#39;False&#39;</span>
-            <span class="n">idem_flag</span> <span class="o">=</span> <span class="s1">&#39;True&#39;</span> <span class="k">if</span> <span class="n">idem</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span> <span class="k">else</span> <span class="s1">&#39;False&#39;</span>
+            <span class="n">safe_flag</span> <span class="o">=</span> <span class="s1">'True'</span> <span class="k">if</span> <span class="n">safe</span> <span class="o">==</span> <span class="s1">'yes'</span> <span class="k">else</span> <span class="s1">'False'</span>
+            <span class="n">idem_flag</span> <span class="o">=</span> <span class="s1">'True'</span> <span class="k">if</span> <span class="n">idem</span> <span class="o">==</span> <span class="s1">'yes'</span> <span class="k">else</span> <span class="s1">'False'</span>
 
-            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">meth</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">safe_flag</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">idem_flag</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">meth</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">safe_flag</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">idem_flag</span><span class="si">}</span><span class="s2">"</span>
+            <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span>
 
-            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate constant context.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Generate constant context.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: CSV data.</span>
@@ -551,15 +551,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constant context.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">enum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">ENUM</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">    &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">enum</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">ENUM</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\n\n</span><span class="s1">    '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">enum</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span></div>
 
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">Method</span><span class="p">())</span>  <span class="c1"># type: ignore[arg-type]</span>
 </pre></div>
         </article>

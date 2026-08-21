@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.engines.scapy</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Scapy Support</span>
+<span class="sd">"""Scapy Support</span>
 <span class="sd">===================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.engines.scapy</span>
@@ -402,14 +402,14 @@
 
 <span class="sd">.. _Scapy: https://scapy.net</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span> <span class="k">as</span> <span class="n">Engine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">warn</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Scapy&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Scapy'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
@@ -421,40 +421,40 @@
 
 <div class="viewcode-block" id="Scapy">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Scapy</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">&#39;ScapyPacket&#39;</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scapy engine support.</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Scapy</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">'ScapyPacket'</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""Scapy engine support.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">scapy.sendrecv</span>
 
         <span class="c1">#: Engine extraction package.</span>
-        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">&#39;scapy.sendrecv&#39;</span>
+        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'scapy.sendrecv'</span>
         <span class="c1">#: Engine extraction temporary storage.</span>
-        <span class="n">_extmp</span><span class="p">:</span> <span class="s1">&#39;Iterator[ScapyPacket]&#39;</span>
+        <span class="n">_extmp</span><span class="p">:</span> <span class="s1">'Iterator[ScapyPacket]'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: Engine name.</span>
-    <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">&#39;Scapy&#39;</span>
+    <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">'Scapy'</span>
 
     <span class="c1">#: Engine module name.</span>
-    <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">&#39;scapy&#39;</span>
+    <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">'scapy'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">'Extractor'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sendrecv</span> <span class="k">as</span> <span class="n">scapy</span>  <span class="c1"># isort:skip</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">scapy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Iterator[ScapyPacket]&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Iterator[ScapyPacket]'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span>
 
@@ -464,8 +464,8 @@
 
 <div class="viewcode-block" id="Scapy.run">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy.run">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call :func:`scapy.sendrecv.sniff` to extract PCAP files.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Call :func:`scapy.sendrecv.sniff` to extract PCAP files.</span>
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;Scapy._expkg&gt;`</span>
 <span class="sd">        as :mod:`scapy.sendrecv` and :attr:`self._extmp &lt;Scapy._extmp&gt;`</span>
@@ -476,19 +476,19 @@
 <span class="sd">                and/or :attr:`self.extractor._exptl &lt;pcapkit.foundation.extraction.Extractor._exptl&gt;`</span>
 <span class="sd">                is provided as the Scapy engine currently does not support such operations.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">!=</span> <span class="s1">&#39;none&#39;</span> <span class="ow">or</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">!=</span> <span class="s1">&#39;null&#39;</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;&#39;Extractor(engine=scapy)&#39; does not support protocol and layer threshold; &quot;</span>
-                 <span class="sa">f</span><span class="s2">&quot;&#39;layer=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="si">}</span><span class="s2">&#39; and &#39;protocol=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="si">}</span><span class="s2">&#39; ignored&quot;</span><span class="p">,</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">!=</span> <span class="s1">'none'</span> <span class="ow">or</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">!=</span> <span class="s1">'null'</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">"'Extractor(engine=scapy)' does not support protocol and layer threshold; "</span>
+                 <span class="sa">f</span><span class="s2">"'layer=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="si">}</span><span class="s2">' and 'protocol=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="si">}</span><span class="s2">' ignored"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
         <span class="c1"># setup verbose handler</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_v</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2chain</span>  <span class="c1"># isort:skip</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="p">)</span>  <span class="c1"># pylint: disable=logging-fstring-interpolation</span>
 
         <span class="c1"># extract &amp; analyse file</span>
@@ -497,8 +497,8 @@
 
 <div class="viewcode-block" id="Scapy.read_frame">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy.read_frame">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ScapyPacket&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read frames with Scapy engine.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ScapyPacket'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read frames with Scapy engine.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed frame instance.</span>
@@ -507,7 +507,7 @@
 <span class="sd">            Please refer to :meth:`PCAP.read_frame &lt;pcapkit.foundation.engines.pcap.PCAP.read_frame&gt;`</span>
 <span class="sd">            for more operational information.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span>
                                            <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
@@ -520,11 +520,11 @@
         <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
         <span class="c1"># write plist</span>
-        <span class="n">frnum</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">frnum</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
             <span class="n">info</span> <span class="o">=</span> <span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
-                <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">frnum</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">frnum</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="n">ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
@@ -553,8 +553,8 @@
 
         <span class="c1"># record frames</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_d</span><span class="p">:</span>
-            <span class="c1"># setattr(packet, &#39;packet2dict&#39;, packet2dict)</span>
-            <span class="c1"># setattr(packet, &#39;packet2chain&#39;, packet2chain)</span>
+            <span class="c1"># setattr(packet, 'packet2dict', packet2dict)</span>
+            <span class="c1"># setattr(packet, 'packet2chain', packet2chain)</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_frame</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
         <span class="c1"># return frame record</span>

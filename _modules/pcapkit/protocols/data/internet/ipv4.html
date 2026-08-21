@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.internet.ipv4</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data model for IPv4 protocol&quot;&quot;&quot;</span>
+<span class="sd">"""data model for IPv4 protocol"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -423,17 +423,17 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;IPv4&#39;</span><span class="p">,</span>
+    <span class="s1">'IPv4'</span><span class="p">,</span>
 
-    <span class="s1">&#39;ToSField&#39;</span><span class="p">,</span> <span class="s1">&#39;Flags&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span>
+    <span class="s1">'ToSField'</span><span class="p">,</span> <span class="s1">'Flags'</span><span class="p">,</span>
+    <span class="s1">'OptionType'</span><span class="p">,</span>
 
-    <span class="s1">&#39;UnassignedOption&#39;</span><span class="p">,</span> <span class="s1">&#39;EOOLOption&#39;</span><span class="p">,</span> <span class="s1">&#39;NOPOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SECOption&#39;</span><span class="p">,</span> <span class="s1">&#39;LSROption&#39;</span><span class="p">,</span> <span class="s1">&#39;TSOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;ESECOption&#39;</span><span class="p">,</span> <span class="s1">&#39;RROption&#39;</span><span class="p">,</span> <span class="s1">&#39;SIDOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SSROption&#39;</span><span class="p">,</span> <span class="s1">&#39;MTUPOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MTUROption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;TROption&#39;</span><span class="p">,</span> <span class="s1">&#39;RTRALTOption&#39;</span><span class="p">,</span> <span class="s1">&#39;QSOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;QuickStartRequestOption&#39;</span><span class="p">,</span> <span class="s1">&#39;QuickStartReportOption&#39;</span><span class="p">,</span>
+    <span class="s1">'UnassignedOption'</span><span class="p">,</span> <span class="s1">'EOOLOption'</span><span class="p">,</span> <span class="s1">'NOPOption'</span><span class="p">,</span>
+    <span class="s1">'SECOption'</span><span class="p">,</span> <span class="s1">'LSROption'</span><span class="p">,</span> <span class="s1">'TSOption'</span><span class="p">,</span>
+    <span class="s1">'ESECOption'</span><span class="p">,</span> <span class="s1">'RROption'</span><span class="p">,</span> <span class="s1">'SIDOption'</span><span class="p">,</span>
+    <span class="s1">'SSROption'</span><span class="p">,</span> <span class="s1">'MTUPOption'</span><span class="p">,</span> <span class="s1">'MTUROption'</span><span class="p">,</span>
+    <span class="s1">'TROption'</span><span class="p">,</span> <span class="s1">'RTRALTOption'</span><span class="p">,</span> <span class="s1">'QSOption'</span><span class="p">,</span>
+    <span class="s1">'QuickStartRequestOption'</span><span class="p">,</span> <span class="s1">'QuickStartReportOption'</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -441,31 +441,31 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.ToSField">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ToSField</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 ToS fields.</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 ToS fields.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        Due to the preserved keyword conflict, please use :meth:`from_dict`</span>
 <span class="sd">        to create an instance of this data model.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">#: Precedence.</span>
-    <span class="n">pre</span><span class="p">:</span> <span class="s1">&#39;ToSPrecedence&#39;</span>
+    <span class="n">pre</span><span class="p">:</span> <span class="s1">'ToSPrecedence'</span>
     <span class="c1">#: Delay.</span>
-    <span class="c1">#del: &#39;ToSDelay&#39;</span>
+    <span class="c1">#del: 'ToSDelay'</span>
     <span class="c1">#: Throughput.</span>
-    <span class="n">thr</span><span class="p">:</span> <span class="s1">&#39;ToSThroughput&#39;</span>
+    <span class="n">thr</span><span class="p">:</span> <span class="s1">'ToSThroughput'</span>
     <span class="c1">#: Reliability.</span>
-    <span class="n">rel</span><span class="p">:</span> <span class="s1">&#39;ToSReliability&#39;</span>
+    <span class="n">rel</span><span class="p">:</span> <span class="s1">'ToSReliability'</span>
     <span class="c1">#: Explicit congestion notification (ECN).</span>
-    <span class="n">ecn</span><span class="p">:</span> <span class="s1">&#39;ToSECN&#39;</span>
+    <span class="n">ecn</span><span class="p">:</span> <span class="s1">'ToSECN'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ToSField&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ToSField'</span><span class="p">:</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># NOTE: We cannot define ``del`` due to preserved keyword conflict.</span>
         <span class="c1"># Thus, we directly inject the information into the annotations.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">&#39;del&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ToSDelay</span>  <span class="c1"># pylint: disable=no-member</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">'del'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ToSDelay</span>  <span class="c1"># pylint: disable=no-member</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -475,15 +475,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.Flags">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Flags."""</span>
 
-    <span class="c1">#: Don&#39;t fragment.</span>
-    <span class="n">df</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="c1">#: Don't fragment.</span>
+    <span class="n">df</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: More fragments.</span>
-    <span class="n">mf</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -491,37 +491,37 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.IPv4">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">IPv4</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 packet.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 packet."""</span>
 
     <span class="c1">#: Version.</span>
-    <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4]&#39;</span>
+    <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[4]'</span>
     <span class="c1">#: Internet header length.</span>
-    <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Type of services.</span>
-    <span class="n">tos</span><span class="p">:</span> <span class="s1">&#39;ToSField&#39;</span>
+    <span class="n">tos</span><span class="p">:</span> <span class="s1">'ToSField'</span>
     <span class="c1">#: Total length.</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Identification.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span>
     <span class="c1">#: Fragment offset.</span>
-    <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Time to live.</span>
-    <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span>
+    <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Protocol.</span>
-    <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span>
+    <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span>
     <span class="c1">#: Header checksum.</span>
-    <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Source address.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
     <span class="c1">#: Destination address.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[OptionNumber, Option]&#39;</span>
+        <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[OptionNumber, Option]'</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">tos</span><span class="p">:</span> <span class="s1">&#39;ToSField&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[4]'</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">tos</span><span class="p">:</span> <span class="s1">'ToSField'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -529,21 +529,21 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.OptionType">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OptionType</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 option type data.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 option type data."""</span>
 
     <span class="c1">#: Change flag.</span>
-    <span class="n">change</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">change</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Option class.</span>
-    <span class="c1">#class: &#39;int&#39;</span>
+    <span class="c1">#class: 'int'</span>
     <span class="c1">#: Number.</span>
-    <span class="n">number</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">number</span><span class="p">:</span> <span class="s1">'int'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'OptionType'</span><span class="p">:</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># NOTE: We cannot define ``class`` due to preserved keyword conflict.</span>
         <span class="c1"># Thus, we directly inject the information into the annotations.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OptionClass</span>  <span class="c1"># pylint: disable=no-member</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">'class'</span><span class="p">]</span> <span class="o">=</span> <span class="n">OptionClass</span>  <span class="c1"># pylint: disable=no-member</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -552,14 +552,14 @@
 <div class="viewcode-block" id="Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.Option">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Option</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 options."""</span>
 
     <span class="c1">#: Option code.</span>
-    <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span>
+    <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span>
     <span class="c1">#: Option length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Option type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span></div>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span></div>
 
 
 
@@ -567,13 +567,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.UnassignedOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 unassigned option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 unassigned option."""</span>
 
     <span class="c1">#: Option data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -581,10 +581,10 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.EOOLOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">EOOLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 End of Option List (``EOOL``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 End of Option List (``EOOL``) option."""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -592,10 +592,10 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.NOPOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NOPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 No Operation (``NOP``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 No Operation (``NOP``) option."""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -603,15 +603,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.SECOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Security (``SEC``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Security (``SEC``) option."""</span>
 
     <span class="c1">#: Classification level.</span>
-    <span class="n">level</span><span class="p">:</span> <span class="s1">&#39;ClassificationLevel&#39;</span>
+    <span class="n">level</span><span class="p">:</span> <span class="s1">'ClassificationLevel'</span>
     <span class="c1">#: Protection authority flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;tuple[ProtectionAuthority, ...]&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'tuple[ProtectionAuthority, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="s1">&#39;ClassificationLevel&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;tuple[ProtectionAuthority, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="s1">'ClassificationLevel'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'tuple[ProtectionAuthority, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -619,15 +619,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.LSROption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">LSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Loose Source Route (``LSR``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Loose Source Route (``LSR``) option."""</span>
 
     <span class="c1">#: Pointer.</span>
-    <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Route.</span>
-    <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv4Address, ...]&#39;</span>
+    <span class="n">route</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv4Address, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -635,19 +635,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.TSOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TSOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Time Stamp (``TS``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Time Stamp (``TS``) option."""</span>
 
     <span class="c1">#: Pointer.</span>
-    <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Overflow.</span>
-    <span class="n">overflow</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">overflow</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Flag.</span>
-    <span class="n">flag</span><span class="p">:</span> <span class="s1">&#39;TSFlag&#39;</span>
+    <span class="n">flag</span><span class="p">:</span> <span class="s1">'TSFlag'</span>
     <span class="c1">#: Timestamp data.</span>
-    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]&#39;</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">overflow</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="s1">&#39;TSFlag&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">overflow</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="s1">'TSFlag'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -655,15 +655,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.ESECOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ESECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Extended Security (``ESEC``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Extended Security (``ESEC``) option."""</span>
 
     <span class="c1">#: Additional security information format code.</span>
-    <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">format</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Additional security information.</span>
-    <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">info</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -671,15 +671,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.RROption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Record Route (``RR``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Record Route (``RR``) option."""</span>
 
     <span class="c1">#: Pointer.</span>
-    <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Route.</span>
-    <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[IPv4Address, ...]]&#39;</span>
+    <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[IPv4Address, ...]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -687,13 +687,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.SIDOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Stream ID (``SID``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Stream ID (``SID``) option."""</span>
 
     <span class="c1">#: Stream ID.</span>
-    <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -701,15 +701,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.SSROption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Strict Source Route (``SSR``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Strict Source Route (``SSR``) option."""</span>
 
     <span class="c1">#: Pointer.</span>
-    <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Route.</span>
-    <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[IPv4Address, ...]]&#39;</span>
+    <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[IPv4Address, ...]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -717,13 +717,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.MTUPOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MTUPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 MTU Probe (``MTUP``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 MTU Probe (``MTUP``) option."""</span>
 
     <span class="c1">#: MTU.</span>
-    <span class="n">mtu</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">mtu</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">mtu</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">mtu</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -731,13 +731,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.MTUROption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MTUROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 MTU Reply (``MTUR``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 MTU Reply (``MTUR``) option."""</span>
 
     <span class="c1">#: MTU.</span>
-    <span class="n">mtu</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">mtu</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">mtu</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">mtu</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -745,28 +745,28 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.TROption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Traceroute (``TR``) option.</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Traceroute (``TR``) option.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        Due to the preserved keyword conflict, please use :meth:`from_dict`</span>
 <span class="sd">        to create an instance of this data model.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">#: ID number.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Outbound hop count.</span>
-    <span class="n">outbound</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">outbound</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Return hop count.</span>
-    <span class="c1">#return: &#39;int&#39;</span>
-    <span class="n">originator</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span>
+    <span class="c1">#return: 'int'</span>
+    <span class="n">originator</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TROption&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TROption'</span><span class="p">:</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># NOTE: We cannot define ``return`` due to preserved keyword conflict.</span>
         <span class="c1"># Thus, we directly inject the information into the annotations.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span>  <span class="c1"># pylint: disable=no-member</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">'return'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span>  <span class="c1"># pylint: disable=no-member</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -776,50 +776,50 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.RTRALTOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RTRALTOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Router Alert (``RTRALT``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Router Alert (``RTRALT``) option."""</span>
 
     <span class="c1">#: Router alert.</span>
-    <span class="n">alert</span><span class="p">:</span> <span class="s1">&#39;RouterAlert&#39;</span>
+    <span class="n">alert</span><span class="p">:</span> <span class="s1">'RouterAlert'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">alert</span><span class="p">:</span> <span class="s1">&#39;RouterAlert&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">alert</span><span class="p">:</span> <span class="s1">'RouterAlert'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
 <div class="viewcode-block" id="QSOption">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.QSOption">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">QSOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Quick Start (``QS``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Quick Start (``QS``) option."""</span>
 
     <span class="c1">#: QS function.</span>
-    <span class="n">func</span><span class="p">:</span> <span class="s1">&#39;QSFunction&#39;</span>
+    <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span>
     <span class="c1">#: Rate request/report.</span>
-    <span class="n">rate</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
+    <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartRequestOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Quick Start request option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Quick Start request option."""</span>
 
     <span class="c1">#: TTL.</span>
-    <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span>
+    <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Nonce.</span>
-    <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">&#39;QSFunction&#39;</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 
 
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartReportOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Quick Start report of approved rate option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv4 Quick Start report of approved rate option."""</span>
 
     <span class="c1">#: Nonce.</span>
-    <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">&#39;QSFunction&#39;</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 </pre></div>
         </article>
       </div>

@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.reassembly.ipv6</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;IPv6 Datagram Reassembly</span>
+<span class="sd">"""IPv6 Datagram Reassembly</span>
 <span class="sd">==============================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.reassembly.ipv6</span>
@@ -402,11 +402,11 @@
 <span class="sd">only, which reconstructs fragmented IPv6 packets back to</span>
 <span class="sd">origin. Please refer to :doc:`ip` for more information.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">IPv6_Protocol</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IPv6&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6'</span><span class="p">]</span>
 
 
 <span class="c1"># BUG: It is supposed to be ``IP[IPv6Address]``. But somehow Python</span>
@@ -415,7 +415,7 @@
 <div class="viewcode-block" id="IPv6">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IPv6</span><span class="p">(</span><span class="n">IP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reassembly for IPv6 payload.</span>
+<span class="w">    </span><span class="sd">"""Reassembly for IPv6 payload.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        strict: if return all datagrams (including those not</span>
@@ -433,14 +433,14 @@
 <span class="sd">        # Fetch result:</span>
 <span class="sd">        &gt;&gt;&gt; result = ipv6_reassembly.datagram</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: Protocol name of current reassembly object.</span>
-    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">&#39;IPv6&#39;</span>
+    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'IPv6'</span>
     <span class="c1">#: Protocol of current reassembly object.</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv6_Protocol</span></div>
 

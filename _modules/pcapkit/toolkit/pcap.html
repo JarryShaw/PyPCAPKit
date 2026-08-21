@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.toolkit.pcap</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;PCAP Tools</span>
+<span class="sd">"""PCAP Tools</span>
 <span class="sd">================</span>
 
 <span class="sd">.. module:: pcapkit.toolkit.pcap</span>
@@ -402,7 +402,7 @@
 <span class="sd">functions returns with a flag to indicate if usable</span>
 <span class="sd">for its caller.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
@@ -420,13 +420,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ipv4_reassembly&#39;</span><span class="p">,</span> <span class="s1">&#39;ipv6_reassembly&#39;</span><span class="p">,</span> <span class="s1">&#39;tcp_reassembly&#39;</span><span class="p">,</span> <span class="s1">&#39;tcp_traceflow&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="ipv4_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.ipv4_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IP_Packet[IPv4Address] | None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make data for IPv4 reassembly.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make data for IPv4 reassembly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        frame: PCAP frame.</span>
@@ -444,9 +444,9 @@
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="s1">&#39;IPv4&#39;</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="n">ipv4</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv4&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;IPv4&#39;</span><span class="p">])</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s1">'IPv4'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+        <span class="n">ipv4</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IPv4'</span><span class="p">])</span>
         <span class="n">ipv4_info</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">info</span>
         <span class="k">if</span> <span class="n">ipv4_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">df</span><span class="p">:</span>       <span class="c1"># dismiss not fragmented frame</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -473,8 +473,8 @@
 
 <div class="viewcode-block" id="ipv6_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.ipv6_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ipv6_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IP_Packet[IPv6Address] | None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make data for IPv6 reassembly.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv6_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv6Address] | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make data for IPv6 reassembly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        frame: PCAP frame.</span>
@@ -492,15 +492,15 @@
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="s1">&#39;IPv6&#39;</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="n">ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;IPv6&#39;</span><span class="p">])</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s1">'IPv6'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+        <span class="n">ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IPv6'</span><span class="p">])</span>
         <span class="n">ipv6_info</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">info</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">ipv6_frag</span> <span class="o">:=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>  <span class="c1"># type: ignore[call-overload]</span>
             <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span>
         <span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># dismiss not fragmented frame</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="n">ipv6_frag_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6_Frag&#39;</span><span class="p">,</span> <span class="n">ipv6_frag</span><span class="p">)</span><span class="o">.</span><span class="n">info</span>
+        <span class="n">ipv6_frag_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6_Frag'</span><span class="p">,</span> <span class="n">ipv6_frag</span><span class="p">)</span><span class="o">.</span><span class="n">info</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>
             <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
@@ -524,8 +524,8 @@
 
 <div class="viewcode-block" id="tcp_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.tcp_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TCP_Packet | None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make data for TCP reassembly.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TCP_Packet | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make data for TCP reassembly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        frame: PCAP frame.</span>
@@ -541,11 +541,11 @@
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="s1">&#39;TCP&#39;</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv4 | IPv6&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;IP&#39;</span><span class="p">])</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
         <span class="n">ip_info</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">info</span>
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;TCP&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;TCP&#39;</span><span class="p">])</span>
+        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
         <span class="n">tcp_info</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">info</span>
 
         <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
@@ -575,8 +575,8 @@
 
 <div class="viewcode-block" id="tcp_traceflow">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.tcp_traceflow">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TF_TCP_Packet | None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace packet flow for TCP.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TF_TCP_Packet | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Trace packet flow for TCP.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        frame: PCAP frame.</span>
@@ -593,11 +593,11 @@
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="s1">&#39;TCP&#39;</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv4 | IPv6&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;IP&#39;</span><span class="p">])</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
         <span class="n">ip_info</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">info</span>
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;TCP&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;TCP&#39;</span><span class="p">])</span>
+        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
         <span class="n">tcp_info</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">info</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>

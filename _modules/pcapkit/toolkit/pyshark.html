@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.toolkit.pyshark</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;PyShark Tools</span>
+<span class="sd">"""PyShark Tools</span>
 <span class="sd">===================</span>
 
 <span class="sd">:mod:`pcapkit.toolkit.pyshark` contains all you need for</span>
@@ -408,7 +408,7 @@
 <span class="sd">   functions of :mod:`pcapkit` may not be available with</span>
 <span class="sd">   the `PyShark`_ engine.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -420,13 +420,13 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;packet2dict&#39;</span><span class="p">,</span> <span class="s1">&#39;tcp_traceflow&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="packet2dict">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pyshark.packet2dict">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert PyShark packet into :obj:`dict`.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert PyShark packet into :obj:`dict`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Scapy packet.</span>
@@ -434,7 +434,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        A :obj:`dict` mapping of packet data.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">dict_</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
     <span class="n">frame</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span>
     <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">field_names</span><span class="p">:</span>
@@ -453,8 +453,8 @@
 
 <div class="viewcode-block" id="tcp_traceflow">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pyshark.tcp_traceflow">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TF_TCP_Packet | None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace packet flow for TCP.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TF_TCP_Packet | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Trace packet flow for TCP.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Scapy packet.</span>
@@ -470,16 +470,16 @@
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="s1">&#39;IP&#39;</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="s1">&#39;IPv6&#39;</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ipv6</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="s1">'IPv6'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ipv6</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="s1">&#39;TCP&#39;</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">tcp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">tcp</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span>  <span class="c1"># data link type from global header</span>

@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.misc.pcap.frame</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data models for frame header of PCAP file&quot;&quot;&quot;</span>
+<span class="sd">"""data models for frame header of PCAP file"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -404,26 +404,26 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="s1">&#39;FrameInfo&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Frame'</span><span class="p">,</span> <span class="s1">'FrameInfo'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="FrameInfo">
 <a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.FrameInfo">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">FrameInfo</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Frame metadata information.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Frame metadata information."""</span>
 
     <span class="c1">#: Timestamp seconds.</span>
-    <span class="n">ts_sec</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">ts_sec</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Timestamp microseconds.</span>
-    <span class="n">ts_usec</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">ts_usec</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Number of octets of packet saved in file.</span>
-    <span class="n">incl_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">incl_len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Actual length of packet.</span>
-    <span class="n">orig_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">orig_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_sec</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ts_usec</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">incl_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">orig_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_sec</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ts_usec</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">incl_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">orig_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called</span></div>
 
 
 
@@ -431,27 +431,27 @@
 <a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.Frame">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Frame</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Frame header of PCAP file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Frame header of PCAP file."""</span>
 
     <span class="c1">#: Metadata information.</span>
-    <span class="n">frame_info</span><span class="p">:</span> <span class="s1">&#39;FrameInfo&#39;</span>
+    <span class="n">frame_info</span><span class="p">:</span> <span class="s1">'FrameInfo'</span>
     <span class="c1">#: Timestamp instance.</span>
-    <span class="n">time</span><span class="p">:</span> <span class="s1">&#39;datetime&#39;</span>
+    <span class="n">time</span><span class="p">:</span> <span class="s1">'datetime'</span>
     <span class="c1">#: Frame index.</span>
-    <span class="n">number</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">number</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: UNIX timestamp.</span>
-    <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">&#39;Decimal&#39;</span>
+    <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span>
     <span class="c1">#: Number of octets of packet saved in file.</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Actual length of packet.</span>
-    <span class="n">cap_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">cap_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Protocol chain.</span>
-        <span class="n">protocols</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="n">protocols</span><span class="p">:</span> <span class="s1">'str'</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_info</span><span class="p">:</span> <span class="s1">&#39;FrameInfo&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="s1">&#39;datetime&#39;</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">&#39;Decimal&#39;</span><span class="p">,</span>
-                     <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cap_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_info</span><span class="p">:</span> <span class="s1">'FrameInfo'</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="s1">'datetime'</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span><span class="p">,</span>
+                     <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cap_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

@@ -392,14 +392,14 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.registry.protocols</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Protocol Registries</span>
+<span class="sd">"""Protocol Registries</span>
 <span class="sd">=========================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.registry.protocols</span>
 
 <span class="sd">This module provides the protocol registries for :mod:`pcapkit`.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
@@ -493,36 +493,36 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">TCP_OptionParser</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;register_protocol&#39;</span><span class="p">,</span>
+    <span class="s1">'register_protocol'</span><span class="p">,</span>
 
-    <span class="s1">&#39;register_linktype&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;register_pcap&#39;</span><span class="p">,</span> <span class="s1">&#39;register_pcapng&#39;</span><span class="p">,</span>
+    <span class="s1">'register_linktype'</span><span class="p">,</span>
+    <span class="s1">'register_pcap'</span><span class="p">,</span> <span class="s1">'register_pcapng'</span><span class="p">,</span>
 
-    <span class="s1">&#39;register_ethertype&#39;</span><span class="p">,</span>
+    <span class="s1">'register_ethertype'</span><span class="p">,</span>
 
-    <span class="s1">&#39;register_transtype&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;register_ipv4_option&#39;</span><span class="p">,</span> <span class="s1">&#39;register_hip_parameter&#39;</span><span class="p">,</span> <span class="s1">&#39;register_hopopt_option&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;register_ipv6_opts_option&#39;</span><span class="p">,</span> <span class="s1">&#39;register_ipv6_route_routing&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;register_mh_message&#39;</span><span class="p">,</span> <span class="s1">&#39;register_mh_option&#39;</span><span class="p">,</span> <span class="s1">&#39;register_mh_extension&#39;</span><span class="p">,</span>
+    <span class="s1">'register_transtype'</span><span class="p">,</span>
+    <span class="s1">'register_ipv4_option'</span><span class="p">,</span> <span class="s1">'register_hip_parameter'</span><span class="p">,</span> <span class="s1">'register_hopopt_option'</span><span class="p">,</span>
+    <span class="s1">'register_ipv6_opts_option'</span><span class="p">,</span> <span class="s1">'register_ipv6_route_routing'</span><span class="p">,</span>
+    <span class="s1">'register_mh_message'</span><span class="p">,</span> <span class="s1">'register_mh_option'</span><span class="p">,</span> <span class="s1">'register_mh_extension'</span><span class="p">,</span>
 
-    <span class="s1">&#39;register_apptype&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;register_tcp&#39;</span><span class="p">,</span> <span class="s1">&#39;register_udp&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;register_tcp_option&#39;</span><span class="p">,</span> <span class="s1">&#39;register_tcp_mp_option&#39;</span><span class="p">,</span>
+    <span class="s1">'register_apptype'</span><span class="p">,</span>
+    <span class="s1">'register_tcp'</span><span class="p">,</span> <span class="s1">'register_udp'</span><span class="p">,</span>
+    <span class="s1">'register_tcp_option'</span><span class="p">,</span> <span class="s1">'register_tcp_mp_option'</span><span class="p">,</span>
 
-    <span class="s1">&#39;register_http_frame&#39;</span><span class="p">,</span>
+    <span class="s1">'register_http_frame'</span><span class="p">,</span>
 
-    <span class="s1">&#39;register_pcapng_block&#39;</span><span class="p">,</span> <span class="s1">&#39;register_pcapng_option&#39;</span><span class="p">,</span> <span class="s1">&#39;register_pcapng_secrets&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;register_pcapng_record&#39;</span><span class="p">,</span>
+    <span class="s1">'register_pcapng_block'</span><span class="p">,</span> <span class="s1">'register_pcapng_option'</span><span class="p">,</span> <span class="s1">'register_pcapng_secrets'</span><span class="p">,</span>
+    <span class="s1">'register_pcapng_record'</span><span class="p">,</span>
 <span class="p">]</span>
 
-<span class="n">NULL</span> <span class="o">=</span> <span class="s1">&#39;(null)&#39;</span>
+<span class="n">NULL</span> <span class="o">=</span> <span class="s1">'(null)'</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.__proto__</span>
 <div class="viewcode-block" id="register_protocol">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered protocol class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Registered protocol class.</span>
 
 <span class="sd">    The protocol class must be a subclass of</span>
 <span class="sd">    :class:`~pcapkit.protocols.protocol.Protocol`, and will be registered to</span>
@@ -531,12 +531,12 @@
 <span class="sd">    Args:</span>
 <span class="sd">        protocol: Protocol class.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
     <span class="n">protocol_registry</span><span class="p">[</span><span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">=</span> <span class="n">protocol</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
 
 
 
@@ -546,16 +546,16 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <div class="viewcode-block" id="register_linktype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
-                      <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span>
+                      <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -577,13 +577,13 @@
 <span class="sd">        * :func:`pcapkit.foundation.registry.protocols.register_pcap`</span>
 <span class="sd">        * :func:`pcapkit.foundation.registry.protocols.register_pcapng`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Protocol]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
     <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered linktype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered linktype protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -593,17 +593,17 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcap.frame.Frame.__proto__</span>
 <div class="viewcode-block" id="register_pcap">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcap">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
-                  <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span>
+                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -618,12 +618,12 @@
 <span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Protocol]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
     <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP linktype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered PCAP linktype protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -633,17 +633,17 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__proto__</span>
 <div class="viewcode-block" id="register_pcapng">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
-                    <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span>
+                    <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -658,12 +658,12 @@
 <span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Protocol]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG linktype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered PCAP-NG linktype protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -678,17 +678,17 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.link.link.Link.__proto__</span>
 <div class="viewcode-block" id="register_ethertype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ethertype">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
-                       <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span>
+                       <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -703,12 +703,12 @@
 <span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Protocol]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
     <span class="n">Link</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered ethertype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered ethertype protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -723,17 +723,17 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.internet.internet.Internet.__proto__</span>
 <div class="viewcode-block" id="register_transtype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_transtype">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
-                       <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span>
+                       <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -748,12 +748,12 @@
 <span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Protocol]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
     <span class="n">Internet</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered transtype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered transtype protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -765,9 +765,9 @@
 <span class="c1"># NOTE: pcapkit.protocols.internet.internet.IPv4</span>
 <div class="viewcode-block" id="register_ipv4_option">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ipv4_option">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ipv4_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv4_OptionNumber&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[IPv4_OptionParser, IPv4_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                         <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_IPv4_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_ipv4_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'IPv4_OptionNumber'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[IPv4_OptionParser, IPv4_OptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_IPv4_Option]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.internet.IPv4` internal registry.</span>
@@ -779,23 +779,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv4.Option`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">IPv4</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a valid IPv4 option parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">IPv4</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid IPv4 option parser function'</span><span class="p">)</span>
 
     <span class="n">IPv4</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_IPv4_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv4 option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered IPv4 option parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.internet.hip.HIP</span>
 <div class="viewcode-block" id="register_hip_parameter">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_hip_parameter">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_hip_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;HIP_Parameter&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[HIP_ParameterParser, HIP_ParameterConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_HIP_Parameter]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a parameter parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_hip_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'HIP_Parameter'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[HIP_ParameterParser, HIP_ParameterConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_HIP_Parameter]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register a parameter parser.</span>
 
 <span class="sd">    The function will register the given parameter parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.hip.HIP` internal registry.</span>
@@ -807,23 +807,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the parameter.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.internet.hip.Parameter`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">HIP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_param_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a valid HIP parameter parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">HIP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid HIP parameter parser function'</span><span class="p">)</span>
 
     <span class="n">HIP</span><span class="o">.</span><span class="n">register_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_HIP_Parameter</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered HIP parameter parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered HIP parameter parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.internet.hopopt.HOPOPT.__option__</span>
 <div class="viewcode-block" id="register_hopopt_option">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_hopopt_option">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_hopopt_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[HOPOPT_OptionParser, HOPOPT_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_HOPOPT_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_hopopt_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'IPv6_Option'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[HOPOPT_OptionParser, HOPOPT_OptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_HOPOPT_Option]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.hopopt.HOPOPT.__option__` registry.</span>
@@ -835,23 +835,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.internet.hopopt.Option`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">HOPOPT</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a valid HOPOPT option parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">HOPOPT</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid HOPOPT option parser function'</span><span class="p">)</span>
 
     <span class="n">HOPOPT</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_HOPOPT_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered HOPOPT option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered HOPOPT option parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__</span>
 <div class="viewcode-block" id="register_ipv6_opts_option">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ipv6_opts_option">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ipv6_opts_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[IPv6_Opts_OptionParser, IPv6_Opts_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                              <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_IPv6_Opts_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_ipv6_opts_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'IPv6_Option'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[IPv6_Opts_OptionParser, IPv6_Opts_OptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                              <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_IPv6_Opts_Option]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__` registry.</span>
@@ -863,23 +863,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_opts.Option`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">IPv6_Opts</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a valid IPv6-Opts option parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">IPv6_Opts</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid IPv6-Opts option parser function'</span><span class="p">)</span>
 
     <span class="n">IPv6_Opts</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_IPv6_Opts_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv6-Opts option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered IPv6-Opts option parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__</span>
 <div class="viewcode-block" id="register_ipv6_route_routing">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ipv6_route_routing">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ipv6_route_routing</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Routing&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[IPv6_Route_TypeParser, IPv6_Route_TypeConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_IPv6_Route_RoutingType]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a routing data parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_ipv6_route_routing</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'IPv6_Routing'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[IPv6_Route_TypeParser, IPv6_Route_TypeConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_IPv6_Route_RoutingType]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register a routing data parser.</span>
 
 <span class="sd">    The function will register the given routing data parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__` registry.</span>
@@ -891,23 +891,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the routing data.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_route.RoutingType`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_data_type_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a valid IPv6-Route routing data parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_data_type_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid IPv6-Route routing data parser function'</span><span class="p">)</span>
 
     <span class="n">IPv6_Route</span><span class="o">.</span><span class="n">register_routing</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_IPv6_Route_RoutingType</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv6-Route routing data parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered IPv6-Route routing data parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.internet.mh.MH.__message__</span>
 <div class="viewcode-block" id="register_mh_message">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_message">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_mh_message</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;MH_Packet&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[MH_PacketParser, MH_PacketConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_MH_Packet]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a MH message type parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_mh_message</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'MH_Packet'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[MH_PacketParser, MH_PacketConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_MH_Packet]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register a MH message type parser.</span>
 
 <span class="sd">    The function will register the given message type parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.mh.MH.__message__` registry.</span>
@@ -919,23 +919,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Packet`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">MH</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_msg_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a valid MH message type parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">MH</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_msg_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid MH message type parser function'</span><span class="p">)</span>
 
     <span class="n">MH</span><span class="o">.</span><span class="n">register_message</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_MH_Packet</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MH message type parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered MH message type parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.internet.mh.MH.__option__</span>
 <div class="viewcode-block" id="register_mh_option">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_option">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_mh_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;MH_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[MH_OptionParser, MH_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                       <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_MH_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a MH option parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_mh_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'MH_Option'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[MH_OptionParser, MH_OptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_MH_Option]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register a MH option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.mh.MH.__option__` registry.</span>
@@ -947,23 +947,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Option`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">MH</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a valid MH option parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">MH</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid MH option parser function'</span><span class="p">)</span>
 
     <span class="n">MH</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_MH_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MH option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered MH option parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.internet.mh.MH.__extension__</span>
 <div class="viewcode-block" id="register_mh_extension">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_extension">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_mh_extension</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;MH_CGAExtension&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]&#39;</span><span class="p">,</span>
-                          <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_MH_CGAExtension]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a CGA extension parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_mh_extension</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'MH_CGAExtension'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]'</span><span class="p">,</span>
+                          <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_MH_CGAExtension]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register a CGA extension parser.</span>
 
 <span class="sd">    The function will register the given CGA extension to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.mh.MH.__extension__` registry.</span>
@@ -975,14 +975,14 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.CGAExtension`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">MH</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_ext_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a valid MH CGA extension function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">MH</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_ext_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid MH CGA extension function'</span><span class="p">)</span>
 
     <span class="n">MH</span><span class="o">.</span><span class="n">register_extension</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_MH_CGAExtension</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MH CGA extension: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered MH CGA extension: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
@@ -992,20 +992,20 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <div class="viewcode-block" id="register_apptype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_apptype">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
-                     <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransportProtocol | str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span>
+                     <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -1026,19 +1026,19 @@
 <span class="sd">        * :func:`pcapkit.foundation.registry.register_tcp`</span>
 <span class="sd">        * :func:`pcapkit.foundation.registry.register_udp`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">proto</span> <span class="ow">is</span> <span class="n">NULL</span><span class="p">:</span>
             <span class="n">proto</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">proto</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Protocol]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
     <span class="n">_reg</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">proto</span> <span class="o">=</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
 
-    <span class="k">for</span> <span class="n">test</span><span class="p">,</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;dict[TransportProtocol, Type[Protocol]]&#39;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="n">test</span><span class="p">,</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[TransportProtocol, Type[Protocol]]'</span><span class="p">,</span> <span class="p">{</span>
         <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span> <span class="n">TCP</span><span class="p">,</span>
         <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span><span class="p">:</span> <span class="n">UDP</span><span class="p">,</span>
     <span class="p">})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1046,11 +1046,11 @@
             <span class="k">continue</span>
 
         <span class="bp">cls</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered </span><span class="si">%s</span><span class="s1"> port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
         <span class="n">_reg</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_reg</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -1060,17 +1060,17 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__proto__</span>
 <div class="viewcode-block" id="register_tcp">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
-                 <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span>
+                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -1085,14 +1085,14 @@
 <span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Protocol]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
     <span class="n">TCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered TCP port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered TCP port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -1104,9 +1104,9 @@
 <span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__option__</span>
 <div class="viewcode-block" id="register_tcp_option">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp_option">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[TCP_OptionParser, TCP_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_TCP_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TCP_Option'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[TCP_OptionParser, TCP_OptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_TCP_Option]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__option__` registry.</span>
@@ -1118,23 +1118,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.Option`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_mode_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a TCP option parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_mode_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a TCP option parser function'</span><span class="p">)</span>
 
     <span class="n">TCP</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_TCP_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered TCP option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered TCP option parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__mp_option__</span>
 <div class="viewcode-block" id="register_tcp_mp_option">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp_mp_option">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp_mp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[TCP_MPOptionParser, TCP_MPOptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_TCP_MPTCP]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an MPTCP option parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp_mp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TCP_MPTCPOption'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[TCP_MPOptionParser, TCP_MPOptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_TCP_MPTCP]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register an MPTCP option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__mp_option__` registry.</span>
@@ -1146,29 +1146,29 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.MPTCP`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_mptcp_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a MPTCP option parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_mptcp_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a MPTCP option parser function'</span><span class="p">)</span>
 
     <span class="n">TCP</span><span class="o">.</span><span class="n">register_mp_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_TCP_MPTCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MPTCP option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered MPTCP option parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.transport.udp.UDP.__proto__</span>
 <div class="viewcode-block" id="register_udp">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_udp">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str | ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">,</span>
-                 <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span>
+                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -1183,14 +1183,14 @@
 <span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 <span class="sd">        class\_: class name</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ModuleDescriptor[Protocol]&#39;</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Protocol]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
     <span class="n">UDP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered UDP port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered UDP port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -1207,9 +1207,9 @@
 <span class="c1"># NOTE: pcapkit.protocols.application.httpv2.HTTPv2.__frame__</span>
 <div class="viewcode-block" id="register_http_frame">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_http_frame">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_http_frame</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;HTTP_Frame&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_HTTP_FrameType]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a frame parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_http_frame</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'HTTP_Frame'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_HTTP_FrameType]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Registered a frame parser.</span>
 
 <span class="sd">    The function will register the given frame parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.application.httpv2.HTTP.__frame__` registry.</span>
@@ -1221,14 +1221,14 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the frame.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.application.httpv2.FrameType`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">HTTPv2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_http_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a frame parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">HTTPv2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_http_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a frame parser function'</span><span class="p">)</span>
 
     <span class="n">HTTPv2</span><span class="o">.</span><span class="n">register_frame</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_HTTP_FrameType</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered HTTP/2 frame parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered HTTP/2 frame parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
@@ -1240,9 +1240,9 @@
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__block__</span>
 <div class="viewcode-block" id="register_pcapng_block">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_block">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_block</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_BlockType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_PCAPNG_BlockType]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a block parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_block</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'PCAPNG_BlockType'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_PCAPNG_BlockType]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Registered a block parser.</span>
 
 <span class="sd">    The function will register the given block parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__block__` registry.</span>
@@ -1254,23 +1254,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the block.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_block_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a block parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_block_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a block parser function'</span><span class="p">)</span>
 
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register_block</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_PCAPNG_BlockType</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG block parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered PCAP-NG block parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__option__</span>
 <div class="viewcode-block" id="register_pcapng_option">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_option">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_OptionType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_PCAPNG_Option]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a option parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'PCAPNG_OptionType'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_PCAPNG_Option]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Registered a option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__option__` registry.</span>
@@ -1282,23 +1282,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.Option`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_option_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a option parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_option_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a option parser function'</span><span class="p">)</span>
 
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_PCAPNG_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered PCAP-NG option parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__record__</span>
 <div class="viewcode-block" id="register_pcapng_record">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_record">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_record</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_RecordType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_PCAPNG_NameResolutionRecord]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a name resolution record parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_record</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'PCAPNG_RecordType'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_PCAPNG_NameResolutionRecord]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Registered a name resolution record parser.</span>
 
 <span class="sd">    The function will register the given name resolution record parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__record__` registry.</span>
@@ -1311,23 +1311,23 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the name resolution record.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_record_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a name resolution record parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_record_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a name resolution record parser function'</span><span class="p">)</span>
 
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register_record</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_PCAPNG_NameResolutionRecord</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG name resolution record parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered PCAP-NG name resolution record parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__</span>
 <div class="viewcode-block" id="register_pcapng_secrets">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng_secrets">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_secrets</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;PCAPNG_SecretsType&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                            <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[Schema_PCAPNG_DSBSecrets]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registered a decryption secrets parser.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_secrets</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'PCAPNG_SecretsType'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_PCAPNG_DSBSecrets]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Registered a decryption secrets parser.</span>
 
 <span class="sd">    The function will register the given decryption secrets parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__` registry.</span>
@@ -1339,14 +1339,14 @@
 <span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the decryption secrets.</span>
 <span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_secrets_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a decryption secrets parser function&#39;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_secrets_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a decryption secrets parser function'</span><span class="p">)</span>
 
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register_secrets</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Schema_PCAPNG_DSBSecrets</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG decryption secrets parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered PCAP-NG decryption secrets parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

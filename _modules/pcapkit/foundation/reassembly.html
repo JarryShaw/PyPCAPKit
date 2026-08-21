@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.foundation.reassembly</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=unused-import</span>
-<span class="sd">&quot;&quot;&quot;Fragmented Packets Reassembly</span>
+<span class="sd">"""Fragmented Packets Reassembly</span>
 <span class="sd">===================================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.reassembly</span>
@@ -402,7 +402,7 @@
 <span class="sd">in :rfc:`791` and :rfc:`815`, implements datagram reassembly</span>
 <span class="sd">of IP and TCP packets.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="c1"># Base Class for Reassembly</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">Reassembly</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span> <span class="k">as</span> <span class="n">IP_Reassembly</span>
@@ -415,8 +415,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;IPv4_Reassembly&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6_Reassembly&#39;</span><span class="p">,</span>   <span class="c1"># IP Reassembly</span>
-    <span class="s1">&#39;TCP_Reassembly&#39;</span><span class="p">,</span>                       <span class="c1"># TCP Reassembly</span>
+    <span class="s1">'IPv4_Reassembly'</span><span class="p">,</span> <span class="s1">'IPv6_Reassembly'</span><span class="p">,</span>   <span class="c1"># IP Reassembly</span>
+    <span class="s1">'TCP_Reassembly'</span><span class="p">,</span>                       <span class="c1"># TCP Reassembly</span>
 <span class="p">]</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -431,17 +431,17 @@
 <a class="viewcode-back" href="../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.ReassemblyManager">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ReassemblyManager</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reassembly Manager.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Reassembly Manager."""</span>
 
     <span class="c1">#: IPv4 reassembly.</span>
-    <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;IPv4_Reassembly&#39;</span>
+    <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IPv4_Reassembly'</span>
     <span class="c1">#: IPv6 reassembly.</span>
-    <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;IPv6_Reassembly&#39;</span>
+    <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'IPv6_Reassembly'</span>
     <span class="c1">#: TCP reassembly.</span>
-    <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;TCP_Reassembly&#39;</span>
+    <span class="n">tcp</span><span class="p">:</span> <span class="s1">'TCP_Reassembly'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;Optional[IPv4_Reassembly]&#39;</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;Optional[IPv6_Reassembly]&#39;</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;Optional[TCP_Reassembly]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'Optional[IPv4_Reassembly]'</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'Optional[IPv6_Reassembly]'</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'Optional[TCP_Reassembly]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 </pre></div>
         </article>

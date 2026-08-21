@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.dumpkit.common</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Common Utilities</span>
+<span class="sd">"""Common Utilities</span>
 <span class="sd">======================</span>
 
 <span class="sd">.. module:: pcapkit.dumpkit.common</span>
@@ -402,7 +402,7 @@
 <span class="sd">generally the customised hooks for :class:`dictdumper.Dumper`</span>
 <span class="sd">classes.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
@@ -419,7 +419,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;make_dumper&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'make_dumper'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Type</span>
@@ -431,20 +431,20 @@
 <div class="viewcode-block" id="DumperBase">
 <a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DumperBase</span><span class="p">(</span><span class="n">dictdumper</span><span class="o">.</span><span class="n">dumper</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base :class:`~dictdumper.dumper.Dumper` object.</span>
+<span class="w">    </span><span class="sd">"""Base :class:`~dictdumper.dumper.Dumper` object.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        This class is for internal use only. For customisation, please use</span>
 <span class="sd">        :class:`Dumper` instead.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span></div>
+<span class="sd">    """</span></div>
 
 
 
 <div class="viewcode-block" id="Dumper">
 <a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Dumper</span><span class="p">(</span><span class="n">DumperBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base :class:`~dictdumper.dumper.Dumper` object.</span>
+<span class="w">    </span><span class="sd">"""Base :class:`~dictdumper.dumper.Dumper` object.</span>
 
 <span class="sd">    This class is a customised :class:`~dictdumper.dumper.Dumper` for the</span>
 <span class="sd">    :mod:`pcapkit.dumpkit` implementation, which is generally customised</span>
@@ -453,13 +453,13 @@
 <span class="sd">    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` output</span>
 <span class="sd">    dumper registries.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="Dumper.__init_subclass__">
 <a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper.__init_subclass__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise subclass.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">ext</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Initialise subclass.</span>
 
 <span class="sd">        This method is used to register the subclass to the</span>
 <span class="sd">        :class:`~pcapkit.foundation.extraction.Extraction` and</span>
@@ -484,14 +484,14 @@
 <span class="sd">            - :meth:`pcapkit.foundation.extraction.Extractor.register_dumper`</span>
 <span class="sd">            - :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper`</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">()</span> <span class="k">as</span> <span class="n">temp</span><span class="p">:</span>
                 <span class="n">fmt</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">kind</span>
         <span class="n">fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">ext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ext</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;.</span><span class="si">{</span><span class="n">fmt</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'.</span><span class="si">{</span><span class="n">fmt</span><span class="si">}</span><span class="s1">'</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
         <span class="n">Extractor</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
@@ -506,8 +506,8 @@
 
 <div class="viewcode-block" id="make_dumper">
 <a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.make_dumper">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Type[ABCDumper]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[ABCDumper]&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a customised :class:`~dictdumper.dumper.Dumper` object.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="s1">'Type[ABCDumper]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[ABCDumper]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Create a customised :class:`~dictdumper.dumper.Dumper` object.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        output: Output class to customise.</span>
@@ -515,12 +515,12 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Customised :class:`~dictdumper.dumper.Dumper` object.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">class</span><span class="w"> </span><span class="nc">DictDumper</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Customised :class:`~dictdumper.dumper.Dumper` object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Customised :class:`~dictdumper.dumper.Dumper` object."""</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Convert content for function call.</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">"""Convert content for function call.</span>
 
 <span class="sd">            Args:</span>
 <span class="sd">                self: Dumper instance.</span>
@@ -529,7 +529,7 @@
 <span class="sd">            Returns:</span>
 <span class="sd">                Converted object.</span>
 
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
                 <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">):</span>
@@ -542,21 +542,21 @@
                 <span class="n">temp</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># type: DefaultDict[str, list[Any]]</span>
                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
-                        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">]&#39;</span>
+                        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">]'</span>
                     <span class="n">temp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">temp</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
-                <span class="n">addon</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)}</span>
+                <span class="n">addon</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'_'</span><span class="p">)}</span>
                 <span class="k">if</span> <span class="n">addon</span><span class="p">:</span>
                     <span class="k">return</span> <span class="p">{</span>
-                        <span class="s1">&#39;enum&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">o</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span>
+                        <span class="s1">'enum'</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">o</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">]'</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">addon</span><span class="p">,</span>
                     <span class="p">}</span>
-                <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">o</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">]&#39;</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">o</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">]'</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>  <span class="c1"># type: ignore[unreachable]</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;fallback&quot;]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Check content type for function call.</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["fallback"]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">            </span><span class="sd">"""Check content type for function call.</span>
 
 <span class="sd">            Args:</span>
 <span class="sd">                self: Dumper instance.</span>
@@ -571,11 +571,11 @@
 <span class="sd">                to find a suitable function for dumping and it should pair with</span>
 <span class="sd">                :func:`pcapkit.dumpkit.common._append_fallback` for use.</span>
 
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">return</span> <span class="s1">&#39;fallback&#39;</span>
+<span class="sd">            """</span>
+            <span class="k">return</span> <span class="s1">'fallback'</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">_append_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;TextIO&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Fallback function for dumping.</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_append_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">"""Fallback function for dumping.</span>
 
 <span class="sd">            Args:</span>
 <span class="sd">                self: Dumper instance.</span>
@@ -588,13 +588,13 @@
 <span class="sd">                to find a suitable function for dumping and it should pair with</span>
 <span class="sd">                :func:`pcapkit.dumpkit.common.default` for use.</span>
 
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__slots__&#39;</span><span class="p">):</span>
+<span class="sd">            """</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__slots__'</span><span class="p">):</span>
                 <span class="n">new_value</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="vm">__slots__</span><span class="p">}</span>
-            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__dict__&#39;</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__dict__'</span><span class="p">):</span>
                 <span class="n">new_value</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;unsupported object type: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">'unsupported object type: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                 <span class="n">new_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
 
             <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_func</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>

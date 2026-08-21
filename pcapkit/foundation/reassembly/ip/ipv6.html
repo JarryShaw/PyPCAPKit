@@ -478,30 +478,30 @@ is as following:</p>
 <em>tuple</em>) is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) datagram
  |--&gt; (Info) data
- |     |--&gt; &#39;completed&#39; : (bool) True --&gt; implemented
- |     |--&gt; &#39;id&#39; : (Info) original packet identifier
- |     |            |--&gt; &#39;src&#39; --&gt; (IPv6Address) ipv6.src
- |     |            |--&gt; &#39;dst&#39; --&gt; (IPv6Address) ipv6.dst
- |     |            |--&gt; &#39;id&#39; --&gt; (int) ipv6.label
- |     |            |--&gt; &#39;proto&#39; --&gt; (EtherType) ipv6_frag.next
- |     |--&gt; &#39;index&#39; : (tuple) packet numbers
+ |     |--&gt; 'completed' : (bool) True --&gt; implemented
+ |     |--&gt; 'id' : (Info) original packet identifier
+ |     |            |--&gt; 'src' --&gt; (IPv6Address) ipv6.src
+ |     |            |--&gt; 'dst' --&gt; (IPv6Address) ipv6.dst
+ |     |            |--&gt; 'id' --&gt; (int) ipv6.label
+ |     |            |--&gt; 'proto' --&gt; (EtherType) ipv6_frag.next
+ |     |--&gt; 'index' : (tuple) packet numbers
  |     |               |--&gt; (int) original packet range number
- |     |--&gt; &#39;payload&#39; : (bytes) reassembled IPv4 packet
- |     |--&gt; &#39;packet&#39; : (Protocol) parsed reassembled payload
+ |     |--&gt; 'payload' : (bytes) reassembled IPv4 packet
+ |     |--&gt; 'packet' : (Protocol) parsed reassembled payload
  |--&gt; (Info) data
- |     |--&gt; &#39;completed&#39; : (bool) False --&gt; not implemented
- |     |--&gt; &#39;id&#39; : (Info) original packet identifier
- |     |            |--&gt; &#39;src&#39; --&gt; (IPv6Address) ipv6.src
- |     |            |--&gt; &#39;dst&#39; --&gt; (IPv6Address) ipv6.dst
- |     |            |--&gt; &#39;id&#39; --&gt; (int) ipv6.id
- |     |            |--&gt; &#39;proto&#39; --&gt; (EtherType) ipv6_frag.next
- |     |--&gt; &#39;index&#39; : (tuple) packet numbers
+ |     |--&gt; 'completed' : (bool) False --&gt; not implemented
+ |     |--&gt; 'id' : (Info) original packet identifier
+ |     |            |--&gt; 'src' --&gt; (IPv6Address) ipv6.src
+ |     |            |--&gt; 'dst' --&gt; (IPv6Address) ipv6.dst
+ |     |            |--&gt; 'id' --&gt; (int) ipv6.id
+ |     |            |--&gt; 'proto' --&gt; (EtherType) ipv6_frag.next
+ |     |--&gt; 'index' : (tuple) packet numbers
  |     |               |--&gt; (int) original packet range number
- |     |--&gt; &#39;header&#39; : (bytes) IPv4 header
- |     |--&gt; &#39;payload&#39; : (tuple) partially reassembled IPv4 payload
+ |     |--&gt; 'header' : (bytes) IPv4 header
+ |     |--&gt; 'payload' : (tuple) partially reassembled IPv4 payload
  |     |                 |--&gt; (bytes) IPv4 payload fragment
  |     |                 |--&gt; ...
- |     |--&gt; &#39;packet&#39; : (None)
+ |     |--&gt; 'packet' : (None)
  |--&gt; (Info) data ...
 </pre></div>
 </div>
@@ -515,15 +515,15 @@ is as following:</p>
  |     |--&gt; ipc6.dst       |
  |     |--&gt; ipv6.label     |
  |     |--&gt; ipv6_frag.next |
- |                         |--&gt; &#39;TDL&#39; : (int) total data length
+ |                         |--&gt; 'TDL' : (int) total data length
  |                         |--&gt; RCVBT : (bytearray) fragment received bit table
- |                         |             |--&gt; (bytes) b&#39;\\x00&#39; -&gt; not received
- |                         |             |--&gt; (bytes) b&#39;\\x01&#39; -&gt; received
+ |                         |             |--&gt; (bytes) b'\\x00' -&gt; not received
+ |                         |             |--&gt; (bytes) b'\\x01' -&gt; received
  |                         |             |--&gt; (bytes) ...
- |                         |--&gt; &#39;index&#39; : (list) list of reassembled packets
+ |                         |--&gt; 'index' : (list) list of reassembled packets
  |                         |               |--&gt; (int) packet range number
- |                         |--&gt; &#39;header&#39; : (bytes) header buffer
- |                         |--&gt; &#39;datagram&#39; : (bytearray) data buffer, holes set to b&#39;\\x00&#39;
+ |                         |--&gt; 'header' : (bytes) header buffer
+ |                         |--&gt; 'datagram' : (bytearray) data buffer, holes set to b'\\x00'
  |--&gt; (tuple) BUFID ...
 </pre></div>
 </div>

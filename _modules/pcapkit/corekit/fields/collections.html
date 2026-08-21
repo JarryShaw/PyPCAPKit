@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.corekit.fields.collections</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;container field class&quot;&quot;&quot;</span>
+<span class="sd">"""container field class"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
@@ -404,7 +404,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;ListField&#39;</span><span class="p">,</span> <span class="s1">&#39;OptionField&#39;</span><span class="p">,</span>
+    <span class="s1">'ListField'</span><span class="p">,</span> <span class="s1">'OptionField'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -417,14 +417,14 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
-<span class="n">_TL</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_TL&#39;</span><span class="p">,</span> <span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="s1">&#39;FieldBase&#39;</span><span class="p">,</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span>
-<span class="n">_TS</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_TS&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Schema&#39;</span><span class="p">)</span>
+<span class="n">_TL</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_TL'</span><span class="p">,</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="s1">'FieldBase'</span><span class="p">,</span> <span class="s1">'bytes'</span><span class="p">)</span>
+<span class="n">_TS</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_TS'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Schema'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ListField">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ListField</span><span class="p">(</span><span class="n">FieldBase</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">_TL</span><span class="p">]],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_TL</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Field list for protocol fields.</span>
+<span class="w">    </span><span class="sd">"""Field list for protocol fields.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
@@ -436,22 +436,22 @@
 <span class="sd">    This field is used to represent a list of fields, as in the case of lists of</span>
 <span class="sd">    constrant-length-field items in a protocol.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Field size.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Field size."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">optional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Field is optional.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">optional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Field is optional."""</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">item_type</span><span class="p">:</span> <span class="s1">&#39;Optional[FieldBase]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="c1">#self._name = &#39;&lt;list&gt;&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">item_type</span><span class="p">:</span> <span class="s1">'Optional[FieldBase]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="c1">#self._name = '&lt;list&gt;'</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span> <span class="o">=</span> <span class="n">item_type</span>
 
@@ -459,12 +459,12 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="s1">&#39;0s&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="s1">'0s'</span>
 
 <div class="viewcode-block" id="ListField.__call__">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.__call__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Update field attributes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Packet data.</span>
@@ -475,19 +475,19 @@
 <span class="sd">        This method will return a new instance of :class:`ListField`</span>
 <span class="sd">        instead of updating the current instance.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">new_self</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">new_self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-            <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s&#39;</span>
+            <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s'</span>
         <span class="k">return</span> <span class="n">new_self</span></div>
 
 
 <div class="viewcode-block" id="ListField.pack">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.pack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Optional[list[_TL]]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pack field value into :obj:`bytes`.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Optional[list[_TL]]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Pack field value into :obj:`bytes`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Field value.</span>
@@ -496,9 +496,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Packed field value.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+            <span class="k">return</span> <span class="sa">b</span><span class="s1">''</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> \
             <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-top-level</span>
@@ -512,14 +512,14 @@
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has invalid value.&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span></div>
+                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has invalid value.'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ListField.unpack">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.unpack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">&#39;bytes | IO[bytes]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes | list[_TL]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unpack field value from :obj:`bytes`.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bytes | IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes | list[_TL]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpack field value from :obj:`bytes`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            buffer: Field buffer.</span>
@@ -528,7 +528,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Unpacked field value.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>  <span class="c1"># type: IO[bytes]</span>
@@ -546,15 +546,15 @@
             <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">is_schema</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;SchemaField&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'SchemaField'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
                 <span class="n">length</span> <span class="o">-=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has invalid length.&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has invalid length.'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">length</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
                 <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has invalid length.&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has invalid length.'</span><span class="p">)</span>
 
                 <span class="n">buffer</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
@@ -568,7 +568,7 @@
 <div class="viewcode-block" id="OptionField">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OptionField</span><span class="p">(</span><span class="n">ListField</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_TS</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Field list for protocol options.</span>
+<span class="w">    </span><span class="sd">"""Field list for protocol options.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
@@ -585,60 +585,60 @@
 <span class="sd">    This field is used to represent a list of fields, as in the case of lists of</span>
 <span class="sd">    options and/or parameters in a protocol.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">base_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[_TS]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Base schema.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">base_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[_TS]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Base schema."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_schema</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">type_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Type name.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">type_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Type name."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_name</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;defaultdict[int | StdlibEnum | AenumEnum, Type[_TS]]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Option registry.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'defaultdict[int | StdlibEnum | AenumEnum, Type[_TS]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Option registry."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">eool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int | StdlibEnum | AenumEnum&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;EOOL option.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int | StdlibEnum | AenumEnum'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""EOOL option."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eool</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">option_padding</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Length option padding data.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">option_padding</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Length option padding data."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_option_padding</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">base_schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[_TS]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">type_name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span>
-                 <span class="n">registry</span><span class="p">:</span> <span class="s1">&#39;Optional[defaultdict[int | StdlibEnum | AenumEnum, Type[_TS]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">eool</span><span class="p">:</span> <span class="s1">&#39;Optional[int | StdlibEnum | AenumEnum]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">base_schema</span><span class="p">:</span> <span class="s1">'Optional[Type[_TS]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">type_name</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="s1">'type'</span><span class="p">,</span>
+                 <span class="n">registry</span><span class="p">:</span> <span class="s1">'Optional[defaultdict[int | StdlibEnum | AenumEnum, Type[_TS]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">eool</span><span class="p">:</span> <span class="s1">'Optional[int | StdlibEnum | AenumEnum]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
-        <span class="c1">#self._name = &#39;&lt;option&gt;&#39;</span>
+        <span class="c1">#self._name = '&lt;option&gt;'</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_eool</span> <span class="o">=</span> <span class="n">eool</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_option_padding</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">if</span> <span class="n">base_schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="s1">&#39;Field &lt;option&gt; has no base schema.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="s1">'Field &lt;option&gt; has no base schema.'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_base_schema</span> <span class="o">=</span> <span class="n">base_schema</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_schema</span><span class="p">,</span> <span class="n">type_name</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Field &lt;option&gt; has no type field &quot;</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s1">&quot;.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Field &lt;option&gt; has no type field "</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s1">".'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_type_name</span> <span class="o">=</span> <span class="n">type_name</span>
 
         <span class="k">if</span> <span class="n">registry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="s1">&#39;Field &lt;option&gt; has no registry.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="s1">'Field &lt;option&gt; has no registry.'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span> <span class="o">=</span> <span class="n">registry</span>
 
 <div class="viewcode-block" id="OptionField.unpack">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField.unpack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">&#39;bytes | IO[bytes]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[_TS]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unpack field value from :obj:`bytes`.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bytes | IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_TS]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpack field value from :obj:`bytes`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            buffer: Field buffer.</span>
@@ -653,7 +653,7 @@
 <span class="sd">            as the remaining length to the ``packet`` argument such that</span>
 <span class="sd">            the next fields can be aware of such informations.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>  <span class="c1"># type: IO[bytes]</span>
@@ -669,7 +669,7 @@
         <span class="k">while</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># unpack option type using base schema</span>
             <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc,var-annotated]</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_name</span><span class="p">])</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_name</span><span class="p">])</span>
             <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
 
             <span class="c1"># rewind to the beginning of the option</span>

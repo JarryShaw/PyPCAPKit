@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.protocols.schema.application.httpv2</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># mypy: disable-error-code=assignment</span>
-<span class="sd">&quot;&quot;&quot;header schema for HTTP/2 protocol&quot;&quot;&quot;</span>
+<span class="sd">"""header schema for HTTP/2 protocol"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
@@ -410,12 +410,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;HTTP&#39;</span><span class="p">,</span>
+    <span class="s1">'HTTP'</span><span class="p">,</span>
 
-    <span class="s1">&#39;FrameType&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;UnassignedFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;DataFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;HeadersFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;PriorityFrame&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;RSTStreamFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;SettingsFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;PushPromiseFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;PingFrame&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;GoawayFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;WindowUpdateFrame&#39;</span><span class="p">,</span> <span class="s1">&#39;ContinuationFrame&#39;</span><span class="p">,</span>
+    <span class="s1">'FrameType'</span><span class="p">,</span>
+    <span class="s1">'UnassignedFrame'</span><span class="p">,</span> <span class="s1">'DataFrame'</span><span class="p">,</span> <span class="s1">'HeadersFrame'</span><span class="p">,</span> <span class="s1">'PriorityFrame'</span><span class="p">,</span>
+    <span class="s1">'RSTStreamFrame'</span><span class="p">,</span> <span class="s1">'SettingsFrame'</span><span class="p">,</span> <span class="s1">'PushPromiseFrame'</span><span class="p">,</span> <span class="s1">'PingFrame'</span><span class="p">,</span>
+    <span class="s1">'GoawayFrame'</span><span class="p">,</span> <span class="s1">'WindowUpdateFrame'</span><span class="p">,</span> <span class="s1">'ContinuationFrame'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -429,7 +429,7 @@
 <div class="viewcode-block" id="FrameFlags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameFlags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">FrameFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;HTTP frame specific flags.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""HTTP frame specific flags."""</span>
 
         <span class="n">bit_7</span><span class="p">:</span> <span class="nb">int</span>
         <span class="n">bit_6</span><span class="p">:</span> <span class="nb">int</span>
@@ -444,7 +444,7 @@
 <div class="viewcode-block" id="StreamID">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.StreamID">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">StreamID</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stream identifier.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Stream identifier."""</span>
 
         <span class="c1">#: Steam identifier.</span>
         <span class="n">sid</span><span class="p">:</span> <span class="nb">int</span></div>
@@ -453,7 +453,7 @@
 <div class="viewcode-block" id="StreamDependency">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.StreamDependency">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">StreamDependency</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stream dependency.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Stream dependency."""</span>
 
         <span class="c1">#: Exclusive flag.</span>
         <span class="n">exclusive</span><span class="p">:</span> <span class="nb">int</span>
@@ -464,7 +464,7 @@
 <div class="viewcode-block" id="WindowSize">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.WindowSize">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">WindowSize</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Window size increment.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Window size increment."""</span>
 
         <span class="c1">#: Window size increment.</span>
         <span class="n">incr</span><span class="p">:</span> <span class="nb">int</span></div>
@@ -473,8 +473,8 @@
 
 <div class="viewcode-block" id="http_frame_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.http_frame_selector">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">http_frame_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`HTTP.frame` field.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">http_frame_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Selector function for :attr:`HTTP.frame` field.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pkt: Packet data.</span>
@@ -484,10 +484,10 @@
 <span class="sd">        :class:`~pcapkit.protocols.schema.application.httpv2.FrameType`</span>
 <span class="sd">        instance.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Enum_Frame&#39;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+<span class="sd">    """</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Frame'</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'type'</span><span class="p">])</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">FrameType</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
 
@@ -495,57 +495,57 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.HTTP">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HTTP</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 packet.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 packet."""</span>
 
     <span class="c1">#: Length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="c1">#: Frame type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Frame&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="p">)</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Frame'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="p">)</span>
     <span class="c1">#: Frame specific flags.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;FrameFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;bit_7&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;bit_6&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;bit_5&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;bit_4&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;bit_3&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;bit_2&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;bit_1&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;bit_0&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'FrameFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'bit_7'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'bit_6'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'bit_5'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'bit_4'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'bit_3'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'bit_2'</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'bit_1'</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'bit_0'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Stream identifier.</span>
-    <span class="n">stream</span><span class="p">:</span> <span class="s1">&#39;StreamID&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+    <span class="n">stream</span><span class="p">:</span> <span class="s1">'StreamID'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'sid'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Frame payload.</span>
-    <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;FrameType&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
+    <span class="n">frame</span><span class="p">:</span> <span class="s1">'FrameType'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">http_frame_selector</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;FrameFlags&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">&#39;StreamID&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;FrameType | bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Frame'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'FrameFlags'</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">'StreamID'</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'FrameType | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
 <div class="viewcode-block" id="FrameType">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FrameType</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_Frame</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 frame payload.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 frame payload."""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="n">__flags__</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span>
+        <span class="n">__flags__</span><span class="p">:</span> <span class="s1">'Flags'</span>
 
     <span class="n">__enum__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedFrame</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FrameType.Flags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType.Flags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">IntFlag</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags enumeration for HTTP/2 frames.&quot;&quot;&quot;</span></div>
+<span class="w">        </span><span class="sd">"""Flags enumeration for HTTP/2 frames."""</span></div>
 
 
 <div class="viewcode-block" id="FrameType.post_process">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: parsed schema</span>
@@ -554,12 +554,12 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;BIT_&#39;</span><span class="p">),</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'BIT_'</span><span class="p">),</span>
                                <span class="bp">self</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="n">name</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="n">name</span><span class="p">]:</span>
                 <span class="n">flags</span> <span class="o">|=</span> <span class="n">val</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__flags__</span> <span class="o">=</span> <span class="n">flags</span>
@@ -572,13 +572,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.UnassignedFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnassignedFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for unassigned HTTP/2 frame payload.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for unassigned HTTP/2 frame payload."""</span>
 
     <span class="c1">#: Frame payload.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -586,32 +586,32 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.DataFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DataFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``DATA`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``DATA`` frames."""</span>
 
 <div class="viewcode-block" id="DataFrame.Flags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.DataFrame.Flags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags enumeration for HTTP/2 ``DATA`` frames.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Flags enumeration for HTTP/2 ``DATA`` frames."""</span>
 
         <span class="n">END_STREAM</span> <span class="o">=</span> <span class="n">BIT_0</span> <span class="o">=</span> <span class="mh">0x1</span>
         <span class="n">PADDED</span>     <span class="o">=</span> <span class="n">BIT_3</span> <span class="o">=</span> <span class="mh">0x8</span></div>
 
 
     <span class="c1">#: Padding length.</span>
-    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt8Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_3&#39;</span><span class="p">],</span>  <span class="c1"># PADDED</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">],</span>  <span class="c1"># PADDED</span>
     <span class="p">)</span>
     <span class="c1">#: Data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pad_len&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_3&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
-        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pad_len&#39;</span><span class="p">]),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_3&#39;</span><span class="p">],</span>  <span class="c1"># PADDED</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">],</span>  <span class="c1"># PADDED</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -619,12 +619,12 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.HeadersFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HeadersFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">HEADERS</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``HEADERS`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``HEADERS`` frames."""</span>
 
 <div class="viewcode-block" id="HeadersFrame.Flags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.HeadersFrame.Flags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags enumeration for HTTP/2 ``DATA`` frames.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Flags enumeration for HTTP/2 ``DATA`` frames."""</span>
 
         <span class="n">END_STREAM</span>  <span class="o">=</span> <span class="n">BIT_0</span> <span class="o">=</span> <span class="mh">0x1</span>
         <span class="n">END_HEADERS</span> <span class="o">=</span> <span class="n">BIT_2</span> <span class="o">=</span> <span class="mh">0x4</span>
@@ -633,35 +633,35 @@
 
 
     <span class="c1">#: Padding length.</span>
-    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt8Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_3&#39;</span><span class="p">],</span>  <span class="c1"># PADDED</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">],</span>  <span class="c1"># PADDED</span>
     <span class="p">)</span>
     <span class="c1">#: Stream dependency.</span>
-    <span class="n">stream_dep</span><span class="p">:</span> <span class="s1">&#39;StreamDependency&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">stream_dep</span><span class="p">:</span> <span class="s1">'StreamDependency'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;exclusive&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+            <span class="s1">'exclusive'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="s1">'sid'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
         <span class="p">}),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_5&#39;</span><span class="p">],</span>  <span class="c1"># PRIORITY</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_5'</span><span class="p">],</span>  <span class="c1"># PRIORITY</span>
     <span class="p">)</span>
     <span class="c1">#: Weight.</span>
-    <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt8Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_5&#39;</span><span class="p">],</span>  <span class="c1"># PRIORITY</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_5'</span><span class="p">],</span>  <span class="c1"># PRIORITY</span>
     <span class="p">)</span>
     <span class="c1">#: Header block fragment.</span>
-    <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span>
-        <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pad_len&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_3&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
     <span class="p">))</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
-        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pad_len&#39;</span><span class="p">]),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_3&#39;</span><span class="p">],</span>  <span class="c1"># PADDED</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">],</span>  <span class="c1"># PADDED</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">stream_dep</span><span class="p">:</span> <span class="s1">&#39;Optional[StreamDependency]&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">stream_dep</span><span class="p">:</span> <span class="s1">'Optional[StreamDependency]'</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -669,18 +669,18 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PriorityFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PriorityFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``PRIORITY`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``PRIORITY`` frames."""</span>
 
     <span class="c1">#: Stream dependency (exclusive, stream ID).</span>
-    <span class="n">stream</span><span class="p">:</span> <span class="s1">&#39;StreamDependency&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;exclusive&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+    <span class="n">stream</span><span class="p">:</span> <span class="s1">'StreamDependency'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'exclusive'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'sid'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Weight.</span>
-    <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">&#39;StreamDependency&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">'StreamDependency'</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -688,13 +688,13 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.RSTStreamFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RSTStreamFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">RST_STREAM</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``RST_STREAM`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``RST_STREAM`` frames."""</span>
 
     <span class="c1">#: Error code.</span>
-    <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;Enum_ErrorCode&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_ErrorCode</span><span class="p">)</span>
+    <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_ErrorCode</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;Enum_ErrorCode&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -702,15 +702,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.SettingPair">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SettingPair</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``SETTINGS`` frame setting pairs.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``SETTINGS`` frame setting pairs."""</span>
 
     <span class="c1">#: Identifier.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;Enum_Setting&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Setting</span><span class="p">)</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'Enum_Setting'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Setting</span><span class="p">)</span>
     <span class="c1">#: Value.</span>
-    <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;Enum_Setting&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'Enum_Setting'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -718,24 +718,24 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.SettingsFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SettingsFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``SETTINGS`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``SETTINGS`` frames."""</span>
 
 <div class="viewcode-block" id="SettingsFrame.Flags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.SettingsFrame.Flags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags enumeration for HTTP/2 ``SETTINGS`` frames.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Flags enumeration for HTTP/2 ``SETTINGS`` frames."""</span>
 
         <span class="n">ACK</span> <span class="o">=</span> <span class="n">BIT_0</span> <span class="o">=</span> <span class="mh">0x1</span></div>
 
 
     <span class="c1">#: Settings.</span>
-    <span class="n">settings</span><span class="p">:</span> <span class="s1">&#39;list[SettingPair]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="s1">'list[SettingPair]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">SettingPair</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="s1">&#39;list[SettingPair] | bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="s1">'list[SettingPair] | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -743,38 +743,38 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PushPromiseFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PushPromiseFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PUSH_PROMISE</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``PUSH_PROMISE`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``PUSH_PROMISE`` frames."""</span>
 
 <div class="viewcode-block" id="PushPromiseFrame.Flags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PushPromiseFrame.Flags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags enumeration for HTTP/2 ``PUSH_PROMISE`` frames.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Flags enumeration for HTTP/2 ``PUSH_PROMISE`` frames."""</span>
 
         <span class="n">END_HEADERS</span> <span class="o">=</span> <span class="n">BIT_2</span> <span class="o">=</span> <span class="mh">0x4</span>
         <span class="n">PADDED</span>      <span class="o">=</span> <span class="n">BIT_3</span> <span class="o">=</span> <span class="mh">0x8</span></div>
 
 
     <span class="c1">#: Padding length.</span>
-    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+    <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt8Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_3&#39;</span><span class="p">],</span>  <span class="c1"># PADDED</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">],</span>  <span class="c1"># PADDED</span>
     <span class="p">)</span>
     <span class="c1">#: Promised stream ID.</span>
-    <span class="n">stream</span><span class="p">:</span> <span class="s1">&#39;StreamID&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+    <span class="n">stream</span><span class="p">:</span> <span class="s1">'StreamID'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'sid'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Header block fragment.</span>
-    <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span>
-        <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pad_len&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_3&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
     <span class="p">))</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
-        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pad_len&#39;</span><span class="p">]),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;bit_3&#39;</span><span class="p">],</span>  <span class="c1"># PADDED</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">],</span>  <span class="c1"># PADDED</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">&#39;StreamID&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">'StreamID'</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -782,21 +782,21 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PingFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PingFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``PING`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``PING`` frames."""</span>
 
 <div class="viewcode-block" id="PingFrame.Flags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PingFrame.Flags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags enumeration for HTTP/2 ``PING`` frames.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Flags enumeration for HTTP/2 ``PING`` frames."""</span>
 
         <span class="n">ACK</span> <span class="o">=</span> <span class="n">BIT_0</span> <span class="o">=</span> <span class="mh">0x1</span></div>
 
 
     <span class="c1">#: Opaque data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -804,19 +804,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.GoawayFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">GoawayFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">GOAWAY</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``GOAWAY`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``GOAWAY`` frames."""</span>
 
     <span class="c1">#: Last stream ID.</span>
-    <span class="n">stream</span><span class="p">:</span> <span class="s1">&#39;StreamID&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;sid&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+    <span class="n">stream</span><span class="p">:</span> <span class="s1">'StreamID'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'sid'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Error code.</span>
-    <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;Enum_ErrorCode&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_ErrorCode</span><span class="p">)</span>
+    <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_ErrorCode</span><span class="p">)</span>
     <span class="c1">#: Additional debug data.</span>
-    <span class="n">debug</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">])</span>
+    <span class="n">debug</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">&#39;StreamID&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;Enum_ErrorCode&#39;</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">'StreamID'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode'</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -824,15 +824,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.WindowUpdateFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">WindowUpdateFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">WINDOW_UPDATE</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``WINDOW_UPDATE`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``WINDOW_UPDATE`` frames."""</span>
 
     <span class="c1">#: Window size increment.</span>
-    <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;WindowSize&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;incr&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+    <span class="n">size</span><span class="p">:</span> <span class="s1">'WindowSize'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'incr'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;WindowSize&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'WindowSize'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -840,21 +840,21 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.ContinuationFrame">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ContinuationFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">CONTINUATION</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``CONTINUATION`` frames.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for HTTP/2 ``CONTINUATION`` frames."""</span>
 
 <div class="viewcode-block" id="ContinuationFrame.Flags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.ContinuationFrame.Flags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags enumeration for HTTP/2 ``CONTINUATION`` frames.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Flags enumeration for HTTP/2 ``CONTINUATION`` frames."""</span>
 
         <span class="n">END_HEADERS</span> <span class="o">=</span> <span class="n">BIT_2</span> <span class="o">=</span> <span class="mh">0x4</span></div>
 
 
     <span class="c1">#: Header block fragment.</span>
-    <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">])</span>
+    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 </pre></div>
         </article>

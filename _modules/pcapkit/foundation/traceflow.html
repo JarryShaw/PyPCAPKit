@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.foundation.traceflow</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=unused-import</span>
-<span class="sd">&quot;&quot;&quot;Trace Flows</span>
+<span class="sd">"""Trace Flows</span>
 <span class="sd">=================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.traceflow</span>
@@ -406,7 +406,7 @@
 <span class="sd">   This was implemented as the demand of my mate</span>
 <span class="sd">   `@gousaiyang &lt;https://github.com/gousaiyang&gt;`__.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="c1"># Base Class for TraceFlow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlow</span>
 
@@ -414,7 +414,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_TraceFlow</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;TCP_TraceFlow&#39;</span><span class="p">,</span>
+    <span class="s1">'TCP_TraceFlow'</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -430,13 +430,13 @@
 <a class="viewcode-back" href="../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.TraceFlowManager">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TraceFlowManager</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;TraceFlow Manager.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""TraceFlow Manager."""</span>
 
     <span class="c1">#: TCP reassembly.</span>
-    <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;TCP_TraceFlow&#39;</span>
+    <span class="n">tcp</span><span class="p">:</span> <span class="s1">'TCP_TraceFlow'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;Optional[TCP_TraceFlow]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'Optional[TCP_TraceFlow]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 </pre></div>
         </article>

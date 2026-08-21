@@ -392,14 +392,14 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.utilities.warnings</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;User Defined Warnings</span>
+<span class="sd">"""User Defined Warnings</span>
 <span class="sd">===========================</span>
 
 <span class="sd">.. module:: pcapkit.utilities.warnings</span>
 
 <span class="sd">:mod:`pcapkit.warnings` refined built-in warnings.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -410,37 +410,37 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;warn&#39;</span><span class="p">,</span>
+    <span class="s1">'warn'</span><span class="p">,</span>
 
     <span class="c1"># UserWarning</span>
-    <span class="s1">&#39;BaseWarning&#39;</span><span class="p">,</span>
+    <span class="s1">'BaseWarning'</span><span class="p">,</span>
     <span class="c1"># ImportWarning</span>
-    <span class="s1">&#39;FormatWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;EngineWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;InvalidVendorWarning&#39;</span><span class="p">,</span>
+    <span class="s1">'FormatWarning'</span><span class="p">,</span> <span class="s1">'EngineWarning'</span><span class="p">,</span> <span class="s1">'InvalidVendorWarning'</span><span class="p">,</span>
     <span class="c1"># RuntimeWarning</span>
-    <span class="s1">&#39;FileWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;LayerWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ProtocolWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;AttributeWarning&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;DevModeWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRequestWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRuntimeWarning&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;UnknownFieldWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;RegistryWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;SchemaWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;InfoWarning&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SeekWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ExtractionWarning&#39;</span><span class="p">,</span>
+    <span class="s1">'FileWarning'</span><span class="p">,</span> <span class="s1">'LayerWarning'</span><span class="p">,</span> <span class="s1">'ProtocolWarning'</span><span class="p">,</span> <span class="s1">'AttributeWarning'</span><span class="p">,</span>
+    <span class="s1">'DevModeWarning'</span><span class="p">,</span> <span class="s1">'VendorRequestWarning'</span><span class="p">,</span> <span class="s1">'VendorRuntimeWarning'</span><span class="p">,</span>
+    <span class="s1">'UnknownFieldWarning'</span><span class="p">,</span> <span class="s1">'RegistryWarning'</span><span class="p">,</span> <span class="s1">'SchemaWarning'</span><span class="p">,</span> <span class="s1">'InfoWarning'</span><span class="p">,</span>
+    <span class="s1">'SeekWarning'</span><span class="p">,</span> <span class="s1">'ExtractionWarning'</span><span class="p">,</span>
     <span class="c1"># ResourceWarning</span>
-    <span class="s1">&#39;DPKTWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ScapyWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;PySharkWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;EmojiWarning&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;VendorWarning&#39;</span><span class="p">,</span>
+    <span class="s1">'DPKTWarning'</span><span class="p">,</span> <span class="s1">'ScapyWarning'</span><span class="p">,</span> <span class="s1">'PySharkWarning'</span><span class="p">,</span> <span class="s1">'EmojiWarning'</span><span class="p">,</span>
+    <span class="s1">'VendorWarning'</span><span class="p">,</span>
     <span class="c1"># DeprecationWarning</span>
-    <span class="s1">&#39;DeprecatedFormatWarning&#39;</span><span class="p">,</span>
+    <span class="s1">'DeprecatedFormatWarning'</span><span class="p">,</span>
 <span class="p">]</span>
 
 
 <div class="viewcode-block" id="warn">
 <a class="viewcode-back" href="../../../pcapkit/utilities/functools.html#pcapkit.utilities.warnings.warn">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Union[str, Warning]&#39;</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="s1">&#39;Type[Warning]&#39;</span><span class="p">,</span>
-         <span class="n">stacklevel</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper function of :func:`warnings.warn`.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="s1">'Union[str, Warning]'</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="s1">'Type[Warning]'</span><span class="p">,</span>
+         <span class="n">stacklevel</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Wrapper function of :func:`warnings.warn`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        message: Warning message.</span>
 <span class="sd">        category: Warning category.</span>
 <span class="sd">        stacklevel: Warning stack level.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">stacklevel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">stacklevel</span> <span class="o">=</span> <span class="n">stacklevel_calculator</span><span class="p">()</span>
 
@@ -458,9 +458,9 @@
 <div class="viewcode-block" id="BaseWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base warning class of all kinds.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Base warning class of all kinds."""</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=useless-super-delegation</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=useless-super-delegation</span>
         <span class="c1"># log warning</span>
         <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
@@ -469,9 +469,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">'ignore'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
-        <span class="c1"># warnings.simplefilter(&#39;default&#39;)</span>
+        <span class="c1"># warnings.simplefilter('default')</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
@@ -484,21 +484,21 @@
 <div class="viewcode-block" id="FormatWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.FormatWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FormatWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ImportWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warning on unknown format(s).&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Warning on unknown format(s)."""</span></div>
 
 
 
 <div class="viewcode-block" id="EngineWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EngineWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ImportWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsupported extraction engine.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Unsupported extraction engine."""</span></div>
 
 
 
 <div class="viewcode-block" id="InvalidVendorWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.InvalidVendorWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InvalidVendorWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ImportWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vendor CLI invalid updater.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Vendor CLI invalid updater."""</span></div>
 
 
 
@@ -510,91 +510,91 @@
 <div class="viewcode-block" id="FileWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.FileWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FileWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warning on file(s).&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Warning on file(s)."""</span></div>
 
 
 
 <div class="viewcode-block" id="LayerWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.LayerWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LayerWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unrecognised layer.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Unrecognised layer."""</span></div>
 
 
 
 <div class="viewcode-block" id="ProtocolWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ProtocolWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unrecognised protocol.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Unrecognised protocol."""</span></div>
 
 
 
 <div class="viewcode-block" id="AttributeWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AttributeWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsupported attribute.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Unsupported attribute."""</span></div>
 
 
 
 <div class="viewcode-block" id="DevModeWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.DevModeWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DevModeWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run in development mode.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Run in development mode."""</span></div>
 
 
 
 <div class="viewcode-block" id="VendorRequestWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.VendorRequestWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">VendorRequestWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vendor request connection failed.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Vendor request connection failed."""</span></div>
 
 
 
 <div class="viewcode-block" id="VendorRuntimeWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.VendorRuntimeWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">VendorRuntimeWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vendor failed during runtime.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Vendor failed during runtime."""</span></div>
 
 
 
 <div class="viewcode-block" id="UnknownFieldWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.UnknownFieldWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnknownFieldWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unknown field.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Unknown field."""</span></div>
 
 
 
 <div class="viewcode-block" id="RegistryWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RegistryWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registry warning.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Registry warning."""</span></div>
 
 
 
 <div class="viewcode-block" id="SchemaWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.SchemaWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SchemaWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema warning.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Schema warning."""</span></div>
 
 
 
 <div class="viewcode-block" id="InfoWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.InfoWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InfoWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Info class warning.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Info class warning."""</span></div>
 
 
 
 <div class="viewcode-block" id="SeekWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.SeekWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SeekWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Seek operation warning.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Seek operation warning."""</span></div>
 
 
 
 <div class="viewcode-block" id="ExtractionWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.ExtractionWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExtractionWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extraction warning.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Extraction warning."""</span></div>
 
 
 
@@ -606,35 +606,35 @@
 <div class="viewcode-block" id="DPKTWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.DPKTWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DPKTWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warnings on DPKT usage.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Warnings on DPKT usage."""</span></div>
 
 
 
 <div class="viewcode-block" id="ScapyWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.ScapyWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ScapyWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warnings on Scapy usage.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Warnings on Scapy usage."""</span></div>
 
 
 
 <div class="viewcode-block" id="PySharkWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.PySharkWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PySharkWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warnings on PyShark usage.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Warnings on PyShark usage."""</span></div>
 
 
 
 <div class="viewcode-block" id="EmojiWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.EmojiWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EmojiWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warnings on Emoji usage.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Warnings on Emoji usage."""</span></div>
 
 
 
 <div class="viewcode-block" id="VendorWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.VendorWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">VendorWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warnings on vendor usage.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Warnings on vendor usage."""</span></div>
 
 
 
@@ -646,7 +646,7 @@
 <div class="viewcode-block" id="DeprecatedFormatWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.DeprecatedFormatWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DeprecatedFormatWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warning on deprecated formats.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Warning on deprecated formats."""</span></div>
 
 </pre></div>
         </article>

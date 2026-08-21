@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.protocols.schema.link.ethernet</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># mypy: disable-error-code=assignment</span>
-<span class="sd">&quot;&quot;&quot;header schema for ethernet protocol&quot;&quot;&quot;</span>
+<span class="sd">"""header schema for ethernet protocol"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -404,7 +404,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Ethernet&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Ethernet'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
@@ -414,11 +414,11 @@
 
 <div class="viewcode-block" id="callback_payload">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.schema.link.ethernet.callback_payload">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">callback_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">&#39;PayloadField&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback function for :attr:`Ethernet.payload`.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">callback_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">'PayloadField'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Callback function for :attr:`Ethernet.payload`."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ethernet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ethernet</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
-    <span class="n">type_</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+    <span class="n">type_</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span>
     <span class="n">protocol</span> <span class="o">=</span> <span class="n">Ethernet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">type_</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
@@ -430,23 +430,23 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.schema.link.ethernet.Ethernet">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Ethernet</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ethernet packet.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Header schema for ethernet packet."""</span>
 
     <span class="c1">#: Destination MAC address.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
     <span class="c1">#: Source MAC address.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
     <span class="c1">#: Protocol (internet layer).</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_EtherType&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_EtherType</span><span class="p">)</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_EtherType'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_EtherType</span><span class="p">)</span>
     <span class="c1">#: Payload.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
         <span class="n">callback</span><span class="o">=</span><span class="n">callback_payload</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">,</span>
-                     <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_EtherType'</span><span class="p">,</span>
+                     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | Protocol | Schema'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 </pre></div>
         </article>

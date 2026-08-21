@@ -392,14 +392,14 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.traceflow.data.tcp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data models for TCP flow tracing&quot;&quot;&quot;</span>
+<span class="sd">"""data models for TCP flow tracing"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;BufferID&#39;</span><span class="p">,</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="s1">&#39;Index&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'BufferID'</span><span class="p">,</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'Index'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -411,48 +411,48 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
 
-<span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;_AT&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span>
+<span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_AT'</span><span class="p">,</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="s1">'IPv6Address'</span><span class="p">)</span>
 
 <span class="c1">#: Buffer ID.</span>
-<span class="n">BufferID</span><span class="p">:</span> <span class="s1">&#39;TypeAlias&#39;</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Packet">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
+<span class="w">    </span><span class="sd">"""Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        * :meth:`pcapkit.foundation.traceflow.TraceFlow.dump`</span>
 <span class="sd">        * :term:`trace.tcp.packet`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">#: Data link type from global header.</span>
-    <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span>
+    <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span>
     <span class="c1">#: Frame number.</span>
-    <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Extracted frame info.</span>
-    <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Data_Frame | dict[str, Any]&#39;</span>
+    <span class="n">frame</span><span class="p">:</span> <span class="s1">'Data_Frame | dict[str, Any]'</span>
     <span class="c1">#: TCP synchronise (SYN) flag.</span>
-    <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: TCP finish (FIN) flag.</span>
-    <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Source IP.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;_AT&#39;</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span>
     <span class="c1">#: Destination IP.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;_AT&#39;</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span>
     <span class="c1">#: TCP source port.</span>
-    <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">srcport</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: TCP destination port.</span>
-    <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">dstport</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Frame timestamp.</span>
-    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Data_Frame | dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;_AT&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;_AT&#39;</span><span class="p">,</span>
-                     <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Data_Frame | dict[str, Any]'</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span>
+                     <span class="n">srcport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 
 
@@ -460,24 +460,24 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Buffer">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
+<span class="w">    </span><span class="sd">"""Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        * :attr:`pcapkit.foundation.traceflow.TraceFlow.index`</span>
 <span class="sd">        * :term:`trace.tcp.buffer`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">#: Output dumper object.</span>
-    <span class="n">fpout</span><span class="p">:</span> <span class="s1">&#39;Dumper&#39;</span>
+    <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Dumper'</span>
     <span class="c1">#: List of frame index.</span>
-    <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span>
     <span class="c1">#: Flow label generated from ``BUFID``.</span>
-    <span class="n">label</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpout</span><span class="p">:</span> <span class="s1">&#39;Dumper&#39;</span><span class="p">,</span>
-                     <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Dumper'</span><span class="p">,</span>
+                     <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 
 
@@ -485,25 +485,25 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Index</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
+<span class="w">    </span><span class="sd">"""Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        * element from :attr:`pcapkit.foundation.traceflow.TraceFlow.index`</span>
 <span class="sd">          *tuple*</span>
 <span class="sd">        * :term:`trace.tcp.index`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">#: Output filename if exists.</span>
-    <span class="n">fpout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
+    <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
     <span class="c1">#: Tuple of frame index.</span>
-    <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
     <span class="c1">#: Flow label generated from ``BUFID``.</span>
-    <span class="n">label</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">,</span>
-                     <span class="n">label</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span>
+                     <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 </pre></div>
         </article>

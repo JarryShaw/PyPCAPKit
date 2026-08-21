@@ -469,7 +469,7 @@ flow label itself.</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p>The flow label is formatted as following:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">&#39;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span>
 </pre></div>
 </div>
 </div>
@@ -531,10 +531,10 @@ is as following:</p>
  |       |--&gt; tcp.srcport |
  |       |--&gt; ip.dst      |
  |       |--&gt; tcp.dstport |
- |                        |--&gt; &#39;fpout&#39; : (dictdumper.dumper.Dumper) output dumper object
- |                        |--&gt; &#39;index&#39;: (list) list of frame index
+ |                        |--&gt; 'fpout' : (dictdumper.dumper.Dumper) output dumper object
+ |                        |--&gt; 'index': (list) list of frame index
  |                        |              |--&gt; (int) frame index
- |                        |--&gt; &#39;label&#39;: (str) flow label generated from ``BUFID``
+ |                        |--&gt; 'label': (str) flow label generated from ``BUFID``
  |--&gt; (tuple) BUFID ...
 </pre></div>
 </div>
@@ -548,10 +548,10 @@ is as following:</p>
 <em>tuple</em>) is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) index
  |--&gt; (Info) data
- |     |--&gt; &#39;fpout&#39; : (Optional[str]) output filename if exists
- |     |--&gt; &#39;index&#39;: (tuple) tuple of frame index
+ |     |--&gt; 'fpout' : (Optional[str]) output filename if exists
+ |     |--&gt; 'index': (tuple) tuple of frame index
  |     |              |--&gt; (int) frame index
- |     |--&gt; &#39;label&#39;: (str) flow label generated from ``BUFID``
+ |     |--&gt; 'label': (str) flow label generated from ``BUFID``
  |--&gt; (Info) data ...
 </pre></div>
 </div>

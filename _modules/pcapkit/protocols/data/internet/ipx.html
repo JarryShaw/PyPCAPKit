@@ -392,7 +392,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.data.internet.ipx</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;data model for internetwork packet exchange&quot;&quot;&quot;</span>
+<span class="sd">"""data model for internetwork packet exchange"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -405,9 +405,9 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipx.socket</span><span class="w"> </span><span class="kn">import</span> <span class="n">Socket</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;IPX&#39;</span><span class="p">,</span>
+    <span class="s1">'IPX'</span><span class="p">,</span>
 
-    <span class="s1">&#39;Address&#39;</span><span class="p">,</span>
+    <span class="s1">'Address'</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -415,19 +415,19 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.data.internet.ipx.Address">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Address</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPX address.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for IPX address."""</span>
 
     <span class="c1">#: Network number (``:`` separated).</span>
-    <span class="n">network</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">network</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Node number (``-`` separated).</span>
-    <span class="n">node</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">node</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Socket number (``:`` separated).</span>
-    <span class="n">socket</span><span class="p">:</span> <span class="s1">&#39;Socket&#39;</span>
+    <span class="n">socket</span><span class="p">:</span> <span class="s1">'Socket'</span>
     <span class="c1">#: Full address (``:`` separated).</span>
-    <span class="n">addr</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="n">addr</span><span class="p">:</span> <span class="s1">'str'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">socket</span><span class="p">:</span> <span class="s1">&#39;Socket&#39;</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">socket</span><span class="p">:</span> <span class="s1">'Socket'</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 
 
@@ -435,23 +435,23 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.data.internet.ipx.IPX">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">IPX</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Internetwork Packet Exchange.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Data model for Internetwork Packet Exchange."""</span>
 
     <span class="c1">#: Checksum.</span>
-    <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Packet length (header includes).</span>
-    <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Transport control (hop count).</span>
-    <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Packet type.</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span>
     <span class="c1">#: Destination Address.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;Address&#39;</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">'Address'</span>
     <span class="c1">#: Source Address.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;Address&#39;</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">'Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;Address&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'Address'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span></div>
 
 </pre></div>
         </article>

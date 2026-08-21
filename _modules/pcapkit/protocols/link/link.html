@@ -393,7 +393,7 @@
           <h1>Source code for pcapkit.protocols.link.link</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># mypy: disable-error-code=dict-item</span>
-<span class="sd">&quot;&quot;&quot;Base Protocol</span>
+<span class="sd">"""Base Protocol</span>
 <span class="sd">===================</span>
 
 <span class="sd">.. module:: pcapkit.protocols.link.link</span>
@@ -408,7 +408,7 @@
 <span class="sd">:class:`~pcapkit.protocols.link.rarp.RARP`/:class:`~pcapkit.protocols.link.rarp.DRARP`</span>
 <span class="sd">and etc.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
 
@@ -424,13 +424,13 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Link&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Link'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Link">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Link</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for link layer protocol family.</span>
+<span class="w">    </span><span class="sd">"""Abstract base class for link layer protocol family.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
 <span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.link.link.Link.__proto__&gt;`</span>
@@ -454,29 +454,29 @@
 <span class="sd">       * - 0x8137</span>
 <span class="sd">         - :class:`pcapkit.protocols.internet.ipx.IPX`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: Layer of protocol.</span>
-    <span class="n">__layer__</span> <span class="o">=</span> <span class="s1">&#39;Link&#39;</span>  <span class="c1"># type: Literal[&#39;Link&#39;]</span>
+    <span class="n">__layer__</span> <span class="o">=</span> <span class="s1">'Link'</span>  <span class="c1"># type: Literal['Link']</span>
 
     <span class="c1">#: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for decoding next layer,</span>
     <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Address_Resolution_Protocol</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link.arp&#39;</span><span class="p">,</span>      <span class="s1">&#39;ARP&#39;</span><span class="p">),</span>
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Reverse_Address_Resolution_Protocol</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link.rarp&#39;</span><span class="p">,</span>     <span class="s1">&#39;RARP&#39;</span><span class="p">),</span>
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Customer_VLAN_Tag_Type</span><span class="p">:</span>              <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link.vlan&#39;</span><span class="p">,</span>     <span class="s1">&#39;VLAN&#39;</span><span class="p">),</span>
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv4&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Address_Resolution_Protocol</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.arp'</span><span class="p">,</span>      <span class="s1">'ARP'</span><span class="p">),</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Reverse_Address_Resolution_Protocol</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.rarp'</span><span class="p">,</span>     <span class="s1">'RARP'</span><span class="p">),</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Customer_VLAN_Tag_Type</span><span class="p">:</span>              <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.vlan'</span><span class="p">,</span>     <span class="s1">'VLAN'</span><span class="p">),</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv4'</span><span class="p">,</span> <span class="s1">'IPv4'</span><span class="p">),</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6'</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">),</span>
 
             <span class="c1"># c.f., https://en.wikipedia.org/wiki/EtherType#Values</span>
-            <span class="mh">0x8137</span><span class="p">:</span>                                             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipx&#39;</span><span class="p">,</span>  <span class="s1">&#39;IPX&#39;</span><span class="p">),</span>
+            <span class="mh">0x8137</span><span class="p">:</span>                                             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipx'</span><span class="p">,</span>  <span class="s1">'IPX'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[Protocol] | Type[Protocol]]</span>
 
@@ -486,8 +486,8 @@
 
     <span class="c1"># protocol layer</span>
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Link&quot;]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol layer.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["Link"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Protocol layer."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__layer__</span>
 
     <span class="c1">##########################################################################</span>
@@ -497,8 +497,8 @@
 <div class="viewcode-block" id="Link.register">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link.register">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;ModuleDescriptor[Protocol] | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_EtherType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new protocol class</span>
@@ -509,13 +509,13 @@
 <span class="sd">            protocol: module descriptor or a</span>
 <span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting&#39;</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
 
@@ -523,8 +523,8 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_EtherType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read next layer protocol type.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            size: buffer size</span>
@@ -532,7 +532,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Internet layer protocol enumeration.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
         <span class="n">_prot</span> <span class="o">=</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_prot</span></div>
