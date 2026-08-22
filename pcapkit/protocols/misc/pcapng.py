@@ -187,7 +187,7 @@ if TYPE_CHECKING:
     from decimal import Decimal
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import IO, Any, Callable, Counter, DefaultDict, Optional, Type, Union
+    from typing import IO, Any, Callable, Counter, DefaultDict, Optional, Tuple, Type, Union
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
@@ -225,6 +225,21 @@ py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 
 PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 # EUI address pattern
 PAT_EUI_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){7}[0-9a-f]{2}')
+
+
+def _option_key(code: 'Enum_OptionType') -> 'Union[Enum_OptionType, Tuple[str, int]]':
+    """Return a collision-free key for PCAP-NG option registries.
+
+    Args:
+        code: The option code.
+
+    Returns:
+        A collision-free key for the option registries.
+
+    """
+    if code.opt_name:
+        return (code.opt_name, code.opt_value)
+    return code
 
 
 class PacketDirection(enum.IntEnum):
@@ -565,48 +580,48 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     __option__ = collections.defaultdict(
         lambda: 'unknown',
         {
-            Enum_OptionType.opt_endofopt: 'endofopt',
-            Enum_OptionType.opt_comment: 'comment',
-            Enum_OptionType.opt_custom_2988: 'custom',
-            Enum_OptionType.opt_custom_2989: 'custom',
-            Enum_OptionType.opt_custom_19372: 'custom',
-            Enum_OptionType.opt_custom_19373: 'custom',
-            Enum_OptionType.if_name: 'if_name',
-            Enum_OptionType.if_description: 'if_description',
-            Enum_OptionType.if_IPv4addr: 'if_ipv4',
-            Enum_OptionType.if_IPv6addr: 'if_ipv6',
-            Enum_OptionType.if_MACaddr: 'if_mac',
-            Enum_OptionType.if_EUIaddr: 'if_eui',
-            Enum_OptionType.if_speed: 'if_speed',
-            Enum_OptionType.if_tsresol: 'if_tsresol',
-            Enum_OptionType.if_tzone: 'if_tzone',
-            Enum_OptionType.if_filter: 'if_filter',
-            Enum_OptionType.if_os: 'if_os',
-            Enum_OptionType.if_fcslen: 'if_fcslen',
-            Enum_OptionType.if_tsoffset: 'if_tsoffset',
-            Enum_OptionType.if_hardware: 'if_hardware',
-            Enum_OptionType.if_txspeed: 'if_txspeed',
-            Enum_OptionType.if_rxspeed: 'if_rxspeed',
-            Enum_OptionType.epb_flags: 'epb_flags',
-            Enum_OptionType.epb_hash: 'epb_hash',
-            Enum_OptionType.epb_dropcount: 'epb_dropcount',
-            Enum_OptionType.epb_packetid: 'epb_packetid',
-            Enum_OptionType.epb_queue: 'epb_queue',
-            Enum_OptionType.epb_verdict: 'epb_verdict',
-            Enum_OptionType.ns_dnsname: 'ns_dnsname',
-            Enum_OptionType.ns_dnsIP4addr: 'ns_dnsipv4',
-            Enum_OptionType.ns_dnsIP6addr: 'ns_dnsipv6',
-            Enum_OptionType.isb_starttime: 'isb_starttime',
-            Enum_OptionType.isb_endtime: 'isb_endtime',
-            Enum_OptionType.isb_ifrecv: 'isb_ifrecv',
-            Enum_OptionType.isb_ifdrop: 'isb_ifdrop',
-            Enum_OptionType.isb_filteraccept: 'isb_filteraccept',
-            Enum_OptionType.isb_osdrop: 'isb_osdrop',
-            Enum_OptionType.isb_usrdeliv: 'isb_usrdeliv',
-            Enum_OptionType.pack_flags: 'pack_flags',
-            Enum_OptionType.pack_hash: 'pack_hash',
+            _option_key(Enum_OptionType.opt_endofopt): 'endofopt',
+            _option_key(Enum_OptionType.opt_comment): 'comment',
+            _option_key(Enum_OptionType.opt_custom_2988): 'custom',
+            _option_key(Enum_OptionType.opt_custom_2989): 'custom',
+            _option_key(Enum_OptionType.opt_custom_19372): 'custom',
+            _option_key(Enum_OptionType.opt_custom_19373): 'custom',
+            _option_key(Enum_OptionType.if_name): 'if_name',
+            _option_key(Enum_OptionType.if_description): 'if_description',
+            _option_key(Enum_OptionType.if_IPv4addr): 'if_ipv4',
+            _option_key(Enum_OptionType.if_IPv6addr): 'if_ipv6',
+            _option_key(Enum_OptionType.if_MACaddr): 'if_mac',
+            _option_key(Enum_OptionType.if_EUIaddr): 'if_eui',
+            _option_key(Enum_OptionType.if_speed): 'if_speed',
+            _option_key(Enum_OptionType.if_tsresol): 'if_tsresol',
+            _option_key(Enum_OptionType.if_tzone): 'if_tzone',
+            _option_key(Enum_OptionType.if_filter): 'if_filter',
+            _option_key(Enum_OptionType.if_os): 'if_os',
+            _option_key(Enum_OptionType.if_fcslen): 'if_fcslen',
+            _option_key(Enum_OptionType.if_tsoffset): 'if_tsoffset',
+            _option_key(Enum_OptionType.if_hardware): 'if_hardware',
+            _option_key(Enum_OptionType.if_txspeed): 'if_txspeed',
+            _option_key(Enum_OptionType.if_rxspeed): 'if_rxspeed',
+            _option_key(Enum_OptionType.epb_flags): 'epb_flags',
+            _option_key(Enum_OptionType.epb_hash): 'epb_hash',
+            _option_key(Enum_OptionType.epb_dropcount): 'epb_dropcount',
+            _option_key(Enum_OptionType.epb_packetid): 'epb_packetid',
+            _option_key(Enum_OptionType.epb_queue): 'epb_queue',
+            _option_key(Enum_OptionType.epb_verdict): 'epb_verdict',
+            _option_key(Enum_OptionType.ns_dnsname): 'ns_dnsname',
+            _option_key(Enum_OptionType.ns_dnsIP4addr): 'ns_dnsipv4',
+            _option_key(Enum_OptionType.ns_dnsIP6addr): 'ns_dnsipv6',
+            _option_key(Enum_OptionType.isb_starttime): 'isb_starttime',
+            _option_key(Enum_OptionType.isb_endtime): 'isb_endtime',
+            _option_key(Enum_OptionType.isb_ifrecv): 'isb_ifrecv',
+            _option_key(Enum_OptionType.isb_ifdrop): 'isb_ifdrop',
+            _option_key(Enum_OptionType.isb_filteraccept): 'isb_filteraccept',
+            _option_key(Enum_OptionType.isb_osdrop): 'isb_osdrop',
+            _option_key(Enum_OptionType.isb_usrdeliv): 'isb_usrdeliv',
+            _option_key(Enum_OptionType.pack_flags): 'pack_flags',
+            _option_key(Enum_OptionType.pack_hash): 'pack_hash',
         },
-    )  # type: DefaultDict[Enum_OptionType | int, str | tuple[OptionParser, OptionConstructor]]
+    )  # type: DefaultDict[Union[Enum_OptionType, Tuple[str, int]], str | tuple[OptionParser, OptionConstructor]]
 
     #: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]: :manpage:`systemd(1)`
     #: Journal Export record type to method mapping. Method names are expected
@@ -774,9 +789,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             meth: Method name or callable to parse and/or construct the option.
 
         """
-        if code in cls.__option__:
+        code_key = _option_key(code)
+        if code_key in cls.__option__:
             warn(f'PCAP-NG: [Option {code}] option already registered', RegistryWarning)
-        cls.__option__[code] = meth
+        cls.__option__[code_key] = meth
 
     @classmethod
     def register_record(cls, code: 'Enum_RecordType', meth: 'str | tuple[RecordParser, RecordConstructor]') -> 'None':
@@ -867,7 +883,13 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             self.__header__ = cast('Schema_PCAPNG', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
 
         data = self.read(length, **kwargs)
-        data.__update__(packet=self.packet.payload)
+        block_schema = self.__header__.block
+        payload_name = getattr(block_schema, '__payload__', None)
+        if payload_name in getattr(block_schema, '__fields__', {}):
+            packet = block_schema.get_payload()
+        else:
+            packet = b''
+        data.__update__(packet=packet)
         return data
 
     def read(self, length: 'Optional[int]' = None, *, _read: 'bool' = True,
@@ -1927,7 +1949,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         for schema in options_schema:
             type = schema.type
-            name = self.__option__[type]
+            name = self.__option__[_option_key(type)]
 
             if isinstance(name, str):
                 meth_name = f'_read_option_{name}'
@@ -3800,7 +3822,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                         has_endofopt = True
                         continue
 
-                    name = self.__option__[code]
+                    name = self.__option__[_option_key(code)]
                     if isinstance(name, str):
                         meth_name = f'_make_option_{name}'
                         meth = cast('OptionConstructor',
@@ -3827,7 +3849,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 has_endofopt = True
                 continue
 
-            name = self.__option__[code]
+            name = self.__option__[_option_key(code)]
             if isinstance(name, str):
                 meth_name = f'_make_option_{name}'
                 meth = cast('OptionConstructor',

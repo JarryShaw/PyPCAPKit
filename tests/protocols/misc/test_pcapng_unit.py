@@ -33,7 +33,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
     def test_pcapng_index_length_and_make_data(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         pcapng = object.__new__(PCAPNG)
@@ -59,7 +59,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.record_type import RecordType
         from pcapkit.const.pcapng.secrets_type import SecretsType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key
 
         block_map = PCAPNG.__dict__['__block__']
         option_map = PCAPNG.__dict__['__option__']
@@ -67,7 +67,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         secrets_map = PCAPNG.__dict__['__secrets__']
         originals = (
             block_map[BlockType.Section_Header_Block],
-            option_map[OptionType.opt_endofopt],
+            option_map[_option_key(OptionType.opt_endofopt)],
             record_map[RecordType.nrb_record_end],
             secrets_map[SecretsType.TLS_Key_Log],
         )
@@ -80,14 +80,25 @@ class PCAPNGUnitTests(unittest.TestCase):
 
             self.assertEqual(warn.call_count, 4)
             self.assertEqual(block_map[BlockType.Section_Header_Block], 'shb')
-            self.assertEqual(option_map[OptionType.opt_endofopt], 'endofopt')
+            self.assertEqual(option_map[_option_key(OptionType.opt_endofopt)], 'endofopt')
             self.assertEqual(record_map[RecordType.nrb_record_end], 'end')
             self.assertEqual(secrets_map[SecretsType.TLS_Key_Log], 'tls')
         finally:
             block_map[BlockType.Section_Header_Block] = originals[0]
-            option_map[OptionType.opt_endofopt] = originals[1]
+            option_map[_option_key(OptionType.opt_endofopt)] = originals[1]
             record_map[RecordType.nrb_record_end] = originals[2]
             secrets_map[SecretsType.TLS_Key_Log] = originals[3]
+
+    def test_pcapng_option_registry_preserves_duplicate_numeric_codes(self) -> None:
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key
+
+        option_map = PCAPNG.__dict__['__option__']
+
+        self.assertEqual(option_map[_option_key(OptionType.if_name)], 'if_name')
+        self.assertEqual(option_map[_option_key(OptionType.epb_flags)], 'epb_flags')
+        self.assertEqual(option_map[_option_key(OptionType.pack_flags)], 'pack_flags')
+        self.assertEqual(option_map.get(_option_key(OptionType.get(2, namespace='opt')), 'unknown'), 'unknown')
 
     def test_pcapng_simple_packet_block_populates_default_interface_and_timestamp(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
@@ -338,13 +349,16 @@ class PCAPNGUnitTests(unittest.TestCase):
         secrets_map = PCAPNG.__dict__['__secrets__']
         proto_code = LinkType.USER0
         custom_block = 65000
-        custom_option = 65000
+        custom_option = OptionType.get(65000)
+        from pcapkit.protocols.misc.pcapng import _option_key
+
+        custom_option_key = _option_key(custom_option)
         custom_record = 65000
         custom_secrets = 65000
         originals = {
             'proto': (proto_code in proto_map, proto_map.get(proto_code)),
             'block': (custom_block in block_map, block_map.get(custom_block)),
-            'option': (custom_option in option_map, option_map.get(custom_option)),
+            'option': (custom_option_key in option_map, option_map.get(custom_option_key)),
             'record': (custom_record in record_map, record_map.get(custom_record)),
             'secrets': (custom_secrets in secrets_map, secrets_map.get(custom_secrets)),
         }
@@ -393,7 +407,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             for mapping, key, original in (
                 (proto_map, proto_code, originals['proto']),
                 (block_map, custom_block, originals['block']),
-                (option_map, custom_option, originals['option']),
+                (option_map, custom_option_key, originals['option']),
                 (record_map, custom_record, originals['record']),
                 (secrets_map, custom_secrets, originals['secrets']),
             ):
@@ -1090,6 +1104,11 @@ class PCAPNGUnitTests(unittest.TestCase):
         })
         self.assertIs(block_field.schema, schema_pcapng.SectionHeaderBlock)
         self.assertEqual(block_field.length, 28)
+        isb_block_field = schema_pcapng.pcapng_block_selector({
+            'type': BlockType.Interface_Statistics_Block,
+            '__length__': 28,
+        })
+        self.assertIs(isb_block_field.schema, schema_pcapng.InterfaceStatisticsBlock)
 
         secrets_field = schema_pcapng.dsb_secrets_selector({
             'secrets_type': SecretsType.TLS_Key_Log,
@@ -1731,32 +1750,49 @@ class PCAPNGUnitTests(unittest.TestCase):
 
         unpacker = object.__new__(PCAPNG)
         unpacker.__header__ = None
-        unpacker.__schema__ = types.SimpleNamespace(unpack=mock.Mock(return_value=types.SimpleNamespace()))
+        payload_block = types.SimpleNamespace(
+            __payload__='packet_data',
+            __fields__={'packet_data': object()},
+            get_payload=mock.Mock(return_value=b'payload'),
+        )
+        unpacker.__schema__ = types.SimpleNamespace(
+            unpack=mock.Mock(return_value=types.SimpleNamespace(block=payload_block)))
         unpacker._file = io.BytesIO(b'0123456789ab')
         unpacker._ctx = types.SimpleNamespace(section=types.SimpleNamespace(byteorder='little'))
         unpacker._byte = 'big'
         unpacker.read = mock.Mock(return_value=DummyData(length=12))
-        unpacker.__dict__['packet'] = types.SimpleNamespace(payload=b'payload')
         data = unpacker.unpack(12, __packet__={})
         self.assertEqual(data['packet'], b'payload')
         self.assertEqual(unpacker._byte, 'little')
+        payload_block.get_payload.assert_called_once_with()
 
-        unpacker.__header__ = types.SimpleNamespace()
+        cached_block = types.SimpleNamespace(
+            __payload__='packet_data',
+            __fields__={'packet_data': object()},
+            get_payload=mock.Mock(return_value=b'cached'),
+        )
+        unpacker.__header__ = types.SimpleNamespace(block=cached_block)
         unpacker.read = mock.Mock(return_value=DummyData(length=12))
-        unpacker.__dict__['packet'] = types.SimpleNamespace(payload=b'cached')
         self.assertEqual(unpacker.unpack(12)['packet'], b'cached')
         unpacker.__schema__.unpack.assert_called_once()
+        cached_block.get_payload.assert_called_once_with()
 
         no_ctx_unpacker = object.__new__(PCAPNG)
         no_ctx_unpacker.__header__ = None
-        no_ctx_unpacker.__schema__ = types.SimpleNamespace(unpack=mock.Mock(return_value=types.SimpleNamespace()))
+        no_payload_block = types.SimpleNamespace(
+            __payload__='payload',
+            __fields__={},
+            get_payload=mock.Mock(return_value=b'unused'),
+        )
+        no_ctx_unpacker.__schema__ = types.SimpleNamespace(
+            unpack=mock.Mock(return_value=types.SimpleNamespace(block=no_payload_block)))
         no_ctx_unpacker._file = io.BytesIO(b'0123456789ab')
         no_ctx_unpacker._ctx = None
         no_ctx_unpacker._byte = 'big'
         no_ctx_unpacker.read = mock.Mock(return_value=DummyData(length=12))
-        no_ctx_unpacker.__dict__['packet'] = types.SimpleNamespace(payload=b'no-context')
-        self.assertEqual(no_ctx_unpacker.unpack(12)['packet'], b'no-context')
+        self.assertEqual(no_ctx_unpacker.unpack(12)['packet'], b'')
         self.assertEqual(no_ctx_unpacker._byte, 'big')
+        no_payload_block.get_payload.assert_not_called()
 
         self.assertEqual(pcapng._make_block_shb(major_version=2, section_length=-1).minor, 0)
         self.assertEqual(pcapng._make_block_shb(major_version=1, minor_version=5,
@@ -1957,6 +1993,9 @@ class PCAPNGUnitTests(unittest.TestCase):
         assert_duplicate('_make_option_pack_flags', OptionType.pack_flags, BlockType.Packet_Block)
 
         option_code = OptionType.get(65001)
+        from pcapkit.protocols.misc.pcapng import _option_key
+
+        option_key = _option_key(option_code)
         record_code = RecordType.get(65001)
         secrets_code = SecretsType.get(65001)
         option_map = PCAPNG.__dict__['__option__']
@@ -1964,7 +2003,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         secrets_map = PCAPNG.__dict__['__secrets__']
         missing = object()
         originals = (
-            option_map.get(option_code, missing),
+            option_map.get(option_key, missing),
             record_map.get(record_code, missing),
             secrets_map.get(secrets_code, missing),
         )
@@ -2000,7 +2039,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             return SchemaUnknownSecrets(data=data)
 
         try:
-            option_map[option_code] = (custom_option_parser, custom_option_constructor)
+            option_map[option_key] = (custom_option_parser, custom_option_constructor)
             record_map[record_code] = (custom_record_parser, custom_record_constructor)
             secrets_map[secrets_code] = (custom_secrets_parser, custom_secrets_constructor)
 
@@ -2110,7 +2149,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                 secrets_data=SchemaUnknownSecrets(data=b'schema'),
             ).secrets_length, 6)
         finally:
-            restore(option_map, option_code, originals[0])
+            restore(option_map, option_key, originals[0])
             restore(record_map, record_code, originals[1])
             restore(secrets_map, secrets_code, originals[2])
 

@@ -83,6 +83,8 @@ class DumpkitCommonTests(unittest.TestCase):
 
         self.assertEqual(dumper.object_hook(decimal.Decimal('1.25')), '1.25')
         self.assertEqual(dumper.object_hook(datetime.timedelta(seconds=2.5)), 2.5)
+        plain_dict = {'plain': 'dict'}
+        self.assertIs(dumper.object_hook(plain_dict), plain_dict)
         self.assertEqual(dumper.object_hook(Info(answer=42)), {'answer': 42})
         self.assertEqual(dumper.object_hook(ip_address('192.0.2.1')), '192.0.2.1')
 

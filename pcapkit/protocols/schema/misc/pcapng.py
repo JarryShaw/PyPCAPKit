@@ -1319,7 +1319,7 @@ class ISB_UsrDelivOption(_ISB_Option, code=Enum_OptionType.isb_usrdeliv):
 
 
 @schema_final
-class InterfaceStatisticsBlock(BlockType):
+class InterfaceStatisticsBlock(BlockType, code=Enum_BlockType.Interface_Statistics_Block):
     """Header schema for PCAP-NG Interface Statistics Block (ISB)."""
 
     #: Block total length.

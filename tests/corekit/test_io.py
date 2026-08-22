@@ -11,8 +11,8 @@ from tests._support import bootstrap_core_modules, load_module, purge_modules
 
 class SeekableReaderTests(unittest.TestCase):
     def _close_reader(self, reader) -> None:
-        reader._buffer_view.release()
         reader.close()
+        self.assertTrue(reader.closed)
 
     def setUp(self) -> None:
         purge_modules(['pcapkit'])

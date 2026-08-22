@@ -161,6 +161,7 @@ class SeekableReader(io.BufferedReader):
             self._stream.close()
         if self._buffer_file is not None:
             self._buffer_file.close()
+        self._buffer_view.release()
         self._buffer.close()
 
         self._closed = True
