@@ -83,7 +83,7 @@ if TYPE_CHECKING:
     Flags = Schema_FrameType.Flags
 
     FrameParser = Callable[[Schema_FrameType, NamedArg(Schema_HTTP, 'header')], Data_HTTP]
-    FrameConstructor = Callable[[Enum_Frame, DefaultArg(Optional[Data_HTTP]),
+    FrameConstructor = Callable[[DefaultArg(Optional[Data_HTTP]),
                                  KwArg(Any)], Tuple[Schema_FrameType, 'Flags']]
 
 __all__ = ['HTTP']
@@ -323,8 +323,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if isinstance(frame, Schema_RSTStreamFrame):
             return 4
         if isinstance(frame, Schema_SettingsFrame):
-            if isinstance(frame.settings, bytes):
-                return len(frame.settings)
+            settings = cast('object', frame.settings)
+            if isinstance(settings, bytes):
+                return len(settings)
             return len(frame.settings) * 6
         if isinstance(frame, Schema_PushPromiseFrame):
             pad_len = frame.pad_len if flags_int & int(Schema_PushPromiseFrame.Flags.PADDED) else 0
@@ -933,7 +934,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         return Schema_UnassignedFrame(
             data=data,
-        ), 0
+        ), cast('Flags', 0)
 
     def _make_http_data(self, frame: 'Optional[Data_DataFrame]' = None, *,
                         end_stream: 'bool' = False,
@@ -1055,7 +1056,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 'sid': sid_dep,
             },
             weight=weight - 1 if weight else 0,
-        ), 0
+        ), cast('Flags', 0)
 
     def _make_http_rst_stream(self, frame: 'Optional[Data_RSTStreamFrame]' = None, *,
                               error: 'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum' = Enum_ErrorCode.HTTP_1_1_REQUIRED,
@@ -1082,7 +1083,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         return Schema_RSTStreamFrame(
             error=error_val,
-        ), 0
+        ), cast('Flags', 0)
 
     def _make_http_settings(self, frame: 'Optional[Data_SettingsFrame]' = None, *,
                             ack: 'bool' = False,
@@ -1243,7 +1244,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             },
             error=error_val,
             debug=debug,
-        ), 0
+        ), cast('Flags', 0)
 
     def _make_http_window_update(self, frame: 'Optional[Data_WindowUpdateFrame]' = None, *,
                                  incr: 'int' = 0,
@@ -1266,7 +1267,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             size={
                 'incr': incr,
             }
-        ), 0
+        ), cast('Flags', 0)
 
     def _make_http_continuation(self, frame: 'Optional[Data_ContinuationFrame]' = None, *,
                                 end_headers: 'bool' = False,

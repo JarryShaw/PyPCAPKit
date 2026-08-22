@@ -148,10 +148,10 @@ from pcapkit.protocols.schema.internet.mh import \
     MobileNetworkPrefixOption as Schema_MobileNetworkPrefixOption
 from pcapkit.protocols.schema.internet.mh import MultiPrefixExtension as Schema_MultiPrefixExtension
 from pcapkit.protocols.schema.internet.mh import NonceIndicesOption as Schema_NonceIndicesOption
+from pcapkit.protocols.schema.internet.mh import Packet as Schema_Packet
 from pcapkit.protocols.schema.internet.mh import PadOption as Schema_PadOption
 from pcapkit.protocols.schema.internet.mh import \
     PermanentHomeKeygenTokenOption as Schema_PermanentHomeKeygenTokenOption
-from pcapkit.protocols.schema.internet.mh import Packet as Schema_Packet
 from pcapkit.protocols.schema.internet.mh import SignatureOption as Schema_SignatureOption
 from pcapkit.protocols.schema.internet.mh import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.internet.mh import UnknownExtension as Schema_UnknownExtension

@@ -12,8 +12,8 @@ which implements extractor for PCAP-NG file format [*]_.
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html
 
 """
-import builtins
 import base64
+import builtins
 import collections
 import datetime
 import decimal

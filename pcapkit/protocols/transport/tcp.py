@@ -91,6 +91,7 @@ from pcapkit.protocols.data.transport.tcp import Timestamps as Data_Timestamps
 from pcapkit.protocols.data.transport.tcp import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.data.transport.tcp import UserTimeout as Data_UserTimeout
 from pcapkit.protocols.data.transport.tcp import WindowScale as Data_WindowScale
+from pcapkit.protocols.schema.schema import Schema
 from pcapkit.protocols.schema.transport.tcp import CC as Schema_CC
 from pcapkit.protocols.schema.transport.tcp import MPTCPDSS as Schema_MPTCPDSS
 from pcapkit.protocols.schema.transport.tcp import SACK as Schema_SACK
@@ -130,7 +131,6 @@ from pcapkit.protocols.schema.transport.tcp import Timestamps as Schema_Timestam
 from pcapkit.protocols.schema.transport.tcp import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.transport.tcp import UserTimeout as Schema_UserTimeout
 from pcapkit.protocols.schema.transport.tcp import WindowScale as Schema_WindowScale
-from pcapkit.protocols.schema.schema import Schema
 from pcapkit.protocols.transport.transport import Transport
 from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -2601,7 +2601,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             data = opt.data
 
         return Schema_MPTCPUnknown(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=2 + len(data),
             test={
                 'subtype': subtype.value,
@@ -2644,7 +2644,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             rkey = opt.rkey
 
         return Schema_MPTCPCapable(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=20 if rkey is None else 32,
             test={
                 'subtype': subtype.value,
@@ -2707,7 +2707,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             nonce = opt.nonce
 
         return Schema_MPTCPJoinSYN(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=12,
             test={
                 'subtype': subtype.value,
@@ -2746,7 +2746,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             nonce = opt.nonce
 
         return Schema_MPTCPJoinSYNACK(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=12,
             test={
                 'subtype': subtype.value,
@@ -2776,7 +2776,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             hmac = opt.hmac
 
         return Schema_MPTCPJoinACK(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=8,
             test={
                 'subtype': subtype.value,
@@ -2829,7 +2829,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             raise ProtocolError(f'{self.alias}: : [OptNo {Enum_Option.Multipath_TCP}] {subtype}: missing required fields')
 
         return Schema_MPTCPDSS(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=4 + (4 if flag_A else 0) + (4 if flag_a else 0) + (12 if flag_M else 0) + (4 if flag_m else 0),
             test={
                 'subtype': subtype.value,
@@ -2877,7 +2877,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         version = addr_val.version
 
         return Schema_MPTCPAddAddress(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=4 + (4 if version == 4 else 16) + (2 if port is not None else 0),
             test={
                 'subtype': subtype.value,
@@ -2909,7 +2909,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             addr_id_list = addr_id if addr_id is not None else []
 
         return Schema_MPTCPRemoveAddress(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=4,
             test={
                 'subtype': subtype.value,
@@ -2938,7 +2938,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             addr_id = opt.addr_id
 
         return Schema_MPTCPPriority(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=4,
             test={
                 'subtype': subtype.value,
@@ -2966,7 +2966,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             dsn = opt.dsn
 
         return Schema_MPTCPFallback(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=12,
             test={
                 'subtype': subtype.value,
@@ -2993,7 +2993,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             key = opt.rkey
 
         return Schema_MPTCPFastclose(
-            kind=Enum_Option.Multipath_TCP,
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=12,
             test={
                 'subtype': subtype.value,

@@ -31,9 +31,9 @@ Octets      Bits        Name                    Description
 
 """
 import datetime
-from datetime import timedelta
 import ipaddress
 import math
+from datetime import timedelta
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate

@@ -359,7 +359,7 @@ class WindowScale(Option, code=Enum_Option.Window_Scale):
     shift: 'int' = UInt8Field()
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'Enum_Option', length: 'int', scale: 'int') -> 'None': ...
+        def __init__(self, kind: 'Enum_Option', length: 'int', shift: 'int') -> 'None': ...
 
 
 @schema_final

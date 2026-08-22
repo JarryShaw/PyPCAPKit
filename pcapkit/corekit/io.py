@@ -403,7 +403,7 @@ class SeekableReader(io.BufferedReader):
             else:
                 buf = self._buffer.read1(min(size, self._buffer_cur - 1))
 
-            if not buf:  # pragma: no cover  # defensive: buffer state should normally prevent this
+            if not buf:  # pragma: no cover
                 size_rem = -1
                 if size < 0 or (size_rem := size - len(buf)) > 0:
                     if hasattr(self._stream, 'read1'):
@@ -490,7 +490,7 @@ class SeekableReader(io.BufferedReader):
             else:
                 buf = self._buffer.read(min(size, self._buffer_cur - 1))
 
-            if not buf and len(buf) < size:  # pragma: no cover  # defensive: buffer state should normally prevent this
+            if not buf and len(buf) < size:  # pragma: no cover
                 size_rem = -1
                 if size < 0 or (size_rem := size - len(buf)) > 0:
                     if hasattr(self._stream, 'peek'):

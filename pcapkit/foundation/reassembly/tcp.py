@@ -117,7 +117,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                 )
             else:
                 # put header into header buffer
-                if SYN:  # pragma: no cover - existing sessions are flushed before this branch.
+                if SYN:  # pragma: no cover
                     self._buffer[BUFID].__update__(hdr=info.header)
 
                 # append packet index
@@ -132,7 +132,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     if GAP >= 0:    # if fragment goes after existing payload
                         RAW += bytearray(GAP) + info.payload
                     else:           # if fragment partially overlaps existing payload
-                        RAW[DSN-ISN:DSN-ISN+info.len] = info.payload
+                        RAW[DSN - ISN:DSN - ISN + info.len] = info.payload
                 else:           # if fragment exceeds existing payload
                     LEN = info.len
                     GAP = ISN - (DSN + LEN)     # gap length between payloads

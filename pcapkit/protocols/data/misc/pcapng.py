@@ -921,5 +921,5 @@ class PacketBlock(PCAPNG):
 
         def __init__(self, type: 'Enum_BlockType', length: 'int', section_number: 'int', number: 'int',
                      interface_id: 'int', drop_count: 'int', timestamp: 'dt_type',
-                     timestamp_epoch: 'Decimal', captured_length: 'int', original_length: 'int',
+                     timestamp_epoch: 'Decimal', captured_len: 'int', original_len: 'int',
                      options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
