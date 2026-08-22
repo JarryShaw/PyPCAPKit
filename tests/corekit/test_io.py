@@ -138,7 +138,7 @@ class SeekableReaderTests(unittest.TestCase):
         reader.read(2)
         self.assertEqual(reader.seek(-1, io.SEEK_CUR), 1)
         self.assertEqual(reader.seek(-1, io.SEEK_END), 3)
-        with mock.patch('pcapkit.corekit.io.warn') as warn:
+        with mock.patch.object(self.io_module, 'warn') as warn:
             self.assertEqual(reader.seek(20), 6)
         warn.assert_called_once()
 

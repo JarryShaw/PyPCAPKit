@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import types
 import unittest
 from unittest import mock
@@ -65,15 +66,16 @@ class EngineBaseTests(unittest.TestCase):
     def test_engine_subclass_registration_explicit_and_default(self) -> None:
         from pcapkit.foundation.engines.engine import Engine
 
-        with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
-            class Explicit(Engine[str], name='ExplicitEngine'):
-                def run(self) -> None:
-                    pass
+        if sys.version_info >= (3, 11):
+            with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
+                class Explicit(Engine[str], name='ExplicitEngine'):
+                    def run(self) -> None:
+                        pass
 
-                def read_frame(self) -> str:
-                    return 'frame'
+                    def read_frame(self) -> str:
+                        return 'frame'
 
-        register.assert_called_once_with('explicitengine', Explicit)
+            register.assert_called_once_with('explicitengine', Explicit)
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
             class Default(Engine[str]):

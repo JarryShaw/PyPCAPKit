@@ -116,7 +116,10 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         proto = DummyProtocol(packet=b'xy')
         self.assertEqual(proto.pack(packet=b'zz'), b'zz')
 
-        proto_from_schema = DummyProtocol.from_schema({'payload': b'12'})
+        schema_from_dict = RawSchema(payload=b'12')
+        with mock.patch.object(RawSchema, 'from_dict', return_value=schema_from_dict) as from_dict:
+            proto_from_schema = DummyProtocol.from_schema({'payload': b'12'})
+        from_dict.assert_called_once_with({'payload': b'12'})
         self.assertIsInstance(proto_from_schema.schema, RawSchema)
         self.assertEqual(bytes(proto_from_schema), b'12')
 

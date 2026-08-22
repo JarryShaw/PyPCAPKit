@@ -97,7 +97,7 @@ class SchemaUnitTests(unittest.TestCase):
         _, _, _, _, BuiltinNameSchema = self._make_schema_classes()
 
         schema = BuiltinNameSchema.__new__(BuiltinNameSchema)
-        schema.__update__({'items': 7})
+        schema.__update__([('items', 7)])
 
         self.assertEqual(schema['items'], 7)
         self.assertEqual(list(schema), ['items'])
@@ -106,7 +106,7 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertIn('items=7', repr(schema))
 
         with mock.patch('pcapkit.protocols.schema.schema.warn') as warn:
-            schema.__update__({'missing': 1})
+            schema.__update__([('missing', 1)])
         self.assertEqual(warn.call_count, 1)
 
     def test_payload_field_accepts_bytes_schema_protocol_and_rejects_other_types(self) -> None:
@@ -266,7 +266,7 @@ class SchemaUnitTests(unittest.TestCase):
         schema = ConflictSchema(value=2)
         schema.__builtin__.add('value')
         schema.__excluded__.append('value')
-        schema.__update__({'value': 4})
+        schema.__update__([('value', 4)])
 
         mapped_name = f'_{type(schema).__name__}value'
         self.assertEqual(schema.__map__['value'], mapped_name)
