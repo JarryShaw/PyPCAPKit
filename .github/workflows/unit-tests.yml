@@ -36,6 +36,7 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: ${{ matrix.experimental }}
           cache: pip
 
       - name: Install package and test dependencies
