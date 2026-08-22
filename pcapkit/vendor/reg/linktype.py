@@ -77,6 +77,8 @@ class LinkType(Vendor):
 
             try:
                 code, _ = temp, int(temp)
+                if not name:
+                    name = f'Unassigned_{code}'
 
                 pres = f"{name} = {code}"
                 if desc:

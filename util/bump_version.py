@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
-import pkg_resources
+from packaging.version import Version
 
 try:
     import pcapkit
@@ -21,7 +21,7 @@ except ImportError:
         raise RuntimeError('cannot find version')
 
 # parse version and bump version
-ver_obj = pkg_resources.parse_version(version)
+ver_obj = Version(version)
 base_version = ver_obj.base_version
 
 if ver_obj.is_devrelease:

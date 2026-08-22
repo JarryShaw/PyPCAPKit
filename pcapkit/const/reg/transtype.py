@@ -434,7 +434,7 @@ class TransType(IntEnum):
     #: Secure Packet Shield [Bill McIntosh]
     SPS = 130
 
-    #: Private IP Encapsulation within IP [Bernhard Petri]
+    #: Private IP Encapsulation within IP [Steffen Fries]
     PIPE = 131
 
     #: Stream Control Transmission Protocol [Randall R Stewart]

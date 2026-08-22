@@ -138,13 +138,13 @@ class Option(IntEnum):
     #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_78 = 78
 
-    #: Accurate ECN Order 0 (AccECN0) [RFC-ietf-tcpm-accurate-ecn-34]
+    #: Accurate ECN Order 0 (AccECN0) [:rfc:`9768`]
     Accurate_ECN_Order_0 = 172
 
     #: Reserved
     Reserved_173 = 173
 
-    #: Accurate ECN Order 1 (AccECN1) [RFC-ietf-tcpm-accurate-ecn-34]
+    #: Accurate ECN Order 1 (AccECN1) [:rfc:`9768`]
     Accurate_ECN_Order_1 = 174
 
     #: RFC3692-style Experiment 1 (also improperly used for shipping

@@ -9,18 +9,23 @@ on:
 jobs:
   vendor-update:
     runs-on: macos-latest
+    concurrency:
+      group: repository-maintenance
+      cancel-in-progress: false
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v7
         with:
-          python-version: '3.13'
+          python-version: '3.14'
 
       - name: Install and Setup
         run: |
           set -x
 
-          python -m pip install -U pip setuptools wheel
+          python -m pip install -U pip setuptools wheel packaging
           python -m pip install -U isort
           python -m pip install -e .[all]
 
@@ -64,6 +69,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
+          pull: rebase
 
       # - name: Create Tag
       #   if: steps.verify-changed-files.outputs.files_changed == 'true'
