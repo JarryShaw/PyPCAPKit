@@ -514,7 +514,7 @@
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># put header into header buffer</span>
-                <span class="k">if</span> <span class="n">SYN</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">SYN</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">hdr</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
 
                 <span class="c1"># append packet index</span>
@@ -529,7 +529,7 @@
                     <span class="k">if</span> <span class="n">GAP</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>    <span class="c1"># if fragment goes after existing payload</span>
                         <span class="n">RAW</span> <span class="o">+=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">GAP</span><span class="p">)</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span>
                     <span class="k">else</span><span class="p">:</span>           <span class="c1"># if fragment partially overlaps existing payload</span>
-                        <span class="n">RAW</span><span class="p">[</span><span class="n">DSN</span><span class="o">-</span><span class="n">ISN</span><span class="p">:]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span>
+                        <span class="n">RAW</span><span class="p">[</span><span class="n">DSN</span> <span class="o">-</span> <span class="n">ISN</span><span class="p">:</span><span class="n">DSN</span> <span class="o">-</span> <span class="n">ISN</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span>
                 <span class="k">else</span><span class="p">:</span>           <span class="c1"># if fragment exceeds existing payload</span>
                     <span class="n">LEN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span>
                     <span class="n">GAP</span> <span class="o">=</span> <span class="n">ISN</span> <span class="o">-</span> <span class="p">(</span><span class="n">DSN</span> <span class="o">+</span> <span class="n">LEN</span><span class="p">)</span>     <span class="c1"># gap length between payloads</span>
@@ -539,7 +539,7 @@
                     <span class="k">if</span> <span class="n">GAP</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>    <span class="c1"># if fragment exceeds existing payload</span>
                         <span class="n">RAW</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span> <span class="o">+</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">GAP</span><span class="p">)</span> <span class="o">+</span> <span class="n">RAW</span>
                     <span class="k">else</span><span class="p">:</span>           <span class="c1"># if fragment partially overlaps existing payload</span>
-                        <span class="n">RAW</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span> <span class="o">+</span> <span class="n">RAW</span><span class="p">[</span><span class="n">ISN</span><span class="o">-</span><span class="n">GAP</span><span class="p">:]</span>
+                        <span class="n">RAW</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span> <span class="o">+</span> <span class="n">RAW</span><span class="p">[</span><span class="o">-</span><span class="n">GAP</span><span class="p">:]</span>
                 <span class="c1">#self._buffer[BUFID].ack[ACK].raw = RAW       # update payload datagram</span>
                 <span class="c1">#self._buffer[BUFID].ack[ACK].len = len(RAW)  # update payload length</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
@@ -604,7 +604,7 @@
                 <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">HDL</span><span class="p">:</span>
                     <span class="n">stop</span> <span class="o">=</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span>
                     <span class="n">byte</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
-                    <span class="n">start</span> <span class="o">=</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="o">+</span> <span class="mi">1</span>
                     <span class="k">if</span> <span class="n">byte</span><span class="p">:</span>    <span class="c1"># strip empty payload</span>
                         <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
                 <span class="n">byte</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
@@ -681,7 +681,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

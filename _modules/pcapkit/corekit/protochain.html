@@ -480,6 +480,8 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
                 <span class="n">alias</span> <span class="o">=</span> <span class="n">proto</span><span class="o">.</span><span class="n">alias</span>
                 <span class="n">proto</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">alias</span> <span class="o">=</span> <span class="n">proto</span><span class="o">.</span><span class="vm">__name__</span>
 
             <span class="n">temp_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">alias</span><span class="p">,</span> <span class="n">proto</span><span class="p">))</span>
 
@@ -716,7 +718,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

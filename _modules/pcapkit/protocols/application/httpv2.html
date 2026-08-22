@@ -476,7 +476,7 @@
     <span class="n">Flags</span> <span class="o">=</span> <span class="n">Schema_FrameType</span><span class="o">.</span><span class="n">Flags</span>
 
     <span class="n">FrameParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="s1">'header'</span><span class="p">)],</span> <span class="n">Data_HTTP</span><span class="p">]</span>
-    <span class="n">FrameConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Frame</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">]),</span>
+    <span class="n">FrameConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">]),</span>
                                  <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="s1">'Flags'</span><span class="p">]]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HTTP'</span><span class="p">]</span>
@@ -662,7 +662,6 @@
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span> <span class="o">+</span> <span class="mi">9</span>
             <span class="n">frame_val</span> <span class="o">=</span> <span class="n">frame</span>  <span class="c1"># type: bytes | Schema_FrameType</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Data_HTTP</span><span class="p">)):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__frame__</span><span class="p">[</span><span class="n">type_val</span><span class="p">]</span>
@@ -674,19 +673,19 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="n">frame_val</span><span class="p">,</span> <span class="n">flags</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">type_val</span><span class="p">,</span> <span class="o">**</span><span class="n">frame</span><span class="p">)</span>
+                <span class="n">frame_val</span><span class="p">,</span> <span class="n">flags</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="o">**</span><span class="n">frame</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">frame_val</span><span class="p">,</span> <span class="n">flags</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">type_val</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame_val</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span> <span class="o">+</span> <span class="mi">9</span>
+                <span class="n">frame_val</span><span class="p">,</span> <span class="n">flags</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span> <span class="o">+</span> <span class="mi">9</span>
             <span class="n">frame_val</span> <span class="o">=</span> <span class="n">frame</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">flags_val</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, int]</span>
         <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
-            <span class="n">flags_val</span><span class="p">[</span><span class="sa">f</span><span class="s1">'bit_</span><span class="si">{</span><span class="n">bit</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="n">bit</span>
+            <span class="n">flags_val</span><span class="p">[</span><span class="sa">f</span><span class="s1">'bit_</span><span class="si">{</span><span class="n">bit</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="n">bit</span>
+
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_http_length</span><span class="p">(</span><span class="n">frame_val</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span> <span class="o">+</span> <span class="mi">9</span>
 
         <span class="k">return</span> <span class="n">Schema_HTTP</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
@@ -698,6 +697,49 @@
             <span class="n">frame</span><span class="o">=</span><span class="n">frame_val</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_length</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'bytes | Schema_FrameType'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Calculate HTTP/2 frame payload length for construction.</span>
+
+<span class="sd">        Several frame payload schemas use conditional fields keyed by the</span>
+<span class="sd">        containing HTTP/2 header flags, so packing them without that context can</span>
+<span class="sd">        produce incorrect lengths or fail outright.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+
+        <span class="n">flags_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_UnassignedFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_DataFrame</span><span class="p">):</span>
+            <span class="n">pad_len</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span> <span class="k">if</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_DataFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PADDED</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">pad_len</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">pad_len</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_HeadersFrame</span><span class="p">):</span>
+            <span class="n">pad_len</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span> <span class="k">if</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_HeadersFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PADDED</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="n">priority_len</span> <span class="o">=</span> <span class="mi">5</span> <span class="k">if</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_HeadersFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span> <span class="o">+</span> <span class="n">priority_len</span> <span class="o">+</span> <span class="p">(</span><span class="n">pad_len</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">pad_len</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_PriorityFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">5</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_RSTStreamFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_SettingsFrame</span><span class="p">):</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'object'</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span> <span class="o">*</span> <span class="mi">6</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_PushPromiseFrame</span><span class="p">):</span>
+            <span class="n">pad_len</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span> <span class="k">if</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_PushPromiseFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PADDED</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="n">pad_len</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">pad_len</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_PingFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_GoawayFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">debug</span><span class="p">)</span> <span class="o">+</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_WindowUpdateFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_ContinuationFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
 
 <div class="viewcode-block" id="HTTP.id">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.id">[docs]</a>
@@ -1337,7 +1379,7 @@
 
         <span class="k">return</span> <span class="n">Schema_UnassignedFrame</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-        <span class="p">),</span> <span class="n">Schema_UnassignedFrame</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Flags'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP._make_http_data">
@@ -1468,7 +1510,7 @@
                 <span class="s1">'sid'</span><span class="p">:</span> <span class="n">sid_dep</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">weight</span><span class="o">=</span><span class="n">weight</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">weight</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="p">),</span> <span class="n">Schema_PriorityFrame</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Flags'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP._make_http_rst_stream">
@@ -1498,7 +1540,7 @@
 
         <span class="k">return</span> <span class="n">Schema_RSTStreamFrame</span><span class="p">(</span>
             <span class="n">error</span><span class="o">=</span><span class="n">error_val</span><span class="p">,</span>
-        <span class="p">),</span> <span class="n">Schema_RSTStreamFrame</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Flags'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP._make_http_settings">
@@ -1663,6 +1705,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">error_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">error_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">error_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">error_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">debug</span> <span class="o">=</span> <span class="n">debug_data</span>
 
         <span class="k">return</span> <span class="n">Schema_GoawayFrame</span><span class="p">(</span>
             <span class="n">stream</span><span class="o">=</span><span class="p">{</span>
@@ -1670,7 +1713,7 @@
             <span class="p">},</span>
             <span class="n">error</span><span class="o">=</span><span class="n">error_val</span><span class="p">,</span>
             <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
-        <span class="p">),</span> <span class="n">Schema_GoawayFrame</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Flags'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP._make_http_window_update">
@@ -1696,7 +1739,7 @@
             <span class="n">size</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'incr'</span><span class="p">:</span> <span class="n">incr</span><span class="p">,</span>
             <span class="p">}</span>
-        <span class="p">),</span> <span class="n">Schema_WindowUpdateFrame</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Flags'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP._make_http_continuation">
@@ -1762,7 +1805,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

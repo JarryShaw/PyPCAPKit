@@ -787,7 +787,7 @@
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
         <span class="n">ihl</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">total_length</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="nb">len</span> <span class="o">=</span> <span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">total_len</span> <span class="o">=</span> <span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv4</span><span class="p">(</span>
             <span class="n">vihl</span><span class="o">=</span><span class="p">{</span>
@@ -801,7 +801,7 @@
                 <span class="s1">'rel'</span><span class="p">:</span> <span class="n">tos_rel_val</span><span class="p">,</span>
                 <span class="s1">'ecn'</span><span class="p">:</span> <span class="n">tos_ecn_val</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">total_len</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'df'</span><span class="p">:</span> <span class="n">df</span><span class="p">,</span>
@@ -2322,7 +2322,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

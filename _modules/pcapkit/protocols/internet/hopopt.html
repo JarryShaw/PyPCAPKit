@@ -693,7 +693,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="n">hopopt</span> <span class="o">=</span> <span class="n">Data_HOPOPT</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
@@ -897,7 +897,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_none">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_none">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnassignedOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnassignedOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnassignedOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnassignedOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT unassigned options.</span>
 
 <span class="sd">        Structure of HOPOPT unassigned options [:rfc:`8200`]:</span>
@@ -928,7 +928,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_pad">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pad">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_PadOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_PadOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_PadOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_PadOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT padding options.</span>
 
 <span class="sd">        Structure of HOPOPT padding options [:rfc:`8200`]:</span>
@@ -985,7 +985,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_tun">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_tun">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_tun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_TunnelEncapsulationLimitOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_TunnelEncapsulationLimitOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_tun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_TunnelEncapsulationLimitOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_TunnelEncapsulationLimitOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Tunnel Encapsulation Limit option.</span>
 
 <span class="sd">        Structure of HOPOPT Tunnel Encapsulation Limit option [:rfc:`2473`]:</span>
@@ -1024,7 +1024,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_ra">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ra">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_ra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RouterAlertOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RouterAlertOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_ra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RouterAlertOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RouterAlertOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Router Alert option.</span>
 
 <span class="sd">        Structure of HOPOPT Router Alert option [:rfc:`2711`]:</span>
@@ -1061,7 +1061,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_calipso">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_calipso">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_calipso</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_CALIPSOOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CALIPSOOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_calipso</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_CALIPSOOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CALIPSOOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Common Architecture Label IPv6 Security Option (CALIPSO) option.</span>
 
 <span class="sd">        Structure of HOPOPT CALIPSO option [:rfc:`5570`]:</span>
@@ -1114,7 +1114,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_smf_dpd">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_smf_dpd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_smf_dpd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SMFDPDOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_SMFDPDOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_smf_dpd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SMFDPDOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_SMFDPDOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.</span>
 
 <span class="sd">        Structure of HOPOPT ``SMF_DPD`` option [:rfc:`6621`]:</span>
@@ -1194,7 +1194,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_pdm">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pdm">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_pdm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_PDMOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_PDMOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_pdm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_PDMOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_PDMOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Performance and Diagnostic Metrics (PDM) option.</span>
 
 <span class="sd">        Structure of HOPOPT PDM option [:rfc:`8250`]:</span>
@@ -1242,7 +1242,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_qs">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_qs">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_QuickStartOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_QuickStartOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument  # pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_QuickStartOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_QuickStartOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument  # pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Quick Start option.</span>
 
 <span class="sd">        Structure of HOPOPT Quick-Start option [:rfc:`4782`]:</span>
@@ -1322,7 +1322,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_rpl">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_rpl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RPLOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RPLOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RPLOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RPLOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Routing Protocol for Low-Power and Lossy Networks (RPL) option.</span>
 
 <span class="sd">        Structure of HOPOPT RPL option [:rfc:`6553`]:</span>
@@ -1371,7 +1371,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_mpl">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_mpl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_mpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_MPLOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_MPLOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_mpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_MPLOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_MPLOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Multicast Protocol for Low-Power and Lossy Networks (MPL) option.</span>
 
 <span class="sd">        Structure of HOPOPT MPL option [:rfc:`7731`]:</span>
@@ -1435,7 +1435,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_ilnp">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ilnp">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_ilnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ILNPOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ILNPOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_ilnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ILNPOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ILNPOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Identifier-Locator Network Protocol (ILNP) Nonce option.</span>
 
 <span class="sd">        Structure of HOPOPT ILNP Nonce option [:rfc:`6744`]:</span>
@@ -1470,7 +1470,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_lio">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_lio">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_lio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_LineIdentificationOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_LineIdentificationOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_lio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_LineIdentificationOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_LineIdentificationOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Line-Identification option.</span>
 
 <span class="sd">        Structure of HOPOPT Line-Identification option [:rfc:`6788`]:</span>
@@ -1506,7 +1506,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_jumbo">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_jumbo">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_jumbo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_JumboPayloadOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_JumboPayloadOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_jumbo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_JumboPayloadOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_JumboPayloadOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Jumbo Payload option.</span>
 
 <span class="sd">        Structure of HOPOPT Jumbo Payload option [:rfc:`2675`]:</span>
@@ -1545,7 +1545,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_home">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_home">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_home</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HomeAddressOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HomeAddressOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_home</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HomeAddressOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HomeAddressOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Home Address option.</span>
 
 <span class="sd">        Structure of HOPOPT Home Address option [:rfc:`6275`]:</span>
@@ -1592,7 +1592,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_ip_dff">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ip_dff">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_ip_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_IPDFFOption'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPDFFOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_ip_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_IPDFFOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPDFFOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Depth-First Forwarding (``IP_DFF``) option.</span>
 
 <span class="sd">        Structure of HOPOPT ``IP_DFF`` option [:rfc:`6971`]:</span>
@@ -1885,6 +1885,8 @@
             <span class="n">level</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">level</span>
             <span class="n">checksum</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">checksum</span>
             <span class="n">bitmap</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">cmpt_bitmap</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'cmpt_bitmap'</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cmpt_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span> <span class="k">if</span> <span class="n">bitmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
 
         <span class="k">return</span> <span class="n">Schema_CALIPSOOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -2419,7 +2421,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

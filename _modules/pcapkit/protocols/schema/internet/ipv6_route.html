@@ -421,7 +421,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span> <span class="k">as</span> <span class="n">Field</span>
 
-<span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
 
 <div class="viewcode-block" id="PadInfo">
@@ -571,7 +571,7 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        """</span>
-        <span class="n">buffer</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span><span class="p">)</span>
         <span class="n">dst_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[IPv6Address]'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'dst'</span><span class="p">))</span>
         <span class="n">dst</span> <span class="o">=</span> <span class="n">dst_val</span><span class="o">.</span><span class="n">packed</span> <span class="k">if</span> <span class="n">dst_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
@@ -647,7 +647,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

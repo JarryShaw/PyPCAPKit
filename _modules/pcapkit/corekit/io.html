@@ -749,17 +749,13 @@
             <span class="k">raise</span> <span class="n">TruncateError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'negative size value </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getbuffer</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># keep the last ``size`` bytes</span>
-            <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getbuffer</span><span class="p">()</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="o">-</span><span class="n">size</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="o">-</span><span class="n">size</span><span class="p">:]</span> <span class="k">if</span> <span class="n">size</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getbuffer</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">=</span> <span class="n">size</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span></div>
@@ -846,7 +842,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="p">:</span>  <span class="c1"># only if the buffer is empty</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                 <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
                 <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">'read1'</span><span class="p">):</span>
@@ -945,7 +941,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>  <span class="c1"># only if the buffer is empty and/or not enough</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                 <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
                 <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">'peek'</span><span class="p">):</span>
@@ -989,7 +985,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

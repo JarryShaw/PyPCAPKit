@@ -466,6 +466,7 @@
     <span class="n">UpdateNotificationACKStatus</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationACKStatus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.upn_reason</span><span class="w"> </span><span class="kn">import</span> <span class="n">UpdateNotificationReason</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationReason</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">MH</span> <span class="k">as</span> <span class="n">Data_MH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">AlternateCareofAddressOption</span> <span class="k">as</span> <span class="n">Data_AlternateCareofAddressOption</span>
@@ -540,6 +541,7 @@
     <span class="n">MobileNetworkPrefixOption</span> <span class="k">as</span> <span class="n">Schema_MobileNetworkPrefixOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiPrefixExtension</span> <span class="k">as</span> <span class="n">Schema_MultiPrefixExtension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">NonceIndicesOption</span> <span class="k">as</span> <span class="n">Schema_NonceIndicesOption</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Schema_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">PadOption</span> <span class="k">as</span> <span class="n">Schema_PadOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">PermanentHomeKeygenTokenOption</span> <span class="k">as</span> <span class="n">Schema_PermanentHomeKeygenTokenOption</span>
@@ -547,6 +549,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Schema_UnassignedOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownExtension</span> <span class="k">as</span> <span class="n">Schema_UnknownExtension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownMessage</span> <span class="k">as</span> <span class="n">Schema_UnknownMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -1514,7 +1517,7 @@
 
 <div class="viewcode-block" id="MH._read_opt_none">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_none">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnassignedOption'</span><span class="p">,</span> <span class="o">*</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnassignedOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                              <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnassignedOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read MH unassigned option.</span>
 
@@ -2306,7 +2309,7 @@
 
 <div class="viewcode-block" id="MH._make_msg_unknown">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_unknown">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_UnknownMessage]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_UnknownMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UnknownMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH unknown message type.</span>
@@ -2330,7 +2333,7 @@
 
 <div class="viewcode-block" id="MH._make_msg_brr">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_brr">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_brr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingRefreshRequestMessage]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_brr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingRefreshRequestMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_BindingRefreshRequestMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH binding refresh request (BRR) message type.</span>
@@ -2356,7 +2359,7 @@
 
 <div class="viewcode-block" id="MH._make_msg_hoti">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_hoti">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_hoti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_HomeTestInitMessage]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_hoti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_HomeTestInitMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HomeTestInitMessage'</span><span class="p">:</span>
@@ -2386,7 +2389,7 @@
 
 <div class="viewcode-block" id="MH._make_msg_coti">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_coti">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_coti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_CareofTestInitMessage]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_coti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_CareofTestInitMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_CareofTestInitMessage'</span><span class="p">:</span>
@@ -2416,7 +2419,7 @@
 
 <div class="viewcode-block" id="MH._make_msg_hot">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_hot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_hot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_HomeTestMessage]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_hot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_HomeTestMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
@@ -2454,7 +2457,7 @@
 
 <div class="viewcode-block" id="MH._make_msg_cot">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_cot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_cot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_CareofTestMessage]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_cot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_CareofTestMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
@@ -2492,7 +2495,7 @@
 
 <div class="viewcode-block" id="MH._make_msg_bu">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_bu">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_bu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingUpdateMessage]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_bu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingUpdateMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="n">home</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -2545,7 +2548,7 @@
 
 <div class="viewcode-block" id="MH._make_msg_ba">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_ba">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_ba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingAcknowledgementMessage]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_ba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingAcknowledgementMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_StatusCode</span><span class="o">.</span><span class="n">Binding_Update_accepted_Proxy_Binding_Update_accepted</span><span class="p">,</span>
                      <span class="n">status_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">status_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -2598,7 +2601,7 @@
 
 <div class="viewcode-block" id="MH._make_msg_be">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_be">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_be</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingErrorMessage]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_be</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingErrorMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_StatusCode</span><span class="o">.</span><span class="n">Binding_Update_accepted_Proxy_Binding_Update_accepted</span><span class="p">,</span>
                      <span class="n">status_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">status_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -3114,10 +3117,13 @@
                 <span class="n">length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema_CGAParameter</span><span class="p">):</span>
-                <span class="n">length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'public_key_test'</span><span class="p">):</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">public_key_test</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'len'</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">public_key</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)}</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">ext_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cga_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
+                <span class="n">length</span> <span class="o">+=</span> <span class="mi">25</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">public_key</span><span class="p">)</span> <span class="o">+</span> <span class="n">ext_len</span>
                 <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_CGAParameter</span><span class="p">):</span>
-                <span class="n">ext</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cga_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
+                <span class="n">ext</span><span class="p">,</span> <span class="n">ext_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cga_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
                 <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_CGAParameter</span><span class="p">(</span>
                     <span class="n">modifier</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">modifier</span><span class="p">,</span>
                     <span class="n">prefix</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
@@ -3125,8 +3131,9 @@
                     <span class="n">public_key</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">public_key</span><span class="p">,</span>
                     <span class="n">extensions</span><span class="o">=</span><span class="n">ext</span><span class="p">,</span>
                 <span class="p">)</span>
+                <span class="n">schema</span><span class="o">.</span><span class="n">public_key_test</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'len'</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">public_key</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)}</span>
 
-                <span class="n">length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+                <span class="n">length</span> <span class="o">+=</span> <span class="mi">25</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">public_key</span><span class="p">)</span> <span class="o">+</span> <span class="n">ext_len</span>
                 <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] unknown CGA parameter format: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -3397,7 +3404,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -1134,9 +1134,9 @@
         <span class="n">mapping</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="p">()</span>  <span class="c1"># type: MultiDict[IPv4Address | IPv6Address, str]</span>
         <span class="n">reverse_mapping</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="p">()</span>  <span class="c1"># type: MultiDict[str, IPv4Address | IPv6Address]</span>
 
-        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="p">(</span><span class="n">IPv4Record</span><span class="p">,</span> <span class="n">IPv6Record</span><span class="p">)):</span>
-                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">records</span><span class="p">:</span>
                     <span class="n">mapping</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
                     <span class="n">reverse_mapping</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
 
@@ -1505,7 +1505,7 @@
 
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_BlockType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">section_number</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">drop_count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'dt_type'</span><span class="p">,</span>
-                     <span class="n">timestamp_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span><span class="p">,</span> <span class="n">captured_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">original_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">timestamp_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span><span class="p">,</span> <span class="n">captured_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">original_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 </pre></div>
@@ -1540,7 +1540,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

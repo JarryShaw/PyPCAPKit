@@ -484,6 +484,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Data_UnassignedOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">UserTimeout</span> <span class="k">as</span> <span class="n">Data_UserTimeout</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">WindowScale</span> <span class="k">as</span> <span class="n">Data_WindowScale</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">CC</span> <span class="k">as</span> <span class="n">Schema_CC</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPDSS</span> <span class="k">as</span> <span class="n">Schema_MPTCPDSS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">SACK</span> <span class="k">as</span> <span class="n">Schema_SACK</span>
@@ -542,7 +543,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPJoin</span> <span class="k">as</span> <span class="n">Data_MPTCPJoin</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Data_Option</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Schema_MPTCP</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Schema_Flags</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPJoin</span> <span class="k">as</span> <span class="n">Schema_MPTCPJoin</span>
@@ -755,7 +755,7 @@
             <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_JOIN</span><span class="p">:</span> <span class="s1">'join'</span><span class="p">,</span>
             <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">DSS</span><span class="p">:</span> <span class="s1">'dss'</span><span class="p">,</span>
             <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="p">:</span> <span class="s1">'addaddr'</span><span class="p">,</span>
-            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">REMOVE_ADDR</span><span class="p">:</span> <span class="s1">'removeaddr'</span><span class="p">,</span>
+            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">REMOVE_ADDR</span><span class="p">:</span> <span class="s1">'remove'</span><span class="p">,</span>
             <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_PRIO</span><span class="p">:</span> <span class="s1">'prio'</span><span class="p">,</span>
             <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_FAIL</span><span class="p">:</span> <span class="s1">'fail'</span><span class="p">,</span>
             <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_FASTCLOSE</span><span class="p">:</span> <span class="s1">'fastclose'</span><span class="p">,</span>
@@ -2421,7 +2421,7 @@
 <span class="sd">            ProtocolError: If length is **NOT** valid.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">6</span> <span class="o">&lt;=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">18</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">or</span> <span class="p">(</span><span class="mi">6</span> <span class="o">&lt;=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">18</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastOpenCookie</span><span class="p">(</span>
@@ -2456,7 +2456,7 @@
                     <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>  <span class="c1"># type: Schema_Option | bytes</span>
                     <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
-                    <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">kind</span>
                     <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">):</span>  <span class="c1"># ignore padding options by default</span>
                         <span class="k">continue</span>
 
@@ -2641,7 +2641,7 @@
         <span class="k">return</span> <span class="n">Schema_WindowScale</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-            <span class="n">scale</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span>
+            <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -3158,6 +3158,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">subtype_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">subtype</span><span class="p">,</span> <span class="n">subtype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">subtype_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                            <span class="nb">reversed</span><span class="o">=</span><span class="n">subtype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">subtype_val</span> <span class="o">=</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">)</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mp_option__</span><span class="p">[</span><span class="n">subtype_val</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -3192,7 +3193,7 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">data</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPUnknown</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3238,7 +3239,7 @@
             <span class="n">rkey</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">rkey</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPCapable</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">20</span> <span class="k">if</span> <span class="n">rkey</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">32</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3307,7 +3308,7 @@
             <span class="n">nonce</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">nonce</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPJoinSYN</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3349,7 +3350,7 @@
             <span class="n">nonce</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">nonce</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPJoinSYNACK</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3382,7 +3383,7 @@
             <span class="n">hmac</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">hmac</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPJoinACK</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3438,7 +3439,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: : [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">subtype</span><span class="si">}</span><span class="s1">: missing required fields'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPDSS</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">flag_A</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">flag_a</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">12</span> <span class="k">if</span> <span class="n">flag_M</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">flag_m</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3489,7 +3490,7 @@
         <span class="n">version</span> <span class="o">=</span> <span class="n">addr_val</span><span class="o">.</span><span class="n">version</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPAddAddress</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3524,7 +3525,7 @@
             <span class="n">addr_id_list</span> <span class="o">=</span> <span class="n">addr_id</span> <span class="k">if</span> <span class="n">addr_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPRemoveAddress</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3556,7 +3557,7 @@
             <span class="n">addr_id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPPriority</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3587,7 +3588,7 @@
             <span class="n">dsn</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">dsn</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPFallback</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3617,7 +3618,7 @@
             <span class="n">key</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">rkey</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPFastclose</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPTCP</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3685,7 +3686,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -405,6 +405,8 @@
 <span class="sd">.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
@@ -564,6 +566,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">WireGuardKeyLog</span> <span class="k">as</span> <span class="n">Schema_WireGuardKeyLog</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeAPSKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeAPSKey</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeNWKKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeNWKKey</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">localcontext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
@@ -1431,10 +1434,10 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="nd">@overload</span>
+    <span class="nd">@overload</span>  <span class="c1"># pragma: no cover</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes] | bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sct</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="s1">'Context'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-    <span class="nd">@overload</span>
+    <span class="nd">@overload</span>  <span class="c1"># pragma: no cover</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sct</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="n">ctx</span><span class="p">:</span> <span class="s1">'Context'</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
@@ -1600,7 +1603,7 @@
             <span class="c1"># raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'")</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute '_get_timezone'"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_timezone</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_local_timezone</span><span class="p">()</span>
 
         <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">interface_id</span><span class="p">]</span><span class="o">.</span><span class="n">options</span>
         <span class="n">tzone</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Data_IF_TZoneOption]'</span><span class="p">,</span>
@@ -2369,8 +2372,8 @@
             <span class="n">drop_count</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">drop_count</span><span class="p">,</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
             <span class="n">timestamp_epoch</span><span class="o">=</span><span class="n">timestamp_epoch</span><span class="p">,</span>
-            <span class="n">captured_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="p">,</span>
-            <span class="n">original_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">original_length</span><span class="p">,</span>
+            <span class="n">captured_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="p">,</span>
+            <span class="n">original_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">original_length</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">linktype</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
@@ -4942,7 +4945,7 @@
             <span class="n">tzone_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tzone</span><span class="o">.</span><span class="n">utcoffset</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [if_tzone] option timezone must be int, timedelta or timezone, '</span>
-                                <span class="sa">f</span><span class="s1">'but </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">tzone</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> found.'</span><span class="p">)</span>
+                                <span class="sa">f</span><span class="s1">'but </span><span class="si">{</span><span class="n">builtins</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">tzone</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> found.'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_IF_TZoneOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -5281,8 +5284,8 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">'direction'</span><span class="p">:</span> <span class="n">direction_val</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                <span class="s1">'reception'</span><span class="p">:</span> <span class="n">reception_val</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'direction'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">direction_val</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">,</span> <span class="n">direction_val</span><span class="p">),</span>
+                <span class="s1">'reception'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">reception_val</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">,</span> <span class="n">reception_val</span><span class="p">),</span>
                 <span class="s1">'fcs_len'</span><span class="p">:</span> <span class="n">fcs_len</span><span class="p">,</span>
                 <span class="s1">'crc_error'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">crc_error</span><span class="p">),</span>
                 <span class="s1">'too_long'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">too_long</span><span class="p">),</span>
@@ -5911,8 +5914,8 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">'direction'</span><span class="p">:</span> <span class="n">direction_val</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                <span class="s1">'reception'</span><span class="p">:</span> <span class="n">reception_val</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'direction'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">direction_val</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">,</span> <span class="n">direction_val</span><span class="p">),</span>
+                <span class="s1">'reception'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">reception_val</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">,</span> <span class="n">reception_val</span><span class="p">),</span>
                 <span class="s1">'fcs_len'</span><span class="p">:</span> <span class="n">fcs_len</span><span class="p">,</span>
                 <span class="s1">'crc_error'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">crc_error</span><span class="p">),</span>
                 <span class="s1">'too_long'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">too_long</span><span class="p">),</span>
@@ -6058,7 +6061,7 @@
 
 <div class="viewcode-block" id="PCAPNG._make_record_unknown">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_record_unknown">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_record_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'Optional[Data_UnknownRecord]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_record_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'Optional[Data_UnknownRecord]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                              <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UnknownRecord'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG unknown :manpage:`systemd(1)` journal export record.</span>
@@ -6106,7 +6109,7 @@
 
 <div class="viewcode-block" id="PCAPNG._make_record_ipv4">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv4">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_record_ipv4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'Optional[Data_IPv4Record]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_record_ipv4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'Optional[Data_IPv4Record]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv4Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span><span class="p">,</span>
                           <span class="n">names</span><span class="p">:</span> <span class="s1">'Optional[list[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv4Record'</span><span class="p">:</span>
@@ -6141,7 +6144,7 @@
 
 <div class="viewcode-block" id="PCAPNG._make_record_ipv6">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv6">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_record_ipv6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'Optional[Data_IPv6Record]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_record_ipv6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'Optional[Data_IPv6Record]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span><span class="p">,</span>
                           <span class="n">names</span><span class="p">:</span> <span class="s1">'Optional[list[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv6Record'</span><span class="p">:</span>
@@ -6260,8 +6263,8 @@
             <span class="n">entries</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'# generated by PyPCAPKit v</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s1"> at </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
-        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_WireGuardKeyLog</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
@@ -6363,7 +6366,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

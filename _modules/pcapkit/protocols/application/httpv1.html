@@ -583,7 +583,9 @@
             <span class="k">if</span> <span class="n">uri</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP request must have URI.'</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">Enum_Method</span><span class="p">):</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">method</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
@@ -598,11 +600,15 @@
             <span class="n">status_code_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">status_code</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">status_code</span><span class="p">,</span> <span class="s1">'message'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">b</span><span class="s1">''</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="s1">'message'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">status_code</span><span class="p">,</span> <span class="s1">'message'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">message</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
 
             <span class="n">header_line</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'HTTP/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">status_code_val</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP packet must be either request or response.'</span><span class="p">)</span>
 
         <span class="n">header_fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
         <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -767,7 +773,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6dfb7e91"></script>
+</div><script src="../../../../_static/documentation_options.js?v=c4bb0af7"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
