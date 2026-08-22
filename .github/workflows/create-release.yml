@@ -15,6 +15,7 @@ name: Create Release
 jobs:
   unit-tests:
     name: Unit Tests
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
     uses: ./.github/workflows/unit-tests.yml
