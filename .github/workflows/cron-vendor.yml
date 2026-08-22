@@ -7,8 +7,15 @@ on:
     branches: [main, ]
 
 jobs:
+  unit-tests:
+    name: Unit Tests
+    permissions:
+      contents: read
+    uses: ./.github/workflows/unit-tests.yml
+
   vendor-update:
     runs-on: macos-latest
+    needs: [ unit-tests ]
     concurrency:
       group: repository-maintenance
       cancel-in-progress: false
