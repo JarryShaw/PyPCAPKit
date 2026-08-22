@@ -27,11 +27,13 @@ class ExceptionsWarningsTests(unittest.TestCase):
     def test_base_error_limits_traceback_in_non_dev_mode(self) -> None:
         original = getattr(sys, 'tracebacklimit', None)
         try:
-            self.exceptions.BaseError('boom', quiet=True)
+            with mock.patch.object(self.exceptions, 'DEVMODE', False):
+                self.exceptions.BaseError('boom', quiet=True)
             self.assertEqual(sys.tracebacklimit, 0)
         finally:
             if original is None:
-                del sys.tracebacklimit
+                if hasattr(sys, 'tracebacklimit'):
+                    del sys.tracebacklimit
             else:
                 sys.tracebacklimit = original
 
@@ -45,9 +47,10 @@ class ExceptionsWarningsTests(unittest.TestCase):
         self.assertTrue(critical.call_args.kwargs['stack_info'])
 
     def test_warn_suppresses_base_warning_categories_outside_dev_mode(self) -> None:
-        with pywarnings.catch_warnings(record=True) as records:
-            pywarnings.simplefilter('always')
-            self.warnings.warn('careful', self.warnings.FormatWarning, stacklevel=1)
+        with mock.patch.object(self.warnings, 'DEVMODE', False):
+            with pywarnings.catch_warnings(record=True) as records:
+                pywarnings.simplefilter('always')
+                self.warnings.warn('careful', self.warnings.FormatWarning, stacklevel=1)
 
         self.assertEqual(records, [])
 

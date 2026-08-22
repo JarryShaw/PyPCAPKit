@@ -63,7 +63,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         udp.__cached__ = {}
         with mock.patch.object(UDP, '_decode_next_layer', return_value='decoded') as decode:
             self.assertEqual(udp.read(), 'decoded')
-        decode.assert_called_once()
+            self.assertEqual(udp.read(length=12), 'decoded')
+        self.assertEqual(decode.call_count, 2)
 
     def test_tcp_index_and_make_data_preserve_flags_and_ports(self) -> None:
         from pcapkit.const.reg.transtype import TransType

@@ -47,6 +47,8 @@ class PCAPNGUnitTests(unittest.TestCase):
             PCAPNG._make_data(data),
             {'type': BlockType.Section_Header_Block, 'block': data},
         )
+        unscoped_option = types.SimpleNamespace(opt_name='', opt_value=42)
+        self.assertIs(_option_key(unscoped_option), unscoped_option)
 
         pcapng._info = DummyData(type=BlockType.Section_Header_Block)
         with self.assertRaises(UnsupportedCall):
