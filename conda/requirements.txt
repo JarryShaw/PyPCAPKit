@@ -9,7 +9,7 @@ dpkt==1.9.8
 emoji==2.15.0
 html5lib==1.1
 idna==3.19
-lxml==6.1.2
+lxml==6.1.3
 packaging==26.3
 pathlib2; python_version < "3.5"
 pyshark==0.6
