@@ -29807,6 +29807,7 @@ class AppType(StrEnum):
     sdsharing: 'AppType' = -1, 'sdsharing', TransportProtocol.get('undefined')
 
     #: [TCP] SecuGen Connect local biometric bridge
+    #: [https://connect.secugen.com/dev-guide-doc/bridge-api-contract]
     secugen_connect: 'AppType' = -1, 'secugen-connect', TransportProtocol.get('tcp')
 
     #: [N/A] SubEthaEdit 2
