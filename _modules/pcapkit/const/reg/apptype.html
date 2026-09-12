@@ -19611,8 +19611,8 @@
     <span class="c1">#: - [UDP] Matter Operational Discovery and Communi</span>
     <span class="n">matter</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="mi">5540</span><span class="p">,</span> <span class="s1">'matter'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">)</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'udp'</span><span class="p">)</span>
 
-    <span class="c1">#: [TCP] QF-Test License Server</span>
-    <span class="n">qftest_licserve</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="mi">5543</span><span class="p">,</span> <span class="s1">'qftest-licserve'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">)</span>
+    <span class="c1">#: [TCP] QF-Test License Server / QF-Test MCP Server</span>
+    <span class="n">qftest_lic_mcp</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="mi">5543</span><span class="p">,</span> <span class="s1">'qftest-lic-mcp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">)</span>
 
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_5543</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="mi">5543</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'udp'</span><span class="p">)</span>
@@ -28809,6 +28809,9 @@
     <span class="c1">#: [N/A] Endpoint Protocol (EP) for use in Home Automation systems</span>
     <span class="n">ep</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'ep'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'undefined'</span><span class="p">)</span>
 
+    <span class="c1">#: [TCP] Esiur distributed resource protocol</span>
+    <span class="n">esiur</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'esiur'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">)</span>
+
     <span class="c1">#: [TCP] Extensis Server Protocol</span>
     <span class="n">esp</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'esp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">)</span>
 
@@ -30197,6 +30200,9 @@
 
     <span class="c1">#: [N/A] Speed Download</span>
     <span class="n">sdsharing</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'sdsharing'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'undefined'</span><span class="p">)</span>
+
+    <span class="c1">#: [TCP] SecuGen Connect local biometric bridge</span>
+    <span class="n">secugen_connect</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'secugen-connect'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">)</span>
 
     <span class="c1">#: [N/A] SubEthaEdit 2</span>
     <span class="n">see</span><span class="p">:</span> <span class="s1">'AppType'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'see'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'undefined'</span><span class="p">)</span>
@@ -33346,7 +33352,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=afb1b211"></script>
+</div><script src="../../../../_static/documentation_options.js?v=91dca989"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
