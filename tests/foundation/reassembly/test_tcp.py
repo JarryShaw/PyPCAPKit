@@ -80,7 +80,7 @@ class TCPReassemblyTests(unittest.TestCase):
         self.assertEqual(reasm._buffer[self._bufid()].hdr, b'new-header')
 
     def test_fragment_merging_covers_gaps_overlaps_new_acks_and_holes(self) -> None:
-        from pcapkit.foundation.reassembly.data.tcp import Buffer, Fragment, HoleDiscriptor
+        from pcapkit.foundation.reassembly.data.tcp import Buffer, Fragment, HoleDescriptor
         from pcapkit.foundation.reassembly.tcp import TCP
 
         class Analyzer:
@@ -94,7 +94,7 @@ class TCPReassemblyTests(unittest.TestCase):
         reasm = TestTCP()
         bufid = self._bufid()
         reasm._buffer[bufid] = Buffer(
-            [HoleDiscriptor(0, 4), HoleDiscriptor(20, 30), HoleDiscriptor(40, sys.maxsize)],
+            [HoleDescriptor(0, 4), HoleDescriptor(20, 30), HoleDescriptor(40, sys.maxsize)],
             b'',
             {
                 500: Fragment([1], 10, 10, bytearray(b'0123456789')),
@@ -120,7 +120,7 @@ class TCPReassemblyTests(unittest.TestCase):
 
         before_gap = TestTCP()
         before_gap._buffer[bufid] = Buffer(
-            [HoleDiscriptor(50, sys.maxsize)],
+            [HoleDescriptor(50, sys.maxsize)],
             b'',
             {500: Fragment([1], 10, 5, bytearray(b'world'))},
         )
@@ -129,7 +129,7 @@ class TCPReassemblyTests(unittest.TestCase):
                          bytearray(b'hello\x00\x00\x00\x00\x00world'))
 
     def test_submit_incomplete_strict_complete_strict_false_and_empty_buffers(self) -> None:
-        from pcapkit.foundation.reassembly.data.tcp import Buffer, Fragment, HoleDiscriptor
+        from pcapkit.foundation.reassembly.data.tcp import Buffer, Fragment, HoleDescriptor
         from pcapkit.foundation.reassembly.tcp import TCP
 
         class Analyzer:
@@ -147,7 +147,7 @@ class TCPReassemblyTests(unittest.TestCase):
         strict = TestTCP()
         incomplete = strict.submit(
             Buffer(
-                [HoleDiscriptor(2, 3), HoleDiscriptor(7, 8), HoleDiscriptor(99, 100)],
+                [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
                 {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'))},
             ),
@@ -160,7 +160,7 @@ class TCPReassemblyTests(unittest.TestCase):
 
         mixed = strict.submit(
             Buffer(
-                [HoleDiscriptor(0, 0), HoleDiscriptor(4, 5), HoleDiscriptor(7, 7)],
+                [HoleDescriptor(0, 0), HoleDescriptor(4, 5), HoleDescriptor(7, 7)],
                 b'tcp-header',
                 {
                     500: Fragment([], 0, 0, bytearray()),
@@ -175,7 +175,7 @@ class TCPReassemblyTests(unittest.TestCase):
         loose = TestTCP(strict=False)
         completed = loose.submit(
             Buffer(
-                [HoleDiscriptor(2, 3), HoleDiscriptor(7, 8), HoleDiscriptor(99, 100)],
+                [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
                 {500: Fragment([3], 0, 3, bytearray(b'abc'))},
             ),

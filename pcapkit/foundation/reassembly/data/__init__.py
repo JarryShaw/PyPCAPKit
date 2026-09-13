@@ -14,6 +14,7 @@ from pcapkit.foundation.reassembly.data.tcp import BufferID as TCP_BufferID
 from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
 from pcapkit.foundation.reassembly.data.tcp import DatagramID as TCP_DatagramID
 from pcapkit.foundation.reassembly.data.tcp import Fragment as TCP_Fragment
+from pcapkit.foundation.reassembly.data.tcp import HoleDescriptor as TCP_HoleDescriptor
 from pcapkit.foundation.reassembly.data.tcp import HoleDiscriptor as TCP_HoleDiscriptor
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 
@@ -22,7 +23,7 @@ __all__ = [
     'IP_BufferID',
 
     'TCP_Packet', 'TCP_DatagramID', 'TCP_Datagram', 'TCP_Buffer',
-    'TCP_Fragment', 'TCP_HoleDiscriptor', 'TCP_BufferID',
+    'TCP_Fragment', 'TCP_HoleDescriptor', 'TCP_HoleDiscriptor', 'TCP_BufferID',
 ]
 
 from typing import TYPE_CHECKING
