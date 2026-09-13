@@ -1,10 +1,35 @@
-.PHONY: dist release docs
+.PHONY: bootstrap setup dist release docs
 
 export PIPENV_VENV_IN_PROJECT=1
+export PIPENV_CACHE_DIR ?= $(CURDIR)/.pipenv-cache
+export PIP_CACHE_DIR ?= $(CURDIR)/.pip-cache
 export all_proxy=
 
 SHELL  := /opt/homebrew/bin/bash
 VERSION = $(shell cat pcapkit/__init__.py | grep "^__version__" | sed "s/__version__ = '\(.*\)'/\1/")
+BREW_PREFIX ?= /opt/homebrew/opt
+
+LIBXML2_PREFIX := $(BREW_PREFIX)/libxml2
+LIBXSLT_PREFIX := $(BREW_PREFIX)/libxslt
+
+ifneq ($(wildcard $(LIBXML2_PREFIX)/bin/xml2-config),)
+export PATH := $(LIBXML2_PREFIX)/bin:$(PATH)
+export CPPFLAGS := -I$(LIBXML2_PREFIX)/include $(CPPFLAGS)
+export LDFLAGS := -L$(LIBXML2_PREFIX)/lib $(LDFLAGS)
+export PKG_CONFIG_PATH := $(LIBXML2_PREFIX)/lib/pkgconfig:$(PKG_CONFIG_PATH)
+export XML2_CONFIG := $(LIBXML2_PREFIX)/bin/xml2-config
+endif
+
+ifneq ($(wildcard $(LIBXSLT_PREFIX)/bin/xslt-config),)
+export PATH := $(LIBXSLT_PREFIX)/bin:$(PATH)
+export CPPFLAGS := -I$(LIBXSLT_PREFIX)/include $(CPPFLAGS)
+export LDFLAGS := -L$(LIBXSLT_PREFIX)/lib $(LDFLAGS)
+export PKG_CONFIG_PATH := $(LIBXSLT_PREFIX)/lib/pkgconfig:$(PKG_CONFIG_PATH)
+export XSLT_CONFIG := $(LIBXSLT_PREFIX)/bin/xslt-config
+endif
+
+bootstrap: pipenv
+setup: pipenv
 
 update: pipenv vendor
 dist: update isort dist-clean dist-build dist-upload
@@ -28,10 +53,7 @@ git-tag:
 	git push --tags
 
 pipenv:
-	pipenv run pip install -U pip setuptools wheel pysocks
-	pipenv update
-	pipenv install --dev
-	pipenv clean
+	pipenv install --skip-lock --dev
 
 vendor:
 	pipenv run pcapkit-vendor

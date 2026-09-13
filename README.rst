@@ -128,6 +128,28 @@ Or install the latest version from the gi repository:
    # and to update at any time
    git pull
 
+For local development with ``pipenv``, the repository already includes a
+``Pipfile`` and ``Makefile`` targets that keep both the virtualenv and the
+package caches inside the project directory:
+
+.. code-block:: shell
+
+   make setup
+
+This resolves two common local setup issues on macOS/Homebrew installations:
+``pipenv`` cache permission errors under ``~/Library/Caches`` and ``lxml``
+builds failing to locate Homebrew's ``libxml2``/``libxslt`` headers.
+
+If you prefer to run ``pipenv`` directly, use the same local cache layout and
+skip any stale, user-local ``Pipfile.lock``:
+
+.. code-block:: shell
+
+   PIPENV_VENV_IN_PROJECT=1 \
+   PIPENV_CACHE_DIR=$PWD/.pipenv-cache \
+   PIP_CACHE_DIR=$PWD/.pip-cache \
+   pipenv install --skip-lock --dev
+
 And since ``pcapkit`` supports various extraction engines, and extensive
 plug-in functions, you may want to install the optional ones:
 

@@ -41,6 +41,9 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
@@ -95,6 +98,10 @@ docs = [
     "sphinx-autodoc-typehints", "sphinx-opengraph", "sphinx-copybutton",
     "typing-extensions", "mypy-extensions",
 ]
+test = [
+    "pytest>=8",
+    "typing-extensions",
+]
 
 # setuptools specific
 
@@ -113,3 +120,20 @@ exclude = [
 
 [tool.setuptools.dynamic]
 version = { attr="pcapkit.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+python_files = [
+    "test_*.py",
+]
+
+[tool.coverage.run]
+source = [
+    "pcapkit",
+]
+branch = true
+
+[tool.coverage.report]
+show_missing = true

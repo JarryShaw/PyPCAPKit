@@ -19216,8 +19216,8 @@ class AppType(StrEnum):
     #: - [UDP] Matter Operational Discovery and Communi
     matter: 'AppType' = 5540, 'matter', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: [TCP] QF-Test License Server
-    qftest_licserve: 'AppType' = 5543, 'qftest-licserve', TransportProtocol.get('tcp')
+    #: [TCP] QF-Test License Server / QF-Test MCP Server
+    qftest_lic_mcp: 'AppType' = 5543, 'qftest-lic-mcp', TransportProtocol.get('tcp')
 
     #: [UDP] Reserved
     reserved_5543: 'AppType' = 5543, 'reserved', TransportProtocol.get('udp')
@@ -28414,6 +28414,9 @@ class AppType(StrEnum):
     #: [N/A] Endpoint Protocol (EP) for use in Home Automation systems
     ep: 'AppType' = -1, 'ep', TransportProtocol.get('undefined')
 
+    #: [TCP] Esiur distributed resource protocol
+    esiur: 'AppType' = -1, 'esiur', TransportProtocol.get('tcp')
+
     #: [TCP] Extensis Server Protocol
     esp: 'AppType' = -1, 'esp', TransportProtocol.get('tcp')
 
@@ -29342,6 +29345,12 @@ class AppType(StrEnum):
     #: [N/A] OmniFocus document synchronization
     ofocus_sync: 'AppType' = -1, 'ofocus-sync', TransportProtocol.get('undefined')
 
+    #: [TCP] Peer-to-peer nearby audio communication
+    ok_connect: 'AppType' = -1, 'ok-connect', TransportProtocol.get('tcp')
+
+    #: [TCP] Peer control and application data
+    ok_control: 'AppType' = -1, 'ok-control', TransportProtocol.get('tcp')
+
     #: [TCP] Web Interface for the Open Lighting Architecture Software
     ola: 'AppType' = -1, 'ola', TransportProtocol.get('tcp')
 
@@ -29796,6 +29805,10 @@ class AppType(StrEnum):
 
     #: [N/A] Speed Download
     sdsharing: 'AppType' = -1, 'sdsharing', TransportProtocol.get('undefined')
+
+    #: [TCP] SecuGen Connect local biometric bridge
+    #: [https://connect.secugen.com/dev-guide-doc/bridge-api-contract]
+    secugen_connect: 'AppType' = -1, 'secugen-connect', TransportProtocol.get('tcp')
 
     #: [N/A] SubEthaEdit 2
     see: 'AppType' = -1, 'see', TransportProtocol.get('undefined')

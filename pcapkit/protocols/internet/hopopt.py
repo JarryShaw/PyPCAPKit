@@ -296,7 +296,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         """
         if length is None:
             length = len(self)
-        schema = self.__schema__
+        schema = self.__header__
 
         hopopt = Data_HOPOPT(
             next=schema.next,
@@ -479,7 +479,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             raise ProtocolError('HOPOPT: invalid format')
         return options
 
-    def _read_opt_none(self, schema: 'Schema_UnassignedOption', option: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
+    def _read_opt_none(self, schema: 'Schema_UnassignedOption', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read HOPOPT unassigned options.
 
         Structure of HOPOPT unassigned options [:rfc:`8200`]:
@@ -507,7 +507,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_pad(self, schema: 'Schema_PadOption', option: 'Option') -> 'Data_PadOption':  # pylint: disable=unused-argument
+    def _read_opt_pad(self, schema: 'Schema_PadOption', *, options: 'Option') -> 'Data_PadOption':  # pylint: disable=unused-argument
         """Read HOPOPT padding options.
 
         Structure of HOPOPT padding options [:rfc:`8200`]:
@@ -561,7 +561,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_tun(self, schema: 'Schema_TunnelEncapsulationLimitOption', option: 'Option') -> 'Data_TunnelEncapsulationLimitOption':  # pylint: disable=unused-argument
+    def _read_opt_tun(self, schema: 'Schema_TunnelEncapsulationLimitOption', *, options: 'Option') -> 'Data_TunnelEncapsulationLimitOption':  # pylint: disable=unused-argument
         """Read HOPOPT Tunnel Encapsulation Limit option.
 
         Structure of HOPOPT Tunnel Encapsulation Limit option [:rfc:`2473`]:
@@ -597,7 +597,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_ra(self, schema: 'Schema_RouterAlertOption', option: 'Option') -> 'Data_RouterAlertOption':  # pylint: disable=unused-argument
+    def _read_opt_ra(self, schema: 'Schema_RouterAlertOption', *, options: 'Option') -> 'Data_RouterAlertOption':  # pylint: disable=unused-argument
         """Read HOPOPT Router Alert option.
 
         Structure of HOPOPT Router Alert option [:rfc:`2711`]:
@@ -631,7 +631,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_calipso(self, schema: 'Schema_CALIPSOOption', option: 'Option') -> 'Data_CALIPSOOption':  # pylint: disable=unused-argument
+    def _read_opt_calipso(self, schema: 'Schema_CALIPSOOption', *, options: 'Option') -> 'Data_CALIPSOOption':  # pylint: disable=unused-argument
         """Read HOPOPT Common Architecture Label IPv6 Security Option (CALIPSO) option.
 
         Structure of HOPOPT CALIPSO option [:rfc:`5570`]:
@@ -681,7 +681,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             ])
         return opt
 
-    def _read_opt_smf_dpd(self, schema: 'Schema_SMFDPDOption', option: 'Option') -> 'Data_SMFDPDOption':  # pylint: disable=unused-argument,line-too-long
+    def _read_opt_smf_dpd(self, schema: 'Schema_SMFDPDOption', *, options: 'Option') -> 'Data_SMFDPDOption':  # pylint: disable=unused-argument,line-too-long
         """Read HOPOPT Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.
 
         Structure of HOPOPT ``SMF_DPD`` option [:rfc:`6621`]:
@@ -758,7 +758,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid DPD mode: {mode}')
         return opt
 
-    def _read_opt_pdm(self, schema: 'Schema_PDMOption', option: 'Option') -> 'Data_PDMOption':  # pylint: disable=unused-argument
+    def _read_opt_pdm(self, schema: 'Schema_PDMOption', *, options: 'Option') -> 'Data_PDMOption':  # pylint: disable=unused-argument
         """Read HOPOPT Performance and Diagnostic Metrics (PDM) option.
 
         Structure of HOPOPT PDM option [:rfc:`8250`]:
@@ -803,7 +803,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_qs(self, schema: 'Schema_QuickStartOption', option: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument  # pylint: disable=unused-argument
+    def _read_opt_qs(self, schema: 'Schema_QuickStartOption', *, options: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument  # pylint: disable=unused-argument
         """Read HOPOPT Quick Start option.
 
         Structure of HOPOPT Quick-Start option [:rfc:`4782`]:
@@ -880,7 +880,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
         return opt
 
-    def _read_opt_rpl(self, schema: 'Schema_RPLOption', option: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
+    def _read_opt_rpl(self, schema: 'Schema_RPLOption', *, options: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
         """Read HOPOPT Routing Protocol for Low-Power and Lossy Networks (RPL) option.
 
         Structure of HOPOPT RPL option [:rfc:`6553`]:
@@ -926,7 +926,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_mpl(self, schema: 'Schema_MPLOption', option: 'Option') -> 'Data_MPLOption':  # pylint: disable=unused-argument
+    def _read_opt_mpl(self, schema: 'Schema_MPLOption', *, options: 'Option') -> 'Data_MPLOption':  # pylint: disable=unused-argument
         """Read HOPOPT Multicast Protocol for Low-Power and Lossy Networks (MPL) option.
 
         Structure of HOPOPT MPL option [:rfc:`7731`]:
@@ -987,7 +987,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_ilnp(self, schema: 'Schema_ILNPOption', option: 'Option') -> 'Data_ILNPOption':  # pylint: disable=unused-argument
+    def _read_opt_ilnp(self, schema: 'Schema_ILNPOption', *, options: 'Option') -> 'Data_ILNPOption':  # pylint: disable=unused-argument
         """Read HOPOPT Identifier-Locator Network Protocol (ILNP) Nonce option.
 
         Structure of HOPOPT ILNP Nonce option [:rfc:`6744`]:
@@ -1019,7 +1019,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_lio(self, schema: 'Schema_LineIdentificationOption', option: 'Option') -> 'Data_LineIdentificationOption':  # pylint: disable=unused-argument
+    def _read_opt_lio(self, schema: 'Schema_LineIdentificationOption', *, options: 'Option') -> 'Data_LineIdentificationOption':  # pylint: disable=unused-argument
         """Read HOPOPT Line-Identification option.
 
         Structure of HOPOPT Line-Identification option [:rfc:`6788`]:
@@ -1052,7 +1052,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_jumbo(self, schema: 'Schema_JumboPayloadOption', option: 'Option') -> 'Data_JumboPayloadOption':  # pylint: disable=unused-argument
+    def _read_opt_jumbo(self, schema: 'Schema_JumboPayloadOption', *, options: 'Option') -> 'Data_JumboPayloadOption':  # pylint: disable=unused-argument
         """Read HOPOPT Jumbo Payload option.
 
         Structure of HOPOPT Jumbo Payload option [:rfc:`2675`]:
@@ -1088,7 +1088,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_home(self, schema: 'Schema_HomeAddressOption', option: 'Option') -> 'Data_HomeAddressOption':  # pylint: disable=unused-argument
+    def _read_opt_home(self, schema: 'Schema_HomeAddressOption', *, options: 'Option') -> 'Data_HomeAddressOption':  # pylint: disable=unused-argument
         """Read HOPOPT Home Address option.
 
         Structure of HOPOPT Home Address option [:rfc:`6275`]:
@@ -1132,7 +1132,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
-    def _read_opt_ip_dff(self, schema: 'Schema_IPDFFOption', option: 'Option') -> 'Data_IPDFFOption':  # pylint: disable=unused-argument
+    def _read_opt_ip_dff(self, schema: 'Schema_IPDFFOption', *, options: 'Option') -> 'Data_IPDFFOption':  # pylint: disable=unused-argument
         """Read HOPOPT Depth-First Forwarding (``IP_DFF``) option.
 
         Structure of HOPOPT ``IP_DFF`` option [:rfc:`6971`]:
@@ -1407,6 +1407,8 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             level = opt.level
             checksum = opt.checksum
             bitmap = opt.cmpt_bitmap if hasattr(opt, 'cmpt_bitmap') else None
+        else:
+            cmpt_len = len(bitmap) if bitmap is not None else 0
 
         return Schema_CALIPSOOption(
             type=code,

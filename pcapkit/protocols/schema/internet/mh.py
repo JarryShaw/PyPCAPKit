@@ -91,7 +91,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class ANSIKeyLengthTest(TypedDict):
@@ -205,7 +205,7 @@ class Option(EnumSchema[Enum_Option]):
 
         """
         # for Pad1 option, length is always 1
-        if self.type == Enum_Option.pad1:
+        if self.type == Enum_Option.Pad1:
             self.length = 0
         return self
 

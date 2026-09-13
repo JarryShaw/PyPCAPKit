@@ -232,7 +232,7 @@ def block2frame(block: 'Packet', *, nanosecond: 'bool' = False) -> 'Data_Frame':
 
     """
     ts_sec = int(block.timestamp_epoch)
-    ts_usec = int(block.timestamp_epoch - ts_sec) * (1_000_000_000 if nanosecond else 1_000_000)
+    ts_usec = int((block.timestamp_epoch - ts_sec) * (1_000_000_000 if nanosecond else 1_000_000))
 
     frame = Data_Frame(
         frame_info=Data_FrameInfo(

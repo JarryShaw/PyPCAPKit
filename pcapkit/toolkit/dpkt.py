@@ -197,7 +197,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
             mf=bool(ipv6_frag.m_flag),                           # more fragment flag
             tl=len(ipv6),                                        # total length, header includes
             header=ipv6.pack()[:hdr_len],                        # raw bytearray type header before IPv6-Frag
-            payload=bytearray(ipv6.pack()[hdr_len+ipv6_frag:]),  # raw bytearray type payload after IPv6-Frag
+            payload=bytearray(ipv6.pack()[hdr_len + len(ipv6_frag):]),  # raw bytearray type payload after IPv6-Frag
         )
         return data
     return None
@@ -230,6 +230,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         return None
 
     tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
+    if tcp is None and type(getattr(ip, 'data', None)).__name__ == 'TCP':
+        tcp = cast('TCP', ip.data)
     if tcp is not None:
         flags = bin(tcp.flags)[2:].zfill(8)
         raw_len = len(tcp.data)                                 # payload length, header excludes
@@ -287,6 +289,8 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         return None
 
     tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
+    if tcp is None and type(getattr(ip, 'data', None)).__name__ == 'TCP':
+        tcp = cast('TCP', ip.data)
     if tcp is not None:
         flags = bin(tcp.flags)[2:].zfill(8)
 

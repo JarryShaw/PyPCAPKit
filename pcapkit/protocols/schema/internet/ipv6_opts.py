@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class TaggerIDInfo(TypedDict):

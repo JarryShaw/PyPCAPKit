@@ -141,6 +141,8 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                         key = f'{type(key).__name__}::{key.name} [{key.value}]'
                     temp[key].append(val)
                 return temp
+            if isinstance(o, dict):
+                return o
             if isinstance(o, (enum.Enum, aenum.Enum)):
                 addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
                 if addon:
