@@ -1414,12 +1414,10 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         """
         if opt is not None:
             domain = opt.domain
-            cmpt_len = len(opt.cmpt_bitmap) if hasattr(opt, 'cmpt_bitmap') else 0
             level = opt.level
             checksum = opt.checksum
             bitmap = opt.cmpt_bitmap if hasattr(opt, 'cmpt_bitmap') else None
-        else:
-            cmpt_len = len(bitmap) if bitmap is not None else 0
+        cmpt_len = len(bitmap) if bitmap is not None else 0
 
         return Schema_CALIPSOOption(
             type=code,
