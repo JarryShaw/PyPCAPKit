@@ -253,7 +253,7 @@ Data Models
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.tcp.HoleDescriptor
+.. autoclass:: pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor
    :members:
    :show-inheritance:
 
