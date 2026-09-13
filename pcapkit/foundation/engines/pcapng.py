@@ -8,7 +8,6 @@ This module contains the implementation for PCAP-NG file extraction
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
-from logging import warn
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
@@ -16,7 +15,7 @@ from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
 from pcapkit.utilities.exceptions import FormatError, stacklevel
-from pcapkit.utilities.warnings import DeprecatedFormatWarning
+from pcapkit.utilities.warnings import DeprecatedFormatWarning, warn
 
 __all__ = ['PCAPNG']
 

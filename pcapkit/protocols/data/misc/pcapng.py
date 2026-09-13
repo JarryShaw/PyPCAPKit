@@ -611,9 +611,9 @@ class NameResolutionBlock(PCAPNG):
         mapping = MultiDict()  # type: MultiDict[IPv4Address | IPv6Address, str]
         reverse_mapping = MultiDict()  # type: MultiDict[str, IPv4Address | IPv6Address]
 
-        for record in self.records:
+        for record in self.records.values():
             if isinstance(record, (IPv4Record, IPv6Record)):
-                for name in record.names:
+                for name in record.records:
                     mapping.add(record.ip, name)
                     reverse_mapping.add(name, record.ip)
 
@@ -921,5 +921,5 @@ class PacketBlock(PCAPNG):
 
         def __init__(self, type: 'Enum_BlockType', length: 'int', section_number: 'int', number: 'int',
                      interface_id: 'int', drop_count: 'int', timestamp: 'dt_type',
-                     timestamp_epoch: 'Decimal', captured_length: 'int', original_length: 'int',
+                     timestamp_epoch: 'Decimal', captured_len: 'int', original_len: 'int',
                      options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...

@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class OffsetFlag(TypedDict):
@@ -359,7 +359,7 @@ class WindowScale(Option, code=Enum_Option.Window_Scale):
     shift: 'int' = UInt8Field()
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'Enum_Option', length: 'int', scale: 'int') -> 'None': ...
+        def __init__(self, kind: 'Enum_Option', length: 'int', shift: 'int') -> 'None': ...
 
 
 @schema_final

@@ -13,7 +13,14 @@ permissions:
   contents: write
 
 jobs:
+  unit-tests:
+    name: Unit Tests
+    permissions:
+      contents: read
+    uses: ./.github/workflows/unit-tests.yml
+
   deploy-pages:
+    needs: [ unit-tests ]
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     runs-on: macos-latest
     steps:
