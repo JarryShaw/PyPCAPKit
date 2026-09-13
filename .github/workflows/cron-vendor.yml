@@ -7,8 +7,20 @@ on:
     branches: [main, ]
 
 jobs:
+  unit-tests:
+    name: Unit Tests
+    permissions:
+      contents: read
+    uses: ./.github/workflows/unit-tests.yml
+
   vendor-update:
     runs-on: macos-latest
+    needs: [ unit-tests ]
+    concurrency:
+      group: repository-maintenance
+      cancel-in-progress: false
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
 
@@ -64,6 +76,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
+          pull: rebase
 
       # - name: Create Tag
       #   if: steps.verify-changed-files.outputs.files_changed == 'true'

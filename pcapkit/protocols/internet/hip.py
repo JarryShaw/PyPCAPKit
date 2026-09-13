@@ -33,6 +33,7 @@ Octets      Bits        Name                    Description
 import datetime
 import ipaddress
 import math
+from datetime import timedelta
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
@@ -230,7 +231,7 @@ if TYPE_CHECKING:
 __all__ = ['HIP']
 
 
-if SPHINX_TYPE_CHECKING:
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class Locator(TypedDict):
