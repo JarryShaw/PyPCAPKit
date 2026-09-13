@@ -58,15 +58,35 @@ engines include:
 - `pypcap <https://github.com/pynetwork/pypcap>`__
 - `pycapfile <https://github.com/kisom/pypcapfile>`__
 
-Implementation for support of new engines would include adding corresponding
-handler methods and code blocks into :class:`pcapkit.foundation.extraction.Extractor`
-(see support for Scapy, DPKT, and/or PyShark), as well as, the unified auxiliary
-tools located in :mod:`pcapkit.toolkit`.
+.. note::
+
+   The engine interface has since been refactored, so this no longer means adding
+   handler methods to :class:`~pcapkit.foundation.extraction.Extractor`. A new
+   engine subclasses :class:`pcapkit.foundation.engines.engine.Engine` and
+   implements just two methods, :meth:`~pcapkit.foundation.engines.engine.Engine.run`
+   and :meth:`~pcapkit.foundation.engines.engine.Engine.read_frame`; subclassing
+   registers it automatically. See :doc:`ext` for a worked example. What does
+   still apply is the unified auxiliary tools in :mod:`pcapkit.toolkit`, where
+   each engine has a matching module.
 
 Test Cases
 ----------
 
-PyPCAPKit still does not have a systematic testing suite to be bundled with it.
-The only test cases I have worked out are those in the ``/tests`` folder - mostly
-functional tests. As PyPCAPKit is growing bigger and bigger, a comprehensive test
-suite is coming much more of demand for a more reliable development process.
+.. note::
+
+   Largely **done**. There is now a systematic unit test suite under ``tests/``
+   (84 modules), bundled with the distribution, and it runs in CI against Python
+   3.10 through 3.14 (see ``.github/workflows/unit-tests.yml``). The sample
+   captures the runtime, regression and integration tiers read are not tracked in
+   git, so ``examples/samples/make_samples.py`` (``make samples``) rebuilds them
+   from source.
+
+   What remains wanted is coverage rather than infrastructure: the protocols and
+   the registered-but-unhandled type codes listed above have no tests because
+   they have no implementation yet.
+
+Originally: PyPCAPKit still does not have a systematic testing suite to be
+bundled with it. The only test cases I have worked out are those in the
+``/tests`` folder - mostly functional tests. As PyPCAPKit is growing bigger and
+bigger, a comprehensive test suite is coming much more of demand for a more
+reliable development process.
