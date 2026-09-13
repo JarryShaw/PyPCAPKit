@@ -174,6 +174,31 @@ For CLI usage, you will need to install the optional packages:
    # or explicitly...
    pip install pypcapkit emoji
 
+-------
+Testing
+-------
+
+The unit tests need nothing beyond the package itself and the sample captures
+tracked in the repository:
+
+.. code-block:: shell
+
+   make test
+
+The runtime, regression and integration tests additionally read sample captures
+that are **not** tracked (see ``.gitignore``); ``util/make_samples.py``
+reconstructs them, and ``make test-all`` regenerates them before running the
+whole suite:
+
+.. code-block:: shell
+
+   make samples     # write sample/*.pcap and sample/*.pcapng
+   make test-all    # regenerate the fixtures, then run every test
+
+Continuous integration runs the ``make test`` selection, since the fixtures are
+not in the repository. ``tshark`` is only required to exercise the PyShark
+engine, and is not needed by the test suite.
+
 .. _PCAP: https://en.wikipedia.org/wiki/Pcap
 .. _Scapy: https://scapy.net
 .. _DPKT: https://dpkt.readthedocs.io
