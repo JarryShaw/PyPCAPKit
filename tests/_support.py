@@ -7,6 +7,44 @@ import types
 from typing import Iterable
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+SAMPLE_ROOT = ROOT / 'examples' / 'sample'
+REGENERATE_SAMPLES_CMD = 'python examples/samples/make_samples.py'
+
+
+def sample_path(name: str) -> str:
+    """Resolve a sample capture file name to its absolute path.
+
+    The sample captures live in :file:`examples/sample/` under the repository
+    root. Tests go through this helper rather than spelling that directory out,
+    so that the location is recorded in exactly one place and so that the suite
+    does not depend on the working directory :program:`pytest` was invoked from.
+
+    Args:
+        name: Bare file name of the capture, e.g. ``'arp.pcap'`` -- not a path,
+            and in particular not ``'sample/arp.pcap'``.
+
+    Returns:
+        Absolute path to the capture as a :obj:`str`, ready to be handed to
+        :func:`pcapkit.interface.extract` as its ``fin`` argument.
+        :obj:`str` rather than :class:`pathlib.Path` is deliberate:
+        :meth:`Extractor.make_name <pcapkit.foundation.extraction.Extractor.make_name>`
+        branches on ``isinstance(fin, str)`` and treats anything else as an
+        already-open binary IO object.
+
+    Raises:
+        FileNotFoundError: If the capture is not present. Most of the samples
+            are generated rather than committed to the repository, so a fresh
+            clone has to build them first.
+
+    """
+    path = SAMPLE_ROOT / name
+    if not path.is_file():
+        raise FileNotFoundError(
+            f'sample capture {name!r} not found at {path} -- most of the sample '
+            f'captures are generated, not committed; regenerate them by running '
+            f'{REGENERATE_SAMPLES_CMD!r} from {ROOT}'
+        )
+    return str(path)
 
 
 def ensure_package(name: str, path: pathlib.Path) -> types.ModuleType:

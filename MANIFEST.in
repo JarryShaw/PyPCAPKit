@@ -7,7 +7,7 @@ prune .eggs
 prune .github
 prune .venv
 prune docs
-prune sample
+prune examples/sample
 prune temp
 prune test
 

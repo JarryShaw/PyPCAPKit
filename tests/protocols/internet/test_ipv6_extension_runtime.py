@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -17,12 +17,12 @@ class IPv6ExtensionRuntimeTests(unittest.TestCase):
     def _extract(self, sample: str):
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample, fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree', store=True, nofile=True)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
     def test_ipv6_fragment_chain_records_extension_header_metadata(self) -> None:
-        extractor = self._extract('sample/ipv6.pcap')
+        extractor = self._extract('ipv6.pcap')
         frame = extractor.frame[12]
         ipv6 = frame.payload.payload
         frag = list(ipv6.extension_headers.values())[0]
@@ -52,7 +52,7 @@ class IPv6ExtensionRuntimeTests(unittest.TestCase):
     def test_ipv6_fragment_extension_forbids_direct_payload_accessors(self) -> None:
         from pcapkit.utilities.exceptions import UnsupportedCall
 
-        extractor = self._extract('sample/ipv6.pcap')
+        extractor = self._extract('ipv6.pcap')
         frame = extractor.frame[15]
         ipv6 = frame.payload.payload
         frag = list(ipv6.extension_headers.values())[0]

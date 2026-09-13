@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import purge_modules
+from tests._support import purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -17,7 +17,7 @@ class PcapFrameRuntimeTests(unittest.TestCase):
     def test_frame_exposes_expected_public_metadata(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin='sample/in.pcap', fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True)
         frame = extractor.frame[0]
 
         self.assertEqual(frame.name, 'Frame 1')
@@ -30,7 +30,7 @@ class PcapFrameRuntimeTests(unittest.TestCase):
     def test_frame_packet_and_payload_walk_protocol_stack(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin='sample/arp.pcap', fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('arp.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True)
         frame = extractor.frame[0]
 
         self.assertEqual(type(frame.packet).__name__, 'Packet')
@@ -41,7 +41,7 @@ class PcapFrameRuntimeTests(unittest.TestCase):
     def test_frame_info_records_protocol_summary(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin='sample/arp.pcap', fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('arp.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True)
         frame = extractor.frame[0]
 
         self.assertEqual(frame.info.protocols, 'Ethernet:ARP:Raw')

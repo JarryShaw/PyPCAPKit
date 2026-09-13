@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Generate the ``.pcap`` sample captures used by the test suite.
 
-The tests under ``tests/`` extract capture files from ``sample/``, but
+The tests under ``tests/`` extract capture files from ``examples/sample/``, but
 ``.gitignore`` keeps that directory empty except for a handful of committed
 files, so a fresh checkout cannot run them. This module rebuilds the missing
 ``.pcap`` fixtures with :mod:`scapy`, deterministically and without network
@@ -107,10 +107,10 @@ if TYPE_CHECKING:
 
 __all__ = ['generate']
 
-#: Repository root, i.e. the parent of the ``util`` directory holding this file.
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+#: Repository root, i.e. the grandparent of the directory holding this file.
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Default destination directory for the generated captures.
-SAMPLE = ROOT / 'sample'
+SAMPLE = ROOT / 'examples' / 'sample'
 
 #: Capture start time, fixed so that regenerating gives identical files.
 EPOCH = 1500000000.0
@@ -462,7 +462,7 @@ class _Flow:
 
 
 ###############################################################################
-# sample/arp.pcap
+# examples/sample/arp.pcap
 ###############################################################################
 
 
@@ -497,7 +497,7 @@ def _write_arp(dest: 'pathlib.Path') -> 'pathlib.Path':
 
 
 ###############################################################################
-# sample/ipv4.pcap
+# examples/sample/ipv4.pcap
 ###############################################################################
 
 
@@ -534,7 +534,7 @@ def _write_ipv4(dest: 'pathlib.Path') -> 'pathlib.Path':
 
 
 ###############################################################################
-# sample/ipv6.pcap
+# examples/sample/ipv6.pcap
 ###############################################################################
 
 
@@ -604,7 +604,7 @@ def _write_ipv6(dest: 'pathlib.Path') -> 'pathlib.Path':
 
 
 ###############################################################################
-# sample/tcp.pcap
+# examples/sample/tcp.pcap
 ###############################################################################
 
 
@@ -661,7 +661,7 @@ def _write_tcp(dest: 'pathlib.Path') -> 'pathlib.Path':
 
 
 ###############################################################################
-# sample/stream.pcap
+# examples/sample/stream.pcap
 ###############################################################################
 
 #: Service types a Bonjour client looks for when hunting media receivers. The
@@ -717,7 +717,7 @@ def _write_stream(dest: 'pathlib.Path') -> 'pathlib.Path':
 
 
 ###############################################################################
-# sample/http.pcap
+# examples/sample/http.pcap
 ###############################################################################
 
 #: Hosts the generated page load talks to, and the address each resolved to.
@@ -1117,8 +1117,8 @@ def generate(dest: 'pathlib.Path | None' = None) -> 'list[pathlib.Path]':
     """Write the ``.pcap`` sample fixtures.
 
     Args:
-        dest: Destination directory; ``sample/`` under the repository root, if
-            not given. Created if it does not exist.
+        dest: Destination directory; ``examples/sample/`` under the repository
+            root, if not given. Created if it does not exist.
 
     Returns:
         The paths written, in the order they were written.

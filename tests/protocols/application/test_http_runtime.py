@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -17,12 +17,12 @@ class HTTPRuntimeTests(unittest.TestCase):
     def _extract(self, sample: str):
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample, fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree', store=True, nofile=True)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
     def test_http_request_frame_exposes_receipt_and_headers(self) -> None:
-        extractor = self._extract('sample/http.pcap')
+        extractor = self._extract('http.pcap')
         frame = extractor.frame[114]
         http = frame.payload.payload.payload.payload
         receipt = http.info.receipt
@@ -41,7 +41,7 @@ class HTTPRuntimeTests(unittest.TestCase):
         self.assertIsNone(http.info.body)
 
     def test_http_response_frame_exposes_status_headers_and_body(self) -> None:
-        extractor = self._extract('sample/http.pcap')
+        extractor = self._extract('http.pcap')
         frame = extractor.frame[117]
         http = frame.payload.payload.payload.payload
         receipt = http.info.receipt
@@ -59,7 +59,7 @@ class HTTPRuntimeTests(unittest.TestCase):
         self.assertTrue(http.info.body.startswith(b'\x1f\x8b\x08'))
 
     def test_http_request_variants_cover_additional_hosts(self) -> None:
-        extractor = self._extract('sample/http.pcap')
+        extractor = self._extract('http.pcap')
 
         sports_request = extractor.frame[393].payload.payload.payload.payload
         beacon_request = extractor.frame[556].payload.payload.payload.payload
@@ -77,7 +77,7 @@ class HTTPRuntimeTests(unittest.TestCase):
         self.assertIsNone(beacon_request.info.body)
 
     def test_http_response_variants_cover_empty_and_small_bodies(self) -> None:
-        extractor = self._extract('sample/http.pcap')
+        extractor = self._extract('http.pcap')
 
         empty_response = extractor.frame[629].payload.payload.payload.payload
         small_body_response = extractor.frame[587].payload.payload.payload.payload
@@ -94,7 +94,7 @@ class HTTPRuntimeTests(unittest.TestCase):
         self.assertEqual(len(small_body_response.info.body), 35)
 
     def test_malformed_http_payload_falls_back_to_raw(self) -> None:
-        extractor = self._extract('sample/http.pcap')
+        extractor = self._extract('http.pcap')
         frame = extractor.frame[1113]
         tcp = frame.payload.payload.payload
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -17,12 +17,12 @@ class UDPRuntimeTests(unittest.TestCase):
     def _extract(self, sample: str, *, store: bool = True, auto: bool = True):
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample, fout='/tmp/out', format='tree', store=store, nofile=True, auto=auto)
+        extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree', store=store, nofile=True, auto=auto)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
     def test_ipv4_udp_frame_exposes_length_checksum_and_raw_payload(self) -> None:
-        extractor = self._extract('sample/ipv4.pcap', store=False, auto=False)
+        extractor = self._extract('ipv4.pcap', store=False, auto=False)
         frame = next(extractor)
         udp = frame.payload.payload.payload
 
@@ -35,7 +35,7 @@ class UDPRuntimeTests(unittest.TestCase):
         self.assertEqual(type(udp.payload).__name__, 'Raw')
 
     def test_ipv6_udp_mdns_frame_exposes_multicast_ports_and_checksum(self) -> None:
-        extractor = self._extract('sample/stream.pcap')
+        extractor = self._extract('stream.pcap')
         frame = extractor.frame[1]
         udp = frame.payload.payload.payload
 

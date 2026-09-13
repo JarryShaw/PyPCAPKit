@@ -30,7 +30,8 @@ logger.addHandler(handler)
 
 def get_long_description() -> "str":
     """Extract description from README.rst, for PyPI's usage."""
-    with open("README.rst", encoding="utf-8") as file:
+    readme = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.rst")
+    with open(readme, encoding="utf-8") as file:
         long_description = file.read()
     return long_description
 

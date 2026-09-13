@@ -69,10 +69,10 @@ pipenv:
 vendor:
 	pipenv run pcapkit-vendor
 
-# Sample captures under sample/ are not tracked (see .gitignore); regenerate the
-# ones the runtime, regression and integration tests read.
+# Sample captures under examples/sample/ are not tracked (see .gitignore);
+# regenerate the ones the runtime, regression and integration tests read.
 samples:
-	pipenv run python util/make_samples.py
+	pipenv run python examples/samples/make_samples.py
 
 # Mirrors the selection run by .github/workflows/unit-tests.yml, i.e. the tests
 # that need no sample captures beyond the committed ones.
@@ -99,7 +99,7 @@ docs-autobuild:
 isort:
 	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit $(wildcard temp/sort.py)
 	pipenv run isort -l100 -ppcapkit pcapkit/{const,vendor}/*/*.py
-	pipenv run isort -l100 -ppcapkit util/*.py
+	pipenv run isort -l100 -ppcapkit util/*.py examples/samples/*.py
 
 vermin:
 	mkdir -p temp

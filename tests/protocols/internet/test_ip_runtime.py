@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -17,12 +17,12 @@ class InternetProtocolRuntimeTests(unittest.TestCase):
     def _extract(self, sample: str):
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample, fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree', store=True, nofile=True)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
     def test_ipv4_packet_exposes_addresses_ttl_and_udp_payload(self) -> None:
-        extractor = self._extract('sample/ipv4.pcap')
+        extractor = self._extract('ipv4.pcap')
         frame = extractor.frame[0]
         ipv4 = frame.payload.payload
         udp = ipv4.payload
@@ -38,7 +38,7 @@ class InternetProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(type(udp.payload).__name__, 'Raw')
 
     def test_ipv6_icmp_payload_falls_back_to_raw_with_protocol_hint(self) -> None:
-        extractor = self._extract('sample/ipv6.pcap')
+        extractor = self._extract('ipv6.pcap')
         frame = extractor.frame[2]
         ipv6 = frame.payload.payload
         raw = ipv6.payload
@@ -53,7 +53,7 @@ class InternetProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(raw.info.protocol.name, 'IPv6_ICMP')
 
     def test_ipv6_udp_packet_exposes_multicast_and_reply_addresses(self) -> None:
-        extractor = self._extract('sample/stream.pcap')
+        extractor = self._extract('stream.pcap')
         frame = extractor.frame[1]
         ipv6 = frame.payload.payload
         udp = ipv6.payload
@@ -66,7 +66,7 @@ class InternetProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(type(udp.payload).__name__, 'Raw')
 
     def test_sample_in_tcp_frames_expose_fin_ack_and_null_payload(self) -> None:
-        extractor = self._extract('sample/in.pcap')
+        extractor = self._extract('in.pcap')
 
         server_fin = extractor.frame[2].payload.payload.payload
         client_ack = extractor.frame[3].payload.payload.payload
@@ -91,7 +91,7 @@ class InternetProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(type(client_fin.payload).__name__, 'NoPayload')
 
     def test_sample_in_udp_frame_exposes_broadcast_destination_and_raw_payload(self) -> None:
-        extractor = self._extract('sample/in.pcap')
+        extractor = self._extract('in.pcap')
         frame = extractor.frame[5]
         ipv4 = frame.payload.payload
         udp = ipv4.payload

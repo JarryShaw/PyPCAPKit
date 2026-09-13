@@ -2,7 +2,7 @@
 """Provision the ``.pcapng`` sample fixtures used by the test suite.
 
 The test suite (``tests/protocols/test_pcapng_regression.py``) reads five
-PCAP-NG captures out of ``sample/`` that :file:`.gitignore` deliberately keeps
+PCAP-NG captures out of ``examples/sample/`` that :file:`.gitignore` deliberately keeps
 out of the repository. This module puts them back on any machine, without a
 checkout of anything private, by two routes:
 
@@ -13,7 +13,7 @@ checkout of anything private, by two routes:
   console output and the return value say so rather than pretending otherwise.
 * **Synthesised** -- written byte by byte by :class:`_Blocks` below, with no
   network access whatsoever, from packet payloads carried in the committed
-  ``sample/dhcp.pcapng`` fixture. Generation is deterministic: the same input
+  ``examples/sample/dhcp.pcapng`` fixture. Generation is deterministic: the same input
   tree always produces the same bytes, so a second run is a no-op.
 
 Which fixture comes from where:
@@ -33,7 +33,7 @@ Provenance and licensing of the downloaded captures
 
 Both downloads come from the Wireshark source tree's ``test/captures``
 directory (https://gitlab.com/wireshark/wireshark, mirrored on GitHub), which
-is distributed under the GNU GPL v2 or later. They are fetched into ``sample/``,
+is distributed under the GNU GPL v2 or later. They are fetched into ``examples/sample/``,
 which :file:`.gitignore` excludes, so this project never redistributes them --
 each machine fetches its own copy. ``many_interfaces.pcapng`` does not exist
 upstream under that name; upstream ships a three-file ring-buffer set, and the
@@ -41,7 +41,7 @@ first member (``many_interfaces.pcapng.1``) is a complete, self-contained
 PCAP-NG file, so that is what is fetched and stored under the name the test
 expects.
 
-The committed ``sample/dhcp.pcapng`` is byte-identical to upstream's
+The committed ``examples/sample/dhcp.pcapng`` is byte-identical to upstream's
 ``test/captures/dhcp.pcapng`` (SHA-256 ``e47f667c...5a1666``), which is where
 the synthesised DHCP payloads come from.
 
@@ -117,8 +117,8 @@ Usage
 
 .. code-block:: shell
 
-   python util/samples_pcapng.py            # write into <repo root>/sample
-   python util/samples_pcapng.py /tmp/fix    # write somewhere else
+   python examples/samples/pcapng.py           # write into examples/sample
+   python examples/samples/pcapng.py /tmp/fix   # write somewhere else
 
 """
 
@@ -138,10 +138,10 @@ if TYPE_CHECKING:
 
 __all__ = ['generate']
 
-#: Repository root, i.e. the parent of the directory holding this script.
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+#: Repository root, i.e. the grandparent of the directory holding this script.
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Default destination directory for the fixtures.
-SAMPLE_DIR = ROOT / 'sample'
+SAMPLE_DIR = ROOT / 'examples' / 'sample'
 #: Committed fixture the synthesised DHCP payloads are lifted from.
 DHCP_SOURCE = SAMPLE_DIR / 'dhcp.pcapng'
 
@@ -524,7 +524,7 @@ def build_dhcp(endian: 'str') -> 'bytes':
         (OPT_COMMENT, f'DHCP exchange in a {writer.name} section'.encode('utf-8')),
         (SHB_HARDWARE, b'synthetic'),
         (SHB_OS, b'synthetic capture host'),
-        (SHB_USERAPPL, b'util/samples_pcapng.py'),
+        (SHB_USERAPPL, b'examples/samples/pcapng.py'),
     ])]
     blocks.append(writer.idb(LINKTYPE_ETHERNET, 0x0004_0000, [
         (IF_NAME, b'eth0'),
@@ -559,7 +559,7 @@ def build_test() -> 'bytes':
         (OPT_COMMENT, b'auxiliary PCAP-NG block types, section 1 of 2'),
         (SHB_HARDWARE, b'synthetic'),
         (SHB_OS, b'synthetic capture host'),
-        (SHB_USERAPPL, b'util/samples_pcapng.py'),
+        (SHB_USERAPPL, b'examples/samples/pcapng.py'),
     ])]
     blocks.append(writer.idb(LINKTYPE_ETHERNET, 0x0004_0000,
                              _interface_profile(writer, 'eth0', 'primary Ethernet interface',
@@ -602,7 +602,7 @@ def build_test() -> 'bytes':
     # Second section, with its own interface table.
     blocks.append(writer.shb([
         (OPT_COMMENT, b'auxiliary PCAP-NG block types, section 2 of 2'),
-        (SHB_USERAPPL, b'util/samples_pcapng.py'),
+        (SHB_USERAPPL, b'examples/samples/pcapng.py'),
     ]))
     blocks.append(writer.idb(LINKTYPE_ETHERNET, 0x0004_0000, [
         (IF_NAME, b'eth1'),
@@ -650,7 +650,7 @@ def build_many_interfaces() -> 'bytes':
         (OPT_COMMENT, f'{len(interfaces)} interfaces in one section'.encode('utf-8')),
         (SHB_HARDWARE, b'synthetic'),
         (SHB_OS, b'synthetic capture host'),
-        (SHB_USERAPPL, b'util/samples_pcapng.py'),
+        (SHB_USERAPPL, b'examples/samples/pcapng.py'),
     ])]
     for index, (name, description, linktype) in enumerate(interfaces):
         blocks.append(writer.idb(linktype, 0x0004_0000, [
@@ -703,7 +703,7 @@ def build_profile() -> 'bytes':
         (OPT_COMMENT, b'interface profile and statistics'),
         (SHB_HARDWARE, b'synthetic'),
         (SHB_OS, b'synthetic capture host'),
-        (SHB_USERAPPL, b'util/samples_pcapng.py'),
+        (SHB_USERAPPL, b'examples/samples/pcapng.py'),
     ])]
     blocks.append(writer.idb(LINKTYPE_ETHERNET, 0x0004_0000,
                              _interface_profile(writer, 'eth0',
