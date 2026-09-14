@@ -207,11 +207,16 @@ class BitField(_TextField[Dict[str, Any]]):
             Processed field value.
 
         """
-        buffer = bytearray(self.length * 8)
+        # NOTE: The buffer holds one ASCII digit per bit, so it must be seeded with
+        # ``b'0'`` rather than with NUL bytes -- a zero bit written by the loop below
+        # is the *character* ``b'0'``, which is itself non-zero, so a truthiness test
+        # over the buffer cannot tell a cleared bit from a set one and would report
+        # every named bit as set.
+        buffer = bytearray(b'0' * (self.length * 8))
         for name, (start, len) in self._namespace.items():
             end = start + len
             buffer[start:end] = f'{value[name]:0{end - start}b}'.encode()
-        return int(b''.join(map(lambda x: b'1' if x else b'0', buffer)), 2).to_bytes(self.length, 'big')
+        return int(buffer, 2).to_bytes(self.length, 'big')
 
     def post_process(self, value: 'bytes', packet: 'dict[str, Any]') -> 'dict[str, Any]':  # pylint: disable=unused-argument
         """Process field value after parsing (unpacked).
