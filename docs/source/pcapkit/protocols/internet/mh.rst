@@ -51,6 +51,12 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_msg_bu
    .. automethod:: _read_msg_ba
    .. automethod:: _read_msg_be
+   .. automethod:: _read_msg_fbu
+   .. automethod:: _read_msg_fback
+   .. automethod:: _read_msg_fna
+   .. automethod:: _read_msg_emh
+   .. automethod:: _read_msg_hi
+   .. automethod:: _read_msg_hack
 
    .. automethod:: _make_msg_unknown
    .. automethod:: _make_msg_brr
@@ -61,6 +67,12 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_msg_bu
    .. automethod:: _make_msg_ba
    .. automethod:: _make_msg_be
+   .. automethod:: _make_msg_fbu
+   .. automethod:: _make_msg_fback
+   .. automethod:: _make_msg_fna
+   .. automethod:: _make_msg_emh
+   .. automethod:: _make_msg_hi
+   .. automethod:: _make_msg_hack
 
    .. automethod:: _read_mh_options
    .. automethod:: _read_opt_none
@@ -81,6 +93,9 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_opt_phkt
    .. automethod:: _read_opt_ct_init
    .. automethod:: _read_opt_ct
+   .. automethod:: _read_opt_exp
+   .. automethod:: _read_opt_badf
+   .. automethod:: _read_opt_ipv6_ap
 
    .. automethod:: _make_mh_options
    .. automethod:: _make_opt_none
@@ -101,6 +116,9 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_opt_phkt
    .. automethod:: _make_opt_ct_init
    .. automethod:: _make_opt_ct
+   .. automethod:: _make_opt_exp
+   .. automethod:: _make_opt_badf
+   .. automethod:: _make_opt_ipv6_ap
 
    .. automethod:: _read_cga_extensions
    .. automethod:: _read_ext_none
@@ -136,6 +154,16 @@ Auxiliary Data
       :type: int
 
       Fraction of a second.
+
+.. autoclass:: pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.internet.mh.IPv6AddressPrefixCode
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Header Schemas
 --------------
@@ -238,6 +266,18 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.internet.mh.ExperimentalMobilityOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.BADFOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv6AddressPrefixOption
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.schema.internet.mh.UnknownMessage
    :members:
    :show-inheritance:
@@ -274,6 +314,30 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.internet.mh.FastBindingUpdateMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.FastBindingAcknowledgmentMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.FastNeighborAdvertisementMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.ExperimentalMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.HandoverInitiateMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.HandoverAcknowledgeMessage
+   :members:
+   :show-inheritance:
+
 Type Stubs
 ~~~~~~~~~~
 
@@ -293,6 +357,26 @@ Type Stubs
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessageFlags
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.FastBindingUpdateMessageFlags
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.FastBindingAcknowledgmentMessageFlags
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.HandoverInitiateMessageFlags
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.HandoverAcknowledgeMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
@@ -400,6 +484,18 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.data.internet.mh.ExperimentalMobilityOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.BADFOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.IPv6AddressPrefixOption
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.data.internet.mh.UnknownMessage
    :members:
    :show-inheritance:
@@ -433,6 +529,30 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.BindingErrorMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.FastBindingUpdateMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.FastBindingAcknowledgmentMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.FastNeighborAdvertisementMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.ExperimentalMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.HandoverInitiateMessage
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.HandoverAcknowledgeMessage
    :members:
    :show-inheritance:
 

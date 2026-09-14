@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import io
 from ipaddress import ip_address, ip_network
 import importlib.util
 from types import SimpleNamespace
@@ -798,6 +799,640 @@ class MHUnitTests(unittest.TestCase):
             0,
             tz=datetime.timezone.utc,
         ))
+
+    def test_mh_fmipv6_message_readers_and_constructors(self) -> None:
+        from pcapkit.const.mh.handover_ack_status import HandoverACKStatus
+        from pcapkit.const.mh.handover_initiate_status import HandoverInitiateStatus
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.mh import MH, FastBindingAcknowledgmentStatus
+
+        proto = object.__new__(MH)
+        proto._read_mh_options = mock.Mock(return_value='opts')
+        proto._make_mh_options = mock.Mock(return_value=['made'])
+
+        def header(type_: Packet) -> SimpleNamespace:
+            return SimpleNamespace(next=TransType.UDP, length=5, type=type_, chksum=b'\x12\x34')
+
+        # RFC 5568, section 6.2.2 -- FBU is identical to the RFC 6275 BU, so the
+        # lifetime is carried in units of 4 seconds.
+        fbu = proto._read_msg_fbu(SimpleNamespace(seq=0x1234,
+                                                 flags={'A': 1, 'H': 1, 'L': 0, 'K': 1},
+                                                 lifetime=10, options=[]),
+                                  header=header(Packet.Fast_Binding_Update))
+        self.assertEqual(fbu.seq, 0x1234)
+        self.assertTrue(fbu.ack)
+        self.assertTrue(fbu.home)
+        self.assertFalse(fbu.lla_compat)
+        self.assertTrue(fbu.key_mngt)
+        self.assertEqual(fbu.lifetime, datetime.timedelta(seconds=40))
+        self.assertEqual(fbu.options, 'opts')
+
+        # RFC 5568, section 6.2.3 -- status 1 is "FBU accepted but NCoA is invalid",
+        # which is *not* what StatusCode(1) means, hence the module-local enum.
+        fback = proto._read_msg_fback(SimpleNamespace(status=1, flags={'K': 1}, seq=0x1234,
+                                                     lifetime=10, options=[]),
+                                     header=header(Packet.Fast_Binding_Acknowledgment))
+        self.assertEqual(fback.status, 1)
+        self.assertIs(fback.status,
+                      FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid)
+        self.assertNotIsInstance(fback.status, type(HandoverACKStatus.Administratively_prohibited))
+        self.assertTrue(fback.key_mngt)
+        self.assertEqual(fback.seq, 0x1234)
+        self.assertEqual(fback.lifetime, datetime.timedelta(seconds=40))
+
+        # RFC 4068, section 6.3.3 -- two reserved octets, then mobility options.
+        fna = proto._read_msg_fna(SimpleNamespace(options=[]),
+                                  header=header(Packet.Fast_Neighbor_Advertisement))
+        self.assertEqual(fna.options, 'opts')
+        self.assertEqual(fna.type, Packet.Fast_Neighbor_Advertisement)
+
+        # RFC 5096, section 3 -- opaque message data, no fields of its own.
+        emh = proto._read_msg_emh(SimpleNamespace(data=b'\xde\xad\xbe\xef'),
+                                  header=header(Packet.Experimental_Mobility_Header))
+        self.assertEqual(emh.data, b'\xde\xad\xbe\xef')
+
+        # RFC 5568, section 6.2.1.1 and RFC 5949, section 6.1.1.
+        hi = proto._read_msg_hi(SimpleNamespace(
+            seq=0x0102,
+            flags={'S': 1, 'U': 0, 'P': 1, 'F': 0},
+            code=HandoverInitiateStatus.FBU_whose_source_IP_address_is_not_PCoA,
+            options=[],
+        ), header=header(Packet.Handover_Initiate_Message))
+        self.assertEqual(hi.seq, 0x0102)
+        self.assertTrue(hi.assign)
+        self.assertFalse(hi.buffer)
+        self.assertTrue(hi.proxy)
+        self.assertFalse(hi.forward)
+        self.assertEqual(hi.code, HandoverInitiateStatus.FBU_whose_source_IP_address_is_not_PCoA)
+
+        # RFC 5568, section 6.2.1.2 and RFC 5949, section 6.1.2.
+        hack = proto._read_msg_hack(SimpleNamespace(
+            seq=0x0102,
+            flags={'U': 1, 'P': 0, 'F': 1},
+            code=HandoverACKStatus.Handover_Accepted_NCoA_assigned,
+            options=[],
+        ), header=header(Packet.Handover_Acknowledge_Message))
+        self.assertEqual(hack.seq, 0x0102)
+        self.assertTrue(hack.buffer)
+        self.assertFalse(hack.proxy)
+        self.assertTrue(hack.forward)
+        self.assertEqual(hack.code, HandoverACKStatus.Handover_Accepted_NCoA_assigned)
+
+        # constructors, both from keyword arguments and from a data model
+        made_fbu = proto._make_msg_fbu(None, seq=7, ack=True, home=True, key_mngt=True,
+                                       lifetime=datetime.timedelta(seconds=40), options=[])
+        self.assertEqual(made_fbu.seq, 7)
+        self.assertEqual(made_fbu.lifetime, 10)
+        self.assertEqual(made_fbu.flags, {'A': True, 'H': True, 'L': False, 'K': True})
+        self.assertEqual(proto._make_msg_fbu(SimpleNamespace(
+            seq=8, ack=False, home=True, lla_compat=True, key_mngt=False,
+            lifetime=datetime.timedelta(seconds=8), options=[],
+        )).seq, 8)
+
+        made_fback = proto._make_msg_fback(None, status=131, key_mngt=True, seq=9, lifetime=40,
+                                           options=[])
+        self.assertEqual(made_fback.status, 131)
+        self.assertEqual(made_fback.lifetime, 10)
+        self.assertEqual(proto._make_msg_fback(
+            None, status=FastBindingAcknowledgmentStatus.Insufficient_resources, options=[],
+        ).status, 130)
+        self.assertEqual(proto._make_msg_fback(
+            None, status='Administratively_prohibited', options=[],
+            status_namespace=FastBindingAcknowledgmentStatus,
+        ).status, 129)
+        self.assertEqual(proto._make_msg_fback(SimpleNamespace(
+            status=FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid,
+            key_mngt=False, seq=10, lifetime=datetime.timedelta(seconds=8), options=[],
+        )).seq, 10)
+
+        self.assertEqual(proto._make_msg_fna(None, options=[]).options, ['made'])
+        self.assertEqual(proto._make_msg_fna(SimpleNamespace(options=[])).options, ['made'])
+
+        self.assertEqual(proto._make_msg_emh(None).data, b'\x00\x00')
+        self.assertEqual(proto._make_msg_emh(None, data=b'raw').data, b'raw')
+        self.assertEqual(proto._make_msg_emh(SimpleNamespace(data=b'model')).data, b'model')
+
+        made_hi = proto._make_msg_hi(None, seq=11, assign=True, buffer=False, proxy=True,
+                                     forward=False, code=1, options=[])
+        self.assertEqual(made_hi.seq, 11)
+        self.assertEqual(made_hi.code, HandoverInitiateStatus.FBU_whose_source_IP_address_is_not_PCoA)
+        self.assertEqual(made_hi.flags, {'S': True, 'U': False, 'P': True, 'F': False})
+        self.assertEqual(proto._make_msg_hi(SimpleNamespace(
+            seq=12, assign=False, buffer=True, proxy=False, forward=True,
+            code=HandoverInitiateStatus.All_available_context_transferred, options=[],
+        )).seq, 12)
+
+        made_hack = proto._make_msg_hack(None, seq=13, buffer=True, proxy=False, forward=True,
+                                         code=130, options=[])
+        self.assertEqual(made_hack.seq, 13)
+        self.assertEqual(made_hack.code, HandoverACKStatus.Insufficient_resources)
+        self.assertEqual(made_hack.flags, {'U': True, 'P': False, 'F': True})
+        self.assertEqual(proto._make_msg_hack(SimpleNamespace(
+            seq=14, buffer=False, proxy=True, forward=False,
+            code=HandoverACKStatus.Handover_Accepted_use_PCoA, options=[],
+        )).seq, 14)
+
+    def test_mh_fmipv6_option_readers_constructors_and_guards(self) -> None:
+        from pcapkit.const.mh.option import Option
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.data.internet import mh as data
+        from pcapkit.protocols.internet.mh import MH, IPv6AddressPrefixCode
+        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(MH)
+        options = OrderedMultiDict()
+
+        # RFC 5096, section 4 -- opaque experimental data.
+        exp = proto._read_opt_exp(
+            schema.ExperimentalMobilityOption(type=Option.Experimental_Mobility_Option,
+                                              length=6, data=b'\x01\x02\x03\x04\x05\x06'),
+            options=options,
+        )
+        self.assertEqual(exp.data, b'\x01\x02\x03\x04\x05\x06')
+        self.assertEqual(exp.length, 8)
+
+        # RFC 5568, section 6.4.5 -- the option length counts the authenticator only,
+        # so the reported total length is 6 bytes longer (2 header + 4 SPI).
+        badf = proto._read_opt_badf(
+            schema.BADFOption(type=Option.Binding_Authorization_Data_for_FMIPv6,
+                              length=12, spi=0xdeadbeef, data=bytes(range(12))),
+            options=options,
+        )
+        self.assertEqual(badf.spi, 0xdeadbeef)
+        self.assertEqual(badf.data, bytes(range(12)))
+        self.assertEqual(badf.length, 18)
+
+        # RFC 5568, section 6.4.2 (type corrected to 34 by errata ID 1816).
+        apfx = proto._read_opt_ipv6_ap(
+            schema.IPv6AddressPrefixOption(type=Option.Mobility_Header_IPv6_Address_Prefix,
+                                           length=18, code=4, prefix_length=64,
+                                           address='2001:db8:2::'),
+            options=options,
+        )
+        self.assertEqual(apfx.code, 4)
+        self.assertIs(apfx.code, IPv6AddressPrefixCode.NAR_Prefix)
+        self.assertEqual(apfx.prefix_length, 64)
+        self.assertEqual(str(apfx.address), '2001:db8:2::')
+        self.assertEqual(apfx.length, 20)
+
+        for reader, bad_schema in [
+            # an authenticator of zero bytes cannot authenticate anything
+            (proto._read_opt_badf, schema.BADFOption(
+                type=Option.Binding_Authorization_Data_for_FMIPv6,
+                length=0, spi=1, data=b'')),
+            # the address/prefix option is a fixed 18 bytes of option data
+            (proto._read_opt_ipv6_ap, schema.IPv6AddressPrefixOption(
+                type=Option.Mobility_Header_IPv6_Address_Prefix,
+                length=17, code=2, prefix_length=64, address='2001:db8:2::')),
+            # "The value ranges from 0 to 128", RFC 5568, section 6.4.2
+            (proto._read_opt_ipv6_ap, schema.IPv6AddressPrefixOption(
+                type=Option.Mobility_Header_IPv6_Address_Prefix,
+                length=18, code=2, prefix_length=129, address='2001:db8:2::')),
+        ]:
+            with self.assertRaises(ProtocolError):
+                reader(bad_schema, options=options)
+
+        self.assertEqual(proto._make_opt_exp(Option.Experimental_Mobility_Option,
+                                             data=b'\x01\x02').length, 2)
+        self.assertEqual(proto._make_opt_exp(
+            Option.Experimental_Mobility_Option,
+            data.ExperimentalMobilityOption(type=Option.Experimental_Mobility_Option,
+                                            length=4, data=b'\x03\x04'),
+        ).data, b'\x03\x04')
+
+        made_badf = proto._make_opt_badf(Option.Binding_Authorization_Data_for_FMIPv6,
+                                         spi=0xdeadbeef, data=bytes(range(12)))
+        self.assertEqual(made_badf.length, 12)
+        self.assertEqual(made_badf.spi, 0xdeadbeef)
+        self.assertEqual(proto._make_opt_badf(
+            Option.Binding_Authorization_Data_for_FMIPv6,
+            data.BADFOption(type=Option.Binding_Authorization_Data_for_FMIPv6,
+                            length=18, spi=7, data=bytes(range(12))),
+        ).spi, 7)
+        with self.assertRaises(ProtocolError):
+            proto._make_opt_badf(Option.Binding_Authorization_Data_for_FMIPv6, data=b'')
+
+        made_apfx = proto._make_opt_ipv6_ap(Option.Mobility_Header_IPv6_Address_Prefix,
+                                            code=1, prefix_length=128, address='2001:db8:1::2')
+        self.assertEqual(made_apfx.length, 18)
+        self.assertEqual(made_apfx.code, 1)
+        self.assertEqual(proto._make_opt_ipv6_ap(
+            Option.Mobility_Header_IPv6_Address_Prefix,
+            code=IPv6AddressPrefixCode.NAR_IP_address,
+        ).code, 3)
+        self.assertEqual(proto._make_opt_ipv6_ap(
+            Option.Mobility_Header_IPv6_Address_Prefix, code='Old_Care_of_Address',
+            code_namespace=IPv6AddressPrefixCode,
+        ).code, 1)
+        self.assertEqual(proto._make_opt_ipv6_ap(
+            Option.Mobility_Header_IPv6_Address_Prefix,
+            data.IPv6AddressPrefixOption(type=Option.Mobility_Header_IPv6_Address_Prefix,
+                                         length=20, code=3, prefix_length=64,
+                                         address=ip_address('2001:db8:3::')),
+        ).code, 3)
+        with self.assertRaises(ProtocolError):
+            proto._make_opt_ipv6_ap(Option.Mobility_Header_IPv6_Address_Prefix,
+                                    prefix_length=129)
+
+    def test_mh_fmipv6_wire_format_matches_rfc(self) -> None:
+        """Parse hand-written byte strings laid out straight from the RFC figures."""
+        from pcapkit.const.mh.handover_ack_status import HandoverACKStatus
+        from pcapkit.const.mh.handover_initiate_status import HandoverInitiateStatus
+        from pcapkit.const.mh.lla_code import LLACode
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.mh import (MH, FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode)
+
+        def parse(hexstr: str) -> object:
+            raw = bytes.fromhex(hexstr)
+            self.assertEqual(len(raw) % 8, 0, 'mobility header must be 8-octet aligned')
+            return MH(io.BytesIO(raw), len(raw), extension=True).info
+
+        badf_type = Option.Binding_Authorization_Data_for_FMIPv6
+        apfx_type = Option.Mobility_Header_IPv6_Address_Prefix
+        acoa_type = Option.Alternate_Care_of_Address
+        mhlla_type = Option.Mobility_Header_Link_Layer_Address_option
+
+        with self.subTest('FBU, RFC 5568 section 6.2.2'):
+            fbu = parse(
+                '1105' '08' '00' '1234'                          # next, hdr len, type, resv, cksum
+                '1234' 'd000' '000a'                             # seq, A|H|L|K + resv, lifetime
+                '0310' '20010db8000100000000000000000002'         # alternate care-of address
+                '150c' 'deadbeef' '000102030405060708090a0b'      # BADF: SPI + authenticator
+            )
+            self.assertEqual(fbu.next, TransType.UDP)
+            self.assertEqual(fbu.type, Packet.Fast_Binding_Update)
+            self.assertEqual(fbu.length, 48)
+            self.assertEqual(fbu.seq, 0x1234)
+            self.assertTrue(fbu.ack)
+            self.assertTrue(fbu.home)
+            self.assertFalse(fbu.lla_compat)
+            self.assertTrue(fbu.key_mngt)
+            self.assertEqual(fbu.lifetime, datetime.timedelta(seconds=40))
+            self.assertEqual(str(fbu.options[acoa_type].address), '2001:db8:1::2')
+            self.assertEqual(fbu.options[badf_type].spi, 0xdeadbeef)
+            self.assertEqual(fbu.options[badf_type].data, bytes(range(12)))
+            self.assertEqual(fbu.options[badf_type].length, 18)
+
+        with self.subTest('FBack, RFC 5568 section 6.2.3'):
+            fback = parse(
+                '1105' '09' '00' '1234'
+                '01' '80' '1234' '000a'                          # status, K + resv, seq, lifetime
+                '0310' '20010db8000100000000000000000002'
+                '150c' '00000000' '000102030405060708090a0b'      # SPI 0: SEND-based handover key
+            )
+            self.assertEqual(fback.type, Packet.Fast_Binding_Acknowledgment)
+            self.assertIs(
+                fback.status,
+                FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid,
+            )
+            self.assertTrue(fback.key_mngt)
+            self.assertEqual(fback.seq, 0x1234)
+            self.assertEqual(fback.lifetime, datetime.timedelta(seconds=40))
+            self.assertEqual(fback.options[badf_type].spi, 0)
+
+        with self.subTest('FNA, RFC 4068 section 6.3.3'):
+            fna = parse(
+                '1102' '0a' '00' '1234'
+                '0000'                                            # reserved
+                '0707' '02' '001122334455'                         # MH-LLA, code 2 = LLA of the MN
+                '0105' '0000000000'                                # PadN
+            )
+            self.assertEqual(fna.type, Packet.Fast_Neighbor_Advertisement)
+            self.assertEqual(fna.length, 24)
+            self.assertEqual(fna.options[mhlla_type].code, LLACode.MH)
+            self.assertEqual(fna.options[mhlla_type].lla, b'\x00\x11\x22\x33\x44\x55')
+            self.assertEqual(fna.options[Option.PadN].length, 7)
+
+        with self.subTest('Experimental Mobility Header, RFC 5096 section 3'):
+            emh = parse('1101' '0b' '00' '1234' '00010203040506070809')
+            self.assertEqual(emh.type, Packet.Experimental_Mobility_Header)
+            self.assertEqual(emh.length, 16)
+            self.assertEqual(emh.data, bytes(range(10)))
+
+        with self.subTest('HI, RFC 5568 section 6.2.1.1 / RFC 5949 section 6.1.1'):
+            hi = parse(
+                '1104' '0e' '00' '1234'
+                '0102' 'c0' '01'                                   # seq, S|U|P|F + resv, code
+                '2212' '02' '40' '20010db8000200000000000000000000'  # addr/prefix: new CoA, /64
+                '0108' '0000000000000000'                           # PadN
+            )
+            self.assertEqual(hi.type, Packet.Handover_Initiate_Message)
+            self.assertEqual(hi.length, 40)
+            self.assertEqual(hi.seq, 0x0102)
+            self.assertTrue(hi.assign)
+            self.assertTrue(hi.buffer)
+            self.assertFalse(hi.proxy)
+            self.assertFalse(hi.forward)
+            self.assertEqual(hi.code, HandoverInitiateStatus.FBU_whose_source_IP_address_is_not_PCoA)
+            self.assertIs(hi.options[apfx_type].code, IPv6AddressPrefixCode.New_Care_of_Address)
+            self.assertEqual(hi.options[apfx_type].prefix_length, 64)
+            self.assertEqual(str(hi.options[apfx_type].address), '2001:db8:2::')
+            self.assertEqual(hi.options[apfx_type].length, 20)
+
+        with self.subTest('HAck, RFC 5568 section 6.2.1.2 / RFC 5949 section 6.1.2'):
+            hack = parse(
+                '1104' '0f' '00' '1234'
+                '0102' 'a0' '02'                                   # seq, U|P|F + resv, code
+                '2212' '02' '80' '20010db8000200000000000000000005'
+                '0108' '0000000000000000'
+            )
+            self.assertEqual(hack.type, Packet.Handover_Acknowledge_Message)
+            self.assertEqual(hack.seq, 0x0102)
+            self.assertTrue(hack.buffer)
+            self.assertFalse(hack.proxy)
+            self.assertTrue(hack.forward)
+            self.assertEqual(hack.code, HandoverACKStatus.Handover_Accepted_NCoA_assigned)
+            self.assertEqual(hack.options[apfx_type].prefix_length, 128)
+            self.assertEqual(str(hack.options[apfx_type].address), '2001:db8:2::5')
+
+        with self.subTest('Experimental Mobility option, RFC 5096 section 4'):
+            brr = parse('1101' '00' '00' '1234' '0000' '1206' '010203040506')
+            exp = brr.options[Option.Experimental_Mobility_Option]
+            self.assertEqual(exp.data, b'\x01\x02\x03\x04\x05\x06')
+            self.assertEqual(exp.length, 8)
+
+    def test_mh_fmipv6_round_trip_is_byte_identical(self) -> None:
+        """``make`` then ``read`` then ``make`` again must reproduce the same bytes."""
+        from pcapkit.const.mh.handover_ack_status import HandoverACKStatus
+        from pcapkit.const.mh.handover_initiate_status import HandoverInitiateStatus
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.mh import (MH, FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode)
+
+        badf_type = Option.Binding_Authorization_Data_for_FMIPv6
+        apfx_type = Option.Mobility_Header_IPv6_Address_Prefix
+        acoa_type = Option.Alternate_Care_of_Address
+        mhlla_type = Option.Mobility_Header_Link_Layer_Address_option
+        exp_type = Option.Experimental_Mobility_Option
+
+        # NOTE: every case below is chosen to be 8-octet aligned without a padding
+        # option, since ``_make_opt_pad`` round-trips a ``PadN`` data model two bytes
+        # too long -- a pre-existing defect of the RFC 6275 padding option, outside
+        # the FMIPv6 message and option types under test here.
+        cases = [
+            ('FBU', Packet.Fast_Binding_Update, {
+                'seq': 0x1234, 'ack': True, 'home': True, 'lla_compat': False,
+                'key_mngt': True, 'lifetime': 40,
+                'options': [(acoa_type, {'address': '2001:db8:1::2'}),
+                            (badf_type, {'spi': 0xdeadbeef, 'data': bytes(range(12))})],
+            }, {'seq': 0x1234, 'ack': True, 'home': True, 'lla_compat': False,
+                'key_mngt': True, 'lifetime': datetime.timedelta(seconds=40)}),
+            # the status goes in as an enum member and must come back as one
+            ('FBack', Packet.Fast_Binding_Acknowledgment, {
+                'status': FastBindingAcknowledgmentStatus.Incorrect_interface_identifier_length,
+                'key_mngt': True, 'seq': 0x1234, 'lifetime': 40,
+                'options': [(acoa_type, {'address': '2001:db8:1::2'}),
+                            (badf_type, {'spi': 0, 'data': bytes(range(12))})],
+            }, {'status': FastBindingAcknowledgmentStatus.Incorrect_interface_identifier_length,
+                'key_mngt': True, 'seq': 0x1234,
+                'lifetime': datetime.timedelta(seconds=40)}),
+            # ... and as a bare integer, for a value the RFC leaves unassigned
+            ('FBack, unassigned status', Packet.Fast_Binding_Acknowledgment, {
+                'status': 77, 'key_mngt': False, 'seq': 1, 'lifetime': 4,
+                'options': [(acoa_type, {'address': '2001:db8:1::3'}),
+                            (badf_type, {'spi': 1, 'data': bytes(range(12))})],
+            }, {'status': 77, 'key_mngt': False, 'seq': 1,
+                'lifetime': datetime.timedelta(seconds=4)}),
+            ('FNA', Packet.Fast_Neighbor_Advertisement, {
+                'options': [(mhlla_type, {'address': b'\x00\x11\x22\x33\x44'})],
+            }, {}),
+            ('Experimental', Packet.Experimental_Mobility_Header, {
+                'data': bytes(range(10)),
+            }, {'data': bytes(range(10))}),
+            ('HI', Packet.Handover_Initiate_Message, {
+                'seq': 0x0102, 'assign': True, 'buffer': True, 'proxy': False,
+                'forward': False,
+                'code': HandoverInitiateStatus.FBU_whose_source_IP_address_is_not_PCoA,
+                'options': [(apfx_type, {'code': IPv6AddressPrefixCode.New_Care_of_Address,
+                                         'prefix_length': 64,
+                                         'address': '2001:db8:2::'}),
+                            (mhlla_type, {'address': b'\x00\x11\x22\x33\x44\x55\x66'})],
+            }, {'seq': 0x0102, 'assign': True, 'buffer': True, 'proxy': False,
+                'forward': False,
+                'code': HandoverInitiateStatus.FBU_whose_source_IP_address_is_not_PCoA}),
+            ('HAck', Packet.Handover_Acknowledge_Message, {
+                'seq': 0x0102, 'buffer': True, 'proxy': False, 'forward': True,
+                'code': HandoverACKStatus.Handover_Accepted_NCoA_assigned,
+                'options': [(apfx_type, {'code': 2, 'prefix_length': 128,
+                                         'address': '2001:db8:2::5'}),
+                            (mhlla_type, {'address': b'\x00\x11\x22\x33\x44\x55\x66'})],
+            }, {'seq': 0x0102, 'buffer': True, 'proxy': False, 'forward': True,
+                'code': HandoverACKStatus.Handover_Accepted_NCoA_assigned}),
+            ('Experimental option', Packet.Binding_Refresh_Request, {
+                'options': [(exp_type, {'data': b'\x01\x02\x03\x04\x05\x06'})],
+            }, {}),
+        ]
+
+        for name, packet_type, payload, expected in cases:
+            with self.subTest(name):
+                raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
+                               type=packet_type, data=payload))
+                self.assertEqual(len(raw) % 8, 0)
+
+                parsed = MH(io.BytesIO(raw), len(raw), extension=True).info
+                self.assertEqual(parsed.type, packet_type)
+                self.assertEqual(parsed.length, len(raw))
+                for field, value in expected.items():
+                    self.assertEqual(getattr(parsed, field), value, field)
+
+                rebuilt = bytes(MH(next=parsed.next, type=parsed.type,
+                                   chksum=parsed.chksum, data=parsed))
+                self.assertEqual(rebuilt, raw)
+
+    def test_mh_rfc5568_local_enums_cover_unregistered_value_sets(self) -> None:
+        """:rfc:`5568` defines two value sets inline, with no IANA registry.
+
+        Both are therefore enumerated in :mod:`pcapkit.protocols.internet.mh`
+        itself rather than in :mod:`pcapkit.const.mh`, and both have to tolerate
+        the values the RFC leaves unassigned -- a capture in the wild carries
+        whatever it carries, so an unassigned code must parse rather than raise.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.mh.status_code import StatusCode
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.mh import (MH, FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode)
+
+        apfx_type = Option.Mobility_Header_IPv6_Address_Prefix
+        badf_type = Option.Binding_Authorization_Data_for_FMIPv6
+        acoa_type = Option.Alternate_Care_of_Address
+        mhlla_type = Option.Mobility_Header_Link_Layer_Address_option
+
+        # The membership assertions come first: ``_missing_`` extends the class in
+        # place, so any unassigned lookup below would otherwise show up here.
+        with self.subTest('FBack status members, RFC 5568 section 6.2.3'):
+            self.assertEqual(
+                {int(member): member.name for member in FastBindingAcknowledgmentStatus},
+                {0: 'Fast_Binding_Update_accepted',
+                 1: 'Fast_Binding_Update_accepted_but_NCoA_is_invalid',
+                 128: 'Reason_unspecified',
+                 129: 'Administratively_prohibited',
+                 130: 'Insufficient_resources',
+                 131: 'Incorrect_interface_identifier_length'},
+            )
+
+        with self.subTest('address/prefix option code members, RFC 5568 section 6.4.2'):
+            self.assertEqual(
+                {int(member): member.name for member in IPv6AddressPrefixCode},
+                {1: 'Old_Care_of_Address', 2: 'New_Care_of_Address',
+                 3: 'NAR_IP_address', 4: 'NAR_Prefix'},
+            )
+
+        with self.subTest('the collision that rules out reusing StatusCode'):
+            # RFC 6275 means something else by both of these, which is why the
+            # registry enumeration cannot stand in for the RFC 5568 one.
+            self.assertEqual(StatusCode.Accepted_but_prefix_discovery_necessary, 1)
+            self.assertEqual(StatusCode.Home_registration_not_supported, 131)
+            self.assertNotIsInstance(FastBindingAcknowledgmentStatus(1), StatusCode)
+            self.assertNotIsInstance(FastBindingAcknowledgmentStatus(131), StatusCode)
+
+        def fback(status: int) -> object:
+            raw = bytes.fromhex(
+                '1105' '09' '00' '1234'
+                f'{status:02x}' '80' '1234' '000a'
+                '0310' '20010db8000100000000000000000002'
+                '150c' '00000000' '000102030405060708090a0b'
+            )
+            return MH(io.BytesIO(raw), len(raw), extension=True).info
+
+        def handover_initiate(code: int) -> object:
+            raw = bytes.fromhex(
+                '1104' '0e' '00' '1234'
+                '0102' 'c0' '01'
+                '2212' f'{code:02x}' '40' '20010db8000200000000000000000000'
+                '0108' '0000000000000000'
+            )
+            return MH(io.BytesIO(raw), len(raw), extension=True).info
+
+        with self.subTest('assigned values parse to the right member'):
+            for wire, member in [
+                (0, FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted),
+                (1, FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid),
+                (128, FastBindingAcknowledgmentStatus.Reason_unspecified),
+                (129, FastBindingAcknowledgmentStatus.Administratively_prohibited),
+                (130, FastBindingAcknowledgmentStatus.Insufficient_resources),
+                (131, FastBindingAcknowledgmentStatus.Incorrect_interface_identifier_length),
+            ]:
+                self.assertIs(fback(wire).status, member, wire)
+
+            for wire, member in [
+                (1, IPv6AddressPrefixCode.Old_Care_of_Address),
+                (2, IPv6AddressPrefixCode.New_Care_of_Address),
+                (3, IPv6AddressPrefixCode.NAR_IP_address),
+                (4, IPv6AddressPrefixCode.NAR_Prefix),
+            ]:
+                self.assertIs(handover_initiate(wire).options[apfx_type].code, member, wire)
+
+        with self.subTest('unassigned values parse without raising'):
+            # 2..127 is the unassigned half of the "accepted" range, 132..255 of
+            # the "rejected" one; both must survive a parse.
+            for wire in (2, 77, 127, 132, 255):
+                status = fback(wire).status
+                self.assertIsInstance(status, FastBindingAcknowledgmentStatus)
+                self.assertEqual(status, wire)
+                self.assertEqual(status.name, 'Unassigned_%d' % wire)
+
+            # RFC 5568 assigns 1 through 4 only, so 0 and 5..255 are unassigned.
+            for wire in (0, 5, 200, 255):
+                code = handover_initiate(wire).options[apfx_type].code
+                self.assertIsInstance(code, IPv6AddressPrefixCode)
+                self.assertEqual(code, wire)
+                self.assertEqual(code.name, 'Unassigned_%d' % wire)
+
+        with self.subTest('out-of-octet values are still rejected'):
+            for enum_cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
+                for value in (-1, 256):
+                    with self.assertRaises(ValueError):
+                        enum_cls(value)
+
+        with self.subTest('get() backports string and integer lookups'):
+            self.assertIs(FastBindingAcknowledgmentStatus.get(130),
+                          FastBindingAcknowledgmentStatus.Insufficient_resources)
+            self.assertIs(FastBindingAcknowledgmentStatus.get('Reason_unspecified'),
+                          FastBindingAcknowledgmentStatus.Reason_unspecified)
+            self.assertEqual(FastBindingAcknowledgmentStatus.get('Vendor_specific', 200), 200)
+            self.assertIs(IPv6AddressPrefixCode.get(4), IPv6AddressPrefixCode.NAR_Prefix)
+            self.assertIs(IPv6AddressPrefixCode.get('New_Care_of_Address'),
+                          IPv6AddressPrefixCode.New_Care_of_Address)
+            self.assertEqual(IPv6AddressPrefixCode.get('Vendor_specific', 201), 201)
+
+        with self.subTest('make round trips both enums byte-identically'):
+            for status, code in [
+                (FastBindingAcknowledgmentStatus.Insufficient_resources,
+                 IPv6AddressPrefixCode.NAR_Prefix),
+                # unassigned on the wire, and handed in as a bare integer
+                (99, 250),
+            ]:
+                fback_raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
+                                     type=Packet.Fast_Binding_Acknowledgment,
+                                     data={'status': status, 'key_mngt': True, 'seq': 0x1234,
+                                           'lifetime': 40,
+                                           'options': [
+                                               (acoa_type, {'address': '2001:db8:1::2'}),
+                                               (badf_type, {'spi': 0,
+                                                            'data': bytes(range(12))})]}))
+                self.assertEqual(fback_raw[6], int(status))
+                parsed = MH(io.BytesIO(fback_raw), len(fback_raw), extension=True).info
+                self.assertIsInstance(parsed.status, FastBindingAcknowledgmentStatus)
+                self.assertEqual(parsed.status, int(status))
+                self.assertEqual(bytes(MH(next=parsed.next, type=parsed.type,
+                                          chksum=parsed.chksum, data=parsed)), fback_raw)
+
+                hi_raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
+                                  type=Packet.Handover_Initiate_Message,
+                                  data={'seq': 0x0102, 'assign': True, 'buffer': True,
+                                        'proxy': False, 'forward': False, 'code': 1,
+                                        'options': [
+                                            (apfx_type, {'code': code, 'prefix_length': 64,
+                                                         'address': '2001:db8:2::'}),
+                                            (mhlla_type,
+                                             {'address': b'\x00\x11\x22\x33\x44\x55\x66'})]}))
+                parsed = MH(io.BytesIO(hi_raw), len(hi_raw), extension=True).info
+                self.assertIsInstance(parsed.options[apfx_type].code, IPv6AddressPrefixCode)
+                self.assertEqual(parsed.options[apfx_type].code, int(code))
+                self.assertEqual(bytes(MH(next=parsed.next, type=parsed.type,
+                                          chksum=parsed.chksum, data=parsed)), hi_raw)
+
+    def test_mh_message_flags_pack_each_bit_independently(self) -> None:
+        """Regression test: a cleared flag must not be emitted as a set bit.
+
+        :class:`~pcapkit.corekit.fields.strings.BitField` used to seed its per-bit
+        buffer with NUL bytes and then truth-test it, so the ASCII ``b'0'`` written
+        for a cleared bit read back as set and every named bit came out as ``1``
+        regardless of the value handed in.
+        """
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.mh import MH
+
+        # A|H|L|K, one flag set at a time, c.f. RFC 5568 section 6.2.2.
+        for flag, octets in [('ack', b'\x80\x00'), ('home', b'\x40\x00'),
+                             ('lla_compat', b'\x20\x00'), ('key_mngt', b'\x10\x00')]:
+            with self.subTest(flag):
+                raw = bytes(MH(next=TransType.UDP, chksum=b'\x00\x00',
+                               type=Packet.Fast_Binding_Update,
+                               data={'seq': 0, 'ack': False, 'home': False,
+                                     'lla_compat': False, 'key_mngt': False,
+                                     flag: True, 'lifetime': 4, 'options': []}))
+                self.assertEqual(raw[8:10], octets)
+
+        # U|P|F of the HAck message, c.f. RFC 5949 section 6.1.2.
+        for flag, octet in [('buffer', 0x80), ('proxy', 0x40), ('forward', 0x20)]:
+            with self.subTest(flag):
+                raw = bytes(MH(next=TransType.UDP, chksum=b'\x00\x00',
+                               type=Packet.Handover_Acknowledge_Message,
+                               data={'seq': 0, 'buffer': False, 'proxy': False,
+                                     'forward': False, flag: True, 'code': 0,
+                                     'options': []}))
+                self.assertEqual(raw[8], octet)
 
 
 if __name__ == '__main__':

@@ -40,6 +40,8 @@ if TYPE_CHECKING:
     from pcapkit.const.mh.handover_ack_status import HandoverACKStatus as Enum_HandoverACKStatus
     from pcapkit.const.mh.handover_initiate_flag import \
         HandoverInitiateFlag as Enum_HandoverInitiateFlag
+    from pcapkit.const.mh.handover_initiate_status import \
+        HandoverInitiateStatus as Enum_HandoverInitiateStatus
     from pcapkit.const.mh.home_address_reply import HomeAddressReply as Enum_HomeAddressReply
     from pcapkit.const.mh.lla_code import LLACode as Enum_LLACode
     from pcapkit.const.mh.lma_mag_suboption import \
@@ -62,20 +64,23 @@ if TYPE_CHECKING:
         UpdateNotificationReason as Enum_UpdateNotificationReason
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.corekit.multidict import OrderedMultiDict
-    from pcapkit.protocols.internet.mh import NTPTimestamp
+    from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+                                               IPv6AddressPrefixCode, NTPTimestamp)
 
 __all__ = [
     'MH',
     'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage', 'CareofTestInitMessage',
     'HomeTestMessage', 'CareofTestMessage', 'BindingUpdateMessage', 'BindingAcknowledgementMessage',
-    'BindingErrorMessage',
+    'BindingErrorMessage', 'FastBindingUpdateMessage', 'FastBindingAcknowledgmentMessage',
+    'FastNeighborAdvertisementMessage', 'ExperimentalMessage', 'HandoverInitiateMessage',
+    'HandoverAcknowledgeMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindingRefreshAdviceOption', 'AlternateCareofAddressOption',
     'NonceIndicesOption', 'AuthorizationDataOption', 'MobileNetworkPrefixOption',
     'LinkLayerAddressOption', 'MNIDOption', 'AuthOption', 'MesgIDOption', 'CGAParametersRequestOption',
     'CGAParametersOption', 'SignatureOption', 'PermanentHomeKeygenTokenOption', 'CareofTestInitOption',
-    'CareofTestOption',
+    'CareofTestOption', 'ExperimentalMobilityOption', 'BADFOption', 'IPv6AddressPrefixOption',
 
     'CGAParameter',
 
@@ -247,6 +252,131 @@ class BindingErrorMessage(MH):
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
                      status: 'Enum_BindingError', home: 'IPv6Address',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class FastBindingUpdateMessage(MH):
+    """Data model for MH Fast Binding Update (FBU) message type."""
+
+    #: Sequence number.
+    seq: 'int'
+    #: Acknowledge flag.
+    ack: 'bool'
+    #: Home registration flag.
+    home: 'bool'
+    #: Link-local address compatibility flag.
+    lla_compat: 'bool'
+    #: Key management mobility capability flag.
+    key_mngt: 'bool'
+    #: Lifetime.
+    lifetime: 'timedelta'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     seq: 'int', ack: 'bool', home: 'bool', lla_compat: 'bool', key_mngt: 'bool',
+                     lifetime: 'timedelta', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class FastBindingAcknowledgmentMessage(MH):
+    """Data model for MH Fast Binding Acknowledgment (FBack) message type."""
+
+    #: Status. :rfc:`5568#section-6.2.3` defines the FBack status values inline
+    #: rather than drawing them from the IANA *Status Codes* registry, so this
+    #: field carries the module-local
+    #: :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`
+    #: instead of :class:`~pcapkit.const.mh.status_code.StatusCode`.
+    status: 'FastBindingAcknowledgmentStatus'
+    #: Key management mobility capability flag.
+    key_mngt: 'bool'
+    #: Sequence number.
+    seq: 'int'
+    #: Lifetime.
+    lifetime: 'timedelta'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     status: 'FastBindingAcknowledgmentStatus', key_mngt: 'bool', seq: 'int',
+                     lifetime: 'timedelta',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class FastNeighborAdvertisementMessage(MH):
+    """Data model for MH Fast Neighbor Advertisement (FNA) message type."""
+
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class ExperimentalMessage(MH):
+    """Data model for MH Experimental Mobility Header message type."""
+
+    #: Experimental message data.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     data: 'bytes') -> 'None': ...
+
+
+@info_final
+class HandoverInitiateMessage(MH):
+    """Data model for MH Handover Initiate (HI) message type."""
+
+    #: Sequence number.
+    seq: 'int'
+    #: Assigned address configuration flag.
+    assign: 'bool'
+    #: Buffer flag.
+    buffer: 'bool'
+    #: Proxy flag.
+    proxy: 'bool'
+    #: Forwarding flag.
+    forward: 'bool'
+    #: Code.
+    code: 'Enum_HandoverInitiateStatus'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     seq: 'int', assign: 'bool', buffer: 'bool', proxy: 'bool', forward: 'bool',
+                     code: 'Enum_HandoverInitiateStatus',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class HandoverAcknowledgeMessage(MH):
+    """Data model for MH Handover Acknowledge (HAck) message type."""
+
+    #: Sequence number.
+    seq: 'int'
+    #: Buffer flag.
+    buffer: 'bool'
+    #: Proxy flag.
+    proxy: 'bool'
+    #: Forwarding flag.
+    forward: 'bool'
+    #: Code.
+    code: 'Enum_HandoverACKStatus'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     seq: 'int', buffer: 'bool', proxy: 'bool', forward: 'bool',
+                     code: 'Enum_HandoverACKStatus',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -504,6 +634,51 @@ class CareofTestOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...
+
+
+@info_final
+class ExperimentalMobilityOption(Option):
+    """Data model for MH Experimental Mobility option."""
+
+    #: Experimental data.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
+
+
+@info_final
+class BADFOption(Option):
+    """Data model for MH Binding Authorization Data for FMIPv6 (BADF) option."""
+
+    #: Security parameter index.
+    spi: 'int'
+    #: Authenticator.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', spi: 'int', data: 'bytes') -> 'None': ...
+
+
+@info_final
+class IPv6AddressPrefixOption(Option):
+    """Data model for MH Mobility Header IPv6 Address/Prefix option."""
+
+    #: Option code, c.f., :rfc:`5568#section-6.4.2`. The codes are defined inline
+    #: by the RFC with no IANA registry behind them, so this field carries the
+    #: module-local
+    #: :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.
+    code: 'IPv6AddressPrefixCode'
+    #: Prefix length.
+    prefix_length: 'int'
+    #: IPv6 address/prefix. Kept separate from :attr:`prefix_length` since option
+    #: codes ``1`` through ``3`` carry a full address whose host bits are
+    #: significant, so the pair cannot always be fused into a network.
+    address: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', code: 'IPv6AddressPrefixCode',
+                     prefix_length: 'int', address: 'IPv6Address') -> 'None': ...
 
 
 # TODO: Implement other options.
