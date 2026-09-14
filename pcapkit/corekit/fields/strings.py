@@ -8,6 +8,7 @@ import chardet
 
 from pcapkit.corekit.fields.field import Field, NoValue
 from pcapkit.utilities.compat import Dict
+from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
     '_TextField',
@@ -196,6 +197,19 @@ class BitField(_TextField[Dict[str, Any]]):
 
         self._namespace = namespace or {}
 
+        # NOTE: A subfield reaching past the end of the field is a mistake in the
+        # schema that declares it, not something a packet can cause, so it is
+        # rejected here rather than at packing time -- where it used to grow the
+        # buffer instead, and surface much later as an opaque ``OverflowError``
+        # from :meth:`int.to_bytes`.
+        width = self.length * 8
+        for name, (start, size) in self._namespace.items():
+            if start < 0 or size < 1 or start + size > width:
+                raise FieldValueError(
+                    f'{type(self).__name__}: subfield {name!r} spans bits '
+                    f'{start}-{start + size - 1} of a {width}-bit field'
+                )
+
     def pre_process(self, value: 'dict[str, Any]', packet: 'dict[str, Any]') -> 'bytes':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
 
@@ -206,12 +220,26 @@ class BitField(_TextField[Dict[str, Any]]):
         Returns:
             Processed field value.
 
+        Raises:
+            FieldValueError: If a subfield value does not fit the bits it was
+                declared to occupy.
+
         """
-        buffer = bytearray(self.length * 8)
-        for name, (start, len) in self._namespace.items():
-            end = start + len
-            buffer[start:end] = f'{value[name]:0{end - start}b}'.encode()
-        return int(b''.join(map(lambda x: b'1' if x else b'0', buffer)), 2).to_bytes(self.length, 'big')
+        # NOTE: The buffer holds one ASCII digit per bit, so it must be seeded with
+        # ``b'0'`` rather than with NUL bytes -- a zero bit written by the loop below
+        # is the *character* ``b'0'``, which is itself non-zero, so a truthiness test
+        # over the buffer cannot tell a cleared bit from a set one and would report
+        # every named bit as set.
+        buffer = bytearray(b'0' * (self.length * 8))
+        for name, (start, size) in self._namespace.items():
+            bits = f'{value[name]:0{size}b}'
+            if len(bits) > size:
+                raise FieldValueError(
+                    f'{type(self).__name__}: subfield {name!r} value {value[name]!r} '
+                    f'needs {len(bits)} bits, but was declared with {size}'
+                )
+            buffer[start:start + size] = bits.encode()
+        return int(buffer, 2).to_bytes(self.length, 'big')
 
     def post_process(self, value: 'bytes', packet: 'dict[str, Any]') -> 'dict[str, Any]':  # pylint: disable=unused-argument
         """Process field value after parsing (unpacked).
