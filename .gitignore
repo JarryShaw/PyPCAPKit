@@ -2,6 +2,9 @@
 pcapkit-*-tempdir/
 pcapkit-temp.html
 
+# Guard the pre-rename path too: worktrees and older checkouts still hold
+# generated captures at examples/sample/, and nothing should track them.
+examples/sample/
 examples/captures/*
 !examples/captures/out.json
 !examples/captures/out.plist

@@ -29,7 +29,7 @@ UDP_BODY = bytes(range(0x40, 0x60))
 UDP_HEADER = (UDP_SRCPORT.to_bytes(2, 'big') + UDP_DSTPORT.to_bytes(2, 'big')
               + (8 + len(UDP_BODY)).to_bytes(2, 'big') + b'\x00\x00')
 
-#: Fragment identification, matching the one in ``examples/sample/ipv6.pcap``.
+#: Fragment identification, matching the one in ``examples/captures/ipv6.pcap``.
 FRAG_ID = 110308
 
 
@@ -131,7 +131,7 @@ class IPv6ExtensionPayloadOffsetTests(unittest.TestCase):
     """The next layer is read from after the *last* extension header.
 
     The datagrams here are built from bytes rather than read out of
-    ``examples/sample/``: no committed capture carries more than one IPv6
+    ``examples/captures/``: no committed capture carries more than one IPv6
     extension header, and the captures are pinned byte-for-byte by the rest of
     the suite, so a chain of several headers cannot be obtained from them.
     Parsing goes through :class:`~pcapkit.protocols.internet.ipv6.IPv6`
