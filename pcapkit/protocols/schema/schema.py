@@ -580,7 +580,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             of the remaining data, which is used to determine the length of
             the payload field.
 
-            And a ``__padding_length__`` key in the ``packet`` to record the
+            And an ``__option_padding__`` key in the ``packet`` to record the
             length of the padding field after an
             :class:`~pcapkit.corekit.fields.collections.OptionField`, which
             is used to potentially determine the length of the remaining
