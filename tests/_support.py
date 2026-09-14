@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import abc
+import collections.abc
 import importlib.util
 import pathlib
 import sys
@@ -131,10 +133,38 @@ def install_fake_payload_protocols(raw_cls: type, null_cls: type) -> None:
     sys.modules['pcapkit.protocols.misc.null'] = null_module
 
 
+def _reset_abc_caches() -> None:
+    """Clear the stdlib ABC instance-check caches.
+
+    :func:`purge_modules` drops :mod:`pcapkit` from :data:`sys.modules` so the
+    next test re-imports it fresh, but the :mod:`collections.abc` ABCs are
+    never purged. Each re-import rebuilds pcapkit's ``Mapping`` subclasses
+    (``Info``, ``Schema``, ``ContextRegistry``, ``ProtocolContext``, …) as new
+    class objects, and their creation churns the C-level ``_abc_impl`` caches
+    on the shared ABCs. Those caches then hold stale answers keyed on immortal
+    built-ins -- so ``isinstance({}, collections.abc.Mapping)`` can return
+    :data:`False`, or ``isinstance({}, Schema)`` :data:`True`, until the cache
+    token happens to advance. The effect is order-dependent and invisible when
+    a test file runs alone, which is why it only ever bit the full suite.
+
+    :func:`abc._reset_caches` is a CPython internal (present on both the C
+    ``_abc`` and pure-python ``_py_abc`` backends); if a future runtime drops
+    it this degrades to the previous, occasionally-flaky behaviour rather than
+    erroring.
+    """
+    reset = getattr(abc, '_reset_caches', None)
+    if reset is None:  # pragma: no cover
+        return
+    for obj in vars(collections.abc).values():
+        if isinstance(obj, type) and hasattr(obj, '_abc_impl'):
+            reset(obj)
+
+
 def purge_modules(prefixes: Iterable[str]) -> None:
     for name in list(sys.modules):
         if any(name == prefix or name.startswith(prefix + '.') for prefix in prefixes):
             sys.modules.pop(name, None)
+    _reset_abc_caches()
 
 
 def close_extractor(extractor: object) -> None:
