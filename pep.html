@@ -459,17 +459,37 @@ engines include:</p>
 <li><p><a class="reference external" href="https://github.com/pynetwork/pypcap">pypcap</a></p></li>
 <li><p><a class="reference external" href="https://github.com/kisom/pypcapfile">pycapfile</a></p></li>
 </ul>
-<p>Implementation for support of new engines would include adding corresponding
-handler methods and code blocks into <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>
-(see support for Scapy, DPKT, and/or PyShark), as well as, the unified auxiliary
-tools located in <a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The engine interface has since been refactored, so this no longer means adding
+handler methods to <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>. A new
+engine subclasses <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.engine.Engine</span></code></a> and
+implements just two methods, <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine.run" title="pcapkit.foundation.engines.engine.Engine.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>
+and <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine.read_frame" title="pcapkit.foundation.engines.engine.Engine.read_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_frame()</span></code></a>; subclassing
+registers it automatically. See <a class="reference internal" href="ext.html"><span class="doc">Customisation &amp; Extensions</span></a> for a worked example. What does
+still apply is the unified auxiliary tools in <a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a>, where
+each engine has a matching module.</p>
+</div>
 </section>
 <section id="test-cases">
 <h2>Test Cases<a class="headerlink" href="#test-cases" title="Link to this heading">¶</a></h2>
-<p>PyPCAPKit still does not have a systematic testing suite to be bundled with it.
-The only test cases I have worked out are those in the <code class="docutils literal notranslate"><span class="pre">/tests</span></code> folder - mostly
-functional tests. As PyPCAPKit is growing bigger and bigger, a comprehensive test
-suite is coming much more of demand for a more reliable development process.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Largely <strong>done</strong>. There is now a systematic unit test suite under <code class="docutils literal notranslate"><span class="pre">tests/</span></code>
+(84 modules), bundled with the distribution, and it runs in CI against Python
+3.10 through 3.14 (see <code class="docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>). The sample
+captures the runtime, regression and integration tiers read are not tracked in
+git, so <code class="docutils literal notranslate"><span class="pre">examples/samples/make_samples.py</span></code> (<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">samples</span></code>) rebuilds them
+from source.</p>
+<p>What remains wanted is coverage rather than infrastructure: the protocols and
+the registered-but-unhandled type codes listed above have no tests because
+they have no implementation yet.</p>
+</div>
+<p>Originally: PyPCAPKit still does not have a systematic testing suite to be
+bundled with it. The only test cases I have worked out are those in the
+<code class="docutils literal notranslate"><span class="pre">/tests</span></code> folder - mostly functional tests. As PyPCAPKit is growing bigger and
+bigger, a comprehensive test suite is coming much more of demand for a more
+reliable development process.</p>
 </section>
 </section>
 
