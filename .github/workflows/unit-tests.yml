@@ -53,6 +53,73 @@ jobs:
           --ignore-glob='*_runtime.py'
           --ignore-glob='*_regression.py'
 
+  integration:
+    name: Integration Python ${{ matrix.python-version }}
+    if: ${{ github.event_name != 'workflow_call' }}
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental == true }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+        experimental:
+          - false
+        include:
+          - python-version: "3.15"
+            experimental: true
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: ${{ matrix.experimental }}
+          cache: pip
+
+      # The Scapy extra is there for examples/samples/pcap.py and legacy.py,
+      # which build their captures with scapy; examples/samples/pcapng.py needs
+      # nothing beyond the standard library and pcapkit itself, which it uses to
+      # parse each fixture back.
+      - name: Install package, test and generator dependencies
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e '.[test,Scapy]'
+
+      # `shell: bash` rather than the default, because it runs with -o pipefail:
+      # without it the `tee` below would swallow the generator's exit status.
+      - name: Regenerate sample captures
+        shell: bash
+        run: |
+          # Keep a failure here legible as what it is -- the fixtures could not
+          # be built, so no test has run yet and nothing is wrong with the code
+          # under test.
+          if ! python examples/samples/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
+            echo "::error title=Sample fixture generation failed::examples/samples/make_samples.py could not rebuild examples/sample/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
+            exit 1
+          fi
+
+          # examples/samples/pcapng.py fetches two captures from the Wireshark
+          # repository and synthesises stand-ins when the download fails. The
+          # stand-ins parse, and tests/protocols/test_pcapng_regression.py only
+          # asserts that extraction succeeds, so a degraded run goes green and
+          # is otherwise indistinguishable from a clean one. Say which happened.
+          if grep -q '(download unavailable)' "$RUNNER_TEMP/make-samples.log"; then
+            echo "::warning title=Sample fixtures degraded::The upstream Wireshark captures were unreachable, so synthesised stand-ins were used. The PCAP-NG tier ran, but not against the upstream bytes."
+            grep '(download unavailable)' "$RUNNER_TEMP/make-samples.log"
+          else
+            echo "Upstream Wireshark captures were used, matching their pinned SHA-256 digests."
+          fi
+
+      - name: Run full test suite
+        run: python -m pytest -q
+
   gate:
     name: Write workflow gate
     if: ${{ github.event_name == 'workflow_call' }}
@@ -67,14 +134,26 @@ jobs:
           python-version: "3.14"
           cache: pip
 
-      - name: Install package and test dependencies
+      - name: Install package, test and generator dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test]'
+          python -m pip install -e '.[test,Scapy]'
 
-      - name: Run unit tests
-        run: >-
-          python -m pytest -q
-          --ignore=tests/integration
-          --ignore-glob='*_runtime.py'
-          --ignore-glob='*_regression.py'
+      # See the integration job above for why this step is shaped the way it is.
+      - name: Regenerate sample captures
+        shell: bash
+        run: |
+          if ! python examples/samples/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
+            echo "::error title=Sample fixture generation failed::examples/samples/make_samples.py could not rebuild examples/sample/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
+            exit 1
+          fi
+
+          if grep -q '(download unavailable)' "$RUNNER_TEMP/make-samples.log"; then
+            echo "::warning title=Sample fixtures degraded::The upstream Wireshark captures were unreachable, so synthesised stand-ins were used. The PCAP-NG tier ran, but not against the upstream bytes."
+            grep '(download unavailable)' "$RUNNER_TEMP/make-samples.log"
+          else
+            echo "Upstream Wireshark captures were used, matching their pinned SHA-256 digests."
+          fi
+
+      - name: Run full test suite
+        run: python -m pytest -q

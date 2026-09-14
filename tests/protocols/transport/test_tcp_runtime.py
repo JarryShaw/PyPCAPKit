@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -17,12 +17,12 @@ class TCPRuntimeTests(unittest.TestCase):
     def _extract(self, sample: str):
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample, fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree', store=True, nofile=True)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
     def test_tcp_ipv4_syn_frame_exposes_expected_option_sequence(self) -> None:
-        extractor = self._extract('sample/tcp.pcap')
+        extractor = self._extract('tcp.pcap')
         frame = extractor.frame[0]
         tcp = frame.payload.payload.payload
         options = list(tcp.info.options.items(multi=True))
@@ -57,7 +57,7 @@ class TCPRuntimeTests(unittest.TestCase):
         self.assertEqual(type(tcp.payload).__name__, 'NoPayload')
 
     def test_tcp_ipv6_frame_keeps_timestamp_only_options(self) -> None:
-        extractor = self._extract('sample/tcp.pcap')
+        extractor = self._extract('tcp.pcap')
         frame = extractor.frame[3]
         ip = frame.payload.payload
         tcp = ip.payload
@@ -73,7 +73,7 @@ class TCPRuntimeTests(unittest.TestCase):
         self.assertEqual(options[2][1].echo, 2559889017)
 
     def test_tcp_unregistered_application_payload_falls_back_to_raw(self) -> None:
-        extractor = self._extract('sample/tcp.pcap')
+        extractor = self._extract('tcp.pcap')
         frame = extractor.frame[5]
         tcp = frame.payload.payload.payload
 
@@ -86,7 +86,7 @@ class TCPRuntimeTests(unittest.TestCase):
         self.assertIsNone(tcp.payload.info.error)
 
     def test_stream_sample_exposes_no_payload_ack_frame(self) -> None:
-        extractor = self._extract('sample/stream.pcap')
+        extractor = self._extract('stream.pcap')
         frame = extractor.frame[3]
         tcp = frame.payload.payload.payload
         options = list(tcp.info.options.items(multi=True))
@@ -101,7 +101,7 @@ class TCPRuntimeTests(unittest.TestCase):
         self.assertEqual(type(tcp.payload).__name__, 'NoPayload')
 
     def test_stream_sample_exposes_ipv6_tcp_raw_payload_pair(self) -> None:
-        extractor = self._extract('sample/stream.pcap')
+        extractor = self._extract('stream.pcap')
 
         client_frame = extractor.frame[2]
         server_frame = extractor.frame[4]

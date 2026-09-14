@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from tests._support import load_module, purge_modules
+from tests._support import load_module, purge_modules, sample_path
 
 
 class InterfaceCoreTests(unittest.TestCase):
@@ -69,11 +69,11 @@ class InterfaceCoreTests(unittest.TestCase):
         class DemoProtocol(ProtocolBase):
             __layer__ = 'internet'
 
-        extractor = module.extract(fin='sample/in.pcap', layer=DemoProtocol, store=False)
+        extractor = module.extract(fin=sample_path('in.pcap'), layer=DemoProtocol, store=False)
         self.assertEqual(extractor.kwargs['layer'], 'internet')
         self.assertFalse(extractor.kwargs['store'])
 
-        extractor = module.extract(fin='sample/in.pcap', layer='link', store=True)
+        extractor = module.extract(fin=sample_path('in.pcap'), layer='link', store=True)
         self.assertEqual(extractor.kwargs['layer'], 'link')
         self.assertTrue(extractor.kwargs['store'])
 

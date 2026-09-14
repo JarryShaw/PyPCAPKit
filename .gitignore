@@ -2,18 +2,18 @@
 pcapkit-*-tempdir/
 pcapkit-temp.html
 
-sample/*
-!sample/out.json
-!sample/out.plist
-!sample/out.txt
-!sample/in.pcap
-!sample/dhcp.pcapng
-!sample/pcapng.txt
+examples/sample/*
+!examples/sample/out.json
+!examples/sample/out.plist
+!examples/sample/out.txt
+!examples/sample/in.pcap
+!examples/sample/dhcp.pcapng
+!examples/sample/pcapng.txt
 
 src
 !requirements.txt
 
-sample/test
+examples/sample/test
 test/pcapkit
 test/dictdumper
 deprecated/

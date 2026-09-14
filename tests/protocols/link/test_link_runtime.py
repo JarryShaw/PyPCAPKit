@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -17,12 +17,12 @@ class LinkProtocolRuntimeTests(unittest.TestCase):
     def _extract(self, sample: str):
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample, fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree', store=True, nofile=True)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
     def test_ethernet_protocol_exposes_addresses_and_next_layer(self) -> None:
-        extractor = self._extract('sample/arp.pcap')
+        extractor = self._extract('arp.pcap')
         ethernet = extractor.frame[0].payload
 
         self.assertEqual(type(ethernet).__name__, 'Ethernet')
@@ -32,7 +32,7 @@ class LinkProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(type(ethernet.payload).__name__, 'ARP')
 
     def test_arp_protocol_exposes_request_fields_and_nested_raw_payload(self) -> None:
-        extractor = self._extract('sample/arp.pcap')
+        extractor = self._extract('arp.pcap')
         arp = extractor.frame[0].payload.payload
 
         self.assertEqual(type(arp).__name__, 'ARP')
@@ -45,7 +45,7 @@ class LinkProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(type(arp.payload).__name__, 'Raw')
 
     def test_arp_reply_frame_exposes_reverse_addresses(self) -> None:
-        extractor = self._extract('sample/arp.pcap')
+        extractor = self._extract('arp.pcap')
         arp = extractor.frame[1].payload.payload
 
         self.assertEqual(int(arp.info.oper), 2)
@@ -55,7 +55,7 @@ class LinkProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(str(arp.info.tpa), '10.20.30.131')
 
     def test_ipv6_chain_from_sample_includes_expected_protocol_names(self) -> None:
-        extractor = self._extract('sample/in.pcap')
+        extractor = self._extract('in.pcap')
         ethernet = extractor.frame[0].payload
         ipv6 = ethernet.payload
         raw = ipv6.payload
