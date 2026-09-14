@@ -260,6 +260,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
@@ -328,6 +329,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
@@ -346,6 +348,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
@@ -435,6 +438,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_Option</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Schema_TCP_MPTCP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_TCP_Option</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">SCTP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.udp</span><span class="w"> </span><span class="kn">import</span> <span class="n">UDP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
@@ -458,6 +462,8 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.payload_protocol_identifier</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">PayloadProtocolIdentifier</span> <span class="k">as</span> <span class="n">SCTP_PayloadProtocolIdentifier</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.mp_tcp_option</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">TCP_MPTCPOption</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.option</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">TCP_Option</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameConstructor</span> <span class="k">as</span> <span class="n">HTTP_FrameConstructor</span>
@@ -506,7 +512,7 @@
     <span class="s1">'register_mh_message'</span><span class="p">,</span> <span class="s1">'register_mh_option'</span><span class="p">,</span> <span class="s1">'register_mh_extension'</span><span class="p">,</span>
 
     <span class="s1">'register_apptype'</span><span class="p">,</span>
-    <span class="s1">'register_tcp'</span><span class="p">,</span> <span class="s1">'register_udp'</span><span class="p">,</span>
+    <span class="s1">'register_tcp'</span><span class="p">,</span> <span class="s1">'register_udp'</span><span class="p">,</span> <span class="s1">'register_sctp'</span><span class="p">,</span>
     <span class="s1">'register_tcp_option'</span><span class="p">,</span> <span class="s1">'register_tcp_mp_option'</span><span class="p">,</span>
 
     <span class="s1">'register_http_frame'</span><span class="p">,</span>
@@ -1022,9 +1028,20 @@
 <span class="sd">        class\_: class name</span>
 <span class="sd">        proto: protocol name (must be a valid transport protocol)</span>
 
+<span class="sd">    Important:</span>
+<span class="sd">        :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**</span>
+<span class="sd">        part of this fan-out, even for application types that name ``sctp`` in</span>
+<span class="sd">        their :class:`~pcapkit.const.reg.apptype.TransportProtocol`. Its</span>
+<span class="sd">        :data:`~pcapkit.protocols.transport.sctp.SCTP.__proto__` registry is</span>
+<span class="sd">        keyed by the DATA chunk's payload protocol identifier rather than by</span>
+<span class="sd">        port number, so writing a port number into it would dispatch on a</span>
+<span class="sd">        number from the wrong registry. Use</span>
+<span class="sd">        :func:`pcapkit.foundation.registry.register_sctp` instead.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        * :func:`pcapkit.foundation.registry.register_tcp`</span>
 <span class="sd">        * :func:`pcapkit.foundation.registry.register_udp`</span>
+<span class="sd">        * :func:`pcapkit.foundation.registry.register_sctp`</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
@@ -1191,6 +1208,53 @@
 
     <span class="n">UDP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered UDP port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+
+    <span class="c1"># register protocol to protocol registry</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="c1"># NOTE: pcapkit.protocols.transport.sctp.SCTP.__proto__</span>
+<div class="viewcode-block" id="register_sctp">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_sctp">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Protocol] | Type[Protocol]'</span><span class="p">,</span>
+                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new protocol class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given protocol class to the</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.sctp.SCTP.__proto__` registry.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        code: payload protocol identifier (PPID), as in</span>
+<span class="sd">            :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`</span>
+<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">        class\_: class name</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        Unlike :func:`register_tcp` and :func:`register_udp`, ``code`` is a</span>
+<span class="sd">        *payload protocol identifier* taken from the DATA chunk, **not** a port</span>
+<span class="sd">        number: SCTP names its upper layer per DATA chunk rather than per</span>
+<span class="sd">        association. See :rfc:`9260#section-3.3.1`.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Protocol]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+
+    <span class="n">SCTP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'registered SCTP payload protocol identifier: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>

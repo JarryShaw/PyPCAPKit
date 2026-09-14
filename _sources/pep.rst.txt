@@ -21,6 +21,21 @@ Wish you enjoy **PyPCAPKit**!!!
 More Protocols, More!!!
 -----------------------
 
+.. note::
+
+   **SCTP** is now **done**. It is implemented as a first-class transport layer
+   protocol per :rfc:`9260`: the common header, all thirteen chunk types the
+   RFC defines, chunk parameters, error causes, and CRC32c checksum
+   verification. Chunk types, parameters and error causes that are registered
+   but not yet implemented fall through to the generic handlers rather than
+   failing the extraction.
+
+   One note on how it differs from its siblings. The next layer is dispatched
+   on the DATA chunk's *payload protocol identifier* through
+   :func:`~pcapkit.foundation.registry.protocols.register_sctp`, not on port
+   numbers, so :func:`~pcapkit.foundation.registry.protocols.register_apptype`
+   deliberately does not fan out to it.
+
 As you may have noticed, there are some protocol-named files under the
 ``NotImplemented`` folders. These protocols are what I planned to implement
 but not yet done. Namely, grouped by each TCP/IP layer and ordered by protocol
@@ -28,7 +43,7 @@ name alphabetically,
 
 * Link Layer: DSL, EAPOL, FDDI, ISDN, PPP
 * Internet Layer: ECN, ESP, ICMP, ICMPv6, IGMP, NDP, Shim6
-* Transport Layer: DCCP, QUIC, RSVP, SCTP
+* Transport Layer: DCCP, QUIC, RSVP
 * Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP,
   ONC/RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL, XMPP
 

@@ -63,6 +63,8 @@ The following table shows all available protocol classes in :mod:`pcapkit`:
 | Transport Layer                                                  | :class:`pcapkit.protocols.transport.tcp.TCP`                                                         |
 + (:class:`~pcapkit.protocols.transport.transport.Transport`       +----------------+-----------------------+-------------------------------------------------------------+
 | subclasses)                                                      | :class:`pcapkit.protocols.transport.udp.UDP`                                                         |
++                                                                  +----------------+-----------------------+-------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.transport.sctp.SCTP`                                                       |
 +------------------------------------------------------------------+----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.ftp.FTP`                                      |
 +                                                                  + FTP Family     +-----------------------+-------------------------------------------------------------+
@@ -145,6 +147,8 @@ functions:
 |                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_tcp`    | the left columns   |
 + Application Layer + :func:`~pcapkit.foundation.registry.protocols.register_apptype`   +----------------------------------------------------------------+ when registering   +
 |                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_udp`    | new protocols.     |
++                   +-------------------------------------------------------------------+----------------------------------------------------------------+                    +
+|                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_sctp`   |                    |
 +-------------------+-------------------------------------------------------------------+----------------------------------------------------------------+--------------------+
 
 Samples
@@ -261,6 +265,12 @@ available extensible items and the helper registry functions:
 |                   |                                                            | :attr:`TCP.__option__ <pcapkit.protocols.transport.tcp.TCP.__option__>`                       | :func:`~pcapkit.foundation.registry.protocols.register_tcp_option`         |
 + Transport Layer   + :class:`~pcapkit.protocols.transport.tcp.TCP`              +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 |                   |                                                            | :attr:`TCP.__mp_option__ <pcapkit.protocols.transport.tcp.TCP.__mp_option__>`                 | :func:`~pcapkit.foundation.registry.protocols.register_tcp_mp_option`      |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+|                   |                                                            | :attr:`SCTP.__chunk__ <pcapkit.protocols.transport.sctp.SCTP.__chunk__>`                      | :meth:`~pcapkit.protocols.transport.sctp.SCTP.register_chunk`              |
++                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.transport.sctp.SCTP`            | :attr:`SCTP.__parameter__ <pcapkit.protocols.transport.sctp.SCTP.__parameter__>`              | :meth:`~pcapkit.protocols.transport.sctp.SCTP.register_parameter`          |
++                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+|                   |                                                            | :attr:`SCTP.__cause__ <pcapkit.protocols.transport.sctp.SCTP.__cause__>`                      | :meth:`~pcapkit.protocols.transport.sctp.SCTP.register_cause`              |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 | Application Layer | :class:`~pcapkit.protocols.application.httpv2.HTTP`        | :attr:`HTTP.__frame__ <pcapkit.protocols.application.httpv2.HTTP.__frame__>`                  | :func:`~pcapkit.foundation.registry.protocols.register_http_frame`         |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+

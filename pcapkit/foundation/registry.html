@@ -267,6 +267,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
@@ -335,6 +336,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
@@ -353,6 +355,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
@@ -1097,11 +1100,23 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 </ul>
 </dd>
 </dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><a class="reference internal" href="../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> is deliberately <strong>not</strong>
+part of this fan-out, even for application types that name <code class="docutils literal notranslate"><span class="pre">sctp</span></code> in
+their <code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code>. Its
+<a class="reference internal" href="../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-data docutils literal notranslate"><span class="pre">__proto__</span></code></a> registry is
+keyed by the DATA chunk’s payload protocol identifier rather than by
+port number, so writing a port number into it would dispatch on a
+number from the wrong registry. Use
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.register_sctp()</span></code> instead.</p>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
 <li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.register_tcp()</span></code></p></li>
 <li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.register_udp()</span></code></p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.register_sctp()</span></code></p></li>
 </ul>
 </div>
 </dd></dl>
@@ -1210,6 +1225,45 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.foundation.registry.protocols.register_sctp">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.registry.protocols.</span></span><span class="sig-name descname"><span class="pre">register_sctp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'(null)'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/registry/protocols.html#register_sctp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.registry.protocols.register_sctp" title="Link to this definition">¶</a></dt>
+<dd><p>Register a new protocol class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Overloads<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | SCTP_PayloadProtocolIdentifier</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | SCTP_PayloadProtocolIdentifier</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The full qualified class name of the new protocol class
+should be as <code class="docutils literal notranslate"><span class="pre">{module}.{class_}</span></code>.</p>
+</div>
+<p>The function will register the given protocol class to the
+<a class="reference internal" href="../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.sctp.SCTP.__proto__</span></code></a> registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference internal" href="../const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a></span>) – payload protocol identifier (PPID), as in
+<a class="reference internal" href="../const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a></p></li>
+<li><p><strong>module</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>[<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]</span>) – module name or module descriptor or a
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass</p></li>
+<li><p><strong>class_</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – class name</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Unlike <a class="reference internal" href="#pcapkit.foundation.registry.protocols.register_tcp" title="pcapkit.foundation.registry.protocols.register_tcp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_tcp()</span></code></a> and <a class="reference internal" href="#pcapkit.foundation.registry.protocols.register_udp" title="pcapkit.foundation.registry.protocols.register_udp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_udp()</span></code></a>, <code class="docutils literal notranslate"><span class="pre">code</span></code> is a
+<em>payload protocol identifier</em> taken from the DATA chunk, <strong>not</strong> a port
+number: SCTP names its upper layer per DATA chunk rather than per
+association. See <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.1"><strong>RFC 9260 Section 3.3.1</strong></a>.</p>
+</div>
 </dd></dl>
 
 </section>

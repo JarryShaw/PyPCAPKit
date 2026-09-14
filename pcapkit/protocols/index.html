@@ -267,6 +267,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
@@ -335,6 +336,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
@@ -353,6 +355,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
@@ -449,6 +452,7 @@ with detailed implementation and methods.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="transport/index.html">Transport Layer</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transport/udp.html">UDP - User Datagram Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transport/index.html#protocol-registry">Protocol Registry</a></li>
@@ -509,7 +513,7 @@ diagram of the class hierarchy of <a class="reference internal" href="#module-pc
     end
 
     subgraph transport [Transport Layer]
-        Transport --&gt; TCP &amp; UDP
+        Transport --&gt; TCP &amp; UDP &amp; SCTP
     end
 
     subgraph application [Application Layer]
@@ -576,6 +580,7 @@ diagram of the class hierarchy of <a class="reference internal" href="#module-pc
     click Transport &quot;/pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.Transport&quot;
     click TCP &quot;/pcapkit/protocols/transport/tcp.html#pcapkit.protocols.internet.tcp.TCP&quot;
     click UDP &quot;/pcapkit/protocols/transport/udp.html#pcapkit.protocols.internet.udp.UDP&quot;
+    click SCTP &quot;/pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP&quot;
 
     click Application &quot;/pcapkit/protocols/application/application.html#pcapkit.protocols.application.Application&quot;
     click HTTP &quot;/pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP&quot;
