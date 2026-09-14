@@ -76,12 +76,14 @@ neither is:
    appears nowhere else) is solved for. The checksums are still computed by
    :mod:`scapy` from the finished packet, and the captures stay well-formed.
 2. ``tests/protocols/internet/test_ipv6_extension_runtime.py`` reads UDP
-   ports 4352 and 1 and a UDP length of 1 out of the first fragment. Those
-   are not the real UDP header: :mod:`pcapkit` hands the next layer the bytes
-   starting at the *fragment header* rather than after it, so ``4352`` is its
-   next-header and reserved octets (``0x1100``), ``1`` is its offset-and-flags
-   hextet, and the length is the top half of the identification. The fixture
-   is an ordinary fragmented datagram; the test pins pcapkit's behaviour.
+   ports 51234 and 5001 and a UDP length of 4778 out of the *first* fragment
+   of ``ipv6.pcap``'s fragmented datagram. Only that fragment carries the UDP
+   header, and the length it declares is that of the whole reassembled
+   datagram, not of the 1448 octets the fragment holds -- so the numbers look
+   inconsistent with the fragment they are read from, and are not. The three
+   later fragments carry no transport header at all; pcapkit decodes one out
+   of their continuation bytes regardless, which is why those frames are not
+   asserted on beyond their fragment header and payload length.
 
 """
 

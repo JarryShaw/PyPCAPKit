@@ -344,15 +344,18 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # keep record of extension headers
             self._exthdr.add(ex_proto, next_)
 
+            # update payload for the next header -- either the next extension
+            # header, or the upper layer protocol should this be the last one;
+            # this must happen before any exit from the loop, since the payload
+            # is what gets handed to ``super()._decode_next_layer`` below
+            payload = payload[next_.length:]
+
             # keep original data after fragment header
             if ex_proto == Enum_ExtensionHeader.IPv6_Frag:
                 ipv6.__update__({
                     'fragment': self._read_packet(header=hdr_len, payload=raw_len),
                 })
                 break
-
-            # update payload for next extension header
-            payload = payload[next_.length:]
 
         # record real header & payload length (headers exclude)
         ipv6.__update__({
