@@ -88,7 +88,7 @@ enumerations include:
      - Link-Layer Address (LLA) Option Code [*]_
    * - :class:`MH_CGAType <pcapkit.const.mh.cga_type.CGAType>`
      - CGA Extension Type Tags [*]_
-   * - :class:`MH_CGAExtension <pcapkit.const.mh.cga_type.CGAExtension>`
+   * - :class:`MH_CGAExtension <pcapkit.const.mh.cga_extension.CGAExtension>`
      - CGA Extension Type Values [*]_
    * - :class:`MH_CGASec <pcapkit.const.mh.cga_sec.CGASec>`
      - CGA SEC [*]_
