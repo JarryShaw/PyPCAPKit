@@ -580,11 +580,21 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             of the remaining data, which is used to determine the length of
             the payload field.
 
-            And a ``__padding_length__`` key in the ``packet`` to record the
-            length of the padding field after an
-            :class:`~pcapkit.corekit.fields.collections.OptionField`, which
-            is used to potentially determine the length of the remaining
-            padding field data.
+            And an ``__option_padding__`` key in the ``packet`` to record how
+            much of an
+            :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared
+            area it did not consume. What follows that area decides what the
+            remainder means: usually padding, to be skipped, but a schema may
+            equally read it as further options, as the PCAP-NG name resolution
+            block does with its records and options.
+
+            An :class:`~pcapkit.corekit.fields.collections.OptionField`
+            declares the size of the whole area it may read, but stops at the
+            end-of-option-list marker and reports the unconsumed remainder
+            through ``__option_padding__``. Since that remainder has not been
+            parsed, we rewind ``data`` by it, so that the fields which size
+            themselves from ``__option_padding__`` read the remainder itself
+            rather than the same number of octets from beyond it.
 
         """
         # force cast arg type since decorator changed their signatures
@@ -640,6 +650,15 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
 
             if isinstance(field, ForwardMatchField):
                 data.seek(-field.length, io.SEEK_CUR)
+            elif isinstance(field, OptionField) and field.option_padding > 0:
+                # the option list ended before the declared field length was
+                # exhausted; give the unconsumed remainder back to ``data``
+                # so that the following fields can read it
+                data.seek(-field.option_padding, io.SEEK_CUR)
+                consumed = field.length - field.option_padding
+
+                self.__buffer__[field.name] = byte[:consumed]
+                packet['__length__'] -= consumed
             else:
                 packet['__length__'] -= field.length
 

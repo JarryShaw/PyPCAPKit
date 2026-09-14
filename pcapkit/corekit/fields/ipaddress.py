@@ -201,6 +201,11 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
         Returns:
             Processed field value.
 
+        Notes:
+            The trailing four octets are a dotted netmask, as written by
+            :meth:`pre_process` -- not a prefix length as in
+            :meth:`IPv6InterfaceField.post_process`.
+
         """
         ip = ipaddress.IPv4Address(value[:4])
         mask = ipaddress.IPv4Address(value[4:])
@@ -264,11 +269,23 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
         Returns:
             Processed field value.
 
+        Raises:
+            FieldValueError: If the trailing octet is not a valid IPv6 prefix
+                length, i.e. greater than 128.
+
+        Notes:
+            The trailing octet is the prefix length as a binary integer, as
+            written by :meth:`pre_process` -- not a dotted netmask as in
+            :meth:`IPv4InterfaceField.post_process`.
+
         """
         ip = ipaddress.IPv6Address(value[:16])
-        mask = int(value[16:])
+        prefixlen = value[16]
 
-        val = ipaddress.ip_interface(f'{ip}/{mask}')
+        if prefixlen > 128:
+            raise FieldValueError(f'invalid IPv6 prefix length: {prefixlen}')
+
+        val = ipaddress.ip_interface(f'{ip}/{prefixlen}')
         if val.version != self.version:
             raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
         return val

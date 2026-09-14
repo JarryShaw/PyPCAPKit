@@ -1914,7 +1914,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             original_len=schema.original_length,
             options=self._read_pcapng_options(schema.options),
         )
-        return self._decode_next_layer(data, self.linktype, schema.captured_length)  # type: ignore[return-value]
+        return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
+                                       schema.captured_length)  # type: ignore[return-value]
 
     def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
         """Read PCAP-NG options.
@@ -3705,9 +3706,15 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         else:
             options_value, _ = [], 0
 
+        # NOTE: ``-n % 4`` is the octet count needed to reach the next 32-bit
+        # boundary, and zero when already there. Integer arithmetic throughout,
+        # unlike the ``math.ceil(n / 4) * 4 - n`` idiom used elsewhere in this
+        # file, which routes a length through a float.
         cb_data = data.pack() if isinstance(data, Schema) else data
+        cb_data += bytes(-len(cb_data) % 4)
         for option in options_value:
             cb_data += option.pack() if isinstance(option, Schema) else option
+        cb_data += bytes(-len(cb_data) % 4)
 
         return Schema_CustomBlock(
             length=len(cb_data) + 16,
