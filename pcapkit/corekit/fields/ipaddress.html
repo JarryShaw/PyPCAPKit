@@ -516,6 +516,12 @@
 <dd class="field-odd"><p>Processed field value.</p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The trailing four octets are a dotted netmask, as written by
+<a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process" title="pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pre_process()</span></code></a> – not a prefix length as in
+<a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.post_process" title="pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6InterfaceField.post_process()</span></code></a>.</p>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -577,7 +583,17 @@
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Processed field value.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If the trailing octet is not a valid IPv6 prefix
+    length, i.e. greater than 128.</p>
+</dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The trailing octet is the prefix length as a binary integer, as
+written by <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.pre_process" title="pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pre_process()</span></code></a> – not a dotted netmask as in
+<a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.post_process" title="pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4InterfaceField.post_process()</span></code></a>.</p>
+</div>
 </dd></dl>
 
 </dd></dl>

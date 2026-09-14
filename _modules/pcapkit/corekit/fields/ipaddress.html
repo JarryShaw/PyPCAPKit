@@ -622,6 +622,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            The trailing four octets are a dotted netmask, as written by</span>
+<span class="sd">            :meth:`pre_process` -- not a prefix length as in</span>
+<span class="sd">            :meth:`IPv6InterfaceField.post_process`.</span>
+
 <span class="sd">        """</span>
         <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">4</span><span class="p">:])</span>
@@ -694,11 +699,23 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If the trailing octet is not a valid IPv6 prefix</span>
+<span class="sd">                length, i.e. greater than 128.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            The trailing octet is the prefix length as a binary integer, as</span>
+<span class="sd">            written by :meth:`pre_process` -- not a dotted netmask as in</span>
+<span class="sd">            :meth:`IPv4InterfaceField.post_process`.</span>
+
 <span class="sd">        """</span>
         <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="mi">16</span><span class="p">])</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">16</span><span class="p">:])</span>
+        <span class="n">prefixlen</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
 
-        <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">mask</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefixlen</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid IPv6 prefix length: </span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IP version mismatch: </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">val</span></div>

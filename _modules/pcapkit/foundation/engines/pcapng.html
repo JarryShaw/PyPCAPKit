@@ -413,6 +413,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'PCAPNG'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">Data_PCAPNG</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomBlock</span> <span class="k">as</span> <span class="n">Data_CustomBlock</span>
@@ -494,6 +496,16 @@
         <span class="sa">b</span><span class="s1">'</span><span class="se">\x0a\x0d\x0d\x0a</span><span class="s1">'</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="c1">#: Block types that carry a captured packet, mapped to the tag used when</span>
+    <span class="c1">#: reporting them. Parsing any of them resolves the interface the packet was</span>
+    <span class="c1">#: captured on, so the enclosing section must describe at least one</span>
+    <span class="c1">#: interface before such a block can be read at all.</span>
+    <span class="n">PACKET_BLOCK_TYPES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">:</span> <span class="s1">'SPB'</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">:</span> <span class="s1">'EPB'</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span>
+    <span class="p">}</span>  <span class="c1"># type: dict[int, str]</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
@@ -567,6 +579,11 @@
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># a packet block resolves the interface it was captured on while it</span>
+            <span class="c1"># is being parsed, so a section that has not described one yet has to</span>
+            <span class="c1"># be rejected before the block is read, not after</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_packet_block_context</span><span class="p">()</span>
+
             <span class="c1"># read next block</span>
             <span class="n">block</span> <span class="o">=</span> <span class="n">P_PCAPNG</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">sct</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span><span class="p">),</span>
                              <span class="n">ctx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="p">,</span>
@@ -618,8 +635,12 @@
                 <span class="k">break</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [SPB] invalid section with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">)</span><span class="si">}</span><span class="s1"> interfaces'</span><span class="p">)</span>
+                <span class="c1"># an SPB has no interface ID field, so it refers to the interface</span>
+                <span class="c1"># described by the section's first IDB; a section with several</span>
+                <span class="c1"># interfaces is legal and merely means the other interfaces have</span>
+                <span class="c1"># to use an EPB instead (Section 4.4 of the PCAP-NG specification)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="s1">'PCAP-NG: [SPB] section has no interface description block'</span><span class="p">)</span>
                 <span class="k">break</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">:</span>
@@ -697,6 +718,50 @@
             <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
             <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_offmt</span> <span class="o">=</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_peek_block_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[int]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read the block type of the next block without consuming it.</span>
+
+<span class="sd">        The block type is the first 32-bit field of every block, read in the</span>
+<span class="sd">        byte order declared by the enclosing section header block (SHB).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Block type of the next block, or :obj:`None` if the input file does</span>
+<span class="sd">            not have a whole block type field left to read.</span>
+
+<span class="sd">        """</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
+
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="mi">4</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_packet_block_context</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reject a packet block in a section that describes no interface.</span>
+
+<span class="sd">        Every packet block -- Simple Packet Block (SPB), Enhanced Packet Block</span>
+<span class="sd">        (EPB) and the obsolete Packet Block -- resolves the interface it was</span>
+<span class="sd">        captured on while it is being parsed, from the Interface Description</span>
+<span class="sd">        Blocks (IDB) of its section. A section that carries a packet block</span>
+<span class="sd">        before any IDB is therefore unparseable rather than merely invalid, so</span>
+<span class="sd">        the check has to run before the block is read.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If the next block is a packet block while the current</span>
+<span class="sd">                section describes no interface.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">block_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_peek_block_type</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">block_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PACKET_BLOCK_TYPES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s1">] section has no interface description block'</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_snaplen</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Get snapshot length from the current context.</span>

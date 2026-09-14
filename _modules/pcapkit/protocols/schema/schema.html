@@ -1004,11 +1004,21 @@
 <span class="sd">            of the remaining data, which is used to determine the length of</span>
 <span class="sd">            the payload field.</span>
 
-<span class="sd">            And a ``__padding_length__`` key in the ``packet`` to record the</span>
-<span class="sd">            length of the padding field after an</span>
-<span class="sd">            :class:`~pcapkit.corekit.fields.collections.OptionField`, which</span>
-<span class="sd">            is used to potentially determine the length of the remaining</span>
-<span class="sd">            padding field data.</span>
+<span class="sd">            And an ``__option_padding__`` key in the ``packet`` to record how</span>
+<span class="sd">            much of an</span>
+<span class="sd">            :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared</span>
+<span class="sd">            area it did not consume. What follows that area decides what the</span>
+<span class="sd">            remainder means: usually padding, to be skipped, but a schema may</span>
+<span class="sd">            equally read it as further options, as the PCAP-NG name resolution</span>
+<span class="sd">            block does with its records and options.</span>
+
+<span class="sd">            An :class:`~pcapkit.corekit.fields.collections.OptionField`</span>
+<span class="sd">            declares the size of the whole area it may read, but stops at the</span>
+<span class="sd">            end-of-option-list marker and reports the unconsumed remainder</span>
+<span class="sd">            through ``__option_padding__``. Since that remainder has not been</span>
+<span class="sd">            parsed, we rewind ``data`` by it, so that the fields which size</span>
+<span class="sd">            themselves from ``__option_padding__`` read the remainder itself</span>
+<span class="sd">            rather than the same number of octets from beyond it.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># force cast arg type since decorator changed their signatures</span>
@@ -1064,6 +1074,15 @@
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">OptionField</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># the option list ended before the declared field length was</span>
+                <span class="c1"># exhausted; give the unconsumed remainder back to ``data``</span>
+                <span class="c1"># so that the following fields can read it</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">field</span><span class="o">.</span><span class="n">option_padding</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+                <span class="n">consumed</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span><span class="p">[:</span><span class="n">consumed</span><span class="p">]</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">consumed</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
 

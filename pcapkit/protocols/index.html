@@ -722,11 +722,20 @@ in the <code class="docutils literal notranslate"><span class="pre">packet</span
 <p>We used a <code class="docutils literal notranslate"><span class="pre">__length__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code> to record the length
 of the remaining data, which is used to determine the length of
 the payload field.</p>
-<p>And a <code class="docutils literal notranslate"><span class="pre">__padding_length__</span></code> key in the <code class="docutils literal notranslate"><span class="pre">packet</span></code> to record the
-length of the padding field after an
-<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a>, which
-is used to potentially determine the length of the remaining
-padding field data.</p>
+<p>And an <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key in the <code class="docutils literal notranslate"><span class="pre">packet</span></code> to record how
+much of an
+<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a>’s declared
+area it did not consume. What follows that area decides what the
+remainder means: usually padding, to be skipped, but a schema may
+equally read it as further options, as the PCAP-NG name resolution
+block does with its records and options.</p>
+<p>An <a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a>
+declares the size of the whole area it may read, but stops at the
+end-of-option-list marker and reports the unconsumed remainder
+through <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code>. Since that remainder has not been
+parsed, we rewind <code class="docutils literal notranslate"><span class="pre">data</span></code> by it, so that the fields which size
+themselves from <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> read the remainder itself
+rather than the same number of octets from beyond it.</p>
 </div>
 </dd></dl>
 

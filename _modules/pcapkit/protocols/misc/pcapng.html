@@ -2398,7 +2398,8 @@
             <span class="n">original_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">original_length</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">linktype</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">interface_id</span><span class="p">),</span>
+                                       <span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG._read_pcapng_options">
@@ -4366,9 +4367,15 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
+        <span class="c1"># NOTE: ``-n % 4`` is the octet count needed to reach the next 32-bit</span>
+        <span class="c1"># boundary, and zero when already there. Integer arithmetic throughout,</span>
+        <span class="c1"># unlike the ``math.ceil(n / 4) * 4 - n`` idiom used elsewhere in this</span>
+        <span class="c1"># file, which routes a length through a float.</span>
         <span class="n">cb_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)</span> <span class="k">else</span> <span class="n">data</span>
+        <span class="n">cb_data</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">cb_data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options_value</span><span class="p">:</span>
             <span class="n">cb_data</span> <span class="o">+=</span> <span class="n">option</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)</span> <span class="k">else</span> <span class="n">option</span>
+        <span class="n">cb_data</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">cb_data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_CustomBlock</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cb_data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span>
