@@ -58,10 +58,12 @@ look like for a datagram to come out of it at all:
    data of its own. Both fixtures therefore keep each direction of each
    connection to a single HTTP message, and let the peer answer only with pure
    acknowledgements until that message is complete.
-3. A datagram counts as complete when the hole descriptor list is down to two
-   entries or fewer, which an ordered run of segments plus a FIN or RST
-   achieves; an out-of-order segment adds a third entry that the missing
-   segment's arrival then removes.
+3. A datagram counts as complete when no hole in the descriptor list falls
+   inside the octets that direction actually received. An ordered run of
+   segments leaves only the open-ended hole past the last octet, which is
+   outside the payload buffer and so does not count; an out-of-order segment
+   opens a hole in the middle, and the missing segment's arrival closes it
+   again.
 4. The payload of a complete datagram goes to
    :meth:`pcapkit.protocols.transport.transport.Transport.analyze`, which
    picks the application protocol from the two port numbers. Port 80 is what
@@ -71,17 +73,28 @@ One absence is deliberate and worth flagging, because it looks like an
 oversight and is not: neither fixture contains a datagram that reassembles
 *incompletely*, even though ``test_reassembly.py`` and ``test_analyse.py`` both
 have a branch for one -- a payload that is a tuple of received fragments, and a
-``packet`` of :data:`None`. That branch cannot be reached from a realistic
-capture. ``submit`` slices the payload buffer with the bounds of each hole, but
-those bounds are absolute TCP sequence numbers (``first=tcp_info.seq`` in
-``pcapkit/toolkit/pcap.py``) while the buffer is indexed from the start of the
-direction's data, so with any real initial sequence number every slice starts
-far beyond the end of the buffer, every fragment comes out empty, and ``if
-data:`` discards the datagram without a word. Measured on a probe capture with
-one segment permanently missing: a realistic initial sequence number yields no
-datagram for that direction at all, and only an initial sequence number of zero
-produces the tuple these scripts print. A fixture cannot have both a real
-handshake and that branch, so it has the real handshake.
+``packet`` of :data:`None`. Nothing prevents that branch any more; it is simply
+that every stream in these two captures arrives whole. Each direction here is
+sent in full and every segment eventually delivered, some of them out of order
+and one retransmitted, so the holes that open all close again before the FIN or
+RST that submits the buffer.
+
+It used to be that no capture could reach that branch at all, which is how the
+absence started. ``submit`` sliced the payload buffer with the bounds of each
+hole, but those bounds were absolute TCP sequence numbers
+(``first=tcp_info.seq`` in ``pcapkit/toolkit/pcap.py``) while the buffer is
+indexed from the start of the direction's data, so with any real initial
+sequence number every slice started far beyond the end of the buffer, every
+fragment came out empty, and ``if data:`` discarded the datagram without a word.
+That is fixed -- ``submit`` now converts each hole's absolute bounds into
+offsets into the buffer it is reading, and decides completeness from whether any
+hole survives that conversion -- and GitHub issue #349 records the whole of it.
+Regenerating these two fixtures to carry a permanently lost segment as well was
+considered and rejected: they are pinned byte-for-byte by the test suite, and a
+stream with a hole in it is cheaper to build segment by segment than to read out
+of a capture. ``tests/foundation/reassembly/test_tcp.py`` therefore covers the
+incomplete branch directly, with realistic initial sequence numbers, while
+these captures go on covering the complete one end to end.
 
 """
 

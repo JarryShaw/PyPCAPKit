@@ -178,6 +178,13 @@ class ScapyToolkitTests(unittest.TestCase):
         self.assertFalse(tcp.rst)
         self.assertEqual(tcp.header, bytes(tcp_layer)[:tcp_layer.dataofs * 4])
         self.assertEqual(bytes(tcp.payload), bytes(tcp_layer[Raw]))
+        # ``first``/``last`` are absolute sequence numbers bounding the payload
+        # inclusively, so they span exactly ``len`` octets -- the same
+        # convention every other engine's toolkit has to use, since they all
+        # feed the one reassembler
+        self.assertEqual(tcp.first, tcp_layer.seq)
+        self.assertEqual(tcp.last, tcp_layer.seq + tcp.len - 1)
+        self.assertEqual(tcp.last - tcp.first + 1, tcp.len)
         v6_tcp = toolkit.tcp_reassembly(self._make_ipv6_tcp_packet(), count=9)
         self.assertIsNotNone(v6_tcp)
         assert v6_tcp is not None

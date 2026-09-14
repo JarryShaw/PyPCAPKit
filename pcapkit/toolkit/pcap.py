@@ -163,8 +163,8 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
             rst=tcp_info.flags.rst,                 # reset connection flag
             header=tcp.packet.header,               # raw bytes type header
             payload=bytearray(tcp.packet.payload),  # raw bytearray type payload
-            first=tcp_info.seq,                     # this sequence number
-            last=tcp_info.seq + raw_len,            # next (wanted) sequence number
+            first=tcp_info.seq,                     # first sequence number of payload
+            last=tcp_info.seq + raw_len - 1,        # last sequence number of payload
             len=raw_len,                            # payload length, header excludes
         )
         return data
