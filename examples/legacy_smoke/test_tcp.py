@@ -2,4 +2,4 @@
 
 import pcapkit
 
-plist = pcapkit.extract(fin='../sample/tcp.pcap', fout='../sample/tcp.txt', format='tree', verbose=True)
+plist = pcapkit.extract(fin='../captures/tcp.pcap', fout='../captures/tcp.txt', format='tree', verbose=True)

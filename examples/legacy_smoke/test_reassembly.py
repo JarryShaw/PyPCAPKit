@@ -7,16 +7,16 @@ import textwrap
 import pcapkit
 from pcapkit.protocols import data
 
-os.system('> ../sample/out')  # nosec: B605 B607
+os.system('> ../captures/out')  # nosec: B605 B607
 
 extraction = pcapkit.extract(
-    fin='../sample/test.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
+    fin='../captures/test.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
     store=False, tcp=True, verbose=True, reasm_strict=True, nofile=True, reassembly=True,
 )
 # pprint.pprint(extraction.frame)
 print()
 
-with open('../sample/out', 'a') as file:  # pylint: disable=unspecified-encoding
+with open('../captures/out', 'a') as file:  # pylint: disable=unspecified-encoding
     # pprint.pprint(extraction.reassembly.tcp)
     for datagram in extraction.reassembly.tcp:
         print(f'completed = {datagram.completed}')

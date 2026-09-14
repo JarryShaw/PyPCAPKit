@@ -2,7 +2,7 @@
 
 import pcapkit
 
-for frame in pcapkit.extract(fin='../sample/http.pcap', nofile=True, auto=False):
+for frame in pcapkit.extract(fin='../captures/http.pcap', nofile=True, auto=False):
     # check if this frame contains HTTP
     if pcapkit.HTTP in frame:
         # print frame number & its protocols chain

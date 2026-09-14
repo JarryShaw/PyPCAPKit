@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Regenerate the sample captures used by the test suite and the examples.
 
-The captures under ``examples/sample/`` are not tracked in git (see
+The captures under ``examples/captures/`` are not tracked in git (see
 ``.gitignore``), yet the runtime, regression and integration tests read them and
 pin their contents, as do the demonstration scripts in
 ``examples/legacy_smoke/``. This script rebuilds the whole set, so a fresh clone
@@ -9,7 +9,7 @@ can run ``pytest`` without any ignore flags:
 
 .. code-block:: shell
 
-   python examples/samples/make_samples.py        # or: make samples
+   python examples/generators/make_samples.py        # or: make samples
 
 The fixtures themselves come from the sibling modules in this directory, each of
 which may also be run on its own:
@@ -43,7 +43,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Directory holding this script and its sibling generator modules.
 HERE = pathlib.Path(__file__).resolve().parent
 #: Destination directory for every generated capture.
-DEST = ROOT / 'examples' / 'sample'
+DEST = ROOT / 'examples' / 'captures'
 #: Generator modules, in the order they are run.
 GENERATORS = ('pcap', 'pcapng', 'legacy')
 
@@ -73,7 +73,7 @@ def load(name: 'str') -> 'ModuleType':
 
 
 def main() -> 'int':
-    """Write every sample capture into ``examples/sample/``."""
+    """Write every sample capture into ``examples/captures/``."""
     DEST.mkdir(parents=True, exist_ok=True)
 
     written = []  # type: list[pathlib.Path]

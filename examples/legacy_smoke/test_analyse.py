@@ -5,7 +5,7 @@ import pprint
 import pcapkit
 
 extraction = pcapkit.extract(
-    fin='../sample/http6.cap',  # fout='../sample/http.txt', format='tree',
+    fin='../captures/http6.cap',  # fout='../captures/http.txt', format='tree',
     store=False, tcp=True, verbose=True, nofile=True, reasm_strict=True, extension=False
 )
 # pprint.pprint(extraction.reassembly.tcp)

@@ -7,14 +7,14 @@ import types
 from typing import Iterable
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SAMPLE_ROOT = ROOT / 'examples' / 'sample'
-REGENERATE_SAMPLES_CMD = 'python examples/samples/make_samples.py'
+SAMPLE_ROOT = ROOT / 'examples' / 'captures'
+REGENERATE_SAMPLES_CMD = 'python examples/generators/make_samples.py'
 
 
 def sample_path(name: str) -> str:
     """Resolve a sample capture file name to its absolute path.
 
-    The sample captures live in :file:`examples/sample/` under the repository
+    The sample captures live in :file:`examples/captures/` under the repository
     root. Tests go through this helper rather than spelling that directory out,
     so that the location is recorded in exactly one place and so that the suite
     does not depend on the working directory :program:`pytest` was invoked from.
