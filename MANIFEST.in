@@ -8,6 +8,7 @@ prune .github
 prune .venv
 prune docs
 prune examples/captures
+prune examples/sample
 prune temp
 prune test
 
