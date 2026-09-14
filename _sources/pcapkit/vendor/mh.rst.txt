@@ -88,7 +88,7 @@ vendor crawlers include:
      - Link-Layer Address (LLA) Option Code [*]_
    * - :class:`MH_CGAType <pcapkit.vendor.mh.cga_type.CGAType>`
      - CGA Extension Type Tags [*]_
-   * - :class:`MH_CGAExtension <pcapkit.vendor.mh.cga_type.CGAExtension>`
+   * - :class:`MH_CGAExtension <pcapkit.vendor.mh.cga_extension.CGAExtension>`
      - CGA Extension Type Values [*]_
    * - :class:`MH_CGASec <pcapkit.vendor.mh.cga_sec.CGASec>`
      - CGA SEC [*]_
