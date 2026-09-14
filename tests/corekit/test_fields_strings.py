@@ -53,6 +53,43 @@ class BitFieldTests(unittest.TestCase):
         self.assertEqual(field.pre_process({'flag': 1}, {}), b'\x10\x00')
         self.assertEqual(field.pre_process({'flag': 0}, {}), b'\x00\x00')
 
+    def test_a_subfield_reaching_past_the_field_is_rejected_at_declaration(self) -> None:
+        """A namespace entry wider than the field is a schema mistake.
+
+        Slice assignment on a :class:`bytearray` *grows* it, so declaring
+        ``ihl: (4, 8)`` on a one-octet field built a 12-bit buffer and then
+        failed in :meth:`int.to_bytes` with an opaque ``OverflowError``, far
+        from the declaration at fault. ``pcapkit/protocols/schema/internet/
+        ipv4.py`` really did carry that declaration.
+
+        """
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        with self.assertRaises(FieldValueError):
+            self.BitField(length=1, namespace={'version': (0, 4), 'ihl': (4, 8)})
+        with self.assertRaises(FieldValueError):
+            self.BitField(length=1, namespace={'flag': (8, 1)})
+        with self.assertRaises(FieldValueError):
+            self.BitField(length=1, namespace={'flag': (-1, 1)})
+
+    def test_a_value_too_wide_for_its_subfield_is_rejected(self) -> None:
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        field = self.BitField(length=1, namespace={'kind': (0, 3), 'value': (3, 5)})
+
+        with self.assertRaises(FieldValueError):
+            field.pre_process({'kind': 8, 'value': 0}, {})
+        self.assertEqual(field.pre_process({'kind': 7, 'value': 31}, {}), b'\xff')
+
+    def test_ipv4_version_and_ihl_pack_into_one_octet(self) -> None:
+        """The real declaration this guard was written for."""
+        from pcapkit.protocols.schema.internet.ipv4 import IPv4
+
+        field = IPv4.__fields__['vihl']
+
+        self.assertEqual(field.pre_process({'version': 4, 'ihl': 5}, {}), b'\x45')
+        self.assertEqual(field.post_process(b'\x45', {}), {'version': 4, 'ihl': 5})
+
     def test_pack_and_parse_round_trip(self) -> None:
         for value in ({'a': 0, 'b': 0, 'c': 0, 'd': 0},
                       {'a': 0, 'b': 0, 'c': 0, 'd': 1},

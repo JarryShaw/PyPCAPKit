@@ -526,7 +526,7 @@ class IPv4(Schema):
     #: Version and header length.
     vihl: 'VerIHLField' = BitField(length=1, namespace={
         'version': (0, 4),
-        'ihl': (4, 8),
+        'ihl': (4, 4),
     })
     #: Type of service.
     tos: 'ToSField' = BitField(length=1, namespace={
