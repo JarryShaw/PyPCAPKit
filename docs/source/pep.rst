@@ -78,7 +78,7 @@ Test Cases
    (84 modules), bundled with the distribution, and it runs in CI against Python
    3.10 through 3.14 (see ``.github/workflows/unit-tests.yml``). The sample
    captures the runtime, regression and integration tiers read are not tracked in
-   git, so ``examples/samples/make_samples.py`` (``make samples``) rebuilds them
+   git, so ``examples/generators/make_samples.py`` (``make samples``) rebuilds them
    from source.
 
    What remains wanted is coverage rather than infrastructure: the protocols and

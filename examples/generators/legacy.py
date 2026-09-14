@@ -2,7 +2,7 @@
 """Generate the extra sample captures the legacy smoke scripts read.
 
 The demonstration scripts under ``examples/legacy_smoke/`` predate the test
-suite and read their captures out of ``examples/sample/`` by relative path.
+suite and read their captures out of ``examples/captures/`` by relative path.
 Most of them read fixtures the sibling generators in this directory already
 write, but two read captures that exist nowhere in the repository, so those two
 scripts cannot run at all on a fresh checkout. This module writes them, with
@@ -107,7 +107,7 @@ __all__ = ['generate']
 #: Repository root, i.e. the grandparent of the directory holding this file.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Default destination directory for the generated captures.
-SAMPLE = ROOT / 'examples' / 'sample'
+SAMPLE = ROOT / 'examples' / 'captures'
 
 #: Capture start time, fixed so that regenerating gives identical files.
 EPOCH = 1500000000.0
@@ -605,7 +605,7 @@ class _Flow:
 
 
 ###############################################################################
-# examples/sample/test.pcap
+# examples/captures/test.pcap
 ###############################################################################
 
 #: Client of both connections in ``test.pcap``, and of ``http6.cap``.
@@ -725,7 +725,7 @@ def _write_test(dest: 'pathlib.Path') -> 'pathlib.Path':
 
 
 ###############################################################################
-# examples/sample/http6.cap
+# examples/captures/http6.cap
 ###############################################################################
 
 #: The IPv6 web server of ``http6.cap``, and the name it answers to.
@@ -807,7 +807,7 @@ def generate(dest: 'pathlib.Path | None' = None) -> 'list[pathlib.Path]':
     """Write the legacy-smoke sample fixtures.
 
     Args:
-        dest: Destination directory; ``examples/sample/`` under the repository
+        dest: Destination directory; ``examples/captures/`` under the repository
             root, if not given. Created if it does not exist.
 
     Returns:

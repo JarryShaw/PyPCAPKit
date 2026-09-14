@@ -187,16 +187,16 @@ tracked in the repository:
 
 The runtime, regression and integration tests additionally read sample captures
 that are **not** tracked (see ``.gitignore``);
-``examples/samples/make_samples.py`` reconstructs them into ``examples/sample/``,
+``examples/generators/make_samples.py`` reconstructs them into ``examples/captures/``,
 and ``make test-all`` regenerates them before running the whole suite:
 
 .. code-block:: shell
 
-   make samples     # write examples/sample/*.pcap and *.pcapng
+   make samples     # write examples/captures/*.pcap and *.pcapng
    make test-all    # regenerate the fixtures, then run every test
 
 The same fixtures back the demonstration scripts in
-``examples/legacy_smoke/``, which read them as ``../sample/…``.
+``examples/legacy_smoke/``, which read them as ``../captures/…``.
 
 Continuous integration runs the ``make test`` selection, since the fixtures are
 not in the repository. ``tshark`` is only required to exercise the PyShark

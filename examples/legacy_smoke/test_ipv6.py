@@ -3,6 +3,6 @@
 import pcapkit
 
 extraction = pcapkit.extract(
-    fin='../sample/ipv6.pcap', fout='../sample/ipv6', format='tree',
+    fin='../captures/ipv6.pcap', fout='../captures/ipv6', format='tree',
     files=True, verbose=True, store=False
 )

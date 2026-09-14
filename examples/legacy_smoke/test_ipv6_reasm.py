@@ -5,15 +5,15 @@ import textwrap
 
 import pcapkit
 
-os.system('> ../sample/out')  # nosec: B605 B607
+os.system('> ../captures/out')  # nosec: B605 B607
 
 extraction = pcapkit.extract(
-    fin='../sample/ipv6.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
+    fin='../captures/ipv6.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
     store=False, ipv6=True, verbose=True, reasm_strict=True, nofile=True, reassembly=True,
 )
 # pprint.pprint(extraction.frame)
 
-with open('../sample/out', 'a') as file:  # pylint: disable=unspecified-encoding
+with open('../captures/out', 'a') as file:  # pylint: disable=unspecified-encoding
     # pprint.pprint(extraction.reassembly.ipv6)
     for datagram in extraction.reassembly.ipv6:
         print(f'completed = {datagram.completed}')

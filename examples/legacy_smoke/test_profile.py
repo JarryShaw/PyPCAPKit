@@ -6,7 +6,7 @@ import pcapkit
 
 
 def test() -> 'None':
-    pcapkit.extract(fin='../sample/http.pcap', store=True,
+    pcapkit.extract(fin='../captures/http.pcap', store=True,
                     nofile=True, engine='default', verbose=True)
 
 

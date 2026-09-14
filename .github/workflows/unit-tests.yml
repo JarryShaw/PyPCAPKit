@@ -83,8 +83,8 @@ jobs:
           allow-prereleases: ${{ matrix.experimental }}
           cache: pip
 
-      # The Scapy extra is there for examples/samples/pcap.py and legacy.py,
-      # which build their captures with scapy; examples/samples/pcapng.py needs
+      # The Scapy extra is there for examples/generators/pcap.py and legacy.py,
+      # which build their captures with scapy; examples/generators/pcapng.py needs
       # nothing beyond the standard library and pcapkit itself, which it uses to
       # parse each fixture back.
       - name: Install package, test and generator dependencies
@@ -100,12 +100,12 @@ jobs:
           # Keep a failure here legible as what it is -- the fixtures could not
           # be built, so no test has run yet and nothing is wrong with the code
           # under test.
-          if ! python examples/samples/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
-            echo "::error title=Sample fixture generation failed::examples/samples/make_samples.py could not rebuild examples/sample/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
+          if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
+            echo "::error title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
             exit 1
           fi
 
-          # examples/samples/pcapng.py fetches two captures from the Wireshark
+          # examples/generators/pcapng.py fetches two captures from the Wireshark
           # repository and synthesises stand-ins when the download fails. The
           # stand-ins parse, and tests/protocols/test_pcapng_regression.py only
           # asserts that extraction succeeds, so a degraded run goes green and
@@ -143,8 +143,8 @@ jobs:
       - name: Regenerate sample captures
         shell: bash
         run: |
-          if ! python examples/samples/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
-            echo "::error title=Sample fixture generation failed::examples/samples/make_samples.py could not rebuild examples/sample/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
+          if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
+            echo "::error title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
             exit 1
           fi
 
