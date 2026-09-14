@@ -71,25 +71,25 @@ to carry them -- not because pcapkit cannot read them:
   no attribute '_info'`` (GitHub issue #345). The block MUST NOT appear in new
   files, so a fixture carrying one would be documenting the past.
 
-One construct still raises on spec-conformant input, so no fixture here contains
-it -- a fixture that cannot be parsed at all is of no use to a regression test:
+Two further constructs used to be avoided rather than covered, and both are
+**fixed** now, so the fixtures carry them as regression cover:
 
 * **``if_IPv6addr``** -- ``IPv6InterfaceField.post_process`` in
-  ``pcapkit/corekit/fields/ipaddress.py`` reads the trailing prefix-length
-  octet as ``int(value[16:])``, i.e. it parses a raw byte as an ASCII decimal
-  string, so a ``/64`` prefix raises ``ValueError``.
-
-A further defect is worked around rather than avoided. A **Simple Packet Block**
-in a section declaring more than one interface raises ``FormatError: PCAP-NG:
-[SPB] invalid section with 2 interfaces`` at
-``pcapkit/foundation/engines/pcapng.py:218``, which tests
-``len(interfaces) != 1``. The format specification (section 4.4 of
-draft-ietf-opsawg-pcapng) permits it -- "in a Section that has more than one
-interface, only packets received or transmitted on the interface described by
-the first Interface Description Block can be contained in a Simple Packet
-Block" -- so the correct check is for *zero* interfaces, not for more than one.
-``test.pcapng`` therefore carries its simple packet block in its
-single-interface second section, which keeps the block type covered.
+  ``pcapkit/corekit/fields/ipaddress.py`` read the trailing prefix-length octet
+  as ``int(value[16:])``, i.e. it parsed a raw byte as an ASCII decimal string,
+  so a ``/64`` prefix raised ``ValueError`` and only the ten lengths 48-57
+  parsed at all -- each of them to the wrong value (GitHub issue #346). Every
+  interface built by :func:`_interface_profile` now carries the option, using
+  the ``/64`` address from section 4.2 of the format specification.
+* **Simple Packet Block** in a multi-interface section -- the engine raised
+  ``FormatError: PCAP-NG: [SPB] invalid section with 2 interfaces`` for any
+  simple packet block in a section declaring more than one interface, which the
+  format specification (section 4.4 of draft-ietf-opsawg-pcapng) permits: it
+  says only that such a block then refers to the interface described by the
+  first Interface Description Block, not that it is invalid. The check is for
+  *zero* interfaces now (GitHub issue #347), so ``test.pcapng`` carries its
+  simple packet block in the two-interface first section, which is the case
+  that used to be rejected.
 
 Three further defects were exercised on purpose, because they warned rather than
 raised, and a fixture that covers the code path is what will catch a future
@@ -464,9 +464,9 @@ def _interface_profile(writer: '_Blocks', name: 'str', description: 'str',
                        resolution: 'int' = 6) -> 'list[tuple[int, bytes]]':
     """The full set of ``if_*`` options pcapkit can parse for one interface.
 
-    ``if_IPv6addr`` is the one omission, and it is omitted because pcapkit
-    raises on it rather than because it does not belong here -- see the module
-    docstring.
+    ``if_IPv6addr`` used to be the one omission, because pcapkit raised on it
+    rather than because it did not belong here; it is included now that the
+    prefix-length octet is read correctly -- see the module docstring.
 
     Args:
         writer: Writer whose byte order the option values are packed in.
@@ -483,6 +483,10 @@ def _interface_profile(writer: '_Blocks', name: 'str', description: 'str',
         (IF_NAME, name.encode('utf-8')),
         (IF_DESCRIPTION, description.encode('utf-8')),
         (IF_IPV4ADDR, octets + bytes([255, 255, 255, 0])),
+        # The address from section 4.2 of draft-ietf-opsawg-pcapng, whose /64
+        # prefix is the case that used to raise: the trailing octet is 0x40,
+        # which read as an ASCII decimal string is the character ``@``.
+        (IF_IPV6ADDR, bytes.fromhex('20010db885a308d313198a2e03707344') + bytes([64])),
         (IF_MACADDR, mac),
         (IF_EUIADDR, mac[:3] + b'\xff\xfe' + mac[3:]),
         (IF_SPEED, writer.pack('Q', 1_000_000_000)),
@@ -572,11 +576,12 @@ def build_test() -> 'bytes':
     Two sections, so the section-scoped interface table is exercised too:
 
     1. an Ethernet and a raw-IPv4 interface, three packets between them --
-       including one truncated -- then a name resolution block, an interface
-       statistics block, a decryption secrets block and a journal export block;
+       including one truncated -- a simple packet block, which belongs here
+       precisely because the section declares two interfaces, then a name
+       resolution block, an interface statistics block, a decryption secrets
+       block and a journal export block;
     2. a second section header with its own interface, which must not inherit
-       anything from the first, one packet, and the simple packet block (see the
-       comment at the end of this function for why it lives here).
+       anything from the first, and one packet.
 
     """
     writer = _Blocks('<')
@@ -603,6 +608,12 @@ def build_test() -> 'bytes':
     # A truncated packet, so snaplen handling is exercised as well.
     blocks.append(writer.epb(0, _timestamp(2_000), packets[2][:32],
                              original_len=len(packets[2])))
+
+    # The simple packet block sits in this section, which declares two
+    # interfaces, because that is the shape the engine used to reject: the
+    # format spec says such a block refers to the first interface description
+    # block, not that it is invalid (GitHub issue #347).
+    blocks.append(writer.spb(packets[3]))
 
     # Name resolution. The IPv6 record is included knowing pcapkit mis-sizes
     # it -- covering the path is what catches a future crash there.
@@ -637,17 +648,6 @@ def build_test() -> 'bytes':
     ] + _timestamp_options(writer)))
     blocks.append(writer.epb(0, _timestamp(5_000), packets[0],
                              [(OPT_COMMENT, b'first packet of the second section')]))
-
-    # The simple packet block lives here, in the single-interface section,
-    # rather than in the first section where it would fit the narrative better.
-    # pcapkit's PCAP-NG engine raises ``FormatError: PCAP-NG: [SPB] invalid
-    # section with 2 interfaces`` at ``pcapkit/foundation/engines/pcapng.py:218``
-    # for any simple packet block in a section declaring more than one
-    # interface, which the format spec permits: it says only that such a block
-    # then refers to the first interface description block, not that it is
-    # invalid. Putting it here keeps the block type covered without shipping a
-    # fixture the library cannot open.
-    blocks.append(writer.spb(packets[3]))
     return b''.join(blocks)
 
 
