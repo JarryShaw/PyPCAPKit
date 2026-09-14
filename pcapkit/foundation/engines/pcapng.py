@@ -20,6 +20,8 @@ from pcapkit.utilities.warnings import DeprecatedFormatWarning, warn
 __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
+    from typing import Optional
+
     from pcapkit.foundation.extraction import Extractor
     from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
     from pcapkit.protocols.data.misc.pcapng import CustomBlock as Data_CustomBlock
@@ -96,6 +98,16 @@ class PCAPNG(Engine[P_PCAPNG]):
         b'\x0a\x0d\x0d\x0a',
     )
 
+    #: Block types that carry a captured packet, mapped to the tag used when
+    #: reporting them. Parsing any of them resolves the interface the packet was
+    #: captured on, so the enclosing section must describe at least one
+    #: interface before such a block can be read at all.
+    PACKET_BLOCK_TYPES = {
+        Enum_BlockType.Simple_Packet_Block: 'SPB',
+        Enum_BlockType.Enhanced_Packet_Block: 'EPB',
+        Enum_BlockType.Packet_Block: 'Packet',
+    }  # type: dict[int, str]
+
     ##########################################################################
     # Defaults.
     ##########################################################################
@@ -164,6 +176,11 @@ class PCAPNG(Engine[P_PCAPNG]):
         ext = self._extractor
 
         while True:
+            # a packet block resolves the interface it was captured on while it
+            # is being parsed, so a section that has not described one yet has to
+            # be rejected before the block is read, not after
+            self._check_packet_block_context()
+
             # read next block
             block = P_PCAPNG(ext._ifile, num=ext._frnum+1, sct=len(self._ctx_list),
                              ctx=self._ctx, layer=ext._exlyr, protocol=ext._exptl,
@@ -215,8 +232,12 @@ class PCAPNG(Engine[P_PCAPNG]):
                 break
 
             elif block.info.type == Enum_BlockType.Simple_Packet_Block:
-                if len(self._ctx.interfaces) != 1:
-                    raise FormatError(f'PCAP-NG: [SPB] invalid section with {len(self._ctx.interfaces)} interfaces')
+                # an SPB has no interface ID field, so it refers to the interface
+                # described by the section's first IDB; a section with several
+                # interfaces is legal and merely means the other interfaces have
+                # to use an EPB instead (Section 4.4 of the PCAP-NG specification)
+                if not self._ctx.interfaces:
+                    raise FormatError('PCAP-NG: [SPB] section has no interface description block')
                 break
 
             elif block.info.type == Enum_BlockType.Packet_Block:
@@ -293,6 +314,50 @@ class PCAPNG(Engine[P_PCAPNG]):
             ext._ofile(block.to_dict(), name=name)
             ofile = ext._ofile
         ext._offmt = ofile.kind
+
+    def _peek_block_type(self) -> 'Optional[int]':
+        """Read the block type of the next block without consuming it.
+
+        The block type is the first 32-bit field of every block, read in the
+        byte order declared by the enclosing section header block (SHB).
+
+        Returns:
+            Block type of the next block, or :obj:`None` if the input file does
+            not have a whole block type field left to read.
+
+        """
+        ext = self._extractor
+
+        buffer = ext._ifile.peek(4)[:4]
+        if len(buffer) < 4:
+            return None
+        return int.from_bytes(buffer, self._ctx.section.byteorder)
+
+    def _check_packet_block_context(self) -> 'None':
+        """Reject a packet block in a section that describes no interface.
+
+        Every packet block -- Simple Packet Block (SPB), Enhanced Packet Block
+        (EPB) and the obsolete Packet Block -- resolves the interface it was
+        captured on while it is being parsed, from the Interface Description
+        Blocks (IDB) of its section. A section that carries a packet block
+        before any IDB is therefore unparseable rather than merely invalid, so
+        the check has to run before the block is read.
+
+        Raises:
+            FormatError: If the next block is a packet block while the current
+                section describes no interface.
+
+        """
+        if self._ctx.interfaces:
+            return
+
+        block_type = self._peek_block_type()
+        if block_type is None:
+            return
+
+        tag = self.PACKET_BLOCK_TYPES.get(block_type)
+        if tag is not None:
+            raise FormatError(f'PCAP-NG: [{tag}] section has no interface description block')
 
     def _get_snaplen(self) -> 'int':
         """Get snapshot length from the current context.

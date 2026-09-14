@@ -33,7 +33,9 @@ def make_extractor(**overrides):
     reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock())
     trace = types.SimpleNamespace(tcp=mock.Mock())
     values = {
-        '_ifile': io.BytesIO(b'capture'),
+        # ``Extractor`` always hands the engines a buffered (peekable) reader,
+        # which the PCAP-NG engine relies on to look at the next block type
+        '_ifile': io.BufferedReader(io.BytesIO(b'capture')),
         '_ifnm': 'capture.pcap',
         '_ofile': sink,
         '_ofnm': 'out',
