@@ -3706,11 +3706,15 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         else:
             options_value, _ = [], 0
 
+        # NOTE: ``-n % 4`` is the octet count needed to reach the next 32-bit
+        # boundary, and zero when already there. Integer arithmetic throughout,
+        # unlike the ``math.ceil(n / 4) * 4 - n`` idiom used elsewhere in this
+        # file, which routes a length through a float.
         cb_data = data.pack() if isinstance(data, Schema) else data
-        cb_data += bytes(math.ceil(len(cb_data) / 4) * 4 - len(cb_data))
+        cb_data += bytes(-len(cb_data) % 4)
         for option in options_value:
             cb_data += option.pack() if isinstance(option, Schema) else option
-        cb_data += bytes(math.ceil(len(cb_data) / 4) * 4 - len(cb_data))
+        cb_data += bytes(-len(cb_data) % 4)
 
         return Schema_CustomBlock(
             length=len(cb_data) + 16,

@@ -580,11 +580,13 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             of the remaining data, which is used to determine the length of
             the payload field.
 
-            And an ``__option_padding__`` key in the ``packet`` to record the
-            length of the padding field after an
-            :class:`~pcapkit.corekit.fields.collections.OptionField`, which
-            is used to potentially determine the length of the remaining
-            padding field data.
+            And an ``__option_padding__`` key in the ``packet`` to record how
+            much of an
+            :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared
+            area it did not consume. What follows that area decides what the
+            remainder means: usually padding, to be skipped, but a schema may
+            equally read it as further options, as the PCAP-NG name resolution
+            block does with its records and options.
 
             An :class:`~pcapkit.corekit.fields.collections.OptionField`
             declares the size of the whole area it may read, but stops at the
