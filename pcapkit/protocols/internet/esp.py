@@ -56,8 +56,33 @@ in :mod:`pcapkit.corekit.context`:
    )
    extraction = pcapkit.extract('esp.pcap', context=ESPContext(sa))
 
-Supported algorithms
---------------------
+Registered algorithms, and supported ones
+-----------------------------------------
+
+ESP has no algorithm registry of its own -- an SA's algorithms are negotiated
+by IKEv2 -- so :class:`Cipher <pcapkit.const.esp.cipher.Cipher>` and
+:class:`Integrity <pcapkit.const.esp.integrity.Integrity>` are generated from
+the IKEv2 *transform ID* sub-registries and enumerate everything **IANA has
+registered**: 3DES, AES-CTR, the AES-CCM and Camellia families,
+ChaCha20-Poly1305, the implicit IV variants of :rfc:`8750`, the :rfc:`9227`
+MGM suites, and the transforms long since deprecated.
+
+**Registration is not support.** A member of either enumeration says only that
+IANA assigned the transform an ID; what :mod:`pcapkit` can actually apply is
+the separate, explicit :data:`CIPHER_SUITES` and :data:`INTEGRITY_SUITES`
+tables, and :meth:`CipherSuite.get` / :meth:`IntegritySuite.get` refuse
+anything outside them rather than half-working:
+
+.. code-block:: python
+
+   >>> Cipher.get('ENCR_3DES')          # registered, so the enum has it
+   <Cipher.ENCR_3DES: 3>
+   >>> CipherSuite.get('ENCR_3DES')     # but ESP cannot apply it
+   Traceback (most recent call last):
+     ...
+   pcapkit.utilities.exceptions.ProtocolError: unsupported ESP encryption
+   algorithm: ENCR_3DES; pcapkit implements ENCR_NULL, ENCR_AES_CBC,
+   ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16
 
 Decryption requires the optional |cryptography|_ dependency
 (``pip install pypcapkit[crypto]``). :mod:`pcapkit` imports and works
@@ -65,7 +90,9 @@ without it; an SA that names an AES suite simply degrades to the opaque
 payload path, with a warning.
 
 The supported set is anchored on the *mandatory to implement* algorithms of
-:rfc:`8221`:
+:rfc:`8221`. The rows marked ``yes`` are exactly the keys of
+:data:`CIPHER_SUITES`; everything else the registry lists is enumerated and
+rejected.
 
 ============================ =================== ============ ==================================
 Encryption                   :rfc:`8221` status   Implemented  Notes
@@ -75,30 +102,42 @@ Encryption                   :rfc:`8221` status   Implemented  Notes
 ``ENCR_AES_GCM_16``          MUST                yes          :rfc:`4106`; 8-octet explicit IV
 ``ENCR_AES_GCM_8``           --                  yes          :rfc:`4106`, 8-octet ICV
 ``ENCR_AES_GCM_12``          --                  yes          :rfc:`4106`, 12-octet ICV
-``ENCR_AES_CCM_8``           SHOULD              **no**       not implemented
-``ENCR_CHACHA20_POLY1305``   SHOULD              **no**       not implemented
-``ENCR_3DES``                SHOULD NOT          **no**       deliberately omitted
-DES, Blowfish, 3IDEA         MUST NOT            **no**       deliberately omitted
+``ENCR_AES_CCM_8``           SHOULD              **no**       registered, not implemented
+``ENCR_CHACHA20_POLY1305``   SHOULD              **no**       registered, not implemented
+``ENCR_3DES``                SHOULD NOT          **no**       registered, deliberately omitted
+DES, Blowfish, 3IDEA         MUST NOT            **no**       registered, deliberately omitted
 ============================ =================== ============ ==================================
 
 "DES, Blowfish, 3IDEA" above covers ``ENCR_DES``, ``ENCR_DES_IV64``,
 ``ENCR_DES_IV32``, ``ENCR_BLOWFISH`` and ``ENCR_3IDEA``.
 
+Likewise, the rows marked ``yes`` below are exactly the keys of
+:data:`INTEGRITY_SUITES`:
+
 ============================ =================== ============ ==================================
 Integrity                    :rfc:`8221` status   Implemented  Notes
 ============================ =================== ============ ==================================
-``AUTH_NONE``                MUST (AEAD only)    yes          for AEAD suites
+``NONE``                     MUST (AEAD only)    yes          for AEAD suites
 ``AUTH_HMAC_SHA2_256_128``   MUST                yes          :rfc:`4868`
 ``AUTH_HMAC_SHA2_512_256``   SHOULD              yes          :rfc:`4868`
 ``AUTH_HMAC_SHA2_384_192``   --                  yes          :rfc:`4868`
 ``AUTH_HMAC_SHA1_96``        MUST-               yes          :rfc:`2404`; still widely captured
-``AUTH_AES_XCBC_96``         SHOULD / MAY        **no**       not implemented
-``AUTH_AES_*_GMAC``          MAY                 **no**       not implemented
-MD5, DES-MAC, KPDK-MD5       MUST NOT            **no**       deliberately omitted
+``AUTH_AES_XCBC_96``         SHOULD / MAY        **no**       registered, not implemented
+``AUTH_AES_*_GMAC``          MAY                 **no**       registered, not implemented
+MD5, DES-MAC, KPDK-MD5       MUST NOT            **no**       registered, deliberately omitted
 ============================ =================== ============ ==================================
 
 "MD5, DES-MAC, KPDK-MD5" above covers ``AUTH_HMAC_MD5_96``,
-``AUTH_DES_MAC`` and ``AUTH_KPDK_MD5``.
+``AUTH_HMAC_MD5_128``, ``AUTH_DES_MAC`` and ``AUTH_KPDK_MD5``. The registry
+spells the "no integrity algorithm" transform ``NONE`` rather than
+``AUTH_NONE``, and :attr:`Integrity.NONE
+<pcapkit.const.esp.integrity.Integrity.NONE>` follows it.
+
+Both enumerations additionally carry each transform's prefix-stripped spelling
+as an alias, since that is how ESP and :rfc:`8221` name the algorithms, so
+:attr:`Cipher.AES_CBC <pcapkit.const.esp.cipher.Cipher.AES_CBC>` and
+:attr:`Cipher.ENCR_AES_CBC <pcapkit.const.esp.cipher.Cipher.ENCR_AES_CBC>`
+are the same member.
 
 Known limitations
 -----------------
@@ -128,8 +167,10 @@ import hashlib
 import hmac
 import ipaddress
 import os
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, NamedTuple, overload
 
+from pcapkit.const.esp.cipher import Cipher
+from pcapkit.const.esp.integrity import Integrity
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.context import ProtocolContext
 from pcapkit.protocols.data.internet.esp import ESP as Data_ESP
@@ -139,7 +180,8 @@ from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, ProtocolUnbound
 from pcapkit.utilities.warnings import ProtocolWarning, warn
 
-__all__ = ['ESP', 'ESPStatus', 'Cipher', 'Integrity', 'SecurityAssociation', 'ESPContext']
+__all__ = ['ESP', 'ESPStatus', 'Cipher', 'Integrity', 'CipherSuite', 'IntegritySuite',
+           'CIPHER_SUITES', 'INTEGRITY_SUITES', 'SecurityAssociation', 'ESPContext']
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -193,201 +235,219 @@ def load_cryptography() -> 'Optional[tuple[Any, Any, Any, Type[Exception]]]':
 
 
 ##############################################################################
-# Algorithm registries.
+# Algorithm support.
 ##############################################################################
 
 
-class Cipher(enum.IntEnum):
-    """ESP encryption algorithms.
+def _resolve(registry: 'Type[Cipher] | Type[Integrity]', value: 'Any',
+             prefix: 'str', kind: 'str') -> 'Any':
+    """Resolve ``value`` to a member of an IKEv2 transform registry.
 
-    Values are the IKEv2 *Transform Type 1 (Encryption Algorithm)* IDs, so
-    that they line up with what an IKE exchange or a key log would name.
-    Only the members listed here are implemented; see the module docstring
-    for what is deliberately left out and why.
+    Args:
+        registry: :class:`Cipher <pcapkit.const.esp.cipher.Cipher>` or
+            :class:`Integrity <pcapkit.const.esp.integrity.Integrity>`.
+        value: A member of ``registry``, an IKEv2 transform ID, or a
+            transform name.
+        prefix: Prefix the registry spells its names with, i.e. ``'ENCR_'``
+            or ``'AUTH_'``.
+        kind: Word naming the registry for the error message, i.e.
+            ``'encryption'`` or ``'integrity'``.
+
+    Returns:
+        The corresponding member of ``registry``.
+
+    Raises:
+        ProtocolError: If ``value`` names nothing the registry holds.
+
+    Notes:
+        Both enumerations carry each transform's prefix-stripped spelling as
+        an alias, so a plain lookup already accepts ``'AES_CBC'`` as well as
+        ``'ENCR_AES_CBC'``. ``prefix`` is still needed for the few names that
+        are no Python identifier once stripped, and so have no alias --
+        ``ENCR_3DES`` and ``ENCR_3IDEA``.
+
+        Resolution is deliberately separate from *support*: it answers only
+        whether IANA registered the transform. See :meth:`CipherSuite.get`.
+
+    """
+    if isinstance(value, registry):
+        return value
+    if isinstance(value, int):
+        try:
+            return registry(value)
+        except ValueError:
+            raise ProtocolError(f'unknown ESP {kind} algorithm: {value}') from None
+
+    name = str(value).upper().replace('-', '_')
+    for candidate in (name, f'{prefix}{name}'):
+        if candidate in registry.__members__:
+            return registry[candidate]
+    raise ProtocolError(f'unknown ESP {kind} algorithm: {value!r}')
+
+
+class CipherSuite(NamedTuple):
+    """Parameters of an ESP encryption algorithm :mod:`pcapkit` implements.
+
+    A member of :class:`Cipher <pcapkit.const.esp.cipher.Cipher>` records only
+    that IANA registered the transform. This records how to apply it, and
+    membership of :data:`CIPHER_SUITES` is what "supported" means -- see the
+    module docstring.
 
     """
 
-    #: ``ENCR_NULL`` -- no encryption [:rfc:`2410`].
-    NULL = 11
-    #: ``ENCR_AES_CBC`` -- AES in CBC mode [:rfc:`3602`].
-    AES_CBC = 12
-    #: ``ENCR_AES_GCM_8`` -- AES-GCM with an 8-octet ICV [:rfc:`4106`].
-    AES_GCM_8 = 18
-    #: ``ENCR_AES_GCM_12`` -- AES-GCM with a 12-octet ICV [:rfc:`4106`].
-    AES_GCM_12 = 19
-    #: ``ENCR_AES_GCM_16`` -- AES-GCM with a 16-octet ICV [:rfc:`4106`].
-    AES_GCM_16 = 20
-
-    @property
-    def is_aead(self) -> 'bool':
-        """Whether the algorithm is a combined mode (AEAD) algorithm."""
-        return self in (Cipher.AES_GCM_8, Cipher.AES_GCM_12, Cipher.AES_GCM_16)
-
-    @property
-    def iv_length(self) -> 'int':
-        """Length of the explicit IV carried at the head of the payload data."""
-        if self is Cipher.AES_CBC:
-            return 16
-        if self.is_aead:
-            return 8
-        return 0
-
-    @property
-    def block_size(self) -> 'int':
-        """Cipher block size, in octets.
-
-        :rfc:`4303` §2.4 additionally requires the ciphertext to be a
-        multiple of 4 octets, which is why :meth:`ESP.make` aligns to
-        ``max(block_size, 4)`` rather than to this value alone.
-
-        """
-        return 16 if self is Cipher.AES_CBC else 1
-
-    @property
-    def icv_length(self) -> 'int':
-        """Length of the ICV produced by the algorithm itself (AEAD only)."""
-        if self is Cipher.AES_GCM_8:
-            return 8
-        if self is Cipher.AES_GCM_12:
-            return 12
-        if self is Cipher.AES_GCM_16:
-            return 16
-        return 0
-
-    @property
-    def key_sizes(self) -> 'tuple[int, ...]':
-        """Permitted lengths of the AES key, in octets, excluding any salt."""
-        if self is Cipher.NULL:
-            return (0,)
-        return (16, 24, 32)
-
-    @property
-    def salt_length(self) -> 'int':
-        """Length of the salt taken from the keying material [:rfc:`4106` §8.1]."""
-        return 4 if self.is_aead else 0
-
-    @property
-    def requires_cryptography(self) -> 'bool':
-        """Whether the algorithm needs the optional |cryptography|_ dependency."""
-        return self is not Cipher.NULL
+    #: Encryption algorithm the suite describes.
+    cipher: 'Cipher'
+    #: Whether the algorithm is a combined mode (AEAD) algorithm, i.e. one
+    #: that provides its own integrity protection.
+    is_aead: 'bool'
+    #: Length of the explicit IV carried at the head of the payload data.
+    iv_length: 'int'
+    #: Cipher block size, in octets. :rfc:`4303` §2.4 additionally requires
+    #: the ciphertext to be a multiple of 4 octets, which is why
+    #: :meth:`ESP.make` aligns to ``max(block_size, 4)`` rather than to this
+    #: value alone.
+    block_size: 'int'
+    #: Length of the ICV the algorithm itself produces (AEAD only).
+    icv_length: 'int'
+    #: Permitted lengths of the key, in octets, excluding any salt.
+    key_sizes: 'tuple[int, ...]'
+    #: Length of the salt taken from the keying material [:rfc:`4106` §8.1].
+    salt_length: 'int'
+    #: Whether the algorithm needs the optional |cryptography|_ dependency.
+    requires_cryptography: 'bool'
 
     @classmethod
-    def get(cls, value: 'Cipher | str | int') -> 'Cipher':
-        """Coerce ``value`` into a :class:`Cipher` member.
+    def get(cls, value: 'Cipher | str | int') -> 'CipherSuite':
+        """Look up how to apply an encryption algorithm.
 
         Args:
-            value: A member, an IKEv2 transform ID, or a name such as
-                ``'AES-CBC'``, ``'aes_gcm_16'`` or ``'ENCR_AES_GCM_16'``.
+            value: A :class:`Cipher <pcapkit.const.esp.cipher.Cipher>` member,
+                an IKEv2 transform ID, or a name such as ``'AES-CBC'``,
+                ``'aes_cbc'`` or ``'ENCR_AES_CBC'``.
 
         Returns:
-            The corresponding member.
+            The suite describing how to apply the algorithm.
 
         Raises:
-            ProtocolError: If ``value`` names no supported algorithm.
+            ProtocolError: If ``value`` names no registered algorithm, or
+                names one :mod:`pcapkit` does not implement. The registry is
+                far larger than the set of suites here, so the second case is
+                the common one.
 
         """
-        if isinstance(value, cls):
-            return value
-        if isinstance(value, int):
-            try:
-                return cls(value)
-            except ValueError:
-                raise ProtocolError(f'unsupported ESP encryption algorithm: {value}') from None
-
-        name = str(value).upper().replace('-', '_')
-        if name.startswith('ENCR_'):
-            name = name[5:]
-        try:
-            return cls[name]
-        except KeyError:
-            raise ProtocolError(f'unsupported ESP encryption algorithm: {value!r}') from None
+        cipher = _resolve(Cipher, value, 'ENCR_', 'encryption')
+        suite = CIPHER_SUITES.get(cipher)
+        if suite is None:
+            raise ProtocolError(f'unsupported ESP encryption algorithm: {cipher.name}; pcapkit '
+                                f'implements {", ".join(key.name for key in CIPHER_SUITES)}')
+        return suite
 
 
-class Integrity(enum.IntEnum):
-    """ESP integrity (authentication) algorithms.
+class IntegritySuite(NamedTuple):
+    """Parameters of an ESP integrity algorithm :mod:`pcapkit` implements.
 
-    Values are the IKEv2 *Transform Type 3 (Integrity Algorithm)* IDs.
+    As with :class:`CipherSuite`, membership of :data:`INTEGRITY_SUITES` --
+    not membership of the IANA registry -- is what makes an algorithm
+    supported.
 
     """
 
-    #: ``AUTH_NONE`` -- no separate integrity algorithm; valid only with an
-    #: AEAD encryption algorithm, or for an unprotected SA.
-    NONE = 0
-    #: ``AUTH_HMAC_SHA1_96`` [:rfc:`2404`].
-    HMAC_SHA1_96 = 2
-    #: ``AUTH_HMAC_SHA2_256_128`` [:rfc:`4868`].
-    HMAC_SHA2_256_128 = 12
-    #: ``AUTH_HMAC_SHA2_384_192`` [:rfc:`4868`].
-    HMAC_SHA2_384_192 = 13
-    #: ``AUTH_HMAC_SHA2_512_256`` [:rfc:`4868`].
-    HMAC_SHA2_512_256 = 14
-
-    @property
-    def digest(self) -> 'Optional[str]':
-        """Name of the underlying hash, for :func:`hmac.new`."""
-        return {
-            Integrity.HMAC_SHA1_96: 'sha1',
-            Integrity.HMAC_SHA2_256_128: 'sha256',
-            Integrity.HMAC_SHA2_384_192: 'sha384',
-            Integrity.HMAC_SHA2_512_256: 'sha512',
-        }.get(self)
-
-    @property
-    def icv_length(self) -> 'int':
-        """Length of the truncated ICV, in octets."""
-        return {
-            Integrity.HMAC_SHA1_96: 12,
-            Integrity.HMAC_SHA2_256_128: 16,
-            Integrity.HMAC_SHA2_384_192: 24,
-            Integrity.HMAC_SHA2_512_256: 32,
-        }.get(self, 0)
-
-    @property
-    def key_size(self) -> 'int':
-        """Key length required by the specification, in octets."""
-        return {
-            Integrity.HMAC_SHA1_96: 20,
-            Integrity.HMAC_SHA2_256_128: 32,
-            Integrity.HMAC_SHA2_384_192: 48,
-            Integrity.HMAC_SHA2_512_256: 64,
-        }.get(self, 0)
+    #: Integrity algorithm the suite describes.
+    integrity: 'Integrity'
+    #: Name of the underlying hash, for :func:`hmac.new`, or :data:`None` when
+    #: the algorithm computes no ICV of its own.
+    digest: 'Optional[str]'
+    #: Length of the truncated ICV, in octets.
+    icv_length: 'int'
+    #: Key length required by the specification, in octets.
+    key_size: 'int'
 
     @classmethod
-    def get(cls, value: 'Integrity | str | int') -> 'Integrity':
-        """Coerce ``value`` into an :class:`Integrity` member.
+    def get(cls, value: 'Integrity | str | int') -> 'IntegritySuite':
+        """Look up how to apply an integrity algorithm.
 
         Args:
-            value: A member, an IKEv2 transform ID, or a name such as
-                ``'HMAC-SHA-256-128'``, ``'hmac_sha2_256_128'`` or
-                ``'AUTH_HMAC_SHA2_256_128'``.
+            value: An :class:`Integrity
+                <pcapkit.const.esp.integrity.Integrity>` member, an IKEv2
+                transform ID, or a name such as ``'HMAC-SHA-256-128'``,
+                ``'hmac_sha2_256_128'`` or ``'AUTH_HMAC_SHA2_256_128'``.
 
         Returns:
-            The corresponding member.
+            The suite describing how to apply the algorithm.
 
         Raises:
-            ProtocolError: If ``value`` names no supported algorithm.
+            ProtocolError: If ``value`` names no registered algorithm, or
+                names one :mod:`pcapkit` does not implement.
 
         """
-        if isinstance(value, cls):
-            return value
-        if isinstance(value, int):
-            try:
-                return cls(value)
-            except ValueError:
-                raise ProtocolError(f'unsupported ESP integrity algorithm: {value}') from None
+        if isinstance(value, str):
+            # accept the RFC 4868 spelling ``HMAC_SHA_256_128`` as well as the
+            # IKEv2 spelling ``HMAC_SHA2_256_128``
+            name = value.upper().replace('-', '_').replace('HMAC_SHA_', 'HMAC_SHA2_')
+            if name in ('HMAC_SHA2_1_96', 'HMAC_SHA2_1'):
+                name = 'HMAC_SHA1_96'
+            value = name
 
-        name = str(value).upper().replace('-', '_')
-        if name.startswith('AUTH_'):
-            name = name[5:]
-        # accept the RFC 4868 spelling ``HMAC_SHA_256_128`` as well as the
-        # IKEv2 spelling ``HMAC_SHA2_256_128``
-        name = name.replace('HMAC_SHA_', 'HMAC_SHA2_')
-        if name in ('HMAC_SHA2_1_96', 'HMAC_SHA2_1'):
-            name = 'HMAC_SHA1_96'
-        try:
-            return cls[name]
-        except KeyError:
-            raise ProtocolError(f'unsupported ESP integrity algorithm: {value!r}') from None
+        integrity = _resolve(Integrity, value, 'AUTH_', 'integrity')
+        suite = INTEGRITY_SUITES.get(integrity)
+        if suite is None:
+            raise ProtocolError(f'unsupported ESP integrity algorithm: {integrity.name}; pcapkit '
+                                f'implements {", ".join(key.name for key in INTEGRITY_SUITES)}')
+        return suite
+
+
+#: Encryption algorithms :mod:`pcapkit` implements, keyed by IKEv2 transform.
+#: This table -- not :class:`Cipher <pcapkit.const.esp.cipher.Cipher>`, which
+#: is the whole IANA registry -- defines what an SA may name.
+CIPHER_SUITES = {
+    Cipher.ENCR_NULL: CipherSuite(
+        cipher=Cipher.ENCR_NULL, is_aead=False, iv_length=0, block_size=1, icv_length=0,
+        key_sizes=(0,), salt_length=0, requires_cryptography=False,
+    ),
+    Cipher.ENCR_AES_CBC: CipherSuite(
+        cipher=Cipher.ENCR_AES_CBC, is_aead=False, iv_length=16, block_size=16, icv_length=0,
+        key_sizes=(16, 24, 32), salt_length=0, requires_cryptography=True,
+    ),
+    Cipher.ENCR_AES_GCM_8: CipherSuite(
+        cipher=Cipher.ENCR_AES_GCM_8, is_aead=True, iv_length=8, block_size=1, icv_length=8,
+        key_sizes=(16, 24, 32), salt_length=4, requires_cryptography=True,
+    ),
+    Cipher.ENCR_AES_GCM_12: CipherSuite(
+        cipher=Cipher.ENCR_AES_GCM_12, is_aead=True, iv_length=8, block_size=1, icv_length=12,
+        key_sizes=(16, 24, 32), salt_length=4, requires_cryptography=True,
+    ),
+    Cipher.ENCR_AES_GCM_16: CipherSuite(
+        cipher=Cipher.ENCR_AES_GCM_16, is_aead=True, iv_length=8, block_size=1, icv_length=16,
+        key_sizes=(16, 24, 32), salt_length=4, requires_cryptography=True,
+    ),
+}  # type: dict[Cipher, CipherSuite]
+
+#: Integrity algorithms :mod:`pcapkit` implements, keyed by IKEv2 transform.
+#: :attr:`Integrity.NONE <pcapkit.const.esp.integrity.Integrity.NONE>` is here
+#: because "no separate integrity algorithm" is a supported configuration --
+#: it is what an AEAD suite, and an unprotected SA, use.
+INTEGRITY_SUITES = {
+    Integrity.NONE: IntegritySuite(
+        integrity=Integrity.NONE, digest=None, icv_length=0, key_size=0,
+    ),
+    Integrity.AUTH_HMAC_SHA1_96: IntegritySuite(
+        integrity=Integrity.AUTH_HMAC_SHA1_96, digest='sha1', icv_length=12, key_size=20,
+    ),
+    Integrity.AUTH_HMAC_SHA2_256_128: IntegritySuite(
+        integrity=Integrity.AUTH_HMAC_SHA2_256_128, digest='sha256', icv_length=16, key_size=32,
+    ),
+    Integrity.AUTH_HMAC_SHA2_384_192: IntegritySuite(
+        integrity=Integrity.AUTH_HMAC_SHA2_384_192, digest='sha384', icv_length=24, key_size=48,
+    ),
+    Integrity.AUTH_HMAC_SHA2_512_256: IntegritySuite(
+        integrity=Integrity.AUTH_HMAC_SHA2_512_256, digest='sha512', icv_length=32, key_size=64,
+    ),
+}  # type: dict[Integrity, IntegritySuite]
+
+
+##############################################################################
+# Payload processing status.
+##############################################################################
 
 
 class ESPStatus(enum.IntEnum):
@@ -424,13 +484,15 @@ class SecurityAssociation:
         spi: Security Parameters Index the SA applies to; :data:`None`
             matches any SPI, which is convenient for a capture holding a
             single tunnel.
-        encryption: Encryption algorithm, c.f. :meth:`Cipher.get`.
+        encryption: Encryption algorithm, c.f. :meth:`CipherSuite.get`. Must
+            be one :mod:`pcapkit` implements; being in the IANA registry is
+            not enough.
         encryption_key: Encryption keying material. For an AEAD suite this
             is the AES key followed by the 4-octet salt [:rfc:`4106` §8.1],
             unless ``salt`` is given separately.
         salt: AEAD salt, when not appended to ``encryption_key``.
-        integrity: Integrity algorithm, c.f. :meth:`Integrity.get`. Must be
-            :attr:`Integrity.NONE` for an AEAD suite, which provides its own.
+        integrity: Integrity algorithm, c.f. :meth:`IntegritySuite.get`. Must
+            be :attr:`Integrity.NONE` for an AEAD suite, which provides its own.
         integrity_key: Integrity key.
         icv_length: Override for the ICV length, in octets. Needed for the
             long standing implementation bug noted in :rfc:`8221` §6, where
@@ -462,7 +524,7 @@ class SecurityAssociation:
     """
 
     def __init__(self, spi: 'Optional[int]' = None, *,
-                 encryption: 'Cipher | str | int' = Cipher.NULL,
+                 encryption: 'Cipher | str | int' = Cipher.ENCR_NULL,
                  encryption_key: 'bytes' = b'',
                  salt: 'Optional[bytes]' = None,
                  integrity: 'Integrity | str | int' = Integrity.NONE,
@@ -475,27 +537,31 @@ class SecurityAssociation:
 
         #: Optional[int]: Security Parameters Index, or :data:`None` for any.
         self.spi = spi
-        #: Cipher: Encryption algorithm.
-        self.encryption = Cipher.get(encryption)
-        #: Integrity: Integrity algorithm.
-        self.integrity = Integrity.get(integrity)
+        #: CipherSuite: How to apply the encryption algorithm.
+        self.cipher_suite = CipherSuite.get(encryption)
+        #: IntegritySuite: How to apply the integrity algorithm.
+        self.integrity_suite = IntegritySuite.get(integrity)
+        #: Cipher: Encryption algorithm, i.e. its IKEv2 transform.
+        self.encryption = self.cipher_suite.cipher
+        #: Integrity: Integrity algorithm, i.e. its IKEv2 transform.
+        self.integrity = self.integrity_suite.integrity
         #: bool: Whether to enforce the :rfc:`4303` §2.4 padding pattern.
         self.strict = strict
         #: Optional[IPv4Address | IPv6Address]: Outer destination address.
         self.destination = ipaddress.ip_address(destination) if destination is not None else None
 
-        if self.encryption.is_aead and self.integrity is not Integrity.NONE:
+        if self.cipher_suite.is_aead and self.integrity is not Integrity.NONE:
             raise ProtocolError(
                 f'{self.encryption.name} is a combined mode algorithm and provides its own '
                 f'integrity; {self.integrity.name} must not be configured alongside it'
             )
 
-        key, self.__salt__ = self._split_key(self.encryption, encryption_key, salt)
+        key, self.__salt__ = self._split_key(self.cipher_suite, encryption_key, salt)
         self.__key__ = key
         self.__integrity_key__ = bytes(integrity_key)
 
         if self.integrity is not Integrity.NONE:
-            expected = self.integrity.key_size
+            expected = self.integrity_suite.key_size
             if len(self.__integrity_key__) != expected:
                 warn(f'{self.integrity.name} expects a {expected}-octet key, got '
                      f'{len(self.__integrity_key__)} octets; the ICV will very likely '
@@ -535,14 +601,14 @@ class SecurityAssociation:
         """Length of the ICV field carried on the wire, in octets."""
         if self.__icv_length__ is not None:
             return self.__icv_length__
-        if self.encryption.is_aead:
-            return self.encryption.icv_length
-        return self.integrity.icv_length
+        if self.cipher_suite.is_aead:
+            return self.cipher_suite.icv_length
+        return self.integrity_suite.icv_length
 
     @property
     def authenticated(self) -> 'bool':
         """Whether the SA provides any integrity protection at all."""
-        return self.encryption.is_aead or self.integrity is not Integrity.NONE
+        return self.cipher_suite.is_aead or self.integrity is not Integrity.NONE
 
     ##########################################################################
     # Methods.
@@ -590,7 +656,7 @@ class SecurityAssociation:
             A reason the SA cannot be applied, or :data:`None` when it can.
 
         """
-        if self.encryption.requires_cryptography and load_cryptography() is None:
+        if self.cipher_suite.requires_cryptography and load_cryptography() is None:
             return (f'{self.encryption.name} needs the optional "cryptography" dependency, '
                     f'which is not installed (pip install pypcapkit[crypto])')
         return None
@@ -615,7 +681,7 @@ class SecurityAssociation:
             ProtocolError: If the SA has no separate integrity algorithm.
 
         """
-        digest = self.integrity.digest
+        digest = self.integrity_suite.digest
         if digest is None:
             raise ProtocolError(f'{self.integrity.name} computes no ICV')
 
@@ -647,7 +713,8 @@ class SecurityAssociation:
 
         """
         cipher = self.encryption
-        if cipher is Cipher.NULL:
+        suite = self.cipher_suite
+        if cipher is Cipher.ENCR_NULL:
             return body
 
         crypto = load_cryptography()
@@ -656,16 +723,16 @@ class SecurityAssociation:
                                 f'which is not installed')
         crypto_cipher, algorithms, modes, _ = crypto
 
-        iv_length = cipher.iv_length
+        iv_length = suite.iv_length
         if len(body) < iv_length:
             raise ProtocolError(f'ESP payload is {len(body)} octets, too short for the '
                                 f'{iv_length}-octet {cipher.name} IV')
         iv, ciphertext = body[:iv_length], body[iv_length:]
 
-        if cipher is Cipher.AES_CBC:
-            if not ciphertext or len(ciphertext) % cipher.block_size:
+        if cipher is Cipher.ENCR_AES_CBC:
+            if not ciphertext or len(ciphertext) % suite.block_size:
                 raise ProtocolError(f'ESP ciphertext of {len(ciphertext)} octets is not a '
-                                    f'positive multiple of the {cipher.block_size}-octet '
+                                    f'positive multiple of the {suite.block_size}-octet '
                                     f'{cipher.name} block size')
             decryptor = crypto_cipher(algorithms.AES(self.__key__), modes.CBC(iv)).decryptor()
             return decryptor.update(ciphertext) + decryptor.finalize()
@@ -708,7 +775,8 @@ class SecurityAssociation:
 
         """
         cipher = self.encryption
-        if cipher is Cipher.NULL:
+        suite = self.cipher_suite
+        if cipher is Cipher.ENCR_NULL:
             return plaintext, b''
 
         crypto = load_cryptography()
@@ -717,13 +785,13 @@ class SecurityAssociation:
                                 f'which is not installed')
         crypto_cipher, algorithms, modes, _ = crypto
 
-        iv_length = cipher.iv_length
+        iv_length = suite.iv_length
         if iv is None:
             iv = os.urandom(iv_length)
         elif len(iv) != iv_length:
             raise ProtocolError(f'{cipher.name} needs a {iv_length}-octet IV, got {len(iv)}')
 
-        if cipher is Cipher.AES_CBC:
+        if cipher is Cipher.ENCR_AES_CBC:
             encryptor = crypto_cipher(algorithms.AES(self.__key__), modes.CBC(iv)).encryptor()
             return iv + encryptor.update(plaintext) + encryptor.finalize(), b''
 
@@ -739,12 +807,12 @@ class SecurityAssociation:
     ##########################################################################
 
     @staticmethod
-    def _split_key(cipher: 'Cipher', material: 'bytes',
+    def _split_key(suite: 'CipherSuite', material: 'bytes',
                    salt: 'Optional[bytes]') -> 'tuple[bytes, bytes]':
         """Split keying material into the key and the AEAD salt.
 
         Args:
-            cipher: Encryption algorithm.
+            suite: Encryption algorithm parameters.
             material: Keying material as supplied by the caller.
             salt: Explicit salt, if the caller kept it separate.
 
@@ -756,7 +824,7 @@ class SecurityAssociation:
 
         """
         material = bytes(material)
-        salt_length = cipher.salt_length
+        salt_length = suite.salt_length
 
         if salt is None:
             # RFC 4106 s8.1: the last four octets of the keying material are
@@ -769,11 +837,11 @@ class SecurityAssociation:
             salt = bytes(salt)
 
         if len(salt) != salt_length:
-            raise ProtocolError(f'{cipher.name} needs a {salt_length}-octet salt, '
+            raise ProtocolError(f'{suite.cipher.name} needs a {salt_length}-octet salt, '
                                 f'got {len(salt)}')
-        if len(material) not in cipher.key_sizes:
-            raise ProtocolError(f'{cipher.name} needs a key of '
-                                f'{" or ".join(map(str, cipher.key_sizes))} octets, '
+        if len(material) not in suite.key_sizes:
+            raise ProtocolError(f'{suite.cipher.name} needs a key of '
+                                f'{" or ".join(map(str, suite.key_sizes))} octets, '
                                 f'got {len(material)}')
         return material, salt
 
@@ -1113,7 +1181,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP],
                                       reversed=next_reversed, pack=False)
 
         plain = self._payload_bytes(payload)
-        align = max(association.encryption.block_size, 4)
+        align = max(association.cipher_suite.block_size, 4)
         if pad_len is None:
             pad_len = -(len(plain) + 2) % align
         elif (len(plain) + pad_len + 2) % align:

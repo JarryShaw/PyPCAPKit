@@ -65,13 +65,38 @@ SA context is supplied through the generic, protocol keyed channel of
 Algorithm Registries
 --------------------
 
-.. autoclass:: pcapkit.protocols.internet.esp.Cipher
+The algorithm enumerations are the IANA IKEv2 transform ID registries,
+generated into :mod:`pcapkit.const.esp` and re-exported here for convenience:
+:class:`Cipher <pcapkit.const.esp.cipher.Cipher>` is
+:class:`pcapkit.const.esp.cipher.Cipher` and :class:`Integrity
+<pcapkit.const.esp.integrity.Integrity>` is
+:class:`pcapkit.const.esp.integrity.Integrity`.
+
+Algorithm Support
+-----------------
+
+A registry enumerates what IANA assigned an ID to, which is far more than
+:mod:`pcapkit` implements. The tables below are the authority on what an SA may
+actually name, and the two ``get`` methods refuse anything outside them.
+
+.. autoclass:: pcapkit.protocols.internet.esp.CipherSuite
    :members:
+   :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.internet.esp.Integrity
+.. autoclass:: pcapkit.protocols.internet.esp.IntegritySuite
    :members:
+   :undoc-members:
    :show-inheritance:
+
+.. autodata:: pcapkit.protocols.internet.esp.CIPHER_SUITES
+
+.. autodata:: pcapkit.protocols.internet.esp.INTEGRITY_SUITES
+
+.. autofunction:: pcapkit.protocols.internet.esp._resolve
+
+Processing Status
+-----------------
 
 .. autoclass:: pcapkit.protocols.internet.esp.ESPStatus
    :members:

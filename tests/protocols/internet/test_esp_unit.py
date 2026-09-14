@@ -129,73 +129,127 @@ class ESPRegistryTests(unittest.TestCase):
         purge_modules(['pcapkit'])
 
     def test_cipher_registry(self) -> None:
-        from pcapkit.protocols.internet.esp import Cipher
+        from pcapkit.const.esp.cipher import Cipher as Const_Cipher
+        from pcapkit.protocols.internet.esp import CIPHER_SUITES, Cipher, CipherSuite
         from pcapkit.utilities.exceptions import ProtocolError
 
+        # the enumeration is the generated IANA registry, re-exported
+        self.assertIs(Cipher, Const_Cipher)
+
         # IKEv2 transform type 1 identifiers
-        self.assertEqual(Cipher.NULL, 11)
-        self.assertEqual(Cipher.AES_CBC, 12)
-        self.assertEqual(Cipher.AES_GCM_8, 18)
-        self.assertEqual(Cipher.AES_GCM_12, 19)
-        self.assertEqual(Cipher.AES_GCM_16, 20)
+        self.assertEqual(Cipher.ENCR_NULL, 11)
+        self.assertEqual(Cipher.ENCR_AES_CBC, 12)
+        self.assertEqual(Cipher.ENCR_AES_GCM_8, 18)
+        self.assertEqual(Cipher.ENCR_AES_GCM_12, 19)
+        self.assertEqual(Cipher.ENCR_AES_GCM_16, 20)
+
+        # ... and their prefix-stripped aliases, which is how ESP names them
+        self.assertIs(Cipher.NULL, Cipher.ENCR_NULL)
+        self.assertIs(Cipher.AES_CBC, Cipher.ENCR_AES_CBC)
+        self.assertIs(Cipher.AES_GCM_8, Cipher.ENCR_AES_GCM_8)
+        self.assertIs(Cipher.AES_GCM_12, Cipher.ENCR_AES_GCM_12)
+        self.assertIs(Cipher.AES_GCM_16, Cipher.ENCR_AES_GCM_16)
 
         for spelling in ('AES-CBC', 'aes_cbc', 'ENCR_AES_CBC', 12, Cipher.AES_CBC):
             with self.subTest(spelling=spelling):
-                self.assertIs(Cipher.get(spelling), Cipher.AES_CBC)
+                self.assertIs(CipherSuite.get(spelling).cipher, Cipher.ENCR_AES_CBC)
 
-        self.assertFalse(Cipher.AES_CBC.is_aead)
-        self.assertTrue(Cipher.AES_GCM_16.is_aead)
-        self.assertEqual(Cipher.AES_CBC.iv_length, 16)
-        self.assertEqual(Cipher.AES_GCM_16.iv_length, 8)
-        self.assertEqual(Cipher.NULL.iv_length, 0)
-        self.assertEqual(Cipher.AES_CBC.block_size, 16)
-        self.assertEqual(Cipher.AES_GCM_16.block_size, 1)
-        self.assertEqual(Cipher.AES_GCM_8.icv_length, 8)
-        self.assertEqual(Cipher.AES_GCM_12.icv_length, 12)
-        self.assertEqual(Cipher.AES_GCM_16.icv_length, 16)
-        self.assertEqual(Cipher.AES_CBC.icv_length, 0)
-        self.assertEqual(Cipher.AES_GCM_16.salt_length, 4)
-        self.assertEqual(Cipher.AES_CBC.salt_length, 0)
-        self.assertFalse(Cipher.NULL.requires_cryptography)
-        self.assertTrue(Cipher.AES_CBC.requires_cryptography)
+        # registration is not support: the registry is much larger than the
+        # set of algorithms pcapkit can apply, and the suite table is the
+        # authority on the latter
+        self.assertGreater(len(Cipher), 30)
+        self.assertEqual(set(CIPHER_SUITES), {
+            Cipher.ENCR_NULL, Cipher.ENCR_AES_CBC, Cipher.ENCR_AES_GCM_8,
+            Cipher.ENCR_AES_GCM_12, Cipher.ENCR_AES_GCM_16,
+        })
 
-        # deliberately unimplemented: 3DES (13 is AES-CTR, 3DES is 3)
+        null = CIPHER_SUITES[Cipher.ENCR_NULL]
+        cbc = CIPHER_SUITES[Cipher.ENCR_AES_CBC]
+        gcm16 = CIPHER_SUITES[Cipher.ENCR_AES_GCM_16]
+        self.assertFalse(cbc.is_aead)
+        self.assertTrue(gcm16.is_aead)
+        self.assertEqual(cbc.iv_length, 16)
+        self.assertEqual(gcm16.iv_length, 8)
+        self.assertEqual(null.iv_length, 0)
+        self.assertEqual(cbc.block_size, 16)
+        self.assertEqual(gcm16.block_size, 1)
+        self.assertEqual(CIPHER_SUITES[Cipher.ENCR_AES_GCM_8].icv_length, 8)
+        self.assertEqual(CIPHER_SUITES[Cipher.ENCR_AES_GCM_12].icv_length, 12)
+        self.assertEqual(gcm16.icv_length, 16)
+        self.assertEqual(cbc.icv_length, 0)
+        self.assertEqual(gcm16.salt_length, 4)
+        self.assertEqual(cbc.salt_length, 0)
+        self.assertEqual(null.key_sizes, (0,))
+        self.assertEqual(cbc.key_sizes, (16, 24, 32))
+        self.assertFalse(null.requires_cryptography)
+        self.assertTrue(cbc.requires_cryptography)
+
+        # deliberately unimplemented, but registered: the enumeration holds
+        # them -- and its own permissive ``get`` answers only "did IANA
+        # register this" -- while the suite lookup refuses them
+        self.assertEqual(Cipher.ENCR_3DES, 3)
+        self.assertEqual(Cipher.ENCR_CHACHA20_POLY1305, 28)
+        self.assertIs(Cipher.get('ENCR_3DES'), Cipher.ENCR_3DES)
         with self.assertRaises(ProtocolError):
-            Cipher.get('3DES')
+            CipherSuite.get('3DES')
         with self.assertRaises(ProtocolError):
-            Cipher.get('CHACHA20_POLY1305')
+            CipherSuite.get('CHACHA20_POLY1305')
         with self.assertRaises(ProtocolError):
-            Cipher.get(3)
+            CipherSuite.get(3)
+        # and a name that is in no registry at all
+        with self.assertRaises(ProtocolError):
+            CipherSuite.get('ROT13')
 
     def test_integrity_registry(self) -> None:
-        from pcapkit.protocols.internet.esp import Integrity
+        from pcapkit.const.esp.integrity import Integrity as Const_Integrity
+        from pcapkit.protocols.internet.esp import INTEGRITY_SUITES, Integrity, IntegritySuite
         from pcapkit.utilities.exceptions import ProtocolError
 
+        self.assertIs(Integrity, Const_Integrity)
+
+        # IKEv2 transform type 3 identifiers; the registry spells 0 ``NONE``
+        # rather than ``AUTH_NONE``, so that member carries no alias
         self.assertEqual(Integrity.NONE, 0)
-        self.assertEqual(Integrity.HMAC_SHA1_96, 2)
-        self.assertEqual(Integrity.HMAC_SHA2_256_128, 12)
-        self.assertEqual(Integrity.HMAC_SHA2_384_192, 13)
-        self.assertEqual(Integrity.HMAC_SHA2_512_256, 14)
+        self.assertEqual(Integrity.AUTH_HMAC_SHA1_96, 2)
+        self.assertEqual(Integrity.AUTH_HMAC_SHA2_256_128, 12)
+        self.assertEqual(Integrity.AUTH_HMAC_SHA2_384_192, 13)
+        self.assertEqual(Integrity.AUTH_HMAC_SHA2_512_256, 14)
+        self.assertIs(Integrity.HMAC_SHA1_96, Integrity.AUTH_HMAC_SHA1_96)
+        self.assertIs(Integrity.HMAC_SHA2_256_128, Integrity.AUTH_HMAC_SHA2_256_128)
+        self.assertIs(Integrity.HMAC_SHA2_384_192, Integrity.AUTH_HMAC_SHA2_384_192)
+        self.assertIs(Integrity.HMAC_SHA2_512_256, Integrity.AUTH_HMAC_SHA2_512_256)
+        self.assertNotIn('AUTH_NONE', Integrity.__members__)
 
         for spelling in ('HMAC-SHA2-256-128', 'AUTH_HMAC_SHA2_256_128',
                          'hmac_sha_256_128', 12):
             with self.subTest(spelling=spelling):
-                self.assertIs(Integrity.get(spelling), Integrity.HMAC_SHA2_256_128)
+                self.assertIs(IntegritySuite.get(spelling).integrity,
+                              Integrity.AUTH_HMAC_SHA2_256_128)
+
+        self.assertEqual(set(INTEGRITY_SUITES), {
+            Integrity.NONE, Integrity.AUTH_HMAC_SHA1_96, Integrity.AUTH_HMAC_SHA2_256_128,
+            Integrity.AUTH_HMAC_SHA2_384_192, Integrity.AUTH_HMAC_SHA2_512_256,
+        })
 
         # RFC 4868 truncation lengths and key sizes
-        self.assertEqual(Integrity.HMAC_SHA1_96.icv_length, 12)
-        self.assertEqual(Integrity.HMAC_SHA2_256_128.icv_length, 16)
-        self.assertEqual(Integrity.HMAC_SHA2_384_192.icv_length, 24)
-        self.assertEqual(Integrity.HMAC_SHA2_512_256.icv_length, 32)
-        self.assertEqual(Integrity.HMAC_SHA1_96.key_size, 20)
-        self.assertEqual(Integrity.HMAC_SHA2_512_256.key_size, 64)
-        self.assertEqual(Integrity.NONE.digest, None)
-        self.assertEqual(Integrity.HMAC_SHA2_256_128.digest, 'sha256')
+        self.assertEqual(INTEGRITY_SUITES[Integrity.AUTH_HMAC_SHA1_96].icv_length, 12)
+        self.assertEqual(INTEGRITY_SUITES[Integrity.AUTH_HMAC_SHA2_256_128].icv_length, 16)
+        self.assertEqual(INTEGRITY_SUITES[Integrity.AUTH_HMAC_SHA2_384_192].icv_length, 24)
+        self.assertEqual(INTEGRITY_SUITES[Integrity.AUTH_HMAC_SHA2_512_256].icv_length, 32)
+        self.assertEqual(INTEGRITY_SUITES[Integrity.AUTH_HMAC_SHA1_96].key_size, 20)
+        self.assertEqual(INTEGRITY_SUITES[Integrity.AUTH_HMAC_SHA2_512_256].key_size, 64)
+        self.assertIsNone(INTEGRITY_SUITES[Integrity.NONE].digest)
+        self.assertEqual(INTEGRITY_SUITES[Integrity.AUTH_HMAC_SHA2_256_128].digest, 'sha256')
 
+        # registered but unimplemented, as above
+        self.assertEqual(Integrity.AUTH_HMAC_MD5_96, 1)
+        self.assertEqual(Integrity.AUTH_AES_XCBC_96, 5)
         with self.assertRaises(ProtocolError):
-            Integrity.get('HMAC_MD5_96')
+            IntegritySuite.get('HMAC_MD5_96')
         with self.assertRaises(ProtocolError):
-            Integrity.get('AES_XCBC_96')
+            IntegritySuite.get('AES_XCBC_96')
+        with self.assertRaises(ProtocolError):
+            IntegritySuite.get('HMAC_SHA3_256')
 
     def test_security_association_validation(self) -> None:
         from pcapkit.protocols.internet.esp import Cipher, Integrity, SecurityAssociation

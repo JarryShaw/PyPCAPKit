@@ -16,6 +16,7 @@ from pcapkit.const.pcapng import *
 
 # per protocol
 from pcapkit.const.arp import *
+from pcapkit.const.esp import *
 from pcapkit.const.ftp import *
 from pcapkit.const.hip import *
 from pcapkit.const.http import *
@@ -34,6 +35,8 @@ __all__ = [
     'ETHERTYPE', 'LINKTYPE', 'TRANSTYPE', 'APPTYPE',
     # ARP
     'ARP_Hardware', 'ARP_Operation',
+    # ESP
+    'ESP_Cipher', 'ESP_Integrity',
     # FTP
     'FTP_Command', 'FTP_ReturnCode',
     # HIP
