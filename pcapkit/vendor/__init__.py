@@ -49,6 +49,7 @@ from pcapkit.vendor.ipx import *
 from pcapkit.vendor.l2tp import *
 from pcapkit.vendor.mh import *
 from pcapkit.vendor.ospf import *
+from pcapkit.vendor.sctp import *
 from pcapkit.vendor.tcp import *
 from pcapkit.vendor.vlan import *
 
@@ -94,6 +95,9 @@ __all__ = [
     'MH_CGAExtension', 'MH_CGASec', 'MH_BindingError',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
+    # SCTP
+    'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode',
+    'SCTP_PayloadProtocolIdentifier',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # VLAN

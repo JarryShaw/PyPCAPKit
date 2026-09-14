@@ -844,13 +844,17 @@ class SCTPUnitTests(unittest.TestCase):
                             dict(I=True, U=True, B=True, E=True, tsn=1, ppid=NGAP_PPID,
                                  data=b'ngap-pdu'))])
 
-        # With nothing registered on the PPID, the payload is raw.
+        # With nothing registered on the PPID, the payload is raw -- but it is
+        # still named after the PPID it arrived with, the way an unregistered
+        # transport type is (``IPv4:Use_for_experimentation_and_testing_253``),
+        # rather than being anonymised to a bare ``Raw``.
         self.assertNotIn(NGAP_PPID, SCTP.__proto__)
         proto = self._packet(raw)
         self.assertEqual(proto.ppid, NGAP_PPID)
         self.assertIsInstance(proto.payload, Raw)
         self.assertEqual(bytes(proto.payload), b'ngap-pdu')
-        self.assertEqual(str(proto.protochain), 'SCTP:Raw')
+        self.assertEqual(str(proto.protochain),
+                         'SCTP:PayloadProtocolIdentifier_3GPP_NG_Application_Protocol')
 
         # This is exactly the call a future NGAP class makes.
         try:
@@ -861,6 +865,75 @@ class SCTPUnitTests(unittest.TestCase):
             proto = self._packet(raw)
             self.assertIsInstance(proto.payload, Raw)
             self.assertEqual(bytes(proto.payload), b'ngap-pdu')
+        finally:
+            SCTP.__proto__.clear()
+
+    def test_unregistered_ppid_does_not_mutate_the_class_registry(self) -> None:
+        """An unregistered PPID reaches :class:`Raw` without touching ``__proto__``.
+
+        :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+        is a :class:`collections.defaultdict`, so *reading* a missing key
+        inserts it. Dispatching an unregistered PPID through that read mutates
+        class-level state shared by every later :class:`SCTP` instance in the
+        process, and it makes
+        :meth:`SCTP.register <pcapkit.protocols.transport.sctp.SCTP.register>`
+        subsequently claim the PPID was "already registered".
+
+        The symptom is invisible unless looked for, hence the before/after
+        comparison of the registry's keys and the second instance: a leak is
+        class-level, so it shows up on the *next* packet rather than this one.
+
+        """
+        from pcapkit.const.sctp.chunk import Chunk
+        from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport import sctp as sctp_module
+        from pcapkit.protocols.transport.sctp import SCTP
+
+        # 4243 is the first code in the trailing "Unassigned" block of the IANA
+        # registry, i.e. a PPID that is well-formed but cannot be registered.
+        UNREGISTERED = 4243
+        self.assertEqual(PayloadProtocolIdentifier(UNREGISTERED).name, 'Unassigned_4243')
+
+        raw = self._build([(Chunk.Payload_Data,
+                            dict(I=True, U=True, B=True, E=True, tsn=1,
+                                 ppid=UNREGISTERED, data=b'unknown-pdu'))])
+
+        try:
+            before = set(SCTP.__proto__)
+            self.assertNotIn(UNREGISTERED, before)
+
+            first = self._packet(raw)
+
+            # (a) The payload is still reachable, as Raw, and is still labelled
+            #     with its real PPID rather than being anonymised to ``None``.
+            #     This is how Internet.__proto__ names an unregistered code --
+            #     cf. ``IPv4:Use_for_experimentation_and_testing_253``.
+            self.assertIsInstance(first.payload, Raw)
+            self.assertEqual(bytes(first.payload), b'unknown-pdu')
+            self.assertEqual(int(first.ppid), UNREGISTERED)
+            self.assertEqual(first.payload.info.protocol, UNREGISTERED)
+            self.assertEqual(str(first.protochain), 'SCTP:Unassigned_4243')
+
+            # (b) The class-level registry gained nothing: no ``None`` key, and
+            #     no key for the unregistered PPID either.
+            self.assertNotIn(None, SCTP.__proto__)
+            self.assertNotIn(UNREGISTERED, SCTP.__proto__)
+            self.assertEqual(set(SCTP.__proto__), before)
+
+            # A second instance in the same process must see the same registry
+            # and behave identically -- class-level leakage would show here.
+            second = self._packet(raw)
+            self.assertIsInstance(second.payload, Raw)
+            self.assertEqual(bytes(second.payload), b'unknown-pdu')
+            self.assertEqual(str(second.protochain), 'SCTP:Unassigned_4243')
+            self.assertEqual(set(SCTP.__proto__), before)
+
+            # And the PPID is still registrable without a bogus overwrite
+            # warning, which a leaked key would have triggered.
+            with mock.patch.object(sctp_module, 'warn') as warned:
+                SCTP.register(UNREGISTERED, Raw)
+            self.assertEqual(warned.call_count, 0)
         finally:
             SCTP.__proto__.clear()
 

@@ -6,10 +6,7 @@
 .. module:: pcapkit.const.sctp.cause_code
 
 This module contains the constant enumeration for **SCTP Error Cause Codes**,
-which is maintained manually against the `IANA`_ registry, as there
-is currently no vendor crawler for SCTP under :mod:`pcapkit.vendor`.
-
-.. _IANA: https://www.iana.org/assignments/sctp-parameters/sctp-parameters.xhtml#sctp-parameters-24
+which is automatically generated from :class:`pcapkit.vendor.sctp.cause_code.CauseCode`.
 
 """
 

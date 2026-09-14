@@ -19,21 +19,13 @@ enumerations include:
    * - :class:`SCTP_PayloadProtocolIdentifier <pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier>`
      - SCTP Payload Protocol Identifiers [*]_
 
-.. note::
-
-   Unlike most constant enumerations of :mod:`pcapkit`, the SCTP enumerations
-   are **hand-maintained**, as there is no crawler for them under
-   :mod:`pcapkit.vendor` yet. Should one be added later, it would target the
-   registries linked above.
-
 SCTP Chunk Types
 ================
 
 .. module:: pcapkit.const.sctp.chunk
 
 This module contains the constant enumeration for **SCTP Chunk Types**,
-which is maintained manually against the IANA registry, as there
-is currently no vendor crawler for SCTP under :mod:`pcapkit.vendor`.
+which is automatically generated from :class:`pcapkit.vendor.sctp.chunk.Chunk`.
 
 .. autoclass:: pcapkit.const.sctp.chunk.Chunk
    :members:
@@ -46,8 +38,7 @@ SCTP Chunk Parameter Types
 .. module:: pcapkit.const.sctp.parameter
 
 This module contains the constant enumeration for **SCTP Chunk Parameter Types**,
-which is maintained manually against the IANA registry, as there
-is currently no vendor crawler for SCTP under :mod:`pcapkit.vendor`.
+which is automatically generated from :class:`pcapkit.vendor.sctp.parameter.Parameter`.
 
 .. autoclass:: pcapkit.const.sctp.parameter.Parameter
    :members:
@@ -60,8 +51,7 @@ SCTP Error Cause Codes
 .. module:: pcapkit.const.sctp.cause_code
 
 This module contains the constant enumeration for **SCTP Error Cause Codes**,
-which is maintained manually against the IANA registry, as there
-is currently no vendor crawler for SCTP under :mod:`pcapkit.vendor`.
+which is automatically generated from :class:`pcapkit.vendor.sctp.cause_code.CauseCode`.
 
 .. autoclass:: pcapkit.const.sctp.cause_code.CauseCode
    :members:
@@ -74,8 +64,7 @@ SCTP Payload Protocol Identifiers
 .. module:: pcapkit.const.sctp.payload_protocol_identifier
 
 This module contains the constant enumeration for **SCTP Payload Protocol Identifiers**,
-which is maintained manually against the IANA registry, as there
-is currently no vendor crawler for SCTP under :mod:`pcapkit.vendor`.
+which is automatically generated from :class:`pcapkit.vendor.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`.
 
 .. autoclass:: pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier
    :members:

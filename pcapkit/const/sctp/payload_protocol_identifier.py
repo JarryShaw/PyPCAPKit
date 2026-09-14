@@ -6,10 +6,7 @@
 .. module:: pcapkit.const.sctp.payload_protocol_identifier
 
 This module contains the constant enumeration for **SCTP Payload Protocol Identifiers**,
-which is maintained manually against the `IANA`_ registry, as there
-is currently no vendor crawler for SCTP under :mod:`pcapkit.vendor`.
-
-.. _IANA: https://www.iana.org/assignments/sctp-parameters/sctp-parameters.xhtml#sctp-parameters-25
+which is automatically generated from :class:`pcapkit.vendor.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`.
 
 """
 
@@ -42,13 +39,13 @@ class PayloadProtocolIdentifier(IntEnum):
     #: V5UA [:rfc:`3807`]
     V5UA = 6
 
-    #: H.248 [ITU-T Recommendation H.248 Annex H, "Transport over SCTP",November
+    #: H.248 [ITU-T Recommendation H.248 Annex H, "Transport over SCTP", November
     #: 2000.]
     H_248 = 7
 
-    #: BICC/Q.2150.3 [ITU-T Recommendation Q.1902.1, "Bearer Independent
-    #: CallControl protocol (Capability Set 2): Functional description",July
-    #: 2001.][ITU-T Recommendation Q.2150.3, "Signalling Transport ConverterOn
+    #: BICC/Q.2150.3 [ITU-T Recommendation Q.1902.1, "Bearer Independent Call
+    #: Control protocol (Capability Set 2): Functional description", July
+    #: 2001.][ITU-T Recommendation Q.2150.3, "Signalling Transport Converter On
     #: SCTP", to be published.]
     BICC_Q_2150_3 = 8
 
@@ -69,8 +66,8 @@ class PayloadProtocolIdentifier(IntEnum):
     H_323 = 13
 
     #: Q.IPC/Q.2150.3 [ITU-T Recommendation Q.2631.1 "IP Connection Control
-    #: SignalingProtocol - Capability Set 1", to be published.][ITU-T
-    #: Recommendation Q.2150.3, "Signalling Transport ConverterOn SCTP", to be
+    #: Signaling Protocol - Capability Set 1", to be published.][ITU-T
+    #: Recommendation Q.2150.3, "Signalling Transport Converter On SCTP", to be
     #: published.]
     Q_IPC_Q_2150_3 = 14
 
@@ -215,40 +212,40 @@ class PayloadProtocolIdentifier(IntEnum):
     #: WebRTC Binary Empty [:rfc:`8831`]
     WebRTC_Binary_Empty = 57
 
-    #: 3GPP XwAP [        3GPP TS 36.462][KIMBA DIT ADAMOU Boubacar]
+    #: 3GPP XwAP [         3GPP TS 36.462][KIMBA DIT ADAMOU Boubacar]
     PayloadProtocolIdentifier_3GPP_XwAP = 58
 
-    #: 3GPP Xw-Control Plane [        3GPP TS 36.462][KIMBA DIT ADAMOU Boubacar]
+    #: 3GPP Xw-Control Plane [         3GPP TS 36.462][KIMBA DIT ADAMOU Boubacar]
     PayloadProtocolIdentifier_3GPP_Xw_Control_Plane = 59
 
-    #: 3GPP NG Application Protocol (NGAP) [        3GPP TS 38.413][Luis Lopes]
+    #: 3GPP NG Application Protocol (NGAP) [         3GPP TS 38.413][Luis Lopes]
     PayloadProtocolIdentifier_3GPP_NG_Application_Protocol = 60
 
-    #: 3GPP Xn Application Protocol (XnAP) [        3GPP TS 38.423][Luis Lopes]
+    #: 3GPP Xn Application Protocol (XnAP) [         3GPP TS 38.423][Luis Lopes]
     PayloadProtocolIdentifier_3GPP_Xn_Application_Protocol = 61
 
-    #: 3GPP F1 Application Protocol (F1 AP) [        3GPP TS 38.473][Luis Lopes]
+    #: 3GPP F1 Application Protocol (F1 AP) [         3GPP TS 38.473][Luis Lopes]
     PayloadProtocolIdentifier_3GPP_F1_Application_Protocol = 62
 
     #: HTTP/SCTP [Michael Tuexen]
     HTTP_SCTP = 63
 
-    #: 3GPP E1 Application Protocol (E1AP) [        3GPP TS 38.463][Yang Xudong]
+    #: 3GPP E1 Application Protocol (E1AP) [         3GPP TS 38.463][Yang Xudong]
     PayloadProtocolIdentifier_3GPP_E1_Application_Protocol = 64
 
     #: ELE2 Lawful Interception [http://ele2.io][Damir Franusic]
     ELE2_Lawful_Interception = 65
 
-    #: 3GPP NGAP over DTLS over SCTP [        3GPP TS 38.413][Yang Xudong]
+    #: 3GPP NGAP over DTLS over SCTP [         3GPP TS 38.413][Yang Xudong]
     PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP = 66
 
-    #: 3GPP XnAP over DTLS over SCTP [        3GPP TS 38.423][Yang Xudong]
+    #: 3GPP XnAP over DTLS over SCTP [         3GPP TS 38.423][Yang Xudong]
     PayloadProtocolIdentifier_3GPP_XnAP_over_DTLS_over_SCTP = 67
 
-    #: 3GPP F1AP over DTLS over SCTP [        3GPP TS 38.473][Yang Xudong]
+    #: 3GPP F1AP over DTLS over SCTP [         3GPP TS 38.473][Yang Xudong]
     PayloadProtocolIdentifier_3GPP_F1AP_over_DTLS_over_SCTP = 68
 
-    #: 3GPP E1AP over DTLS over SCTP [        3GPP TS 38.463][Yang Xudong]
+    #: 3GPP E1AP over DTLS over SCTP [         3GPP TS 38.463][Yang Xudong]
     PayloadProtocolIdentifier_3GPP_E1AP_over_DTLS_over_SCTP = 69
 
     #: E2-CP [O-RAN Alliance][Jun Hyuk Song]

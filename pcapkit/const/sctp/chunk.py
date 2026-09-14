@@ -6,10 +6,7 @@
 .. module:: pcapkit.const.sctp.chunk
 
 This module contains the constant enumeration for **SCTP Chunk Types**,
-which is maintained manually against the `IANA`_ registry, as there
-is currently no vendor crawler for SCTP under :mod:`pcapkit.vendor`.
-
-.. _IANA: https://www.iana.org/assignments/sctp-parameters/sctp-parameters.xhtml#sctp-parameters-1
+which is automatically generated from :class:`pcapkit.vendor.sctp.chunk.Chunk`.
 
 """
 

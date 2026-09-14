@@ -30,10 +30,8 @@ More Protocols, More!!!
    but not yet implemented fall through to the generic handlers rather than
    failing the extraction.
 
-   Two notes on how it differs from its siblings. Its constant enumerations
-   under :mod:`pcapkit.const.sctp` are hand-maintained, as there is no
-   ``pcapkit.vendor.sctp`` crawler yet. And the next layer is dispatched on the
-   DATA chunk's *payload protocol identifier* through
+   One note on how it differs from its siblings. The next layer is dispatched
+   on the DATA chunk's *payload protocol identifier* through
    :func:`~pcapkit.foundation.registry.protocols.register_sctp`, not on port
    numbers, so :func:`~pcapkit.foundation.registry.protocols.register_apptype`
    deliberately does not fan out to it.

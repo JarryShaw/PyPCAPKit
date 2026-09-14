@@ -155,6 +155,7 @@ from pcapkit.protocols.schema.transport.sctp import \
 from pcapkit.protocols.schema.transport.sctp import \
     UserInitiatedAbortCause as Schema_UserInitiatedAbortCause
 from pcapkit.protocols.transport.transport import Transport
+from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import ProtocolError, RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -786,11 +787,71 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             which keys the lookup on port numbers, since SCTP keys it on the
             DATA chunk's payload protocol identifier instead.
 
+            The PPID is passed through **unchanged**, registered or not, so that
+            an unregistered payload is still labelled with the identifier it
+            arrived with -- as :meth:`Internet._import_next_layer
+            <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
+            does for an unregistered transport type. Resolving it to
+            :class:`~pcapkit.protocols.misc.raw.Raw` is
+            :meth:`self._import_next_layer <SCTP._import_next_layer>`'s job.
+
         """
-        if proto is not None and proto not in self.__proto__:
-            proto = None
         return ProtocolBase._decode_next_layer(  # pylint: disable=protected-access
             self, dict_, proto, length, packet=packet)  # type: ignore[arg-type,return-value]
+
+    @beholder  # type: ignore[arg-type]
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'Protocol':
+        """Import next layer extractor.
+
+        Arguments:
+            proto: payload protocol identifier (PPID) of the DATA chunk carrying
+                the payload, or :obj:`None` if the packet carries no user data
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of next layer.
+
+        Important:
+            This overrides :meth:`ProtocolBase._import_next_layer
+            <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` for one
+            reason only: to look the PPID up **without** mutating
+            :attr:`self.__proto__ <SCTP.__proto__>`.
+
+            The registry is a :class:`collections.defaultdict`, so the base
+            implementation's ``self.__proto__[proto]`` *inserts* any key it is
+            handed. Every packet with an unregistered PPID would therefore grow
+            a registry that is class-level -- shared by every :class:`SCTP`
+            instance in the process -- and make
+            :meth:`self.register <SCTP.register>` report that PPID as already
+            registered. The fallback itself is unchanged: an unregistered PPID
+            still resolves to :class:`~pcapkit.protocols.misc.raw.Raw`, which is
+            what :attr:`self.__proto__ <SCTP.__proto__>` declares as its default.
+
+        """
+        if TYPE_CHECKING:
+            protocol: 'Type[Protocol]'
+
+        file_ = self._get_payload()
+        if length is None:
+            length = len(file_)
+
+        if length == 0:
+            from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        elif self._sigterm:
+            from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        elif proto in self.__proto__:
+            protocol = self.__proto__[proto]  # type: ignore[assignment]
+            if isinstance(protocol, ModuleDescriptor):
+                protocol = protocol.klass  # type: ignore[unreachable]
+                self.__proto__[proto] = protocol  # update mapping upon import
+        else:
+            from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+
+        next_ = protocol(file_, length, alias=proto, packet=packet,  # type: ignore[abstract]
+                         layer=self._exlayer, protocol=self._exproto)
+        return next_
 
     def _read_sctp_chunks(self) -> 'Chunks':
         """Read SCTP chunk list.
