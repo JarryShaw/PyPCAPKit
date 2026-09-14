@@ -1,5 +1,8 @@
 name: "Conda Update"
 
+permissions:
+  contents: read
+
 on:
   schedule:
     - cron: '0 10 * * 6' # everyday at 10am
