@@ -1892,12 +1892,10 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">domain</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">domain</span>
-            <span class="n">cmpt_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">cmpt_bitmap</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'cmpt_bitmap'</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
             <span class="n">level</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">level</span>
             <span class="n">checksum</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">checksum</span>
             <span class="n">bitmap</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">cmpt_bitmap</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'cmpt_bitmap'</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">cmpt_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span> <span class="k">if</span> <span class="n">bitmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">cmpt_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span> <span class="k">if</span> <span class="n">bitmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
 
         <span class="k">return</span> <span class="n">Schema_CALIPSOOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
