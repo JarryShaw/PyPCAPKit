@@ -400,7 +400,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'DatagramID'</span><span class="p">,</span> <span class="s1">'Datagram'</span><span class="p">,</span> <span class="s1">'HoleDiscriptor'</span><span class="p">,</span>
+    <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'DatagramID'</span><span class="p">,</span> <span class="s1">'Datagram'</span><span class="p">,</span> <span class="s1">'HoleDescriptor'</span><span class="p">,</span>
     <span class="s1">'Fragment'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'BufferID'</span><span class="p">,</span>
 <span class="p">]</span>
 
@@ -502,10 +502,10 @@
 
 
 
-<div class="viewcode-block" id="HoleDiscriptor">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor">[docs]</a>
+<div class="viewcode-block" id="HoleDescriptor">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.HoleDescriptor">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">HoleDiscriptor</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HoleDescriptor</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` hole descriptor."""</span>
 
     <span class="c1">#: Start of hole.</span>
@@ -545,14 +545,14 @@
 <span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` buffer entry."""</span>
 
     <span class="c1">#: Hole descriptor list.</span>
-    <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDiscriptor]'</span>
+    <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDescriptor]'</span>
     <span class="c1">#: Initial TCP header.</span>
     <span class="n">hdr</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: ACK list.</span>
     <span class="n">ack</span><span class="p">:</span> <span class="s1">'dict[int, Fragment]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDiscriptor]'</span><span class="p">,</span> <span class="n">hdr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'dict[int, Fragment]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDescriptor]'</span><span class="p">,</span> <span class="n">hdr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'dict[int, Fragment]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>
