@@ -586,6 +586,14 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             is used to potentially determine the length of the remaining
             padding field data.
 
+            An :class:`~pcapkit.corekit.fields.collections.OptionField`
+            declares the size of the whole area it may read, but stops at the
+            end-of-option-list marker and reports the unconsumed remainder
+            through ``__option_padding__``. Since that remainder has not been
+            parsed, we rewind ``data`` by it, so that the fields which size
+            themselves from ``__option_padding__`` read the remainder itself
+            rather than the same number of octets from beyond it.
+
         """
         # force cast arg type since decorator changed their signatures
         if TYPE_CHECKING:
@@ -640,6 +648,15 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
 
             if isinstance(field, ForwardMatchField):
                 data.seek(-field.length, io.SEEK_CUR)
+            elif isinstance(field, OptionField) and field.option_padding > 0:
+                # the option list ended before the declared field length was
+                # exhausted; give the unconsumed remainder back to ``data``
+                # so that the following fields can read it
+                data.seek(-field.option_padding, io.SEEK_CUR)
+                consumed = field.length - field.option_padding
+
+                self.__buffer__[field.name] = byte[:consumed]
+                packet['__length__'] -= consumed
             else:
                 packet['__length__'] -= field.length
 

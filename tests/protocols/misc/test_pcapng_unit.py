@@ -7,6 +7,7 @@ import datetime
 import decimal
 import io
 from ipaddress import ip_address, ip_interface
+import struct
 import types
 import unittest
 from unittest import mock
@@ -24,6 +25,30 @@ class DummyData(dict):
         for value in values:
             self.update(value)
         self.update(kwargs)
+
+
+def pad32(value: bytes) -> bytes:
+    """Pad ``value`` with zeroes up to the next 32-bit boundary."""
+    return value + bytes(-len(value) % 4)
+
+
+def tlv(code: int, value: bytes) -> bytes:
+    """Build a little-endian PCAP-NG option or NRB record, padded to 32 bits."""
+    return struct.pack('<HH', code, len(value)) + pad32(value)
+
+
+def block_body(body: bytes) -> bytes:
+    """Wrap ``body`` in the two block total length fields of a PCAP-NG block.
+
+    The returned buffer is what a block schema is handed by
+    :class:`~pcapkit.protocols.schema.misc.pcapng.PCAPNG`, i.e. the block
+    without its leading 4-octet block type, but *with* the block total length
+    at either end. The length itself counts the block type as well, so it is
+    the length of the returned buffer plus four.
+
+    """
+    length = len(body) + 12
+    return struct.pack('<I', length) + body + struct.pack('<I', length)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -2178,6 +2203,208 @@ class PCAPNGUnitTests(unittest.TestCase):
             SecretsType.ZigBee_APS_Key,
             DummyData(aps_key=b'\x04' * 16, pan_id=4, short_address=0x56789ABC),
         ).addr_low, 0x9ABC)
+
+    def test_pcapng_custom_block_data_spans_padding_and_options(self) -> None:
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.schema.misc.pcapng import CustomBlock
+
+        # A Custom Block carries no length for its custom data, so everything
+        # between the private enterprise number and the trailing block total
+        # length -- the custom data, its padding, and the block options -- is
+        # ``data``, and there is no separate padding field to size.
+        custom = pad32(b'hello')
+        options = tlv(0, b'')  # opt_endofopt
+        raw = block_body(struct.pack('<I', 0x00FFFFFF) + custom + options)
+
+        schema = CustomBlock.unpack(raw, len(raw), {'byteorder': 'little'})
+
+        self.assertEqual(schema.length, schema.length2)
+        self.assertEqual(schema.length, len(raw) + 4)
+        self.assertEqual(schema.pen, 0x00FFFFFF)
+        self.assertEqual(schema.data, custom + options)
+        self.assertEqual(len(schema), len(raw))
+        self.assertFalse(hasattr(schema, 'padding'))
+
+        # ... and the maker keeps the block total length a multiple of four
+        # even when the custom data is not aligned.
+        pcapng = object.__new__(PCAPNG)
+        made = pcapng._make_block_cb(pen=1, data=b'odd')
+        self.assertEqual(made.length, made.length2)
+        self.assertEqual(made.length % 4, 0)
+        self.assertEqual(made.data, pad32(b'odd'))
+
+    def test_pcapng_isb_option_area_excludes_trailing_block_length(self) -> None:
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import InterfaceStatisticsBlock
+
+        # The ISB's fixed fields occupy 24 octets: block type, block total
+        # length, interface ID, the 64-bit timestamp, and the trailing block
+        # total length. Sizing the option area as ``length - 20`` lets the
+        # options field read the trailing block total length as if it were an
+        # option, so the block is consumed 8 octets past its end.
+        options = tlv(2, struct.pack('<II', 1, 2)) + tlv(0, b'')  # isb_starttime, opt_endofopt
+        raw = block_body(struct.pack('<III', 0, 3, 4) + options)
+
+        schema = InterfaceStatisticsBlock.unpack(raw, len(raw), {'byteorder': 'little'})
+
+        self.assertEqual(schema.length, schema.length2)
+        self.assertEqual(schema.length, len(raw) + 4)
+        self.assertEqual(schema.interface_id, 0)
+        self.assertEqual(schema.timestamp_high, 3)
+        self.assertEqual(schema.timestamp_low, 4)
+        self.assertEqual([option.type for option in schema.options],
+                         [OptionType.isb_starttime, OptionType.opt_endofopt])
+        self.assertEqual(schema.options[0].timestamp_high, 1)
+        self.assertEqual(schema.options[0].timestamp_low, 2)
+        self.assertEqual(schema.padding, b'')
+        self.assertEqual(len(schema), len(raw))
+
+    def test_pcapng_option_field_hands_unconsumed_remainder_to_next_field(self) -> None:
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import InterfaceStatisticsBlock
+
+        # An option list that ends at ``opt_endofopt`` before the option area
+        # does leaves a remainder, reported through ``__option_padding__``.
+        # The padding field which sizes itself from it has to read *that*
+        # remainder, not the same number of octets from beyond the options.
+        options = tlv(2, struct.pack('<II', 1, 2)) + tlv(0, b'') + bytes(8)
+        raw = block_body(struct.pack('<III', 0, 3, 4) + options)
+
+        schema = InterfaceStatisticsBlock.unpack(raw, len(raw), {'byteorder': 'little'})
+
+        self.assertEqual(schema.length, schema.length2)
+        self.assertEqual(schema.length, len(raw) + 4)
+        self.assertEqual([option.type for option in schema.options],
+                         [OptionType.isb_starttime, OptionType.opt_endofopt])
+        self.assertEqual(schema.padding, bytes(8))
+        self.assertEqual(len(schema), len(raw))
+
+    def test_pcapng_nrb_ipv6_record_name_follows_sixteen_octet_address(self) -> None:
+        from pcapkit.const.pcapng.record_type import RecordType
+        from pcapkit.protocols.schema.misc.pcapng import NameResolutionBlock
+
+        # An ``nrb_record_ipv6`` record value is a 16-octet address followed by
+        # zero-terminated names, so the names span ``length - 16``. Sizing them
+        # as ``length - 4`` -- the IPv4 record's arithmetic -- over-reads by 12
+        # octets and swallows whatever record follows.
+        v6_value = ip_address('2001:db8::1').packed + b'host6.example\x00'
+        v4_value = ip_address('192.0.2.1').packed + b'host4.example\x00'
+        records = tlv(2, v6_value) + tlv(1, v4_value) + tlv(0, b'')
+        raw = block_body(records)
+
+        schema = NameResolutionBlock.unpack(raw, len(raw), {'byteorder': 'little'})
+
+        self.assertEqual(schema.length, schema.length2)
+        self.assertEqual([record.type for record in schema.records],
+                         [RecordType.nrb_record_ipv6,
+                          RecordType.nrb_record_ipv4,
+                          RecordType.nrb_record_end])
+        self.assertEqual(len(schema.records[0]), 4 + len(pad32(v6_value)))
+        self.assertEqual(schema.records[0].ip, ip_address('2001:db8::1'))
+        self.assertEqual(schema.records[0].names, ['host6.example'])
+        self.assertEqual(schema.records[1].ip, ip_address('192.0.2.1'))
+        self.assertEqual(schema.records[1].names, ['host4.example'])
+        self.assertEqual(schema.mapping.getlist(ip_address('2001:db8::1')), ['host6.example'])
+        self.assertEqual(len(schema), len(raw))
+
+    def test_pcapng_nrb_options_read_from_inside_the_block(self) -> None:
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.const.pcapng.record_type import RecordType
+        from pcapkit.protocols.schema.misc.pcapng import NameResolutionBlock
+
+        # The NRB is the only block with two consecutive option fields: the
+        # record area's size is known only once its records have been parsed,
+        # so ``records`` is declared over the record *and* option areas and the
+        # options have to be read from the remainder it did not consume.
+        v4_value = ip_address('192.0.2.1').packed + b'host4.example\x00'
+        records = tlv(1, v4_value) + tlv(0, b'')
+
+        for name in ('dns.example.', 'dns.example'):
+            with self.subTest(dnsname=name):
+                options = tlv(2, name.encode()) + tlv(0, b'')  # ns_dnsname, opt_endofopt
+                raw = block_body(records + options)
+
+                schema = NameResolutionBlock.unpack(raw, len(raw), {'byteorder': 'little'})
+
+                self.assertEqual(schema.length, schema.length2)
+                self.assertEqual(schema.length, len(raw) + 4)
+                self.assertEqual([record.type for record in schema.records],
+                                 [RecordType.nrb_record_ipv4, RecordType.nrb_record_end])
+                self.assertEqual([option.type for option in schema.options],
+                                 [OptionType.ns_dnsname, OptionType.opt_endofopt])
+                self.assertEqual(schema.options[0].name, name)
+                # the option is padded to a 32-bit boundary whether or not its
+                # value length happens to be a multiple of four
+                self.assertEqual(len(schema.options[0]), 4 + len(pad32(name.encode())))
+                self.assertEqual(schema.padding, b'')
+                self.assertEqual(len(schema), len(raw))
+
+    def test_pcapng_obsolete_packet_block_uses_sixteen_bit_ids(self) -> None:
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import PacketBlock
+
+        # The obsolete Packet Block packs Interface ID and Drops Count into one
+        # 32-bit word, which is what the option area's ``length - 32`` overhead
+        # assumes; declaring them as 32-bit fields reads every later field from
+        # four octets too far in.
+        packet_data = bytes.fromhex('ffffffffffff001122334455') + b'\x08\x06' + bytes(28)
+        options = tlv(2, struct.pack('<I', 0)) + tlv(0, b'')  # pack_flags, opt_endofopt
+        raw = block_body(struct.pack('<HHIIII', 0, 7, 1, 2, len(packet_data), len(packet_data)) +
+                         pad32(packet_data) + options)
+
+        schema = PacketBlock.unpack(raw, len(raw), {'byteorder': 'little'})
+
+        self.assertEqual(schema.length, schema.length2)
+        self.assertEqual(schema.length, len(raw) + 4)
+        self.assertEqual(schema.interface_id, 0)
+        self.assertEqual(schema.drop_count, 7)
+        self.assertEqual(schema.timestamp_high, 1)
+        self.assertEqual(schema.timestamp_low, 2)
+        self.assertEqual(schema.captured_length, len(packet_data))
+        self.assertEqual(schema.original_length, len(packet_data))
+        self.assertEqual(schema.packet_data, packet_data)
+        self.assertEqual(schema.padding_data, bytes(2))
+        self.assertEqual([option.type for option in schema.options],
+                         [OptionType.pack_flags, OptionType.opt_endofopt])
+        self.assertEqual(len(schema), len(raw))
+
+    def test_pcapng_read_block_packet_resolves_linktype_without_info(self) -> None:
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.schema.misc.pcapng import PacketBlock, PCAPNG as Header
+
+        # ``_read_block_packet`` runs before ``self._info`` exists, so it has to
+        # resolve the link type from the schema's interface ID the way the EPB
+        # and SPB readers do, rather than through the ``linktype`` property.
+        pcapng = object.__new__(PCAPNG)
+        pcapng._sect = 1
+        pcapng._fnum = 2
+        pcapng._opt = collections.Counter()
+        pcapng._type = BlockType.Packet_Block
+        pcapng._ctx = types.SimpleNamespace(
+            interfaces=[types.SimpleNamespace(linktype=LinkType.ETHERNET)],
+        )
+        pcapng._read_timestamp = lambda high, low, interface_id=0: (
+            datetime.datetime.fromtimestamp(0, datetime.timezone.utc),
+            decimal.Decimal(0),
+        )
+        decoded = []
+        pcapng._decode_next_layer = lambda data, proto=None, length=None, packet=None: (
+            decoded.append((proto, length)) or data
+        )
+        self.assertFalse(hasattr(pcapng, '_info'))
+
+        with mock.patch('pcapkit.protocols.misc.pcapng.warn'):
+            block = pcapng._read_block_packet(
+                PacketBlock(length=36, interface_id=0, drop_count=1, timestamp_high=0,
+                            timestamp_low=0, captured_length=4, original_length=4,
+                            packet_data=b'data', options=[], length2=36),
+                header=Header(type=BlockType.Packet_Block, block=b''),
+            )
+
+        self.assertEqual(block.drop_count, 1)
+        self.assertEqual(decoded, [(LinkType.ETHERNET, 4)])
 
 
 if __name__ == '__main__':

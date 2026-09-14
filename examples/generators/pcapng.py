@@ -48,26 +48,38 @@ the synthesised DHCP payloads come from.
 Block types deliberately left out
 ---------------------------------
 
-Three constructs that :mod:`pcapkit.protocols.misc.pcapng` nominally supports
-raise on spec-conformant input, so no fixture here contains them -- a fixture
-that cannot be parsed at all is of no use to a regression test:
+Two block types that used to raise on spec-conformant input now parse, so they
+are absent from these fixtures only because the fixtures have not been extended
+to carry them -- not because pcapkit cannot read them:
 
-* **Custom Block** (``0x00000BAD``/``0x40000BAD``) --
-  ``pcapkit/protocols/schema/misc/pcapng.py:1591`` computes its padding as
-  ``(4 - pkt['data'] % 4) % 4`` where ``pkt['data']`` is :class:`bytes`, so any
-  custom block raises ``TypeError: not all arguments converted during bytes
-  formatting``. The ``len()`` call is missing.
-* **Packet Block** (obsolete, ``0x00000002``) -- its ``interface_id`` and
-  ``drop_count`` are declared ``UInt32Field`` at lines 1657 and 1659, but the
-  format spec makes both 16-bit, and the ``options`` length at line 1674
-  subtracts the 32-byte prefix that only the 16-bit layout produces. The field
-  widths and the arithmetic disagree, so neither layout parses.
+* **Custom Block** (``0x00000BAD``/``0x40000BAD``) -- **parses now.** Its
+  padding was computed as ``(4 - pkt['data'] % 4) % 4``, i.e. on the
+  :class:`bytes` object rather than on its length, so any custom block raised
+  ``TypeError: not all arguments converted during bytes formatting``. The
+  padding field is gone rather than repaired: the block carries no length for
+  its custom data, so ``data`` already spans the custom data, its padding *and*
+  the block's options, which is as much as a reader that does not own the
+  private enterprise number can tell apart (GitHub issue #341).
+* **Packet Block** (obsolete, ``0x00000002``) -- **parses now.** Its
+  ``interface_id`` and ``drop_count`` were declared ``UInt32Field`` although
+  Appendix A of draft-ietf-opsawg-pcapng (Figure 19) packs both into one 32-bit
+  word -- which is the layout the ``options`` length's 32-octet overhead already
+  assumed. Both are ``UInt16Field`` now, and the reader resolves the link type
+  from the block's own ``interface_id`` rather than through the ``linktype``
+  property, which needs a ``self._info`` that does not exist yet while the block
+  is still being read and so failed with ``AttributeError: 'PCAPNG' object has
+  no attribute '_info'`` (GitHub issue #345). The block MUST NOT appear in new
+  files, so a fixture carrying one would be documenting the past.
+
+One construct still raises on spec-conformant input, so no fixture here contains
+it -- a fixture that cannot be parsed at all is of no use to a regression test:
+
 * **``if_IPv6addr``** -- ``IPv6InterfaceField.post_process`` in
   ``pcapkit/corekit/fields/ipaddress.py`` reads the trailing prefix-length
   octet as ``int(value[16:])``, i.e. it parses a raw byte as an ASCII decimal
   string, so a ``/64`` prefix raises ``ValueError``.
 
-A fourth defect is worked around rather than avoided. A **Simple Packet Block**
+A further defect is worked around rather than avoided. A **Simple Packet Block**
 in a section declaring more than one interface raises ``FormatError: PCAP-NG:
 [SPB] invalid section with 2 interfaces`` at
 ``pcapkit/foundation/engines/pcapng.py:218``, which tests
@@ -79,33 +91,48 @@ Block" -- so the correct check is for *zero* interfaces, not for more than one.
 ``test.pcapng`` therefore carries its simple packet block in its
 single-interface second section, which keeps the block type covered.
 
-Three further defects are exercised on purpose, because they warn rather than
-raise, and a fixture that covers the code path is what will catch a future
-crash there. All three are option-area sizing errors in
-``pcapkit/protocols/schema/misc/pcapng.py``, and all three were confirmed by
-bisecting one block type at a time:
+Three further defects were exercised on purpose, because they warned rather than
+raised, and a fixture that covers the code path is what will catch a future
+crash there. All three were option-area sizing errors in
+``pcapkit/protocols/schema/misc/pcapng.py``, all three were confirmed by
+bisecting one block type at a time, and all three are now **fixed** -- so the
+fixtures that reached them are regression cover rather than known-bad input:
 
-* **Interface Statistics Block** -- ``options`` is sized ``length - 20`` at line
-  1335, but the block's fixed fields occupy 24 octets, so the option area
-  over-runs into the trailing block length. Unconditional: an explicit
-  ``opt_endofopt`` does not save it, because the field still consumes its
-  declared width. Symptom, on every capture containing one including the
-  downloaded ``many_interfaces.pcapng``: ``packet length < 0: -8`` and
-  ``[Block 5] block length mismatch: N != 0``.
-* **Name Resolution Block options** -- ``options`` is sized
-  ``__option_padding__ - 4`` at line 1177, which over-runs whenever ``ns_*``
-  options are present. Symptom: ``[Block 4] block length mismatch: 60 != 314``.
-* **Name Resolution Block IPv6 records** -- ``resol`` is sized ``length - 4`` at
-  line 1102, copied from the IPv4 record where the address is four octets wide;
-  an IPv6 address is sixteen, so the name field over-reads by twelve and
-  swallows the record terminator and the block's options. Symptom: ``packet
-  length < 0: -29273``, and the block's ``ns_*`` options vanish.
+* **Interface Statistics Block** -- ``options`` was sized ``length - 20`` though
+  the block's fixed fields occupy 24 octets, so the option area over-ran into
+  the trailing block length. Unconditional: an explicit ``opt_endofopt`` did not
+  save it, because the field still consumed its declared width. Symptom, on
+  every capture containing one including the downloaded
+  ``many_interfaces.pcapng``: ``packet length < 0: -8`` and ``[Block 5] block
+  length mismatch: N != 0``. Now ``length - 24`` (GitHub issue #342).
+* **Name Resolution Block options** -- ``options`` was sized
+  ``__option_padding__ - 4``, which over-ran whenever ``ns_*`` options were
+  present. Symptom: ``[Block 4] block length mismatch: 60 != 314``. Not a wrong
+  constant: ``Schema.unpack`` advances the file by each field's *declared*
+  length, so the octets the option field was trying to size had already been
+  consumed by ``records``. An ``OptionField`` now hands the remainder it did not
+  parse back to the file -- the rewind ``ForwardMatchField`` already did -- which
+  is what makes ``__option_padding__`` mean the same thing to the field that
+  reads it as to the field that reported it, and the NRB's ``options`` is sized
+  ``__option_padding__`` (GitHub issue #344). ``ns_dnsname`` also gained the
+  ``PaddingField`` its ``if_name`` and ``if_description`` siblings have, without
+  which an unaligned DNS name under-read by its own padding.
+* **Name Resolution Block IPv6 records** -- ``resol`` was sized ``length - 4``,
+  copied from the IPv4 record where the address is four octets wide; an IPv6
+  address is sixteen, so the name field over-read by twelve and swallowed the
+  record terminator and the block's options. Symptom: ``packet length <
+  0: -29273``, and the block's ``ns_*`` options vanished. Now ``length - 16``
+  (GitHub issue #343).
+
+``many_interfaces.pcapng`` and ``profile.pcapng`` now extract with neither a
+block length mismatch nor a negative packet length; before these fixes each
+reported one of each.
 
 Every fixture here was checked against an independent PCAP-NG implementation
 (scapy's ``PcapNgReader``) as well as against pcapkit, and against a structural
 walk asserting that each block's total length is 4-octet aligned, repeated
 identically at both ends, and that the block chain covers the file exactly. So
-the complaints above are pcapkit's readings, not malformed fixtures.
+the complaints above were pcapkit's readings, not malformed fixtures.
 
 One complaint is expected rather than a defect: ``test.pcapng`` carries a
 deliberately truncated packet (``captured_len`` below ``original_len``, to

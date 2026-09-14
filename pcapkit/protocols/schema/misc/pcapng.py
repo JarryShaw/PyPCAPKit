@@ -1094,12 +1094,12 @@ class IPv4Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv4):
 
 @schema_final
 class IPv6Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv6):
-    """Header schema for PCAP-NG NRB ``nrb_record_ipv4`` records."""
+    """Header schema for PCAP-NG NRB ``nrb_record_ipv6`` records."""
 
-    #: IPv4 address.
+    #: IPv6 address.
     ip: 'IPv6Address' = IPv6AddressField()
     #: Name resolution data.
-    resol: 'str' = StringField(length=lambda pkt: pkt['length'] - 4)
+    resol: 'str' = StringField(length=lambda pkt: pkt['length'] - 16)
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1138,6 +1138,8 @@ class NS_DNSNameOption(_NS_Option, code=Enum_OptionType.ns_dnsname):
 
     #: DNS name.
     name: 'str' = StringField(length=lambda pkt: pkt['length'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
@@ -1181,7 +1183,7 @@ class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
     )
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['__option_padding__'] - 4 if pkt['__option_padding__'] else 0,
+        length=lambda pkt: pkt['__option_padding__'],
         base_schema=_NS_Option,
         type_name='type',
         registry=Option.registry['ns'],
@@ -1332,7 +1334,7 @@ class InterfaceStatisticsBlock(BlockType, code=Enum_BlockType.Interface_Statisti
     timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 20,
+        length=lambda pkt: pkt['length'] - 24,
         base_schema=_ISB_Option,
         type_name='type',
         registry=Option.registry['isb'],
@@ -1579,16 +1581,23 @@ class DecryptionSecretsBlock(BlockType, code=Enum_BlockType.Decryption_Secrets_B
 @schema_final
 class CustomBlock(BlockType, code=[Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files,
                                    Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files]):
-    """Header schema for PCAP-NG Custom Block (CB)."""
+    """Header schema for PCAP-NG Custom Block (CB).
+
+    Note:
+        The block carries no length for its custom data, so where the custom
+        data ends and the block options begin is known only to the owner of
+        the private enterprise number. :attr:`data` therefore spans the whole
+        region between :attr:`pen` and the trailing block total length, i.e.
+        the custom data, its padding to a 32-bit boundary, and any options.
+
+    """
 
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Private enterprise number.
     pen: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Custom data.
+    #: Custom data (incl. padding and options).
     data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 16)
-    #: Padding.
-    padding: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['data'] % 4) % 4)
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1654,9 +1663,9 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Interface ID.
-    interface_id: 'int' = UInt32Field(callback=byteorder_callback)
+    interface_id: 'int' = UInt16Field(callback=byteorder_callback)
     #: Drops count.
-    drop_count: 'int' = UInt32Field(callback=byteorder_callback, default=0xFFFF)
+    drop_count: 'int' = UInt16Field(callback=byteorder_callback, default=0xFFFF)
     #: Timestamp (high).
     timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)
     #: Timestamp (low).
