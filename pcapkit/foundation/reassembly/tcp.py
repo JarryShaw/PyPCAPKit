@@ -13,7 +13,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.foundation.reassembly.data.tcp import (Buffer, BufferID, Datagram, DatagramID,
-                                                    Fragment, HoleDiscriptor, Packet)
+                                                    Fragment, HoleDescriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
@@ -87,7 +87,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
         if BUFID not in self._buffer:
             self._buffer[BUFID] = Buffer(
                 hdl=[
-                    HoleDiscriptor(
+                    HoleDescriptor(
                         first=info.len,
                         last=sys.maxsize,
                     ),
@@ -159,14 +159,14 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     continue
                 del HDL[index]                                     # step four
                 if info.first > hole.first:                        # step five
-                    new_hole = HoleDiscriptor(
+                    new_hole = HoleDescriptor(
                         first=hole.first,
                         last=info.first - 1,
                     )
                     HDL.insert(index, new_hole)
                     index += 1
                 if info.last < hole.last and not FIN and not RST:  # step six
-                    new_hole = HoleDiscriptor(
+                    new_hole = HoleDescriptor(
                         first=info.last + 1,
                         last=hole.last
                     )

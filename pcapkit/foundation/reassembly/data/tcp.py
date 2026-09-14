@@ -7,7 +7,7 @@ from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
-    'Packet', 'DatagramID', 'Datagram', 'HoleDiscriptor',
+    'Packet', 'DatagramID', 'Datagram', 'HoleDescriptor',
     'Fragment', 'Buffer', 'BufferID',
 ]
 
@@ -101,7 +101,7 @@ class Datagram(Info, Generic[_AT]):
 
 
 @info_final
-class HoleDiscriptor(Info):
+class HoleDescriptor(Info):
     """Data model for :term:`TCP <reasm.tcp.buffer>` hole descriptor."""
 
     #: Start of hole.
@@ -135,11 +135,11 @@ class Buffer(Info):
     """Data model for :term:`TCP <reasm.tcp.buffer>` buffer entry."""
 
     #: Hole descriptor list.
-    hdl: 'list[HoleDiscriptor]'
+    hdl: 'list[HoleDescriptor]'
     #: Initial TCP header.
     hdr: 'bytes'
     #: ACK list.
     ack: 'dict[int, Fragment]'
 
     if TYPE_CHECKING:
-        def __init__(self, hdl: 'list[HoleDiscriptor]', hdr: 'bytes', ack: 'dict[int, Fragment]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, hdl: 'list[HoleDescriptor]', hdr: 'bytes', ack: 'dict[int, Fragment]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

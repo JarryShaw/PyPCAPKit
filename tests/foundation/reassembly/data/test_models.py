@@ -48,10 +48,10 @@ class ReassemblyDataModelTests(unittest.TestCase):
 
     def test_tcp_data_models_and_package_aliases(self) -> None:
         from pcapkit.foundation.reassembly.data import (TCP_Buffer, TCP_Datagram, TCP_DatagramID,
-                                                        TCP_Fragment, TCP_HoleDiscriptor,
+                                                        TCP_Fragment, TCP_HoleDescriptor,
                                                         TCP_Packet)
         from pcapkit.foundation.reassembly.data.tcp import (Buffer, Datagram, DatagramID,
-                                                            Fragment, HoleDiscriptor, Packet)
+                                                            Fragment, HoleDescriptor, Packet)
 
         src = ip_address('192.0.2.10')
         dst = ip_address('198.51.100.20')
@@ -69,10 +69,10 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertIsInstance(datagram, TCP_Datagram)
         self.assertTrue(datagram.completed)
 
-        hole = HoleDiscriptor(5, 10)
+        hole = HoleDescriptor(5, 10)
         fragment = Fragment([3], 100, 5, bytearray(b'hello'))
         buffer = Buffer([hole], b'tcp-header', {200: fragment})
-        self.assertIsInstance(hole, TCP_HoleDiscriptor)
+        self.assertIsInstance(hole, TCP_HoleDescriptor)
         self.assertIsInstance(fragment, TCP_Fragment)
         self.assertIsInstance(buffer, TCP_Buffer)
         self.assertEqual(buffer.ack[200].raw, bytearray(b'hello'))
