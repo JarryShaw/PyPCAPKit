@@ -42,6 +42,7 @@ from pcapkit.protocols.schema.misc.pcapng import \
 from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
 from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
 from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
+from pcapkit.protocols.transport.sctp import SCTP
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
@@ -65,6 +66,8 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.ethertype import EtherType
     from pcapkit.const.reg.linktype import LinkType
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.const.sctp.payload_protocol_identifier import \
+        PayloadProtocolIdentifier as SCTP_PayloadProtocolIdentifier
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
     from pcapkit.const.tcp.option import Option as TCP_Option
     from pcapkit.protocols.application.httpv2 import FrameConstructor as HTTP_FrameConstructor
@@ -113,7 +116,7 @@ __all__ = [
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
 
     'register_apptype',
-    'register_tcp', 'register_udp',
+    'register_tcp', 'register_udp', 'register_sctp',
     'register_tcp_option', 'register_tcp_mp_option',
 
     'register_http_frame',
@@ -585,9 +588,20 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         class\_: class name
         proto: protocol name (must be a valid transport protocol)
 
+    Important:
+        :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**
+        part of this fan-out, even for application types that name ``sctp`` in
+        their :class:`~pcapkit.const.reg.apptype.TransportProtocol`. Its
+        :data:`~pcapkit.protocols.transport.sctp.SCTP.__proto__` registry is
+        keyed by the DATA chunk's payload protocol identifier rather than by
+        port number, so writing a port number into it would dispatch on a
+        number from the wrong registry. Use
+        :func:`pcapkit.foundation.registry.register_sctp` instead.
+
     See Also:
         * :func:`pcapkit.foundation.registry.register_tcp`
         * :func:`pcapkit.foundation.registry.register_udp`
+        * :func:`pcapkit.foundation.registry.register_sctp`
 
     """
     if isinstance(code, Enum_AppType):
@@ -742,6 +756,50 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
 
     UDP.register(code, module)
     logger.info('registered UDP port: %s', code)
+
+    # register protocol to protocol registry
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    register_protocol(module)
+
+
+@overload
+def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+@overload
+def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str', class_: 'str') -> 'None': ...
+
+
+# NOTE: pcapkit.protocols.transport.sctp.SCTP.__proto__
+def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+                  class_: 'str' = NULL) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The full qualified class name of the new protocol class
+        should be as ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.transport.sctp.SCTP.__proto__` registry.
+
+    Arguments:
+        code: payload protocol identifier (PPID), as in
+            :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+        class\_: class name
+
+    Important:
+        Unlike :func:`register_tcp` and :func:`register_udp`, ``code`` is a
+        *payload protocol identifier* taken from the DATA chunk, **not** a port
+        number: SCTP names its upper layer per DATA chunk rather than per
+        association. See :rfc:`9260#section-3.3.1`.
+
+    """
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+
+    SCTP.register(code, module)
+    logger.info('registered SCTP payload protocol identifier: %s', code)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):

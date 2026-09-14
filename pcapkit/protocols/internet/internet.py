@@ -69,6 +69,8 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
          - :class:`pcapkit.protocols.internet.mh.MH`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.HIP`
          - :class:`pcapkit.protocols.internet.hip.HIP`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.SCTP`
+         - :class:`pcapkit.protocols.transport.sctp.SCTP`
 
     """
 
@@ -98,6 +100,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             Enum_TransType.IPX_in_IP:       ModuleDescriptor('pcapkit.protocols.internet.ipx',        'IPX'),
             Enum_TransType.Mobility_Header: ModuleDescriptor('pcapkit.protocols.internet.mh',         'MH'),
             Enum_TransType.HIP:             ModuleDescriptor('pcapkit.protocols.internet.hip',        'HIP'),
+            Enum_TransType.SCTP:            ModuleDescriptor('pcapkit.protocols.transport.sctp',      'SCTP'),
         },
     )
 

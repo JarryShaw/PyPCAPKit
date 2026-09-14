@@ -99,6 +99,28 @@ __all__ = [
     'TCP_MPTCPJoinSYN', 'TCP_MPTCPJoinSYNACK', 'TCP_MPTCPJoinACK',
     'UDP',
 
+    # Stream Control Transmission Protocol
+    'SCTP',
+    'SCTP_GapAckBlock',
+    'SCTP_Chunk',
+    'SCTP_UnknownChunk', 'SCTP_DATAChunk', 'SCTP_INITChunk', 'SCTP_INITACKChunk', 'SCTP_SACKChunk',
+    'SCTP_HeartbeatChunk', 'SCTP_HeartbeatACKChunk', 'SCTP_AbortChunk', 'SCTP_ShutdownChunk',
+    'SCTP_ShutdownACKChunk', 'SCTP_ErrorChunk', 'SCTP_CookieEchoChunk', 'SCTP_CookieACKChunk',
+    'SCTP_ShutdownCompleteChunk',
+    'SCTP_Parameter',
+    'SCTP_UnknownParameter', 'SCTP_HeartbeatInfoParameter', 'SCTP_IPv4AddressParameter',
+    'SCTP_IPv6AddressParameter', 'SCTP_StateCookieParameter', 'SCTP_UnrecognizedParameter',
+    'SCTP_CookiePreservativeParameter', 'SCTP_HostNameAddressParameter',
+    'SCTP_SupportedAddressTypesParameter',
+    'SCTP_ErrorCause',
+    'SCTP_UnknownCause', 'SCTP_InvalidStreamIdentifierCause',
+    'SCTP_MissingMandatoryParameterCause', 'SCTP_StaleCookieCause', 'SCTP_OutOfResourceCause',
+    'SCTP_UnresolvableAddressCause', 'SCTP_UnrecognizedChunkTypeCause',
+    'SCTP_InvalidMandatoryParameterCause', 'SCTP_UnrecognizedParametersCause',
+    'SCTP_NoUserDataCause', 'SCTP_CookieReceivedWhileShuttingDownCause',
+    'SCTP_RestartOfAnAssociationWithNewAddressesCause', 'SCTP_UserInitiatedAbortCause',
+    'SCTP_ProtocolViolationCause',
+
     # Application Layer Protocols
     'FTP',
     'HTTPv1',

@@ -6,8 +6,9 @@ Base Protocol
 :mod:`pcapkit.protocols.transport.transport` contains
 :class:`~pcapkit.protocols.transport.transport.Transport`,
 which is a base class for transport layer protocols, eg.
-:class:`~pcapkit.protocols.transport.transport.tcp.TCP` and
-:class:`~pcapkit.protocols.transport.transport.udp.UDP`.
+:class:`~pcapkit.protocols.transport.tcp.TCP`,
+:class:`~pcapkit.protocols.transport.udp.UDP` and
+:class:`~pcapkit.protocols.transport.sctp.SCTP`.
 
 .. autoclass:: pcapkit.protocols.transport.transport.Transport
    :no-members:

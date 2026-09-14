@@ -61,7 +61,7 @@ __all__ = [
     'IPv6_Route', 'MH',
 
     # Transport Layer
-    'TCP', 'UDP',
+    'TCP', 'UDP', 'SCTP',
 
     # Application Layer
     'FTP', 'FTP_DATA',

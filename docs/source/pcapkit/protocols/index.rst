@@ -57,7 +57,7 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph transport [Transport Layer]
-           Transport --> TCP & UDP
+           Transport --> TCP & UDP & SCTP
        end
 
        subgraph application [Application Layer]
@@ -124,6 +124,7 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
        click Transport "/pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.Transport"
        click TCP "/pcapkit/protocols/transport/tcp.html#pcapkit.protocols.internet.tcp.TCP"
        click UDP "/pcapkit/protocols/transport/udp.html#pcapkit.protocols.internet.udp.UDP"
+       click SCTP "/pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP"
 
        click Application "/pcapkit/protocols/application/application.html#pcapkit.protocols.application.Application"
        click HTTP "/pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP"

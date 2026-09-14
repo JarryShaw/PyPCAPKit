@@ -12,12 +12,13 @@ transport layer, with detailed implementation and methods.
    :maxdepth: 1
 
    transport
+   sctp
    tcp
    udp
 
 .. todo::
 
-   Implements DCCP, RSVP, SCTP.
+   Implements DCCP, RSVP.
 
 Protocol Registry
 -----------------
