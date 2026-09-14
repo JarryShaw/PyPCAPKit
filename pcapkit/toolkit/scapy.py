@@ -250,8 +250,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
             rst=bool(tcp.flags.R),                  # reset connection flag
             header=bytes(tcp)[:tcp.dataofs * 4],    # raw bytes type header
             payload=bytearray(bytes(tcp.payload)),  # raw bytearray type payload
-            first=tcp.seq,                          # this sequence number
-            last=tcp.seq + raw_len,                 # next (wanted) sequence number
+            first=tcp.seq,                          # first sequence number of payload
+            last=tcp.seq + raw_len - 1,             # last sequence number of payload
             len=raw_len,                            # payload length, header excludes
         )
         return data
