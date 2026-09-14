@@ -440,9 +440,12 @@
     <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Payload length, header excluded.</span>
     <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: This sequence number.</span>
+    <span class="c1">#: Sequence number of the first octet of :attr:`payload`, i.e. the segment's</span>
+    <span class="c1">#: own sequence number. Absolute, not an offset into any payload buffer.</span>
     <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Next (wanted) sequence number.</span>
+    <span class="c1">#: Sequence number of the last octet of :attr:`payload`, i.e. ``first +</span>
+    <span class="c1">#: len - 1``. **Inclusive**, so a segment carrying no payload at all has</span>
+    <span class="c1">#: :attr:`last` one below :attr:`first`.</span>
     <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Raw :obj:`bytes` type header.</span>
     <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
@@ -506,11 +509,21 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.HoleDescriptor">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HoleDescriptor</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` hole descriptor."""</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` hole descriptor.</span>
 
-    <span class="c1">#: Start of hole.</span>
+<span class="sd">    Both bounds are **absolute TCP sequence numbers** and both are</span>
+<span class="sd">    **inclusive**, so a hole covers ``last - first + 1`` octets. They are not</span>
+<span class="sd">    offsets into :attr:`Fragment.raw`: the descriptor list is kept once per</span>
+<span class="sd">    buffer ID, whereas each acknowledgement number's payload buffer carries an</span>
+<span class="sd">    initial sequence number of its own, so only</span>
+<span class="sd">    :meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;` -- which</span>
+<span class="sd">    knows which buffer it is looking at -- can convert one to the other.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Sequence number of the first missing octet.</span>
     <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Stop of hole.</span>
+    <span class="c1">#: Sequence number of the last missing octet, inclusive.</span>
     <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -526,7 +539,11 @@
 
     <span class="c1">#: List of reassembled packets.</span>
     <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span>
-    <span class="c1">#: ISN of payload buffer.</span>
+    <span class="c1">#: Sequence number of the octet held in ``raw[0]``, i.e. the origin this</span>
+    <span class="c1">#: buffer is indexed from: ``raw[n]`` holds the octet whose sequence number</span>
+    <span class="c1">#: is ``isn + n``. Revised downwards whenever a segment turns up below the</span>
+    <span class="c1">#: data already buffered, so it is not necessarily the connection's own</span>
+    <span class="c1">#: initial sequence number.</span>
     <span class="n">isn</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Length of payload buffer.</span>
     <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
