@@ -51,6 +51,7 @@ Transport Layer
 .. toctree::
    :maxdepth: 2
 
+   sctp
    tcp
 
 Application Layer

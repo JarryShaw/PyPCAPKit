@@ -99,6 +99,8 @@ Transport Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_udp
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_sctp
+
 Application Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

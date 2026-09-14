@@ -31,7 +31,7 @@ __all__ = [
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
 
     'register_apptype',
-    'register_tcp', 'register_udp',
+    'register_tcp', 'register_udp', 'register_sctp',
     'register_tcp_option', 'register_tcp_mp_option',
 
     'register_http_frame',
