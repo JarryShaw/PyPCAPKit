@@ -4,6 +4,9 @@
 # Authentication Header
 from pcapkit.protocols.data.internet.ah import AH
 
+# Encapsulating Security Payload
+from pcapkit.protocols.data.internet.esp import ESP
+
 # Host Identity Protocol
 from pcapkit.protocols.data.internet.hip import HIP
 from pcapkit.protocols.data.internet.hip import AckDataParameter as HIP_AckDataParameter
@@ -215,6 +218,9 @@ from pcapkit.protocols.data.internet.mh import UnknownMessage as MH_UnknownMessa
 __all__ = [
     # Authentication Header
     'AH',
+
+    # Encapsulating Security Payload
+    'ESP',
 
     # Host Identity Protocol
     'HIP', 'HIP_Control',

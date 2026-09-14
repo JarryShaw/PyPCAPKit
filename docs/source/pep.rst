@@ -42,15 +42,19 @@ but not yet done. Namely, grouped by each TCP/IP layer and ordered by protocol
 name alphabetically,
 
 * Link Layer: DSL, EAPOL, FDDI, ISDN, PPP
-* Internet Layer: ECN, ESP, ICMP, ICMPv6, IGMP, NDP, Shim6
+* Internet Layer: ECN, ICMP, ICMPv6, IGMP, NDP, Shim6
 * Transport Layer: DCCP, QUIC, RSVP
 * Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP,
   ONC/RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL, XMPP
 
-Specifically, I have attempted to implement **ESP** several years ago, and I
-abandoned the implementation in the `NotImplemented` folder due to some design
-flaws within PyPCAPKit at that time. But now, the protocol should be able to
-implement quite smoothly.
+**ESP** -- abandoned in the ``NotImplemented`` folder for years, because of
+design flaws within PyPCAPKit at the time -- is now implemented, c.f.
+:class:`~pcapkit.protocols.internet.esp.ESP`. It parses without keys, and
+decrypts when a Security Association is supplied through the protocol keyed
+:mod:`pcapkit.corekit.context` channel. What is still wanted there is wider
+algorithm coverage: ChaCha20-Poly1305 [:rfc:`7634`], AES-CCM [:rfc:`4309`] and
+AES-XCBC integrity [:rfc:`3566`] are not implemented, and neither are Extended
+Sequence Numbers.
 
 More over, :class:`~pcapkit.protocols.internet.mh.MH` requires some help to
 implement all the *message data* types, you can find more information in the

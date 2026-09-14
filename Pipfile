@@ -15,6 +15,7 @@ pypcapkit = {editable = true,path = "."}
 pyshark = "*"
 dpkt = "*"
 scapy = "*"
+cryptography = "*"
 beautifulsoup4 = {extras = ["html5lib"],version = "*"}
 requests = {extras = ["socks"],version = "*"}
 autopep8 = "*"

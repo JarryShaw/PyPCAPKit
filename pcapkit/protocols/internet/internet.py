@@ -57,6 +57,8 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
          - :class:`pcapkit.protocols.internet.ipv6_route.IPv6_Route`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Frag`
          - :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.ESP`
+         - :class:`pcapkit.protocols.internet.esp.ESP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.AH`
          - :class:`pcapkit.protocols.internet.ah.AH`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`
@@ -94,6 +96,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             Enum_TransType.IPv6:            ModuleDescriptor('pcapkit.protocols.internet.ipv6',       'IPv6'),
             Enum_TransType.IPv6_Route:      ModuleDescriptor('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
             Enum_TransType.IPv6_Frag:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
+            Enum_TransType.ESP:             ModuleDescriptor('pcapkit.protocols.internet.esp',        'ESP'),
             Enum_TransType.AH:              ModuleDescriptor('pcapkit.protocols.internet.ah',         'AH'),
             Enum_TransType.IPv6_NoNxt:      ModuleDescriptor('pcapkit.protocols.misc.raw',            'Raw'),
             Enum_TransType.IPv6_Opts:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
@@ -248,5 +251,6 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
                 self.__proto__[proto] = protocol  # update mapping upon import
 
         next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
-                         alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto)
+                         alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto,
+                         __context__=self._exctx)
         return next_

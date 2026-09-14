@@ -82,6 +82,8 @@ pcapkit-vendor = "pcapkit.vendor.__main__:main"
 [project.optional-dependencies]
 # for CLI display
 cli = [ "emoji" ]
+# for ESP payload decryption, c.f. pcapkit.protocols.internet.esp
+crypto = [ "cryptography>=3.4" ]
 # for normal users
 DPKT = [ "dpkt" ]
 Scapy = [ "scapy" ]
@@ -90,6 +92,7 @@ PyShark = [ "pyshark" ]
 vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]
 all = [
     "emoji",
+    "cryptography>=3.4",
     "dpkt", "scapy", "pyshark",
     "requests[socks]", "beautifulsoup4[html5lib]",
 ]

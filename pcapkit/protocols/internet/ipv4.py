@@ -217,7 +217,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPv4':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, *,  # pylint: disable=unused-argument,arguments-differ
+             __packet__: 'Optional[dict[str, Any]]' = None, **kwargs: 'Any') -> 'Data_IPv4':
         """Read Internet Protocol version 4 (IPv4).
 
         Structure of IPv4 header [:rfc:`791`]:
@@ -242,6 +243,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Args:
             length: Length of packet data.
+            __packet__: Optional packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -285,7 +287,16 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 ('options', self._read_ipv4_options(_optl)),
             ])
 
-        return self._decode_next_layer(ipv4, ipv4.protocol, ipv4.len - ipv4.hdr_len)
+        # update packet info
+        if __packet__ is None:
+            __packet__ = {}
+        __packet__.update({
+            'src': ipv4.src,
+            'dst': ipv4.dst,
+        })
+
+        return self._decode_next_layer(ipv4, ipv4.protocol, ipv4.len - ipv4.hdr_len,
+                                       packet=__packet__)
 
     def make(self,
              tos_pre: 'Enum_ToSPrecedence | StdlibEnum | AenumEnum | int | str' = Enum_ToSPrecedence.Routine,

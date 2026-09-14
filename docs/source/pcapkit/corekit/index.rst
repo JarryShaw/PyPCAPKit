@@ -10,12 +10,15 @@ class :class:`~pcapkit.corekit.infoclass.Info`,
 protocol collection class :class:`~pcapkit.corekit.protochain.ProtoChain`,
 and :class:`~pcapkit.corekit.multidict.MultiDict` family inspired from
 :mod:`Werkzeug` for multientry :obj:`dict` data mapping, the
-:class:`~pcapkit.corekit.fields.field.Field` family for data parsing.
+:class:`~pcapkit.corekit.fields.field.Field` family for data parsing, and
+the :class:`~pcapkit.corekit.context.ContextRegistry` channel for caller
+supplied information that a protocol needs but the wire does not carry.
 
 .. toctree::
    :maxdepth: 2
 
    fields/index
+   context
    infoclass
    io
    module

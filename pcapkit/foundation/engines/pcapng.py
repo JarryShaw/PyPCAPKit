@@ -184,6 +184,7 @@ class PCAPNG(Engine[P_PCAPNG]):
             # read next block
             block = P_PCAPNG(ext._ifile, num=ext._frnum+1, sct=len(self._ctx_list),
                              ctx=self._ctx, layer=ext._exlyr, protocol=ext._exptl,
+                             __context__=ext._exctx,
                              __packet__={
                                  'snaplen': self._get_snaplen(),
                              })

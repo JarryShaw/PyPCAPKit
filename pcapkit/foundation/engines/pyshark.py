@@ -83,6 +83,9 @@ class PyShark(Engine['PySharkPacket']):
                   support such operations.
                 * if reassembly is enabled, as the PyShark engine currently
                   does not support such operation.
+                * if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
+                  is provided, as the PyShark engine does not parse with
+                  :mod:`pcapkit`'s own protocol implementations.
 
         """
         ext = self._extractor
@@ -90,6 +93,12 @@ class PyShark(Engine['PySharkPacket']):
         if ext._exlyr != 'none' or ext._exptl != 'null':
             warn("'Extractor(engine='pyshark')' does not support protocol and layer threshold; "
                  f"'layer={ext._exlyr}' and 'protocol={ext._exptl}' ignored",
+                 AttributeWarning, stacklevel=stacklevel())
+
+        if ext._exctx:
+            warn("'Extractor(engine='pyshark')' does not parse with pcapkit's own protocol "
+                 f"implementations, so the caller supplied parsing context "
+                 f"'context={ext._exctx!r}' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         if ext._flag_r and (ext._ipv4 or ext._ipv6 or ext._tcp):
