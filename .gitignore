@@ -21,6 +21,7 @@ test/pcapkit
 test/dictdumper
 deprecated/
 temp
+sample
 
 _build
 Pipfile.lock
