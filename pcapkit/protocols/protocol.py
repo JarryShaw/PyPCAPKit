@@ -546,7 +546,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         #: str: Parse packet until such protocol.
         self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | ProtocolBase | Type[ProtocolBase]]
         #: pcapkit.corekit.context.ContextRegistry: Caller supplied parsing context.
-        self._exctx = ContextRegistry.make(kwargs.pop('__context__', None))  # type: ContextRegistry
+        # NOTE: Every nested layer normalises the context it was handed, so an
+        # already-normalised registry is adopted as-is: ``make()`` copies, and
+        # paying for a dict copy per protocol in a capture buys nothing when the
+        # contexts are shared regardless.
+        __context__ = kwargs.pop('__context__', None)
+        self._exctx = (__context__ if isinstance(__context__, ContextRegistry)
+                       else ContextRegistry.make(__context__))  # type: ContextRegistry
         #: bool: If terminate parsing next layer of protocol.
         self._sigterm = self._check_term_threshold()
 

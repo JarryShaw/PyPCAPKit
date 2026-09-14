@@ -151,11 +151,11 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-#: Sentinel for the not-yet-attempted :mod:`cryptography` import.
-_CRYPTO_UNSET = object()
-
 #: Cached :mod:`cryptography` primitives, c.f. :func:`load_cryptography`.
-_CRYPTO = _CRYPTO_UNSET  # type: Any
+#: :data:`NotImplemented` means the import has not been attempted yet, and
+#: :data:`None` that it was attempted and |cryptography|_ is not installed --
+#: three states, so a missing dependency is not retried on every frame.
+_CRYPTO = NotImplemented  # type: Any
 
 
 def load_cryptography() -> 'Optional[tuple[Any, Any, Any, Type[Exception]]]':
@@ -175,7 +175,7 @@ def load_cryptography() -> 'Optional[tuple[Any, Any, Any, Type[Exception]]]':
     """
     global _CRYPTO  # pylint: disable=global-statement
 
-    if _CRYPTO is _CRYPTO_UNSET:
+    if _CRYPTO is NotImplemented:
         try:
             from cryptography.exceptions import \
                 InvalidTag as _InvalidTag  # pylint: disable=import-outside-toplevel
@@ -956,7 +956,9 @@ class ESP(IPsec[Data_ESP, Schema_ESP],
         spi, seq = schema.spi, schema.seq
         total = 8 + len(data)
 
-        packet = kwargs.get('packet') or {}
+        packet = kwargs.get('packet')
+        if packet is None:
+            packet = {}
         context = self._get_context(ESPContext)
         association = context.match(spi, packet.get('dst')) if context is not None else None
 
@@ -1034,7 +1036,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP],
             padding=padding,
             plaintext=inner,
         )
-        return self._decode_next_layer(esp, next_type, len(inner), packet=packet or None,
+        return self._decode_next_layer(esp, next_type, len(inner), packet=packet,
                                        version=version, payload=inner)
 
     def make(self,

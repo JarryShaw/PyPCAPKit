@@ -92,8 +92,8 @@ class Scapy(Engine['ScapyPacket']):
 
         if ext._exctx:
             warn("'Extractor(engine=scapy)' does not parse with pcapkit's own protocol "
-                 f"implementations, so the caller supplied parsing context "
-                 f"'context={ext._exctx!r}' is ignored",
+                 "implementations, so the parsing context supplied through "
+                 "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         # setup verbose handler
