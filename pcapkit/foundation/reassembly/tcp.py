@@ -42,6 +42,24 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
         # Fetch result:
         >>> result = tcp_reassembly.datagram
 
+    Note:
+        There are two coordinate systems in play here, and keeping them apart
+        matters. The :term:`hole descriptor list <reasm.tcp.buffer>` of
+        :rfc:`815` is kept in **absolute TCP sequence numbers**, inclusive of
+        both bounds, because a hole belongs to the connection's sequence space
+        for that direction and not to any one payload buffer: the list is held
+        once per buffer ID, while each acknowledgement number gets a payload
+        buffer of its own with an initial sequence number of its own, and that
+        initial sequence number is revised whenever a segment turns up below
+        the data already buffered. A payload buffer, on the other hand, is
+        indexed from zero, such that
+        :attr:`buffer.raw[n] <pcapkit.foundation.reassembly.data.tcp.Fragment.raw>`
+        holds the octet with sequence number
+        :attr:`buffer.isn <pcapkit.foundation.reassembly.data.tcp.Fragment.isn>`
+        ``+ n``. :meth:`submit` is therefore the one place that converts
+        between the two, subtracting that buffer's initial sequence number from
+        each hole bound.
+
     """
     if TYPE_CHECKING:
         protocol: 'Type[TCP_Protocol]'
@@ -77,6 +95,14 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
         RST = info.rst      # Reset Connection Flag (Termination)
         SYN = info.syn      # Synchronise Flag (Establishment)
 
+        # Sequence number of the first octet of this segment's payload. A SYN
+        # occupies a sequence number of its own (:rfc:`793`), so payload sent
+        # by or after a SYN starts at ``dsn + 1`` rather than at ``dsn``.
+        # Without this the octet the SYN spends becomes a zero byte at the head
+        # of the payload buffer, and every complete datagram of a connection
+        # whose handshake was captured comes back one octet too long.
+        PSN = DSN + 1 if SYN else DSN
+
         # when SYN is set, reset buffer of existing session
         if SYN and BUFID in self._buffer:
             self._dtgram.extend(
@@ -88,7 +114,11 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
             self._buffer[BUFID] = Buffer(
                 hdl=[
                     HoleDescriptor(
-                        first=info.len,
+                        # everything from the octet after this segment onwards
+                        # is still missing -- in absolute sequence numbers, so
+                        # that the bound stays valid for every payload buffer
+                        # under this buffer ID
+                        first=PSN + info.len,
                         last=sys.maxsize,
                     ),
                 ],
@@ -98,7 +128,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                         ind=[
                             info.num,
                         ],
-                        isn=info.dsn,
+                        isn=PSN,
                         len=info.len,
                         raw=info.payload,
                     ),
@@ -111,7 +141,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     ind=[
                         info.num,
                     ],
-                    isn=info.dsn,
+                    isn=PSN,
                     len=info.len,
                     raw=info.payload,
                 )
@@ -126,18 +156,18 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                 # record fragment payload
                 ISN = self._buffer[BUFID].ack[ACK].isn       # Initial Sequence Number
                 RAW = self._buffer[BUFID].ack[ACK].raw       # Raw Payload Data
-                if DSN >= ISN:  # if fragment goes after existing payload
+                if PSN >= ISN:  # if fragment goes after existing payload
                     LEN = self._buffer[BUFID].ack[ACK].len
-                    GAP = DSN - (ISN + LEN)     # gap length between payloads
+                    GAP = PSN - (ISN + LEN)     # gap length between payloads
                     if GAP >= 0:    # if fragment goes after existing payload
                         RAW += bytearray(GAP) + info.payload
                     else:           # if fragment partially overlaps existing payload
-                        RAW[DSN - ISN:DSN - ISN + info.len] = info.payload
+                        RAW[PSN - ISN:PSN - ISN + info.len] = info.payload
                 else:           # if fragment exceeds existing payload
                     LEN = info.len
-                    GAP = ISN - (DSN + LEN)     # gap length between payloads
+                    GAP = ISN - (PSN + LEN)     # gap length between payloads
                     self._buffer[BUFID].ack[ACK].__update__(
-                        isn=DSN,
+                        isn=PSN,
                     )
                     if GAP >= 0:    # if fragment exceeds existing payload
                         RAW = info.payload + bytearray(GAP) + RAW
@@ -151,28 +181,36 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                 )
 
             # update hole descriptor list
-            HDL = self._buffer[BUFID].hdl                          # HDL alias
-            for (index, hole) in enumerate(HDL):                   # step one
-                if info.first > hole.last:                         # step two
-                    continue
-                if info.last < hole.first:                         # step three
-                    continue
-                del HDL[index]                                     # step four
-                if info.first > hole.first:                        # step five
-                    new_hole = HoleDescriptor(
-                        first=hole.first,
-                        last=info.first - 1,
-                    )
-                    HDL.insert(index, new_hole)
-                    index += 1
-                if info.last < hole.last and not FIN and not RST:  # step six
-                    new_hole = HoleDescriptor(
-                        first=info.last + 1,
-                        last=hole.last
-                    )
-                    HDL.insert(index, new_hole)
-                break                                              # step seven
-            #self._buffer[BUFID].hdl = HDL                         # update HDL
+            #
+            # A segment carrying no payload -- a bare acknowledgement, SYN, FIN
+            # or RST -- fills no hole, so it must not be run through the
+            # :rfc:`815` algorithm: its ``last`` lies one below its ``first``,
+            # and letting that through would split whichever hole contains it
+            # into two adjacent holes covering the very same octets, growing
+            # the list without bound on a long-lived connection.
+            if info.len > 0:
+                HDL = self._buffer[BUFID].hdl                          # HDL alias
+                for (index, hole) in enumerate(HDL):                   # step one
+                    if info.first > hole.last:                         # step two
+                        continue
+                    if info.last < hole.first:                         # step three
+                        continue
+                    del HDL[index]                                     # step four
+                    if info.first > hole.first:                        # step five
+                        new_hole = HoleDescriptor(
+                            first=hole.first,
+                            last=info.first - 1,
+                        )
+                        HDL.insert(index, new_hole)
+                        index += 1
+                    if info.last < hole.last and not FIN and not RST:  # step six
+                        new_hole = HoleDescriptor(
+                            first=info.last + 1,
+                            last=hole.last
+                        )
+                        HDL.insert(index, new_hole)
+                    break                                              # step seven
+                #self._buffer[BUFID].hdl = HDL                         # update HDL
 
         # when FIN/RST is set, submit buffer of this session
         if FIN or RST:
@@ -196,17 +234,34 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
 
         # check through every buffer with ACK
         for (ack, buffer) in buf.ack.items():
+            # Translate the hole descriptor list, which is kept in absolute
+            # sequence numbers for the whole direction, into offsets into this
+            # payload buffer, which is indexed from its own initial sequence
+            # number. Holes lying wholly outside this buffer -- the open-ended
+            # one past the last octet received, and any belonging to a
+            # different acknowledgement number's data -- drop out here; those
+            # straddling an edge are clipped to it rather than being allowed to
+            # index from the far end of the buffer as a negative bound would.
+            length = len(buffer.raw)
+            holes = []  # type: list[tuple[int, int]]
+            for hole in HDL:
+                start = hole.first - buffer.isn       # inclusive lower bound
+                stop = hole.last - buffer.isn + 1     # exclusive upper bound
+                if stop <= 0 or start >= length:
+                    continue                          # hole misses this buffer
+                holes.append((max(start, 0), min(stop, length)))
+            holes.sort()
+
             # if this buffer is not implemented
             # go through every hole and extract received payload
-            if len(HDL) > 2 and self._flag_s:
+            if holes and self._flag_s:
                 data = []  # type: list[bytes]
-                start = stop = 0
-                for hole in HDL:
-                    stop = hole.first
-                    byte = buffer.raw[start:stop]
-                    start = hole.last + 1
+                start = 0
+                for (hole_start, hole_stop) in holes:
+                    byte = buffer.raw[start:hole_start]
                     if byte:    # strip empty payload
-                        data.append(byte)
+                        data.append(bytes(byte))
+                    start = max(start, hole_stop)
                 byte = buffer.raw[start:]
                 if byte:    # strip empty payload
                     data.append(bytes(byte))

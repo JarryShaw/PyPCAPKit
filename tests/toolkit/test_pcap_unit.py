@@ -78,30 +78,36 @@ class PCAPToolkitTests(unittest.TestCase):
             ),
         )
 
-    def _make_tcp(self):
+    def _make_tcp(self, *, seq: int = 10, payload: bytes = b'tcpdata',
+                  syn: bool = True, fin: bool = False, rst: bool = True):
         return types.SimpleNamespace(
             info=types.SimpleNamespace(
                 srcport=port(1234),
                 dstport=port(80),
                 ack=5,
-                seq=10,
-                flags=flags(syn=True, fin=False, rst=True),
+                seq=seq,
+                flags=flags(syn=syn, fin=fin, rst=rst),
             ),
-            packet=types.SimpleNamespace(header=b'T' * 20, payload=b'tcpdata'),
+            packet=types.SimpleNamespace(header=b'T' * 20, payload=payload),
         )
 
     def _make_pcap_frame(self, *, include_tcp: bool = True,
-                         ipv4_df: bool = False) -> FakeFrame:
+                         ipv4_df: bool = False, seq: int = 10,
+                         payload: bytes = b'tcpdata', number: int = 9,
+                         syn: bool = True, fin: bool = False,
+                         rst: bool = True) -> FakeFrame:
         layers = {
             'IPv4': self._make_ipv4(df=ipv4_df),
         }
         layers['IP'] = layers['IPv4']
         if include_tcp:
-            layers['TCP'] = self._make_tcp()
-        return FakeFrame(layers, types.SimpleNamespace(number=9, time_epoch='50.25'))
+            layers['TCP'] = self._make_tcp(seq=seq, payload=payload,
+                                           syn=syn, fin=fin, rst=rst)
+        return FakeFrame(layers, types.SimpleNamespace(number=number, time_epoch='50.25'))
 
     def _make_pcapng_frame(self, *, include_tcp: bool = True,
-                           ipv4_df: bool = False):
+                           ipv4_df: bool = False, seq: int = 10,
+                           payload: bytes = b'tcpdata'):
         from pcapkit.const.reg.linktype import LinkType
 
         layers = {
@@ -109,7 +115,7 @@ class PCAPToolkitTests(unittest.TestCase):
         }
         layers['IP'] = layers['IPv4']
         if include_tcp:
-            layers['TCP'] = self._make_tcp()
+            layers['TCP'] = self._make_tcp(seq=seq, payload=payload)
         return FakeFrame(
             layers,
             types.SimpleNamespace(number=11, timestamp_epoch=60.5,
@@ -159,7 +165,13 @@ class PCAPToolkitTests(unittest.TestCase):
         self.assertEqual(tcp.bufid[3], 80)
         self.assertTrue(tcp.syn)
         self.assertTrue(tcp.rst)
-        self.assertEqual(tcp.last, 17)
+        # ``first``/``last`` bound the payload in absolute sequence numbers and
+        # ``last`` is inclusive, so the two describe exactly ``len`` octets --
+        # ``seq`` is 10 and the payload is the seven octets of ``b'tcpdata'``.
+        self.assertEqual(tcp.len, 7)
+        self.assertEqual(tcp.first, 10)
+        self.assertEqual(tcp.last, 16)
+        self.assertEqual(tcp.last - tcp.first + 1, tcp.len)
         self.assertIsNone(toolkit.tcp_reassembly(self._make_pcap_frame(include_tcp=False)))
 
         flow = toolkit.tcp_traceflow(frame, data_link=LinkType.ETHERNET)
@@ -200,7 +212,12 @@ class PCAPToolkitTests(unittest.TestCase):
         self.assertIsNotNone(tcp)
         assert tcp is not None
         self.assertEqual(tcp.bufid[1], 1234)
-        self.assertEqual(tcp.last, 17)
+        # same inclusive bounds as the PCAP engine above -- the two toolkits
+        # must agree, or a stream reassembles differently per capture format
+        self.assertEqual(tcp.len, 7)
+        self.assertEqual(tcp.first, 10)
+        self.assertEqual(tcp.last, 16)
+        self.assertEqual(tcp.last - tcp.first + 1, tcp.len)
         self.assertIsNone(toolkit.tcp_reassembly(self._make_pcapng_frame(include_tcp=False)))
 
         flow = toolkit.tcp_traceflow(frame)
@@ -223,6 +240,93 @@ class PCAPToolkitTests(unittest.TestCase):
 
         pcap_frame_ns = toolkit.block2frame(block, nanosecond=True)
         self.assertEqual(pcap_frame_ns.frame_info.ts_usec, 250000000)
+
+    def test_tcp_reassembly_descriptor_bounds_are_absolute_and_inclusive(self) -> None:
+        """The segment descriptor handed to the reassembler (GitHub issue #349).
+
+        ``first`` and ``last`` are absolute TCP sequence numbers bounding the
+        payload, and ``last`` is the sequence number of its final octet rather
+        than of the octet after it. Both matter: the reassembler holds its
+        :rfc:`815` hole descriptor list in the same absolute space and treats
+        both bounds as inclusive, so a descriptor that is relative, or exclusive
+        at the top end, silently corrupts the hole list -- and this is not
+        visible at a sequence number of zero, which is why a realistic one is
+        used here.
+
+        Both the PCAP and the PCAP-NG toolkit are checked, and against each
+        other, since they feed the one reassembler and a stream must not
+        reassemble differently depending on the capture format it arrived in.
+
+        """
+        from pcapkit.toolkit import pcap, pcapng
+
+        # a realistic initial sequence number, plus the 1448 octets an Ethernet
+        # path carries with a timestamp option in the TCP header
+        seq = 0xC0DE1234
+        payload = bytes(range(256)) * 5 + bytes(168)
+        self.assertEqual(len(payload), 1448)
+
+        for (name, toolkit, frame) in (
+            ('pcap', pcap, self._make_pcap_frame(seq=seq, payload=payload)),
+            ('pcapng', pcapng, self._make_pcapng_frame(seq=seq, payload=payload)),
+        ):
+            with self.subTest(engine=name):
+                tcp = toolkit.tcp_reassembly(frame)
+                self.assertIsNotNone(tcp)
+                assert tcp is not None
+
+                self.assertEqual(tcp.dsn, seq)
+                self.assertEqual(tcp.len, 1448)
+                self.assertEqual(tcp.first, seq)             # absolute, not an offset
+                self.assertEqual(tcp.last, seq + 1447)       # inclusive, not seq + 1448
+                self.assertEqual(tcp.last - tcp.first + 1, tcp.len)
+                self.assertEqual(bytes(tcp.payload), payload)
+
+        # a segment carrying no payload bounds an empty range, i.e. ``last`` one
+        # below ``first``, rather than claiming the octet it does not carry
+        empty = pcap.tcp_reassembly(self._make_pcap_frame(seq=seq, payload=b''))
+        self.assertIsNotNone(empty)
+        assert empty is not None
+        self.assertEqual(empty.len, 0)
+        self.assertEqual((empty.first, empty.last), (seq, seq - 1))
+
+    def test_tcp_reassembly_descriptor_drives_the_reassembler(self) -> None:
+        """The descriptor the toolkit builds reassembles to the octets sent.
+
+        Guards the seam rather than either side of it: the toolkit and the
+        reassembler each looked self-consistent while disagreeing about what
+        ``first`` and ``last`` meant.
+
+        """
+        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.toolkit import pcap
+
+        class Analyzer:
+            @classmethod
+            def analyze(cls, ports: tuple[int, int], payload: bytes) -> bytes:
+                return payload
+
+        class TestTCP(TCP):
+            __protocol_type__ = Analyzer
+
+        seq = 0xC0DE1234
+        reasm = TestTCP()
+
+        # three data segments and then a bare RST at the sequence number after
+        # the data, which is what makes the reassembler submit the buffer
+        deliveries = ((1, 0, b'first-', False), (2, 6, b'second-', False),
+                      (3, 13, b'third', False), (4, 18, b'', True))
+        for (number, offset, payload, rst) in deliveries:
+            frame = self._make_pcap_frame(seq=seq + offset, payload=payload,
+                                          number=number, syn=False, rst=rst)
+            packet = pcap.tcp_reassembly(frame)
+            self.assertIsNotNone(packet)
+            assert packet is not None
+            reasm(packet)
+
+        datagram, = reasm.datagram
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'first-second-third')
 
 
 if __name__ == '__main__':

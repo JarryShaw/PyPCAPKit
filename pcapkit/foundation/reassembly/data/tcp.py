@@ -45,9 +45,12 @@ class Packet(Info):
     rst: 'bool'
     #: Payload length, header excluded.
     len: 'int'
-    #: This sequence number.
+    #: Sequence number of the first octet of :attr:`payload`, i.e. the segment's
+    #: own sequence number. Absolute, not an offset into any payload buffer.
     first: 'int'
-    #: Next (wanted) sequence number.
+    #: Sequence number of the last octet of :attr:`payload`, i.e. ``first +
+    #: len - 1``. **Inclusive**, so a segment carrying no payload at all has
+    #: :attr:`last` one below :attr:`first`.
     last: 'int'
     #: Raw :obj:`bytes` type header.
     header: 'bytes'
@@ -102,11 +105,21 @@ class Datagram(Info, Generic[_AT]):
 
 @info_final
 class HoleDescriptor(Info):
-    """Data model for :term:`TCP <reasm.tcp.buffer>` hole descriptor."""
+    """Data model for :term:`TCP <reasm.tcp.buffer>` hole descriptor.
 
-    #: Start of hole.
+    Both bounds are **absolute TCP sequence numbers** and both are
+    **inclusive**, so a hole covers ``last - first + 1`` octets. They are not
+    offsets into :attr:`Fragment.raw`: the descriptor list is kept once per
+    buffer ID, whereas each acknowledgement number's payload buffer carries an
+    initial sequence number of its own, so only
+    :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` -- which
+    knows which buffer it is looking at -- can convert one to the other.
+
+    """
+
+    #: Sequence number of the first missing octet.
     first: 'int'
-    #: Stop of hole.
+    #: Sequence number of the last missing octet, inclusive.
     last: 'int'
 
     if TYPE_CHECKING:
@@ -119,7 +132,11 @@ class Fragment(Info):
 
     #: List of reassembled packets.
     ind: 'list[int]'
-    #: ISN of payload buffer.
+    #: Sequence number of the octet held in ``raw[0]``, i.e. the origin this
+    #: buffer is indexed from: ``raw[n]`` holds the octet whose sequence number
+    #: is ``isn + n``. Revised downwards whenever a segment turns up below the
+    #: data already buffered, so it is not necessarily the connection's own
+    #: initial sequence number.
     isn: 'int'
     #: Length of payload buffer.
     len: 'int'

@@ -153,8 +153,12 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertEqual(tcp.bufid[3], 80)
         self.assertTrue(tcp.syn)
         self.assertFalse(tcp.fin)
+        # ``last`` is the sequence number of the payload's last octet, not of
+        # the one after it, so ``b'data'`` at sequence number 10 ends at 13
+        self.assertEqual(tcp.len, 4)
         self.assertEqual(tcp.first, 10)
-        self.assertEqual(tcp.last, 14)
+        self.assertEqual(tcp.last, 13)
+        self.assertEqual(tcp.last - tcp.first + 1, tcp.len)
 
         flow = toolkit.tcp_traceflow(packet, 50.25, data_link=LinkType.ETHERNET, count=9)
         self.assertIsNotNone(flow)
