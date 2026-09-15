@@ -58,7 +58,7 @@ def packet2chain(packet: 'bytes', *, data_link: 'Enum_LinkType') -> 'str':
         data_link: Data link type, from the capture handle.
 
     Returns:
-        Colon (``:``) seperated list of protocol chain.
+        Colon (``:``) separated list of protocol chain.
 
     Note:
         As `PyPCAP`_ does not dissect the packet, the chain is only ever the

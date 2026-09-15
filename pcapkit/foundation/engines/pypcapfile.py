@@ -190,7 +190,7 @@ class PyPCAPFile(Engine['PCAPFilePacket']):
         if ext._flag_r and ext._ipv6:
             ext._ipv6 = False
             ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=None, tcp=ext._reasm.tcp)
-            warn("'Extractor(engine=pypcapfile)' object dose not support IPv6 reassembly; "
+            warn("'Extractor(engine=pypcapfile)' object does not support IPv6 reassembly; "
                  "so 'ipv6=True' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
         sfile = pcapfile.savefile.load_savefile(

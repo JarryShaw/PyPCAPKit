@@ -247,7 +247,7 @@ def packet2chain(packet: 'Packet', *, data_link: 'Enum_LinkType') -> 'str':
         data_link: Data link type, from the savefile header.
 
     Returns:
-        Colon (``:``) seperated list of protocol chain.
+        Colon (``:``) separated list of protocol chain.
 
     Note:
         The chain reports what `PyPCAPFile`_ actually decoded and no more, so it

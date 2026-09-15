@@ -156,14 +156,14 @@ class PyPCAP(Engine['RawFrame']):
         if ext._flag_r and (ext._ipv4 or ext._ipv6 or ext._tcp):
             ext._flag_r = False
             ext._reasm = ReassemblyManager(ipv4=None, ipv6=None, tcp=None)
-            warn("'Extractor(engine=pypcap)' object dose not support reassembly; "
+            warn("'Extractor(engine=pypcap)' object does not support reassembly; "
                  f"so 'ipv4={ext._ipv4}', 'ipv6={ext._ipv6}' and 'tcp={ext._tcp}' will be ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         if ext._flag_t and ext._tcp:
             ext._flag_t = False
             ext._trace = TraceFlowManager(tcp=None)
-            warn("'Extractor(engine=pypcap)' object dose not support flow tracing; "
+            warn("'Extractor(engine=pypcap)' object does not support flow tracing; "
                  f"so 'tcp={ext._tcp}' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
         # NOTE: ``promisc=False`` is defensive only -- the offline branch of
