@@ -59,8 +59,10 @@ class ScapyToolkitTests(unittest.TestCase):
 
         packet = (
             Ether(**self._ether_kwargs()) /
+            # the fragment identification is deliberately different from the flow
+            # label, so a ``bufid`` keyed on the wrong one of the two is visible
             IPv6(src='2001:db8::1', dst='2001:db8::2', fl=7) /
-            IPv6ExtHdrFragment(nh=6, offset=1, m=1) /
+            IPv6ExtHdrFragment(nh=6, offset=1, m=1, id=4321) /
             Raw(b'v6')
         )
         return Ether(bytes(packet))
@@ -149,9 +151,14 @@ class ScapyToolkitTests(unittest.TestCase):
         self.assertEqual(v6.num, 4)
         self.assertEqual(v6.bufid[0], ip_address('2001:db8::1'))
         self.assertEqual(v6.bufid[1], ip_address('2001:db8::2'))
-        self.assertEqual(v6.bufid[2], 7)
+        # identification, not flow label -- ``bufid[2]`` feeds ``DatagramID.id``
+        self.assertEqual(v6.bufid[2], 4321)
+        self.assertNotEqual(v6.bufid[2], 7)
         self.assertEqual(v6.bufid[3].value, 6)
-        self.assertEqual(v6.fo, 1)
+        # Scapy's ``offset`` is in on-wire 8-octet units, but ``fo`` indexes the
+        # reassembly datagram buffer in octets, so one unit must become 8 octets
+        self.assertEqual(ipv6_frag.offset, 1)
+        self.assertEqual(v6.fo, 8)
         self.assertTrue(v6.mf)
         self.assertEqual(bytes(v6.payload), bytes(ipv6_frag.payload))
 

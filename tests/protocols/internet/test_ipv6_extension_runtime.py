@@ -112,7 +112,11 @@ class IPv6ExtensionRuntimeTests(unittest.TestCase):
         frag = list(ipv6.extension_headers.values())[0]
 
         self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:IPv6-Frag:UDP:Raw')
-        self.assertEqual(frag.info.offset, 543)
+        # ``Data_IPv6_Frag.offset`` is in octets, matching ``Data_IPv4.offset``: the
+        # on-wire field is 543 counts of 8 octets (:rfc:`8200#section-4.5`), i.e. the
+        # 4344th octet of the fragmentable part, which with this fragment's 434
+        # octets of payload accounts for the full 4778 octet datagram.
+        self.assertEqual(frag.info.offset, 4344)
         self.assertFalse(frag.info.mf)
         self.assertEqual(frag.info.id, 110308)
         self.assertEqual(ipv6.info.raw_len, 434)

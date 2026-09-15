@@ -175,7 +175,8 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAP
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
-from pcapkit.utilities.exceptions import ProtocolError, RegistryError, UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import (FormatError, ProtocolError, RegistryError,
+                                          UnsupportedCall, stacklevel)
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
                                         RegistryWarning, warn)
 
@@ -531,6 +532,17 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     PACKET_TYPES = (Enum_BlockType.Enhanced_Packet_Block,
                     Enum_BlockType.Simple_Packet_Block,
                     Enum_BlockType.Packet_Block)
+
+    #: Blocks that resolve an interface of their section, mapped to the tag used
+    #: when reporting an interface ID that names no such interface. A Simple
+    #: Packet Block carries no interface ID field and always refers to the
+    #: section's first interface, so it is listed here too.
+    INTERFACE_ID_BLOCK_TAGS = {
+        Enum_BlockType.Enhanced_Packet_Block: 'EPB',
+        Enum_BlockType.Simple_Packet_Block: 'SPB',
+        Enum_BlockType.Packet_Block: 'Packet',
+        Enum_BlockType.Interface_Statistics_Block: 'ISB',
+    }  # type: dict[int, str]
 
     ##########################################################################
     # Defaults.
@@ -1119,6 +1131,33 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             return datetime.timezone.utc
         return cast('timezone', tzinfo)
 
+    def _get_interface(self, interface_id: 'int') -> 'Data_InterfaceDescriptionBlock':
+        """Interface description that ``interface_id`` names.
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Interface Description Block (IDB) of the current section that
+            ``interface_id`` identifies.
+
+        Raises:
+            FormatError: If the current section describes no such interface.
+
+        Note:
+            The PCAP-NG specification requires a block's interface ID to name an
+            Interface Description Block of the block's own section, so an ID that
+            names none is a malformed file rather than a programming error --
+            hence :exc:`~pcapkit.utilities.exceptions.FormatError` rather than
+            the bare :exc:`IndexError` that indexing the list would raise.
+
+        """
+        interfaces = self._ctx.interfaces
+        if not 0 <= interface_id < len(interfaces):
+            tag = self.INTERFACE_ID_BLOCK_TAGS.get(self._type, f'Block {self._type}')
+            raise FormatError(f'PCAP-NG: [{tag}] invalid interface ID: {interface_id}')
+        return interfaces[interface_id]
+
     def _get_resolution(self, interface_id: 'int' = 0) -> 'int':
         """Timestamp resolution of the current block, in units per second.
 
@@ -1135,7 +1174,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                  AttributeWarning, stacklevel=stacklevel())
             return 1_000_000
 
-        options = self._ctx.interfaces[interface_id].options
+        options = self._get_interface(interface_id).options
         tsresol = cast('Optional[Data_IF_TSResolOption]',
                        options.get(Enum_OptionType.if_tsresol))
         if tsresol is None:
@@ -1158,7 +1197,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                  AttributeWarning, stacklevel=stacklevel())
             return 0
 
-        options = self._ctx.interfaces[interface_id].options
+        options = self._get_interface(interface_id).options
         tsoffset = cast('Optional[Data_IF_TSOffsetOption]',
                         options.get(Enum_OptionType.if_tsoffset))
         if tsoffset is None:
@@ -1181,7 +1220,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                  AttributeWarning, stacklevel=stacklevel())
             return self._get_local_timezone()
 
-        options = self._ctx.interfaces[interface_id].options
+        options = self._get_interface(interface_id).options
         tzone = cast('Optional[Data_IF_TZoneOption]',
                      options.get(Enum_OptionType.if_tzone))
         if tzone is None:
@@ -1204,7 +1243,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._ctx is None or self._type not in self.PACKET_TYPES:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_linktype'")
-        return self._ctx.interfaces[interface_id].linktype
+        return self._get_interface(interface_id).linktype
 
     def _read_timestamp(self, timestamp_high: 'int', timestamp_low: 'int', *,
                         interface_id: 'int' = 0) -> 'tuple[dt_type, Decimal]':
@@ -3338,7 +3377,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 minor_version = version[1]
 
         if options is not None:
-            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+            options_value, total_length = self._make_pcapng_options(options, namespace='opt')
         else:
             options_value, total_length = [], 0
 
@@ -3385,7 +3424,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                                             reversed=linktype_reversed, pack=False)
 
         if options is not None:
-            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+            options_value, total_length = self._make_pcapng_options(options, namespace='if')
         else:
             options_value, total_length = [], 0
 
@@ -3433,14 +3472,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             if self._ctx is None:
                 snaplen = 0xFFFF_FFFF_FFFF_FFFF
             else:
-                snaplen = self._ctx.interfaces[interface_id].snaplen
+                snaplen = self._get_interface(interface_id).snaplen
             captured_len = min(len(packet_data), snaplen)
         if original_len is None:
             original_len = len(packet_data)
         packet_len = math.ceil(len(packet_data) / 4) * 4
 
         if options is not None:
-            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+            options_value, total_length = self._make_pcapng_options(options, namespace='epb')
         else:
             options_value, total_length = [], 0
 
@@ -3512,7 +3551,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             records_value, records_length = [], 0
 
         if options is not None:
-            options_value, options_length = self._make_pcapng_options(options, namespace='shb')
+            options_value, options_length = self._make_pcapng_options(options, namespace='ns')
         else:
             options_value, options_length = [], 0
 
@@ -3549,7 +3588,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
 
         if options is not None:
-            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+            options_value, total_length = self._make_pcapng_options(options, namespace='isb')
         else:
             options_value, total_length = [], 0
 
@@ -3665,7 +3704,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         secrets_length = len(secrets_data_val)
 
         if options is not None:
-            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+            options_value, total_length = self._make_pcapng_options(options, namespace='dsb')
         else:
             options_value, total_length = [], 0
 
@@ -3701,8 +3740,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             data = block.data
             options = cast('Option', getattr(block, 'options', None))
 
+        # NOTE: Unlike every other block, a custom block has no ``OptionField``
+        # to name an option registry: :class:`~pcapkit.protocols.schema.misc.pcapng.CustomBlock`
+        # spans the custom data, its padding and the options as one opaque blob,
+        # since only the owner of the private enterprise number knows where the
+        # custom data ends. Its options are therefore resolved in the generic
+        # ``opt_*`` space, which is the only one valid in every block.
         if options is not None:
-            options_value, _ = self._make_pcapng_options(options, namespace='shb')
+            options_value, _ = self._make_pcapng_options(options, namespace='opt')
         else:
             options_value, _ = [], 0
 
@@ -3765,14 +3810,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             if self._ctx is None:
                 snaplen = 0xFFFF_FFFF_FFFF_FFFF
             else:
-                snaplen = self._ctx.interfaces[interface_id].snaplen
+                snaplen = self._get_interface(interface_id).snaplen
             captured_len = min(len(packet_data), snaplen)
         if original_len is None:
             original_len = len(packet_data)
         packet_len = math.ceil(len(packet_data) / 4) * 4
 
         if options is not None:
-            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+            options_value, total_length = self._make_pcapng_options(options, namespace='pack')
         else:
             options_value, total_length = [], 0
 

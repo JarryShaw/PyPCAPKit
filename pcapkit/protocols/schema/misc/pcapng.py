@@ -149,6 +149,27 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         symbol_error: int
 
 
+def packet_byteorder(packet: 'dict[str, Any]') -> 'Literal["big", "little"]':
+    """Byte order declared for the section that ``packet`` belongs to.
+
+    A nested schema is handed its parent's packet data under a ``__packet__``
+    key (see :meth:`SchemaField.pack
+    <pcapkit.corekit.fields.misc.SchemaField.pack>`), so the section byte order
+    may live one level up.
+
+    Args:
+        packet: Packet data.
+
+    Returns:
+        Byte order of the enclosing section, falling back to the host byte
+        order when the packet data declares none.
+
+    """
+    if 'byteorder' not in packet and '__packet__' in packet:
+        return packet['__packet__'].get('byteorder', sys.byteorder)
+    return packet.get('byteorder', sys.byteorder)
+
+
 def byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':
     """Update byte order of PCAP-NG file.
 
@@ -157,14 +178,19 @@ def byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None'
         packet: Packet data.
 
     """
-    if 'byteorder' not in packet and '__packet__' in packet:
-        field._byteorder = packet['__packet__'].get('byteorder', sys.byteorder)
-    else:
-        field._byteorder = packet.get('byteorder', sys.byteorder)
+    field._byteorder = packet_byteorder(packet)
 
 
 def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':
     """Update byte order of PCAP-NG file for SHB.
+
+    A Section Header Block declares the byte order of its own section through
+    its Byte-Order Magic, so it cannot take one from the enclosing packet data:
+    the first SHB of a file has no section context by construction, and a later
+    one would otherwise inherit the *previous* section's byte order. The magic
+    is therefore also written back as ``packet['byteorder']``, which is what the
+    SHB's own options -- read by :func:`byteorder_callback`, after this field --
+    resolve their byte order from.
 
     Args:
         field: Field instance.
@@ -178,6 +204,7 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
         field._byteorder = 'little'
     else:
         raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
+    packet['byteorder'] = field._byteorder
 
 
 def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
@@ -532,8 +559,8 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
         registry=Option.registry['opt'],
         eool=Enum_OptionType.opt_endofopt,
     )
-    #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
+    #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=shb_byteorder_callback)
 
@@ -547,12 +574,17 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
             This method is expected to directly modify any data stored
             in the ``packet`` and thus no return is required.
 
+            The Byte-Order Magic is not carried by any field of the schema --
+            :attr:`magic` is the palindromic constant, identical in either byte
+            order -- so it is seeded here from the byte order the packet data
+            asks for, and from the host byte order when it asks for none.
+
         """
         if 'match' in packet:
             return
 
         packet['match'] = {
-            'byteorder': 0x1A2B3C4D if sys.byteorder == 'big' else 0x4D3C2B1A,
+            'byteorder': 0x1A2B3C4D if packet_byteorder(packet) == 'big' else 0x4D3C2B1A,
         }
 
     def post_process(self, packet: 'dict[str, Any]') -> 'SectionHeaderBlock':
@@ -850,8 +882,8 @@ class InterfaceDescriptionBlock(BlockType, code=Enum_BlockType.Interface_Descrip
         registry=Option.registry['if'],
         eool=Enum_OptionType.opt_endofopt,
     )
-    #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
+    #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -987,14 +1019,18 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_len'] % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 32 - pkt['captured_len'] - len(pkt['padding_data']),
+        # NOTE: The padding is recomputed here rather than read back from
+        # ``padding_data``: a PaddingField is written straight into the schema
+        # buffer while packing and never lands in the packet data, so its name
+        # is not a key here on the packing path.
+        length=lambda pkt: pkt['length'] - 32 - pkt['captured_len'] - (4 - pkt['captured_len'] % 4) % 4,
         base_schema=_EPB_Option,
         type_name='type',
         registry=Option.registry['epb'],
         eool=Enum_OptionType.opt_endofopt,
     )
-    #: Padding.
-    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
+    #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
+    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1183,14 +1219,14 @@ class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
     )
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['__option_padding__'],
+        length=lambda pkt: pkt.get('__option_padding__', 0),  # key from OptionField
         base_schema=_NS_Option,
         type_name='type',
         registry=Option.registry['ns'],
         eool=Enum_OptionType.opt_endofopt,
     )
-    #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
+    #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1340,8 +1376,8 @@ class InterfaceStatisticsBlock(BlockType, code=Enum_BlockType.Interface_Statisti
         registry=Option.registry['isb'],
         eool=Enum_OptionType.opt_endofopt,
     )
-    #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
+    #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1558,17 +1594,19 @@ class DecryptionSecretsBlock(BlockType, code=Enum_BlockType.Decryption_Secrets_B
         selector=dsb_secrets_selector,
     )
     #: Padding.
-    padding_data: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['secrets_length'] % 4) % 4)
+    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['secrets_length'] % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 20 - pkt['secrets_length'] - len(pkt['padding_data']),
+        # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
+        # here instead of being read back from ``padding_data``.
+        length=lambda pkt: pkt['length'] - 20 - pkt['secrets_length'] - (4 - pkt['secrets_length'] % 4) % 4,
         base_schema=_DSB_Option,
         type_name='type',
         registry=Option.registry['dsb'],
         eool=Enum_OptionType.opt_endofopt,
     )
-    #: Padding.
-    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
+    #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
+    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1677,17 +1715,19 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     #: Packet data.
     packet_data: 'bytes' = PayloadField(length=lambda pkt: pkt['captured_length'])
     #: Padding.
-    padding_data: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['captured_length'] % 4) % 4)
+    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_length'] % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 32 - pkt['captured_length'] - len(pkt['padding_data']),
+        # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
+        # here instead of being read back from ``padding_data``.
+        length=lambda pkt: pkt['length'] - 32 - pkt['captured_length'] - (4 - pkt['captured_length'] % 4) % 4,
         base_schema=_PACK_Option,
         type_name='type',
         registry=Option.registry['pack'],
         eool=Enum_OptionType.opt_endofopt,
     )
-    #: Padding.
-    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
+    #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
+    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 

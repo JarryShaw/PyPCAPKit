@@ -94,6 +94,11 @@ class PCAPNGWriter:
                                        len(ETHERNET_FRAME), len(ETHERNET_FRAME))
                            + self._pad(ETHERNET_FRAME))
 
+    def interface_statistics(self, interface_id: int = 0) -> PCAPNGWriter:
+        """Interface Statistics Block, with no options."""
+        return self._block(0x00000005,
+                           struct.pack(f'{self._endian}III', interface_id, 0, 0))
+
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PCAPNGEngineTests(unittest.TestCase):
@@ -265,23 +270,24 @@ class PCAPNGEngineTests(unittest.TestCase):
         from pcapkit.foundation.engines.pcapng import Context, PCAPNG
         from pcapkit.utilities.exceptions import FormatError
 
-        cases = [
-            FakeBlock(self._info(BlockType.Interface_Statistics_Block, interface_id=0)),
-            FakeBlock(self._info(BlockType.Enhanced_Packet_Block, interface_id=0)),
-            FakeBlock(self._info(BlockType.Simple_Packet_Block)),
-            FakeBlock(self._info(BlockType.Packet_Block, interface_id=0)),
-        ]
+        # A Simple Packet Block carries no interface ID field, so a section that
+        # describes no interface is the only thing there is to reject about it,
+        # and ``read_frame`` is where that happens. The interface *ID* of an EPB,
+        # ISB or obsolete Packet Block is instead bounds-checked while the block
+        # is parsed -- see
+        # ``PCAPNGSectionShapeTests.test_out_of_range_interface_id_is_a_format_error``
+        # for the equivalent end-to-end coverage of those three.
+        block = FakeBlock(self._info(BlockType.Simple_Packet_Block))
 
-        for block in cases:
-            with self.subTest(block=block.info.type):
-                extractor, _ = make_extractor(_flag_q=True, _flag_r=False,
-                                              _flag_t=False, _flag_d=False)
-                engine = PCAPNG(extractor)
-                engine._ctx = Context(self._section())
-                engine._ctx_list = [engine._ctx]
-                with mock.patch('pcapkit.foundation.engines.pcapng.P_PCAPNG', side_effect=[block]):
-                    with self.assertRaises(FormatError):
-                        engine.read_frame()
+        extractor, _ = make_extractor(_flag_q=True, _flag_r=False,
+                                      _flag_t=False, _flag_d=False)
+        engine = PCAPNG(extractor)
+        engine._ctx = Context(self._section())
+        engine._ctx_list = [engine._ctx]
+        with mock.patch('pcapkit.foundation.engines.pcapng.P_PCAPNG', side_effect=[block]):
+            with self.assertRaises(FormatError) as context:
+                engine.read_frame()
+        self.assertIn('PCAP-NG: [SPB]', str(context.exception))
 
     def test_check_packet_block_context_only_fires_for_packet_blocks(self) -> None:
         import io
@@ -406,6 +412,60 @@ class PCAPNGSectionRuleTests(unittest.TestCase):
                     message = str(context.exception)
                     self.assertIn(f'PCAP-NG: [{tag}]', message)
                     self.assertIn('interface description block', message)
+
+    def test_out_of_range_interface_id_is_a_format_error(self) -> None:
+        # Regression for #367: a section with at least one IDB and a block naming
+        # an interface it does not describe used to escape as a bare
+        # ``IndexError`` out of ``PCAPNG._get_timezone``, because the engine's
+        # bounds guards ran only after the block had already been parsed.
+        from pcapkit.utilities.exceptions import FormatError
+
+        blocks = {
+            'EPB': lambda writer, iface: writer.enhanced_packet(interface_id=iface),
+            'Packet': lambda writer, iface: writer.packet(interface_id=iface),
+            'ISB': lambda writer, iface: writer.interface_statistics(interface_id=iface),
+        }
+
+        for byteorder in ('little', 'big'):
+            for tag, add_block in blocks.items():
+                with self.subTest(byteorder=byteorder, tag=tag):
+                    # two interfaces described, interface 7 named
+                    capture = add_block(PCAPNGWriter(byteorder).section_header()
+                                        .interface_description()
+                                        .interface_description(), 7)
+                    with self.assertRaises(FormatError) as context:
+                        self._extract(capture)
+
+                    message = str(context.exception)
+                    self.assertIn(f'PCAP-NG: [{tag}]', message)
+                    self.assertIn('invalid interface ID: 7', message)
+
+    def test_interface_statistics_without_an_interface_description_is_a_format_error(self) -> None:
+        # An ISB is not a packet block, so the pre-parse check for a section with
+        # no IDB does not cover it; the bounds check in the parse path does.
+        from pcapkit.utilities.exceptions import FormatError
+
+        capture = PCAPNGWriter().section_header().interface_statistics(interface_id=0)
+        with self.assertRaises(FormatError) as context:
+            self._extract(capture)
+
+        message = str(context.exception)
+        self.assertIn('PCAP-NG: [ISB]', message)
+        self.assertIn('invalid interface ID: 0', message)
+
+    def test_in_range_interface_id_still_parses(self) -> None:
+        # The guard is a bound, not a ban: the highest valid ID must still work.
+        capture = (PCAPNGWriter().section_header()
+                   .interface_description()
+                   .interface_description()
+                   .interface_statistics(interface_id=1)
+                   .enhanced_packet(interface_id=1))
+        extractor = self._extract(capture)
+
+        self.assertEqual(len(extractor.frame), 1)
+        self.assertEqual(extractor.frame[0].info.interface_id, 1)
+        self.assertEqual(len(extractor.engine._ctx.statistics), 1)
+        self.assertEqual(extractor.engine._ctx.statistics[0].interface_id, 1)
 
 
 if __name__ == '__main__':

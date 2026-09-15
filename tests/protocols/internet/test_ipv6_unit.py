@@ -289,6 +289,107 @@ class IPv6UnitTests(unittest.TestCase):
         proto.__proto__ = defaultdict(lambda: Raw, {custom_proto: Raw})
         self.assertIsInstance(proto._import_next_layer(custom_proto, length=6), Raw)
 
+    def test_flow_label_is_read_from_bits_12_to_31(self) -> None:
+        """The flow label occupies bits 12-31 of the first hextet.
+
+        Per :rfc:`8200#section-3` the IPv6 header opens with Version (4 bits),
+        Traffic Class (8 bits) and Flow Label (20 bits), so the label starts at
+        bit 12. The :class:`~pcapkit.corekit.fields.strings.BitField` namespace
+        spells each subfield as ``(start_bit, length_in_bits)``, so declaring the
+        label as ``(8, 20)`` reads bits 8-27 instead: the parsed value picks up
+        the low nibble of the Traffic Class and drops the low nibble of the real
+        label.
+
+        A zero flow label behind a non-zero Traffic Class is the clearest case,
+        and also the most common one -- :rfc:`6437` makes a zero label lawful.
+
+        """
+        import io
+        import struct
+
+        from pcapkit.protocols.internet.ipv6 import IPv6
+
+        src = bytes.fromhex('fe80000000000000a423b61d7c9270c6')
+        dst = bytes.fromhex('fe80000000000000821f12fffec9d13d')
+
+        cases = (
+            (0x00, 0x12345),
+            (0xff, 0x00000),   # a zero label behind a saturated traffic class
+            (0xff, 0x12345),
+            (0x00, 0xfffff),
+            (0xab, 0xcdef0),
+        )
+        for tclass, label in cases:
+            with self.subTest(tclass=tclass, label=label):
+                hextet = (6 << 28) | (tclass << 20) | label
+                raw = struct.pack('>IHBB', hextet, 0, 59, 64) + src + dst
+                info = IPv6(io.BytesIO(raw), len(raw)).info
+
+                self.assertEqual(info.version, 6)
+                self.assertEqual(info['class'], tclass)
+                self.assertEqual(info.label, label)
+
+                # the value the (8, 20) declaration produced: bits 8-27 rather
+                # than bits 12-31 of the same four octets
+                bits = f'{hextet:032b}'
+                self.assertEqual(int(bits[12:32], 2), label)
+                if int(bits[8:28], 2) != label:
+                    self.assertNotEqual(info.label, int(bits[8:28], 2))
+
+    def test_flow_label_subfields_tile_the_hextet_without_overlap(self) -> None:
+        """No two subfields of the first hextet may claim the same bit.
+
+        The ``(start, length)`` namespace is written to in declaration order, so
+        an overlapping declaration silently corrupts whichever subfield is
+        written first -- which is how the flow label came to overwrite the low
+        nibble of the traffic class on the way out as well as misreading it on
+        the way in. Asserting an exact tiling catches both directions at once.
+
+        """
+        from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
+
+        namespace = Schema_IPv6.__fields__['hextet']._namespace
+        self.assertEqual(namespace, {'version': (0, 4), 'class': (4, 8), 'label': (12, 20)})
+
+        coverage = [0] * 32
+        for start, size in namespace.values():
+            for bit in range(start, start + size):
+                coverage[bit] += 1
+        self.assertEqual(coverage, [1] * 32)
+
+    def test_flow_label_survives_a_wire_round_trip(self) -> None:
+        """Building then parsing a header must preserve traffic class and label.
+
+        ``BitField`` writes and reads through the same namespace, so a wrong bit
+        range round-trips cleanly whenever the subfields do not overlap and is
+        therefore invisible to a build-then-parse test on its own. This test
+        pins the *wire* bytes as well, which is what makes it a real check.
+
+        """
+        import io
+
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
+
+        schema = Schema_IPv6(
+            hextet={'version': 6, 'class': 0x2a, 'label': 0x12345},
+            length=0,
+            next=59,
+            limit=64,
+            src='2001:db8::1',
+            dst='2001:db8::2',
+            payload=b'',
+        )
+        raw = bytes(schema)
+
+        # version 6, traffic class 0x2a, flow label 0x12345 packs as 0x62a12345
+        self.assertEqual(raw[:4], bytes.fromhex('62a12345'))
+
+        info = IPv6(io.BytesIO(raw), len(raw)).info
+        self.assertEqual(info.version, 6)
+        self.assertEqual(info['class'], 0x2a)
+        self.assertEqual(info.label, 0x12345)
+
 
 if __name__ == '__main__':
     unittest.main()
