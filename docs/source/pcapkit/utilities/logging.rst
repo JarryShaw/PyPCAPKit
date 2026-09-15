@@ -191,10 +191,9 @@ Compatibility Note
 
 .. note::
 
-   Two related issues are deliberately left alone for now:
-   :func:`pcapkit.utilities.warnings.warn` reports every warning twice, once
-   through :mod:`logging` and once through :mod:`warnings`; and
-   :class:`~pcapkit.utilities.warnings.BaseWarning` calls
-   :func:`warnings.simplefilter` outside development mode, which mutates the
-   process-wide warning filters. Both change observable behaviour well beyond
-   logging and belong in their own change.
+   The warning channel is documented separately, in
+   :doc:`warnings`. In short:
+   :func:`pcapkit.utilities.warnings.warn` reports each warning exactly once per
+   channel -- one :data:`logging.WARNING` record and one :func:`warnings.warn`
+   -- and constructing a warning no longer mutates the process-wide warning
+   filters, so suppression is the application's to configure.
