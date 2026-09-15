@@ -3,14 +3,14 @@ from __future__ import annotations
 import abc
 import collections.abc
 import importlib.util
+import inspect
 import pathlib
 import sys
 import types
 from typing import Iterable
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
-SAMPLE_ROOT = ROOT / 'examples' / 'captures'
-REGENERATE_SAMPLES_CMD = 'python examples/generators/make_samples.py'
+from tests._tiers import (ROOT, SAMPLE_ROOT, REGENERATE_SAMPLES_CMD,
+                          GeneratedFixtureInUnitTierError, check_unit_tier_read)
 
 
 def sample_path(name: str) -> str:
@@ -20,6 +20,12 @@ def sample_path(name: str) -> str:
     root. Tests go through this helper rather than spelling that directory out,
     so that the location is recorded in exactly one place and so that the suite
     does not depend on the working directory :program:`pytest` was invoked from.
+
+    Going through one helper is also what makes the tier rule enforceable: this
+    is the single door onto :file:`examples/captures/`, so it is where a
+    unit-tier module reading a *generated* capture can be stopped. See
+    :mod:`tests._tiers` for the rule and why breaking it is otherwise invisible
+    until CI runs on a fresh checkout.
 
     Args:
         name: Bare file name of the capture, e.g. ``'arp.pcap'`` -- not a path,
@@ -34,11 +40,33 @@ def sample_path(name: str) -> str:
         already-open binary IO object.
 
     Raises:
+        GeneratedFixtureInUnitTierError: If a unit-tier module asked for a
+            capture git does not track, and the call site does not handle the
+            capture being absent. Raised whether or not the file is on disk, so
+            the mistake surfaces on the machine that made it rather than on the
+            next fresh checkout.
         FileNotFoundError: If the capture is not present. Most of the samples
             are generated rather than committed to the repository, so a fresh
             clone has to build them first.
 
     """
+    # Where the call came from, which is what decides its tier. Read out of the
+    # calling frame rather than passed in, so that no test has to declare its own
+    # tier and none can get the declaration wrong. Both locals are dropped again
+    # straight away: a frame reachable from a local keeps the whole chain alive
+    # once a traceback references this frame, and this function raises.
+    frame = inspect.currentframe()
+    caller = frame.f_back if frame is not None else None
+    try:
+        module_path = caller.f_globals.get('__file__') if caller is not None else None
+        lineno = caller.f_lineno if caller is not None else None
+    finally:
+        del frame, caller
+
+    problem = check_unit_tier_read(name, module_path, lineno)
+    if problem is not None:
+        raise GeneratedFixtureInUnitTierError(problem)
+
     path = SAMPLE_ROOT / name
     if not path.is_file():
         raise FileNotFoundError(
