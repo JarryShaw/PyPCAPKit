@@ -1,22 +1,39 @@
 # -*- coding: utf-8 -*-
+"""Time ``pcapkit.extract`` on each engine and report milliseconds per packet.
+
+An engine that is not available on this host is reported as skipped, with the
+reason, and the remaining engines are still timed -- see :mod:`_engine_support` for
+what counts as unavailable. Anything else is a real failure and is left to
+propagate.
+
+Note that the engines are tried once each before being timed: a failure halfway
+through a thousand rounds throws the whole measurement away, and an engine this
+host does not have is not a result worth measuring.
+
+"""
 
 import statistics
 import time
 
-import dpkt
-import pyshark
-import scapy.all
-
 import pcapkit
+from _engine_support import ENGINES, preflight
 from pcapkit.utilities.logging import logger
 
 logger.setLevel('INFO')
 
-for engine in ['default', 'dpkt', 'scapy', 'pyshark']:
+#: Timed extractions per engine. The first is discarded as a warm-up round.
+ROUNDS = 1_000
+
+for engine in ENGINES:
+    reason = preflight(engine, '../captures/in.pcap')
+    if reason is not None:
+        print(f'Report: [{engine}] skipped -- {reason}')
+        continue
+
     print(f'Testing: [{engine}] starting...', end='', flush=True)
 
-    lid = []
-    for index in range(0, 1_000):
+    lid = []  # type: list[float]
+    for index in range(0, ROUNDS):
         now = time.time_ns()
 
         extraction = pcapkit.extract(fin='../captures/in.pcap', store=False, nofile=True, verbose=False, engine=engine)  # type: ignore[arg-type]

@@ -4,9 +4,14 @@ import pprint
 
 import pcapkit
 
+# NOTE: ``reassembly=True`` is what turns reassembly on; ``tcp=True`` only selects
+# which protocol to reassemble, and ``reasm_strict`` only tunes it. Without it the
+# extraction runs to completion and then ``extraction.reassembly`` raises
+# ``UnsupportedCall``, since the attribute is gated on the reassembly flag.
 extraction = pcapkit.extract(
     fin='../captures/http6.cap',  # fout='../captures/http.txt', format='tree',
-    store=False, tcp=True, verbose=True, nofile=True, reasm_strict=True, extension=False
+    store=False, tcp=True, verbose=True, nofile=True, reassembly=True,
+    reasm_strict=True, extension=False
 )
 # pprint.pprint(extraction.reassembly.tcp)
 print()
