@@ -811,13 +811,12 @@ another stream and made it invisible until the consumer configured a handler.</p
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Two related issues are deliberately left alone for now:
-<a class="reference internal" href="functools.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> reports every warning twice, once
-through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> and once through <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a>; and
-<a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a> calls
-<a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.simplefilter" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.simplefilter()</span></code></a> outside development mode, which mutates the
-process-wide warning filters. Both change observable behaviour well beyond
-logging and belong in their own change.</p>
+<p>The warning channel is documented separately, in
+<a class="reference internal" href="warnings.html"><span class="doc">User Defined Warnings</span></a>. In short:
+<a class="reference internal" href="functools.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> reports each warning exactly once per
+channel – one <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a> record and one <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>
+– and constructing a warning no longer mutates the process-wide warning
+filters, so suppression is the application’s to configure.</p>
 </div>
 </section>
 </section>

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/exceptions.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.exceptions refined built-in exceptions. Make it possible to show only user error stack infomation*, when exception raised on user’s operation. TypeError Category: AttributeError Category: I..." />
-<meta name="description" content="pcapkit.exceptions refined built-in exceptions. Make it possible to show only user error stack infomation*, when exception raised on user’s operation. TypeError Category: AttributeError Category: I..." />
+<meta property="og:description" content="pcapkit.utilities.exceptions refined built-in exceptions. Make it possible to show only user error stack information*, when exception raised on user’s operation. Loud and Quiet Errors: Raising a Ba..." />
+<meta name="description" content="pcapkit.utilities.exceptions refined built-in exceptions. Make it possible to show only user error stack information*, when exception raised on user’s operation. Loud and Quiet Errors: Raising a Ba..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="User Defined Warnings" href="warnings.html"><link rel="prev" title="Auxiliary Functions" href="functools.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -417,25 +417,61 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.utilities.exceptions">
 <span id="user-defined-exceptions"></span><h1>User Defined Exceptions<a class="headerlink" href="#module-pcapkit.utilities.exceptions" title="Link to this heading">¶</a></h1>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.exceptions</span></code> refined built-in exceptions.
-Make it possible to show only user error stack infomation <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>,
+<p><a class="reference internal" href="#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> refined built-in exceptions.
+Make it possible to show only user error stack information <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>,
 when exception raised on user’s operation.</p>
+<section id="loud-and-quiet-errors">
+<h2>Loud and Quiet Errors<a class="headerlink" href="#loud-and-quiet-errors" title="Link to this heading">¶</a></h2>
+<p>Raising a <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a> is, by default, a
+<strong>loud</strong> act: the error is logged once at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.CRITICAL" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.CRITICAL</span></code></a> on the
+<a class="reference internal" href="logging.html#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a> logger, and outside development mode
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> is set to <code class="docutils literal notranslate"><span class="pre">0</span></code>, which suppresses the traceback frames
+entirely so the user sees the exception line rather than a walk through
+<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s internals.</p>
+<p><code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> marks an error that <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> raises as <strong>internal control
+flow</strong> and expects to catch itself – the
+<a class="reference internal" href="#pcapkit.utilities.exceptions.MissingKeyError" title="pcapkit.utilities.exceptions.MissingKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MissingKeyError</span></code></a> behind
+<a class="reference internal" href="../corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.get" title="pcapkit.corekit.multidict.MultiDict.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDict.get</span></code></a> is the archetype.
+Such an error emits nothing on any channel and touches no process-global state.
+It is still an ordinary exception carrying its message, so <code class="docutils literal notranslate"><span class="pre">except</span></code> clauses and
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#repr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> are unaffected.</p>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>Up to and including v1.4.1, <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> meant “log at <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> instead of
+<code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code>” rather than “do not log”, and <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> was set
+on both paths. A single <code class="docutils literal notranslate"><span class="pre">MultiDict.get()</span></code> miss therefore produced an
+<code class="docutils literal notranslate"><span class="pre">ERROR</span></code> record – one per frame when parsing a capture containing
+unfragmented IPv6 with reassembly enabled – and truncated the tracebacks of
+unrelated exceptions for the remainder of the process. A consumer who was
+watching for those <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> records will no longer see them; they never
+corresponded to a fault. Anything that genuinely wants to observe internal
+lookup misses should catch the exception rather than read the log.</p>
+</div>
 <dl class="py exception">
 <dt class="sig sig-object py" id="pcapkit.utilities.exceptions.BaseError">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">BaseError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#BaseError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.BaseError" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Base error class of all kinds.</p>
+<p>A loud error – the default – is reported once, at
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.CRITICAL" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.CRITICAL</span></code></a> level, on the
+<a class="reference internal" href="logging.html#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a> logger. Outside development mode it
+also sets <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to <code class="docutils literal notranslate"><span class="pre">0</span></code>, which suppresses the traceback
+frames entirely, so a user sees the exception line rather than a walk through
+<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s internals.</p>
+<p>A <strong>quiet</strong> error (<code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>) is one <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> raises as internal
+control flow and expects to catch itself, such as the
+<a class="reference internal" href="#pcapkit.utilities.exceptions.MissingKeyError" title="pcapkit.utilities.exceptions.MissingKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MissingKeyError</span></code></a> behind
+<a class="reference internal" href="../corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.get" title="pcapkit.corekit.multidict.MultiDict.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDict.get</span></code></a>. It is
+therefore silent and free of side effects: nothing is logged, and
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> is left alone. It is still a perfectly ordinary
+exception, carrying its message for whoever catches it.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<ul>
-<li><p>Turn off system-default traceback function by set <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
-<li><p>But bugs appear in Python 3.6, so we have to set <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This note is deprecated since Python fixed the problem above.</p>
-</div>
-</li>
-<li><p>In Python 2.7, <code class="xref py py-func docutils literal notranslate"><span class="pre">trace.print_stack(limit)()</span></code> dose not support negative limit.</p></li>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> is process-global, so it is only set for a
+loud error – a quiet one used as control flow must not truncate the
+tracebacks of unrelated exceptions for the rest of the process.</p></li>
+<li><p>In Python 2.7, <code class="xref py py-func docutils literal notranslate"><span class="pre">trace.print_stack(limit)()</span></code> does not support negative limit.</p></li>
 </ul>
 </div>
 <div class="admonition seealso">
@@ -445,7 +481,9 @@ when exception raised on user’s operation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>quiet</strong> – If <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, suppress exception message.</p></li>
+<li><p><strong>quiet</strong> – If <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, the error is neither logged nor allowed to
+alter <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a>; it is raised silently, as internal
+control flow.</p></li>
 <li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
 <li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -453,6 +491,7 @@ when exception raised on user’s operation.</p>
 </dl>
 </dd></dl>
 
+</section>
 <section id="typeerror-category">
 <h2><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> Category<a class="headerlink" href="#typeerror-category" title="Link to this heading">¶</a></h2>
 <dl class="py exception">
@@ -869,6 +908,7 @@ when exception raised on user’s operation.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">User Defined Exceptions</a><ul>
+<li><a class="reference internal" href="#loud-and-quiet-errors">Loud and Quiet Errors</a></li>
 <li><a class="reference internal" href="#typeerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> Category</a></li>
 <li><a class="reference internal" href="#attributeerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code> Category</a></li>
 <li><a class="reference internal" href="#ioerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">IOError</span></code> Category</a></li>

@@ -492,16 +492,27 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Base error class of all kinds.</span>
 
+<span class="sd">    A loud error -- the default -- is reported once, at</span>
+<span class="sd">    :data:`logging.CRITICAL` level, on the</span>
+<span class="sd">    :data:`~pcapkit.utilities.logging.logger` logger. Outside development mode it</span>
+<span class="sd">    also sets :data:`sys.tracebacklimit` to ``0``, which suppresses the traceback</span>
+<span class="sd">    frames entirely, so a user sees the exception line rather than a walk through</span>
+<span class="sd">    :mod:`pcapkit`'s internals.</span>
+
+<span class="sd">    A **quiet** error (``quiet=True``) is one :mod:`pcapkit` raises as internal</span>
+<span class="sd">    control flow and expects to catch itself, such as the</span>
+<span class="sd">    :exc:`~pcapkit.utilities.exceptions.MissingKeyError` behind</span>
+<span class="sd">    :meth:`MultiDict.get &lt;pcapkit.corekit.multidict.MultiDict.get&gt;`. It is</span>
+<span class="sd">    therefore silent and free of side effects: nothing is logged, and</span>
+<span class="sd">    :data:`sys.tracebacklimit` is left alone. It is still a perfectly ordinary</span>
+<span class="sd">    exception, carrying its message for whoever catches it.</span>
+
 <span class="sd">    Important:</span>
 
-<span class="sd">        * Turn off system-default traceback function by set :data:`sys.tracebacklimit` to ``0``.</span>
-<span class="sd">        * But bugs appear in Python 3.6, so we have to set :data:`sys.tracebacklimit` to ``None``.</span>
-
-<span class="sd">          .. note::</span>
-
-<span class="sd">             This note is deprecated since Python fixed the problem above.</span>
-
-<span class="sd">        * In Python 2.7, :func:`trace.print_stack(limit)` dose not support negative limit.</span>
+<span class="sd">        * :data:`sys.tracebacklimit` is process-global, so it is only set for a</span>
+<span class="sd">          loud error -- a quiet one used as control flow must not truncate the</span>
+<span class="sd">          tracebacks of unrelated exceptions for the rest of the process.</span>
+<span class="sd">        * In Python 2.7, :func:`trace.print_stack(limit)` does not support negative limit.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :func:`pcapkit.utilities.exceptions.stacklevel`</span>
@@ -509,22 +520,15 @@
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">quiet</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="c1"># log error</span>
+        <span class="c1"># log error -- a quiet error emits nothing and mutates nothing</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
                                 <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span> <span class="k">if</span> <span class="n">VERBOSE</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
                                 <span class="n">stack_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=-</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-
-            <span class="c1"># logger.error('%s: %s', type(self).__name__, str(self), exc_info=self,</span>
-            <span class="c1">#              stack_info=True, stacklevel=-stacklevel())</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">DEVMODE</span><span class="p">:</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">tracebacklimit</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">tracebacklimit</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 

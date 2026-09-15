@@ -3,15 +3,47 @@ User Defined Exceptions
 
 .. module:: pcapkit.utilities.exceptions
 
-:mod:`pcapkit.exceptions` refined built-in exceptions.
-Make it possible to show only user error stack infomation [*]_,
+:mod:`pcapkit.utilities.exceptions` refined built-in exceptions.
+Make it possible to show only user error stack information [*]_,
 when exception raised on user's operation.
+
+Loud and Quiet Errors
+---------------------
+
+Raising a :class:`~pcapkit.utilities.exceptions.BaseError` is, by default, a
+**loud** act: the error is logged once at :data:`logging.CRITICAL` on the
+:data:`~pcapkit.utilities.logging.logger` logger, and outside development mode
+:data:`sys.tracebacklimit` is set to ``0``, which suppresses the traceback frames
+entirely so the user sees the exception line rather than a walk through
+:mod:`pcapkit`'s internals.
+
+``quiet=True`` marks an error that :mod:`pcapkit` raises as **internal control
+flow** and expects to catch itself -- the
+:exc:`~pcapkit.utilities.exceptions.MissingKeyError` behind
+:meth:`MultiDict.get <pcapkit.corekit.multidict.MultiDict.get>` is the archetype.
+Such an error emits nothing on any channel and touches no process-global state.
+It is still an ordinary exception carrying its message, so ``except`` clauses and
+:func:`repr` are unaffected.
+
+.. attention::
+
+   Up to and including v1.4.1, ``quiet=True`` meant "log at ``ERROR`` instead of
+   ``CRITICAL``" rather than "do not log", and :data:`sys.tracebacklimit` was set
+   on both paths. A single ``MultiDict.get()`` miss therefore produced an
+   ``ERROR`` record -- one per frame when parsing a capture containing
+   unfragmented IPv6 with reassembly enabled -- and truncated the tracebacks of
+   unrelated exceptions for the remainder of the process. A consumer who was
+   watching for those ``ERROR`` records will no longer see them; they never
+   corresponded to a fault. Anything that genuinely wants to observe internal
+   lookup misses should catch the exception rather than read the log.
 
 .. autoexception:: pcapkit.utilities.exceptions.BaseError
    :no-members:
    :show-inheritance:
 
-   :param quiet: If :data:`True`, suppress exception message.
+   :param quiet: If :data:`True`, the error is neither logged nor allowed to
+      alter :data:`sys.tracebacklimit`; it is raised silently, as internal
+      control flow.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 

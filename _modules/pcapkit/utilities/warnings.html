@@ -405,17 +405,62 @@
 
 <span class="sd">.. module:: pcapkit.utilities.warnings</span>
 
-<span class="sd">:mod:`pcapkit.warnings` refined built-in warnings.</span>
+<span class="sd">:mod:`pcapkit.utilities.warnings` refined built-in warnings.</span>
+
+<span class="sd">Every warning :mod:`pcapkit` reports goes through :func:`warn`, which reports it</span>
+<span class="sd">**exactly once on each of two channels**:</span>
+
+<span class="sd">1. the :data:`~pcapkit.utilities.logging.logger` logger, at</span>
+<span class="sd">   :data:`logging.WARNING` level, unconditionally -- so a consumer watching the</span>
+<span class="sd">   ``pcapkit`` logger sees every complaint whatever the warning filters say;</span>
+<span class="sd">2. the standard :mod:`warnings` machinery, via :func:`warnings.warn`, subject to</span>
+<span class="sd">   the filters -- so :func:`warnings.filterwarnings`,</span>
+<span class="sd">   :func:`warnings.catch_warnings`, :mod:`pytest`'s ``filterwarnings``,</span>
+<span class="sd">   :option:`-W` and :envvar:`PYTHONWARNINGS` govern :mod:`pcapkit` warnings</span>
+<span class="sd">   exactly as they govern any other library's (see below for the one wrinkle in</span>
+<span class="sd">   naming a category on the command line).</span>
+
+<span class="sd">The counts are the same in development mode as outside it;</span>
+<span class="sd">:data:`~pcapkit.utilities.logging.DEVMODE` and</span>
+<span class="sd">:data:`~pcapkit.utilities.logging.VERBOSE` change how much detail the log record</span>
+<span class="sd">carries, never how many records there are. Constructing a warning class is not</span>
+<span class="sd">an act of reporting one, and has no side effects at all.</span>
+
+<span class="sd">To silence :mod:`pcapkit` warnings, filter them like any other category::</span>
+
+<span class="sd">    import warnings</span>
+
+<span class="sd">    from pcapkit.utilities.warnings import BaseWarning</span>
+
+<span class="sd">    warnings.filterwarnings('ignore', category=BaseWarning)</span>
+
+<span class="sd">From the command line, name one of the standard categories these are mixed with</span>
+<span class="sd">-- :exc:`UserWarning` covers all of them, and :exc:`RuntimeWarning`,</span>
+<span class="sd">:exc:`ImportWarning`, :exc:`ResourceWarning` and :exc:`DeprecationWarning` each</span>
+<span class="sd">select a family::</span>
+
+<span class="sd">    python -W ignore::UserWarning ...</span>
+
+<span class="sd">:option:`-W` and :envvar:`PYTHONWARNINGS` cannot name a :mod:`pcapkit` category</span>
+<span class="sd">directly -- ``-W ignore::pcapkit.utilities.warnings.BaseWarning`` is rejected</span>
+<span class="sd">with ``Invalid -W option ignored: invalid module name``. CPython imports the</span>
+<span class="sd">category while parsing the option, which happens before :mod:`site` has added</span>
+<span class="sd">``site-packages`` to :data:`sys.path`, so no installed package's own category can</span>
+<span class="sd">be named there; this is not specific to :mod:`pcapkit`.</span>
+
+<span class="sd">Note that all of the above governs the :mod:`warnings` channel only. The</span>
+<span class="sd">``pcapkit`` logger is configured separately, e.g. with</span>
+<span class="sd">``logging.getLogger('pcapkit').setLevel(logging.ERROR)``.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span> <span class="k">as</span> <span class="n">stacklevel_calculator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEVMODE</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'warn'</span><span class="p">,</span>
@@ -448,10 +493,22 @@
          <span class="n">stacklevel</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Wrapper function of :func:`warnings.warn`.</span>
 
+<span class="sd">    The warning is reported once on the :data:`~pcapkit.utilities.logging.logger`</span>
+<span class="sd">    logger, then once through :func:`warnings.warn`. The logger call does not</span>
+<span class="sd">    consult :data:`warnings.filters`, so a log-based consumer sees the complaint</span>
+<span class="sd">    even when the application has filtered the category out; the</span>
+<span class="sd">    :func:`warnings.warn` call is filtered normally, so the application keeps</span>
+<span class="sd">    full control of that channel -- including turning the warning into an error</span>
+<span class="sd">    with :option:`-W error &lt;-W&gt;`.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        message: Warning message.</span>
 <span class="sd">        category: Warning category.</span>
 <span class="sd">        stacklevel: Warning stack level.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :mod:`pcapkit.utilities.warnings` for the emission model in full, and for</span>
+<span class="sd">        how to silence either channel.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">stacklevel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -471,21 +528,26 @@
 <div class="viewcode-block" id="BaseWarning">
 <a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Base warning class of all kinds."""</span>
+<span class="w">    </span><span class="sd">"""Base warning class of all kinds.</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=useless-super-delegation</span>
-        <span class="c1"># log warning</span>
-        <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                            <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel_calculator</span><span class="p">())</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">'ignore'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+<span class="sd">    Constructing one of these is deliberately free of side effects: it emits</span>
+<span class="sd">    nothing and mutates no process-global state. Reporting a warning is the job</span>
+<span class="sd">    of :func:`warn`, which is called once per complaint; a warning object may be</span>
+<span class="sd">    built without ever being reported, and the two must not be confused.</span>
 
-        <span class="c1"># warnings.simplefilter('default')</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+<span class="sd">    Note:</span>
+<span class="sd">        Up to and including v1.4.1, this constructor called</span>
+<span class="sd">        ``warnings.simplefilter('ignore', type(self))`` outside development</span>
+<span class="sd">        mode, which inserted an entry at the front of the process-global</span>
+<span class="sd">        :data:`warnings.filters` -- overriding whatever the host application,</span>
+<span class="sd">        :option:`-W` or the test runner had configured, and invalidating every</span>
+<span class="sd">        module's ``__warningregistry__`` so that unrelated warnings re-fired.</span>
+<span class="sd">        It also logged the warning a second time under</span>
+<span class="sd">        :data:`~pcapkit.utilities.logging.DEVMODE`. Both are gone; filtering is</span>
+<span class="sd">        the application's business, and is done through the standard</span>
+<span class="sd">        :mod:`warnings` machinery.</span>
+
+<span class="sd">    """</span></div>
 
 
 
