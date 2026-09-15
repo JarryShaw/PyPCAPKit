@@ -23,9 +23,14 @@ from pcapkit.dumpkit.common import make_dumper
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.utilities.exceptions import FileExists, RegistryError, stacklevel
+from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, RegistryWarning, warn
 
 __all__ = ['TraceFlow']
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 if TYPE_CHECKING:
     from typing import Any, Callable, DefaultDict, Optional, Type
@@ -232,7 +237,11 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
                 warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
                 raise FileExists(*error.args).with_traceback(error.__traceback__)
-        return make_dumper(output), ext
+
+        dumper = make_dumper(output)
+        # NOTE: as above -- make_dumper()'s subclass is always called 'DictDumper'.
+        logger.debug('flow tracing output root %s, format %s via %s', fout, fmt, output.__name__)
+        return dumper, ext
 
     @abc.abstractmethod
     def dump(self, packet: '_PT') -> 'None':
@@ -322,6 +331,9 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         self._foutio = fio
         #: Optional[str]: Output file extension.
         self._fdpext = ext
+
+        logger.debug('%s flow tracing initialised (root=%s, format=%s, byteorder=%s, '
+                     'nanosecond=%s)', self.name, fout, format, byteorder, nanosecond)
 
     def __call__(self, packet: '_PT') -> 'None':
         """Dump frame to output files.

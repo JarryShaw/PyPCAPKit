@@ -22,7 +22,7 @@ import traceback
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
-from pcapkit.utilities.logging import DEVMODE, VERBOSE, logger
+from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
 
 if TYPE_CHECKING:
     from typing import Any
@@ -50,6 +50,11 @@ __all__ = [
     'MissingKeyError', 'FragmentError', 'PacketError',              # KeyError
     'ModuleNotFound',                                               # ModuleNotFoundError
 ]
+
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 def stacklevel() -> 'int':

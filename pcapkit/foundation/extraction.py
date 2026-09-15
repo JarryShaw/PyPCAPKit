@@ -37,7 +37,7 @@ from pcapkit.foundation.traceflow.data import TraceFlowData
 from pcapkit.foundation.traceflow.traceflow import TraceFlow
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           RegistryError, UnsupportedCall, stacklevel)
-from pcapkit.utilities.logging import logger
+from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import (EngineWarning, ExtractionWarning, FormatWarning,
                                         RegistryWarning, warn)
 
@@ -69,6 +69,10 @@ if TYPE_CHECKING:
     VerboseHandler = Callable[['Extractor', Packet], Any]
 
 __all__ = ['Extractor']
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 _P = TypeVar('_P')
 
@@ -426,12 +430,15 @@ class Extractor(Generic[_P]):
 
         :rtype: None
         """
+        logger.debug('requested extraction engine: %s', self._exnam)
+
         if self._exnam in self.__engine__:  # check if engine is supported
             eng = self.__engine__[self._exnam]
             if isinstance(eng, ModuleDescriptor):
                 eng = eng.klass
 
             if self.import_test(eng.module, name=eng.name) is not None:  # type: ignore[arg-type]
+                logger.debug('using engine %s (%s)', eng.name, eng.module)
                 self._exeng = eng(self)
                 self._exeng.run()
 
@@ -449,8 +456,10 @@ class Extractor(Generic[_P]):
             self._exnam = 'default'  # using default/pcapkit engine
 
         if self._magic in PCAP_Engine.MAGIC_NUMBER:
+            logger.debug('magic number %r identifies a PCAP file', self._magic)
             self._exeng = cast('Engine[_P]', PCAP_Engine(self))
         elif self._magic in PCAPNG_Engine.MAGIC_NUMBER:
+            logger.debug('magic number %r identifies a PCAP-NG file', self._magic)
             self._exeng = cast('Engine[_P]', PCAPNG_Engine(self))
         else:
             raise FormatError(f'unknown file format: {self._magic!r}')
@@ -480,6 +489,7 @@ class Extractor(Generic[_P]):
             module = importlib.import_module(engine)
         except ImportError:
             module = None
+            logger.debug('engine module %r is not importable', engine)
             warn(f"extraction engine '{name or engine}' not available; "
                  'using default engine instead', EngineWarning, stacklevel=stacklevel())
         return module
@@ -610,6 +620,7 @@ class Extractor(Generic[_P]):
 
         """
         if self._flag_a:
+            logger.debug('reading frames from %s', self._ifnm)
             while True:
                 try:
                     self._exeng.read_frame()
@@ -622,9 +633,11 @@ class Extractor(Generic[_P]):
                     # quit when EOF
                     break
                 except KeyboardInterrupt:
+                    logger.debug('interrupted after %d frame(s)', self._frnum)
                     self._cleanup()
                     raise
 
+            logger.debug('read %d frame(s) from %s', self._frnum, self._ifnm)
             self._cleanup()
 
     ##########################################################################
@@ -732,9 +745,14 @@ class Extractor(Generic[_P]):
         if isinstance(verbose, bool):
             self._flag_v = verbose
             if verbose:
+                # NOTE: ``verbose=True`` and the CLI's ``-v`` are a request for
+                # user-facing output on stdout, not diagnostics -- the frame
+                # chains are a feature of the tool, so they stay on ``print``
+                # rather than becoming log records a consumer has to configure
+                # a handler to see (and on a different stream at that).
                 self._vfunc = lambda e, f: print(
                     f'Frame {e._frnum:>3d}: {f.protochain}'  # pylint: disable=protected-access
-                )  # pylint: disable=logging-fstring-interpolation
+                )
             else:
                 self._vfunc = lambda e, f: None
         else:
@@ -757,7 +775,7 @@ class Extractor(Generic[_P]):
             reasm_obj_ipv4 = reasm_obj_ipv6 = reasm_obj_tcp = None
 
             if self._ipv4:
-                logger.info('IPv4 reassembly enabled')
+                logger.debug('IPv4 reassembly enabled')
 
                 reasm_cls_ipv4 = self.__reassembly__['ipv4']
                 if isinstance(reasm_cls_ipv4, ModuleDescriptor):
@@ -765,7 +783,7 @@ class Extractor(Generic[_P]):
                     self.__reassembly__['ipv4'] = reasm_cls_ipv4  # update mapping upon import
                 reasm_obj_ipv4 = cast('IPv4_Reassembly', reasm_cls_ipv4(strict=reasm_strict, store=reasm_store))
             if self._ipv6:
-                logger.info('IPv6 reassembly enabled')
+                logger.debug('IPv6 reassembly enabled')
 
                 reasm_cls_ipv6 = self.__reassembly__['ipv6']
                 if isinstance(reasm_cls_ipv6, ModuleDescriptor):
@@ -773,7 +791,7 @@ class Extractor(Generic[_P]):
                     self.__reassembly__['ipv6'] = reasm_cls_ipv6  # update mapping upon import
                 reasm_obj_ipv6 = cast('IPv6_Reassembly', reasm_cls_ipv6(strict=reasm_strict, store=reasm_store))
             if self._tcp:
-                logger.info('TCP reassembly enabled')
+                logger.debug('TCP reassembly enabled')
 
                 reasm_cls_tcp = self.__reassembly__['tcp']
                 if isinstance(reasm_cls_tcp, ModuleDescriptor):
@@ -796,7 +814,7 @@ class Extractor(Generic[_P]):
                 trace_format = None
 
             if self._tcp:
-                logger.info('TCP flow tracing enabled')
+                logger.debug('TCP flow tracing enabled')
 
                 trace_cls_tcp = self.__traceflow__['tcp']
                 if isinstance(trace_cls_tcp, ModuleDescriptor):
@@ -810,11 +828,14 @@ class Extractor(Generic[_P]):
             )
 
         if self._flag_s:
+            logger.debug('opening input file %s', ifnm)
             self._ifile = open(ifnm, 'rb')  # input file # pylint: disable=unspecified-encoding,consider-using-with
         else:
+            logger.debug('reading from the pre-opened stream %r', fin)
             self._ifile = cast('BufferedReader', fin)
 
         if not self._ifile.seekable():
+            logger.debug('input stream is not seekable, wrapping it in SeekableReader')
             self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path,
                                          stream_closing=not self._flag_s)
 
@@ -828,7 +849,12 @@ class Extractor(Generic[_P]):
                 self.__output__[fmt] = (output, ext)  # update mapping upon import
             dumper = make_dumper(output)
 
+            # NOTE: make_dumper() names every subclass it builds 'DictDumper', so the
+            # useful name is the output class it wraps.
+            logger.debug('dumping %s output to %s via %s', fmt, ofnm, output.__name__)
             self._ofile = dumper if self._flag_f else dumper(ofnm)  # output file
+        else:
+            logger.debug('file output disabled')
 
         # NOTE: we use peek() to read the magic number, as the file pointer
         # will not be moved after reading; however, the returned bytes object
@@ -906,6 +932,7 @@ class Extractor(Generic[_P]):
     def __exit__(self, exc_type: 'Type[BaseException] | None', exc_value: 'BaseException | None',
                  traceback: 'TracebackType | None') -> 'None':  # pylint: disable=unused-argument
         """Close the input file when exits."""
+        logger.debug('closing %s on context exit after %d frame(s)', self._ifnm, self._frnum)
         self._ifile.close()
         self._exeng.close()
 
@@ -922,6 +949,7 @@ class Extractor(Generic[_P]):
 
         """
         # pylint: disable=attribute-defined-outside-init
+        logger.debug('cleaning up after %d frame(s) from %s', self._frnum, self._ifnm)
         self._flag_e = True
         if isinstance(self._ifile, SeekableReader):
             self._ifile.close()

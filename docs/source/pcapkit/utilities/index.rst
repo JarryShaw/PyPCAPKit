@@ -16,45 +16,7 @@ several user-refined exceptions and warnings.
    functools
    exceptions
    warnings
-
-Logging System
-==============
-
-.. module:: pcapkit.utilities.logging
-
-:mod:`pcapkit.utilities.logging` contains naïve integration
-of the Python logging system, i.e. a :class:`logging.Logger`
-instance as :data:`~pcapkit.utilities.logging.logger`.
-
-.. autodata:: pcapkit.utilities.logging.logger
-   :no-value:
-
-Environment Variables
----------------------
-
-.. autodata:: pcapkit.utilities.logging.DEVMODE
-   :no-value:
-
-   .. seealso::
-
-      This variable can be configured through the environment variable
-      :envvar:`PCAPKIT_DEVMODE`.
-
-.. autodata:: pcapkit.utilities.logging.VERBOSE
-   :no-value:
-
-   .. seealso::
-
-      This variable can be configured through the environment variable
-      :envvar:`PCAPKIT_VERBOSE`.
-
-.. autodata:: pcapkit.utilities.logging.SPHINX_TYPE_CHECKING
-   :no-value:
-
-   .. seealso::
-
-      This variable can be configured through the environment variable
-      :envvar:`PCAPKIT_SPHINX`.
+   logging
 
 Version Compatibility
 =====================

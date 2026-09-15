@@ -19,7 +19,7 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
-from pcapkit.utilities.logging import DEVMODE, logger
+from pcapkit.utilities.logging import DEVMODE, get_logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -28,6 +28,11 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
 __all__ = ['Transport']
+
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
