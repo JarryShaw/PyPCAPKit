@@ -177,10 +177,12 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         return self.__header__.pack(packet)
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Frame':
-        """Unpack (parse) packet data.
+        r"""Unpack (parse) packet data.
 
         Args:
             length: Length of packet data.
+            \_seek_set (int): File offset before reading, forwarded to
+                :meth:`self.read <read>` through ``**kwargs``.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -198,12 +200,17 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             self.__header__ = cast('Schema_Frame', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         return self.read(length, **kwargs)
 
-    def read(self, length: 'Optional[int]' = None, *, _read: 'bool' = True, **kwargs: 'Any') -> 'Data_Frame':
+    def read(self, length: 'Optional[int]' = None, *, _read: 'bool' = True,
+             _seek_set: 'int' = 0, **kwargs: 'Any') -> 'Data_Frame':
         r"""Read each block after global header.
 
         Args:
             length: Length of data to be read.
             \_read: If the class is called in a parsing scenario.
+            \_seek_set: File offset of the record's own first octet, i.e. where
+                the stream stood before :meth:`self.unpack <unpack>` consumed
+                the record; see the note in the parsing branch below for why it
+                cannot be recovered from the stream once we get here.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -225,7 +232,18 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         _irat = _epch.as_integer_ratio()
 
         try:
-            _time = datetime.datetime.fromtimestamp(_irat[0] / _irat[1])
+            # NOTE: Anchored to UTC, and aware rather than naive. ``ts_sec`` is an
+            # offset from the UNIX epoch, so the instant it names does not depend
+            # on where the file is read; a bare ``fromtimestamp`` renders it in
+            # the reading host's zone and drops the offset, leaving a datetime
+            # that reads as a different wall-clock time on every machine and
+            # cannot be compared against an aware one at all. The ``except``
+            # branch below has always returned an aware UTC datetime, and the
+            # PCAP-NG reader returns one too -- the same
+            # :attr:`Data_Frame.time <pcapkit.protocols.data.misc.pcap.frame.Frame.time>`
+            # field is filled from there by
+            # :func:`pcapkit.toolkit.pcapng.block2frame`, so the two have to agree.
+            _time = datetime.datetime.fromtimestamp(_irat[0] / _irat[1], datetime.timezone.utc)
         except ValueError:
             warn(f'PCAP: invalid timestamp: {_epch}', ProtocolWarning, stacklevel=stacklevel())
             _time = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
@@ -250,15 +268,27 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         else:
             # NOTE: We create a copy of the frame data here for parsing
             # scenarios to keep the original frame data intact.
-            seek_cur = self._file.tell()
+            #
+            # NOTE: The record spans ``self.length + incl_len`` octets, and by
+            # the time we get here :meth:`self.unpack <unpack>` has consumed
+            # *all* of them -- the schema's payload field carries the
+            # ``incl_len`` octets of packet data, not just the 16-octet record
+            # header. So the frame's own start cannot be reached by seeking
+            # backwards over ``self.length`` alone: that lands ``incl_len``
+            # octets too late and captures the tail of this record followed by
+            # the head of the next one (see GH-357). It is recorded before the
+            # unpack instead, in :meth:`self.__post_init__ <__post_init__>`, and
+            # seeked to absolutely -- which is what the PCAP-NG reader has
+            # always done, c.f. :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.
+            seek_cur = _seek_set + self.length + _ilen
 
             # move backward to the beginning of the frame
-            self._file.seek(-self.length, io.SEEK_CUR)
+            self._file.seek(_seek_set, io.SEEK_SET)
 
             #: bytes: Raw frame data.
             self._data = self._read_fileng(self.length + _ilen)
 
-            # move backward to the beginning of frame's payload
+            # move forward to the beginning of the next frame
             self._file.seek(seek_cur, io.SEEK_SET)
 
             #: io.BytesIO: Source data stream.
@@ -352,9 +382,13 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             _read = True
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(file) if isinstance(file, bytes) else file
+        # NOTE: Taken *before* the unpack, which advances the stream past the
+        # whole record; :meth:`self.read <read>` needs the record's own start and
+        # cannot work it out afterwards. See the note there.
+        _seek_set = self._file.tell()
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.unpack(length, _read=_read, **kwargs)
+        self._info = self.unpack(length, _read=_read, _seek_set=_seek_set, **kwargs)
 
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""

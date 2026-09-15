@@ -723,12 +723,17 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     @property
     def ts_timezone(self) -> 'timezone':
-        """Timezone of the current block."""
+        """Timezone of the current block.
+
+        Defaults to UTC when the capture names no ``if_tzone``, for the reason
+        given in :meth:`self._get_timezone <_get_timezone>`.
+
+        """
         if self._ctx is None:
             #raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'")
             warn(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'",
                  AttributeWarning, stacklevel=stacklevel())
-            return self._get_local_timezone()
+            return datetime.timezone.utc
 
         info = cast('Packet', self._info)
         return self._get_timezone(info.interface_id)
@@ -1125,7 +1130,23 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     @staticmethod
     def _get_local_timezone() -> 'timezone':
-        """Get local timezone."""
+        """Get local timezone.
+
+        Warning:
+            Not used when reconstructing a block timestamp, and must not be:
+            a PCAP-NG timestamp is an offset from the UNIX epoch, so mixing the
+            *reading* host's zone into it makes one file parse to different
+            instants on different machines (see GH-361).
+            :meth:`self._get_timezone <_get_timezone>` returns
+            :attr:`datetime.timezone.utc` instead when the capture names no
+            ``if_tzone``.
+
+            It also answers for *today* rather than for the capture's own
+            instant -- ``America/New_York`` reports ``-04:00`` all year, so a
+            December timestamp would get EDT's offset and not EST's -- which is
+            a second reason it cannot stand in for a capture's timezone.
+
+        """
         tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
         if tzinfo is None:
             return datetime.timezone.utc
@@ -1214,17 +1235,25 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Timezone of the current block.
 
         """
+        # NOTE: UTC, not the host's timezone, is the default in both branches
+        # below. A capture carries no timezone of its own unless it says so, and
+        # draft-ietf-opsawg-pcapng-02 §4.3 defines the block timestamp as an
+        # offset from 1970-01-01 00:00:00 UTC with no timezone term at all --
+        # so substituting whatever zone the *reading* machine happens to sit in
+        # made the same file parse to different instants on different hosts
+        # (see GH-361). ``_get_resolution`` and ``_get_offset`` fall back to the
+        # format's own defaults in this situation; this is the matching one.
         if self._ctx is None:
             # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'")
             warn(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'",
                  AttributeWarning, stacklevel=stacklevel())
-            return self._get_local_timezone()
+            return datetime.timezone.utc
 
         options = self._get_interface(interface_id).options
         tzone = cast('Optional[Data_IF_TZoneOption]',
                      options.get(Enum_OptionType.if_tzone))
         if tzone is None:
-            return self._get_local_timezone()
+            return datetime.timezone.utc
         return tzone.timezone
 
     def _get_linktype(self, interface_id: 'int' = 0) -> 'Enum_LinkType':
@@ -1264,20 +1293,32 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         timestamp_raw = (timestamp_high << 32) | timestamp_low
         with localcontext(prec=64):
+            # NOTE: This *is* the UTC epoch the docstring above promises, and it
+            # is returned as such. It used to have ``tzone.utcoffset(None)``
+            # added to it, which is wrong twice over: the block timestamp is an
+            # offset from the UNIX epoch, so it is timezone-independent by
+            # definition (draft-ietf-opsawg-pcapng-02 §4.3 spells out the
+            # arithmetic and has no timezone term), and the same draft §4.2 says
+            # of ``if_tzone`` that it "SHOULD NOT be used" and of ``if_tsoffset``
+            # that it is "not intended to be used as an offset between local time
+            # and UTC". Adding the offset also made the two return values
+            # contradict each other, since ``ts_datetime`` below was always built
+            # from the unshifted value (see GH-361).
             timestamp_epoch = decimal.Decimal(timestamp_raw) / self._get_resolution(interface_id) + \
                 self._get_offset(interface_id)
-            ts_decimal = timestamp_epoch + decimal.Decimal(
-                tzone.utcoffset(None).total_seconds())
 
         ts_ratio = timestamp_epoch.as_integer_ratio()
         try:
+            # NOTE: ``tzone`` survives only here, as the zone the instant is
+            # *rendered* in -- which is all a ``tzinfo`` can affect on an aware
+            # datetime. It never moves the instant itself.
             ts_datetime = datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], tzone)
         except ValueError:
-            warn(f'PCAP-NG: [Block {self._type}] invalid timestamp: {ts_decimal}',
+            warn(f'PCAP-NG: [Block {self._type}] invalid timestamp: {timestamp_epoch}',
                  ProtocolWarning, stacklevel=stacklevel())
             ts_datetime = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
 
-        return (ts_datetime, ts_decimal)
+        return (ts_datetime, timestamp_epoch)
 
     @classmethod
     def _make_data(cls, data: 'Data_PCAPNG') -> 'dict[str, Any]':  # type: ignore[override]
@@ -1300,12 +1341,22 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         """Make timestamp.
 
         Args:
-            timestamp: Timestamp in seconds since UNIX-Epoch.
+            timestamp: Timestamp in seconds since UNIX-Epoch, in UTC, i.e. as
+                :meth:`self._read_timestamp <_read_timestamp>` returns it.
             interface_id: Interface ID that the current block associates with.
 
         Returns:
-            Tuple of timestamp in higher and lower 32-bit integer value
-            based on the given offset and timezone conversion.
+            Tuple of timestamp in higher and lower 32-bit integer value,
+            scaled by the interface's ``if_tsresol`` and shifted by its
+            ``if_tsoffset``.
+
+        Notes:
+            No timezone conversion happens here, and none should: the field this
+            builds is defined as an offset from the UNIX epoch. The docstring
+            used to promise a "timezone conversion" that the code never
+            performed, which made it look as though the read side's timezone
+            shift had a counterpart here (it did not, so a read followed by a
+            write drifted by the host's UTC offset -- see GH-361).
 
         """
         with localcontext(prec=64):

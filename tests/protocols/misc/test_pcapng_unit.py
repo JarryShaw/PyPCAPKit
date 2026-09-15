@@ -10,11 +10,12 @@ from ipaddress import ip_address, ip_interface
 import os
 import struct
 import sys
+import time
 import types
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -232,9 +233,19 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng.linktype, LinkType.ETHERNET)
         self.assertEqual(pcapng._make_timestamp(decimal.Decimal(12)), (0, 2000))
 
+        # GH-361: the epoch is 2000 units at if_tsresol=1000, i.e. 2s, plus the
+        # 10s if_tsoffset -- 12s, and nothing else. It used to come back as 3612,
+        # the same instant with this interface's if_tzone (+01:00) *added* to it,
+        # which is 3600s of pure error: a PCAP-NG timestamp is an offset from the
+        # UNIX epoch and so carries no timezone. The datetime is the one place
+        # ``tz`` still shows, as the zone the instant is rendered in, and it
+        # names the very same instant -- which the two returns did not before.
         ts_datetime, ts_decimal = pcapng._read_timestamp(0, 2000)
         self.assertEqual(ts_datetime, datetime.datetime.fromtimestamp(12, tz))
-        self.assertEqual(ts_decimal, decimal.Decimal(3612))
+        self.assertEqual(ts_decimal, decimal.Decimal(12))
+        self.assertEqual(ts_datetime.timestamp(), float(ts_decimal))
+        # and the round trip closes, which it could not while the two disagreed
+        self.assertEqual(pcapng._make_timestamp(ts_decimal), (0, 2000))
 
         self.assertEqual(pcapng._read_mac_addr(b'\x00\x01\x02\x03\x04\x05'), '00:01:02:03:04:05')
         self.assertEqual(pcapng._read_eui_addr(bytes.fromhex('023456fffe789abc')),
@@ -282,7 +293,9 @@ class PCAPNGUnitTests(unittest.TestCase):
         with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
             self.assertEqual(pcapng.ts_resolution, 1_000_000)
             self.assertEqual(pcapng.ts_offset, 0)
-            self.assertIsInstance(pcapng.ts_timezone, datetime.timezone)
+            # GH-361: UTC, not the reading host's zone -- the format's own
+            # default, to match the two above
+            self.assertEqual(pcapng.ts_timezone, datetime.timezone.utc)
         self.assertEqual(warn.call_count, 3)
 
         pcapng._info = DummyData(type=BlockType.Simple_Packet_Block, length=20, interface_id=0)
@@ -320,7 +333,10 @@ class PCAPNGUnitTests(unittest.TestCase):
         pcapng._ctx = empty_ctx
         self.assertEqual(pcapng._get_resolution(0), 1_000_000)
         self.assertEqual(pcapng._get_offset(0), 0)
-        self.assertIsInstance(pcapng._get_timezone(0), datetime.timezone)
+        # GH-361: an interface that names no if_tzone gets UTC, not the reading
+        # host's zone -- which is what made one file parse to different instants
+        # on different machines
+        self.assertEqual(pcapng._get_timezone(0), datetime.timezone.utc)
         pcapng._ctx = None
         with self.assertRaises(UnsupportedCall):
             pcapng._get_linktype(0)
@@ -354,7 +370,11 @@ class PCAPNGUnitTests(unittest.TestCase):
                 mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
             timestamp, epoch = pcapng._read_timestamp(0, 1, interface_id=0)
         self.assertEqual(timestamp, real_datetime.fromtimestamp(0, datetime.timezone.utc))
-        self.assertEqual(epoch, decimal.Decimal(7200) + decimal.Decimal(2) + decimal.Decimal('0.000000001'))
+        # GH-361: 1 unit at if_tsresol=1e9 plus the 2s if_tsoffset. The leading
+        # ``Decimal(7200)`` this used to carry was this interface's if_tzone
+        # (+02:00) leaking into the epoch; the fallback datetime above is aware
+        # UTC either way, so the two used to name different instants.
+        self.assertEqual(epoch, decimal.Decimal(2) + decimal.Decimal('0.000000001'))
         warn.assert_called_once()
 
         with mock.patch('pcapkit.protocols.misc.pcapng.time.time_ns', return_value=3_500_000_000):
@@ -2932,6 +2952,129 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual([option.length for _, option in section.options.items(multi=True)],
                          [9, 12, 15, 7, 0])
         self.assertEqual(section.options[OptionType.opt_comment].comment, 'test001')
+
+    def _under_timezone(self, zone: 'str') -> 'datetime.timedelta':
+        """Install ``zone`` as the process timezone and return its UTC offset.
+
+        Restored on teardown. :mod:`pcapkit` reads the host zone at parse time
+        rather than at import time, so this takes effect without reimporting it.
+
+        """
+        previous = os.environ.get('TZ')
+
+        def restore() -> 'None':
+            if previous is None:
+                os.environ.pop('TZ', None)
+            else:
+                os.environ['TZ'] = previous
+            time.tzset()
+
+        self.addCleanup(restore)
+        os.environ['TZ'] = zone
+        time.tzset()
+        offset = datetime.datetime.now().astimezone().utcoffset()
+        assert offset is not None
+        return offset
+
+    def test_read_timestamp_is_utc_whatever_the_host_timezone_is(self) -> None:
+        """A block timestamp names one instant, on every machine that reads it.
+
+        GH-361: ``_read_timestamp`` added ``tzone.utcoffset(None)`` to the epoch
+        it returned, and ``_get_timezone`` fell back to the *reading host's* zone
+        whenever the capture named no ``if_tzone`` -- which
+        draft-ietf-opsawg-pcapng-02 §4.2 says should be the normal case, since
+        the option "SHOULD NOT be used". So the same file parsed to a different
+        absolute time on every host, by that host's UTC offset.
+
+        The defect is invisible on a UTC machine, which is why it survived, so
+        this drives several zones explicitly and asserts they were really
+        installed -- a run that silently stayed on UTC would prove nothing and
+        is skipped rather than passed.
+
+        """
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+
+        if not hasattr(time, 'tzset'):  # pragma: no cover
+            self.skipTest('time.tzset() is unavailable on this platform')
+
+        # A synthetic interface naming no if_tzone: 2_000_000 units at the
+        # default if_tsresol of 1e6, i.e. 2s since the UNIX epoch, full stop.
+        interface = types.SimpleNamespace(linktype=0, snaplen=65535, options={})
+        pcapng = object.__new__(PCAPNG)
+        pcapng._ctx = types.SimpleNamespace(
+            interfaces=[interface],
+            section=types.SimpleNamespace(byteorder='little'),
+        )
+        pcapng._type = 6  # Enhanced Packet Block
+
+        offsets = set()
+        for zone in ('UTC', 'Asia/Shanghai', 'America/New_York', 'Asia/Kolkata'):
+            with self.subTest(TZ=zone):
+                offsets.add(self._under_timezone(zone))
+
+                ts_datetime, ts_epoch = pcapng._read_timestamp(0, 2_000_000)
+
+                self.assertEqual(ts_epoch, decimal.Decimal(2))
+                self.assertEqual(ts_datetime,
+                                 datetime.datetime.fromtimestamp(2, datetime.timezone.utc))
+                self.assertEqual(ts_datetime.utcoffset(), datetime.timedelta(0))
+                # the two returns must name the same instant
+                self.assertEqual(ts_datetime.timestamp(), float(ts_epoch))
+                # and a read followed by a write must not drift
+                self.assertEqual(pcapng._make_timestamp(ts_epoch), (0, 2_000_000))
+
+        # Guard against the whole test having run on UTC four times over, which
+        # is exactly the condition under which the defect was undetectable.
+        if len(offsets) < 2:  # pragma: no cover
+            self.skipTest(f'the host resolved every zone to the same offset {offsets}; '
+                          'no tzdata installed, so this test proves nothing')
+        self.assertTrue(any(offset for offset in offsets),
+                        f'expected at least one non-zero UTC offset, got {offsets}')
+
+    def test_sample_capture_timestamp_matches_its_own_raw_bytes(self) -> None:
+        """The same property on a real capture, against the bytes in the file.
+
+        ``dhcp.pcapng`` is committed, and its interface carries ``if_tsresol=6``
+        with neither ``if_tsoffset`` nor ``if_tzone`` -- the shape GH-361 is
+        about, where the epoch used to be shifted by whatever zone the reading
+        machine sat in.
+
+        """
+        from pcapkit.interface import extract
+
+        if not hasattr(time, 'tzset'):  # pragma: no cover
+            self.skipTest('time.tzset() is unavailable on this platform')
+
+        path = sample_path('dhcp.pcapng')
+        with open(path, 'rb') as stream:
+            raw = stream.read()
+
+        # independent ground truth, straight out of the block chain
+        self.assertEqual(raw[8:12], b'\x4d\x3c\x2b\x1a')  # little-endian section
+        shb_len, = struct.unpack_from('<I', raw, 4)
+        idb_len, = struct.unpack_from('<I', raw, shb_len + 4)
+        epb = shb_len + idb_len
+        self.assertEqual(struct.unpack_from('<I', raw, epb)[0], 6)  # EPB
+        high, low = struct.unpack_from('<II', raw, epb + 12)
+        expected = decimal.Decimal((high << 32) | low) / 1_000_000
+        self.assertEqual(expected, decimal.Decimal('1102274184.317453'))
+
+        offsets = set()
+        for zone in ('UTC', 'Asia/Shanghai', 'America/New_York', 'Asia/Kolkata'):
+            with self.subTest(TZ=zone):
+                offsets.add(self._under_timezone(zone))
+
+                block = extract(fin=path, store=True, nofile=True).frame[0].info
+
+                self.assertEqual(block.timestamp_epoch, expected)
+                self.assertEqual(block.timestamp,
+                                 datetime.datetime.fromtimestamp(float(expected),
+                                                                 datetime.timezone.utc))
+                self.assertEqual(block.timestamp.utcoffset(), datetime.timedelta(0))
+
+        if len(offsets) < 2:  # pragma: no cover
+            self.skipTest(f'the host resolved every zone to the same offset {offsets}; '
+                          'no tzdata installed, so this test proves nothing')
 
 
 if __name__ == '__main__':
