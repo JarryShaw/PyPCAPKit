@@ -86,15 +86,26 @@ def stacklevel() -> 'int':
 class BaseError(Exception):
     """Base error class of all kinds.
 
+    A loud error -- the default -- is reported once, at
+    :data:`logging.CRITICAL` level, on the
+    :data:`~pcapkit.utilities.logging.logger` logger. Outside development mode it
+    also sets :data:`sys.tracebacklimit` to ``0``, which suppresses the traceback
+    frames entirely, so a user sees the exception line rather than a walk through
+    :mod:`pcapkit`'s internals.
+
+    A **quiet** error (``quiet=True``) is one :mod:`pcapkit` raises as internal
+    control flow and expects to catch itself, such as the
+    :exc:`~pcapkit.utilities.exceptions.MissingKeyError` behind
+    :meth:`MultiDict.get <pcapkit.corekit.multidict.MultiDict.get>`. It is
+    therefore silent and free of side effects: nothing is logged, and
+    :data:`sys.tracebacklimit` is left alone. It is still a perfectly ordinary
+    exception, carrying its message for whoever catches it.
+
     Important:
 
-        * Turn off system-default traceback function by set :data:`sys.tracebacklimit` to ``0``.
-        * But bugs appear in Python 3.6, so we have to set :data:`sys.tracebacklimit` to ``None``.
-
-          .. note::
-
-             This note is deprecated since Python fixed the problem above.
-
+        * :data:`sys.tracebacklimit` is process-global, so it is only set for a
+          loud error -- a quiet one used as control flow must not truncate the
+          tracebacks of unrelated exceptions for the rest of the process.
         * In Python 2.7, :func:`trace.print_stack(limit)` dose not support negative limit.
 
     See Also:
@@ -103,22 +114,15 @@ class BaseError(Exception):
     """
 
     def __init__(self, *args: 'Any', quiet: 'bool' = False, **kwargs: 'Any') -> 'None':
-        # log error
+        # log error -- a quiet error emits nothing and mutates nothing
         if not quiet:
             if DEVMODE:
                 logger.critical('%s: %s', type(self).__name__, str(self),
                                 exc_info=self if VERBOSE else False,
                                 stack_info=VERBOSE, stacklevel=-stacklevel())
             else:
-                logger.critical("%s: %s", type(self).__name__, str(self))
-
-            # logger.error('%s: %s', type(self).__name__, str(self), exc_info=self,
-            #              stack_info=True, stacklevel=-stacklevel())
-        else:
-            logger.error('%s: %s', type(self).__name__, str(self))
-
-        if not DEVMODE:
-            sys.tracebacklimit = 0
+                logger.critical('%s: %s', type(self).__name__, str(self))
+                sys.tracebacklimit = 0
         super().__init__(*args, **kwargs)
 
 
