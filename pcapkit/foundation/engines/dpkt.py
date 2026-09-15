@@ -10,7 +10,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _DPKT: https://dpkt.readthedocs.io
 
 """
-import logging
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType

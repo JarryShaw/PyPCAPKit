@@ -16,7 +16,6 @@ extracts parametres from a PCAP file.
 import collections
 import importlib
 import io
-import logging
 import os
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
@@ -850,7 +849,9 @@ class Extractor(Generic[_P]):
                 self.__output__[fmt] = (output, ext)  # update mapping upon import
             dumper = make_dumper(output)
 
-            logger.debug('dumping %s output to %s via %s', fmt, ofnm, dumper.__name__)
+            # NOTE: make_dumper() names every subclass it builds 'DictDumper', so the
+            # useful name is the output class it wraps.
+            logger.debug('dumping %s output to %s via %s', fmt, ofnm, output.__name__)
             self._ofile = dumper if self._flag_f else dumper(ofnm)  # output file
         else:
             logger.debug('file output disabled')

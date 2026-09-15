@@ -239,7 +239,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
                 raise FileExists(*error.args).with_traceback(error.__traceback__)
 
         dumper = make_dumper(output)
-        logger.debug('flow tracing output root %s, format %s via %s', fout, fmt, dumper.__name__)
+        # NOTE: as above -- make_dumper()'s subclass is always called 'DictDumper'.
+        logger.debug('flow tracing output root %s, format %s via %s', fout, fmt, output.__name__)
         return dumper, ext
 
     @abc.abstractmethod

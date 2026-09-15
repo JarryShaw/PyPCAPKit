@@ -10,7 +10,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _Scapy: https://scapy.net
 
 """
-import logging
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase as Engine

@@ -174,10 +174,15 @@ def ensure_output(level: 'Union[int, str]' = logging.DEBUG, *,
                   stream: 'Optional[IO[str]]' = None) -> 'bool':
     """Guarantee that :mod:`pcapkit`'s records have somewhere to go.
 
-    This exists for the features a caller switches on precisely *because* they
-    want to see the output -- ``Extractor(verbose=True)`` above all -- where
-    staying silent because the application never configured :mod:`logging` would
-    be a bug rather than good library manners.
+    This is for a caller that has switched something on precisely *because* it
+    wants to see the output, and for which staying silent merely because the
+    application never configured :mod:`logging` would be unhelpful.
+
+    Note that ``Extractor(verbose=True)`` and the CLI's ``-v`` do **not** go
+    through here: their frame chains are user-facing output and are written to
+    :data:`sys.stdout` with :func:`print`, so they are visible with no logging
+    configuration at all. Nothing in :mod:`pcapkit` calls this function itself;
+    it exists for consumers.
 
     An application that has configured its own handlers has already answered the
     question, so nothing is changed in that case.
@@ -325,13 +330,20 @@ def configure(level: 'Optional[Union[int, str]]' = None, *,
     return target
 
 
-# Re-running this module (which the test suite does, to exercise import-time
-# behaviour) must not stack a second handler onto the process-wide ``pcapkit``
-# logger, so start from a known-clean state rather than adding to whatever is
-# already there.
-reset()
+# NOTE: Import must not disturb configuration the application has already
+# made -- that is the whole point of the NullHandler convention -- so this only
+# guarantees the logger has *a* handler, and leaves level and propagation
+# alone. Calling reset() here instead would detach a host application's
+# handlers merely because it imported pcapkit after configuring logging.
+#
+# The membership tests also make re-execution idempotent, which the test suite
+# relies on when it exercises import-time behaviour: neither the NullHandler
+# nor the devmode stderr handler can be stacked twice.
+if not logger.handlers:
+    logger.addHandler(logging.NullHandler())
 
 if DEVMODE:
     # development mode keeps the historical behaviour: everything, on stderr
     logger.setLevel(logging.DEBUG)
-    logger.addHandler(handler)
+    if handler not in logger.handlers:
+        logger.addHandler(handler)
