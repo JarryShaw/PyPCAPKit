@@ -411,5 +411,6 @@
     "esbonio.sphinx.forceFullBuild": false,
     "esbonio.sphinx.numJobs": 0,
     "restructuredtext.trace": "off",
-    "restructuredtext.linter.run": "off"
+    "restructuredtext.linter.run": "off",
+    "python-envs.defaultEnvManager": "ms-python.python:pipenv"
 }
