@@ -62,8 +62,13 @@ class PCAPToolkitTests(unittest.TestCase):
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
 
+        # NOTE: ``offset`` here stands in for ``Data_IPv6_Frag.offset``, which is in
+        # octets (the 8-octet on-wire units are scaled in ``IPv6_Frag.read``), so the
+        # toolkit passes it through to ``fo`` unscaled. ``id`` is deliberately
+        # different from the IPv6 header's flow label below, so that a ``bufid``
+        # keyed on the wrong one of the two is visible.
         fragment = types.SimpleNamespace(
-            info=types.SimpleNamespace(next=TransType.TCP, offset=1, mf=True),
+            info=types.SimpleNamespace(next=TransType.TCP, offset=8, mf=True, id=4321),
         )
         extension_headers = {ExtensionHeader.IPv6_Frag: fragment} if with_fragment else {}
         return types.SimpleNamespace(
@@ -148,7 +153,13 @@ class PCAPToolkitTests(unittest.TestCase):
         self.assertIsNotNone(v6)
         assert v6 is not None
         self.assertEqual(v6.bufid[0], ip_address('2001:db8::1'))
-        self.assertEqual(v6.bufid[2], 7)
+        # ``bufid[2]`` is the identification slot -- ``DatagramID.id`` is built from
+        # it -- so it must carry the IPv6 Fragment header's identification and not
+        # the IPv6 header's flow label, which does not identify a datagram at all
+        # (:rfc:`8200#section-4.5`).
+        self.assertEqual(v6.bufid[2], 4321)
+        self.assertNotEqual(v6.bufid[2], 7)
+        self.assertEqual(v6.fo, 8)
         self.assertTrue(v6.mf)
         self.assertEqual(v6.header, b'V' * 48)
         self.assertEqual(bytes(v6.payload), b'v6data')
@@ -202,6 +213,10 @@ class PCAPToolkitTests(unittest.TestCase):
         self.assertIsNotNone(v6)
         assert v6 is not None
         self.assertEqual(v6.bufid[0], ip_address('2001:db8::1'))
+        # the PCAPNG engine keys the buffer the same way the PCAP engine does
+        self.assertEqual(v6.bufid[2], 4321)
+        self.assertNotEqual(v6.bufid[2], 7)
+        self.assertEqual(v6.fo, 8)
         self.assertEqual(v6.header, b'V' * 48)
         self.assertIsNone(toolkit.ipv6_reassembly(FakeFrame({}, frame.info)))
         self.assertIsNone(toolkit.ipv6_reassembly(

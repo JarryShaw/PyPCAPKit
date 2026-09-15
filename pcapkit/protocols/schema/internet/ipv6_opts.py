@@ -489,6 +489,13 @@ Option.register(Enum_Option.Quick_Start, _QuickStartOption)
 class QuickStartOption(Option, EnumSchema[Enum_QSFunction]):
     """Header schema for IPv6-Opts quick start options."""
 
+    # NOTE: This declaration scopes the QS-function registry to this class. Without
+    # it the subclasses below register into the *parent* ``Option`` registry, whose
+    # keys are IPv6-Opts option *types* -- and since ``Quick_Start_Request`` is 0
+    # and ``Report_of_Approved_Rate`` is 8, they would clobber option types 0
+    # (``Pad1``) and 8 (``SMF_DPD``). ``hopopt.py`` carries the same declaration.
+    __enum__: 'DefaultDict[Enum_QSFunction, Type[QuickStartOption]]' = collections.defaultdict(lambda: None)  # type: ignore[arg-type,return-value]
+
     #: Flags.
     flags: 'QuickStartFlags' = BitField(length=1, namespace={
         'func': (0, 4),
