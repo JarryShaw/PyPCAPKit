@@ -448,7 +448,21 @@ class Extractor(Generic[_P]):
             if isinstance(eng, ModuleDescriptor):
                 eng = eng.klass
 
-            if self.import_test(eng.module, name=eng.name) is not None:  # type: ignore[arg-type]
+            # An engine may rule itself out before the import is even attempted.
+            # Asking it is necessary because ``import_test`` can only see whether
+            # the top-level module imports, which is not the same question: a
+            # package whose *submodules* fail leaves the guard satisfied and the
+            # failure to escape from the engine's constructor instead. The base
+            # class answers :data:`None`, so only engines with a real limitation
+            # override it.
+            reason = eng.unsupported_reason()
+            if reason is not None:
+                logger.debug('engine %s is unavailable: %s', eng.name, reason)
+                warn(f'engine {eng.name} is not supported on this interpreter '
+                     f'({reason}); using default engine instead',
+                     EngineWarning, stacklevel=stacklevel())
+                self._exnam = 'default'
+            elif self.import_test(eng.module, name=eng.name) is not None:  # type: ignore[arg-type]
                 logger.debug('using engine %s (%s)', eng.name, eng.module)
                 self._exeng = eng(self)
                 self._exeng.run()
@@ -456,10 +470,10 @@ class Extractor(Generic[_P]):
                 # start iteration
                 self.record_frames()
                 return
-
-            warn(f'engine {eng.name} (`{eng.module}`) is not installed; '
-                 'using default engine instead', EngineWarning, stacklevel=stacklevel())
-            self._exnam = 'default'  # using default/pcapkit engine
+            else:
+                warn(f'engine {eng.name} (`{eng.module}`) is not installed; '
+                     'using default engine instead', EngineWarning, stacklevel=stacklevel())
+                self._exnam = 'default'  # using default/pcapkit engine
 
         if self._exnam not in ('default', 'pcapkit'):
             warn(f'unsupported extraction engine: {self._exnam}; '

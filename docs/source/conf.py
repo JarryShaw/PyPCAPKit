@@ -71,9 +71,25 @@ intersphinx_mapping = {
     'chardet': ('https://chardet.readthedocs.io/en/latest/', None),
     'dpkt': ('https://dpkt.readthedocs.io/en/latest/', None),
     'scapy': ('https://scapy.readthedocs.io/en/latest/', None),
+    'cryptography': ('https://cryptography.io/en/latest/', None),
     'requests': ('https://requests.readthedocs.io/en/latest/', None),
     'bs4': ('https://www.crummy.com/software/BeautifulSoup/bs4/doc/', None),
 }
+
+# NOTE: Deliberately *not* in the mapping above, having been checked rather than
+# assumed. Every entry costs an inventory fetch on each build and warns for the
+# whole build when it cannot be resolved, so an entry that resolves nothing is
+# worse than no entry at all.
+#
+#   * ``pypcapfile`` publishes no documentation site -- its ``objects.inv`` 404s.
+#   * ``pyshark``, ``pypcap``, ``aenum`` and ``emoji`` do serve a real
+#     ``objects.inv``, but each contains only ``std:doc``/``std:label`` entries
+#     and *zero* ``py:`` objects (5-8 objects apiece), so no ``:mod:``,
+#     ``:class:`` or ``:func:`` cross-reference into them could ever resolve.
+#
+# Those packages are therefore referenced as plain external links instead, the
+# ``.. _PyPCAP: https://github.com/pynetwork/pypcap`` style used throughout
+# ``pcapkit/foundation/engines/3rdparty.rst``.
 
 autodoc_default_options = {
     # 'members': True,

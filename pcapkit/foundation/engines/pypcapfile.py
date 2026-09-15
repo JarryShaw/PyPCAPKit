@@ -11,6 +11,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
 import struct
+import sys
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
@@ -101,6 +102,40 @@ class PyPCAPFile(Engine['PCAPFilePacket']):
     #: Number of layers to descend while decoding, i.e. link plus network. See
     #: the class docstring for why this stops short of the transport layer.
     LAYERS = 2
+
+    #: First Python version `PyPCAPFile`_ does not work on, as a
+    #: ``(major, minor)`` pair. Released 0.12.0 imports :mod:`imp` from
+    #: :mod:`pcapfile.linklayer`, and :mod:`imp` was removed in Python 3.12.
+    PYTHON_CEILING = (3, 12)
+
+    @classmethod
+    def unsupported_reason(cls) -> 'Optional[str]':
+        """Why this engine cannot run here, or :data:`None` when it can.
+
+        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
+        the import test, because the import test cannot answer this question.
+        :mod:`pcapfile`'s top-level package imports perfectly well on Python 3.12
+        and newer -- it is :mod:`pcapfile.linklayer` that fails, and
+        :mod:`pcapfile.savefile` imports it -- so a guard that only tries
+        ``import pcapfile`` is satisfied and the :exc:`ModuleNotFoundError` then
+        escapes from :meth:`__init__` as a hard error instead of degrading to the
+        default engine with a warning, which is what happens when the package is
+        simply absent.
+
+        The version is checked rather than the import attempted so that the answer
+        does not depend on which of the package's submodules happens to be
+        imported first, and so it is the same answer on a machine that has never
+        installed :mod:`pcapfile` at all.
+
+        Returns:
+            A short phrase naming the limitation, or :data:`None`.
+
+        """
+        if sys.version_info[:2] >= cls.PYTHON_CEILING:
+            return (f'pypcapfile does not support Python '
+                    f'{sys.version_info[0]}.{sys.version_info[1]}; '
+                    'its linklayer module imports `imp`, removed in Python 3.12')
+        return None
 
     ##########################################################################
     # Defaults.
