@@ -101,7 +101,12 @@ def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
     Args:
         message: Warning message.
         category: Warning category.
-        stacklevel: Warning stack level.
+        stacklevel: Warning stack level, **relative to the caller of this
+            function** -- ``1`` blames the line that called :func:`warn`, ``2``
+            its caller, and so on, exactly as the argument of the same name reads
+            on :func:`warnings.warn` itself. Defaults to
+            :func:`~pcapkit.utilities.exceptions.stacklevel`, i.e. the innermost
+            frame outside :mod:`pcapkit`.
 
     See Also:
         :mod:`pcapkit.utilities.warnings` for the emission model in full, and for
@@ -109,7 +114,17 @@ def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
 
     """
     if stacklevel is None:
+        # Computed here, so the level is already relative to *this* frame, which
+        # is the frame both consumers below count outwards from. Used as is.
         stacklevel = stacklevel_calculator()
+    else:
+        # A caller-supplied level is relative to the caller's frame, one deeper
+        # than this one, so this frame has to be added back before forwarding --
+        # the ordinary convention for a function wrapping `warnings.warn`. Without
+        # it, `warn(..., stacklevel=stacklevel())` at a call site lands one frame
+        # short of the boundary, i.e. still inside pcapkit, which is the frame the
+        # whole exercise exists to skip past.
+        stacklevel += 1
 
     logger.warning(message, exc_info=VERBOSE, stack_info=VERBOSE,
                    stacklevel=stacklevel)
