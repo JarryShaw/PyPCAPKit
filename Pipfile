@@ -16,6 +16,12 @@ pyshark = "*"
 dpkt = "*"
 scapy = "*"
 cryptography = "*"
+# NB: ``pypcap`` is deliberately absent. It builds a C extension against
+# libpcap, so listing it here would break ``pipenv install --dev`` -- and even
+# ``pipenv lock``, which has to build its metadata -- on any machine without the
+# libpcap development files. Install it by hand to work on that engine:
+# ``pipenv run pip install pypcap``.
+pypcapfile = "*"
 beautifulsoup4 = {extras = ["html5lib"],version = "*"}
 requests = {extras = ["socks"],version = "*"}
 autopep8 = "*"

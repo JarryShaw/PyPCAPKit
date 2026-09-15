@@ -88,12 +88,22 @@ crypto = [ "cryptography>=3.4" ]
 DPKT = [ "dpkt" ]
 Scapy = [ "scapy" ]
 PyShark = [ "pyshark" ]
+# pypcap ships no wheels, so this compiles a C extension against libpcap and
+# needs both its headers and its shared library present; deliberately kept out
+# of ``all`` for that reason, c.f. the note below
+PyPCAP = [ "pypcap" ]
+PyPCAPFile = [ "pypcapfile" ]
 # for developers
 vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]
+# NB: ``pypcap`` is *not* included here. It is an sdist-only C extension, so
+# ``pip install pypcapkit[all]`` would require a compiler and the libpcap
+# development files on every platform, and fails where only the header is
+# present -- as on the macOS runners. Install it explicitly with
+# ``pip install pypcapkit[PyPCAP]`` once libpcap is available.
 all = [
     "emoji",
     "cryptography>=3.4",
-    "dpkt", "scapy", "pyshark",
+    "dpkt", "scapy", "pyshark", "pypcapfile",
     "requests[socks]", "beautifulsoup4[html5lib]",
 ]
 docs = [

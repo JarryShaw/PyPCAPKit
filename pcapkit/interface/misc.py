@@ -27,7 +27,9 @@ if TYPE_CHECKING:
 
     ByteOrder = Literal['little', 'big']
     Formats = Literal['pcap', 'json', 'tree', 'plist']
-    Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
+    # NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;
+    # both copies need updating when a new engine lands.
+    Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pypcapfile']
 
 __all__ = ['follow_tcp_stream']
 
@@ -72,7 +74,11 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
         List of extracted TCP streams.
 
     """
-    if engine is not None and engine.lower() == 'pyshark':
+    # NOTE: both of these engines disable TCP flow tracing outright -- PyShark
+    # because ``pcapkit`` has no reassembly adapter for it, PyPCAP because it
+    # performs no protocol dissection at all -- so ``extraction.trace`` below
+    # would raise instead of yielding streams.
+    if engine is not None and engine.lower() in ('pyshark', 'pypcap'):
         warn(f'unsupported extraction engine: {engine}; fallback to default engine',
              EngineWarning, stacklevel=stacklevel())
         engine = None
