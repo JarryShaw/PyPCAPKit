@@ -111,7 +111,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(proto.__length_hint__(), 8)
         values = IPv6_Frag._make_data(data)
         self.assertEqual(values['next'], TransType.TCP)
-        self.assertEqual(values['offset'], 16)
+        # ``data.offset`` is in octets while ``make`` takes on-wire 8-octet units,
+        # so 16 octets is written back as 2 units
+        self.assertEqual(values['offset'], 2)
         self.assertEqual(values['mf'], True)
         self.assertEqual(values['id'], 99)
         self.assertIn('payload', values)
@@ -198,9 +200,15 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(proto.protochain, ['TCP'])
         data = proto.read(extension=True)
         self.assertEqual(data.next, TransType.TCP)
-        self.assertEqual(data.offset, 12)
+        # the schema's ``offset`` is the raw 13-bit on-wire field, a count of
+        # 8-octet units (:rfc:`8200#section-4.5`); ``Data_IPv6_Frag.offset`` is in
+        # octets, like ``Data_IPv4.offset``, so 12 units becomes 96 octets
+        self.assertEqual(proto.__header__.flags['offset'], 12)
+        self.assertEqual(data.offset, 96)
         self.assertTrue(data.mf)
         self.assertEqual(data.id, 0x12345678)
+        # ``_make_data`` must undo the scaling, so that data -> make round trips
+        self.assertEqual(IPv6_Frag._make_data(data)['offset'], 12)
 
         with mock.patch.object(IPv6_Frag, '_decode_next_layer', return_value='decoded') as decode:
             self.assertEqual(proto.read(length=12), 'decoded')
@@ -1275,6 +1283,80 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         with_dst = route_schema.RPL(cmpr_i=8, cmpr_e=8, pad={'pad_len': 0}, addresses=suffixes)
         with_dst.post_process({'dst': ip_address('2001:db8::ffff')})
         self.assertEqual([str(item) for item in with_dst.ip], ['2001:db8::1', '2001:db8::2'])
+
+    def test_option_registries_are_not_clobbered_by_a_nested_enum_registry(self) -> None:
+        """Option type 0 must resolve to the padding option in every module.
+
+        An :class:`~pcapkit.protocols.schema.schema.EnumSchema` subclass that
+        does not declare its own ``__enum__`` shares its parent's registry, so
+        registering *its* subclasses writes into the parent's key space. The
+        quick-start options are keyed by
+        :class:`~pcapkit.const.ipv6.qs_function.QSFunction`, whose members are
+        ``0`` and ``8``, so a shared registry silently overwrites option types
+        ``0`` (``Pad1``) and ``8`` (``SMF_DPD``) -- and the failure is silent
+        because a missing ``__enum__`` is not an error, it just merges two
+        registries whose key spaces happen to overlap.
+
+        :rfc:`8200#section-4.2` defines ``Pad1`` for both the Hop-by-Hop Options
+        and the Destination Options header, so it must resolve in both.
+
+        """
+        from pcapkit.const.ipv6.option import Option as Enum_Option
+        from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
+        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
+        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+
+        # the two enum values that collide with option types when unscoped
+        self.assertEqual(Enum_QSFunction.Quick_Start_Request.value, 0)
+        self.assertEqual(Enum_QSFunction.Report_of_Approved_Rate.value, 8)
+        self.assertEqual(Enum_Option.Pad1.value, 0)
+        self.assertEqual(Enum_Option.PadN.value, 1)
+
+        for module in (hopopt_schema, opts_schema):
+            with self.subTest(module=module.__name__.rsplit('.', 1)[-1]):
+                option = module.Option
+                quick_start = module.QuickStartOption
+
+                # the quick-start registry must be its own, not the option one
+                self.assertIsNot(quick_start.__enum__, option.__enum__)
+                self.assertIn('__enum__', vars(quick_start))
+
+                # snapshot the registries: they are ``defaultdict``s, so reading a
+                # missing key through them would insert it
+                options = dict(option.registry)
+                functions = dict(quick_start.registry)
+
+                # option type 0 (Pad1) and 1 (PadN) both resolve to PadOption
+                self.assertIs(options[Enum_Option.Pad1], module.PadOption)
+                self.assertIs(options[Enum_Option.PadN], module.PadOption)
+                # option type 8 (SMF_DPD) must not be the quick-start report either
+                self.assertIsNot(options[Enum_Option.SMF_DPD], module.QuickStartReportOption)
+
+                # and the quick-start functions resolve inside their own registry
+                self.assertIs(functions[Enum_QSFunction.Quick_Start_Request],
+                              module.QuickStartRequestOption)
+                self.assertIs(functions[Enum_QSFunction.Report_of_Approved_Rate],
+                              module.QuickStartReportOption)
+
+    def test_ipv6_opts_and_hopopt_option_registries_agree(self) -> None:
+        """The two modules describe the same option space and must map it alike.
+
+        ``hopopt`` and ``ipv6_opts`` are near-identical by construction, so the
+        cheapest guard against one drifting from the other is to compare their
+        registries key for key. The registry collision this catches came about
+        from exactly one line present in one module and missing in the other.
+
+        """
+        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
+        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+
+        hopopt_options = dict(hopopt_schema.Option.registry)
+        opts_options = dict(opts_schema.Option.registry)
+        self.assertEqual(set(hopopt_options), set(opts_options))
+
+        for key in sorted(hopopt_options, key=int):
+            with self.subTest(option=int(key)):
+                self.assertEqual(hopopt_options[key].__name__, opts_options[key].__name__)
 
 
 if __name__ == '__main__':

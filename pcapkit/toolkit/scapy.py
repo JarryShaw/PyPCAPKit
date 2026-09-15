@@ -190,11 +190,14 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
                      ipaddress.ip_address(ipv6.src)),     # source IP address
                 cast('IPv6Address',
                      ipaddress.ip_address(ipv6.dst)),     # destination IP address
-                ipv6.fl,                                  # label
+                ipv6_frag.id,                             # identification
                 Enum_TransType.get(ipv6_frag.nh),      # next header field in IPv6 Fragment Header
             ),
             num=count,                                    # original packet range number
-            fo=ipv6_frag.offset,                          # fragment offset
+            # NOTE: Scapy reports ``IPv6ExtHdrFragment.offset`` in on-wire 8-octet
+            # units (:rfc:`8200#section-4.5`), but the reassembly machinery indexes
+            # the datagram buffer with ``fo``, so it must be scaled into octets.
+            fo=ipv6_frag.offset * 8,                      # fragment offset
             ihl=len(ipv6) - len(ipv6_frag),               # header length, only headers before IPv6-Frag
             mf=bool(ipv6_frag.m),                         # more fragment flag
             tl=len(ipv6),                                 # total length, header includes

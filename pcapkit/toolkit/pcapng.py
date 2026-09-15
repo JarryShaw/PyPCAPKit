@@ -112,7 +112,7 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
             bufid=(
                 ipv6_info.src,                              # source IP address
                 ipv6_info.dst,                              # destination IP address
-                ipv6_info.label,                            # label
+                ipv6_frag_info.id,                          # identification
                 ipv6_frag_info.next,                        # next header field in IPv6 Fragment Header
             ),
             num=frame_info.number,                          # original packet range number

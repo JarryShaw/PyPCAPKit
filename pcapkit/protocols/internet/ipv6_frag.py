@@ -136,9 +136,15 @@ class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
             length = len(self)
         schema = self.__header__
 
+        # NOTE: The on-wire Fragment Offset is a 13-bit count of 8-octet units
+        # (:rfc:`8200#section-4.5`), but ``Data_IPv6_Frag.offset`` carries octets
+        # so that it matches ``Data_IPv4.offset`` and can be handed straight to
+        # the reassembly machinery, which indexes the datagram buffer with it
+        # (:meth:`pcapkit.foundation.reassembly.ip.IP.reassembly`). Scale here,
+        # exactly as :meth:`pcapkit.protocols.internet.ipv4.IPv4.read` does.
         ipv6_frag = Data_IPv6_Frag(
             next=schema.next,
-            offset=schema.flags['offset'],
+            offset=int(schema.flags['offset']) * 8,
             mf=bool(schema.flags['mf']),
             id=schema.id,
         )
@@ -164,7 +170,10 @@ class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
             next_default: Default value of next header.
             next_namespace: Namespace of next header.
             next_reversed: If the namespace of next header is reversed.
-            offset: Fragment offset.
+            offset: Fragment offset, in on-wire 8-octet units (:rfc:`8200#section-4.5`).
+                Note that :attr:`Data_IPv6_Frag.offset
+                <pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag.offset>` is in
+                octets, so it must be divided by 8 before being passed here.
             mf: More fragments flag.
             id: Identification.
             payload: Payload of current instance.
@@ -249,9 +258,12 @@ class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
             Key-value pairs for protocol construction.
 
         """
+        # NOTE: ``make`` takes ``offset`` in on-wire 8-octet units, while
+        # ``data.offset`` is in octets (see :meth:`read`), so scale back down to
+        # keep the data-to-schema round trip exact.
         return {
             'next': data.next,
-            'offset': data.offset,
+            'offset': data.offset // 8,
             'mf': data.mf,
             'id': data.id,
             'payload': cls._make_payload(data),

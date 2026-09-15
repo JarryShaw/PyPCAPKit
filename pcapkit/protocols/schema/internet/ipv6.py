@@ -38,10 +38,18 @@ class IPv6(Schema):
     """Header schema for IPv6 packet."""
 
     #: Version, traffic class and flow label.
+    #:
+    #: The :class:`~pcapkit.corekit.fields.strings.BitField` namespace maps each
+    #: subfield to a ``(start_bit, length_in_bits)`` pair, *not* to
+    #: ``(start_bit, end_bit)``. Per :rfc:`8200#section-3` the first 32 bits of
+    #: the IPv6 header are Version (bits 0-3), Traffic Class (bits 4-11) and
+    #: Flow Label (bits 12-31), so the flow label starts at bit 12 -- reading it
+    #: as ``(8, 20)`` would overlap the low nibble of the traffic class and drop
+    #: the low nibble of the label.
     hextet: 'IPv6Hextet' = BitField(length=4, namespace={
         'version': (0, 4),
         'class': (4, 8),
-        'label': (8, 20),
+        'label': (12, 20),
     })
     #: Payload length.
     length: int = UInt16Field()
