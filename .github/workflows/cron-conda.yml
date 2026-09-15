@@ -86,7 +86,14 @@ jobs:
         uses: ad-m/github-push-action@master
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # NB: not GITHUB_TOKEN. main requires 15 status checks, and required
+          # checks apply to direct pushes as well as to pull requests -- a commit
+          # that does not exist yet cannot have passed them, so a push as
+          # github-actions[bot] is rejected outright with
+          # `GH006: Protected branch update failed`. The PAT belongs to a repository
+          # admin, and admin enforcement is off, so it may bypass them. Humans and
+          # pull requests are still gated.
+          github_token: ${{ secrets.PYPCAPKIT }}
           branch: ${{ github.ref }}
           pull: rebase
 
