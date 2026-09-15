@@ -21,14 +21,22 @@ on:
 permissions:
   contents: read
 
-# `github.workflow` is the *caller's* workflow name inside a called workflow,
-# so the `unit-tests-` prefix is what stops a called run from ever sharing a
-# group with the caller that invoked it -- if they shared one, the callee
-# would cancel its own caller. Only pull-request runs are cancellable: on
-# main, on a tag, or on the release path a cancelled run is worse than a slow
-# one.
+# Only pull-request runs may be superseded. Keying every event on the ref (as
+# this did) coalesces all of main's pushes into one group, and GitHub cancels a
+# *pending* run whenever a newer one joins the group -- `cancel-in-progress:
+# false` protects a run that has already started, never one still queued. Merging
+# two PRs a minute apart therefore left the first commit with no unit tests at
+# all: measured on run 34970682137 for e0f0160a3, which finished `cancelled` with
+# zero jobs one second after the next push's run was created. Keying non-PR
+# events on the run id gives each commit its own group.
+#
+# `github.workflow` is the *caller's* workflow name inside a called workflow, and
+# `github.run_id` is the caller's run id too, so the literal `unit-tests-` prefix
+# is what stops a called run from sharing a group with the caller that invoked it
+# -- if they shared one, the callee would sit pending behind its own caller and
+# deadlock.
 concurrency:
-  group: unit-tests-${{ github.workflow }}-${{ github.ref }}
+  group: unit-tests-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:

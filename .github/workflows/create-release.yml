@@ -20,6 +20,13 @@ name: Create Release
 # before either had tagged, which is a double-publish race. Serialise instead:
 # never cancel a release run, just make the second wait and find the tag
 # already there.
+# Deliberately still keyed on the ref, unlike the validation workflows, and the
+# distinction is the point: for them a dropped run means a commit nobody checked,
+# which is unrecoverable, whereas here a dropped run means a publish that did not
+# happen twice. This workflow tags, uploads to PyPI and uploads to Anaconda, and
+# unlike cron-conda and cron-vendor it has *no* job-level concurrency to fall back
+# on, so this group is the only thing serialising it. Keying it per run would let
+# two runs tag and publish concurrently, which is the worse failure.
 concurrency:
   group: create-release-${{ github.ref }}
   cancel-in-progress: false

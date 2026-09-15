@@ -9,8 +9,11 @@ on:
   schedule:
     - cron: '0 2 * * 6'
 
+# Only pull-request runs may be superseded -- see the note in unit-tests.yml. A
+# ref-keyed group drops a *pending* run when a newer one joins it, which for a
+# security scan means a commit reaching main with no analysis on record.
 concurrency:
-  group: codeql-${{ github.ref }}
+  group: codeql-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:

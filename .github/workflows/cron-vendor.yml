@@ -7,7 +7,14 @@ on:
     branches: [main]
 
 # This workflow commits and pushes, so a cancelled run can leave the bump
-# half-applied -- queue superseded runs rather than killing them.
+# half-applied. Kept keyed on the ref, unlike the validation workflows: a dropped
+# run here just means a crawl that did not happen twice, and the next schedule
+# picks the registries up again, whereas a dropped validation run means a commit
+# nobody ever checked.
+#
+# Note this group is not what serialises the repository writes -- the
+# `vendor-update` job below carries its own `repository-maintenance` group, shared
+# with cron-conda, and that is what actually stops two jobs committing at once.
 concurrency:
   group: vendor-update-${{ github.ref }}
   cancel-in-progress: false

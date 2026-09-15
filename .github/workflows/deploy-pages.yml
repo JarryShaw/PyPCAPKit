@@ -14,6 +14,12 @@ on:
 permissions:
   contents: write
 
+# Deliberately still keyed on the ref, unlike the validation workflows. This one
+# publishes a *latest state* rather than a verdict on a commit, so coalescing is
+# correct: when two pushes land close together the pending build is dropped and
+# the newer one publishes, and deploying the older commit's docs after the newer
+# ones would actively be wrong. GitHub Pages also permits only one live
+# deployment, so serialising here is a requirement rather than a saving.
 concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
