@@ -20,7 +20,7 @@ python test_basic.py
 rest are generated, so build them once before running anything else:
 
 ```shell
-python ../samples/make_samples.py        # or: make samples, from the repository root
+python ../generators/make_samples.py     # or: make samples, from the repository root
 ```
 
 ## The scripts
