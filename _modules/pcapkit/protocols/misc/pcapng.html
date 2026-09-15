@@ -576,7 +576,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeNWKKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeNWKKey</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">localcontext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">FormatError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span>
+                                          <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
                                         <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
@@ -946,6 +947,17 @@
     <span class="n">PACKET_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">,</span>
                     <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">,</span>
                     <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">)</span>
+
+    <span class="c1">#: Blocks that resolve an interface of their section, mapped to the tag used</span>
+    <span class="c1">#: when reporting an interface ID that names no such interface. A Simple</span>
+    <span class="c1">#: Packet Block carries no interface ID field and always refers to the</span>
+    <span class="c1">#: section's first interface, so it is listed here too.</span>
+    <span class="n">INTERFACE_ID_BLOCK_TAGS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">:</span> <span class="s1">'EPB'</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">:</span> <span class="s1">'SPB'</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">:</span> <span class="s1">'ISB'</span><span class="p">,</span>
+    <span class="p">}</span>  <span class="c1"># type: dict[int, str]</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -1573,6 +1585,33 @@
             <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'timezone'</span><span class="p">,</span> <span class="n">tzinfo</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_InterfaceDescriptionBlock'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Interface description that ``interface_id`` names.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            interface_id: Interface ID that the current block associates with.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Interface Description Block (IDB) of the current section that</span>
+<span class="sd">            ``interface_id`` identifies.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If the current section describes no such interface.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The PCAP-NG specification requires a block's interface ID to name an</span>
+<span class="sd">            Interface Description Block of the block's own section, so an ID that</span>
+<span class="sd">            names none is a malformed file rather than a programming error --</span>
+<span class="sd">            hence :exc:`~pcapkit.utilities.exceptions.FormatError` rather than</span>
+<span class="sd">            the bare :exc:`IndexError` that indexing the list would raise.</span>
+
+<span class="sd">        """</span>
+        <span class="n">interfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">interface_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">interfaces</span><span class="p">):</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INTERFACE_ID_BLOCK_TAGS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'Block </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s1">] invalid interface ID: </span><span class="si">{</span><span class="n">interface_id</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">interfaces</span><span class="p">[</span><span class="n">interface_id</span><span class="p">]</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Timestamp resolution of the current block, in units per second.</span>
 
@@ -1589,7 +1628,7 @@
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">return</span> <span class="mi">1_000_000</span>
 
-        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">interface_id</span><span class="p">]</span><span class="o">.</span><span class="n">options</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_interface</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span><span class="o">.</span><span class="n">options</span>
         <span class="n">tsresol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Data_IF_TSResolOption]'</span><span class="p">,</span>
                        <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsresol</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">tsresol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1612,7 +1651,7 @@
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">return</span> <span class="mi">0</span>
 
-        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">interface_id</span><span class="p">]</span><span class="o">.</span><span class="n">options</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_interface</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span><span class="o">.</span><span class="n">options</span>
         <span class="n">tsoffset</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Data_IF_TSOffsetOption]'</span><span class="p">,</span>
                         <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsoffset</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">tsoffset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1635,7 +1674,7 @@
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_local_timezone</span><span class="p">()</span>
 
-        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">interface_id</span><span class="p">]</span><span class="o">.</span><span class="n">options</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_interface</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span><span class="o">.</span><span class="n">options</span>
         <span class="n">tzone</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Data_IF_TZoneOption]'</span><span class="p">,</span>
                      <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tzone</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">tzone</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1658,7 +1697,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PACKET_TYPES</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute '_get_linktype'"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">interface_id</span><span class="p">]</span><span class="o">.</span><span class="n">linktype</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_interface</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span><span class="o">.</span><span class="n">linktype</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp_high</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp_low</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[dt_type, Decimal]'</span><span class="p">:</span>
@@ -3983,7 +4022,7 @@
                 <span class="n">minor_version</span> <span class="o">=</span> <span class="n">version</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'shb'</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'opt'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
@@ -4033,7 +4072,7 @@
                                             <span class="nb">reversed</span><span class="o">=</span><span class="n">linktype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'shb'</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'if'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
@@ -4084,14 +4123,14 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">snaplen</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">interface_id</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span>
+                <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_interface</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span><span class="o">.</span><span class="n">snaplen</span>
             <span class="n">captured_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">),</span> <span class="n">snaplen</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">original_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span>
         <span class="n">packet_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'shb'</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'epb'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
@@ -4169,7 +4208,7 @@
             <span class="n">records_value</span><span class="p">,</span> <span class="n">records_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'shb'</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'ns'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
@@ -4209,7 +4248,7 @@
         <span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'shb'</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'isb'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
@@ -4331,7 +4370,7 @@
         <span class="n">secrets_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">secrets_data_val</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'shb'</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'dsb'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
@@ -4370,8 +4409,14 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">data</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Option'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
+        <span class="c1"># NOTE: Unlike every other block, a custom block has no ``OptionField``</span>
+        <span class="c1"># to name an option registry: :class:`~pcapkit.protocols.schema.misc.pcapng.CustomBlock`</span>
+        <span class="c1"># spans the custom data, its padding and the options as one opaque blob,</span>
+        <span class="c1"># since only the owner of the private enterprise number knows where the</span>
+        <span class="c1"># custom data ends. Its options are therefore resolved in the generic</span>
+        <span class="c1"># ``opt_*`` space, which is the only one valid in every block.</span>
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'shb'</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'opt'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
@@ -4437,14 +4482,14 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">snaplen</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">interface_id</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span>
+                <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_interface</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span><span class="o">.</span><span class="n">snaplen</span>
             <span class="n">captured_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">),</span> <span class="n">snaplen</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">original_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span>
         <span class="n">packet_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'shb'</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'pack'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 

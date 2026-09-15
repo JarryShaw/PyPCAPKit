@@ -562,6 +562,27 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">packet_byteorder</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["big", "little"]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Byte order declared for the section that ``packet`` belongs to.</span>
+
+<span class="sd">    A nested schema is handed its parent's packet data under a ``__packet__``</span>
+<span class="sd">    key (see :meth:`SchemaField.pack</span>
+<span class="sd">    &lt;pcapkit.corekit.fields.misc.SchemaField.pack&gt;`), so the section byte order</span>
+<span class="sd">    may live one level up.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Byte order of the enclosing section, falling back to the host byte</span>
+<span class="sd">        order when the packet data declares none.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s1">'byteorder'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packet</span> <span class="ow">and</span> <span class="s1">'__packet__'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__packet__'</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'byteorder'</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'byteorder'</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="byteorder_callback">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.byteorder_callback">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">byteorder_callback</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="s1">'NumberField'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -572,10 +593,7 @@
 <span class="sd">        packet: Packet data.</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="s1">'byteorder'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packet</span> <span class="ow">and</span> <span class="s1">'__packet__'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__packet__'</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'byteorder'</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'byteorder'</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span></div>
+    <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">packet_byteorder</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
 
 
 
@@ -583,6 +601,14 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">shb_byteorder_callback</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="s1">'NumberField'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Update byte order of PCAP-NG file for SHB.</span>
+
+<span class="sd">    A Section Header Block declares the byte order of its own section through</span>
+<span class="sd">    its Byte-Order Magic, so it cannot take one from the enclosing packet data:</span>
+<span class="sd">    the first SHB of a file has no section context by construction, and a later</span>
+<span class="sd">    one would otherwise inherit the *previous* section's byte order. The magic</span>
+<span class="sd">    is therefore also written back as ``packet['byteorder']``, which is what the</span>
+<span class="sd">    SHB's own options -- read by :func:`byteorder_callback`, after this field --</span>
+<span class="sd">    resolve their byte order from.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        field: Field instance.</span>
@@ -595,7 +621,8 @@
     <span class="k">elif</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x4D3C2B1A</span><span class="p">:</span>
         <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="s1">'little'</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown byteorder magic: </span><span class="si">{</span><span class="n">magic</span><span class="si">:</span><span class="s1">#x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown byteorder magic: </span><span class="si">{</span><span class="n">magic</span><span class="si">:</span><span class="s1">#x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="n">packet</span><span class="p">[</span><span class="s1">'byteorder'</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span></div>
 
 
 
@@ -995,8 +1022,8 @@
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'opt'</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1">#: Padding.</span>
-    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">])</span>
+    <span class="c1">#: Padding, sized from the ``__option_padding__`` key that OptionField generates.</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">shb_byteorder_callback</span><span class="p">)</span>
 
@@ -1012,12 +1039,17 @@
 <span class="sd">            This method is expected to directly modify any data stored</span>
 <span class="sd">            in the ``packet`` and thus no return is required.</span>
 
+<span class="sd">            The Byte-Order Magic is not carried by any field of the schema --</span>
+<span class="sd">            :attr:`magic` is the palindromic constant, identical in either byte</span>
+<span class="sd">            order -- so it is seeded here from the byte order the packet data</span>
+<span class="sd">            asks for, and from the host byte order when it asks for none.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="s1">'match'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="n">packet</span><span class="p">[</span><span class="s1">'match'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">'byteorder'</span><span class="p">:</span> <span class="mh">0x1A2B3C4D</span> <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span> <span class="o">==</span> <span class="s1">'big'</span> <span class="k">else</span> <span class="mh">0x4D3C2B1A</span><span class="p">,</span>
+            <span class="s1">'byteorder'</span><span class="p">:</span> <span class="mh">0x1A2B3C4D</span> <span class="k">if</span> <span class="n">packet_byteorder</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">==</span> <span class="s1">'big'</span> <span class="k">else</span> <span class="mh">0x4D3C2B1A</span><span class="p">,</span>
         <span class="p">}</span></div>
 
 
@@ -1376,8 +1408,8 @@
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'if'</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1">#: Padding.</span>
-    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">])</span>
+    <span class="c1">#: Padding, sized from the ``__option_padding__`` key that OptionField generates.</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -1537,14 +1569,18 @@
     <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'padding_data'</span><span class="p">]),</span>
+        <span class="c1"># NOTE: The padding is recomputed here rather than read back from</span>
+        <span class="c1"># ``padding_data``: a PaddingField is written straight into the schema</span>
+        <span class="c1"># buffer while packing and never lands in the packet data, so its name</span>
+        <span class="c1"># is not a key here on the packing path.</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_EPB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'epb'</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1">#: Padding.</span>
-    <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">])</span>
+    <span class="c1">#: Padding, sized from the ``__option_padding__`` key that OptionField generates.</span>
+    <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -1772,14 +1808,14 @@
     <span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">],</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># key from OptionField</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_NS_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'ns'</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1">#: Padding.</span>
-    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">])</span>
+    <span class="c1">#: Padding, sized from the ``__option_padding__`` key that OptionField generates.</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -1959,8 +1995,8 @@
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'isb'</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1">#: Padding.</span>
-    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">])</span>
+    <span class="c1">#: Padding, sized from the ``__option_padding__`` key that OptionField generates.</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -2210,17 +2246,19 @@
         <span class="n">selector</span><span class="o">=</span><span class="n">dsb_secrets_selector</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">20</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'padding_data'</span><span class="p">]),</span>
+        <span class="c1"># NOTE: see EnhancedPacketBlock.options on why the padding is recomputed</span>
+        <span class="c1"># here instead of being read back from ``padding_data``.</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">20</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_DSB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'dsb'</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1">#: Padding.</span>
-    <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">])</span>
+    <span class="c1">#: Padding, sized from the ``__option_padding__`` key that OptionField generates.</span>
+    <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -2344,17 +2382,19 @@
     <span class="c1">#: Packet data.</span>
     <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">])</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'padding_data'</span><span class="p">]),</span>
+        <span class="c1"># NOTE: see EnhancedPacketBlock.options on why the padding is recomputed</span>
+        <span class="c1"># here instead of being read back from ``padding_data``.</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_PACK_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'pack'</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1">#: Padding.</span>
-    <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">])</span>
+    <span class="c1">#: Padding, sized from the ``__option_padding__`` key that OptionField generates.</span>
+    <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 

@@ -709,6 +709,16 @@ updating the current instance.</p>
 <dd class="field-odd"><p>Processed field value.</p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>Masking against <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.bit_length" title="pcapkit.corekit.fields.numbers.NumberField.bit_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._bit_mask</span></code></a>
+truncates the value to the field’s bit length, but it also turns a
+negative value into its unsigned two’s-complement pattern, which
+neither <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> nor <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#int.to_bytes" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">int.to_bytes()</span></code></a> accepts for a
+signed field. A signed field therefore maps the pattern back into
+its signed range afterwards, so that e.g. a PCAP-NG section length
+of <code class="docutils literal notranslate"><span class="pre">-1</span></code> (section length not specified) can be written out.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">

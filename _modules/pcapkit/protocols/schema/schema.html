@@ -912,7 +912,15 @@
             <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="c1"># NOTE: ``pre_unpack`` is called here as well as from the unpacking path</span>
+        <span class="c1"># since a schema may seed ``packet`` keys that both paths need, as</span>
+        <span class="c1"># ``pcapkit.protocols.schema.internet.hip.EncryptedParameter`` does.</span>
+        <span class="c1"># ``pre_pack`` is what carries the packing-only preparation, such as the</span>
+        <span class="c1"># PCAP-NG section header block's byte order magic, which no field of the</span>
+        <span class="c1"># schema holds and which therefore cannot be recovered from</span>
+        <span class="c1"># ``self.__dict__`` above.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pre_unpack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pre_pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">'__length__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
             <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># reasonable default value</span>

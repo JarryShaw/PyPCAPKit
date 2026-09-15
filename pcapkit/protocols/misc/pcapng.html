@@ -4386,7 +4386,7 @@ equal.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.padding">
 <span class="sig-name descname"><span class="pre">padding</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.padding" title="Link to this definition">¶</a></dt>
-<dd><p>Padding.</p>
+<dd><p>Padding, sized from the <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key that OptionField generates.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4411,6 +4411,10 @@ equal.</p>
 <p class="admonition-title">Note</p>
 <p>This method is expected to directly modify any data stored
 in the <code class="docutils literal notranslate"><span class="pre">packet</span></code> and thus no return is required.</p>
+<p>The Byte-Order Magic is not carried by any field of the schema –
+<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.magic" title="pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.magic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">magic</span></code></a> is the palindromic constant, identical in either byte
+order – so it is seeded here from the byte order the packet data
+asks for, and from the host byte order when it asks for none.</p>
 </div>
 </dd></dl>
 
@@ -4479,7 +4483,7 @@ the parsed schema.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.InterfaceDescriptionBlock.padding">
 <span class="sig-name descname"><span class="pre">padding</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.InterfaceDescriptionBlock.padding" title="Link to this definition">¶</a></dt>
-<dd><p>Padding.</p>
+<dd><p>Padding, sized from the <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key that OptionField generates.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4552,7 +4556,7 @@ the parsed schema.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.EnhancedPacketBlock.padding_opts">
 <span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding_opts&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.EnhancedPacketBlock.padding_opts" title="Link to this definition">¶</a></dt>
-<dd><p>Padding.</p>
+<dd><p>Padding, sized from the <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key that OptionField generates.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4626,7 +4630,7 @@ the parsed schema.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.NameResolutionBlock.padding">
 <span class="sig-name descname"><span class="pre">padding</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionBlock.padding" title="Link to this definition">¶</a></dt>
-<dd><p>Padding.</p>
+<dd><p>Padding, sized from the <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key that OptionField generates.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4704,7 +4708,7 @@ the parsed schema.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.InterfaceStatisticsBlock.padding">
 <span class="sig-name descname"><span class="pre">padding</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.InterfaceStatisticsBlock.padding" title="Link to this definition">¶</a></dt>
-<dd><p>Padding.</p>
+<dd><p>Padding, sized from the <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key that OptionField generates.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4794,7 +4798,7 @@ the parsed schema.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.padding_data">
-<span class="sig-name descname"><span class="pre">padding_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">padding_data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.padding_data" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">padding_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding_data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.padding_data" title="Link to this definition">¶</a></dt>
 <dd><p>Padding.</p>
 </dd></dl>
 
@@ -4807,7 +4811,7 @@ the parsed schema.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.padding_opts">
 <span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding_opts&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.padding_opts" title="Link to this definition">¶</a></dt>
-<dd><p>Padding.</p>
+<dd><p>Padding, sized from the <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key that OptionField generates.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4912,7 +4916,7 @@ the custom data, its padding to a 32-bit boundary, and any options.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.PacketBlock.padding_data">
-<span class="sig-name descname"><span class="pre">padding_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">padding_data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.PacketBlock.padding_data" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">padding_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding_data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.PacketBlock.padding_data" title="Link to this definition">¶</a></dt>
 <dd><p>Padding.</p>
 </dd></dl>
 
@@ -4925,7 +4929,7 @@ the custom data, its padding to a 32-bit boundary, and any options.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.PacketBlock.padding_opts">
 <span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">padding_opts&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.PacketBlock.padding_opts" title="Link to this definition">¶</a></dt>
-<dd><p>Padding.</p>
+<dd><p>Padding, sized from the <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key that OptionField generates.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -6367,6 +6371,13 @@ the FCS can change during time.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">shb_byteorder_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#shb_byteorder_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback" title="Link to this definition">¶</a></dt>
 <dd><p>Update byte order of PCAP-NG file for SHB.</p>
+<p>A Section Header Block declares the byte order of its own section through
+its Byte-Order Magic, so it cannot take one from the enclosing packet data:
+the first SHB of a file has no section context by construction, and a later
+one would otherwise inherit the <em>previous</em> section’s byte order. The magic
+is therefore also written back as <code class="docutils literal notranslate"><span class="pre">packet['byteorder']</span></code>, which is what the
+SHB’s own options – read by <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.byteorder_callback" title="pcapkit.protocols.schema.misc.pcapng.byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">byteorder_callback()</span></code></a>, after this field –
+resolve their byte order from.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

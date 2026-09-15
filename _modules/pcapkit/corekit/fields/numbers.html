@@ -553,8 +553,19 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            Masking against :attr:`self._bit_mask &lt;NumberField.bit_length&gt;`</span>
+<span class="sd">            truncates the value to the field's bit length, but it also turns a</span>
+<span class="sd">            negative value into its unsigned two's-complement pattern, which</span>
+<span class="sd">            neither :func:`struct.pack` nor :meth:`int.to_bytes` accepts for a</span>
+<span class="sd">            signed field. A signed field therefore maps the pattern back into</span>
+<span class="sd">            its signed range afterwards, so that e.g. a PCAP-NG section length</span>
+<span class="sd">            of ``-1`` (section length not specified) can be written out.</span>
+
 <span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">value</span>
 
