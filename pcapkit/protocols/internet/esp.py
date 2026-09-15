@@ -1037,13 +1037,13 @@ class ESP(IPsec[Data_ESP, Schema_ESP],
                 version=version, packet=packet, warning=False,
             )
 
-        unavailable = association.unavailable()
-        if unavailable is not None:
-            return self._make_opaque(
-                spi, seq, total, data, ESPStatus.UNSUPPORTED, unavailable,
-                version=version, packet=packet,
-            )
-
+        # NOTE: The ICV length comes from the security association, not from
+        # |cryptography|_, so the split and the truncation check are both
+        # possible whether or not the algorithms are available. Doing them
+        # first means a truncated packet is reported as TRUNCATED rather than
+        # masked as UNSUPPORTED, and that an UNSUPPORTED packet still reports
+        # the ``icv`` it carries -- which for a combined-mode algorithm is the
+        # authentication tag a caller may well want to see.
         icv_length = association.icv_length
         if icv_length > len(data):
             return self._make_opaque(
@@ -1054,6 +1054,13 @@ class ESP(IPsec[Data_ESP, Schema_ESP],
             )
         body, icv = (data[:len(data) - icv_length], data[len(data) - icv_length:]) \
             if icv_length else (data, b'')
+
+        unavailable = association.unavailable()
+        if unavailable is not None:
+            return self._make_opaque(
+                spi, seq, total, body, ESPStatus.UNSUPPORTED, unavailable,
+                icv=icv, version=version, packet=packet,
+            )
 
         # Separate integrity algorithm, RFC 4303 s3.4.4.1. A combined mode
         # algorithm verifies its own tag as part of decryption instead.

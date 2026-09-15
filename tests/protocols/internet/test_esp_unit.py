@@ -735,6 +735,41 @@ class ESPProtocolTests(unittest.TestCase):
         self.assertEqual(info.payload_data, CASE5_ESP[8:])
         self.assertEqual(str(esp.protochain), 'ESP:Raw')
 
+    def test_icv_is_split_off_even_when_cryptography_is_missing(self) -> None:
+        """The ICV length comes from the SA, not from |cryptography|_.
+
+        So an UNSUPPORTED packet still reports the ICV it carries -- which for
+        a combined-mode algorithm is the authentication tag -- and a packet too
+        short to hold the declared ICV is reported as TRUNCATED rather than
+        being masked as UNSUPPORTED.
+
+        """
+        from pcapkit.corekit.context import ContextRegistry
+        from pcapkit.protocols.internet import esp as esp_module
+        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+                                                    SecurityAssociation)
+
+        body = bytes(range(32))
+        tag = bytes(range(0xa0, 0xb0))                      # 16-octet ICV
+        packet = struct.pack('!II', 0x1234, 7) + body + tag
+
+        with mock.patch.object(esp_module, 'load_cryptography', return_value=None):
+            with mock.patch.object(esp_module, 'warn'):
+                sa = SecurityAssociation(spi=0x1234, encryption=Cipher.AES_GCM_16,
+                                         encryption_key=bytes(20))
+            registry = ContextRegistry.make(ESPContext(sa))
+
+            info = ESP(packet, len(packet), __context__=registry).info
+            self.assertIs(info.status, ESPStatus.UNSUPPORTED)
+            self.assertEqual(info.icv, tag)
+            self.assertEqual(info.payload_data, body)
+            self.assertIsNone(info.plaintext)
+
+            # one octet short of the declared 16-octet ICV
+            short = struct.pack('!II', 0x1234, 8) + tag[:15]
+            short_info = ESP(short, len(short), __context__=registry).info
+            self.assertIs(short_info.status, ESPStatus.TRUNCATED)
+
     ##########################################################################
     # Integrity.
     ##########################################################################
