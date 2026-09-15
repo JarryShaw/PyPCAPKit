@@ -50,6 +50,9 @@ class FakeFragment:
     #: Fragment offset, in 8-octet units, so the byte offset is ``2 * 8``.
     frag_off = 2
     m_flag = 1
+    #: Identification, deliberately different from :attr:`FakeIPv6.flow`, so a
+    #: buffer identifier keyed on the wrong one of the two is visible.
+    id = 4321
 
     def __len__(self) -> int:
         return 8
@@ -251,7 +254,10 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertEqual(reassembled.num, 5)
         self.assertEqual(reassembled.bufid[0], ip_address('2001:db8::1'))
         self.assertEqual(reassembled.bufid[1], ip_address('2001:db8::2'))
-        self.assertEqual(reassembled.bufid[2], 7)
+        # the fragment header's Identification, not the IPv6 header's Flow Label
+        # -- ``bufid[2]`` feeds ``DatagramID.id``
+        self.assertEqual(reassembled.bufid[2], frag.id)
+        self.assertNotEqual(reassembled.bufid[2], ipv6.flow)
         # the buffer identifier carries the Next Header field of the fragment
         # header, as a registry enum rather than its name
         self.assertEqual(reassembled.bufid[3], TransType.get(frag.nxt))
@@ -344,27 +350,32 @@ def _make_ipv4_fragment(*, offset_units: int, mf: bool, body: bytes):
 
 
 def _ipv6_fragment_bytes(*, offset_units: int, mf: bool, body: bytes,
-                         ident: int = 110308, nxt: int = 17) -> bytes:
+                         ident: int = 110308, nxt: int = 17, flow: int = 0) -> bytes:
     """Serialise an IPv6 packet carrying a Fragment header, as wire octets.
 
     Built by hand rather than through :mod:`dpkt`'s constructors so the Fragment
-    header is unambiguously the one :rfc:`8200#section-4.5` describes.
+    header is unambiguously the one :rfc:`8200#section-4.5` describes: a 13-bit
+    Fragment Offset counted in 8-octet units, two reserved bits, then the More
+    Fragments flag, which is why ``offset_units`` is shifted left by three.
+
+    ``flow`` is the IPv6 header's Flow Label, kept separate from ``ident`` so a
+    buffer identifier keyed on the wrong one of the two is visible.
 
     """
     frag_hdr = struct.pack('>BBHI', nxt, 0,
                            (offset_units << 3) | (1 if mf else 0), ident)
     payload = frag_hdr + body
-    header = struct.pack('>IHBB', 6 << 28, len(payload), 44, 64)
+    header = struct.pack('>IHBB', (6 << 28) | flow, len(payload), 44, 64)
     header += socket.inet_pton(socket.AF_INET6, '2001:db8::1')
     header += socket.inet_pton(socket.AF_INET6, '2001:db8::2')
     return header + payload
 
 
 def _ipv6_fragment_frame(*, offset_units: int, mf: bool, body: bytes,
-                         ident: int = 110308, nxt: int = 17) -> bytes:
+                         ident: int = 110308, nxt: int = 17, flow: int = 0) -> bytes:
     """Wrap :func:`_ipv6_fragment_bytes` in an Ethernet frame."""
     return b'\xbb' * 6 + b'\xaa' * 6 + b'\x86\xdd' + _ipv6_fragment_bytes(
-        offset_units=offset_units, mf=mf, body=body, ident=ident, nxt=nxt,
+        offset_units=offset_units, mf=mf, body=body, ident=ident, nxt=nxt, flow=flow,
     )
 
 
@@ -578,6 +589,13 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
         self.assertFalse(hasattr(frag, 'nh'))
         self.assertEqual(frag.nxt, dpkt.ip.IP_PROTO_UDP)
         self.assertEqual(frag.frag_off, offset_units)
+        # ``frag_off`` is the 13-bit Fragment Offset, already shifted out of the
+        # flags word, and *not* the raw 16-bit ``_frag_off_resv_m`` -- which is
+        # what makes the ``* 8`` below a scaling into octets rather than a second
+        # scaling on top of one DPKT had already applied
+        self.assertEqual(frag._frag_off_resv_m, offset_units << 3)
+        self.assertEqual(frag.frag_off, frag._frag_off_resv_m >> 3)
+        self.assertNotEqual(frag.frag_off, frag._frag_off_resv_m)
 
         data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), count=3)
         self.assertIsNotNone(data)
@@ -596,6 +614,94 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
         self.assertEqual(bytes(data.payload), body)
         # ... and ``tl - ihl`` has to be that payload's length, not 8 more
         self.assertEqual(data.tl - data.ihl, len(data.payload))
+
+    def test_offset_is_scaled_once_into_octets(self) -> None:
+        """``fo`` is the octet offset, so it is neither ``frag_off`` nor ``* 64``.
+
+        The three candidate readings of the field are pinned against each other
+        rather than only the right one being asserted, because the failure mode
+        that matters is an offset scaled the wrong number of times: an unscaled
+        ``fo`` overlaps the fragments and a doubly scaled one leaves holes, and
+        both still look like plausible integers.
+
+        """
+        import dpkt
+
+        from pcapkit.toolkit import dpkt as toolkit
+
+        offset_units = 181
+        ipv6 = dpkt.ip6.IP6(_ipv6_fragment_bytes(
+            offset_units=offset_units, mf=True, body=b'C' * 64,
+        ))
+        data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), count=1)
+        assert data is not None
+
+        self.assertEqual(data.fo, 1448)               # 181 units of 8 octets
+        self.assertNotEqual(data.fo, offset_units)    # not left in 8-octet units
+        self.assertNotEqual(data.fo, offset_units * 64)  # not scaled twice
+
+    def test_buffer_identifier_is_keyed_on_the_fragment_identification(self) -> None:
+        """``bufid[2]`` is the Fragment header's Identification, not the Flow Label.
+
+        The Flow Label is optional and routinely zero, so keying on it merges
+        unrelated datagrams between one address pair. The fixture gives the two a
+        different value so the wrong one cannot pass by coincidence.
+
+        """
+        import dpkt
+
+        from pcapkit.toolkit import dpkt as toolkit
+
+        ident, flow = 110308, 0x12345
+        ipv6 = dpkt.ip6.IP6(_ipv6_fragment_bytes(
+            offset_units=0, mf=True, body=b'D' * 32, ident=ident, flow=flow,
+        ))
+        self.assertEqual(ipv6.flow, flow)
+        self.assertEqual(ipv6.extension_hdrs[44].id, ident)
+
+        data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), count=1)
+        assert data is not None
+
+        self.assertEqual(data.bufid[2], ident)
+        self.assertNotEqual(data.bufid[2], flow)
+
+    def test_two_datagrams_sharing_a_flow_label_stay_separate(self) -> None:
+        """Distinct identifications must not be merged into one datagram.
+
+        This is the consequence a single fragmented datagram cannot show: both
+        datagrams below share source, destination, Next Header *and* Flow Label,
+        so a buffer identifier keyed on the label puts all four fragments into
+        one buffer and the payloads overwrite one another.
+
+        """
+        import dpkt
+
+        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.toolkit import dpkt as toolkit
+
+        first, second = b'E' * 64, b'F' * 64
+        third, fourth = b'G' * 64, b'H' * 64
+
+        reasm = IPv6(strict=True)
+        for index, (ident, offset_units, mf, chunk) in enumerate((
+            (1000, 0, True, first),
+            (2000, 0, True, third),
+            (1000, 8, False, second),
+            (2000, 8, False, fourth),
+        ), start=1):
+            ipv6 = dpkt.ip6.IP6(_ipv6_fragment_bytes(
+                offset_units=offset_units, mf=mf, body=chunk, ident=ident, flow=0x12345,
+            ))
+            data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), count=index)
+            assert data is not None
+            reasm(data)
+
+        datagrams = list(reasm.datagram)
+        self.assertEqual(len(datagrams), 2)
+        payloads = {datagram.id.id: bytes(datagram.payload) for datagram in datagrams}
+        self.assertEqual(sorted(payloads), [1000, 2000])
+        self.assertEqual(payloads[1000], first + second)
+        self.assertEqual(payloads[2000], third + fourth)
 
     def test_reassembly_reconstructs_a_fragmented_datagram(self) -> None:
         import dpkt
