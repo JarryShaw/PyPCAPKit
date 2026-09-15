@@ -47,6 +47,18 @@ class FakeEngine:
     module = 'fake.module'
     MAGIC_NUMBER = (b'fake',)
 
+    @classmethod
+    def unsupported_reason(cls) -> 'None':
+        """Always available.
+
+        This stand-in duck-types the engine interface rather than subclassing
+        :class:`~pcapkit.foundation.engines.engine.Engine`, so it has to carry
+        this itself; :meth:`~pcapkit.foundation.extraction.Extractor.run` asks
+        every engine before attempting the import test.
+
+        """
+        return None
+
     def __init__(self, extractor) -> None:
         self.extractor = extractor
         self.run_calls = 0

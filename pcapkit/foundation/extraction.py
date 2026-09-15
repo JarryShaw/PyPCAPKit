@@ -448,14 +448,14 @@ class Extractor(Generic[_P]):
             if isinstance(eng, ModuleDescriptor):
                 eng = eng.klass
 
-            # An engine may rule itself out before the import is even attempted --
-            # see ``unsupported_reason`` on
-            # :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`. Asking
-            # the engine is necessary because ``import_test`` can only see whether
+            # An engine may rule itself out before the import is even attempted.
+            # Asking it is necessary because ``import_test`` can only see whether
             # the top-level module imports, which is not the same question: a
             # package whose *submodules* fail leaves the guard satisfied and the
-            # failure to escape from the engine's constructor instead.
-            reason = getattr(eng, 'unsupported_reason', lambda: None)()
+            # failure to escape from the engine's constructor instead. The base
+            # class answers :data:`None`, so only engines with a real limitation
+            # override it.
+            reason = eng.unsupported_reason()
             if reason is not None:
                 logger.debug('engine %s is unavailable: %s', eng.name, reason)
                 warn(f'engine {eng.name} is not supported on this interpreter '
