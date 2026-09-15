@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit import __version__
 from pcapkit import vendor as vendor_module
-from pcapkit.utilities.logging import VERBOSE, logger
+from pcapkit.utilities.logging import VERBOSE, get_logger
 from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarning, warn
 
 if TYPE_CHECKING:
@@ -26,6 +26,11 @@ if TYPE_CHECKING:
     from typing import Type
 
     from pcapkit.vendor.default import Vendor
+
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 def get_parser() -> 'ArgumentParser':

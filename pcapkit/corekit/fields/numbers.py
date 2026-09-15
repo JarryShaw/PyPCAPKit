@@ -142,8 +142,19 @@ class NumberField(Field[int], Generic[_T]):
         Returns:
             Processed field value.
 
+        Notes:
+            Masking against :attr:`self._bit_mask <NumberField.bit_length>`
+            truncates the value to the field's bit length, but it also turns a
+            negative value into its unsigned two's-complement pattern, which
+            neither :func:`struct.pack` nor :meth:`int.to_bytes` accepts for a
+            signed field. A signed field therefore maps the pattern back into
+            its signed range afterwards, so that e.g. a PCAP-NG section length
+            of ``-1`` (section length not specified) can be written out.
+
         """
         value = value & self._bit_mask
+        if self._signed and value > self._bit_mask >> 1:
+            value -= self._bit_mask + 1
         if not self._need_process:
             return value
 

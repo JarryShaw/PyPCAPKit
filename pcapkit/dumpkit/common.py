@@ -24,15 +24,21 @@ import dictdumper.dumper
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.logging import logger
+from pcapkit.utilities.logging import get_logger
 
 __all__ = ['make_dumper']
+
 
 if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, TextIO, Type
 
     from dictdumper.dumper import Dumper as ABCDumper
     from typing_extensions import Literal
+
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 class DumperBase(dictdumper.dumper.Dumper):

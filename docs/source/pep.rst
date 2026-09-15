@@ -63,9 +63,49 @@ specific file.
 Logging Integration
 -------------------
 
-As PyPCAPKit now has the :data:`pcapkit.utilities.logging.logger` in place, I'm
-expecting to fully extend its functionality in the entire module. Ideas and
-contributions are welcomed to integrate the logging system into PyPCAPKit.
+.. note::
+
+   Largely **done**. :mod:`pcapkit.utilities.logging` is no longer a single flat
+   logger with a hard-wired handler. It now provides:
+
+   - a **logger hierarchy** rooted at ``pcapkit``, with every module logging
+     through its own child obtained from
+     :func:`~pcapkit.utilities.logging.get_logger`, so that a subtree such as
+     ``pcapkit.foundation.registry`` can be silenced independently of
+     ``pcapkit.foundation.extraction``;
+   - **library-safe defaults** -- importing :mod:`pcapkit` attaches only a
+     :class:`logging.NullHandler` and sets no level, leaving the destination and
+     verbosity to the application. :envvar:`PCAPKIT_DEVMODE` still bootstraps the
+     historical :obj:`sys.stderr` handler at :data:`logging.DEBUG`;
+   - a **runtime configuration API** --
+     :func:`~pcapkit.utilities.logging.configure`,
+     :func:`~pcapkit.utilities.logging.reset` and
+     :func:`~pcapkit.utilities.logging.ensure_output` -- rather than a single
+     environment variable read once at import;
+   - **levels chosen deliberately**. Registration bookkeeping across
+     :mod:`pcapkit.foundation.registry` moved from ``info`` to ``debug``, since
+     a library announcing its own registry entries is not news to its consumer;
+     and the four :func:`print` calls that were marked
+     ``# pylint: disable=logging-fstring-interpolation`` are now real logger
+     calls;
+   - **``debug`` coverage of the extraction path** -- extractor construction,
+     engine selection and fallback, frame counts, cleanup, reassembly and
+     flow-tracing setup -- so that ``DEBUG`` explains what PyPCAPKit did with a
+     file without descending into per-field parsing.
+
+   See :doc:`pcapkit/utilities/logging` for the configuration recipes, including
+   the one-line restore of the pre-existing :obj:`sys.stderr` output.
+
+   What remains wanted is the two items called out there as deliberately out of
+   scope: :func:`pcapkit.utilities.warnings.warn` still double-reports every
+   warning through both :mod:`logging` and :mod:`warnings`, and
+   :class:`~pcapkit.utilities.warnings.BaseWarning` still mutates the global
+   warning filters with :func:`warnings.simplefilter`.
+
+Originally: as PyPCAPKit now has the :data:`pcapkit.utilities.logging.logger` in
+place, I'm expecting to fully extend its functionality in the entire module.
+Ideas and contributions are welcomed to integrate the logging system into
+PyPCAPKit.
 
 New Engines
 -----------

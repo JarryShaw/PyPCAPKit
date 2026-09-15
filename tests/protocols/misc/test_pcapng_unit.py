@@ -7,7 +7,9 @@ import datetime
 import decimal
 import io
 from ipaddress import ip_address, ip_interface
+import os
 import struct
+import sys
 import types
 import unittest
 from unittest import mock
@@ -1510,7 +1512,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             EndOfOption(type=OptionType.opt_endofopt, length=0),
             CommentOption(type=OptionType.opt_comment, length=5, comment='again'),
             b'\x88\x13\x03\x00raw\x00',
-        ], namespace='shb')
+        ], namespace='opt')
         self.assertEqual(opts[-1].type, OptionType.opt_endofopt)
         self.assertGreater(opt_len, 0)
 
@@ -1522,7 +1524,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             (OptionType.opt_endofopt, object()),
         ])
         pcapng._opt = collections.Counter()
-        opts_from_data, data_opt_len = pcapng._make_pcapng_options(data_options, namespace='shb')
+        opts_from_data, data_opt_len = pcapng._make_pcapng_options(data_options, namespace='opt')
         self.assertEqual(opts_from_data[-1].type, OptionType.opt_endofopt)
         self.assertGreater(data_opt_len, 0)
 
@@ -2082,28 +2084,28 @@ class PCAPNGUnitTests(unittest.TestCase):
                 b'\x00\x00\x00\x00',
                 (option_code, {'data': b'list'}),
                 (OptionType.opt_endofopt, {}),
-            ], namespace='shb')
+            ], namespace='opt')
             self.assertEqual(list_options[-1].type, OptionType.opt_endofopt)
             self.assertEqual(list_options[0].data, b'list')
 
             pcapng._opt = collections.Counter()
             no_end_options, _ = pcapng._make_pcapng_options([
                 (OptionType.opt_comment, {'comment': 'no-end'}),
-            ], namespace='shb')
+            ], namespace='opt')
             self.assertNotEqual(no_end_options[-1].type, OptionType.opt_endofopt)
 
             pcapng._opt = collections.Counter()
             dict_options, _ = pcapng._make_pcapng_options(OrderedMultiDict([
                 (option_code, DummyData(data=b'dict')),
                 (OptionType.opt_endofopt, object()),
-            ]), namespace='shb')
+            ]), namespace='opt')
             self.assertEqual(dict_options[0].data, b'dict')
             self.assertEqual(dict_options[-1].type, OptionType.opt_endofopt)
 
             pcapng._opt = collections.Counter()
             dict_options_no_end, _ = pcapng._make_pcapng_options(OrderedMultiDict([
                 (OptionType.opt_comment, DummyData(comment='dict-no-end')),
-            ]), namespace='shb')
+            ]), namespace='opt')
             self.assertNotEqual(dict_options_no_end[-1].type, OptionType.opt_endofopt)
 
             records = pcapng._read_nrb_records([
@@ -2405,6 +2407,531 @@ class PCAPNGUnitTests(unittest.TestCase):
 
         self.assertEqual(block.drop_count, 1)
         self.assertEqual(decoded, [(LinkType.ETHERNET, 4)])
+
+    ##########################################################################
+    # Write path: packing block schemas (#366).
+    ##########################################################################
+
+    @staticmethod
+    def _all_block_schemas():
+        """Every PCAP-NG block schema, populated well enough to be packed.
+
+        Returns a list of ``(label, block type, schema)`` triples covering all
+        eleven block schemas of
+        :mod:`pcapkit.protocols.schema.misc.pcapng`, each with the block total
+        length its own fields imply.
+
+        """
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.pcapng.secrets_type import SecretsType
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.schema.misc.pcapng import (CustomBlock, DecryptionSecretsBlock,
+                                                          EnhancedPacketBlock,
+                                                          InterfaceDescriptionBlock,
+                                                          InterfaceStatisticsBlock,
+                                                          NameResolutionBlock, PacketBlock,
+                                                          SectionHeaderBlock, SimplePacketBlock,
+                                                          SystemdJournalExportBlock, UnknownBlock)
+
+        payload = b'\xde\xad\xbe\xef'
+        return [
+            ('UnknownBlock', BlockType.get(0xFFFF_0000),
+             UnknownBlock(length=12, body=b'', length2=12)),
+            ('SectionHeaderBlock', BlockType.Section_Header_Block,
+             SectionHeaderBlock(length=28, magic=0x1A2B3C4D, major=1, minor=0,
+                                section_length=-1, options=[], length2=28)),
+            ('InterfaceDescriptionBlock', BlockType.Interface_Description_Block,
+             InterfaceDescriptionBlock(length=20, linktype=LinkType.ETHERNET, snaplen=0,
+                                       options=[], length2=20)),
+            ('EnhancedPacketBlock', BlockType.Enhanced_Packet_Block,
+             EnhancedPacketBlock(length=36, interface_id=0, timestamp_high=0, timestamp_low=0,
+                                 captured_len=len(payload), original_len=len(payload),
+                                 packet_data=payload, options=[], length2=36)),
+            # captured_len=5 needs three genuine padding octets, unlike the
+            # 32-bit aligned case above
+            ('EnhancedPacketBlock, captured_len=5', BlockType.Enhanced_Packet_Block,
+             EnhancedPacketBlock(length=40, interface_id=0, timestamp_high=0, timestamp_low=0,
+                                 captured_len=5, original_len=5, packet_data=payload + b'\x00',
+                                 options=[], length2=40)),
+            ('SimplePacketBlock', BlockType.Simple_Packet_Block,
+             SimplePacketBlock(length=20, original_len=len(payload), packet_data=payload,
+                               length2=20)),
+            ('NameResolutionBlock', BlockType.Name_Resolution_Block,
+             NameResolutionBlock(length=12, records=[], options=[], length2=12)),
+            ('InterfaceStatisticsBlock', BlockType.Interface_Statistics_Block,
+             InterfaceStatisticsBlock(length=24, interface_id=0, timestamp_high=0,
+                                      timestamp_low=0, options=[], length2=24)),
+            ('SystemdJournalExportBlock', BlockType.systemd_Journal_Export_Block,
+             SystemdJournalExportBlock(length=12, entry=b'', length2=12)),
+            ('DecryptionSecretsBlock', BlockType.Decryption_Secrets_Block,
+             DecryptionSecretsBlock(length=24, secrets_type=SecretsType.TLS_Key_Log,
+                                    secrets_length=len(payload), secrets_data=payload,
+                                    options=[], length2=24)),
+            ('CustomBlock', BlockType.Custom_Block_that_rewriters_can_copy_into_new_files,
+             CustomBlock(length=16, pen=0, data=b'', length2=16)),
+            ('PacketBlock', BlockType.Packet_Block,
+             PacketBlock(length=36, interface_id=0, drop_count=0, timestamp_high=0,
+                         timestamp_low=0, captured_length=len(payload),
+                         original_length=len(payload), packet_data=payload, options=[],
+                         length2=36)),
+        ]
+
+    def test_pcapng_every_block_schema_packs(self) -> None:
+        # Regression for #366: seven of the eleven block schemas could not be
+        # packed at all, from four independent causes -- a ``BytesField``
+        # standing in for a ``PaddingField``, an option length callback reading
+        # a ``PaddingField``'s value, ``Schema.pre_pack`` never being called,
+        # and ``packet['__option_padding__']`` being subscripted on the packing
+        # path where only the unpacking path sets it. Since the SHB was among
+        # them, no valid PCAP-NG file could be written at all.
+        for label, _, schema in self._all_block_schemas():
+            with self.subTest(schema=label):
+                packed = bytes(schema)
+                # every block schema packs the block without its 4-octet block
+                # type, so it is four short of the block total length it declares
+                self.assertEqual(len(packed) + 4, schema.length)
+
+    def test_pcapng_padding_fields_are_padding_fields(self) -> None:
+        # Regression for #366, cause 1: ``PacketBlock.padding_data`` and
+        # ``DecryptionSecretsBlock.padding_data`` were declared ``BytesField``,
+        # which ``Schema.pack`` does not fill in, so packing them handed
+        # ``struct.pack`` the ``NoValue`` sentinel.
+        from pcapkit.corekit.fields.strings import PaddingField
+        from pcapkit.protocols.schema.misc.pcapng import (DecryptionSecretsBlock,
+                                                          EnhancedPacketBlock, PacketBlock)
+
+        for schema in (EnhancedPacketBlock, PacketBlock, DecryptionSecretsBlock):
+            with self.subTest(schema=schema.__name__):
+                self.assertIsInstance(schema.__fields__['padding_data'], PaddingField)
+                self.assertIsInstance(schema.__fields__['padding_opts'], PaddingField)
+
+    def test_pcapng_option_length_callbacks_survive_missing_pack_keys(self) -> None:
+        # Regression for #366, causes 2 and 4: the option length callbacks read
+        # ``pkt['padding_data']`` and ``pkt['__option_padding__']``, neither of
+        # which is a key in the packet data while packing.
+        from pcapkit.protocols.schema.misc.pcapng import (DecryptionSecretsBlock,
+                                                          EnhancedPacketBlock,
+                                                          InterfaceDescriptionBlock,
+                                                          InterfaceStatisticsBlock,
+                                                          NameResolutionBlock, PacketBlock,
+                                                          SectionHeaderBlock)
+
+        cases = {
+            'EnhancedPacketBlock': (EnhancedPacketBlock, {'length': 36, 'captured_len': 4}),
+            'PacketBlock': (PacketBlock, {'length': 44, 'captured_length': 4}),
+            'DecryptionSecretsBlock': (DecryptionSecretsBlock, {'length': 24,
+                                                                'secrets_length': 4}),
+            'SectionHeaderBlock': (SectionHeaderBlock, {'length': 28}),
+            'InterfaceDescriptionBlock': (InterfaceDescriptionBlock, {'length': 20}),
+            'NameResolutionBlock': (NameResolutionBlock, {'length': 12}),
+            'InterfaceStatisticsBlock': (InterfaceStatisticsBlock, {'length': 24}),
+        }
+        for label, (schema, packet) in cases.items():
+            with self.subTest(schema=label):
+                for name, field in schema.__fields__.items():
+                    if field.__class__.__name__ not in ('OptionField', 'PaddingField'):
+                        continue
+                    with self.subTest(field=name):
+                        # the callback must not raise on a packet dict that
+                        # carries no padding field values and no
+                        # ``__option_padding__`` key, i.e. the packing case
+                        self.assertGreaterEqual(field(dict(packet)).length, 0)
+
+    def test_pcapng_section_header_block_packs_byteorder_magic(self) -> None:
+        # Regression for #366, cause 3: nothing in the package called
+        # ``Schema.pre_pack``, so ``SectionHeaderBlock.pre_pack`` never got to
+        # seed ``packet['match']`` and packing an SHB raised ``KeyError``.
+        from pcapkit.protocols.schema.misc.pcapng import SectionHeaderBlock
+
+        for byteorder, endian in (('big', '>'), ('little', '<')):
+            with self.subTest(byteorder=byteorder):
+                schema = SectionHeaderBlock(length=28, magic=0x1A2B3C4D, major=1, minor=0,
+                                            section_length=-1, options=[], length2=28)
+                packed = schema.pack({'byteorder': byteorder})
+
+                length, magic, major, minor, section_length, length2 = struct.unpack(
+                    f'{endian}IIHHqI', packed)
+                self.assertEqual(length, 28)
+                self.assertEqual(length2, 28)
+                self.assertEqual(magic, 0x1A2B3C4D)
+                self.assertEqual((major, minor), (1, 0))
+                # section length not specified, i.e. all ones on the wire
+                self.assertEqual(section_length, -1)
+                self.assertEqual(packed[12:20], b'\xff' * 8)
+
+    def test_pcapng_section_header_block_round_trips_through_bytes(self) -> None:
+        # Regression for #366: the point of the write path is that what it
+        # writes can be read back. Build a whole capture out of ``bytes()`` on
+        # the block schemas, then dissect it with the public reader and check
+        # the fields survived.
+        import tempfile
+
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.interface import extract
+        from pcapkit.protocols.schema.misc.pcapng import PCAPNG as Header
+        from pcapkit.protocols.schema.misc.pcapng import (CommentOption, EndOfOption,
+                                                          EnhancedPacketBlock,
+                                                          InterfaceDescriptionBlock,
+                                                          InterfaceStatisticsBlock,
+                                                          SectionHeaderBlock, SimplePacketBlock)
+
+        frame = (b'\xff\xff\xff\xff\xff\xff\x00\x11\x22\x33\x44\x55\x08\x00'
+                 b'\x45\x00\x00\x1c\x00\x01\x00\x00\x40\x11\x00\x00'
+                 b'\x0a\x00\x00\x01\x0a\x00\x00\x02'
+                 b'\x04\xd2\x16\x2e\x00\x08\x00\x00')      # eth / ipv4 / udp, 42 octets
+        self.assertEqual(len(frame), 42)
+
+        comment = CommentOption(type=OptionType.opt_comment, length=6, comment='hello!')
+        endofopt = EndOfOption(type=OptionType.opt_endofopt, length=0)
+        options = [comment, endofopt]
+        # 4 octets of option header plus a 32-bit aligned 6-octet comment, then
+        # the 4 octets of the end-of-option-list marker
+        options_length = 4 + 8 + 4
+
+        shb = SectionHeaderBlock(length=28 + options_length, magic=0x1A2B3C4D, major=1,
+                                 minor=0, section_length=-1, options=options,
+                                 length2=28 + options_length)
+        idb = InterfaceDescriptionBlock(length=20, linktype=LinkType.ETHERNET, snaplen=0xFFFF,
+                                        options=[], length2=20)
+        epb = EnhancedPacketBlock(length=32 + 44, interface_id=0, timestamp_high=0,
+                                  timestamp_low=1_000_000, captured_len=len(frame),
+                                  original_len=len(frame), packet_data=frame, options=[],
+                                  length2=32 + 44)
+        spb = SimplePacketBlock(length=16 + 44, original_len=len(frame),
+                                packet_data=frame + bytes(-len(frame) % 4), length2=16 + 44)
+        isb = InterfaceStatisticsBlock(length=24, interface_id=0, timestamp_high=0,
+                                       timestamp_low=0, options=[], length2=24)
+
+        capture = b''.join(bytes(Header(type=block_type, block=block)) for block_type, block in (
+            (BlockType.Section_Header_Block, shb),
+            (BlockType.Interface_Description_Block, idb),
+            (BlockType.Enhanced_Packet_Block, epb),
+            (BlockType.Simple_Packet_Block, spb),
+            (BlockType.Interface_Statistics_Block, isb),
+        ))
+
+        handle, path = tempfile.mkstemp(suffix='.pcapng')
+        try:
+            with os.fdopen(handle, 'wb') as file:
+                file.write(capture)
+            extractor = extract(fin=path, store=True, nofile=True)
+        finally:
+            os.unlink(path)
+
+        # the two packet blocks are the frames; the SHB, IDB and ISB are context
+        self.assertEqual(len(extractor.frame), 2)
+
+        section = extractor.engine._ctx_list[0].section
+        self.assertEqual(section.byteorder, sys.byteorder)
+        self.assertEqual(section.version.major, 1)
+        self.assertEqual(section.version.minor, 0)
+        self.assertEqual(section.section_length, -1)
+        self.assertEqual(section.options[OptionType.opt_comment].comment, 'hello!')
+
+        interfaces = extractor.engine._ctx_list[0].interfaces
+        self.assertEqual(len(interfaces), 1)
+        self.assertEqual(interfaces[0].linktype, LinkType.ETHERNET)
+        self.assertEqual(interfaces[0].snaplen, 0xFFFF)
+
+        epb_read = extractor.frame[0]
+        self.assertEqual(epb_read.info.type, BlockType.Enhanced_Packet_Block)
+        self.assertEqual(epb_read.info.interface_id, 0)
+        self.assertEqual(epb_read.info.captured_len, len(frame))
+        self.assertEqual(epb_read.info.original_len, len(frame))
+        self.assertEqual(str(epb_read.protochain), 'Ethernet:IPv4:UDP')
+        ipv4 = epb_read.info.ethernet.ipv4
+        self.assertEqual((str(ipv4.src), str(ipv4.dst)), ('10.0.0.1', '10.0.0.2'))
+        self.assertEqual((int(ipv4.udp.srcport), int(ipv4.udp.dstport)), (1234, 5678))
+
+        spb_read = extractor.frame[1]
+        self.assertEqual(spb_read.info.type, BlockType.Simple_Packet_Block)
+        self.assertEqual(spb_read.info.original_len, len(frame))
+        self.assertEqual(str(spb_read.protochain), 'Ethernet:IPv4:UDP')
+
+        statistics = extractor.engine._ctx_list[0].statistics
+        self.assertEqual(len(statistics), 1)
+        self.assertEqual(statistics[0].interface_id, 0)
+
+    ##########################################################################
+    # Signed numeric fields (#366, uncovered by the SHB repro).
+    ##########################################################################
+
+    def test_signed_number_fields_pack_negative_values(self) -> None:
+        # Uncovered while fixing #366: ``NumberField.pre_process`` masks the
+        # value against the *unsigned* bit mask, which turns any negative value
+        # into a pattern ``struct.pack`` rejects for a signed template. No
+        # signed field in the library could write a negative value, which is
+        # what a PCAP-NG section length of -1 (not specified) needs.
+        from pcapkit.corekit.fields.numbers import (Int8Field, Int16Field, Int32Field, Int64Field,
+                                                    UInt32Field)
+
+        cases = {
+            Int8Field: ('b', 1),
+            Int16Field: ('h', 2),
+            Int32Field: ('i', 4),
+            Int64Field: ('q', 8),
+        }
+        for field_type, (code, size) in cases.items():
+            for value in (-1, -8, 0, 7):
+                with self.subTest(field=field_type.__name__, value=value):
+                    field = field_type()({})
+                    self.assertEqual(field.pack(value, {}),
+                                     struct.pack(f'>{code}', value))
+                    self.assertEqual(len(field.pack(value, {})), size)
+
+        # unsigned fields keep truncating, i.e. -1 stays all ones
+        self.assertEqual(UInt32Field()({}).pack(-1, {}), b'\xff\xff\xff\xff')
+
+    ##########################################################################
+    # Option namespaces per block (#365).
+    ##########################################################################
+
+    def test_pcapng_make_block_uses_its_own_option_namespace(self) -> None:
+        # Regression for #365: all eight ``_make_block_*`` methods passed
+        # ``namespace='shb'``, which is not a namespace anywhere -- neither on
+        # ``OptionType`` nor in the schema option registry -- so every raw-bytes
+        # option was misclassified as ``shb_unknown_*`` and ``OptionType`` was
+        # permanently extended with a member per unrecognised code.
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.const.pcapng.secrets_type import SecretsType
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.schema.misc.pcapng import Option
+
+        # ``'shb'`` names no namespace on either side of the wire
+        namespaces = set(dict(OptionType.__members_ns__)) | set(dict(Option.registry))
+        self.assertNotIn('shb', namespaces)
+
+        recorded = []
+
+        pcapng = object.__new__(PCAPNG)
+        pcapng._byte = 'little'
+        pcapng._opt = collections.Counter()
+        pcapng._ctx = None
+        pcapng._make_pcapng_options = lambda options, namespace: (
+            recorded.append(namespace) or ([], 0)
+        )
+
+        raw = [b'\x00\x00\x00\x00']       # opt_endofopt, valid in every namespace
+        calls = [
+            ('shb', BlockType.Section_Header_Block, 'opt',
+             lambda: pcapng._make_block_shb(options=raw)),
+            ('idb', BlockType.Interface_Description_Block, 'if',
+             lambda: pcapng._make_block_idb(linktype=LinkType.ETHERNET, options=raw)),
+            ('epb', BlockType.Enhanced_Packet_Block, 'epb',
+             lambda: pcapng._make_block_epb(interface_id=0, timestamp=0,
+                                            packet_data=b'data', options=raw)),
+            ('nrb', BlockType.Name_Resolution_Block, 'ns',
+             lambda: pcapng._make_block_nrb(records=[], options=raw)),
+            ('isb', BlockType.Interface_Statistics_Block, 'isb',
+             lambda: pcapng._make_block_isb(interface_id=0, timestamp=0, options=raw)),
+            ('dsb', BlockType.Decryption_Secrets_Block, 'dsb',
+             lambda: pcapng._make_block_dsb(secrets_type=SecretsType.get(0xDEAD_BEEF),
+                                            secrets_data=b'data', options=raw)),
+            ('cb', BlockType.Custom_Block_that_rewriters_can_copy_into_new_files, 'opt',
+             lambda: pcapng._make_block_cb(pen=0, data=b'data', options=raw)),
+            ('packet', BlockType.Packet_Block, 'pack',
+             lambda: pcapng._make_block_packet(interface_id=0, timestamp=0,
+                                               packet_data=b'data', options=raw)),
+        ]
+
+        for name, block_type, expected, call in calls:
+            with self.subTest(block=name):
+                recorded.clear()
+                pcapng._type = block_type
+                with mock.patch('pcapkit.protocols.misc.pcapng.warn'):
+                    call()
+                self.assertEqual(recorded, [expected])
+                # the namespace has to be a real one, otherwise every code in
+                # it resolves as unknown
+                self.assertIn(expected, namespaces)
+
+        # ... and nothing minted a bogus ``shb_*`` member along the way
+        self.assertNotIn('shb', set(dict(OptionType.__members_ns__)))
+        self.assertEqual([name for name in OptionType.__members__ if name.startswith('shb_')], [])
+
+    def test_pcapng_make_block_namespace_matches_read_side_registry(self) -> None:
+        # The read side is the authority on which registry a block's options
+        # come from: each block schema's ``OptionField`` names it explicitly.
+        # #365's fix has to agree with it, block for block.
+        from pcapkit.protocols.schema.misc.pcapng import (DecryptionSecretsBlock,
+                                                          EnhancedPacketBlock,
+                                                          InterfaceDescriptionBlock,
+                                                          InterfaceStatisticsBlock,
+                                                          NameResolutionBlock, Option, PacketBlock,
+                                                          SectionHeaderBlock)
+
+        expected = {
+            SectionHeaderBlock: 'opt',
+            InterfaceDescriptionBlock: 'if',
+            EnhancedPacketBlock: 'epb',
+            NameResolutionBlock: 'ns',
+            InterfaceStatisticsBlock: 'isb',
+            DecryptionSecretsBlock: 'dsb',
+            PacketBlock: 'pack',
+        }
+        for schema, namespace in expected.items():
+            with self.subTest(schema=schema.__name__):
+                self.assertIs(schema.__fields__['options'].registry,
+                              dict(Option.registry)[namespace])
+
+    ##########################################################################
+    # Interface ID bounds (#367).
+    ##########################################################################
+
+    def test_pcapng_out_of_range_interface_id_is_a_format_error(self) -> None:
+        # Regression for #367: the engine's bounds guards ran after the block
+        # had been parsed, and the parse itself indexed the section's interface
+        # list, so an out-of-range interface ID escaped as a bare ``IndexError``
+        # from ``_get_timezone`` instead of the intended ``FormatError``.
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.utilities.exceptions import FormatError
+
+        tags = {
+            BlockType.Enhanced_Packet_Block: 'EPB',
+            BlockType.Simple_Packet_Block: 'SPB',
+            BlockType.Packet_Block: 'Packet',
+            BlockType.Interface_Statistics_Block: 'ISB',
+        }
+        getters = ('_get_resolution', '_get_offset', '_get_timezone', '_get_linktype')
+
+        pcapng = object.__new__(PCAPNG)
+        # a section that describes two interfaces, as #367's capture does
+        pcapng._ctx = types.SimpleNamespace(interfaces=[object(), object()])
+
+        for block_type, tag in tags.items():
+            pcapng._type = block_type
+            for getter in getters:
+                if getter == '_get_linktype' and block_type not in PCAPNG.PACKET_TYPES:
+                    continue        # documented to be unavailable off a packet block
+                for interface_id in (2, 7, -1):
+                    with self.subTest(block=tag, getter=getter, interface_id=interface_id):
+                        with self.assertRaises(FormatError) as context:
+                            getattr(pcapng, getter)(interface_id)
+                        message = str(context.exception)
+                        self.assertIn(f'PCAP-NG: [{tag}]', message)
+                        self.assertIn(f'invalid interface ID: {interface_id}', message)
+
+        # an in-range ID still resolves, i.e. the guard is a bound and not a ban
+        pcapng._type = BlockType.Enhanced_Packet_Block
+        self.assertIs(pcapng._get_interface(1), pcapng._ctx.interfaces[1])
+
+    def test_pcapng_interface_id_bounds_reported_for_unlisted_blocks(self) -> None:
+        # A block that is not in ``INTERFACE_ID_BLOCK_TAGS`` still has to report
+        # a ``FormatError`` rather than an ``IndexError``, naming the block type.
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.utilities.exceptions import FormatError
+
+        pcapng = object.__new__(PCAPNG)
+        pcapng._ctx = types.SimpleNamespace(interfaces=[])
+        pcapng._type = BlockType.Name_Resolution_Block
+
+        with self.assertRaises(FormatError) as context:
+            pcapng._get_interface(0)
+        self.assertIn('invalid interface ID: 0', str(context.exception))
+        self.assertIn(str(BlockType.Name_Resolution_Block), str(context.exception))
+
+    ##########################################################################
+    # Section header block options and the section byte order (#368).
+    ##########################################################################
+
+    @staticmethod
+    def _section_header_bytes(byteorder: str) -> bytes:
+        """A Section Header Block, options and all, in the given byte order.
+
+        The buffer starts at the block total length, i.e. it is what a
+        :class:`~pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock` is
+        handed, without the leading 4-octet block type.
+
+        """
+        endian = '>' if byteorder == 'big' else '<'
+
+        def option(code: int, value: bytes) -> bytes:
+            return (struct.pack(f'{endian}HH', code, len(value))
+                    + value + bytes(-len(value) % 4))
+
+        options = (option(2, b'Apple MBP')            # shb_hardware
+                   + option(3, b'OS-X 10.10.5')       # shb_os
+                   + option(4, b'pcap_writer.lua')    # shb_userappl
+                   + option(1, b'test001')            # opt_comment
+                   + option(0, b''))                  # opt_endofopt
+        length = 28 + len(options)
+        return (struct.pack(f'{endian}IIHHq', length, 0x1A2B3C4D, 1, 0, -1)
+                + options + struct.pack(f'{endian}I', length))
+
+    def test_pcapng_section_header_options_use_the_section_byteorder(self) -> None:
+        # Regression for #368: an SHB's own options were read with the host byte
+        # order rather than the one its Byte-Order Magic declares, because
+        # ``packet['byteorder']`` is only seeded from an existing section
+        # context and the first SHB of a file has none by construction. In a
+        # big-endian section every option was replaced by one bogus
+        # ``opt_unknown`` whose byte-swapped length swallowed the option area.
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import SectionHeaderBlock
+
+        expected = [
+            (2, 9, b'Apple MBP'),
+            (3, 12, b'OS-X 10.10.5'),
+            (4, 15, b'pcap_writer.lua'),
+            (OptionType.opt_comment, 7, 'test001'),
+            (OptionType.opt_endofopt, 0, None),
+        ]
+
+        for byteorder in ('big', 'little'):
+            with self.subTest(byteorder=byteorder):
+                buffer = self._section_header_bytes(byteorder)
+                schema = SectionHeaderBlock.unpack(buffer, len(buffer), {})
+
+                self.assertEqual(schema.byteorder, byteorder)
+                self.assertEqual(schema.length, len(buffer) + 4)
+                self.assertEqual(schema.section_length, -1)
+
+                parsed = [(option.type, option.length,
+                           getattr(option, 'data', getattr(option, 'comment', None)))
+                          for option in schema.options]
+                self.assertEqual(parsed, expected)
+
+    def test_pcapng_section_header_options_ignore_the_previous_section(self) -> None:
+        # #368's multi-section case: for a second SHB ``self._ctx`` is not
+        # ``None``, it is the *previous* section's context, so seeding the byte
+        # order from it is wrong even when a context exists. An SHB has to read
+        # its own options through its own magic whatever the packet data says.
+        from pcapkit.protocols.schema.misc.pcapng import SectionHeaderBlock
+
+        for byteorder in ('big', 'little'):
+            other = 'little' if byteorder == 'big' else 'big'
+            for declared in (byteorder, other):
+                with self.subTest(section=byteorder, declared=declared):
+                    buffer = self._section_header_bytes(byteorder)
+                    schema = SectionHeaderBlock.unpack(buffer, len(buffer),
+                                                       {'byteorder': declared})
+
+                    self.assertEqual(schema.byteorder, byteorder)
+                    self.assertEqual([option.length for option in schema.options],
+                                     [9, 12, 15, 7, 0])
+
+    def test_pcapng_big_endian_sample_section_options_are_intact(self) -> None:
+        # The same defect, on the sample capture #368 reports it against. Skipped
+        # unless the samples have been generated, since they are not tracked.
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.interface import extract
+
+        path = os.path.join('examples', 'captures', 'dhcp_big_endian.pcapng')
+        if not os.path.isfile(path):
+            self.skipTest('run examples/generators/make_samples.py first')
+
+        extractor = extract(fin=path, store=True, nofile=True)
+        section = extractor.engine._ctx_list[0].section
+
+        self.assertEqual(section.byteorder, 'big')
+        self.assertEqual([option.length for _, option in section.options.items(multi=True)],
+                         [9, 12, 15, 7, 0])
+        self.assertEqual(section.options[OptionType.opt_comment].comment, 'test001')
 
 
 if __name__ == '__main__':

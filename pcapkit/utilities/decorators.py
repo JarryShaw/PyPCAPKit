@@ -18,7 +18,7 @@ import traceback
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.utilities.exceptions import StructError, stacklevel
-from pcapkit.utilities.logging import DEVMODE, VERBOSE, logger
+from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
 
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type, TypeVar
@@ -34,6 +34,11 @@ if TYPE_CHECKING:
     R_prepare = TypeVar('R_prepare', bound=Schema)
 
 __all__ = ['seekset', 'beholder', 'prepare']
+
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 def seekset(func: 'Callable[Concatenate[Protocol, P], R_seekset]') -> 'Callable[P, R_seekset]':

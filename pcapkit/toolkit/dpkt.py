@@ -133,6 +133,10 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
     if ipv4 is not None:
         if ipv4.df:     # dismiss not fragmented packet
             return None
+        # internet header length, in octets -- ``IP.hl`` counts 32-bit words and
+        # covers any IP options, whereas ``IP.__hdr_len__`` is the fixed 20-octet
+        # struct size and would leave option octets at the head of the payload
+        ihl = ipv4.hl * 4
 
         data = IP_Packet(
             bufid=(
@@ -141,15 +145,15 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
                 cast('IPv4Address',
                      ipaddress.ip_address(ipv4.dst)),           # destination IP address
                 ipv4.id,                                        # identification
-                Enum_TransType.get(ipv4.p).name,             # payload protocol type
+                Enum_TransType.get(ipv4.p),                     # payload protocol type
             ),
             num=count,                                          # original packet range number
-            fo=ipv4.off,                                        # fragment offset
-            ihl=ipv4.__hdr_len__,                               # internet header length
+            fo=ipv4.offset * 8,                                 # fragment offset
+            ihl=ihl,                                            # internet header length
             mf=bool(ipv4.mf),                                   # more fragment flag
             tl=ipv4.len,                                        # total length, header includes
-            header=ipv4.pack()[:ipv4.__hdr_len__],              # raw bytes type header
-            payload=bytearray(ipv4.pack()[ipv4.__hdr_len__:]),  # raw bytearray type payload
+            header=ipv4.pack()[:ihl],                           # raw bytes type header
+            payload=bytearray(ipv4.pack()[ihl:]),               # raw bytearray type payload
         )
         return data
     return None
@@ -181,6 +185,8 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         if ipv6_frag is None:       # dismiss not fragmented packet
             return None
         hdr_len = ipv6_hdr_len(ipv6)
+        # payload following the IPv6 Fragment header
+        payload = ipv6.pack()[hdr_len + ipv6_frag.__hdr_len__:]
 
         data = IP_Packet(
             bufid=(
@@ -189,15 +195,15 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
                 cast('IPv6Address',
                      ipaddress.ip_address(ipv6.dst)),            # destination IP address
                 ipv6.flow,                                       # label
-                Enum_TransType.get(ipv6_frag.nh).name,        # next header field in IPv6 Fragment Header
+                Enum_TransType.get(ipv6_frag.nxt),               # next header field in IPv6 Fragment Header
             ),
             num=count,                                           # original packet range number
-            fo=ipv6_frag.nxt,                                    # fragment offset
+            fo=ipv6_frag.frag_off * 8,                           # fragment offset
             ihl=hdr_len,                                         # header length, only headers before IPv6-Frag
             mf=bool(ipv6_frag.m_flag),                           # more fragment flag
-            tl=len(ipv6),                                        # total length, header includes
+            tl=hdr_len + len(payload),                           # total length, header includes
             header=ipv6.pack()[:hdr_len],                        # raw bytearray type header before IPv6-Frag
-            payload=bytearray(ipv6.pack()[hdr_len + len(ipv6_frag):]),  # raw bytearray type payload after IPv6-Frag
+            payload=bytearray(payload),                          # raw bytearray type payload after IPv6-Frag
         )
         return data
     return None
@@ -249,8 +255,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
             rst=bool(int(flags[5])),                            # reset connection flag
             syn=bool(int(flags[6])),                            # synchronise flag
             fin=bool(int(flags[7])),                            # finish flag
-            header=tcp.pack()[:tcp.__hdr_len__],                # raw bytes type header
-            payload=bytearray(tcp.pack()[tcp.__hdr_len__:]),    # raw bytearray type payload
+            header=tcp.pack()[:tcp.off * 4],                    # raw bytes type header
+            payload=bytearray(bytes(tcp.data)),                 # raw bytearray type payload
             first=tcp.seq,                                      # first sequence number of payload
             last=tcp.seq + raw_len - 1,                         # last sequence number of payload
             len=raw_len,                                        # payload length, header excludes
