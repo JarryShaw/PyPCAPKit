@@ -140,6 +140,42 @@ class LoggingImportTimeTests(unittest.TestCase):
 
         self.assertEqual(len(logging.getLogger(ROOT).handlers), 1)
 
+    def test_re_executing_the_module_under_devmode_does_not_stack_handlers(self) -> None:
+        """The devmode bootstrap must be idempotent across re-execution.
+
+        ``handler`` is built when the module runs, so a *new* object exists on
+        every re-execution and an identity test against
+        ``logger.handlers`` would be true each time, adding one stderr handler
+        per reload. The guard therefore tests for a handler already writing to
+        the same stream.
+
+        """
+        root = logging.getLogger(ROOT)
+
+        # ``setUp``/``tearDown`` own this: the env var is saved and restored
+        # there, and ``pristine()`` resets the logger afterwards. Restoring it
+        # from an ``addCleanup`` instead would run *after* ``tearDown`` and so
+        # undo that reset, leaving the logger in this test's state rather than
+        # the neutral one the next test expects.
+        os.environ['PCAPKIT_DEVMODE'] = '1'
+
+        def streams() -> 'int':
+            return len([handler for handler in root.handlers
+                        if isinstance(handler, logging.StreamHandler)
+                        and not isinstance(handler, logging.NullHandler)])
+
+        module = load_module('pcapkit.utilities.logging', 'pcapkit/utilities/logging.py')
+        self.assertTrue(module.DEVMODE)
+        self.assertEqual(streams(), 1)
+
+        for _ in range(3):
+            load_module('pcapkit.utilities.logging', 'pcapkit/utilities/logging.py')
+
+        # one stderr handler however many times the module is executed, and the
+        # level devmode asks for is still in place
+        self.assertEqual(streams(), 1)
+        self.assertEqual(root.level, logging.DEBUG)
+
 
 class LoggerHierarchyTests(unittest.TestCase):
     """Per-module loggers, so a consumer can address one subtree at a time."""
