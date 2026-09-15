@@ -145,9 +145,9 @@ host, capture and iteration count as the existing rows.
 Installation
 ------------
 
-.. note::
+..
 
-   ``pcapkit`` supports Python versions **since 3.6**.
+   **Note** -- ``pcapkit`` supports Python versions **since 3.6**.
 
 Simply run the following to install the current version from PyPI:
 
@@ -209,9 +209,10 @@ plug-in functions, you may want to install the optional ones:
    # or to do this explicitly
    pip install pypcapkit dpkt scapy pyshark pypcapfile
 
-.. important::
+..
 
-   The ``all`` extra deliberately does **not** include ``pypcap``. Everything
+   **Important** -- The ``all`` extra deliberately does **not** include
+   ``pypcap``. Everything
    else in ``all`` is a pure-Python wheel, whereas ``pypcap`` compiles a C
    extension; pulling it into ``all`` would demand a working compiler and the
    `libpcap`_ development files from everyone installing ``pypcapkit[all]``.
@@ -261,9 +262,10 @@ Three of the engines need something beyond a ``pip install``:
    this but no release carries the fix yet, so this engine also requires Python
    **3.11 or older** until 0.12.1 is published.
 
-.. note::
+..
 
-   ``pcapkit`` itself, and its ``default``, ``dpkt`` and ``scapy`` engines, work
+   **Note** -- ``pcapkit`` itself, and its ``default``, ``dpkt`` and ``scapy``
+   engines, work
    fine on current Python versions. Only the three engines above carry these
    extra constraints, and asking for an engine whose package is unavailable
    emits a warning and falls back to ``pcapkit``'s own parser rather than
