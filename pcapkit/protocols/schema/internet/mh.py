@@ -33,6 +33,8 @@ from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag as Enum_HandoverA
 from pcapkit.const.mh.handover_ack_status import HandoverACKStatus as Enum_HandoverACKStatus
 from pcapkit.const.mh.handover_initiate_flag import \
     HandoverInitiateFlag as Enum_HandoverInitiateFlag
+from pcapkit.const.mh.handover_initiate_status import \
+    HandoverInitiateStatus as Enum_HandoverInitiateStatus
 from pcapkit.const.mh.home_address_reply import HomeAddressReply as Enum_HomeAddressReply
 from pcapkit.const.mh.lla_code import LLACode as Enum_LLACode
 from pcapkit.const.mh.lma_mag_suboption import \
@@ -68,14 +70,16 @@ __all__ = [
     'Packet',
     'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage', 'CareofTestInitMessage',
     'HomeTestMessage', 'CareofTestMessage', 'BindingUpdateMessage', 'BindingAcknowledgementMessage',
-    'BindingErrorMessage',
+    'BindingErrorMessage', 'FastBindingUpdateMessage', 'FastBindingAcknowledgmentMessage',
+    'FastNeighborAdvertisementMessage', 'ExperimentalMessage', 'HandoverInitiateMessage',
+    'HandoverAcknowledgeMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindingRefreshAdviceOption', 'AlternateCareofAddressOption',
     'NonceIndicesOption', 'AuthorizationDataOption', 'MobileNetworkPrefixOption',
     'LinkLayerAddressOption', 'MNIDOption', 'AuthOption', 'MesgIDOption', 'CGAParametersRequestOption',
     'CGAParametersOption', 'SignatureOption', 'PermanentHomeKeygenTokenOption', 'CareofTestInitOption',
-    'CareofTestOption',
+    'CareofTestOption', 'ExperimentalMobilityOption', 'BADFOption', 'IPv6AddressPrefixOption',
 
     'CGAParameter',
 
@@ -117,6 +121,34 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         """Flags for :attr:`BindingAcknowledgementMessage.flags`."""
 
         K: 'int'
+
+    class FastBindingUpdateMessageFlags(TypedDict):
+        """Flags for :attr:`FastBindingUpdateMessage.flags`."""
+
+        A: 'int'
+        H: 'int'
+        L: 'int'
+        K: 'int'
+
+    class FastBindingAcknowledgmentMessageFlags(TypedDict):
+        """Flags for :attr:`FastBindingAcknowledgmentMessage.flags`."""
+
+        K: 'int'
+
+    class HandoverInitiateMessageFlags(TypedDict):
+        """Flags for :attr:`HandoverInitiateMessage.flags`."""
+
+        S: 'int'
+        U: 'int'
+        P: 'int'
+        F: 'int'
+
+    class HandoverAcknowledgeMessageFlags(TypedDict):
+        """Flags for :attr:`HandoverAcknowledgeMessage.flags`."""
+
+        U: 'int'
+        P: 'int'
+        F: 'int'
 
 
 def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -505,6 +537,72 @@ class CareofTestOption(Option, code=Enum_Option.Care_of_Test):
         def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...
 
 
+@schema_final
+class ExperimentalMobilityOption(Option, code=Enum_Option.Experimental_Mobility_Option):
+    """Header schema for MH Experimental Mobility options."""
+
+    #: Experimental data.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class BADFOption(Option, code=Enum_Option.Binding_Authorization_Data_for_FMIPv6):
+    """Header schema for MH Binding Authorization Data for FMIPv6 (BADF) options.
+
+    Note:
+        Per :rfc:`5568#section-6.4.5`, the ``length`` field of this option counts
+        the :attr:`data` (authenticator) bytes **only** -- it excludes the 4-byte
+        :attr:`spi` field, unlike every other mobility option, whose length covers
+        all option data. The option is therefore 6 bytes longer than its declared
+        length, which is why :rfc:`5568` also requires it to be the **last**
+        mobility option present.
+
+    """
+
+    #: Security parameter index. ``0`` is reserved for authenticators computed
+    #: using SEND-based handover keys.
+    spi: 'int' = UInt32Field()
+    #: Authenticator.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', spi: 'int', data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class IPv6AddressPrefixOption(Option, code=Enum_Option.Mobility_Header_IPv6_Address_Prefix):
+    """Header schema for MH Mobility Header IPv6 Address/Prefix options.
+
+    Note:
+        The option codes of :rfc:`5568#section-6.4.2` are defined inline by the
+        RFC with no IANA registry behind them, so their enumeration lives in
+        :class:`pcapkit.protocols.internet.mh.IPv6AddressPrefixCode` rather than
+        in :mod:`pcapkit.const.mh`. Being module-local, it cannot be imported
+        here without a circular import, so :attr:`code` carries the raw wire
+        integer and the enumeration is applied when
+        :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_ipv6_ap` builds the
+        data model -- the same split as
+        :class:`pcapkit.protocols.misc.pcapng.PacketDirection` and the
+        ``epb_flags`` option schema.
+
+    """
+
+    #: Option code, c.f.,
+    #: :class:`pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.
+    code: 'int' = UInt8Field()
+    #: Prefix length.
+    prefix_length: 'int' = UInt8Field()
+    #: IPv6 address/prefix.
+    address: 'IPv6Address' = IPv6AddressField()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', code: 'int', prefix_length: 'int',
+                     address: 'IPv6Address | int | bytes | str') -> 'None': ...
+
+
 # TODO: Implement other options.
 
 
@@ -713,6 +811,164 @@ class BindingErrorMessage(Packet, code=Enum_Packet.Binding_Error):
     if TYPE_CHECKING:
         def __init__(self, status: 'Enum_BindingError', home: 'IPv6Address | str | int | bytes',
                      options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class FastBindingUpdateMessage(Packet, code=Enum_Packet.Fast_Binding_Update):
+    """Header schema for MH Fast Binding Update (FBU) messages."""
+
+    #: Sequence number.
+    seq: 'int' = UInt16Field()
+    #: Flags.
+    flags: 'FastBindingUpdateMessageFlags' = BitField(length=2, namespace={
+        'A': (0, 1),
+        'H': (1, 1),
+        'L': (2, 1),
+        'K': (3, 1),
+    })
+    #: Lifetime. One time unit is 4 seconds.
+    lifetime: 'int' = UInt16Field()
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=Option.registry,
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, seq: 'int', flags: 'FastBindingUpdateMessageFlags',
+                     lifetime: 'int', options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class FastBindingAcknowledgmentMessage(Packet, code=Enum_Packet.Fast_Binding_Acknowledgment):
+    """Header schema for MH Fast Binding Acknowledgment (FBack) messages.
+
+    Note:
+        The status values of :rfc:`5568#section-6.2.3` are defined inline by the
+        RFC and are absent from the IANA *Status Codes* registry, so their
+        enumeration lives in
+        :class:`pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`
+        rather than in :mod:`pcapkit.const.mh`. Being module-local, it cannot be
+        imported here without a circular import, so :attr:`status` carries the
+        raw wire integer and the enumeration is applied when
+        :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_fback` builds the data
+        model.
+
+    """
+
+    #: Status, c.f.,
+    #: :class:`pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`.
+    status: 'int' = UInt8Field()
+    #: Flags.
+    flags: 'FastBindingAcknowledgmentMessageFlags' = BitField(length=1, namespace={
+        'K': (0, 1),
+    })
+    #: Sequence number.
+    seq: 'int' = UInt16Field()
+    #: Lifetime. One time unit is 4 seconds.
+    lifetime: 'int' = UInt16Field()
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=Option.registry,
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, status: 'int', flags: 'FastBindingAcknowledgmentMessageFlags',
+                     seq: 'int', lifetime: 'int', options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class FastNeighborAdvertisementMessage(Packet, code=Enum_Packet.Fast_Neighbor_Advertisement):
+    """Header schema for MH Fast Neighbor Advertisement (FNA) messages."""
+
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=2)
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=Option.registry,
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class ExperimentalMessage(Packet, code=Enum_Packet.Experimental_Mobility_Header):
+    """Header schema for MH Experimental Mobility Header messages."""
+
+    #: Experimental message data.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'])
+
+    if TYPE_CHECKING:
+        def __init__(self, data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class HandoverInitiateMessage(Packet, code=Enum_Packet.Handover_Initiate_Message):
+    """Header schema for MH Handover Initiate (HI) messages."""
+
+    #: Sequence number.
+    seq: 'int' = UInt16Field()
+    #: Flags.
+    flags: 'HandoverInitiateMessageFlags' = BitField(length=1, namespace={
+        'S': (0, 1),
+        'U': (1, 1),
+        'P': (2, 1),
+        'F': (3, 1),
+    })
+    #: Code.
+    code: 'Enum_HandoverInitiateStatus' = EnumField(length=1, namespace=Enum_HandoverInitiateStatus)
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=Option.registry,
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, seq: 'int', flags: 'HandoverInitiateMessageFlags',
+                     code: 'Enum_HandoverInitiateStatus', options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class HandoverAcknowledgeMessage(Packet, code=Enum_Packet.Handover_Acknowledge_Message):
+    """Header schema for MH Handover Acknowledge (HAck) messages."""
+
+    #: Sequence number.
+    seq: 'int' = UInt16Field()
+    #: Flags.
+    flags: 'HandoverAcknowledgeMessageFlags' = BitField(length=1, namespace={
+        'U': (0, 1),
+        'P': (1, 1),
+        'F': (2, 1),
+    })
+    #: Code.
+    code: 'Enum_HandoverACKStatus' = EnumField(length=1, namespace=Enum_HandoverACKStatus)
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=Option.registry,
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, seq: 'int', flags: 'HandoverAcknowledgeMessageFlags',
+                     code: 'Enum_HandoverACKStatus', options: 'list[Option | bytes]') -> 'None': ...
 
 
 # TODO: Implement other message types.

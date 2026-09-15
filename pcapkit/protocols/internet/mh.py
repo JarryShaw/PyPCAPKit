@@ -27,6 +27,8 @@ import ipaddress
 import math
 from typing import TYPE_CHECKING, cast, overload
 
+from aenum import IntEnum, extend_enum
+
 from pcapkit.const.mh.access_type import AccessType as Enum_AccessType
 from pcapkit.const.mh.ack_status_code import ACKStatusCode as Enum_ACKStatusCode
 from pcapkit.const.mh.ani_suboption import ANISuboption as Enum_ANISuboption
@@ -54,6 +56,8 @@ from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag as Enum_HandoverA
 from pcapkit.const.mh.handover_ack_status import HandoverACKStatus as Enum_HandoverACKStatus
 from pcapkit.const.mh.handover_initiate_flag import \
     HandoverInitiateFlag as Enum_HandoverInitiateFlag
+from pcapkit.const.mh.handover_initiate_status import \
+    HandoverInitiateStatus as Enum_HandoverInitiateStatus
 from pcapkit.const.mh.home_address_reply import HomeAddressReply as Enum_HomeAddressReply
 from pcapkit.const.mh.lla_code import LLACode as Enum_LLACode
 from pcapkit.const.mh.lma_mag_suboption import \
@@ -80,6 +84,7 @@ from pcapkit.protocols.data.internet.mh import \
 from pcapkit.protocols.data.internet.mh import AuthOption as Data_AuthOption
 from pcapkit.protocols.data.internet.mh import \
     AuthorizationDataOption as Data_AuthorizationDataOption
+from pcapkit.protocols.data.internet.mh import BADFOption as Data_BADFOption
 from pcapkit.protocols.data.internet.mh import \
     BindingAcknowledgementMessage as Data_BindingAcknowledgementMessage
 from pcapkit.protocols.data.internet.mh import BindingErrorMessage as Data_BindingErrorMessage
@@ -97,8 +102,23 @@ from pcapkit.protocols.data.internet.mh import CGAParameter as Data_CGAParameter
 from pcapkit.protocols.data.internet.mh import CGAParametersOption as Data_CGAParametersOption
 from pcapkit.protocols.data.internet.mh import \
     CGAParametersRequestOption as Data_CGAParametersRequestOption
+from pcapkit.protocols.data.internet.mh import ExperimentalMessage as Data_ExperimentalMessage
+from pcapkit.protocols.data.internet.mh import \
+    ExperimentalMobilityOption as Data_ExperimentalMobilityOption
+from pcapkit.protocols.data.internet.mh import \
+    FastBindingAcknowledgmentMessage as Data_FastBindingAcknowledgmentMessage
+from pcapkit.protocols.data.internet.mh import \
+    FastBindingUpdateMessage as Data_FastBindingUpdateMessage
+from pcapkit.protocols.data.internet.mh import \
+    FastNeighborAdvertisementMessage as Data_FastNeighborAdvertisementMessage
+from pcapkit.protocols.data.internet.mh import \
+    HandoverAcknowledgeMessage as Data_HandoverAcknowledgeMessage
+from pcapkit.protocols.data.internet.mh import \
+    HandoverInitiateMessage as Data_HandoverInitiateMessage
 from pcapkit.protocols.data.internet.mh import HomeTestInitMessage as Data_HomeTestInitMessage
 from pcapkit.protocols.data.internet.mh import HomeTestMessage as Data_HomeTestMessage
+from pcapkit.protocols.data.internet.mh import \
+    IPv6AddressPrefixOption as Data_IPv6AddressPrefixOption
 from pcapkit.protocols.data.internet.mh import LinkLayerAddressOption as Data_LinkLayerAddressOption
 from pcapkit.protocols.data.internet.mh import MesgIDOption as Data_MesgIDOption
 from pcapkit.protocols.data.internet.mh import MNIDOption as Data_MNIDOption
@@ -120,6 +140,7 @@ from pcapkit.protocols.schema.internet.mh import \
 from pcapkit.protocols.schema.internet.mh import AuthOption as Schema_AuthOption
 from pcapkit.protocols.schema.internet.mh import \
     AuthorizationDataOption as Schema_AuthorizationDataOption
+from pcapkit.protocols.schema.internet.mh import BADFOption as Schema_BADFOption
 from pcapkit.protocols.schema.internet.mh import \
     BindingAcknowledgementMessage as Schema_BindingAcknowledgementMessage
 from pcapkit.protocols.schema.internet.mh import BindingErrorMessage as Schema_BindingErrorMessage
@@ -138,8 +159,23 @@ from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_CGAParam
 from pcapkit.protocols.schema.internet.mh import CGAParametersOption as Schema_CGAParametersOption
 from pcapkit.protocols.schema.internet.mh import \
     CGAParametersRequestOption as Schema_CGAParametersRequestOption
+from pcapkit.protocols.schema.internet.mh import ExperimentalMessage as Schema_ExperimentalMessage
+from pcapkit.protocols.schema.internet.mh import \
+    ExperimentalMobilityOption as Schema_ExperimentalMobilityOption
+from pcapkit.protocols.schema.internet.mh import \
+    FastBindingAcknowledgmentMessage as Schema_FastBindingAcknowledgmentMessage
+from pcapkit.protocols.schema.internet.mh import \
+    FastBindingUpdateMessage as Schema_FastBindingUpdateMessage
+from pcapkit.protocols.schema.internet.mh import \
+    FastNeighborAdvertisementMessage as Schema_FastNeighborAdvertisementMessage
+from pcapkit.protocols.schema.internet.mh import \
+    HandoverAcknowledgeMessage as Schema_HandoverAcknowledgeMessage
+from pcapkit.protocols.schema.internet.mh import \
+    HandoverInitiateMessage as Schema_HandoverInitiateMessage
 from pcapkit.protocols.schema.internet.mh import HomeTestInitMessage as Schema_HomeTestInitMessage
 from pcapkit.protocols.schema.internet.mh import HomeTestMessage as Schema_HomeTestMessage
+from pcapkit.protocols.schema.internet.mh import \
+    IPv6AddressPrefixOption as Schema_IPv6AddressPrefixOption
 from pcapkit.protocols.schema.internet.mh import \
     LinkLayerAddressOption as Schema_LinkLayerAddressOption
 from pcapkit.protocols.schema.internet.mh import MesgIDOption as Schema_MesgIDOption
@@ -208,12 +244,138 @@ class NTPTimestamp(collections.namedtuple('NTPTimestamp', 'seconds fraction')):
     fraction: int
 
 
+class FastBindingAcknowledgmentStatus(IntEnum):
+    """[FastBindingAcknowledgmentStatus] Fast Binding Acknowledgment Status Codes.
+
+    Status values of the fast binding acknowledgment (FBack) message, c.f.,
+    :rfc:`5568#section-6.2.3`. Values below ``128`` indicate that the fast
+    binding update was accepted by the receiving node, values of ``128`` and
+    above that it was rejected.
+
+    Note:
+        :rfc:`5568#section-6.2.3` defines these values inline and IANA keeps no
+        registry of them, so the enumeration lives here rather than in
+        :mod:`pcapkit.const.mh`. It is also **not** interchangeable with the
+        registered :class:`~pcapkit.const.mh.status_code.StatusCode`, since two
+        of its values collide semantically: ``1`` means *NCoA is invalid* here
+        but *accepted but prefix discovery necessary* there, and ``131`` means
+        *incorrect interface identifier length* here but *home registration not
+        supported* there.
+
+    """
+
+    #: Fast Binding Update accepted [:rfc:`5568#section-6.2.3`]
+    Fast_Binding_Update_accepted = 0
+
+    #: Fast Binding Update accepted but NCoA is invalid; use the NCoA supplied in
+    #: the "alternate" care-of address option [:rfc:`5568#section-6.2.3`]
+    Fast_Binding_Update_accepted_but_NCoA_is_invalid = 1
+
+    #: Reason unspecified [:rfc:`5568#section-6.2.3`]
+    Reason_unspecified = 128
+
+    #: Administratively prohibited [:rfc:`5568#section-6.2.3`]
+    Administratively_prohibited = 129
+
+    #: Insufficient resources [:rfc:`5568#section-6.2.3`]
+    Insufficient_resources = 130
+
+    #: Incorrect interface identifier length [:rfc:`5568#section-6.2.3`]
+    Incorrect_interface_identifier_length = 131
+
+    @staticmethod
+    def get(key: 'int | str', default: 'int' = -1) -> 'FastBindingAcknowledgmentStatus':
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        """
+        if isinstance(key, int):
+            return FastBindingAcknowledgmentStatus(key)
+        if key not in FastBindingAcknowledgmentStatus._member_map_:  # pylint: disable=no-member
+            extend_enum(FastBindingAcknowledgmentStatus, key, default)
+        return FastBindingAcknowledgmentStatus[key]  # type: ignore[misc]
+
+    @classmethod
+    def _missing_(cls, value: 'int') -> 'FastBindingAcknowledgmentStatus':
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= 255):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        #: Unassigned
+        return extend_enum(cls, 'Unassigned_%d' % value, value)
+
+
+class IPv6AddressPrefixCode(IntEnum):
+    """[IPv6AddressPrefixCode] Mobility Header IPv6 Address/Prefix Option Codes.
+
+    Option codes of the mobility header IPv6 address/prefix option, which
+    identify which address the option carries, c.f.,
+    :rfc:`5568#section-6.4.2`.
+
+    Note:
+        :rfc:`5568#section-6.4.2` defines these values inline and IANA keeps no
+        registry of them, so the enumeration lives here rather than in
+        :mod:`pcapkit.const.mh`. The identical code space of the neighbor
+        discovery IP address/prefix option of :rfc:`5568#section-6.4.1` is
+        likewise unregistered.
+
+    """
+
+    #: Old Care-of Address [:rfc:`5568#section-6.4.2`]
+    Old_Care_of_Address = 1
+
+    #: New Care-of Address [:rfc:`5568#section-6.4.2`]
+    New_Care_of_Address = 2
+
+    #: NAR's IP address [:rfc:`5568#section-6.4.2`]
+    NAR_IP_address = 3
+
+    #: NAR's Prefix, sent in PrRtAdv; the prefix length field contains the number
+    #: of valid leading bits in the prefix [:rfc:`5568#section-6.4.2`]
+    NAR_Prefix = 4
+
+    @staticmethod
+    def get(key: 'int | str', default: 'int' = -1) -> 'IPv6AddressPrefixCode':
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        """
+        if isinstance(key, int):
+            return IPv6AddressPrefixCode(key)
+        if key not in IPv6AddressPrefixCode._member_map_:  # pylint: disable=no-member
+            extend_enum(IPv6AddressPrefixCode, key, default)
+        return IPv6AddressPrefixCode[key]  # type: ignore[misc]
+
+    @classmethod
+    def _missing_(cls, value: 'int') -> 'IPv6AddressPrefixCode':
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= 255):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        #: Unassigned
+        return extend_enum(cls, 'Unassigned_%d' % value, value)
+
+
 class MH(Internet[Data_MH, Schema_MH],
          schema=Schema_MH, data=Data_MH):
     """This class implements Mobility Header.
 
-    This class currently supports parsing og the following MH message types,
-    which are resgitered in the :attr:`self.__message__ <pcapkit.protocols.internet.mh.MH.__message__>`
+    This class currently supports parsing of the following MH message types,
+    which are registered in the :attr:`self.__message__ <pcapkit.protocols.internet.mh.MH.__message__>`
     attribute:
 
     .. list-table::
@@ -246,6 +408,24 @@ class MH(Internet[Data_MH, Schema_MH],
        * - :attr:`~pcapkit.const.mh.packet.Packet.Binding_Error`
          - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_be`
          - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_be`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Fast_Binding_Update`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_fbu`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_fbu`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Fast_Binding_Acknowledgment`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_fback`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_fback`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Fast_Neighbor_Advertisement`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_fna`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_fna`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Experimental_Mobility_Header`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_emh`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_emh`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Handover_Initiate_Message`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_hi`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_hi`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Handover_Acknowledge_Message`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_hack`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_hack`
 
     This class currently supports parsing the following MH options, which are
     registered in the :attr:`self.__option__ <pcapkit.protocols.internet.mh.MH.__option__>`
@@ -309,6 +489,15 @@ class MH(Internet[Data_MH, Schema_MH],
        * - :attr:`~pcapkit.const.mh.option.Option.Care_of_Test`
          - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_ct`
          - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_ct`
+       * - :attr:`~pcapkit.const.mh.option.Option.Experimental_Mobility_Option`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_exp`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_exp`
+       * - :attr:`~pcapkit.const.mh.option.Option.Binding_Authorization_Data_for_FMIPv6`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_badf`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_badf`
+       * - :attr:`~pcapkit.const.mh.option.Option.Mobility_Header_IPv6_Address_Prefix`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_ipv6_ap`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_ipv6_ap`
 
     This class currently supports parsing of the following MH CGA extensions,
     which are registered in the :attr:`self.__extension__ <pcapkit.protocols.internet.mh.MH.__extension__>`
@@ -346,6 +535,12 @@ class MH(Internet[Data_MH, Schema_MH],
             Enum_Packet.Binding_Update: 'bu',
             Enum_Packet.Binding_Acknowledgement: 'ba',
             Enum_Packet.Binding_Error: 'be',
+            Enum_Packet.Fast_Binding_Update: 'fbu',
+            Enum_Packet.Fast_Binding_Acknowledgment: 'fback',
+            Enum_Packet.Fast_Neighbor_Advertisement: 'fna',
+            Enum_Packet.Experimental_Mobility_Header: 'emh',
+            Enum_Packet.Handover_Initiate_Message: 'hi',
+            Enum_Packet.Handover_Acknowledge_Message: 'hack',
         },
     )  # type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]
 
@@ -374,6 +569,9 @@ class MH(Internet[Data_MH, Schema_MH],
             Enum_Option.Permanent_Home_Keygen_Token: 'phkt',
             Enum_Option.Care_of_Test_Init: 'ct_init',
             Enum_Option.Care_of_Test: 'ct',
+            Enum_Option.Experimental_Mobility_Option: 'exp',
+            Enum_Option.Binding_Authorization_Data_for_FMIPv6: 'badf',
+            Enum_Option.Mobility_Header_IPv6_Address_Prefix: 'ipv6_ap',
         },
     )  # type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]
 
@@ -1018,6 +1216,286 @@ class MH(Internet[Data_MH, Schema_MH],
             chksum=header.chksum,
             status=schema.status,
             home=schema.home,
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_fbu(self, schema: 'Schema_FastBindingUpdateMessage', *,
+                      header: 'Schema_MH') -> 'Data_FastBindingUpdateMessage':
+        """Read MH fast binding update (FBU) message type.
+
+        Structure of MH Fast Binding Update Message [:rfc:`5568#section-6.2.2`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |          Sequence #           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |A|H|L|K|       Reserved        |            Lifetime           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            :rfc:`5568#section-6.2.2` states that the FBU is *identical* to the
+            Mobile IPv6 binding update (BU) message, so the lifetime is read in
+            units of 4 seconds exactly as in :meth:`_read_msg_bu`.
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_FastBindingUpdateMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            seq=schema.seq,
+            ack=bool(schema.flags['A']),
+            home=bool(schema.flags['H']),
+            lla_compat=bool(schema.flags['L']),
+            key_mngt=bool(schema.flags['K']),
+            lifetime=datetime.timedelta(seconds=schema.lifetime * 4),
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_fback(self, schema: 'Schema_FastBindingAcknowledgmentMessage', *,
+                        header: 'Schema_MH') -> 'Data_FastBindingAcknowledgmentMessage':
+        """Read MH fast binding acknowledgment (FBack) message type.
+
+        Structure of MH Fast Binding Acknowledgment Message [:rfc:`5568#section-6.2.3`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |     Status    |K|  Reserved   |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |            Sequence #         |            Lifetime           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            :rfc:`5568#section-6.2.3` defines the FBack status values inline
+            instead of drawing them from the IANA *Status Codes* registry, whose
+            values ``1`` and ``131`` mean something else entirely. The status is
+            therefore reported as a
+            :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`,
+            which is local to this module, rather than being mislabelled as a
+            :class:`~pcapkit.const.mh.status_code.StatusCode`.
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_FastBindingAcknowledgmentMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            status=FastBindingAcknowledgmentStatus(schema.status),
+            key_mngt=bool(schema.flags['K']),
+            seq=schema.seq,
+            lifetime=datetime.timedelta(seconds=schema.lifetime * 4),
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_fna(self, schema: 'Schema_FastNeighborAdvertisementMessage', *,
+                      header: 'Schema_MH') -> 'Data_FastNeighborAdvertisementMessage':
+        """Read MH fast neighbor advertisement (FNA) message type.
+
+        Structure of MH Fast Neighbor Advertisement Message [:rfc:`4068#section-6.3.3`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |           Reserved            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            The FNA message is **deprecated** by :rfc:`5568#section-8`, which
+            replaces it with the unsolicited neighbor advertisement (UNA) of
+            :rfc:`4861`. Its wire format is therefore taken from :rfc:`4068`,
+            the specification :rfc:`5568` obsoletes, since a NAR is still
+            permitted to process the message as specified there.
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_FastNeighborAdvertisementMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_emh(self, schema: 'Schema_ExperimentalMessage', *,
+                      header: 'Schema_MH') -> 'Data_ExperimentalMessage':
+        """Read MH experimental mobility header message type.
+
+        Structure of MH Experimental Mobility Header Message [:rfc:`5096#section-3`]:
+
+        .. code-block:: text
+
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | Payload Proto |  Header Len   |   MH Type     |   Reserved    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Checksum            |                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               |
+           |                                                               |
+           .                                                               .
+           .                       Message Data                            .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            :rfc:`5096#section-3` defines no fields beyond those of the mobility
+            header itself, so the message data is carried opaquely -- its layout
+            is whatever the experiment in question defines. Two bytes of padding
+            are required when no data is present.
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_ExperimentalMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            data=schema.data,
+        )
+        return data
+
+    def _read_msg_hi(self, schema: 'Schema_HandoverInitiateMessage', *,
+                     header: 'Schema_MH') -> 'Data_HandoverInitiateMessage':
+        """Read MH handover initiate (HI) message type.
+
+        Structure of MH Handover Initiate Message [:rfc:`5568#section-6.2.1.1`,
+        :rfc:`5949#section-6.1.1`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |          Sequence #           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |S|U|P|F| Resv  |      Code     |                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               .
+           |                                                               |
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            :rfc:`5568` defines only the ``S`` and ``U`` flags; the ``P`` and
+            ``F`` flags, and code values ``2`` and ``3``, are added by
+            :rfc:`5949#section-6.1.1`. All four flags are registered in the IANA
+            *Handover Initiate Flags* registry, hence all four are parsed here.
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_HandoverInitiateMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            seq=schema.seq,
+            assign=bool(schema.flags['S']),
+            buffer=bool(schema.flags['U']),
+            proxy=bool(schema.flags['P']),
+            forward=bool(schema.flags['F']),
+            code=schema.code,
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_hack(self, schema: 'Schema_HandoverAcknowledgeMessage', *,
+                       header: 'Schema_MH') -> 'Data_HandoverAcknowledgeMessage':
+        """Read MH handover acknowledge (HAck) message type.
+
+        Structure of MH Handover Acknowledge Message [:rfc:`5568#section-6.2.1.2`,
+        :rfc:`5949#section-6.1.2`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |          Sequence #           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |U|P|F| Reserved|      Code     |                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               .
+           |                                                               |
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            :rfc:`5568` reserves the whole first octet of the message data; the
+            ``U``, ``P`` and ``F`` flags carved out of it, and code values ``5``
+            and ``6``, are added by :rfc:`5949#section-6.1.2`. All three flags
+            are registered in the IANA *Handover Acknowledge Flags* registry,
+            hence all three are parsed here.
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_HandoverAcknowledgeMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            seq=schema.seq,
+            buffer=bool(schema.flags['U']),
+            proxy=bool(schema.flags['P']),
+            forward=bool(schema.flags['F']),
+            code=schema.code,
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -1681,6 +2159,147 @@ class MH(Internet[Data_MH, Schema_MH],
         )
         return data
 
+    def _read_opt_exp(self, schema: 'Schema_ExperimentalMobilityOption', *,
+                      options: 'Option') -> 'Data_ExperimentalMobilityOption':
+        """Read MH experimental mobility option.
+
+        Structure of MH Experimental Mobility option [:rfc:`5096#section-4`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Type      |    Length     |        Data .....
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        data = Data_ExperimentalMobilityOption(
+            type=schema.type,
+            length=schema.length + 2,
+            data=schema.data,
+        )
+        return data
+
+    def _read_opt_badf(self, schema: 'Schema_BADFOption', *,
+                       options: 'Option') -> 'Data_BADFOption':
+        """Read MH binding authorization data for FMIPv6 (BADF) option.
+
+        Structure of MH Binding Authorization Data for FMIPv6 option
+        [:rfc:`5568#section-6.4.5`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |   Type = 21   | Option Length |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                              SPI                              |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                         Authenticator                         |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            :rfc:`5568#section-6.4.5` defines the option length as *the length of
+            the Authenticator in bytes*, i.e. it does **not** cover the 4-byte
+            SPI, unlike every other mobility option, whose length covers all of
+            its option data. The wording is inherited from the :rfc:`6275`
+            binding authorization data option (type ``5``), which carries no SPI
+            and for which the two readings coincide. Because :rfc:`5568` also
+            requires this option to be the **last** mobility option present, the
+            discrepancy never has to be resolved in order to find the following
+            option, so the literal reading is used here and the reported
+            :attr:`~pcapkit.protocols.data.internet.mh.Option.length` accounts
+            for the extra 4 bytes.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if schema.length == 0:
+            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
+
+        data = Data_BADFOption(
+            type=schema.type,
+            length=schema.length + 6,  # 2 bytes for type & length, 4 bytes for SPI
+            spi=schema.spi,
+            data=schema.data,
+        )
+        return data
+
+    def _read_opt_ipv6_ap(self, schema: 'Schema_IPv6AddressPrefixOption', *,
+                          options: 'Option') -> 'Data_IPv6AddressPrefixOption':
+        """Read MH mobility header IPv6 address/prefix option.
+
+        Structure of MH Mobility Header IPv6 Address/Prefix option
+        [:rfc:`5568#section-6.4.2`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Type      |    Length     |  Option-Code  | Prefix Length |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +                     IPv6 Address/Prefix                       +
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        The option code identifies which address the option carries, c.f.,
+        :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`. It, too,
+        is defined inline by :rfc:`5568#section-6.4.2` with no IANA registry
+        behind it, hence the enumeration is local to this module.
+
+        Note:
+            :rfc:`5568` prints the type as ``17``, which is the *neighbor
+            discovery* option type of its sibling in
+            :rfc:`5568#section-6.4.1`. Errata ID 1816 (verified) corrects it to
+            the IANA-assigned mobility option type ``34``, which is what this
+            handler is registered against.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if schema.length != 18:
+            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
+        if schema.prefix_length > 128:
+            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
+
+        data = Data_IPv6AddressPrefixOption(
+            type=schema.type,
+            length=schema.length + 2,
+            code=IPv6AddressPrefixCode(schema.code),
+            prefix_length=schema.prefix_length,
+            address=schema.address,
+        )
+        return data
+
     # TODO: Implement other options.
 
     def _read_cga_extensions(self, extensions_schema: 'list[Schema_CGAExtension]') -> 'Extension':
@@ -2099,6 +2718,261 @@ class MH(Internet[Data_MH, Schema_MH],
         return Schema_BindingErrorMessage(
             status=status_val,
             home=home,
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_fbu(self, message: 'Optional[Data_FastBindingUpdateMessage]' = None, *,
+                      seq: 'int' = 0,
+                      ack: 'bool' = True,  # MUST be set, c.f., RFC 5568, section 6.2.2
+                      home: 'bool' = True,  # MUST be set, c.f., RFC 5568, section 6.2.2
+                      lla_compat: 'bool' = False,
+                      key_mngt: 'bool' = False,
+                      lifetime: 'int | timedelta' = 4,  # reasonable default value
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      **kwargs: 'Any') -> 'Schema_FastBindingUpdateMessage':
+        """Make MH fast binding update (FBU) message type.
+
+        Args:
+            message: Message data model.
+            seq: Sequence number.
+            ack: Acknowledgement flag.
+            home: Home registration flag.
+            lla_compat: LLA compatibility flag.
+            key_mngt: Key management mobility option flag.
+            lifetime: Lifetime in seconds or timedelta.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            seq = message.seq
+            ack = message.ack
+            home = message.home
+            lla_compat = message.lla_compat
+            key_mngt = message.key_mngt
+            lifetime_val = math.ceil(message.lifetime.total_seconds())
+            options = message.options
+        else:
+            lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(lifetime.total_seconds())
+            options = options or []
+
+        return Schema_FastBindingUpdateMessage(
+            seq=seq,
+            flags={
+                'A': ack,
+                'H': home,
+                'L': lla_compat,
+                'K': key_mngt,
+            },
+            lifetime=math.ceil(lifetime_val / 4),
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_fback(self, message: 'Optional[Data_FastBindingAcknowledgmentMessage]' = None, *,
+                        status: 'FastBindingAcknowledgmentStatus | StdlibEnum | AenumEnum | str | int' = FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted,
+                        status_default: 'Optional[int]' = None,
+                        status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                        status_reversed: 'bool' = False,
+                        key_mngt: 'bool' = False,
+                        seq: 'int' = 0,
+                        lifetime: 'int | timedelta' = 4,  # reasonable default value
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                        **kwargs: 'Any') -> 'Schema_FastBindingAcknowledgmentMessage':
+        """Make MH fast binding acknowledgment (FBack) message type.
+
+        Args:
+            message: Message data model.
+            status: Status code, c.f.,
+                :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`.
+            status_default: Default status code.
+            status_namespace: Status code namespace.
+            status_reversed: Reverse status code namespace.
+            key_mngt: Key management mobility option flag.
+            seq: Sequence number.
+            lifetime: Lifetime in seconds or timedelta.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            status_val = message.status
+            key_mngt = message.key_mngt
+            seq = message.seq
+            lifetime_val = math.ceil(message.lifetime.total_seconds())
+            options = message.options
+        else:
+            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
+                                          reversed=status_reversed, pack=False)
+            lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(lifetime.total_seconds())
+            options = options or []
+
+        return Schema_FastBindingAcknowledgmentMessage(
+            status=status_val,
+            flags={
+                'K': key_mngt,
+            },
+            seq=seq,
+            lifetime=math.ceil(lifetime_val / 4),
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_fna(self, message: 'Optional[Data_FastNeighborAdvertisementMessage]' = None, *,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      **kwargs: 'Any') -> 'Schema_FastNeighborAdvertisementMessage':
+        """Make MH fast neighbor advertisement (FNA) message type.
+
+        Args:
+            message: Message data model.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            options = message.options
+        else:
+            options = options or []
+
+        return Schema_FastNeighborAdvertisementMessage(
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_emh(self, message: 'Optional[Data_ExperimentalMessage]' = None, *,
+                      data: 'bytes' = b'\x00\x00',  # 2 bytes of padding, c.f., RFC 5096, section 3
+                      **kwargs: 'Any') -> 'Schema_ExperimentalMessage':
+        """Make MH experimental mobility header message type.
+
+        Args:
+            message: Message data model.
+            data: Experimental message data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            data = message.data
+
+        return Schema_ExperimentalMessage(
+            data=data,
+        )
+
+    def _make_msg_hi(self, message: 'Optional[Data_HandoverInitiateMessage]' = None, *,
+                     seq: 'int' = 0,
+                     assign: 'bool' = False,
+                     buffer: 'bool' = False,
+                     proxy: 'bool' = False,
+                     forward: 'bool' = False,
+                     code: 'Enum_HandoverInitiateStatus | StdlibEnum | AenumEnum | str | int' = Enum_HandoverInitiateStatus.FBU_with_the_PCoA_as_source_IP_address,
+                     code_default: 'Optional[int]' = None,
+                     code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                     code_reversed: 'bool' = False,
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     **kwargs: 'Any') -> 'Schema_HandoverInitiateMessage':
+        """Make MH handover initiate (HI) message type.
+
+        Args:
+            message: Message data model.
+            seq: Sequence number.
+            assign: Assigned address configuration flag.
+            buffer: Buffer flag.
+            proxy: Proxy flag.
+            forward: Forwarding flag.
+            code: Code.
+            code_default: Default code.
+            code_namespace: Code namespace.
+            code_reversed: Reverse code namespace.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            seq = message.seq
+            assign = message.assign
+            buffer = message.buffer
+            proxy = message.proxy
+            forward = message.forward
+            code_val = message.code
+            options = message.options
+        else:
+            code_val = self._make_index(code, code_default, namespace=code_namespace,  # type: ignore[assignment]
+                                        reversed=code_reversed, pack=False)
+            options = options or []
+
+        return Schema_HandoverInitiateMessage(
+            seq=seq,
+            flags={
+                'S': assign,
+                'U': buffer,
+                'P': proxy,
+                'F': forward,
+            },
+            code=code_val,
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_hack(self, message: 'Optional[Data_HandoverAcknowledgeMessage]' = None, *,
+                       seq: 'int' = 0,
+                       buffer: 'bool' = False,
+                       proxy: 'bool' = False,
+                       forward: 'bool' = False,
+                       code: 'Enum_HandoverACKStatus | StdlibEnum | AenumEnum | str | int' = Enum_HandoverACKStatus.Handover_Accepted_with_NCoA_valid,
+                       code_default: 'Optional[int]' = None,
+                       code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                       code_reversed: 'bool' = False,
+                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                       **kwargs: 'Any') -> 'Schema_HandoverAcknowledgeMessage':
+        """Make MH handover acknowledge (HAck) message type.
+
+        Args:
+            message: Message data model.
+            seq: Sequence number.
+            buffer: Buffer flag.
+            proxy: Proxy flag.
+            forward: Forwarding flag.
+            code: Code.
+            code_default: Default code.
+            code_namespace: Code namespace.
+            code_reversed: Reverse code namespace.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            seq = message.seq
+            buffer = message.buffer
+            proxy = message.proxy
+            forward = message.forward
+            code_val = message.code
+            options = message.options
+        else:
+            code_val = self._make_index(code, code_default, namespace=code_namespace,  # type: ignore[assignment]
+                                        reversed=code_reversed, pack=False)
+            options = options or []
+
+        return Schema_HandoverAcknowledgeMessage(
+            seq=seq,
+            flags={
+                'U': buffer,
+                'P': proxy,
+                'F': forward,
+            },
+            code=code_val,
             options=self._make_mh_options(options),
         )
 
@@ -2652,6 +3526,110 @@ class MH(Internet[Data_MH, Schema_MH],
             type=type,
             length=8,
             token=token,
+        )
+
+    def _make_opt_exp(self, type: 'Enum_Option', option: 'Optional[Data_ExperimentalMobilityOption]' = None, *,
+                      data: 'bytes' = b'',
+                      **kwargs: 'Any') -> 'Schema_ExperimentalMobilityOption':
+        """Make MH experimental mobility option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            data: Experimental data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            data = option.data
+
+        return Schema_ExperimentalMobilityOption(
+            type=type,
+            length=len(data),
+            data=data,
+        )
+
+    def _make_opt_badf(self, type: 'Enum_Option', option: 'Optional[Data_BADFOption]' = None, *,
+                       spi: 'int' = 0,
+                       data: 'bytes' = b'',
+                       **kwargs: 'Any') -> 'Schema_BADFOption':
+        """Make MH binding authorization data for FMIPv6 (BADF) option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            spi: Security parameter index.
+            data: Authenticator.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        Note:
+            The ``length`` field counts the authenticator only, excluding the
+            SPI, c.f., :meth:`_read_opt_badf`.
+
+        """
+        if option is not None:
+            spi = option.spi
+            data = option.data
+
+        if not data:
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
+
+        return Schema_BADFOption(
+            type=type,
+            length=len(data),
+            spi=spi,
+            data=data,
+        )
+
+    def _make_opt_ipv6_ap(self, type: 'Enum_Option', option: 'Optional[Data_IPv6AddressPrefixOption]' = None, *,
+                          code: 'IPv6AddressPrefixCode | StdlibEnum | AenumEnum | str | int' = IPv6AddressPrefixCode.New_Care_of_Address,
+                          code_default: 'Optional[int]' = None,
+                          code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                          code_reversed: 'bool' = False,
+                          prefix_length: 'int' = 128,
+                          address: 'bytes | str | int | IPv6Address' = '::',
+                          **kwargs: 'Any') -> 'Schema_IPv6AddressPrefixOption':
+        """Make MH mobility header IPv6 address/prefix option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            code: Option code, c.f.,
+                :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.
+            code_default: Default option code.
+            code_namespace: Option code namespace.
+            code_reversed: Reverse option code namespace.
+            prefix_length: Prefix length.
+            address: IPv6 address/prefix.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            code_val = option.code
+            prefix_length = option.prefix_length
+            address = option.address
+        else:
+            code_val = self._make_index(code, code_default, namespace=code_namespace,  # type: ignore[assignment]
+                                        reversed=code_reversed, pack=False)
+
+        if prefix_length > 128:
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
+
+        return Schema_IPv6AddressPrefixOption(
+            type=type,
+            length=18,
+            code=code_val,
+            prefix_length=prefix_length,
+            address=address,
         )
 
     # TODO: Implement other options.
