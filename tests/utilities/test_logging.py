@@ -150,8 +150,21 @@ class LoggingImportTimeTests(unittest.TestCase):
         the same stream.
 
         """
-        os.environ['PCAPKIT_DEVMODE'] = '1'
         root = logging.getLogger(ROOT)
+        old_devmode = os.environ.get('PCAPKIT_DEVMODE')
+        old_level = root.level
+        old_handlers = root.handlers[:]
+
+        def cleanup() -> 'None':
+            if old_devmode is None:
+                os.environ.pop('PCAPKIT_DEVMODE', None)
+            else:
+                os.environ['PCAPKIT_DEVMODE'] = old_devmode
+            root.handlers = old_handlers
+            root.setLevel(old_level)
+
+        self.addCleanup(cleanup)
+        os.environ['PCAPKIT_DEVMODE'] = '1'
 
         def streams() -> 'int':
             return len([handler for handler in root.handlers

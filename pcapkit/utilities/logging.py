@@ -349,7 +349,10 @@ if not logger.handlers:
 
 def _writes_to(candidate: 'logging.Handler', stream: 'Any') -> 'bool':
     """Whether ``candidate`` is a stream handler already writing to ``stream``."""
-    return isinstance(candidate, logging.StreamHandler) and getattr(candidate, 'stream', None) is stream
+    return (
+        isinstance(candidate, logging.StreamHandler) and
+        getattr(candidate, 'stream', None) is stream
+    )
 
 
 if DEVMODE:
