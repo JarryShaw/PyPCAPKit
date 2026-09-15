@@ -11,8 +11,11 @@ on:
 
 # This workflow commits and pushes, so a cancelled run can leave the bump
 # half-applied -- queue superseded runs rather than killing them.
+# One group per run, never cancelled. This publishes to Anaconda, so like the
+# release path a run must neither be interrupted nor dropped while pending; and as
+# a scheduled job its value is tied to when it ran, not to the commit it ran on.
 concurrency:
-  group: conda-update-${{ github.ref }}
+  group: conda-update-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:

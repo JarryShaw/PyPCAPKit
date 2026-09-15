@@ -20,8 +20,12 @@ name: Create Release
 # before either had tagged, which is a double-publish race. Serialise instead:
 # never cancel a release run, just make the second wait and find the tag
 # already there.
+# One group per run, never cancelled. This path tags and uploads, so a run must
+# neither be interrupted nor silently dropped -- and a ref-keyed group does drop
+# a run that is still *pending* when a newer one joins it, which for a release
+# means a version that never shipped.
 concurrency:
-  group: create-release-${{ github.ref }}
+  group: create-release-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:

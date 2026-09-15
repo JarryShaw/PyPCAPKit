@@ -8,8 +8,12 @@ on:
 
 # This workflow commits and pushes, so a cancelled run can leave the bump
 # half-applied -- queue superseded runs rather than killing them.
+# One group per run, never cancelled. This crawls the IANA registries and commits
+# what changed, so a run's value comes from *when* it ran rather than from which
+# commit it ran on: two scheduled runs at the same SHA are both meaningful, and a
+# ref-keyed group would drop the pending one and skip that cycle's update.
 concurrency:
-  group: vendor-update-${{ github.ref }}
+  group: vendor-update-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:

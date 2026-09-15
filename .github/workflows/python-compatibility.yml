@@ -11,8 +11,15 @@ on:
 permissions:
   contents: read
 
+# Only pull-request runs may be superseded. Keying every event on the ref (as
+# this did) coalesces all of main's pushes into one group, and GitHub cancels a
+# *pending* run whenever a newer one joins the group -- `cancel-in-progress:
+# false` protects a run that has already started, never one still queued. So a
+# commit merged while its predecessor was still running lost its validation
+# entirely. Keying non-PR events on the run id gives each one its own group,
+# which is what "validate every commit" actually requires.
 concurrency:
-  group: python-compatibility-${{ github.ref }}
+  group: python-compatibility-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
