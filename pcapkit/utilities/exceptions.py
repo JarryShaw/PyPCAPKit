@@ -14,11 +14,11 @@ when exception raised on user's operation.
 .. _tbtrim: https://github.com/gousaiyang/tbtrim
 
 """
+import inspect
 import io
 import os
 import struct
 import sys
-from inspect import currentframe
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
@@ -120,7 +120,7 @@ def stacklevel() -> 'int':
     """
     pcapkit = f'{os.path.sep}pcapkit{os.path.sep}'
 
-    frame = currentframe()
+    frame = inspect.currentframe()
     if frame is None:  # pragma: no cover
         # No Python stack frame support, so there is no boundary to find. Blaming
         # the immediate caller is the least wrong answer available.

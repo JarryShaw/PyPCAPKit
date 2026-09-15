@@ -185,7 +185,7 @@ class StacklevelArithmeticTests(unittest.TestCase):
     def level_for(self, outer: 'int', inner: 'int') -> 'int':
         """``stacklevel()`` over a synthetic stack of the given shape."""
         stack = synthetic_stack(outer, inner)
-        with mock.patch.object(exceptions, 'currentframe', return_value=stack):
+        with mock.patch.object(exceptions.inspect, 'currentframe', return_value=stack):
             return exceptions.stacklevel()
 
     def test_level_counts_the_pcapkit_frames_not_the_outer_ones(self) -> None:
@@ -218,7 +218,7 @@ class StacklevelArithmeticTests(unittest.TestCase):
             for inner in (1, 2, 3, 8):
                 with self.subTest(outer=outer, inner=inner):
                     stack = synthetic_stack(outer, inner)
-                    with mock.patch.object(exceptions, 'currentframe', return_value=stack):
+                    with mock.patch.object(exceptions.inspect, 'currentframe', return_value=stack):
                         level = exceptions.stacklevel()
 
                     self.assertEqual(frame_at(stack, level).f_code.co_filename, EXTERNAL)
@@ -268,7 +268,7 @@ class StacklevelArithmeticTests(unittest.TestCase):
         for filename in (EXTERNAL, INTERNAL, EXTERNAL, INTERNAL, INTERNAL):
             stack = FakeFrame(filename, stack)
 
-        with mock.patch.object(exceptions, 'currentframe', return_value=stack):
+        with mock.patch.object(exceptions.inspect, 'currentframe', return_value=stack):
             level = exceptions.stacklevel()
 
         self.assertEqual(level, 4)
