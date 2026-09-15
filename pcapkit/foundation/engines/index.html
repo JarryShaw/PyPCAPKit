@@ -185,7 +185,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -410,7 +410,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -523,6 +523,52 @@ PCAP savefiles only, otherwise
 </tbody>
 </table>
 </div>
+<section id="availability">
+<h2>Availability<a class="headerlink" href="#availability" title="Link to this heading">¶</a></h2>
+<p>A third-party engine is only usable where its backing package is, and three of
+them are harder to obtain than a plain <strong class="program">pip install</strong> suggests. Asking
+for an engine whose package is missing is not fatal – <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> emits an
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineWarning</span></code></a> and falls back to its own
+parser – but the extraction then has nothing to do with the engine requested,
+so it is worth knowing in advance.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Engine</p></th>
+<th class="head"><p>What it needs beyond <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcap.PCAP" title="pcapkit.foundation.engines.pcap.PCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP</span></code></a>,
+<a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a></p></td>
+<td><p>nothing – built in</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a>,
+<a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a></p></td>
+<td><p>nothing – both ship pure-Python wheels</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark" title="pcapkit.foundation.engines.pyshark.PyShark"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyShark</span></code></a></p></td>
+<td><p>Wireshark’s <strong class="program">tshark</strong> binary on <code class="docutils literal notranslate"><span class="pre">PATH</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a></p></td>
+<td><p><a class="reference external" href="https://www.tcpdump.org">libpcap</a> headers and library, a C compiler, and Python
+<strong>3.11 or older</strong> – <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> 1.3.0 publishes no wheel and
+its pre-generated <code class="file docutils literal notranslate"><span class="pre">pcap.c</span></code> does not compile on 3.12+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a></p></td>
+<td><p>Python <strong>3.11 or older</strong> – <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> 0.12.0 imports the
+<code class="docutils literal notranslate"><span class="pre">imp</span></code> module, removed in Python 3.12</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../../../index.html"><span class="doc">PyPCAPKit - Comprehensive Network Packet Analysis Library</span></a> covers the installation prerequisites in full,
+including how <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>’s <code class="file docutils literal notranslate"><span class="pre">setup.py</span></code> looks for <code class="file docutils literal notranslate"><span class="pre">pcap.h</span></code> and why
+a Homebrew <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> is not always found.</p>
+</div>
+</section>
 </section>
 
         </article>
@@ -568,8 +614,27 @@ PCAP savefiles only, otherwise
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Engine Support</a><ul>
+<li><a class="reference internal" href="#availability">Availability</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

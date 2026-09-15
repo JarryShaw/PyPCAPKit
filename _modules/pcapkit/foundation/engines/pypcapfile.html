@@ -412,6 +412,7 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
@@ -510,6 +511,40 @@
     <span class="c1">#: Number of layers to descend while decoding, i.e. link plus network. See</span>
     <span class="c1">#: the class docstring for why this stops short of the transport layer.</span>
     <span class="n">LAYERS</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="c1">#: First Python version `PyPCAPFile`_ does not work on, as a</span>
+    <span class="c1">#: ``(major, minor)`` pair. Released 0.12.0 imports :mod:`imp` from</span>
+    <span class="c1">#: :mod:`pcapfile.linklayer`, and :mod:`imp` was removed in Python 3.12.</span>
+    <span class="n">PYTHON_CEILING</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unsupported_reason</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Why this engine cannot run here, or :data:`None` when it can.</span>
+
+<span class="sd">        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*</span>
+<span class="sd">        the import test, because the import test cannot answer this question.</span>
+<span class="sd">        :mod:`pcapfile`'s top-level package imports perfectly well on Python 3.12</span>
+<span class="sd">        and newer -- it is :mod:`pcapfile.linklayer` that fails, and</span>
+<span class="sd">        :mod:`pcapfile.savefile` imports it -- so a guard that only tries</span>
+<span class="sd">        ``import pcapfile`` is satisfied and the :exc:`ModuleNotFoundError` then</span>
+<span class="sd">        escapes from :meth:`__init__` as a hard error instead of degrading to the</span>
+<span class="sd">        default engine with a warning, which is what happens when the package is</span>
+<span class="sd">        simply absent.</span>
+
+<span class="sd">        The version is checked rather than the import attempted so that the answer</span>
+<span class="sd">        does not depend on which of the package's submodules happens to be</span>
+<span class="sd">        imported first, and so it is the same answer on a machine that has never</span>
+<span class="sd">        installed :mod:`pcapfile` at all.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A short phrase naming the limitation, or :data:`None`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">PYTHON_CEILING</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'pypcapfile does not support Python '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">; '</span>
+                    <span class="s1">'its linklayer module imports `imp`, removed in Python 3.12'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>

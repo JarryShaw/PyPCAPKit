@@ -509,6 +509,37 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
     <span class="c1">##########################################################################</span>
+    <span class="c1"># Availability.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unsupported_reason</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Why this engine cannot run in this environment, if it cannot.</span>
+
+<span class="sd">        Engines are normally gated by whether their third-party module imports,</span>
+<span class="sd">        which :meth:`pcapkit.foundation.extraction.Extractor.import_test` decides.</span>
+<span class="sd">        This hook is for the cases that question cannot answer -- most often a</span>
+<span class="sd">        dependency that installs cleanly and only fails when it is *used*, so the</span>
+<span class="sd">        import test passes and the error escapes from the engine's constructor as</span>
+<span class="sd">        a hard failure instead of degrading to the default engine.</span>
+
+<span class="sd">        The default is :data:`None`, i.e. always available; override it only where</span>
+<span class="sd">        there is a real limitation, and return a short phrase naming the *cause*</span>
+<span class="sd">        rather than merely refusing, since the string is shown to the user.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A phrase describing the limitation, or :data:`None` when the engine is</span>
+<span class="sd">            usable here.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile` overrides</span>
+<span class="sd">            this, because ``pypcapfile`` installs on Python 3.12 and newer and then</span>
+<span class="sd">            raises :exc:`ModuleNotFoundError` on first use.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 

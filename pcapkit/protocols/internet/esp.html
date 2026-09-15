@@ -1155,7 +1155,7 @@ trailer (padding, pad length, next header).</p>
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the payload is malformed for the algorithm, or
     if <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> is needed and unavailable.</p></li>
-<li><p><strong>cryptography.exceptions.InvalidTag</strong> – If an AEAD tag fails to
+<li><p><a class="reference external" href="https://cryptography.io/en/latest/hazmat/primitives/symmetric-encryption/#cryptography.exceptions.InvalidTag" title="(in Cryptography v51.0.0-dev1)"><strong>cryptography.exceptions.InvalidTag</strong></a> – If an AEAD tag fails to
     verify – typically a wrong key.</p></li>
 </ul>
 </dd>
@@ -1584,7 +1584,7 @@ e.g. because the optional <a class="reference external" href="https://cryptograp
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A 4-tuple of <code class="docutils literal notranslate"><span class="pre">(Cipher,</span> <span class="pre">algorithms,</span> <span class="pre">modes,</span> <span class="pre">InvalidTag)</span></code> taken from
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography.hazmat.primitives.ciphers</span></code> and
+<a class="reference external" href="https://cryptography.io/en/latest/hazmat/primitives/symmetric-encryption/#module-cryptography.hazmat.primitives.ciphers" title="(in Cryptography v51.0.0-dev1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography.hazmat.primitives.ciphers</span></code></a> and
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography.exceptions</span></code>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when
 <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> is not installed.</p>
 </dd>
