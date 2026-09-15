@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>pcapkit.interface.misc - PyPCAPKit</title>
+        <title>pcapkit.toolkit.pypcap - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -398,138 +398,190 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.interface.misc</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.toolkit.pypcap</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""Auxiliary Interface</span>
-<span class="sd">=========================</span>
+<span class="sd">"""PyPCAP Tools</span>
+<span class="sd">=================</span>
 
-<span class="sd">.. module:: pcapkit.interface.misc</span>
+<span class="sd">.. module:: pcapkit.toolkit.pypcap</span>
 
-<span class="sd">:mod:`pcapkit.interface.misc` contains miscellaneous</span>
-<span class="sd">user interface functions, classes, etc., which are</span>
-<span class="sd">generally provided per user's requests.</span>
+<span class="sd">:mod:`pcapkit.toolkit.pypcap` contains all you need for</span>
+<span class="sd">:mod:`pcapkit` handy usage with `PyPCAP`_ engine. All reforming</span>
+<span class="sd">functions returns with a flag to indicate if usable for</span>
+<span class="sd">its caller.</span>
+
+<span class="sd">.. _PyPCAP: https://github.com/pynetwork/pypcap</span>
+
+<span class="sd">.. important::</span>
+
+<span class="sd">   `PyPCAP`_ is a thin :manpage:`libpcap(3)` binding: it hands back the</span>
+<span class="sd">   ``(timestamp, bytes)`` pair that :c:func:`pcap_next_ex` produced and performs</span>
+<span class="sd">   **no protocol dissection whatsoever**. There is therefore no IP or TCP layer</span>
+<span class="sd">   for this module to read, and the reassembly and flow tracing adapters that</span>
+<span class="sd">   :mod:`pcapkit.toolkit.dpkt` and :mod:`pcapkit.toolkit.scapy` provide cannot</span>
+<span class="sd">   be implemented here.</span>
+
+<span class="sd">   They are still defined below, but only so that reaching for one fails loudly</span>
+<span class="sd">   with :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than with an</span>
+<span class="sd">   :exc:`ImportError` that says nothing about why. Dissecting the raw bytes with</span>
+<span class="sd">   :mod:`pcapkit`'s own parsers would defeat the point of selecting a third-party</span>
+<span class="sd">   engine, so it is deliberately not done.</span>
 
 <span class="sd">"""</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
+    <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span>
+<span class="p">]</span>
 
-    <span class="n">ByteOrder</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'little'</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">]</span>
-    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">]</span>
-    <span class="c1"># NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;</span>
-    <span class="c1"># both copies need updating when a new engine lands.</span>
-    <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">]</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'follow_tcp_stream'</span><span class="p">]</span>
-
-<span class="c1">###############################################################################</span>
-<span class="c1"># Follow TCP Stream</span>
-<span class="c1">###############################################################################</span>
-
-
-<div class="viewcode-block" id="Stream">
-<a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.Stream">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Stream</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for TCP streams."""</span>
-
-    <span class="c1">#: Output filename.</span>
-    <span class="n">filename</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
-    <span class="c1">#: Packet list.</span>
-    <span class="n">packets</span><span class="p">:</span> <span class="s1">'tuple[Packet, ...]'</span>
-    <span class="c1">#: TCP conversation.</span>
-    <span class="n">conversations</span><span class="p">:</span> <span class="s1">'tuple[bytes | tuple[bytes, ...], ...]'</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">'tuple[Packet, ...]'</span><span class="p">,</span> <span class="n">conversations</span><span class="p">:</span> <span class="s1">'tuple[bytes | tuple[bytes, ...], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+<span class="c1">#: Explanatory suffix shared by every unsupported adapter below.</span>
+<span class="n">_NO_DISSECTION</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"'pypcap' is a libpcap binding and performs no protocol "</span>
+                  <span class="s2">"dissection, so there is no protocol layer to read"</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="packet2chain">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcap.packet2chain">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2chain</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch PyPCAP packet protocol chain.</span>
 
-<div class="viewcode-block" id="follow_tcp_stream">
-<a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.follow_tcp_stream">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extrator options</span>
-                      <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                      <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TraceFlow options # pylint: disable=redefined-builtin</span>
-                      <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'ByteOrder'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Stream, ...]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Follow TCP streams.</span>
-
-<span class="sd">    Arguments:</span>
-<span class="sd">        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`</span>
-<span class="sd">        extension: if check and append extensions to output file</span>
-<span class="sd">        verbose: if print verbose output information</span>
-<span class="sd">        engine: extraction engine to be used</span>
-
-<span class="sd">        fout: path name for flow tracer if necessary</span>
-<span class="sd">        format: output file format of flow tracer</span>
-<span class="sd">        byteorder: output file byte order</span>
-<span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Raw packet bytes, as returned by :class:`pcap.pcap` iteration.</span>
+<span class="sd">        data_link: Data link type, from the capture handle.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List of extracted TCP streams.</span>
+<span class="sd">        Colon (``:``) separated list of protocol chain.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        As `PyPCAP`_ does not dissect the packet, the chain is only ever the</span>
+<span class="sd">        link layer type followed by ``Raw``, e.g. ``ETHERNET:Raw``.</span>
+
+<span class="sd">    .. _PyPCAP: https://github.com/pynetwork/pypcap</span>
 
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: both of these engines disable TCP flow tracing outright -- PyShark</span>
-    <span class="c1"># because ``pcapkit`` has no reassembly adapter for it, PyPCAP because it</span>
-    <span class="c1"># performs no protocol dissection at all -- so ``extraction.trace`` below</span>
-    <span class="c1"># would raise instead of yielding streams.</span>
-    <span class="k">if</span> <span class="n">engine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">engine</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">):</span>
-        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine: </span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s1">; fallback to default engine'</span><span class="p">,</span>
-             <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-        <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">data_link</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">:Raw'</span></div>
 
-    <span class="n">extraction</span> <span class="o">=</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
-                           <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
-                           <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">reassembly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
-                           <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">)</span>  <span class="c1"># type: ignore[var-annotated]</span>
 
-    <span class="n">fallback</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">'dpkt'</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-    <span class="k">elif</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">'scapy'</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="n">fallback</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="n">streams</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Stream]</span>
-    <span class="n">frames</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">frame</span>
-    <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
-        <span class="n">reassembly</span> <span class="o">=</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="packet2dict">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcap.packet2dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert PyPCAP packet into :obj:`dict`.</span>
 
-        <span class="n">packets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Packet]</span>
-        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">stream</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-            <span class="n">frame</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">packets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Raw packet bytes, as returned by :class:`pcap.pcap` iteration.</span>
+<span class="sd">        timestamp: Timestamp of packet, as returned by :class:`pcap.pcap` iteration.</span>
+<span class="sd">        data_link: Data link type, from the capture handle.</span>
 
-            <span class="k">if</span> <span class="n">fallback</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: A :obj:`dict` mapping of packet data.</span>
 
-            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">reassembly</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="sd">    Note:</span>
+<span class="sd">        The mapping carries the captured bytes verbatim rather than a decoded</span>
+<span class="sd">        protocol tree, since `PyPCAP`_ does not decode anything.</span>
 
-        <span class="n">streams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Stream</span><span class="p">(</span>
-            <span class="n">filename</span><span class="o">=</span><span class="n">stream</span><span class="o">.</span><span class="n">fpout</span><span class="p">,</span>
-            <span class="n">packets</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">packets</span><span class="p">),</span>
-            <span class="n">conversations</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">datagram</span><span class="o">.</span><span class="n">payload</span> <span class="k">for</span> <span class="n">datagram</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
-                <span class="n">reassembly</span><span class="o">.</span><span class="n">datagram</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">datagram</span><span class="p">:</span> <span class="n">datagram</span><span class="o">.</span><span class="n">index</span>  <span class="c1"># make sure the converstations are in order</span>
-            <span class="p">)),</span>
-        <span class="p">))</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">streams</span><span class="p">)</span></div>
+<span class="sd">    .. _PyPCAP: https://github.com/pynetwork/pypcap</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">'timestamp'</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span>
+        <span class="s1">'packet'</span><span class="p">:</span> <span class="n">packet</span><span class="p">,</span>
+        <span class="n">data_link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">'raw_len'</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
+            <span class="s1">'raw'</span><span class="p">:</span> <span class="n">packet</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="ipv4_reassembly">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcap.ipv4_reassembly">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make data for IPv4 reassembly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Raw packet bytes.</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        UnsupportedCall: Always, as `PyPCAP`_ provides no IPv4 layer to read.</span>
+
+<span class="sd">    .. _PyPCAP: https://github.com/pynetwork/pypcap</span>
+
+<span class="sd">    """</span>
+    <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv4 reassembly is not supported by the PyPCAP engine: </span><span class="si">{</span><span class="n">_NO_DISSECTION</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ipv6_reassembly">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcap.ipv6_reassembly">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv6Address] | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make data for IPv6 reassembly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Raw packet bytes.</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        UnsupportedCall: Always, as `PyPCAP`_ provides no IPv6 layer to read.</span>
+
+<span class="sd">    .. _PyPCAP: https://github.com/pynetwork/pypcap</span>
+
+<span class="sd">    """</span>
+    <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6 reassembly is not supported by the PyPCAP engine: </span><span class="si">{</span><span class="n">_NO_DISSECTION</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tcp_reassembly">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcap.tcp_reassembly">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TCP_Packet | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make data for TCP reassembly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Raw packet bytes.</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        UnsupportedCall: Always, as `PyPCAP`_ provides no TCP layer to read.</span>
+
+<span class="sd">    .. _PyPCAP: https://github.com/pynetwork/pypcap</span>
+
+<span class="sd">    """</span>
+    <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'TCP reassembly is not supported by the PyPCAP engine: </span><span class="si">{</span><span class="n">_NO_DISSECTION</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tcp_traceflow">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcap.tcp_traceflow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span>
+                  <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TF_TCP_Packet | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Trace packet flow for TCP.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Raw packet bytes.</span>
+<span class="sd">        timestamp: Timestamp of the packet.</span>
+<span class="sd">        data_link: Data link layer protocol (from the capture handle).</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        UnsupportedCall: Always, as `PyPCAP`_ provides no TCP layer to read.</span>
+
+<span class="sd">    .. _PyPCAP: https://github.com/pynetwork/pypcap</span>
+
+<span class="sd">    """</span>
+    <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'TCP flow tracing is not supported by the PyPCAP engine: </span><span class="si">{</span><span class="n">_NO_DISSECTION</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

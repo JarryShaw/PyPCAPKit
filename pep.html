@@ -517,15 +517,47 @@ PyPCAPKit.</p>
 </section>
 <section id="new-engines">
 <h2>New Engines<a class="headerlink" href="#new-engines" title="Link to this heading">¶</a></h2>
-<p>Although PyPCAPKit already has support for some popular PCAP parsing libraries,
-I’m expecting to extend the list of supported engines furthermore. The candidate
-engines include:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://github.com/pynetwork/pypcap">pypcap</a></p></li>
-<li><p><a class="reference external" href="https://github.com/kisom/pypcapfile">pycapfile</a></p></li>
-</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
+<p><strong>Done</strong>, for both candidates. <code class="docutils literal notranslate"><span class="pre">engine='pypcapfile'</span></code> selects
+<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcapfile.PyPCAPFile</span></code></a> and
+<code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> selects <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcap.PyPCAP</span></code></a>;
+each has a matching <a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> module
+(<a class="reference internal" href="pcapkit/toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a>, <a class="reference internal" href="pcapkit/toolkit/3rdparty.html#module-pcapkit.toolkit.pypcap" title="pcapkit.toolkit.pypcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcap</span></code></a>), a
+<code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> extra (<code class="docutils literal notranslate"><span class="pre">PyPCAPFile</span></code>, which <code class="docutils literal notranslate"><span class="pre">all</span></code> includes, and
+<code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code>, which it deliberately does not – see below), docs
+under <a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a>, and tests under
+<code class="docutils literal notranslate"><span class="pre">tests/foundation/engines/</span></code> and <code class="docutils literal notranslate"><span class="pre">tests/toolkit/</span></code>. Both were verified
+end-to-end against the sample captures: each agrees with the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine
+on frame count, per-record capture length, timestamp and Ethernet header.</p>
+<p>Neither library, though, is usable straight from PyPI on a current Python, and
+both of the following are worth knowing before reaching for them:</p>
+<ul class="simple">
+<li><p><strong>pypcapfile</strong> – the released 0.12.0 imports the <a class="reference external" href="https://docs.python.org/3/library/imp.html#module-imp" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">imp</span></code></a> module, removed
+in Python 3.12, so it cannot be imported at all on 3.12 or newer. Upstream
+<code class="docutils literal notranslate"><span class="pre">master</span></code> (0.12.1, unreleased) has fixed this, and that is what the engine
+was verified against. The extra therefore installs a version that only works
+on Python 3.10 and 3.11 until 0.12.1 is published.</p></li>
+<li><p><strong>pypcap</strong> – the 1.3.0 sdist ships a pre-generated <code class="docutils literal notranslate"><span class="pre">pcap.c</span></code> from an old
+Cython, which no longer compiles against the Python 3.12+ C API
+(<code class="docutils literal notranslate"><span class="pre">ob_digit</span></code>, <code class="docutils literal notranslate"><span class="pre">_PyLong_AsByteArray</span></code>), and its <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> searches a
+fixed list of prefixes for <code class="docutils literal notranslate"><span class="pre">pcap.h</span></code>. It builds once <strong class="program">libpcap</strong>’s
+headers are visible under <code class="docutils literal notranslate"><span class="pre">sys.prefix</span></code> and <code class="docutils literal notranslate"><span class="pre">pcap.c</span></code> is regenerated with
+Cython 3. That is a packaging problem upstream rather than an engine problem,
+but it does mean <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[PyPCAP]</span></code> can fail to build. Since
+there is no wheel to fall back on, the extra is kept <strong>out of</strong> <code class="docutils literal notranslate"><span class="pre">all</span></code>:
+otherwise <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[all]</span></code> would demand a compiler and the
+libpcap development files from every user, and it broke the docs, conda and
+release workflows – all of which install <code class="docutils literal notranslate"><span class="pre">.[all]</span></code> – on the macOS runner,
+where <code class="file docutils literal notranslate"><span class="pre">pcap.h</span></code> is present but no <code class="docutils literal notranslate"><span class="pre">libpcap.dylib</span></code> is.</p></li>
+</ul>
+<p>Both engines support less than the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine does, deliberately and
+noisily: <a class="reference external" href="https://github.com/pynetwork/pypcap">pypcap</a> performs no protocol dissection, so it disables reassembly
+<em>and</em> flow tracing; <a class="reference external" href="https://github.com/kisom/pypcapfile">pypcapfile</a> has no IPv6 decoder, so it disables IPv6
+reassembly while keeping IPv4 and TCP. Each gap is announced through an
+<a class="reference internal" href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> or an outright exception
+rather than by silently returning nothing –
+<a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> tabulates them.</p>
 <p>The engine interface has since been refactored, so this no longer means adding
 handler methods to <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>. A new
 engine subclasses <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.engine.Engine</span></code></a> and
@@ -535,6 +567,13 @@ registers it automatically. See <a class="reference internal" href="ext.html"><s
 still apply is the unified auxiliary tools in <a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a>, where
 each engine has a matching module.</p>
 </div>
+<p>Originally: although PyPCAPKit already has support for some popular PCAP parsing
+libraries, I’m expecting to extend the list of supported engines furthermore. The
+candidate engines include:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/pynetwork/pypcap">pypcap</a></p></li>
+<li><p><a class="reference external" href="https://github.com/kisom/pypcapfile">pypcapfile</a></p></li>
+</ul>
 </section>
 <section id="test-cases">
 <h2>Test Cases<a class="headerlink" href="#test-cases" title="Link to this heading">¶</a></h2>

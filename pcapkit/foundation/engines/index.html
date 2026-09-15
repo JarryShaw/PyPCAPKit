@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/engines/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.engines is a collection of engines support for pcapkit, including but not limited to the built-in PCAP and PCAP-NG file support, Scapy, PyShark, and DPKT 3rd party engine support..." />
-<meta name="description" content="pcapkit.foundation.engines is a collection of engines support for pcapkit, including but not limited to the built-in PCAP and PCAP-NG file support, Scapy, PyShark, and DPKT 3rd party engine support..." />
+<meta property="og:description" content="pcapkit.foundation.engines is a collection of engines support for pcapkit, including but not limited to the built-in PCAP and PCAP-NG file support, Scapy, PyShark, DPKT, PyPCAP and PyPCAPFile 3rd p..." />
+<meta name="description" content="pcapkit.foundation.engines is a collection of engines support for pcapkit, including but not limited to the built-in PCAP and PCAP-NG file support, Scapy, PyShark, DPKT, PyPCAP and PyPCAPFile 3rd p..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Base Engine" href="engine.html"><link rel="prev" title="File Extractor" href="../extraction.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -420,7 +420,7 @@
 <p><a class="reference internal" href="#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines</span></code></a> is a collection of engines
 support for <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, including but not limited to the
 built-in PCAP and <a class="reference external" href="https://wiki.wireshark.org/Development/PcapNg">PCAP-NG</a> file support, <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>,
-and <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> 3rd party engine support.</p>
+<a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>, <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 3rd party engine support.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>For more information on customisation and extension, please
@@ -442,6 +442,8 @@ refer to <a class="reference internal" href="../../../ext.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.scapy">Scapy Support</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.dpkt">DPKT Support</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.pyshark">PyShark Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.pypcap">PyPCAP Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.pypcapfile">PyPCAPFile Support</a></li>
 </ul>
 </li>
 </ul>
@@ -468,6 +470,8 @@ class hierarchy of <a class="reference internal" href="#module-pcapkit.foundatio
         Scapy
         DPKT
         PyShark
+        PyPCAP
+        PyPCAPFile
     end
     B --&gt; third-party
 
@@ -485,7 +489,41 @@ class hierarchy of <a class="reference internal" href="#module-pcapkit.foundatio
     click Scapy &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy&quot;
     click DPKT &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT&quot;
     click PyShark &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark&quot;
-    </pre></section>
+    click PyPCAP &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP&quot;
+    click PyPCAPFile &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile&quot;
+    </pre><p>Not every engine can do everything <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
+offers, and the ones that cannot say so rather than quietly doing less:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Engine</p></th>
+<th class="head"><p>Gap, and how it is surfaced</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark" title="pcapkit.foundation.engines.pyshark.PyShark"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyShark</span></code></a></p></td>
+<td><p>no reassembly – disabled with an
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a></p></td>
+<td><p>no protocol dissection at all, hence no reassembly and no
+flow tracing – both disabled with an
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a>; PCAP
+savefiles on disk only, otherwise
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a> /
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a></p></td>
+<td><p>no IPv6 decoder, hence no IPv6 reassembly – disabled with an
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a>, and
+<a class="reference internal" href="../../toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.ipv6_reassembly" title="pcapkit.toolkit.pypcapfile.ipv6_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv6_reassembly()</span></code></a> raises;
+PCAP savefiles only, otherwise
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 
         </article>
       </div>

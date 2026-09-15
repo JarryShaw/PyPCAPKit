@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>pcapkit.interface.misc - PyPCAPKit</title>
+        <title>pcapkit.toolkit.pypcapfile - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -398,138 +398,484 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.interface.misc</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.toolkit.pypcapfile</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""Auxiliary Interface</span>
-<span class="sd">=========================</span>
+<span class="sd">"""PyPCAPFile Tools</span>
+<span class="sd">=====================</span>
 
-<span class="sd">.. module:: pcapkit.interface.misc</span>
+<span class="sd">.. module:: pcapkit.toolkit.pypcapfile</span>
 
-<span class="sd">:mod:`pcapkit.interface.misc` contains miscellaneous</span>
-<span class="sd">user interface functions, classes, etc., which are</span>
-<span class="sd">generally provided per user's requests.</span>
+<span class="sd">:mod:`pcapkit.toolkit.pypcapfile` contains all you need for</span>
+<span class="sd">:mod:`pcapkit` handy usage with `PyPCAPFile`_ engine. All reforming</span>
+<span class="sd">functions returns with a flag to indicate if usable for</span>
+<span class="sd">its caller.</span>
+
+<span class="sd">.. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">.. important::</span>
+
+<span class="sd">   `PyPCAPFile`_ decodes Ethernet, IPv4, TCP and UDP and nothing else -- there</span>
+<span class="sd">   is no IPv6 decoder at all. :func:`ipv6_reassembly` therefore cannot be</span>
+<span class="sd">   implemented and raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`</span>
+<span class="sd">   instead of quietly returning :data:`None`, which would be indistinguishable</span>
+<span class="sd">   from "this frame carries no IPv6 fragment".</span>
+
+<span class="sd">   Note also that `PyPCAPFile`_ decoders *replace* the payload bytes of the layer</span>
+<span class="sd">   they decode. :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` therefore</span>
+<span class="sd">   stops at the network layer, which keeps the transport segment verbatim so that</span>
+<span class="sd">   the header/payload split this module reports is exact. The transport header is</span>
+<span class="sd">   decoded on demand below, using `PyPCAPFile`_'s own</span>
+<span class="sd">   :class:`~pcapfile.protocols.transport.tcp.TCP` class rather than a</span>
+<span class="sd">   reimplementation.</span>
 
 <span class="sd">"""</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.network.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.structs</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap_packet</span> <span class="k">as</span> <span class="n">Packet</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 
-    <span class="n">ByteOrder</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'little'</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">]</span>
-    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">]</span>
-    <span class="c1"># NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;</span>
-    <span class="c1"># both copies need updating when a new engine lands.</span>
-    <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'ipv4_header'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
+    <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span>
+<span class="p">]</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'follow_tcp_stream'</span><span class="p">]</span>
+<span class="c1">#: Minimum length of a TCP header, i.e. the fixed part with no options.</span>
+<span class="n">TCP_MIN_HEADER_LEN</span> <span class="o">=</span> <span class="mi">20</span>
 
-<span class="c1">###############################################################################</span>
-<span class="c1"># Follow TCP Stream</span>
-<span class="c1">###############################################################################</span>
+<span class="c1">#: IPv4 **DF** (don't fragment) bit, within the three-bit flags field.</span>
+<span class="n">IPV4_FLAG_DF</span> <span class="o">=</span> <span class="mb">0b010</span>
 
-
-<div class="viewcode-block" id="Stream">
-<a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.Stream">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Stream</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for TCP streams."""</span>
-
-    <span class="c1">#: Output filename.</span>
-    <span class="n">filename</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
-    <span class="c1">#: Packet list.</span>
-    <span class="n">packets</span><span class="p">:</span> <span class="s1">'tuple[Packet, ...]'</span>
-    <span class="c1">#: TCP conversation.</span>
-    <span class="n">conversations</span><span class="p">:</span> <span class="s1">'tuple[bytes | tuple[bytes, ...], ...]'</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">'tuple[Packet, ...]'</span><span class="p">,</span> <span class="n">conversations</span><span class="p">:</span> <span class="s1">'tuple[bytes | tuple[bytes, ...], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+<span class="c1">#: IPv4 **MF** (more fragments) bit, within the three-bit flags field.</span>
+<span class="n">IPV4_FLAG_MF</span> <span class="o">=</span> <span class="mb">0b001</span>
 
 
+<div class="viewcode-block" id="packet2timestamp">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.packet2timestamp">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'float'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calculate the timestamp of a PyPCAPFile packet.</span>
 
-<div class="viewcode-block" id="follow_tcp_stream">
-<a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.follow_tcp_stream">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extrator options</span>
-                      <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                      <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TraceFlow options # pylint: disable=redefined-builtin</span>
-                      <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'ByteOrder'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Stream, ...]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Follow TCP streams.</span>
-
-<span class="sd">    Arguments:</span>
-<span class="sd">        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`</span>
-<span class="sd">        extension: if check and append extensions to output file</span>
-<span class="sd">        verbose: if print verbose output information</span>
-<span class="sd">        engine: extraction engine to be used</span>
-
-<span class="sd">        fout: path name for flow tracer if necessary</span>
-<span class="sd">        format: output file format of flow tracer</span>
-<span class="sd">        byteorder: output file byte order</span>
-<span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List of extracted TCP streams.</span>
+<span class="sd">        Timestamp of the packet, in seconds since the epoch.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `PyPCAPFile`_ keeps the two halves of the per-packet timestamp apart, and</span>
+<span class="sd">        the sub-second half is nanoseconds rather than microseconds when the</span>
+<span class="sd">        savefile carries the nanosecond magic number -- which is recorded on the</span>
+<span class="sd">        savefile header as ``ns_resolution``.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: both of these engines disable TCP flow tracing outright -- PyShark</span>
-    <span class="c1"># because ``pcapkit`` has no reassembly adapter for it, PyPCAP because it</span>
-    <span class="c1"># performs no protocol dissection at all -- so ``extraction.trace`` below</span>
-    <span class="c1"># would raise instead of yielding streams.</span>
-    <span class="k">if</span> <span class="n">engine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">engine</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">):</span>
-        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine: </span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s1">; fallback to default engine'</span><span class="p">,</span>
-             <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-        <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">divisor</span> <span class="o">=</span> <span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ns_resolution</span> <span class="k">else</span> <span class="mi">1_000_000</span>
+    <span class="k">return</span> <span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">+</span> <span class="n">packet</span><span class="o">.</span><span class="n">timestamp_us</span> <span class="o">/</span> <span class="n">divisor</span></div>
 
-    <span class="n">extraction</span> <span class="o">=</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
-                           <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
-                           <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">reassembly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
-                           <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">)</span>  <span class="c1"># type: ignore[var-annotated]</span>
 
-    <span class="n">fallback</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">'dpkt'</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-    <span class="k">elif</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">'scapy'</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+
+<div class="viewcode-block" id="ipv4_header">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.ipv4_header">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv4_header</span><span class="p">(</span><span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rebuild the raw header bytes of a PyPCAPFile IPv4 packet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ipv4: PyPCAPFile IPv4 packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Raw IPv4 header bytes, options included.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `PyPCAPFile`_ discards the header bytes once decoded, but it retains</span>
+<span class="sd">        *every* IPv4 header field plus the options blob, so this reconstruction</span>
+<span class="sd">        is byte-exact rather than approximate.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
+        <span class="s1">'!BBHHHBBHII'</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">v</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">|</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hl</span><span class="p">,</span>          <span class="c1"># version and internet header length</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">tos</span><span class="p">,</span>                         <span class="c1"># type of service</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                         <span class="c1"># total length</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                          <span class="c1"># identification</span>
+        <span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span> <span class="o">&lt;&lt;</span> <span class="mi">13</span><span class="p">)</span> <span class="o">|</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">off</span><span class="p">,</span>    <span class="c1"># flags and fragment offset</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">ttl</span><span class="p">,</span>                         <span class="c1"># time to live</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>                           <span class="c1"># payload protocol type</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span>                         <span class="c1"># header checksum</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                         <span class="c1"># source IP address</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                         <span class="c1"># destination IP address</span>
+    <span class="p">)</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">opt</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_raw</span><span class="p">(</span><span class="n">layer</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Test if a decoded layer is in fact undecoded raw bytes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        layer: Decoded layer, or raw bytes.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="nb">memoryview</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[IP]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the decoded IPv4 layer of a PyPCAPFile packet, if any.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The decoded :class:`~pcapfile.protocols.network.ip.IP` layer, or</span>
+<span class="sd">        :data:`None` when the frame was not decoded that far -- which is the</span>
+<span class="sd">        case for every non-IPv4 frame, `PyPCAPFile`_ having no other network</span>
+<span class="sd">        layer decoder.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span>
+    <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">link</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s1">'IP'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">payload</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_transport</span><span class="p">(</span><span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[bytes]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the verbatim TCP segment carried by a PyPCAPFile IPv4 packet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ipv4: PyPCAPFile IPv4 packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The raw TCP segment, or :data:`None` if the packet does not carry a</span>
+<span class="sd">        TCP payload long enough to hold a header.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">segment</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">segment</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">segment</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">segment</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ethernet2dict</span><span class="p">(</span><span class="n">link</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert a PyPCAPFile Ethernet frame into :obj:`dict`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        link: PyPCAPFile Ethernet frame.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">'dst'</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>
+        <span class="s1">'src'</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>
+        <span class="s1">'type'</span><span class="p">:</span> <span class="n">link</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ipv4_2dict</span><span class="p">(</span><span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert a PyPCAPFile IPv4 packet into :obj:`dict`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ipv4: PyPCAPFile IPv4 packet.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">'v'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">v</span><span class="p">,</span>
+        <span class="s1">'hl'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hl</span><span class="p">,</span>
+        <span class="s1">'tos'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">tos</span><span class="p">,</span>
+        <span class="s1">'len'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
+        <span class="s1">'id'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="s1">'flags'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
+        <span class="s1">'off'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">off</span><span class="p">,</span>
+        <span class="s1">'ttl'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">ttl</span><span class="p">,</span>
+        <span class="s1">'p'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>
+        <span class="s1">'sum'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span>
+        <span class="s1">'src'</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">)),</span>
+        <span class="s1">'dst'</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>
+        <span class="s1">'opt'</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">opt</span><span class="p">),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_layer2dict</span><span class="p">(</span><span class="n">layer</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert a decoded PyPCAPFile layer into :obj:`dict`, recursively.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        layer: Decoded PyPCAPFile layer, or raw bytes.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">layer</span><span class="p">):</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">'raw_len'</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">),</span> <span class="s1">'raw'</span><span class="p">:</span> <span class="n">raw</span><span class="p">}</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'Ethernet'</span><span class="p">:</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="n">_ethernet2dict</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'IP'</span><span class="p">:</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="n">_ipv4_2dict</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="n">fallback</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="p">{</span><span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">),</span> <span class="s1">'_fields_'</span><span class="p">,</span> <span class="p">())}</span>
 
-    <span class="n">streams</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Stream]</span>
-    <span class="n">frames</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">frame</span>
-    <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
-        <span class="n">reassembly</span> <span class="o">=</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dict_</span><span class="p">[</span><span class="s1">'Raw'</span> <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">_layer2dict</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dict_</span>
 
-        <span class="n">packets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Packet]</span>
-        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">stream</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-            <span class="n">frame</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">packets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">fallback</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+<div class="viewcode-block" id="packet2chain">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.packet2chain">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2chain</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch PyPCAPFile packet protocol chain.</span>
 
-            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">reassembly</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+<span class="sd">        data_link: Data link type, from the savefile header.</span>
 
-        <span class="n">streams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Stream</span><span class="p">(</span>
-            <span class="n">filename</span><span class="o">=</span><span class="n">stream</span><span class="o">.</span><span class="n">fpout</span><span class="p">,</span>
-            <span class="n">packets</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">packets</span><span class="p">),</span>
-            <span class="n">conversations</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">datagram</span><span class="o">.</span><span class="n">payload</span> <span class="k">for</span> <span class="n">datagram</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
-                <span class="n">reassembly</span><span class="o">.</span><span class="n">datagram</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">datagram</span><span class="p">:</span> <span class="n">datagram</span><span class="o">.</span><span class="n">index</span>  <span class="c1"># make sure the converstations are in order</span>
-            <span class="p">)),</span>
-        <span class="p">))</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">streams</span><span class="p">)</span></div>
+<span class="sd">    Returns:</span>
+<span class="sd">        Colon (``:``) separated list of protocol chain.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The chain reports what `PyPCAPFile`_ actually decoded and no more, so it</span>
+<span class="sd">        ends in ``Raw`` -- the transport segment is left undecoded on purpose,</span>
+<span class="sd">        see the module notes.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span>
+    <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">layer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">data_link</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">:Raw'</span>
+
+    <span class="n">chain</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">layer</span><span class="p">):</span>
+        <span class="n">chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+    <span class="n">chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">'Raw'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s1">':'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="packet2dict">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.packet2dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert PyPCAPFile packet into :obj:`dict`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+<span class="sd">        data_link: Data link type, from the savefile header.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: A :obj:`dict` mapping of packet data.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">'timestamp'</span><span class="p">:</span> <span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
+        <span class="s1">'capture_len'</span><span class="p">:</span> <span class="n">packet</span><span class="o">.</span><span class="n">capture_len</span><span class="p">,</span>
+        <span class="s1">'packet_len'</span><span class="p">:</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet_len</span><span class="p">,</span>
+        <span class="n">data_link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">_layer2dict</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">packet</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="ipv4_reassembly">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.ipv4_reassembly">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make data for IPv4 reassembly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Data for IPv4 reassembly.</span>
+
+<span class="sd">        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled</span>
+<span class="sd">          if it contains an IPv4 layer (:class:`pcapfile.protocols.network.ip.IP`) and the</span>
+<span class="sd">          **DF** flag is :data:`False`.</span>
+<span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
+<span class="sd">          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`</span>
+
+<span class="sd">    """</span>
+    <span class="n">ipv4</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">IPV4_FLAG_DF</span><span class="p">:</span>  <span class="c1"># dismiss not fragmented packet</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="n">ipv4_header</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">IP_Packet</span><span class="p">(</span>
+        <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
+            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>        <span class="c1"># source IP address</span>
+            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>        <span class="c1"># destination IP address</span>
+            <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                                <span class="c1"># identification</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">),</span>             <span class="c1"># payload protocol type</span>
+        <span class="p">),</span>
+        <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                  <span class="c1"># original packet range number</span>
+        <span class="n">fo</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">off</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>                            <span class="c1"># fragment offset, in octets</span>
+        <span class="n">ihl</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">),</span>                            <span class="c1"># internet header length</span>
+        <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">IPV4_FLAG_MF</span><span class="p">),</span>         <span class="c1"># more fragment flag</span>
+        <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                                <span class="c1"># total length, header includes</span>
+        <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>                              <span class="c1"># raw bytes type header</span>
+        <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>            <span class="c1"># raw bytearray type payload</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ipv6_reassembly">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.ipv6_reassembly">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv6Address] | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make data for IPv6 reassembly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        UnsupportedCall: Always, as `PyPCAPFile`_ has no IPv6 decoder.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s1">'IPv6 reassembly is not supported by the PyPCAPFile engine: '</span>
+                          <span class="s2">"'pypcapfile' has no IPv6 decoder, so no IPv6 fragment header "</span>
+                          <span class="s1">'can be read'</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tcp_reassembly">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.tcp_reassembly">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TCP_Packet | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make data for TCP reassembly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Data for TCP reassembly.</span>
+
+<span class="sd">        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled</span>
+<span class="sd">          if it contains an IPv4 layer carrying a TCP segment.</span>
+<span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
+<span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
+
+<span class="sd">    """</span>
+    <span class="n">ipv4</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">segment</span> <span class="o">=</span> <span class="n">_transport</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">segment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># NOTE: imported only once there is something to decode, so that declining a</span>
+    <span class="c1"># frame does not require ``pcapfile`` to be installed.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>  <span class="c1"># isort:skip</span>
+
+    <span class="n">tcp</span> <span class="o">=</span> <span class="n">TCP</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span><span class="p">,</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">TCP_Packet</span><span class="p">(</span>
+        <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
+            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>  <span class="c1"># source IP address</span>
+            <span class="n">tcp</span><span class="o">.</span><span class="n">src_port</span><span class="p">,</span>                     <span class="c1"># source port</span>
+            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>  <span class="c1"># destination IP address</span>
+            <span class="n">tcp</span><span class="o">.</span><span class="n">dst_port</span><span class="p">,</span>                     <span class="c1"># destination port</span>
+        <span class="p">),</span>
+        <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                            <span class="c1"># original packet range number</span>
+        <span class="n">ack</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">acknum</span><span class="p">,</span>                       <span class="c1"># acknowledgement</span>
+        <span class="n">dsn</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seqnum</span><span class="p">,</span>                       <span class="c1"># data sequence number</span>
+        <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">rst</span><span class="p">),</span>                    <span class="c1"># reset connection flag</span>
+        <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">syn</span><span class="p">),</span>                    <span class="c1"># synchronise flag</span>
+        <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">fin</span><span class="p">),</span>                    <span class="c1"># finish flag</span>
+        <span class="n">header</span><span class="o">=</span><span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span>             <span class="c1"># raw bytes type header</span>
+        <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>           <span class="c1"># raw bytearray type payload</span>
+        <span class="n">first</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seqnum</span><span class="p">,</span>                     <span class="c1"># this sequence number</span>
+        <span class="n">last</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seqnum</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>       <span class="c1"># next (wanted) sequence number</span>
+        <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                     <span class="c1"># payload length, header excludes</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tcp_traceflow">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.tcp_traceflow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span>
+                  <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TF_TCP_Packet | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Trace packet flow for TCP.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+<span class="sd">        data_link: Data link layer protocol (from the savefile header).</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Data for TCP flow tracing.</span>
+
+<span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced</span>
+<span class="sd">          if it contains an IPv4 layer carrying a TCP segment.</span>
+<span class="sd">        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP</span>
+<span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
+
+<span class="sd">    """</span>
+    <span class="n">ipv4</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">segment</span> <span class="o">=</span> <span class="n">_transport</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">segment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># NOTE: imported only once there is something to decode, so that declining a</span>
+    <span class="c1"># frame does not require ``pcapfile`` to be installed.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>  <span class="c1"># isort:skip</span>
+
+    <span class="n">tcp</span> <span class="o">=</span> <span class="n">TCP</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
+        <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                                 <span class="c1"># data link type from savefile header</span>
+        <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                        <span class="c1"># frame number</span>
+        <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">data_link</span><span class="p">),</span>     <span class="c1"># extracted packet</span>
+        <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">syn</span><span class="p">),</span>                                  <span class="c1"># TCP synchronise (SYN) flag</span>
+        <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">fin</span><span class="p">),</span>                                  <span class="c1"># TCP finish (FIN) flag</span>
+        <span class="n">src</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>                <span class="c1"># source IP</span>
+        <span class="n">dst</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                <span class="c1"># destination IP</span>
+        <span class="n">srcport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">src_port</span><span class="p">,</span>                               <span class="c1"># TCP source port</span>
+        <span class="n">dstport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">dst_port</span><span class="p">,</span>                               <span class="c1"># TCP destination port</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                 <span class="c1"># timestamp</span>
+    <span class="p">)</span></div>
 
 </pre></div>
         </article>

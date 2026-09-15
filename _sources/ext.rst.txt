@@ -310,23 +310,39 @@ the network packets for further processing.
 The following table shows the available engines and the corresponding supported
 file formats:
 
-+---------------------+-----------------------------------------------------+-------------------------------------+
-| Engine Type         | Engine Class                                        | Supported File Formats              |
-+=====================+=====================================================+=====================================+
-|                     | :class:`pcapkit.foundation.engines.pcap.PCAP`       | PCAP only                           |
-+ Built-in Engines    +-----------------------------------------------------+-------------------------------------+
-|                     | :class:`pcapkit.foundation.engines.pcapng.PCAPNG`   | PCAP-NG only                        |
-+---------------------+-----------------------------------------------------+-------------------------------------+
-|                     | :class:`pcapkit.foundation.engines.scapy.Scapy`     | all formats supported by `Scapy`_   |
-+                     +-----------------------------------------------------+-------------------------------------+
-| Third-party Engines | :class:`pcapkit.foundation.engines.dpkt.DPKT`       | all formats supported by `DPKT`_    |
-|                     +-----------------------------------------------------+-------------------------------------+
-|                     | :class:`pcapkit.foundation.engines.pyshark.PyShark` | all formats supported by `PyShark`_ |
-+---------------------+-----------------------------------------------------+-------------------------------------+
++---------------------+-----------------------------------------------------------+----------------------------------------+
+| Engine Type         | Engine Class                                              | Supported File Formats                 |
++=====================+===========================================================+========================================+
+|                     | :class:`pcapkit.foundation.engines.pcap.PCAP`             | PCAP only                              |
++ Built-in Engines    +-----------------------------------------------------------+----------------------------------------+
+|                     | :class:`pcapkit.foundation.engines.pcapng.PCAPNG`         | PCAP-NG only                           |
++---------------------+-----------------------------------------------------------+----------------------------------------+
+|                     | :class:`pcapkit.foundation.engines.scapy.Scapy`           | all formats supported by `Scapy`_      |
++                     +-----------------------------------------------------------+----------------------------------------+
+|                     | :class:`pcapkit.foundation.engines.dpkt.DPKT`             | all formats supported by `DPKT`_       |
+|                     +-----------------------------------------------------------+----------------------------------------+
+| Third-party Engines | :class:`pcapkit.foundation.engines.pyshark.PyShark`       | all formats supported by `PyShark`_    |
+|                     +-----------------------------------------------------------+----------------------------------------+
+|                     | :class:`pcapkit.foundation.engines.pypcap.PyPCAP`         | PCAP only, and from a file on disk     |
+|                     +-----------------------------------------------------------+----------------------------------------+
+|                     | :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile` | PCAP only                              |
++---------------------+-----------------------------------------------------------+----------------------------------------+
+
+.. note::
+
+   An engine is free to support less than :class:`~pcapkit.foundation.extraction.Extractor`
+   offers, and several do. `PyPCAP`_ performs no protocol dissection whatsoever, so
+   it supports neither reassembly nor flow tracing; `PyPCAPFile`_ has no IPv6
+   decoder, so it supports IPv4 and TCP reassembly but not IPv6. What matters is
+   that the gap is *announced* -- each engine warns, or raises, for the capability
+   it cannot provide, rather than silently producing an empty result. See
+   :doc:`pcapkit/foundation/engines/index` for the full table.
 
 .. _Scapy: https://scapy.net
 .. _DPKT: https://dpkt.readthedocs.io
 .. _PyShark: https://kiminewt.github.io/pyshark
+.. _PyPCAP: https://github.com/pynetwork/pypcap
+.. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
 Samples
 ~~~~~~~

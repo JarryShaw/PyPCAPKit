@@ -6,7 +6,7 @@ Engine Support
 :mod:`pcapkit.foundation.engines` is a collection of engines
 support for :mod:`pcapkit`, including but not limited to the
 built-in PCAP and `PCAP-NG`_ file support, `Scapy`_, `PyShark`_,
-and `DPKT`_ 3rd party engine support.
+`DPKT`_, `PyPCAP`_ and `PyPCAPFile`_ 3rd party engine support.
 
 .. seealso::
 
@@ -44,6 +44,8 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
            Scapy
            DPKT
            PyShark
+           PyPCAP
+           PyPCAPFile
        end
        B --> third-party
 
@@ -61,9 +63,36 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
        click Scapy "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy"
        click DPKT "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT"
        click PyShark "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark"
+       click PyPCAP "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP"
+       click PyPCAPFile "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile"
+
+Not every engine can do everything :class:`~pcapkit.foundation.extraction.Extractor`
+offers, and the ones that cannot say so rather than quietly doing less:
+
++-----------------------------------------------------------------+---------------------------------------------------------------+
+| Engine                                                          | Gap, and how it is surfaced                                   |
++=================================================================+===============================================================+
+| :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | no reassembly -- disabled with an                             |
+|                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`         |
++-----------------------------------------------------------------+---------------------------------------------------------------+
+| :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`              | no protocol dissection at all, hence no reassembly and no     |
+|                                                                 | flow tracing -- both disabled with an                         |
+|                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`; PCAP   |
+|                                                                 | savefiles on disk only, otherwise                             |
+|                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError` /            |
+|                                                                 | :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`          |
++-----------------------------------------------------------------+---------------------------------------------------------------+
+| :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | no IPv6 decoder, hence no IPv6 reassembly -- disabled with an |
+|                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`, and    |
+|                                                                 | :func:`~pcapkit.toolkit.pypcapfile.ipv6_reassembly` raises;   |
+|                                                                 | PCAP savefiles only, otherwise                                |
+|                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError`              |
++-----------------------------------------------------------------+---------------------------------------------------------------+
 
 .. _PCAP-NG: https://wiki.wireshark.org/Development/PcapNg
 
 .. _Scapy: https://scapy.net
 .. _DPKT: https://dpkt.readthedocs.io
 .. _PyShark: https://kiminewt.github.io/pyshark
+.. _PyPCAP: https://github.com/pynetwork/pypcap
+.. _PyPCAPFile: https://github.com/kisom/pypcapfile

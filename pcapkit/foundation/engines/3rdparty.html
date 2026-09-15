@@ -686,6 +686,413 @@ close the engine instance after the extraction process is finished.</p>
 </dd></dl>
 
 </section>
+<section id="module-pcapkit.foundation.engines.pypcap">
+<span id="pypcap-support"></span><h2>PyPCAP Support<a class="headerlink" href="#module-pcapkit.foundation.engines.pypcap" title="Link to this heading">¶</a></h2>
+<p>This module contains the implementation for <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> engine
+support, as is used by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> publishes no wheels, so installing it compiles a C extension and
+needs both the <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> headers and its shared library on the
+system – a header alone is not enough. It is therefore <strong>not</strong> part of the
+<code class="docutils literal notranslate"><span class="pre">all</span></code> extra, and is installed on its own once libpcap is available:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>PyPCAP<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> is a <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> binding aimed primarily at live capture.
+Offline it performs <strong>no protocol dissection</strong>: each frame is the
+<code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> pair that <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_next_ex()</span></code> produced. Reassembly
+and flow tracing are therefore unavailable and are disabled – with an
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – when requested.</p>
+<p>The engine also reads PCAP savefiles only, and only from a file on disk.
+PCAP-NG is rejected with a
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a>, because
+<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> opens such a file without complaint and then yields no
+frames at all; and a non-file input is rejected with an
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>, because
+<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> opens a savefile by <em>name</em>.</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pypcap.</span></span><span class="sig-name descname"><span class="pre">PyPCAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcap.html#PyPCAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RawFrame</span></code>]</p>
+<p>PyPCAP engine support.</p>
+<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> is a binding over <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>, primarily aimed at live
+capture. Offline it is a savefile reader and nothing more: iteration yields
+the <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> pair from <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_next_ex()</span></code> and no protocol
+dissection is performed. Consequently this engine</p>
+<ul class="simple">
+<li><p>returns each frame as a <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> rather than as
+a parsed packet object, and</p></li>
+<li><p>disables both reassembly and flow tracing, warning as it does so, since
+neither can be derived without an IP or TCP layer to read.</p></li>
+</ul>
+<p>It also requires the input to be a real file on disk, because
+<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> opens by <em>name</em> – there is no way to hand
+<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> an already-open Python stream.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a></span>) – <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.__engine_name__">
+<span class="sig-name descname"><span class="pre">__engine_name__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PyPCAP'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__engine_name__" title="Link to this definition">¶</a></dt>
+<dd><p>Engine name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.__engine_module__">
+<span class="sig-name descname"><span class="pre">__engine_module__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pcap'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__engine_module__" title="Link to this definition">¶</a></dt>
+<dd><p>Engine module name.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.dlink">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dlink</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.dlink" title="Link to this definition">¶</a></dt>
+<dd><p>Data link layer protocol, as reported by the capture handle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcap.html#PyPCAP.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.run" title="Link to this definition">¶</a></dt>
+<dd><p>Call <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> to extract PCAP files.</p>
+<p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP._expkg" title="pcapkit.foundation.engines.pypcap.PyPCAP._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a>
+as <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> and <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP._extmp" title="pcapkit.foundation.engines.pypcap.PyPCAP._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a>
+as an iterator from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AttributeWarning</strong> – Warns under following circumstances:</p>
+<ul class="simple">
+<li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
+and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
+is provided as the PyPCAP engine currently does not
+support such operations.</p></li>
+<li><p>if reassembly and/or flow tracing is enabled, as the PyPCAP
+engine performs no protocol dissection and so cannot support
+either operation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the file format is not supported, i.e., not a PCAP
+    file. PCAP-NG is rejected explicitly rather than left to
+    <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>, which opens such a file without complaint
+    and then yields no frames at all.</p></li>
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If the input is not a file on disk, as
+    <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> can only open a savefile by name.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.read_frame">
+<span class="sig-name descname"><span class="pre">read_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcap.html#PyPCAP.read_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.read_frame" title="Link to this definition">¶</a></dt>
+<dd><p>Read frames with PyPCAP engine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> pair as yielded by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Please refer to <a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcap.PCAP.read_frame" title="pcapkit.foundation.engines.pcap.PCAP.read_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAP.read_frame</span></code></a>
+for more operational information.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcap.html#PyPCAP.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.close" title="Link to this definition">¶</a></dt>
+<dd><p>Close engine.</p>
+<p>This method closes the underlying <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> handle. It is
+idempotent, as <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor._cleanup</span></code></a> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.__exit__</span></code>
+may both reach it, and <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcap.pcap.close()</span></code> is not safe to call twice.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP._expkg">
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcap</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP._expkg" title="Link to this definition">¶</a></dt>
+<dd><p>Engine extraction package.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP._extmp">
+<span class="sig-name descname"><span class="pre">_extmp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">RawFrame</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP._extmp" title="Link to this definition">¶</a></dt>
+<dd><p>Engine extraction temporary storage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP._dlink">
+<span class="sig-name descname"><span class="pre">_dlink</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_LinkType</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP._dlink" title="Link to this definition">¶</a></dt>
+<dd><p>Data link layer protocol, from the capture handle.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP._closed">
+<span class="sig-name descname"><span class="pre">_closed</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP._closed" title="Link to this definition">¶</a></dt>
+<dd><p>Closed flag, so that the handle is not closed twice.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.foundation.engines.pypcapfile">
+<span id="pypcapfile-support"></span><h2>PyPCAPFile Support<a class="headerlink" href="#module-pcapkit.foundation.engines.pypcapfile" title="Link to this heading">¶</a></h2>
+<p>This module contains the implementation for <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> engine
+support, as is used by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> is a pure Python savefile reader that decodes Ethernet, IPv4,
+TCP and UDP and nothing else. IPv6 reassembly is therefore unavailable and is
+disabled – with an <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> –
+when requested; IPv4 and TCP reassembly and TCP flow tracing remain
+available. PCAP-NG is rejected with a
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a>.</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">PyPCAPFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPFilePacket</span></code>]</p>
+<p>PyPCAPFile engine support.</p>
+<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> is a pure Python savefile reader. It decodes Ethernet, IPv4,
+TCP and UDP, and nothing else – in particular there is no IPv6 decoder and
+no PCAP-NG support. Consequently this engine</p>
+<ul class="simple">
+<li><p>reads PCAP savefiles only, raising
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a> on PCAP-NG, and</p></li>
+<li><p>disables IPv6 reassembly, warning as it does so, while leaving IPv4 and
+TCP reassembly and TCP flow tracing in place.</p></li>
+</ul>
+<p>The engine stops decoding at the network layer rather than descending into
+the transport layer. <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> decoders <em>replace</em> the payload bytes of
+the layer they decode, so descending further would discard the verbatim TCP
+segment that <a class="reference internal" href="../../toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.tcp_reassembly" title="pcapkit.toolkit.pypcapfile.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_reassembly()</span></code></a> needs in
+order to report an exact header/payload split.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a></span>) – <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__engine_name__">
+<span class="sig-name descname"><span class="pre">__engine_name__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PyPCAPFile'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__engine_name__" title="Link to this definition">¶</a></dt>
+<dd><p>Engine name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__engine_module__">
+<span class="sig-name descname"><span class="pre">__engine_module__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pcapfile'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__engine_module__" title="Link to this definition">¶</a></dt>
+<dd><p>Engine module name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS">
+<span class="sig-name descname"><span class="pre">LAYERS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS" title="Link to this definition">¶</a></dt>
+<dd><p>Number of layers to descend while decoding, i.e. link plus network. See
+the class docstring for why this stops short of the transport layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.dlink">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dlink</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.dlink" title="Link to this definition">¶</a></dt>
+<dd><p>Data link layer protocol, as reported by the savefile header.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run" title="Link to this definition">¶</a></dt>
+<dd><p>Call <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile.load_savefile()</span></code> to extract PCAP files.</p>
+<p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a>
+as <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> and <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a>
+as an iterator over the lazily generated savefile packets.</p>
+<p>The savefile is loaded with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code>, so that each frame arrives with
+its bytes verbatim, and <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.read_frame" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.read_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_frame()</span></code></a> then decodes it to
+<a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LAYERS</span></code></a> depth using <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.linklayer.clookup()</span></code> – the very
+call <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> makes internally. Doing it this way round is what
+lets the link layer type be inspected (and reported on) <em>before</em> the
+first frame is decoded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AttributeWarning</strong> – Warns under following circumstances:</p>
+<ul class="simple">
+<li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
+and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
+is provided as the PyPCAPFile engine currently does not
+support such operations.</p></li>
+<li><p>if IPv6 reassembly is enabled, as <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has no IPv6
+decoder.</p></li>
+<li><p>if <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has no decoder for the savefile’s link layer
+type, in which case frames are left undecoded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the file format is not supported, i.e., not a PCAP
+    file. <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> reads libpcap savefiles only.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.read_frame">
+<span class="sig-name descname"><span class="pre">read_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile.read_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.read_frame" title="Link to this definition">¶</a></dt>
+<dd><p>Read frames with PyPCAPFile engine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed frame instance.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Please refer to <a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcap.PCAP.read_frame" title="pcapkit.foundation.engines.pcap.PCAP.read_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAP.read_frame</span></code></a>
+for more operational information.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg">
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapfile</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg" title="Link to this definition">¶</a></dt>
+<dd><p>Engine extraction package.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp">
+<span class="sig-name descname"><span class="pre">_extmp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">PCAPFilePacket</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp" title="Link to this definition">¶</a></dt>
+<dd><p>Engine extraction temporary storage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._dlink">
+<span class="sig-name descname"><span class="pre">_dlink</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_LinkType</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._dlink" title="Link to this definition">¶</a></dt>
+<dd><p>Data link layer protocol, from the savefile header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._declf">
+<span class="sig-name descname"><span class="pre">_declf</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._declf" title="Link to this definition">¶</a></dt>
+<dd><p>Link layer decoder for this savefile, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has none for its link layer type.</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="internal-definitions">
+<h3>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile._NamedStream">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_NamedStream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#_NamedStream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile._NamedStream" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Read-only proxy that gives a stream the <code class="docutils literal notranslate"><span class="pre">name</span></code> attribute.</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile.load_savefile()</span></code> dereferences <code class="docutils literal notranslate"><span class="pre">input_file.name</span></code>
+unconditionally, on the way into its trace helper. That is fine for the
+<a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
+normally holds, but not for the <a class="reference internal" href="../../corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>
+it substitutes when the caller supplied a non-seekable stream – that class
+exposes no <code class="docutils literal notranslate"><span class="pre">name</span></code>, so the load would fail with <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> before
+a single byte was read.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stream</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a></span>) – Underlying binary stream.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name to report as <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile._NamedStream.name" title="pcapkit.foundation.engines.pypcapfile._NamedStream.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile._NamedStream.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile._NamedStream.name" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the underlying stream.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile._NamedStream.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#_NamedStream.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile._NamedStream.read" title="Link to this definition">¶</a></dt>
+<dd><p>Read from the underlying stream.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Number of bytes to read; all remaining bytes if negative.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder">
+<span class="sig-prename descclassname"><span class="pre">PyPCAPFile.</span></span><span class="sig-name descname"><span class="pre">_get_decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linktype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile._get_decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder" title="Link to this definition">¶</a></dt>
+<dd><p>Return the <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> link layer decoder for a link layer type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>linktype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Link layer type code, from the savefile header.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The decoder class, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has none.</p>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AttributeWarning</strong> – If no decoder is available, as frames will then be
+left as raw bytes and no reassembly or flow tracing is possible.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode">
+<span class="sig-prename descclassname"><span class="pre">PyPCAPFile.</span></span><span class="sig-name descname"><span class="pre">_decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frnum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile._decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode" title="Link to this definition">¶</a></dt>
+<dd><p>Decode a raw savefile packet down to <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LAYERS</span></code></a> depth.</p>
+<p>A new <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapfile.structs.pcap_packet</span></code> is built rather than the
+given one mutated, so that a decoding failure leaves the original intact.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span>) – Undecoded savefile packet, i.e. as loaded with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code>.</p></li>
+<li><p><strong>frnum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Frame number, for the warning message below.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The decoded packet, or <code class="docutils literal notranslate"><span class="pre">packet</span></code> unchanged when it could not be
+decoded.</p>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AttributeWarning</strong> – If <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> could not decode the frame, e.g.
+because the capture is truncated. One bad frame should not abort
+the extraction, but it should not pass silently either.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
 </section>
 
         </article>
@@ -747,6 +1154,11 @@ close the engine instance after the extraction process is finished.</p>
 <li><a class="reference internal" href="#module-pcapkit.foundation.engines.scapy">Scapy Support</a></li>
 <li><a class="reference internal" href="#module-pcapkit.foundation.engines.dpkt">DPKT Support</a></li>
 <li><a class="reference internal" href="#module-pcapkit.foundation.engines.pyshark">PyShark Support</a></li>
+<li><a class="reference internal" href="#module-pcapkit.foundation.engines.pypcap">PyPCAP Support</a></li>
+<li><a class="reference internal" href="#module-pcapkit.foundation.engines.pypcapfile">PyPCAPFile Support</a><ul>
+<li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
