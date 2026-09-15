@@ -415,11 +415,11 @@
 <span class="sd">.. _tbtrim: https://github.com/gousaiyang/tbtrim</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="ne">ModuleNotFoundError</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
@@ -461,24 +461,92 @@
 <div class="viewcode-block" id="stacklevel">
 <a class="viewcode-back" href="../../../pcapkit/utilities/functools.html#pcapkit.utilities.exceptions.stacklevel">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">stacklevel</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Fetch current stack level.</span>
+<span class="w">    </span><span class="sd">"""Stack level of the innermost frame outside :mod:`pcapkit`.</span>
 
-<span class="sd">    The function will walk through the straceback stack (:func:`traceback.extract_stack`),</span>
-<span class="sd">    and fetch the stack level where the path contains ``/pcapkit/``. So that it won't</span>
-<span class="sd">    display any disturbing internal traceback information when raising errors.</span>
+<span class="sd">    The value is a *relative* level, in the sense both :func:`warnings.warn` and</span>
+<span class="sd">    the :mod:`logging` module use: level ``1`` is the frame that called</span>
+<span class="sd">    :func:`stacklevel`, level ``2`` its caller, and so on outwards. Handing it to</span>
+<span class="sd">    either of them attributes the complaint to the caller who reached into</span>
+<span class="sd">    :mod:`pcapkit`, rather than to whichever :mod:`pcapkit` internal happened to</span>
+<span class="sd">    notice the problem -- which is the whole point of the function, since the</span>
+<span class="sd">    internal frames are noise to the user reading the report.</span>
+
+<span class="sd">    The arithmetic, since it is easy to get backwards. Number the frames outwards</span>
+<span class="sd">    from this one, so that a number *is* the relative level a consumer wants::</span>
+
+<span class="sd">        level 0             stacklevel() itself</span>
+<span class="sd">        level 1             whoever called stacklevel()</span>
+<span class="sd">        ...</span>
+<span class="sd">        level ``boundary``  the outermost frame inside pcapkit</span>
+<span class="sd">        ...</span>
+<span class="sd">        level ``outermost`` the interpreter entry point</span>
+
+<span class="sd">    The frame to name is the first one *past* the boundary, hence</span>
+<span class="sd">    ``boundary + 1``. What makes this a fix rather than a rewrite is that</span>
+<span class="sd">    ``boundary`` is measured from the *inside* out: it depends only on how deep the</span>
+<span class="sd">    :mod:`pcapkit` frames run, never on how deep the caller's own stack is.</span>
+<span class="sd">    Numbering from the outside in, as this function once did, grew with the outer</span>
+<span class="sd">    stack, so the frame it named drifted one further out for every extra frame</span>
+<span class="sd">    above the boundary -- under :program:`pytest`, dozens of them.</span>
+
+<span class="sd">    Both bounds are enforced, as neither consumer copes with a level outside them:</span>
+
+<span class="sd">    * Never below ``1``. ``0`` and negative values mean "do not walk out at all"</span>
+<span class="sd">      to :meth:`logging.Logger.findCaller`, which then attributes the record to</span>
+<span class="sd">      :mod:`logging` itself; :func:`warnings.warn` treats them as ``1``.</span>
+<span class="sd">    * Never above ``outermost``. That bound is reached when the whole stack is</span>
+<span class="sd">      inside :mod:`pcapkit`, e.g. running the package as a script, and walking</span>
+<span class="sd">      past the outermost frame makes :func:`warnings.warn` fall back to blaming</span>
+<span class="sd">      the :mod:`sys` module.</span>
+
+<span class="sd">    The walk goes through :func:`inspect.currentframe` and ``f_back`` rather than</span>
+<span class="sd">    :func:`traceback.extract_stack`, which cannot be used here:</span>
+<span class="sd">    :meth:`traceback.StackSummary.extract` honours :data:`sys.tracebacklimit`, and</span>
+<span class="sd">    :class:`BaseError` sets that to ``0`` for every loud error outside development</span>
+<span class="sd">    mode. One such error therefore made ``extract_stack()`` return an *empty* list</span>
+<span class="sd">    for the rest of the process, which is where the old ``-1`` came from -- so in</span>
+<span class="sd">    ordinary use the first error silently broke the attribution of every warning</span>
+<span class="sd">    after it. Walking frames also skips building the :class:`~traceback.FrameSummary`</span>
+<span class="sd">    objects and the :mod:`linecache` lookups behind them, which is worth having on</span>
+<span class="sd">    a function called once per warning.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        The level is relative to the *caller* of :func:`stacklevel`. A function</span>
+<span class="sd">        that forwards it to :func:`warnings.warn` on its caller's behalf has to</span>
+<span class="sd">        add one for its own frame -- see :func:`pcapkit.utilities.warnings.warn`,</span>
+<span class="sd">        which does exactly that.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Stack level until internal stacks, i.e. contains ``/pcapkit/``.</span>
+<span class="sd">        Number of frames from the caller of :func:`stacklevel` outwards to the</span>
+<span class="sd">        innermost frame whose path does not contain ``/pcapkit/``.</span>
 
 <span class="sd">    """</span>
     <span class="n">pcapkit</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">pcapkit</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span>
-    <span class="n">tb</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_stack</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">tbitem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tb</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">pcapkit</span> <span class="ow">in</span> <span class="n">tbitem</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="k">break</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tb</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">index</span><span class="o">-</span><span class="mi">1</span></div>
+
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="c1"># No Python stack frame support, so there is no boundary to find. Blaming</span>
+        <span class="c1"># the immediate caller is the least wrong answer available.</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">boundary</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># level of the outermost pcapkit frame seen so far</span>
+        <span class="n">outermost</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># level of the outermost frame there is</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="mi">0</span>      <span class="c1"># level 0 is this function's own frame, which is in pcapkit</span>
+        <span class="k">while</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pcapkit</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="p">:</span>
+                <span class="n">boundary</span> <span class="o">=</span> <span class="n">level</span>
+            <span class="n">outermost</span> <span class="o">=</span> <span class="n">level</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_back</span>
+            <span class="n">level</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># A frame reachable from a local keeps its whole chain alive as soon as a</span>
+        <span class="c1"># traceback references this one, so the name is dropped rather than left</span>
+        <span class="c1"># bound. The loop exits with `frame` at :data:`None` anyway; this covers</span>
+        <span class="c1"># leaving it early.</span>
+        <span class="k">del</span> <span class="n">frame</span>
+
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">boundary</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">outermost</span><span class="p">))</span></div>
 
 
 
@@ -512,7 +580,12 @@
 <span class="sd">        * :data:`sys.tracebacklimit` is process-global, so it is only set for a</span>
 <span class="sd">          loud error -- a quiet one used as control flow must not truncate the</span>
 <span class="sd">          tracebacks of unrelated exceptions for the rest of the process.</span>
-<span class="sd">        * In Python 2.7, :func:`trace.print_stack(limit)` does not support negative limit.</span>
+<span class="sd">        * The ``stacklevel`` of the log record is the relative level</span>
+<span class="sd">          :func:`stacklevel` computes, so the record is attributed to the caller</span>
+<span class="sd">          whose operation failed rather than to this module. It used to be</span>
+<span class="sd">          *negated*, which :meth:`logging.Logger.findCaller` reads as "do not walk</span>
+<span class="sd">          out at all" and which therefore blamed :mod:`logging` itself for every</span>
+<span class="sd">          error pcapkit raised.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :func:`pcapkit.utilities.exceptions.stacklevel`</span>
@@ -525,7 +598,7 @@
             <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
                                 <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span> <span class="k">if</span> <span class="n">VERBOSE</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
-                                <span class="n">stack_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=-</span><span class="n">stacklevel</span><span class="p">())</span>
+                                <span class="n">stack_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">tracebacklimit</span> <span class="o">=</span> <span class="mi">0</span>

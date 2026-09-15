@@ -471,7 +471,12 @@ exception, carrying its message for whoever catches it.</p>
 <li><p><a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> is process-global, so it is only set for a
 loud error – a quiet one used as control flow must not truncate the
 tracebacks of unrelated exceptions for the rest of the process.</p></li>
-<li><p>In Python 2.7, <code class="xref py py-func docutils literal notranslate"><span class="pre">trace.print_stack(limit)()</span></code> does not support negative limit.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">stacklevel</span></code> of the log record is the relative level
+<a class="reference internal" href="functools.html#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a> computes, so the record is attributed to the caller
+whose operation failed rather than to this module. It used to be
+<em>negated</em>, which <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger.findCaller" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">logging.Logger.findCaller()</span></code></a> reads as “do not walk
+out at all” and which therefore blamed <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> itself for every
+error pcapkit raised.</p></li>
 </ul>
 </div>
 <div class="admonition seealso">

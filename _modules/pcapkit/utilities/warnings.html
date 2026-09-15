@@ -504,7 +504,12 @@
 <span class="sd">    Args:</span>
 <span class="sd">        message: Warning message.</span>
 <span class="sd">        category: Warning category.</span>
-<span class="sd">        stacklevel: Warning stack level.</span>
+<span class="sd">        stacklevel: Warning stack level, **relative to the caller of this</span>
+<span class="sd">            function** -- ``1`` blames the line that called :func:`warn`, ``2``</span>
+<span class="sd">            its caller, and so on, exactly as the argument of the same name reads</span>
+<span class="sd">            on :func:`warnings.warn` itself. Defaults to</span>
+<span class="sd">            :func:`~pcapkit.utilities.exceptions.stacklevel`, i.e. the innermost</span>
+<span class="sd">            frame outside :mod:`pcapkit`.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :mod:`pcapkit.utilities.warnings` for the emission model in full, and for</span>
@@ -512,7 +517,17 @@
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">stacklevel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Computed here, so the level is already relative to *this* frame, which</span>
+        <span class="c1"># is the frame both consumers below count outwards from. Used as is.</span>
         <span class="n">stacklevel</span> <span class="o">=</span> <span class="n">stacklevel_calculator</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># A caller-supplied level is relative to the caller's frame, one deeper</span>
+        <span class="c1"># than this one, so this frame has to be added back before forwarding --</span>
+        <span class="c1"># the ordinary convention for a function wrapping `warnings.warn`. Without</span>
+        <span class="c1"># it, `warn(..., stacklevel=stacklevel())` at a call site lands one frame</span>
+        <span class="c1"># short of the boundary, i.e. still inside pcapkit, which is the frame the</span>
+        <span class="c1"># whole exercise exists to skip past.</span>
+        <span class="n">stacklevel</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span>
                    <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">)</span>
