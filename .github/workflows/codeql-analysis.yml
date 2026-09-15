@@ -2,24 +2,27 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [main, ]
+    branches: [main]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [main]
   schedule:
     - cron: '0 2 * * 6'
 
-jobs:
-  unit-tests:
-    name: Unit Tests
-    permissions:
-      contents: read
-    uses: ./.github/workflows/unit-tests.yml
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+jobs:
+  # This workflow used to call ./.github/workflows/unit-tests.yml and gate
+  # `analyze` behind it. That re-ran the entire unit and integration matrix
+  # against a commit the Unit Tests workflow is already testing, and it bought
+  # nothing: CodeQL reads the source, so its findings do not depend on the test
+  # suite passing. Worse, it meant a failing test suppressed the security
+  # analysis for that commit. Static analysis now runs on its own.
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-    needs: [ unit-tests ]
     permissions:
       actions: read
       contents: read

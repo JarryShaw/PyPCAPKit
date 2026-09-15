@@ -9,12 +9,20 @@ on:
   push:
     branches: [main]
 
+# This workflow commits and pushes, so a cancelled run can leave the bump
+# half-applied -- queue superseded runs rather than killing them.
+concurrency:
+  group: conda-update-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   unit-tests:
-    name: Unit Tests
+    name: Conda test gate
     permissions:
       contents: read
     uses: ./.github/workflows/unit-tests.yml
+    with:
+      gate-only: true
 
   conda-update:
     name: Update requirements.txt
@@ -93,7 +101,9 @@ jobs:
       PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
 
   conda-tag:
-    name: Conda Tag
+    # See create-release.yml: "(update)" keeps this apart from the Conda Tag job
+    # there, which runs on the same commits.
+    name: Conda Tag (update)
     runs-on: ubuntu-latest
     needs: [ conda-update ]
     if: needs.conda-update.outputs.CONDA_CHANGED == 'true'
@@ -124,7 +134,7 @@ jobs:
           tags: true
 
   conda-dist:
-    name: Conda deployment of package for platform ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    name: Conda deployment (update) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     needs: [ conda-tag, conda-update ]
     if: needs.conda-update.outputs.CONDA_CHANGED == 'true'

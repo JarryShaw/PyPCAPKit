@@ -6,14 +6,41 @@ on:
   pull_request:
     branches: [main]
   workflow_call:
+    inputs:
+      gate-only:
+        description: >-
+          Run only the single-version gate job instead of the full matrix.
+          Callers that merely need a pass/fail verdict before shipping set
+          this to true: the full matrix already runs once per commit from
+          this workflow's own push and pull_request triggers, so running it
+          again per caller tests the same commit several times over.
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
 
+# `github.workflow` is the *caller's* workflow name inside a called workflow,
+# so the `unit-tests-` prefix is what stops a called run from ever sharing a
+# group with the caller that invoked it -- if they shared one, the callee
+# would cancel its own caller. Only pull-request runs are cancellable: on
+# main, on a tag, or on the release path a cancelled run is worse than a slow
+# one.
+concurrency:
+  group: unit-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
+    # `github.event_name` is NOT 'workflow_call' inside a called workflow --
+    # the github context is inherited from the caller, so it reads
+    # 'pull_request', 'push', 'schedule' or 'workflow_run'. Guarding on it (as
+    # this workflow used to) therefore ran the whole matrix in every caller
+    # and skipped the gate everywhere. An input is the only reliable way for a
+    # reusable workflow to know how it was invoked.
     name: Python ${{ matrix.python-version }}
-    if: ${{ github.event_name != 'workflow_call' }}
+    if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental == true }}
     timeout-minutes: 30
@@ -55,7 +82,7 @@ jobs:
 
   integration:
     name: Integration Python ${{ matrix.python-version }}
-    if: ${{ github.event_name != 'workflow_call' }}
+    if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental == true }}
     timeout-minutes: 30
@@ -120,9 +147,13 @@ jobs:
       - name: Run full test suite
         run: python -m pytest -q
 
+  # The verdict a shipping workflow asks for: the full suite, fixtures and
+  # all, on one interpreter. It is deliberately not the matrix -- the matrix
+  # has already run against this very commit, from this workflow's own push or
+  # pull_request trigger, before anything reaches a release path.
   gate:
-    name: Write workflow gate
-    if: ${{ github.event_name == 'workflow_call' }}
+    name: Gate (full suite, Python 3.14)
+    if: ${{ inputs.gate-only == true }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
