@@ -11,7 +11,7 @@ import warnings
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.exceptions import stacklevel as stacklevel_calculator
-from pcapkit.utilities.logging import DEVMODE, VERBOSE, logger
+from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Type, Union
@@ -34,6 +34,11 @@ __all__ = [
     # DeprecationWarning
     'DeprecatedFormatWarning',
 ]
+
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',

@@ -16,7 +16,7 @@ from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
 from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
-from pcapkit.utilities.logging import logger
+from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
     from typing import Type
@@ -40,6 +40,10 @@ __all__ = [
 
     'register_extractor_reassembly', 'register_extractor_traceflow',
 ]
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 NULL = '(null)'
 
@@ -77,7 +81,7 @@ def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | T
         module = cast('ModuleDescriptor[Engine]', ModuleDescriptor(module, class_))
 
     Extractor.register_engine(name, module)
-    logger.info('registered extractor engine: %s', name)
+    logger.debug('registered extractor engine: %s', name)
 
 
 ###############################################################################
@@ -120,7 +124,7 @@ def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dump
 
     Extractor.register_dumper(format, module, ext)
     TraceFlow.register_dumper(format, module, ext)
-    logger.info('registered output format: %s', format)
+    logger.debug('registered output format: %s', format)
 
 
 @overload
@@ -153,7 +157,7 @@ def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
         module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
 
     Extractor.register_dumper(format, module, ext)
-    logger.info('registered extractor output dumper: %s', format)
+    logger.debug('registered extractor output dumper: %s', format)
 
 
 @overload
@@ -186,7 +190,7 @@ def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
         module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
 
     TraceFlow.register_dumper(format, module, ext)
-    logger.info('registered traceflow output: %s', format)
+    logger.debug('registered traceflow output: %s', format)
 
 
 ###############################################################################
@@ -207,7 +211,7 @@ def register_reassembly_ipv4_callback(callback: 'Reasm_CallbackFn') -> 'None':
 
     """
     IPv4_Reassembly.register(callback)
-    logger.info('registered IPv4 reassembly callback: %r', callback)
+    logger.debug('registered IPv4 reassembly callback: %r', callback)
 
 
 # NOTE: pcapkit.foundation.reassembly.ipv6.IPv6.__callback_fn__
@@ -223,7 +227,7 @@ def register_reassembly_ipv6_callback(callback: 'Reasm_CallbackFn') -> 'None':
 
     """
     IPv6_Reassembly.register(callback)
-    logger.info('registered IPv6 reassembly callback: %r', callback)
+    logger.debug('registered IPv6 reassembly callback: %r', callback)
 
 
 # NOTE: pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__
@@ -239,7 +243,7 @@ def register_reassembly_tcp_callback(callback: 'Reasm_CallbackFn') -> 'None':
 
     """
     TCP_Reassembly.register(callback)
-    logger.info('registered TCP reassembly callback: %r', callback)
+    logger.debug('registered TCP reassembly callback: %r', callback)
 
 
 # NOTE: pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__
@@ -255,7 +259,7 @@ def register_traceflow_tcp_callback(callback: 'Trace_CallbackFn') -> 'None':
 
     """
     TCP_TraceFlow.register_callback(callback)
-    logger.info('registered TCP flow tracing callback: %r', callback)
+    logger.debug('registered TCP flow tracing callback: %r', callback)
 
 
 ###############################################################################
@@ -292,7 +296,7 @@ def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescript
         module = cast('ModuleDescriptor[Reassembly]', ModuleDescriptor(module, class_))
 
     Extractor.register_reassembly(protocol, module)
-    logger.info('registered extractor reassembly: %s', protocol)
+    logger.debug('registered extractor reassembly: %s', protocol)
 
 
 @overload
@@ -324,4 +328,4 @@ def register_extractor_traceflow(protocol: 'str', module: 'str | ModuleDescripto
         module = cast('ModuleDescriptor[TraceFlow]', ModuleDescriptor(module, class_))
 
     Extractor.register_traceflow(protocol, module)
-    logger.info('registered extractor flow tracing: %s', protocol)
+    logger.debug('registered extractor flow tracing: %s', protocol)

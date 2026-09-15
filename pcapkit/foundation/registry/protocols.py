@@ -46,7 +46,7 @@ from pcapkit.protocols.transport.sctp import SCTP
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
-from pcapkit.utilities.logging import logger
+from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
     from typing import Optional, Type
@@ -125,6 +125,10 @@ __all__ = [
     'register_pcapng_record',
 ]
 
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
+
 NULL = '(null)'
 
 
@@ -144,7 +148,7 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
         raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
 
     protocol_registry[protocol.__name__.upper()] = protocol
-    logger.info('registered protocol: %s', protocol.__name__)
+    logger.debug('registered protocol: %s', protocol.__name__)
 
 
 ###############################################################################
@@ -188,7 +192,7 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
 
     Frame.register(code, module)
     PCAPNG.register(code, module)
-    logger.info('registered linktype protocol: %s', code.name)
+    logger.debug('registered linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
@@ -225,7 +229,7 @@ def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] | 
         module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
     Frame.register(code, module)
-    logger.info('registered PCAP linktype protocol: %s', code.name)
+    logger.debug('registered PCAP linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
@@ -262,7 +266,7 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] 
         module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
     PCAPNG.register(code, module)
-    logger.info('registered PCAP-NG linktype protocol: %s', code.name)
+    logger.debug('registered PCAP-NG linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
@@ -304,7 +308,7 @@ def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protoc
         module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
     Link.register(code, module)
-    logger.info('registered ethertype protocol: %s', code.name)
+    logger.debug('registered ethertype protocol: %s', code.name)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
@@ -346,7 +350,7 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
         module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
     Internet.register(code, module)
-    logger.info('registered transtype protocol: %s', code.name)
+    logger.debug('registered transtype protocol: %s', code.name)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
@@ -376,7 +380,7 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
     IPv4.register_option(code, meth)
     if schema is not None:
         Schema_IPv4_Option.register(code, schema)
-    logger.info('registered IPv4 option parser: %s', code.name)
+    logger.debug('registered IPv4 option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.hip.HIP
@@ -401,7 +405,7 @@ def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_Paramet
     HIP.register_parameter(code, meth)
     if schema is not None:
         Schema_HIP_Parameter.register(code, schema)
-    logger.info('registered HIP parameter parser: %s', code.name)
+    logger.debug('registered HIP parameter parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.hopopt.HOPOPT.__option__
@@ -426,7 +430,7 @@ def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_Option
     HOPOPT.register_option(code, meth)
     if schema is not None:
         Schema_HOPOPT_Option.register(code, schema)
-    logger.info('registered HOPOPT option parser: %s', code.name)
+    logger.debug('registered HOPOPT option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__
@@ -451,7 +455,7 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
     IPv6_Opts.register_option(code, meth)
     if schema is not None:
         Schema_IPv6_Opts_Option.register(code, schema)
-    logger.info('registered IPv6-Opts option parser: %s', code.name)
+    logger.debug('registered IPv6-Opts option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__
@@ -476,7 +480,7 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
     IPv6_Route.register_routing(code, meth)
     if schema is not None:
         Schema_IPv6_Route_RoutingType.register(code, schema)
-    logger.info('registered IPv6-Route routing data parser: %s', code.name)
+    logger.debug('registered IPv6-Route routing data parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.mh.MH.__message__
@@ -501,7 +505,7 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
     MH.register_message(code, meth)
     if schema is not None:
         Schema_MH_Packet.register(code, schema)
-    logger.info('registered MH message type parser: %s', code.name)
+    logger.debug('registered MH message type parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.mh.MH.__option__
@@ -526,7 +530,7 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
     MH.register_option(code, meth)
     if schema is not None:
         Schema_MH_Option.register(code, schema)
-    logger.info('registered MH option parser: %s', code.name)
+    logger.debug('registered MH option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.mh.MH.__extension__
@@ -551,7 +555,7 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
     MH.register_extension(code, meth)
     if schema is not None:
         Schema_MH_CGAExtension.register(code, schema)
-    logger.info('registered MH CGA extension: %s', code.name)
+    logger.debug('registered MH CGA extension: %s', code.name)
 
 
 ###############################################################################
@@ -623,7 +627,7 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
             continue
 
         cls.register(code, module)
-        logger.info('registered %s port: %s', test.name, code)
+        logger.debug('registered %s port: %s', test.name, code)
         _reg = True
 
     if not _reg:
@@ -666,7 +670,7 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
         module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
     TCP.register(code, module)
-    logger.info('registered TCP port: %s', code)
+    logger.debug('registered TCP port: %s', code)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
@@ -696,7 +700,7 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
     TCP.register_option(code, meth)
     if schema is not None:
         Schema_TCP_Option.register(code, schema)
-    logger.info('registered TCP option parser: %s', code.name)
+    logger.debug('registered TCP option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.transport.tcp.TCP.__mp_option__
@@ -721,7 +725,7 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
     TCP.register_mp_option(code, meth)
     if schema is not None:
         Schema_TCP_MPTCP.register(code, schema)
-    logger.info('registered MPTCP option parser: %s', code.name)
+    logger.debug('registered MPTCP option parser: %s', code.name)
 
 
 @overload
@@ -755,7 +759,7 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
         module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
     UDP.register(code, module)
-    logger.info('registered UDP port: %s', code)
+    logger.debug('registered UDP port: %s', code)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
@@ -834,7 +838,7 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
     HTTPv2.register_frame(code, meth)
     if schema is not None:
         Schema_HTTP_FrameType.register(code, schema)
-    logger.info('registered HTTP/2 frame parser: %s', code.name)
+    logger.debug('registered HTTP/2 frame parser: %s', code.name)
 
 
 ###############################################################################
@@ -864,7 +868,7 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
     PCAPNG.register_block(code, meth)
     if schema is not None:
         Schema_PCAPNG_BlockType.register(code, schema)
-    logger.info('registered PCAP-NG block parser: %s', code.name)
+    logger.debug('registered PCAP-NG block parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__option__
@@ -889,7 +893,7 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
     PCAPNG.register_option(code, meth)
     if schema is not None:
         Schema_PCAPNG_Option.register(code, schema)
-    logger.info('registered PCAP-NG option parser: %s', code.name)
+    logger.debug('registered PCAP-NG option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__record__
@@ -915,7 +919,7 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
     PCAPNG.register_record(code, meth)
     if schema is not None:
         Schema_PCAPNG_NameResolutionRecord.register(code, schema)
-    logger.info('registered PCAP-NG name resolution record parser: %s', code.name)
+    logger.debug('registered PCAP-NG name resolution record parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__
@@ -940,4 +944,4 @@ def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPN
     PCAPNG.register_secrets(code, meth)
     if schema is not None:
         Schema_PCAPNG_DSBSecrets.register(code, schema)
-    logger.info('registered PCAP-NG decryption secrets parser: %s', code.name)
+    logger.debug('registered PCAP-NG decryption secrets parser: %s', code.name)

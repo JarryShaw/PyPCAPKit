@@ -14,12 +14,17 @@ from typing import TYPE_CHECKING, Generic, overload
 from pcapkit.foundation.traceflow.data.tcp import _AT, Buffer, BufferID, Index, Packet
 from pcapkit.foundation.traceflow.traceflow import TraceFlowBase as TraceFlow
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
+from pcapkit.utilities.logging import get_logger
 
 __all__ = ['TCP']
 
 if TYPE_CHECKING:
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 class TCP(TraceFlow[BufferID, Buffer, Index, Packet[_AT]], Generic[_AT]):
@@ -108,6 +113,7 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[_AT]], Generic[_AT]):
                 label = f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
             else:
                 label = f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'.replace(':', '.')
+            logger.debug('new TCP flow %s', label)
             self._buffer[BUFID] = Buffer(
                 fpout=self._foutio(fname=f'{self._fproot}/{label}{self._fdpext or ""}', protocol=packet.protocol,
                                    byteorder=self._endian, nanosecond=self._nnsecd),
@@ -125,6 +131,7 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[_AT]], Generic[_AT]):
             buf = self._buffer.pop(BUFID)
             # fpout, label = buf['fpout'], buf['label']
 
+            logger.debug('TCP flow %s closed after %d frame(s)', label, len(buf.index))
             index = Index(
                 fpout=f'{self._fproot}/{label}{self._fdpext}' if self._fdpext is not None else None,
                 index=tuple(buf.index),
@@ -154,6 +161,9 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[_AT]], Generic[_AT]):
                              label=buf.label,))
         ret.extend(self._stream)
         ret_submit = tuple(ret)
+
+        logger.debug('submitted %d TCP flow(s), %d still open',
+                     len(ret_submit), len(self._buffer))
 
         self.__cached__['submit'] = ret_submit
         return ret_submit

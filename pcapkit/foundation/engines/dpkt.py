@@ -10,11 +10,13 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _DPKT: https://dpkt.readthedocs.io
 
 """
+import logging
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.utilities.exceptions import FormatError, stacklevel
+from pcapkit.utilities.logging import ensure_output, get_logger
 from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 
 __all__ = ['DPKT']
@@ -29,6 +31,10 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     Reader = Union[PCAPReader, PCAPNGReader]
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 class DPKT(Engine['DPKTPacket']):
@@ -112,13 +118,16 @@ class DPKT(Engine['DPKTPacket']):
         # setup verbose handler
         if ext._flag_v:
             from pcapkit.toolkit.dpkt import packet2chain  # isort:skip
-            ext._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
-            )  # pylint: disable=logging-fstring-interpolation
+            ensure_output(logging.DEBUG)
+            ext._vfunc = lambda e, f: logger.debug(
+                'Frame %3d: %s', e._frnum, packet2chain(f)  # pylint: disable=protected-access
+            )
 
         if ext.magic_number in PCAP.MAGIC_NUMBER:
+            logger.debug('dpkt: reading %s as PCAP', ext._ifnm)
             reader = dpkt.pcap.Reader(ext._ifile)
         elif ext.magic_number in PCAPNG.MAGIC_NUMBER:
+            logger.debug('dpkt: reading %s as PCAP-NG', ext._ifnm)
             reader = dpkt.pcapng.Reader(ext._ifile)
         else:
             raise FormatError(f'unsupported file format: {ext.magic_number!r}')

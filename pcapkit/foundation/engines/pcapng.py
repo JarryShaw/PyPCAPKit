@@ -15,9 +15,14 @@ from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
 from pcapkit.utilities.exceptions import FormatError, stacklevel
+from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import DeprecatedFormatWarning, warn
 
 __all__ = ['PCAPNG']
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -151,6 +156,7 @@ class PCAPNG(Engine[P_PCAPNG]):
         self._ctx_list.append(self._ctx)
         shb._ctx = self._ctx
 
+        logger.debug('PCAP-NG section %d header read', len(self._ctx_list))
         self._write_file(shb.info, name=f'Section Header {len(self._ctx_list)}')
 
     def read_frame(self) -> 'P_PCAPNG':

@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Generic, Type, TypeVar, cast
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Type
@@ -29,6 +30,10 @@ if TYPE_CHECKING:
     CallbackFn = Callable[[list['_DT']], None]
 
 __all__ = ['Reassembly']
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 # packet
 _PT = TypeVar('_PT', bound='Info')
@@ -217,6 +222,8 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
         if (cached := self.__cached__.get('fetch')) is not None:
             return cached
 
+        logger.debug('%s: flushing %d outstanding buffer(s)', self.name, len(self._buffer))
+
         temp_dtgram = []  # type: list[_DT]
         for (bufid, buffer) in self._buffer.items():
             temp_dtgram.extend(
@@ -224,6 +231,8 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
             )
         temp_dtgram.extend(self._dtgram)
         ret = tuple(temp_dtgram)
+
+        logger.debug('%s: fetched %d datagram(s)', self.name, len(ret))
 
         self.__cached__['fetch'] = ret
         return ret
@@ -253,6 +262,7 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
             packets: list of packet dicts to be reassembled
 
         """
+        logger.debug('%s: reassembling %d packet(s)', self.name, len(packets))
         for packet in packets:
             self.reassembly(packet)
 
@@ -319,6 +329,9 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
         #: list[_DT]: List reassembled datagram. This list is used
         #: to store reassembled datagrams.
         self._dtgram = []  # type: list[_DT]
+
+        logger.debug('%s reassembly initialised (strict=%s, store=%s)',
+                     self.name, strict, store)
 
     def __call__(self, packet: '_PT') -> 'None':
         """Call packet reassembly.

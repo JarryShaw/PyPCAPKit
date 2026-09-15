@@ -13,12 +13,17 @@ from typing import TYPE_CHECKING
 from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
+from pcapkit.utilities.logging import get_logger
 
 __all__ = ['PCAP']
 
 if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
     from pcapkit.corekit.version import VersionInfo
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 class PCAP(Engine[Frame]):
@@ -109,6 +114,9 @@ class PCAP(Engine[Frame]):
         self._vinfo = self._gbhdr.version
         self._dlink = self._gbhdr.protocol
         self._nnsec = self._gbhdr.nanosecond
+
+        logger.debug('PCAP global header: version %s, link layer %s, nanosecond %s',
+                     self._vinfo, self._dlink.name, self._nnsec)
 
         if ext._flag_q:
             return

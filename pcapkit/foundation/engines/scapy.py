@@ -10,10 +10,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _Scapy: https://scapy.net
 
 """
+import logging
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.logging import ensure_output, get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn
 
 __all__ = ['Scapy']
@@ -24,6 +26,10 @@ if TYPE_CHECKING:
     from scapy.packet import Packet as ScapyPacket
 
     from pcapkit.foundation.extraction import Extractor
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 class Scapy(Engine['ScapyPacket']):
@@ -99,11 +105,13 @@ class Scapy(Engine['ScapyPacket']):
         # setup verbose handler
         if ext._flag_v:
             from pcapkit.toolkit.scapy import packet2chain  # isort:skip
-            ext._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
-            )  # pylint: disable=logging-fstring-interpolation
+            ensure_output(logging.DEBUG)
+            ext._vfunc = lambda e, f: logger.debug(
+                'Frame %3d: %s', e._frnum, packet2chain(f)  # pylint: disable=protected-access
+            )
 
         # extract & analyse file
+        logger.debug('scapy: sniffing %s', ext._ifnm)
         self._extmp = iter(self._expkg.sniff(offline=ext._ifnm))
 
     def read_frame(self) -> 'ScapyPacket':

@@ -10,11 +10,13 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 """
+import logging
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.logging import ensure_output, get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn
 
 __all__ = ['PyShark']
@@ -24,6 +26,10 @@ if TYPE_CHECKING:
     from pyshark.packet.packet import Packet as PySharkPacket
 
     from pcapkit.foundation.extraction import Extractor
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 class PyShark(Engine['PySharkPacket']):
@@ -103,6 +109,7 @@ class PyShark(Engine['PySharkPacket']):
 
         if ext._flag_r and (ext._ipv4 or ext._ipv6 or ext._tcp):
             ext._flag_r = False
+            logger.debug('pyshark: reassembly unsupported, disabling it')
             ext._reasm = ReassemblyManager(ipv4=None, ipv6=None, tcp=None)
             warn("'Extractor(engine=pyshark)' object does not support reassembly; "
                  f"so 'ipv4={ext._ipv4}', 'ipv6={ext._ipv6}' and 'tcp={ext._tcp}' will be ignored",
@@ -110,11 +117,13 @@ class PyShark(Engine['PySharkPacket']):
 
         # setup verbose handler
         if ext._flag_v:
-            ext._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {f.frame_info.protocols}'  # pylint: disable=protected-access
-            )  # pylint: disable=logging-fstring-interpolation
+            ensure_output(logging.DEBUG)
+            ext._vfunc = lambda e, f: logger.debug(
+                'Frame %3d: %s', e._frnum, f.frame_info.protocols  # pylint: disable=protected-access
+            )
 
         # extract & analyse file
+        logger.debug('pyshark: opening %s', ext._ifnm)
         self._extmp = self._expkg.FileCapture(ext._ifnm, keep_packets=False)
 
     def read_frame(self) -> 'PySharkPacket':
