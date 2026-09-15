@@ -37,6 +37,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Load maintenance deploy key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
+
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
@@ -86,12 +91,11 @@ jobs:
           have been changed: ${{ steps.verify-changed-files.outputs.changed_files }}"
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
         if: steps.verify-changed-files.outputs.files_changed == 'true'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-          pull: rebase
+        run: |
+          git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
+          git pull --rebase origin "${GITHUB_REF#refs/heads/}"
+          git push origin "HEAD:${GITHUB_REF}"
 
       # - name: Create Tag
       #   if: steps.verify-changed-files.outputs.files_changed == 'true'
