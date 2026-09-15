@@ -336,14 +336,24 @@ def configure(level: 'Optional[Union[int, str]]' = None, *,
 # alone. Calling reset() here instead would detach a host application's
 # handlers merely because it imported pcapkit after configuring logging.
 #
-# The membership tests also make re-execution idempotent, which the test suite
-# relies on when it exercises import-time behaviour: neither the NullHandler
-# nor the devmode stderr handler can be stacked twice.
+# Re-execution has to be idempotent too, which the test suite relies on when it
+# exercises import-time behaviour. That rules out an identity test for the
+# devmode handler: ``handler`` is built when this module runs, so re-executing
+# it yields a *new* object every time and ``handler not in logger.handlers``
+# would be true on each pass, stacking one stderr handler per reload. The test
+# is therefore on what would actually duplicate -- a stream handler already
+# writing to the same stream.
 if not logger.handlers:
     logger.addHandler(logging.NullHandler())
+
+
+def _writes_to(candidate: 'logging.Handler', stream: 'Any') -> 'bool':
+    """Whether ``candidate`` is a stream handler already writing to ``stream``."""
+    return isinstance(candidate, logging.StreamHandler) and getattr(candidate, 'stream', None) is stream
+
 
 if DEVMODE:
     # development mode keeps the historical behaviour: everything, on stderr
     logger.setLevel(logging.DEBUG)
-    if handler not in logger.handlers:
+    if not any(_writes_to(installed, handler.stream) for installed in logger.handlers):
         logger.addHandler(handler)
