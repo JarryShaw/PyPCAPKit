@@ -52,7 +52,7 @@ class PcapFrameRuntimeTests(unittest.TestCase):
         self.assertEqual(frame.payload.payload.payload.name, 'Unknown')
 
     def test_extracted_frames_carry_their_own_record_bytes(self) -> None:
-        """GH-357, through the whole extractor rather than one ``Frame``.
+        """#357, through the whole extractor rather than one ``Frame``.
 
         ``arp.pcap`` holds two records of identical length, which is the shape
         that made the defect legible: frame 1's payload was frame 2's record

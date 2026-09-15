@@ -1,4 +1,4 @@
-"""Regression tests for GH-362 -- ``quiet=True`` must mean *emit nothing*.
+"""Regression tests for #362 -- ``quiet=True`` must mean *emit nothing*.
 
 ``BaseError.__init__`` used to treat ``quiet`` as "log at ``ERROR`` instead of
 ``CRITICAL``", so every absent-key lookup through

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """What ``files=True`` actually writes to disk.
 
-GH-358: every per-frame report landed with two dots before its extension --
+#358: every per-frame report landed with two dots before its extension --
 ``Frame 1..json``, ``Global Header..txt``, ``Section Header 1..plist``. The name
 was composed as ``f'{name}.{ext._fext}'`` while ``_fext`` still carried its own
 leading dot, so the separator was supplied twice.
@@ -31,7 +31,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #:
 #: Three registered formats are deliberately absent, each because it raises
 #: before any file is named -- so none of them can say anything about how a name
-#: is composed, and all three are separate defects from GH-358:
+#: is composed, and all three are separate defects from #358:
 #:
 #: * ``'pcap'`` and ``'cap'`` -- ``PCAPIO.__init__`` wants a ``protocol``
 #:   keyword that the extractor never supplies, so they fail with

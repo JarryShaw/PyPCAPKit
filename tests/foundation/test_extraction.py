@@ -252,7 +252,7 @@ class ExtractorTests(unittest.TestCase):
             no_ext_capture = temp / 'capture'
             no_ext_capture.write_bytes(b'pcap')
 
-            # GH-358: the returned extension is bare, i.e. carries no leading
+            # #358: the returned extension is bare, i.e. carries no leading
             # dot. ``Extractor.__output__`` spells its extensions *with* the dot
             # and ``make_name`` normalises it away, because ``_fext`` reaches the
             # engines, which each compose a per-frame name as

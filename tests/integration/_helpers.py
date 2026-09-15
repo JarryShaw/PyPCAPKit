@@ -132,7 +132,7 @@ def report_stems(directory: 'str') -> 'list[str]':
 
     This used to be neutrality about the number of dots as well: per-frame
     reports were named ``f'{name}.{ext._fext}'`` while ``_fext`` still carried
-    its own leading dot, so they landed on disk as ``Frame 1..json`` (GH-358).
+    its own leading dot, so they landed on disk as ``Frame 1..json`` (#358).
     That is fixed -- the extension is bare now, and
     :mod:`tests.integration.test_files_output_naming` asserts the real names --
     so nothing here is working around it any more.

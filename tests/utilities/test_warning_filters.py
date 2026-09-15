@@ -1,4 +1,4 @@
-"""Regression tests for GH-364 -- constructing a pcapkit warning must not touch
+"""Regression tests for #364 -- constructing a pcapkit warning must not touch
 the process-global :data:`warnings.filters`.
 
 ``BaseWarning.__init__`` used to call ``warnings.simplefilter('ignore',

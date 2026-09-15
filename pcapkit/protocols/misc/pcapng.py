@@ -1136,7 +1136,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Not used when reconstructing a block timestamp, and must not be:
             a PCAP-NG timestamp is an offset from the UNIX epoch, so mixing the
             *reading* host's zone into it makes one file parse to different
-            instants on different machines (see GH-361).
+            instants on different machines (see #361).
             :meth:`self._get_timezone <_get_timezone>` returns
             :attr:`datetime.timezone.utc` instead when the capture names no
             ``if_tzone``.
@@ -1241,7 +1241,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         # offset from 1970-01-01 00:00:00 UTC with no timezone term at all --
         # so substituting whatever zone the *reading* machine happens to sit in
         # made the same file parse to different instants on different hosts
-        # (see GH-361). ``_get_resolution`` and ``_get_offset`` fall back to the
+        # (see #361). ``_get_resolution`` and ``_get_offset`` fall back to the
         # format's own defaults in this situation; this is the matching one.
         if self._ctx is None:
             # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'")
@@ -1303,7 +1303,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             # that it is "not intended to be used as an offset between local time
             # and UTC". Adding the offset also made the two return values
             # contradict each other, since ``ts_datetime`` below was always built
-            # from the unshifted value (see GH-361).
+            # from the unshifted value (see #361).
             timestamp_epoch = decimal.Decimal(timestamp_raw) / self._get_resolution(interface_id) + \
                 self._get_offset(interface_id)
 
@@ -1356,7 +1356,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             used to promise a "timezone conversion" that the code never
             performed, which made it look as though the read side's timezone
             shift had a counterpart here (it did not, so a read followed by a
-            write drifted by the host's UTC offset -- see GH-361).
+            write drifted by the host's UTC offset -- see #361).
 
         """
         with localcontext(prec=64):

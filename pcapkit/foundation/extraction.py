@@ -597,7 +597,7 @@ class Extractor(Generic[_P]):
             # The value we hand back, though, is documented bare and is used
             # bare -- ``Extractor._fext`` reaches the engines, which each
             # compose a per-frame name as ``f'{name}.{ext._fext}'``. Leaving the
-            # dot on is what produced ``Frame 1..json`` (see GH-358), so
+            # dot on is what produced ``Frame 1..json`` (see #358), so
             # normalise it away once, here, rather than at six call sites.
             ext = registered[1:] if registered.startswith('.') else registered
 

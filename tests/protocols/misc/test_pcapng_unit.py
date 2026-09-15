@@ -233,7 +233,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng.linktype, LinkType.ETHERNET)
         self.assertEqual(pcapng._make_timestamp(decimal.Decimal(12)), (0, 2000))
 
-        # GH-361: the epoch is 2000 units at if_tsresol=1000, i.e. 2s, plus the
+        # #361: the epoch is 2000 units at if_tsresol=1000, i.e. 2s, plus the
         # 10s if_tsoffset -- 12s, and nothing else. It used to come back as 3612,
         # the same instant with this interface's if_tzone (+01:00) *added* to it,
         # which is 3600s of pure error: a PCAP-NG timestamp is an offset from the
@@ -293,7 +293,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
             self.assertEqual(pcapng.ts_resolution, 1_000_000)
             self.assertEqual(pcapng.ts_offset, 0)
-            # GH-361: UTC, not the reading host's zone -- the format's own
+            # #361: UTC, not the reading host's zone -- the format's own
             # default, to match the two above
             self.assertEqual(pcapng.ts_timezone, datetime.timezone.utc)
         self.assertEqual(warn.call_count, 3)
@@ -333,7 +333,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         pcapng._ctx = empty_ctx
         self.assertEqual(pcapng._get_resolution(0), 1_000_000)
         self.assertEqual(pcapng._get_offset(0), 0)
-        # GH-361: an interface that names no if_tzone gets UTC, not the reading
+        # #361: an interface that names no if_tzone gets UTC, not the reading
         # host's zone -- which is what made one file parse to different instants
         # on different machines
         self.assertEqual(pcapng._get_timezone(0), datetime.timezone.utc)
@@ -370,7 +370,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                 mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
             timestamp, epoch = pcapng._read_timestamp(0, 1, interface_id=0)
         self.assertEqual(timestamp, real_datetime.fromtimestamp(0, datetime.timezone.utc))
-        # GH-361: 1 unit at if_tsresol=1e9 plus the 2s if_tsoffset. The leading
+        # #361: 1 unit at if_tsresol=1e9 plus the 2s if_tsoffset. The leading
         # ``Decimal(7200)`` this used to carry was this interface's if_tzone
         # (+02:00) leaking into the epoch; the fallback datetime above is aware
         # UTC either way, so the two used to name different instants.
@@ -2979,7 +2979,7 @@ class PCAPNGUnitTests(unittest.TestCase):
     def test_read_timestamp_is_utc_whatever_the_host_timezone_is(self) -> None:
         """A block timestamp names one instant, on every machine that reads it.
 
-        GH-361: ``_read_timestamp`` added ``tzone.utcoffset(None)`` to the epoch
+        #361: ``_read_timestamp`` added ``tzone.utcoffset(None)`` to the epoch
         it returned, and ``_get_timezone`` fell back to the *reading host's* zone
         whenever the capture named no ``if_tzone`` -- which
         draft-ietf-opsawg-pcapng-02 §4.2 says should be the normal case, since
@@ -3035,7 +3035,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         """The same property on a real capture, against the bytes in the file.
 
         ``dhcp.pcapng`` is committed, and its interface carries ``if_tsresol=6``
-        with neither ``if_tsoffset`` nor ``if_tzone`` -- the shape GH-361 is
+        with neither ``if_tsoffset`` nor ``if_tzone`` -- the shape #361 is
         about, where the epoch used to be shifted by whatever zone the reading
         machine sat in.
 

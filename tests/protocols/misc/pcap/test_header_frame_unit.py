@@ -319,7 +319,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
     def test_frame_data_holds_its_own_record_not_the_next(self) -> None:
         """A frame's raw data must be the record it parsed, at its own offset.
 
-        GH-357: :meth:`Frame.read <pcapkit.protocols.misc.pcap.frame.Frame.read>`
+        #357: :meth:`Frame.read <pcapkit.protocols.misc.pcap.frame.Frame.read>`
         rewound by ``self.length`` (16) to find the start of the record, but the
         schema unpack has by then consumed the record header *and* the
         ``incl_len`` octets of packet data. So the rewind landed ``incl_len``
@@ -371,7 +371,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
     def test_frame_time_is_timezone_aware_utc(self) -> None:
         """``Frame.info.time`` names an instant, so it must not be host-local.
 
-        GH-361 is about the PCAP-NG epoch, but the same family of defect sat
+        #361 is about the PCAP-NG epoch, but the same family of defect sat
         here: ``ts_sec`` is an offset from the UNIX epoch, and rendering it with
         a bare :meth:`datetime.datetime.fromtimestamp` produced a *naive*
         datetime in whatever zone the reading machine sat in. The instant was

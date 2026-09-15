@@ -276,7 +276,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             # header. So the frame's own start cannot be reached by seeking
             # backwards over ``self.length`` alone: that lands ``incl_len``
             # octets too late and captures the tail of this record followed by
-            # the head of the next one (see GH-357). It is recorded before the
+            # the head of the next one (see #357). It is recorded before the
             # unpack instead, in :meth:`self.__post_init__ <__post_init__>`, and
             # seeked to absolutely -- which is what the PCAP-NG reader has
             # always done, c.f. :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.
