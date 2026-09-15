@@ -590,7 +590,11 @@ class MHUnitTests(unittest.TestCase):
                 data=SimpleNamespace(data=b'read'),
             )
             self.assertEqual(proto.read(extension=True).data, b'read')
-            self.assertEqual(proto.make(type=custom_packet, data={'value': b'dict'}).data, b'dict')
+            # this constructor returns raw bytes, and 6 + 4 octets is 6 short of
+            # 16, so the body is padded to align the header; before that it emitted
+            # 10 octets while declaring 8
+            self.assertEqual(proto.make(type=custom_packet, data={'value': b'dict'}).data,
+                             b'dict' + b'\x00' * 6)
             unknown_message = data.UnknownMessage(
                 next=TransType.UDP,
                 length=2,
@@ -598,7 +602,10 @@ class MHUnitTests(unittest.TestCase):
                 chksum=b'',
                 data=b'model',
             )
-            self.assertEqual(proto.make(type=custom_packet, data=unknown_message).data, b'model')
+            # likewise raw bytes out of the constructor: 6 + 5 octets is 5 short of
+            # 16, so the body is padded rather than the header misdeclared
+            self.assertEqual(proto.make(type=custom_packet, data=unknown_message).data,
+                             b'model' + b'\x00' * 5)
 
             parsed_options = proto._read_mh_options([
                 SimpleNamespace(type=custom_option, data=b'opt'),
@@ -666,10 +673,17 @@ class MHUnitTests(unittest.TestCase):
             finally:
                 schema.CGAParameter.public_key_test = public_key_test
 
-            self.assertEqual(proto._make_opt_pad(
+            # NOTE: The data model's ``length`` is the whole option, the schema's is
+            # its ``Option Length`` field. A 4-octet ``PadN`` spends 2 octets on its
+            # type and length fields, so ``Option Length`` is 2 and the schema packs
+            # back to the 4 octets the data model described. Asserting 4 here was
+            # asserting the two-octet overshoot.
+            remade = proto._make_opt_pad(
                 Option.Pad1,
                 data.PadOption(type=Option.PadN, length=4),
-            ).length, 4)
+            )
+            self.assertEqual(remade.length, 2)
+            self.assertEqual(len(remade.pack()), 4)
             self.assertEqual(str(proto._make_opt_aca(
                 Option.Alternate_Care_of_Address,
                 data.AlternateCareofAddressOption(type=Option.Alternate_Care_of_Address,
@@ -1172,10 +1186,12 @@ class MHUnitTests(unittest.TestCase):
         mhlla_type = Option.Mobility_Header_Link_Layer_Address_option
         exp_type = Option.Experimental_Mobility_Option
 
-        # NOTE: every case below is chosen to be 8-octet aligned without a padding
-        # option, since ``_make_opt_pad`` round-trips a ``PadN`` data model two bytes
-        # too long -- a pre-existing defect of the RFC 6275 padding option, outside
-        # the FMIPv6 message and option types under test here.
+        # NOTE: Every case below is 8-octet aligned and so draws no padding option,
+        # which keeps these cases about the FMIPv6 message and option types. It used
+        # to be a workaround as well: ``_make_opt_pad`` round-tripped a ``PadN`` data
+        # model two octets too long, because it copied the data model's whole-option
+        # ``length`` into the schema's ``Option Length`` field. That is fixed, and
+        # ``test_mh_padding_option_data_model_round_trips`` covers it.
         cases = [
             ('FBU', Packet.Fast_Binding_Update, {
                 'seq': 0x1234, 'ack': True, 'home': True, 'lla_compat': False,
@@ -1433,6 +1449,197 @@ class MHUnitTests(unittest.TestCase):
                                      'forward': False, flag: True, 'code': 0,
                                      'options': []}))
                 self.assertEqual(raw[8], octet)
+
+    def test_mh_padding_options_parse_from_the_wire(self) -> None:
+        """A ``Pad1`` option must consume exactly one octet, wherever it sits.
+
+        Per :rfc:`6275#section-6.2.5` the two padding options do not share a wire
+        shape: ``Pad1`` is a lone type octet with no ``Option Length`` field at
+        all, while ``PadN`` is a type octet, a length octet, and that many data
+        octets. Reading a length octet that is not there consumes the *next*
+        option's type byte instead, so every case below puts something after the
+        padding.
+
+        The header is a Binding Refresh Request with ``Header Len`` 1, i.e. 16
+        octets: 6 of fixed header, 2 of the message's own reserved field, and 8
+        of mobility options.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.mh import MH
+
+        header = b'\x3b\x01\x00\x00\x00\x00' + b'\x00\x00'
+        cases = (
+            ('pad1 then padn', b'\x00' + b'\x01\x05\x00\x00\x00\x00\x00',
+             [(Option.Pad1, 1), (Option.PadN, 7)]),
+            ('pad1 then a real option then pad1', b'\x00' + b'\x02\x02\x00\x0a' + b'\x00\x00\x00',
+             [(Option.Pad1, 1), (Option.Binding_Refresh_Advice, 4),
+              (Option.Pad1, 1), (Option.Pad1, 1), (Option.Pad1, 1)]),
+            ('eight pad1 in a row', b'\x00' * 8, [(Option.Pad1, 1)] * 8),
+            ('pad1 as the final octet', b'\x01\x05\x00\x00\x00\x00\x00' + b'\x00',
+             [(Option.PadN, 7), (Option.Pad1, 1)]),
+            ('padn is unaffected', b'\x01\x06\x00\x00\x00\x00\x00\x00',
+             [(Option.PadN, 8)]),
+        )
+
+        for name, options, expected in cases:
+            with self.subTest(case=name):
+                raw = header + options
+                self.assertEqual(len(raw), 16)
+
+                info = MH(raw, extension=True).info
+                self.assertEqual(info.length, 16)
+                self.assertEqual(
+                    [(code, opt.length) for code, opt in info.options.items(multi=True)],
+                    expected,
+                )
+                self.assertEqual(bytes(MH(next=info.next, type=info.type,
+                                          chksum=info.chksum, data=info)), raw)
+
+    def test_mh_padding_option_schema_sizes_itself(self) -> None:
+        """The padding option schema on its own, and the helper behind it.
+
+        :func:`~pcapkit.protocols.schema.internet.mh.pad_opt_data_len` has to read
+        a skipped conditional field -- which is recorded as
+        :data:`~pcapkit.corekit.fields.field.NoValue`, not omitted -- as zero
+        padding octets, rather than handing that singleton to
+        :class:`~pcapkit.corekit.fields.strings.PaddingField` where it becomes an
+        unusable :mod:`struct` template.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.corekit.fields.field import NoValue
+        from pcapkit.protocols.schema.internet import mh as schema
+
+        self.assertEqual(schema.pad_opt_data_len({}), 0)
+        self.assertEqual(schema.pad_opt_data_len({'length': NoValue}), 0)
+        self.assertEqual(schema.pad_opt_data_len({'length': None}), 0)
+        self.assertEqual(schema.pad_opt_data_len({'length': 4}), 4)
+
+        # a Pad1 option on its own: one octet read, the next left for whatever follows
+        stream = io.BytesIO(b'\x00\x2a')
+        pad1 = schema.PadOption.unpack(stream, 2, {})
+        self.assertEqual(pad1.type, Option.Pad1)
+        self.assertEqual(pad1.length, 0)
+        self.assertEqual(len(pad1), 1)
+        self.assertEqual(bytes(pad1), b'\x00')
+        self.assertEqual(stream.tell(), 1)
+
+        # a PadN option still spans its length octet plus that many data octets
+        stream = io.BytesIO(b'\x01\x02\xaa\xbb\xcc')
+        padn = schema.PadOption.unpack(stream, 5, {})
+        self.assertEqual(padn.type, Option.PadN)
+        self.assertEqual(padn.length, 2)
+        self.assertEqual(len(padn), 4)
+        self.assertEqual(bytes(padn), b'\x01\x02\xaa\xbb')
+        self.assertEqual(stream.tell(), 4)
+
+    def test_mh_padding_option_data_model_round_trips(self) -> None:
+        """Re-making a parsed padding option must give back the same octets.
+
+        The data model's ``length`` counts the whole option while the schema's is
+        the ``Option Length`` field, so copying one into the other unconverted
+        produced a ``PadN`` two octets longer than the one that was parsed.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.data.internet.mh import PadOption
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+        for code, total in ((Option.Pad1, 1), (Option.PadN, 3), (Option.PadN, 6)):
+            with self.subTest(option=code.name, length=total):
+                made = proto._make_opt_pad(code, PadOption(type=code, length=total))
+                self.assertEqual(made.type, code)
+                self.assertEqual(len(made.pack()), total)
+
+    def test_mh_constructed_header_round_trips(self) -> None:
+        """Construction must declare the number of octets it actually emits.
+
+        The Mobility Header is a multiple of 8 octets and ``Header Len`` counts
+        those units less one [:rfc:`6275#section-6.1.1`]. Its fixed part is six
+        octets, so it is ``len(message data) + 6`` that has to be aligned -- a
+        different modulus from the 2-octet fixed part of an IPv6 options header.
+        Rounding ``Header Len`` up without emitting the padding to match sent the
+        re-parse off the end of the buffer.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.mh import MH
+
+        brr = Packet.Binding_Refresh_Request
+        cases = (
+            # 2 octets of reserved + a 6-octet PadN = 8, so 6 + 8 = 14 needs 2 more
+            ('padn then two pad1', [(Option.PadN, {'length': 4})], 16),
+            # 2 + 8 = 10, and 6 + 10 = 16 is already aligned
+            ('padn, already aligned', [(Option.PadN, {'length': 6})], 16),
+            # 2 + 4 = 6, and 6 + 6 = 12 needs 4 more octets
+            ('real option then padn', [(Option.Binding_Refresh_Advice, {'interval': 10})], 16),
+            # no options at all: 6 + 2 = 8 is aligned, so MH needs no padding here
+            # where an IPv6 options header would need 6 octets of it
+            ('no options', [], 8),
+        )
+
+        for name, options, size in cases:
+            with self.subTest(case=name):
+                built = MH(next=TransType.IPv6_NoNxt, type=brr, chksum=b'\x00\x00',
+                           data={'options': list(options)})
+                raw = bytes(built)
+
+                self.assertEqual(len(raw), size)
+                self.assertEqual(len(raw) % 8, 0)
+                # the declared length and the emitted length must be the same
+                self.assertEqual((raw[1] + 1) * 8, len(raw))
+
+                parsed = MH(raw, extension=True).info
+                self.assertEqual(parsed.length, size)
+                self.assertEqual(bytes(MH(next=parsed.next, type=parsed.type,
+                                          chksum=parsed.chksum, data=parsed)), raw)
+
+    def test_mh_opaque_message_body_cannot_be_padded(self) -> None:
+        """An opaque message body is padded to alignment, with a warning.
+
+        A message whose body is raw bytes carries no mobility options, so the
+        padding goes into the body itself. Warning and returning it unchanged was
+        not enough: ``length`` is ``(len(data) + 6) // 8 - 1``, which floors, so the
+        header shipped declaring 8 octets while emitting 10, 12 or 14, and a parser
+        reads 8 and misinterprets the rest.
+
+        """
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.warnings import ProtocolWarning
+
+        proto = object.__new__(MH)
+
+        # each of these previously emitted 6 + n octets while declaring only 8
+        for n in (4, 6, 8):
+            with self.subTest(body=n):
+                with mock.patch('pcapkit.protocols.internet.mh.warn') as warned:
+                    padded = proto._pad_mh_message(b'\x00' * n)
+                self.assertEqual(warned.call_count, 1)
+                self.assertIs(warned.call_args.args[1], ProtocolWarning)
+
+                # the emitted header is now exactly what it declares
+                total = 6 + len(padded)
+                self.assertEqual(total % 8, 0)
+                self.assertEqual(((len(padded) + 6) // 8) * 8, total)
+
+        # an already-aligned body needs no padding, is returned untouched, and says
+        # nothing -- the warning is only for a body the caller will not get back
+        # byte-for-byte
+        for n in (2, 10):
+            with self.subTest(body=n):
+                body = b'\x00' * n
+                with mock.patch('pcapkit.protocols.internet.mh.warn') as warned:
+                    self.assertIs(proto._pad_mh_message(body), body)
+                warned.assert_not_called()
+
+        # and the whole header still comes out 8-octet aligned when it can be padded
+        raw = bytes(MH(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
+                       chksum=b'\x00\x00', data={'options': []}))
+        self.assertEqual(len(raw) % 8, 0)
 
 
 if __name__ == '__main__':

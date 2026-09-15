@@ -746,9 +746,16 @@ class MH(Internet[Data_MH, Schema_MH],
         else:
             raise ProtocolError(f'MH: [Type {type_val}] invalid format')
 
+        # NOTE: The header has to be a multiple of 8 octets, so the message data
+        # needs padding until ``len(data) + 6`` is aligned. Rounding ``length`` up
+        # without emitting that padding -- which is what ``math.ceil`` used to do
+        # here -- declares a header longer than the bytes that follow it, and the
+        # re-parse then reads whatever happens to be past the end of the buffer.
+        data_val = self._pad_mh_message(data_val)
+
         return Schema_MH(
             next=next_val,
-            length=math.ceil((len(data_val) + 6) / 8) - 1,
+            length=(len(data_val) + 6) // 8 - 1,
             type=type_val,
             chksum=chksum,
             data=data_val,
@@ -2978,6 +2985,111 @@ class MH(Internet[Data_MH, Schema_MH],
 
     # TODO: Implement other message types.
 
+    def _make_pad_options(self, offset: 'int') -> 'tuple[list[Schema_PadOption], int]':
+        """Make the padding options needed to align the header to 8 octets.
+
+        Args:
+            offset: Number of octets emitted so far, **counting the six octets
+                of the fixed header** (``Payload Proto``, ``Header Len``,
+                ``MH Type``, ``Reserved`` and ``Checksum``) as well as the whole
+                message data.
+
+        Returns:
+            Tuple of the padding option schemas and the number of octets they
+            occupy.
+
+        Note:
+            The Mobility Header is a multiple of 8 octets and
+            :attr:`~pcapkit.protocols.schema.internet.mh.MH.length` counts those
+            units less one [:rfc:`6275#section-6.1.1`]. Its fixed part is
+            **six** octets, not the two of an IPv6 options header, so it is
+            ``len(data) + 6`` that has to be aligned -- which means the message
+            data is well formed only when it is 2 octets past a multiple of 8,
+            a different modulus from the one the extension headers use.
+
+            A ``PadN`` option spends two octets on its own type and
+            ``Option Length`` fields before any padding data, so occupying
+            ``pad_len`` octets means an ``Option Length`` of ``pad_len - 2``.
+            One or two octets are padded with ``Pad1`` options instead, that
+            being the only form which can occupy a single octet
+            [:rfc:`6275#section-6.2.5`]; two octets need two separate ``Pad1``
+            schemas, since a schema instance is mutable and must not be shared
+            between two entries of the option list.
+
+        """
+        if offset % 8 == 0:
+            return [], 0
+
+        pad_len = 8 - (offset % 8)
+        if pad_len <= 2:
+            return [self._make_opt_pad(Enum_Option.Pad1, length=0)  # type: ignore[arg-type]
+                    for _ in range(pad_len)], pad_len
+        return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
+
+    def _pad_mh_message(self, data: 'Schema_Packet | bytes') -> 'Schema_Packet | bytes':
+        """Pad an MH message so that the Mobility Header aligns to 8 octets.
+
+        Args:
+            data: Constructed message data.
+
+        Returns:
+            The message data, with padding options appended if any were needed.
+
+        Note:
+            The padding goes into the message's mobility options, which is where
+            :rfc:`6275#section-6.2.5` puts it. A message whose body is opaque has
+            nowhere to put it --
+            :class:`~pcapkit.protocols.schema.internet.mh.UnknownMessage` and
+            :class:`~pcapkit.protocols.schema.internet.mh.ExperimentalMessage`
+            carry raw bytes and no options, as does a ``data`` argument given
+            directly as :obj:`bytes` -- so for those the padding is appended to the
+            message body itself and a
+            :class:`~pcapkit.utilities.warnings.ProtocolWarning` says so.
+
+            Appending is necessary rather than optional: ``length`` is
+            ``(len(data) + 6) // 8 - 1``, which floors, so leaving an opaque body
+            short emitted 10, 12 or 14 octets while declaring 8, and a parser reads
+            8 and misinterprets the remainder. Since the caller asked for a packet
+            to be built and the shortfall is recoverable, completing it beats
+            refusing -- the warning is there because the emitted body is then not
+            byte-for-byte what was handed in.
+
+        """
+        pad_opts, pad_len = self._make_pad_options(len(data) + 6)
+        if pad_len == 0:
+            return data
+
+        options = getattr(data, 'options', None)
+        # NOTE: The ``isinstance`` test comes first so that the type checker can
+        # narrow ``data`` for the assignment below; at runtime ``getattr`` has
+        # already covered the :obj:`bytes` case by returning :obj:`None`.
+        if isinstance(data, bytes) or options is None:
+            warn(f'{self.alias}: message data of {len(data)} octets carries no '
+                 f'mobility options to hold padding, so {pad_len} octet(s) were '
+                 'appended to the message body to align the header',
+                 ProtocolWarning)
+            if isinstance(data, bytes):
+                return data + b'\x00' * pad_len
+
+            # An opaque schema body -- UnknownMessage, ExperimentalMessage -- keeps
+            # its content in ``data`` rather than in options, so that is where the
+            # octets go. Rebound rather than mutated in place so that ``len()`` and
+            # ``pack()`` see the change, exactly as for the options branch below.
+            body = getattr(data, 'data', None)
+            if not isinstance(body, bytes):
+                raise ProtocolError(
+                    f'{self.alias}: message data of {len(data)} octets needs '
+                    f'{pad_len} octet(s) of padding, but the body is neither bytes '
+                    'nor a schema carrying bytes, so there is nowhere to put it')
+            data.data = body + b'\x00' * pad_len
+            return data
+
+        # NOTE: Rebinding the attribute rather than mutating the list in place is
+        # what marks the schema as updated, so that ``len()`` and ``pack()`` take
+        # the padding into account.
+        data.options = list(options) + pad_opts
+        return data
+
     def _make_mh_options(self, options: 'Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]') -> 'list[Schema_Option | bytes]':
         """Make options for MH.
 
@@ -3057,15 +3169,25 @@ class MH(Internet[Data_MH, Schema_MH],
         Args:
             type: Option type.
             option: Option data model.
-            length: Padding length.
+            length: Value of the ``Option Length`` field, i.e. the number of
+                padding octets *after* the two octets of the option header.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
 
+        Note:
+            :attr:`Data_PadOption.length
+            <pcapkit.protocols.data.internet.mh.PadOption.length>` counts the
+            *whole* option, whereas :attr:`Schema_PadOption.length
+            <pcapkit.protocols.schema.internet.mh.PadOption.length>` is the
+            ``Option Length`` field -- two octets fewer, and absent altogether
+            for a ``Pad1``. Copying one into the other unconverted is why
+            re-making a parsed ``PadN`` used to come back two octets too long.
+
         """
-        if  option is not None:
-            length = option.length
+        if option is not None:
+            length = 0 if option.type == Enum_Option.Pad1 else option.length - 2
 
         if type == Enum_Option.Pad1 and length != 0:
             # raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')

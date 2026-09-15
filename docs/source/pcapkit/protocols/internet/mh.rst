@@ -386,6 +386,7 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.protocols.schema.internet.mh.mh_data_selector
 .. autofunction:: pcapkit.protocols.schema.internet.mh.mn_id_selector
+.. autofunction:: pcapkit.protocols.schema.internet.mh.pad_opt_data_len
 
 Data Models
 -----------

@@ -224,6 +224,39 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     return SchemaField(length=5, schema=schema)
 
 
+def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return the length of the padding data of a padding option.
+
+    Args:
+        pkt: Padding option unpacked schema.
+
+    Returns:
+        Number of padding octets carried after the option header, i.e. the
+        value of the ``Opt Data Len`` field of a ``PadN`` option, and zero for
+        a ``Pad1`` option, which carries no such field.
+
+    Note:
+        A ``Pad1`` option is a single octet with neither an ``Opt Data Len``
+        field nor any option data (c.f. :rfc:`8200#section-4.2`), which is why
+        :attr:`Option.len` is declared as a
+        :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped
+        for it. A skipped conditional field is *recorded* in the packet data as
+        :data:`~pcapkit.corekit.fields.field.NoValue`, rather than being left
+        out of it, so the test below has to be on the **value** and not on the
+        presence of the key: ``pkt.get('len', 0)`` on its own hands that
+        :obj:`~pcapkit.corekit.fields.field.NoValueType` straight to
+        :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes
+        an unusable :mod:`struct` template and surfaces much later as an opaque
+        :exc:`struct.error` -- which is exactly how a ``Pad1`` option used to
+        fail to parse.
+
+    """
+    length = pkt.get('len', 0)
+    if not isinstance(length, int):  # ``NoValue`` (skipped) or :obj:`None` (unset)
+        return 0
+    return length
+
+
 class Option(EnumSchema[Enum_Option]):
     """Header schema for IPv6-Opts options."""
 
@@ -267,10 +300,19 @@ class UnassignedOption(Option):
 @schema_final
 class PadOption(Option, code=[Enum_Option.Pad1,
                               Enum_Option.PadN]):
-    """Header schema for IPv6-Opts padding options."""
+    """Header schema for IPv6-Opts padding options.
+
+    The two padding options do **not** share a wire shape: a ``Pad1`` option is
+    a lone type octet, whereas a ``PadN`` option is a type octet, an
+    ``Opt Data Len`` octet, and that many padding octets [:rfc:`8200#section-4.2`].
+    Both the ``Opt Data Len`` octet (:attr:`Option.len`) and the padding data
+    (:attr:`self.pad <PadOption.pad>`) are therefore sized from the option type,
+    so that a ``Pad1`` option consumes exactly one octet.
+
+    """
 
     #: Padding.
-    pad: 'bytes' = PaddingField(length=lambda pkt: pkt.get('len', 0))
+    pad: 'bytes' = PaddingField(length=pad_opt_data_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int') -> 'None': ...
