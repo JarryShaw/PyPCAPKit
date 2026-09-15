@@ -183,10 +183,11 @@ Compatibility Note
    importable from both :mod:`pcapkit.utilities.logging` and
    :mod:`pcapkit.utilities`, and named ``pcapkit``;
    :envvar:`PCAPKIT_DEVMODE` still produces the stderr handler at
-   :data:`logging.DEBUG`; and ``Extractor(verbose=True)`` still prints a line per
-   frame, now through :data:`logging.DEBUG` with a destination guaranteed by
-   :func:`~pcapkit.utilities.logging.ensure_output` when the application has
-   configured none.
+   :data:`logging.DEBUG`; and ``Extractor(verbose=True)`` -- like the CLI's
+   ``-v`` -- still prints a line per frame to :data:`sys.stdout`. That output is
+   a feature of the tool rather than diagnostics, so it deliberately stays on
+   :func:`print`: routing it through :mod:`logging` would have moved it to
+   another stream and made it invisible until the consumer configured a handler.
 
 .. note::
 

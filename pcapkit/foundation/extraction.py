@@ -38,7 +38,7 @@ from pcapkit.foundation.traceflow.data import TraceFlowData
 from pcapkit.foundation.traceflow.traceflow import TraceFlow
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           RegistryError, UnsupportedCall, stacklevel)
-from pcapkit.utilities.logging import ensure_output, get_logger
+from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import (EngineWarning, ExtractionWarning, FormatWarning,
                                         RegistryWarning, warn)
 
@@ -746,12 +746,13 @@ class Extractor(Generic[_P]):
         if isinstance(verbose, bool):
             self._flag_v = verbose
             if verbose:
-                # ``verbose=True`` is an explicit request to see the frames, so
-                # make sure the records have a destination even in an
-                # application that never configured logging at all
-                ensure_output(logging.DEBUG)
-                self._vfunc = lambda e, f: logger.debug(
-                    'Frame %3d: %s', e._frnum, f.protochain  # pylint: disable=protected-access
+                # NOTE: ``verbose=True`` and the CLI's ``-v`` are a request for
+                # user-facing output on stdout, not diagnostics -- the frame
+                # chains are a feature of the tool, so they stay on ``print``
+                # rather than becoming log records a consumer has to configure
+                # a handler to see (and on a different stream at that).
+                self._vfunc = lambda e, f: print(
+                    f'Frame {e._frnum:>3d}: {f.protochain}'  # pylint: disable=protected-access
                 )
             else:
                 self._vfunc = lambda e, f: None

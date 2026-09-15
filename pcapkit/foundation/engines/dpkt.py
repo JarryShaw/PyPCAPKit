@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.utilities.exceptions import FormatError, stacklevel
-from pcapkit.utilities.logging import ensure_output, get_logger
+from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 
 __all__ = ['DPKT']
@@ -118,9 +118,8 @@ class DPKT(Engine['DPKTPacket']):
         # setup verbose handler
         if ext._flag_v:
             from pcapkit.toolkit.dpkt import packet2chain  # isort:skip
-            ensure_output(logging.DEBUG)
-            ext._vfunc = lambda e, f: logger.debug(
-                'Frame %3d: %s', e._frnum, packet2chain(f)  # pylint: disable=protected-access
+            ext._vfunc = lambda e, f: print(
+                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
             )
 
         if ext.magic_number in PCAP.MAGIC_NUMBER:

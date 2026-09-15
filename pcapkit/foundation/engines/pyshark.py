@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.utilities.exceptions import stacklevel
-from pcapkit.utilities.logging import ensure_output, get_logger
+from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn
 
 __all__ = ['PyShark']
@@ -117,9 +117,8 @@ class PyShark(Engine['PySharkPacket']):
 
         # setup verbose handler
         if ext._flag_v:
-            ensure_output(logging.DEBUG)
-            ext._vfunc = lambda e, f: logger.debug(
-                'Frame %3d: %s', e._frnum, f.frame_info.protocols  # pylint: disable=protected-access
+            ext._vfunc = lambda e, f: print(
+                f'Frame {e._frnum:>3d}: {f.frame_info.protocols}'  # pylint: disable=protected-access
             )
 
         # extract & analyse file

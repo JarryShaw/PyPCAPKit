@@ -427,19 +427,38 @@ class ExtractorLoggingTests(unittest.TestCase):
                           if record.levelno >= logging.INFO and 'EOF' not in record.getMessage()],
                          [])
 
-    def test_verbose_extraction_still_reaches_a_destination(self) -> None:
+    def test_verbose_extraction_prints_frames_to_stdout(self) -> None:
+        """``verbose=True`` is user-facing output, not a log record.
+
+        The frame chains are a feature of the tool and of the CLI's ``-v``, so
+        they go to stdout via :func:`print` and are readable without the
+        consumer configuring a logging handler. Removing the import-time stderr
+        handler must not turn that into silence, and moving it onto the logger
+        would have changed both the stream and the visibility.
+
+        """
+        import contextlib
+        import io
+
         from pcapkit.foundation.extraction import Extractor
         from tests._support import sample_path
 
-        # ``verbose=True`` asks to see the frames; removing the import-time
-        # stderr handler must not turn that into silence
-        with self.assertLogs('pcapkit', level=logging.DEBUG) as caught:
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
             Extractor(fin=sample_path('arp.pcap'), nofile=True, store=False, verbose=True)
 
-        frames = [record.getMessage() for record in caught.records
-                  if record.getMessage().startswith('Frame ')]
+        frames = [line for line in stdout.getvalue().splitlines()
+                  if line.startswith('Frame ')]
         self.assertEqual(len(frames), 2)
         self.assertTrue(frames[0].startswith('Frame   1: '), frames)
+
+        # and it stays off the logger, so a consumer at DEBUG is not spammed
+        # with per-frame records
+        with self.assertLogs('pcapkit', level=logging.DEBUG) as caught:
+            with contextlib.redirect_stdout(io.StringIO()):
+                Extractor(fin=sample_path('arp.pcap'), nofile=True, store=False, verbose=True)
+        self.assertEqual([record.getMessage() for record in caught.records
+                          if record.getMessage().startswith('Frame ')], [])
 
 
 if __name__ == '__main__':

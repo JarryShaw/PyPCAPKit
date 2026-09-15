@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase as Engine
 from pcapkit.utilities.exceptions import stacklevel
-from pcapkit.utilities.logging import ensure_output, get_logger
+from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn
 
 __all__ = ['Scapy']
@@ -105,9 +105,8 @@ class Scapy(Engine['ScapyPacket']):
         # setup verbose handler
         if ext._flag_v:
             from pcapkit.toolkit.scapy import packet2chain  # isort:skip
-            ensure_output(logging.DEBUG)
-            ext._vfunc = lambda e, f: logger.debug(
-                'Frame %3d: %s', e._frnum, packet2chain(f)  # pylint: disable=protected-access
+            ext._vfunc = lambda e, f: print(
+                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
             )
 
         # extract & analyse file

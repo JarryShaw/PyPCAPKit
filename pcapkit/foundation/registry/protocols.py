@@ -803,7 +803,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
         module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
 
     SCTP.register(code, module)
-    logger.info('registered SCTP payload protocol identifier: %s', code)
+    logger.debug('registered SCTP payload protocol identifier: %s', code)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
