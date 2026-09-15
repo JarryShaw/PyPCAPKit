@@ -413,14 +413,14 @@ class ExtractorLoggingTests(unittest.TestCase):
         from tests._support import sample_path
 
         with self.assertLogs('pcapkit', level=logging.DEBUG) as caught:
-            extractor = Extractor(fin=sample_path('arp.pcap'), nofile=True, store=False)
+            extractor = Extractor(fin=sample_path('in.pcap'), nofile=True, store=False)
 
         messages = [record.getMessage() for record in caught.records]
         self.assertTrue(any('opening input file' in message for message in messages), messages)
         self.assertTrue(any('extraction engine' in message for message in messages), messages)
         self.assertTrue(any('reading frames from' in message for message in messages), messages)
         self.assertTrue(any('frame(s) from' in message for message in messages), messages)
-        self.assertEqual(extractor.length, 2)
+        self.assertEqual(extractor.length, 6)
 
         # nothing on the parsing path should be shouting at info or above
         self.assertEqual([record.getMessage() for record in caught.records
@@ -445,18 +445,18 @@ class ExtractorLoggingTests(unittest.TestCase):
 
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout):
-            Extractor(fin=sample_path('arp.pcap'), nofile=True, store=False, verbose=True)
+            Extractor(fin=sample_path('in.pcap'), nofile=True, store=False, verbose=True)
 
         frames = [line for line in stdout.getvalue().splitlines()
                   if line.startswith('Frame ')]
-        self.assertEqual(len(frames), 2)
+        self.assertEqual(len(frames), 6)
         self.assertTrue(frames[0].startswith('Frame   1: '), frames)
 
         # and it stays off the logger, so a consumer at DEBUG is not spammed
         # with per-frame records
         with self.assertLogs('pcapkit', level=logging.DEBUG) as caught:
             with contextlib.redirect_stdout(io.StringIO()):
-                Extractor(fin=sample_path('arp.pcap'), nofile=True, store=False, verbose=True)
+                Extractor(fin=sample_path('in.pcap'), nofile=True, store=False, verbose=True)
         self.assertEqual([record.getMessage() for record in caught.records
                           if record.getMessage().startswith('Frame ')], [])
 
