@@ -88,12 +88,14 @@ crypto = [ "cryptography>=3.4" ]
 DPKT = [ "dpkt" ]
 Scapy = [ "scapy" ]
 PyShark = [ "pyshark" ]
+PyPCAP = [ "pypcap" ]
+PyPCAPFile = [ "pypcapfile" ]
 # for developers
 vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]
 all = [
     "emoji",
     "cryptography>=3.4",
-    "dpkt", "scapy", "pyshark",
+    "dpkt", "scapy", "pyshark", "pypcap", "pypcapfile",
     "requests[socks]", "beautifulsoup4[html5lib]",
 ]
 docs = [

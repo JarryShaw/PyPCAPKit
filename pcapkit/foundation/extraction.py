@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from typing import IO, Any, Callable, DefaultDict, Iterable, Mapping, Optional, Type, Union
 
     from dpkt.dpkt import Packet as DPKTPacket
+    from pcapfile.structs import pcap_packet as PCAPFilePacket
     from pyshark.packet.packet import Packet as PySharkPacket
     from scapy.packet import Packet as ScapyPacket
     from typing_extensions import Literal
@@ -60,10 +61,16 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
-    Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
+    # NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; both
+    # copies need updating when a new engine lands. The duplication predates the
+    # engines added here and is left as-is on purpose.
+    Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pypcapfile']
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
-    Packet = Union[Frame, PCAPNG, ScapyPacket, DPKTPacket, PySharkPacket]
+    # NOTE: the PyPCAP engine performs no dissection, so its "packet" is the
+    # ``(timestamp, bytes)`` pair that ``pcap.pcap`` yields.
+    Packet = Union[Frame, PCAPNG, ScapyPacket, DPKTPacket, PySharkPacket,
+                   PCAPFilePacket, tuple[float, bytes]]
 
     Protocols = Union[str, Protocol, Type[Protocol]]
     VerboseHandler = Callable[['Extractor', Packet], Any]
@@ -190,6 +197,8 @@ class Extractor(Generic[_P]):
         'scapy': ModuleDescriptor('pcapkit.foundation.engines.scapy', 'Scapy'),
         'dpkt': ModuleDescriptor('pcapkit.foundation.engines.dpkt', 'DPKT'),
         'pyshark': ModuleDescriptor('pcapkit.foundation.engines.pyshark', 'PyShark'),
+        'pypcap': ModuleDescriptor('pcapkit.foundation.engines.pypcap', 'PyPCAP'),
+        'pypcapfile': ModuleDescriptor('pcapkit.foundation.engines.pypcapfile', 'PyPCAPFile'),
     }  # type: dict[str, ModuleDescriptor[Engine] | Type[Engine]]
 
     #: Reassembly support mapping for extracting frames. The values should be a tuple
@@ -418,6 +427,8 @@ class Extractor(Generic[_P]):
         * DPKT driver: :class:`pcapkit.foundation.engines.dpkt.DPKT`
         * Scapy driver: :class:`pcapkit.foundation.engines.scapy.Scapy`
         * PyShark driver: :class:`pcapkit.foundation.engines.pyshark.PyShark`
+        * PyPCAP driver: :class:`pcapkit.foundation.engines.pypcap.PyPCAP`
+        * PyPCAPFile driver: :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
 
         Warns:
             pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not
@@ -790,10 +801,21 @@ class Extractor(Generic[_P]):
         if trace:
             trace_obj_tcp = None
 
-            if self._exnam in ('pyshark',) and trace_format in ('pcap',):
+            # NOTE: these engines' flow tracing adapters report the frame as a
+            # plain :obj:`dict`, which the PCAP trace dumper cannot re-serialise
+            # -- it reaches for ``frame.packet``. ``None`` has to be caught along
+            # with ``'pcap'`` here, and replaced by a format that *can* take a
+            # mapping, because :meth:`TraceFlow.__init__
+            # <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__init__>`
+            # itself substitutes ``'pcap'`` for ``None``.
+            #
+            # The DPKT and Scapy engines report the frame as a mapping too and are
+            # deliberately *not* listed here: they are affected by the same defect
+            # on this revision, but they are outside the scope of this change.
+            if self._exnam in ('pyshark', 'pypcapfile') and trace_format in ('pcap', 'cap', None):
                 warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
-                     "using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
-                trace_format = None
+                     "using 'trace_format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
+                trace_format = 'json'
 
             if self._tcp:
                 logger.info('TCP flow tracing enabled')

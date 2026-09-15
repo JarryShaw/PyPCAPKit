@@ -38,6 +38,19 @@ from pcapkit.toolkit.pcapng import block2frame as pcapng_block2frame
 # from pcapkit.toolkit.scapy import tcp_reassembly as scapy_tcp_reassembly
 # from pcapkit.toolkit.scapy import tcp_traceflow as scapy_tcp_traceflow
 
+# # tools for PyPCAP engine
+# from pcapkit.toolkit.pypcap import packet2chain as pypcap_packet2chain
+# from pcapkit.toolkit.pypcap import packet2dict as pypcap_packet2dict
+
+# # tools for PyPCAPFile engine
+# from pcapkit.toolkit.pypcapfile import packet2timestamp as pypcapfile_packet2timestamp
+# from pcapkit.toolkit.pypcapfile import ipv4_header as pypcapfile_ipv4_header
+# from pcapkit.toolkit.pypcapfile import packet2chain as pypcapfile_packet2chain
+# from pcapkit.toolkit.pypcapfile import packet2dict as pypcapfile_packet2dict
+# from pcapkit.toolkit.pypcapfile import ipv4_reassembly as pypcapfile_ipv4_reassembly
+# from pcapkit.toolkit.pypcapfile import tcp_reassembly as pypcapfile_tcp_reassembly
+# from pcapkit.toolkit.pypcapfile import tcp_traceflow as pypcapfile_tcp_traceflow
+
 __all__ = [
     # default engine
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
@@ -54,4 +67,12 @@ __all__ = [
     # # Scapy engine
     # 'scapy_packet2chain', 'scapy_packet2dict',
     # 'scapy_ipv4_reassembly', 'scapy_ipv6_reassembly', 'scapy_tcp_reassembly', 'scapy_tcp_traceflow',
+
+    # # PyPCAP engine
+    # 'pypcap_packet2chain', 'pypcap_packet2dict',
+
+    # # PyPCAPFile engine
+    # 'pypcapfile_packet2timestamp', 'pypcapfile_ipv4_header',
+    # 'pypcapfile_packet2chain', 'pypcapfile_packet2dict',
+    # 'pypcapfile_ipv4_reassembly', 'pypcapfile_tcp_reassembly', 'pypcapfile_tcp_traceflow',
 ]

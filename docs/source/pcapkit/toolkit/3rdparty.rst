@@ -86,3 +86,85 @@ Auxiliary Functions
 -------------------
 
 .. autofunction:: pcapkit.toolkit.pyshark.packet2dict
+
+PyPCAP Tools
+============
+
+.. module:: pcapkit.toolkit.pypcap
+
+:mod:`pcapkit.toolkit.pypcap` contains all you need for
+:mod:`pcapkit` handy usage with `PyPCAP`_ engine. All reforming
+functions returns with a flag to indicate if usable for
+its caller.
+
+.. _PyPCAP: https://github.com/pynetwork/pypcap
+
+.. note::
+
+   `PyPCAP`_ performs no protocol dissection, so the reassembly and flow tracing
+   adapters below cannot be implemented. They are defined all the same, so that
+   reaching for one fails with an explanatory
+   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than an
+   :exc:`ImportError`.
+
+.. autofunction:: pcapkit.toolkit.pypcap.ipv4_reassembly
+
+.. autofunction:: pcapkit.toolkit.pypcap.ipv6_reassembly
+
+.. autofunction:: pcapkit.toolkit.pypcap.tcp_reassembly
+
+.. autofunction:: pcapkit.toolkit.pypcap.tcp_traceflow
+
+Auxiliary Functions
+-------------------
+
+.. autofunction:: pcapkit.toolkit.pypcap.packet2chain
+
+.. autofunction:: pcapkit.toolkit.pypcap.packet2dict
+
+PyPCAPFile Tools
+================
+
+.. module:: pcapkit.toolkit.pypcapfile
+
+:mod:`pcapkit.toolkit.pypcapfile` contains all you need for
+:mod:`pcapkit` handy usage with `PyPCAPFile`_ engine. All reforming
+functions returns with a flag to indicate if usable for
+its caller.
+
+.. _PyPCAPFile: https://github.com/kisom/pypcapfile
+
+.. note::
+
+   `PyPCAPFile`_ has no IPv6 decoder, so :func:`~pcapkit.toolkit.pypcapfile.ipv6_reassembly`
+   raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than returning
+   :data:`None` -- which would be indistinguishable from "this frame carries no
+   IPv6 fragment".
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.ipv4_reassembly
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.ipv6_reassembly
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.tcp_reassembly
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.tcp_traceflow
+
+Auxiliary Functions
+-------------------
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.packet2timestamp
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.ipv4_header
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.packet2chain
+
+.. autofunction:: pcapkit.toolkit.pypcapfile.packet2dict
+
+Internal Definitions
+--------------------
+
+.. autodata:: pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN
+
+.. autodata:: pcapkit.toolkit.pypcapfile.IPV4_FLAG_DF
+
+.. autodata:: pcapkit.toolkit.pypcapfile.IPV4_FLAG_MF
