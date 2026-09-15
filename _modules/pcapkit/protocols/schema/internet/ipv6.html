@@ -441,10 +441,18 @@
 <span class="w">    </span><span class="sd">"""Header schema for IPv6 packet."""</span>
 
     <span class="c1">#: Version, traffic class and flow label.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: The :class:`~pcapkit.corekit.fields.strings.BitField` namespace maps each</span>
+    <span class="c1">#: subfield to a ``(start_bit, length_in_bits)`` pair, *not* to</span>
+    <span class="c1">#: ``(start_bit, end_bit)``. Per :rfc:`8200#section-3` the first 32 bits of</span>
+    <span class="c1">#: the IPv6 header are Version (bits 0-3), Traffic Class (bits 4-11) and</span>
+    <span class="c1">#: Flow Label (bits 12-31), so the flow label starts at bit 12 -- reading it</span>
+    <span class="c1">#: as ``(8, 20)`` would overlap the low nibble of the traffic class and drop</span>
+    <span class="c1">#: the low nibble of the label.</span>
     <span class="n">hextet</span><span class="p">:</span> <span class="s1">'IPv6Hextet'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'version'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
         <span class="s1">'class'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
-        <span class="s1">'label'</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+        <span class="s1">'label'</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Payload length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>

@@ -672,6 +672,13 @@ as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.hextet">
 <span class="sig-name descname"><span class="pre">hextet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6Hextet" title="pcapkit.protocols.schema.internet.ipv6.IPv6Hextet"><span class="pre">IPv6Hextet</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">hextet&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.hextet" title="Link to this definition">¶</a></dt>
 <dd><p>Version, traffic class and flow label.</p>
+<p>The <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField" title="pcapkit.corekit.fields.strings.BitField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitField</span></code></a> namespace maps each
+subfield to a <code class="docutils literal notranslate"><span class="pre">(start_bit,</span> <span class="pre">length_in_bits)</span></code> pair, <em>not</em> to
+<code class="docutils literal notranslate"><span class="pre">(start_bit,</span> <span class="pre">end_bit)</span></code>. Per <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a> the first 32 bits of
+the IPv6 header are Version (bits 0-3), Traffic Class (bits 4-11) and
+Flow Label (bits 12-31), so the flow label starts at bit 12 – reading it
+as <code class="docutils literal notranslate"><span class="pre">(8,</span> <span class="pre">20)</span></code> would overlap the low nibble of the traffic class and drop
+the low nibble of the label.</p>
 </dd></dl>
 
 <dl class="py attribute">

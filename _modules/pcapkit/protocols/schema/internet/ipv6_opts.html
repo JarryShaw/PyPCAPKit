@@ -973,6 +973,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_QSFunction</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts quick start options."""</span>
 
+    <span class="c1"># NOTE: This declaration scopes the QS-function registry to this class. Without</span>
+    <span class="c1"># it the subclasses below register into the *parent* ``Option`` registry, whose</span>
+    <span class="c1"># keys are IPv6-Opts option *types* -- and since ``Quick_Start_Request`` is 0</span>
+    <span class="c1"># and ``Report_of_Approved_Rate`` is 8, they would clobber option types 0</span>
+    <span class="c1"># (``Pad1``) and 8 (``SMF_DPD``). ``hopopt.py`` carries the same declaration.</span>
+    <span class="n">__enum__</span><span class="p">:</span> <span class="s1">'DefaultDict[Enum_QSFunction, Type[QuickStartOption]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type,return-value]</span>
+
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'QuickStartFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'func'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>

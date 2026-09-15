@@ -541,9 +541,15 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
+        <span class="c1"># NOTE: The on-wire Fragment Offset is a 13-bit count of 8-octet units</span>
+        <span class="c1"># (:rfc:`8200#section-4.5`), but ``Data_IPv6_Frag.offset`` carries octets</span>
+        <span class="c1"># so that it matches ``Data_IPv4.offset`` and can be handed straight to</span>
+        <span class="c1"># the reassembly machinery, which indexes the datagram buffer with it</span>
+        <span class="c1"># (:meth:`pcapkit.foundation.reassembly.ip.IP.reassembly`). Scale here,</span>
+        <span class="c1"># exactly as :meth:`pcapkit.protocols.internet.ipv4.IPv4.read` does.</span>
         <span class="n">ipv6_frag</span> <span class="o">=</span> <span class="n">Data_IPv6_Frag</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">],</span>
+            <span class="n">offset</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">])</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'mf'</span><span class="p">]),</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
         <span class="p">)</span>
@@ -572,7 +578,10 @@
 <span class="sd">            next_default: Default value of next header.</span>
 <span class="sd">            next_namespace: Namespace of next header.</span>
 <span class="sd">            next_reversed: If the namespace of next header is reversed.</span>
-<span class="sd">            offset: Fragment offset.</span>
+<span class="sd">            offset: Fragment offset, in on-wire 8-octet units (:rfc:`8200#section-4.5`).</span>
+<span class="sd">                Note that :attr:`Data_IPv6_Frag.offset</span>
+<span class="sd">                &lt;pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag.offset&gt;` is in</span>
+<span class="sd">                octets, so it must be divided by 8 before being passed here.</span>
 <span class="sd">            mf: More fragments flag.</span>
 <span class="sd">            id: Identification.</span>
 <span class="sd">            payload: Payload of current instance.</span>
@@ -666,9 +675,12 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: ``make`` takes ``offset`` in on-wire 8-octet units, while</span>
+        <span class="c1"># ``data.offset`` is in octets (see :meth:`read`), so scale back down to</span>
+        <span class="c1"># keep the data-to-schema round trip exact.</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'next'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>
+            <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>
             <span class="s1">'mf'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>
             <span class="s1">'id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
