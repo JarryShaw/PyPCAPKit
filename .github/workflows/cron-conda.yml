@@ -40,6 +40,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Load maintenance deploy key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
+
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -83,12 +88,11 @@ jobs:
             ${{ steps.verify-changed-files.outputs.changed_files }}"
 
       - name: Push Changes
-        uses: ad-m/github-push-action@master
         if: steps.verify-changed-files.outputs.files_changed == 'true'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-          pull: rebase
+        run: |
+          git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
+          git pull --rebase origin "${GITHUB_REF#refs/heads/}"
+          git push origin "HEAD:${GITHUB_REF}"
 
       - name: Get Version
         if: steps.verify-changed-files.outputs.files_changed == 'true'
@@ -116,6 +120,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Load maintenance deploy key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v7
         with:
@@ -133,11 +142,9 @@ jobs:
           git tag "conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}+${{ needs.conda-update.outputs.PCAPKIT_BUILD }}" -m"Conda Build"
 
       - name: Push Tag
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PYPCAPKIT }}
-          atomic: false
-          tags: true
+        run: |
+          git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
+          git push origin "conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}+${{ needs.conda-update.outputs.PCAPKIT_BUILD }}"
 
   conda-dist:
     name: Conda deployment (update) on ${{ matrix.os }} with Python ${{ matrix.python-version }}

@@ -123,6 +123,11 @@ jobs:
     needs: [ version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     steps:
+      - name: Load maintenance deploy key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v7
         with:
@@ -147,9 +152,10 @@ jobs:
           git commit -m"Reset conda build number" || true
 
       - name: Push Changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PYPCAPKIT }}
+        run: |
+          git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
+          git pull --rebase origin main
+          git push origin HEAD:main
 
       - name: Create Tag
         run: |
@@ -162,11 +168,9 @@ jobs:
           git tag "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0" -m"Conda Build"
 
       - name: Push Tag
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PYPCAPKIT }}
-          atomic: false
-          tags: true
+        run: |
+          git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
+          git push origin "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
 
   pypi:
     name: PyPI distribution for Python ${{ matrix.python-version }}
