@@ -15,6 +15,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import struct
+import sys
 import types
 import unittest
 from unittest import mock
@@ -366,6 +367,56 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         self.assertEqual(stream.read(2), b'ab')
         self.assertEqual(stream.read(), b'cdef')
         self.assertEqual(stream.read(), b'')
+
+
+class PyPCAPFilePythonCeilingTests(unittest.TestCase):
+    """The engine rules itself out above its dependency's Python ceiling.
+
+    ``pypcapfile`` 0.12.0 installs cleanly on Python 3.12 and newer and *then*
+    fails, because :mod:`pcapfile.linklayer` imports :mod:`imp`, which 3.12
+    removed, and :mod:`pcapfile.savefile` imports ``linklayer``. An import guard
+    that only tries ``import pcapfile`` is therefore satisfied, and the
+    :exc:`ModuleNotFoundError` escapes from the engine's constructor as a hard
+    error rather than degrading to the default engine.
+
+    """
+
+    def test_the_ceiling_is_declared_and_matches_the_imp_removal(self) -> None:
+        from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
+
+        # 3.12 is where :mod:`imp` went, so that is the first unsupported version
+        self.assertEqual(PyPCAPFile.PYTHON_CEILING, (3, 12))
+
+    def test_unsupported_reason_tracks_the_running_interpreter(self) -> None:
+        from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
+
+        reason = PyPCAPFile.unsupported_reason()
+        if sys.version_info[:2] >= PyPCAPFile.PYTHON_CEILING:
+            self.assertIsNotNone(reason)
+            # the message has to name the cause, not merely refuse: a bare
+            # "unsupported" sends the reader to the wrong place
+            self.assertIn('imp', reason)  # type: ignore[arg-type]
+            self.assertIn(f'{sys.version_info[0]}.{sys.version_info[1]}',
+                          reason)  # type: ignore[arg-type]
+        else:
+            self.assertIsNone(reason)
+
+    def test_the_reason_is_decided_by_version_not_by_the_import(self) -> None:
+        """The verdict must not depend on whether ``pcapfile`` is installed.
+
+        Otherwise the answer differs between a machine that has the package and
+        one that does not, and the engine would report itself usable on 3.12+
+        purely because the failing submodule had not been reached yet.
+
+        """
+        from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
+
+        for version, expected in (((3, 11), False), ((3, 12), True), ((3, 14), True)):
+            with self.subTest(python=version):
+                with mock.patch.object(sys, 'version_info',
+                                       (*version, 0, 'final', 0)):
+                    self.assertEqual(PyPCAPFile.unsupported_reason() is not None,
+                                     expected)
 
 
 if __name__ == '__main__':

@@ -9,9 +9,14 @@ which synthesises file I/O and protocol analysis,
 coordinates information exchange in all network layers,
 extracts parametres from a PCAP file.
 
-.. todo::
+.. seealso::
 
-   Implement engine support for |pypcap|_ & |pycapfile|_.
+   Engine support for |pypcap|_ and |pypcapfile|_ has since landed, as
+   :class:`pcapkit.foundation.engines.pypcap.PyPCAP` (``engine='pypcap'``) and
+   :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
+   (``engine='pypcapfile'``). Both support less than the ``default`` engine
+   does; :doc:`engines/index` tabulates the gaps, and :doc:`../../index`
+   documents the installation prerequisites each of the two carries.
 
 .. autoclass:: pcapkit.foundation.extraction.Extractor
    :no-members:
@@ -85,6 +90,6 @@ Type Variables
    :type: typing.Any
 
 .. |pypcap| replace:: ``pypcap``
-.. _pypcap: https://pypcap.readthedocs.io/en/latest/
-.. |pycapfile| replace:: ``pycapfile``
-.. _pycapfile: https://github.com/kisom/pypcapfile
+.. _pypcap: https://github.com/pynetwork/pypcap
+.. |pypcapfile| replace:: ``pypcapfile``
+.. _pypcapfile: https://github.com/kisom/pypcapfile
