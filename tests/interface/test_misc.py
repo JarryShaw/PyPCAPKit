@@ -32,7 +32,7 @@ class FollowTCPStreamTests(unittest.TestCase):
     """:func:`~pcapkit.interface.misc.follow_tcp_stream` per extraction engine.
 
     ``examples/captures/in.pcap`` (committed, so unit-tier safe) holds three TCP
-    conversations. GH-399: the reassembly adapter was chosen by comparing the
+    conversations. #399: the reassembly adapter was chosen by comparing the
     engine *instance* to a string -- a comparison that is never true -- so every
     engine silently used the pcapkit adapter regardless of which engine ran. That
     crashed on DPKT frames (``AttributeError: 'dict' object has no attribute
@@ -77,7 +77,7 @@ class FollowTCPStreamTests(unittest.TestCase):
     def test_dpkt_engine_matches_the_default_engine(self) -> None:
         # DPKT dissects in.pcap's Ethernet/IP/TCP in full, so it must agree with the
         # native engine on both the stream count and the reassembled bytes. This is
-        # the regression guard for GH-399: before the fix the DPKT frame reached the
+        # the regression guard for #399: before the fix the DPKT frame reached the
         # pcapkit adapter and raised AttributeError, and the counted-vs-uncounted
         # call convention is what makes the reassembled numbering line up.
         with warnings.catch_warnings():
@@ -96,7 +96,7 @@ class FollowTCPStreamTests(unittest.TestCase):
         # Scapy does not recognise this capture's link-layer type and hands every
         # frame back as one opaque ``Raw`` layer with no TCP inside, so it correctly
         # finds no TCP stream to follow. Zero is therefore a capability gap, not the
-        # GH-399 bug -- and the second assertion pins the *cause*, so a future scapy
+        # #399 bug -- and the second assertion pins the *cause*, so a future scapy
         # that learns this link type fails here loudly instead of silently drifting.
         import pcapkit
 
@@ -133,7 +133,7 @@ class FollowTCPStreamTests(unittest.TestCase):
         # The PCAP trace dumper cannot serialise DPKT's dict frames, so an explicit
         # 'pcap' trace format is replaced with a dict-capable one, with a
         # FormatWarning -- and the stream is still followed rather than crashing the
-        # extraction the way it did before GH-399 was fixed.
+        # extraction the way it did before #399 was fixed.
         from pcapkit.utilities.warnings import FormatWarning
 
         with warnings.catch_warnings(record=True) as caught:
@@ -159,7 +159,7 @@ class FollowTCPStreamTests(unittest.TestCase):
     def test_engine_without_a_reassembly_adapter_returns_no_streams(self) -> None:
         # An engine pcapkit ships no reassembly adapter for -- a third-party one, or
         # a built-in that grows dict frames -- must not be silently routed to the
-        # pcapkit adapter, which is precisely the GH-399 failure mode. It warns and
+        # pcapkit adapter, which is precisely the #399 failure mode. It warns and
         # returns nothing. Extractor is stubbed so the branch can be reached without
         # registering a real engine.
         from pcapkit.interface import misc

@@ -97,7 +97,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     # NOTE: the DPKT and Scapy engines hand their frames to the flow tracer as plain
     # :obj:`dict`\\ s, which the PCAP trace dumper cannot re-serialise -- it reaches
     # for ``frame.packet`` and dies with ``AttributeError: 'dict' object has no
-    # attribute 'packet'`` (GH-399). The tracer defaults an unset ``format`` to
+    # attribute 'packet'`` (#399). The tracer defaults an unset ``format`` to
     # ``'pcap'``, so following a stream through either engine crashes *during
     # extraction*, before the reassembly below ever runs. :class:`Extractor
     # <pcapkit.foundation.extraction.Extractor>` already substitutes a dict-capable
@@ -123,7 +123,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     # never its name -- so the historical ``extraction.engine == 'dpkt'`` compared an
     # object against a string and was *always* :data:`False`. Every capture then fell
     # through to the pcapkit adapter, which crashed on DPKT frames and silently
-    # returned no streams on Scapy frames (GH-399). Dispatch on the engine *type*
+    # returned no streams on Scapy frames (#399). Dispatch on the engine *type*
     # instead, and via :func:`isinstance` so that a third-party engine subclassing a
     # built-in still reaches the adapter that matches its frames.
     #
@@ -152,7 +152,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
         tcp_reassembly = cast('ReassemblyAdapter', tk_pypcapfile.tcp_reassembly)
     else:
         # A third-party engine pcapkit ships no reassembly adapter for. Falling back
-        # to the pcapkit adapter is exactly the GH-399 failure mode -- a wrong or empty
+        # to the pcapkit adapter is exactly the #399 failure mode -- a wrong or empty
         # result indistinguishable from a real one -- so warn and return no streams
         # rather than reassemble frames whose shape we cannot parse.
         warn(f'unsupported extraction engine for TCP stream following: {exeng.name}; '
