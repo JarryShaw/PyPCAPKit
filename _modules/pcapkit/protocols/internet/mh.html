@@ -427,6 +427,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.access_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessType</span> <span class="k">as</span> <span class="n">Enum_AccessType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.ack_status_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACKStatusCode</span> <span class="k">as</span> <span class="n">Enum_ACKStatusCode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.ani_suboption</span><span class="w"> </span><span class="kn">import</span> <span class="n">ANISuboption</span> <span class="k">as</span> <span class="n">Enum_ANISuboption</span>
@@ -454,6 +456,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.handover_ack_status</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandoverACKStatus</span> <span class="k">as</span> <span class="n">Enum_HandoverACKStatus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.handover_initiate_flag</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">HandoverInitiateFlag</span> <span class="k">as</span> <span class="n">Enum_HandoverInitiateFlag</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.handover_initiate_status</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">HandoverInitiateStatus</span> <span class="k">as</span> <span class="n">Enum_HandoverInitiateStatus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.home_address_reply</span><span class="w"> </span><span class="kn">import</span> <span class="n">HomeAddressReply</span> <span class="k">as</span> <span class="n">Enum_HomeAddressReply</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.lla_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLACode</span> <span class="k">as</span> <span class="n">Enum_LLACode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.lma_mag_suboption</span><span class="w"> </span><span class="kn">import</span> \
@@ -480,6 +484,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthOption</span> <span class="k">as</span> <span class="n">Data_AuthOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">AuthorizationDataOption</span> <span class="k">as</span> <span class="n">Data_AuthorizationDataOption</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">BADFOption</span> <span class="k">as</span> <span class="n">Data_BADFOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">BindingAcknowledgementMessage</span> <span class="k">as</span> <span class="n">Data_BindingAcknowledgementMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">BindingErrorMessage</span> <span class="k">as</span> <span class="n">Data_BindingErrorMessage</span>
@@ -497,8 +502,23 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">CGAParametersOption</span> <span class="k">as</span> <span class="n">Data_CGAParametersOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">CGAParametersRequestOption</span> <span class="k">as</span> <span class="n">Data_CGAParametersRequestOption</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExperimentalMessage</span> <span class="k">as</span> <span class="n">Data_ExperimentalMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">ExperimentalMobilityOption</span> <span class="k">as</span> <span class="n">Data_ExperimentalMobilityOption</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">FastBindingAcknowledgmentMessage</span> <span class="k">as</span> <span class="n">Data_FastBindingAcknowledgmentMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">FastBindingUpdateMessage</span> <span class="k">as</span> <span class="n">Data_FastBindingUpdateMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">FastNeighborAdvertisementMessage</span> <span class="k">as</span> <span class="n">Data_FastNeighborAdvertisementMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">HandoverAcknowledgeMessage</span> <span class="k">as</span> <span class="n">Data_HandoverAcknowledgeMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">HandoverInitiateMessage</span> <span class="k">as</span> <span class="n">Data_HandoverInitiateMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">HomeTestInitMessage</span> <span class="k">as</span> <span class="n">Data_HomeTestInitMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">HomeTestMessage</span> <span class="k">as</span> <span class="n">Data_HomeTestMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">IPv6AddressPrefixOption</span> <span class="k">as</span> <span class="n">Data_IPv6AddressPrefixOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkLayerAddressOption</span> <span class="k">as</span> <span class="n">Data_LinkLayerAddressOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">MesgIDOption</span> <span class="k">as</span> <span class="n">Data_MesgIDOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">MNIDOption</span> <span class="k">as</span> <span class="n">Data_MNIDOption</span>
@@ -520,6 +540,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthOption</span> <span class="k">as</span> <span class="n">Schema_AuthOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">AuthorizationDataOption</span> <span class="k">as</span> <span class="n">Schema_AuthorizationDataOption</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">BADFOption</span> <span class="k">as</span> <span class="n">Schema_BADFOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">BindingAcknowledgementMessage</span> <span class="k">as</span> <span class="n">Schema_BindingAcknowledgementMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">BindingErrorMessage</span> <span class="k">as</span> <span class="n">Schema_BindingErrorMessage</span>
@@ -538,8 +559,23 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">CGAParametersOption</span> <span class="k">as</span> <span class="n">Schema_CGAParametersOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">CGAParametersRequestOption</span> <span class="k">as</span> <span class="n">Schema_CGAParametersRequestOption</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExperimentalMessage</span> <span class="k">as</span> <span class="n">Schema_ExperimentalMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">ExperimentalMobilityOption</span> <span class="k">as</span> <span class="n">Schema_ExperimentalMobilityOption</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">FastBindingAcknowledgmentMessage</span> <span class="k">as</span> <span class="n">Schema_FastBindingAcknowledgmentMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">FastBindingUpdateMessage</span> <span class="k">as</span> <span class="n">Schema_FastBindingUpdateMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">FastNeighborAdvertisementMessage</span> <span class="k">as</span> <span class="n">Schema_FastNeighborAdvertisementMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">HandoverAcknowledgeMessage</span> <span class="k">as</span> <span class="n">Schema_HandoverAcknowledgeMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">HandoverInitiateMessage</span> <span class="k">as</span> <span class="n">Schema_HandoverInitiateMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">HomeTestInitMessage</span> <span class="k">as</span> <span class="n">Schema_HomeTestInitMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">HomeTestMessage</span> <span class="k">as</span> <span class="n">Schema_HomeTestMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">IPv6AddressPrefixOption</span> <span class="k">as</span> <span class="n">Schema_IPv6AddressPrefixOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">LinkLayerAddressOption</span> <span class="k">as</span> <span class="n">Schema_LinkLayerAddressOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">MesgIDOption</span> <span class="k">as</span> <span class="n">Schema_MesgIDOption</span>
@@ -611,14 +647,158 @@
 
 
 
+<div class="viewcode-block" id="FastBindingAcknowledgmentStatus">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""[FastBindingAcknowledgmentStatus] Fast Binding Acknowledgment Status Codes.</span>
+
+<span class="sd">    Status values of the fast binding acknowledgment (FBack) message, c.f.,</span>
+<span class="sd">    :rfc:`5568#section-6.2.3`. Values below ``128`` indicate that the fast</span>
+<span class="sd">    binding update was accepted by the receiving node, values of ``128`` and</span>
+<span class="sd">    above that it was rejected.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        :rfc:`5568#section-6.2.3` defines these values inline and IANA keeps no</span>
+<span class="sd">        registry of them, so the enumeration lives here rather than in</span>
+<span class="sd">        :mod:`pcapkit.const.mh`. It is also **not** interchangeable with the</span>
+<span class="sd">        registered :class:`~pcapkit.const.mh.status_code.StatusCode`, since two</span>
+<span class="sd">        of its values collide semantically: ``1`` means *NCoA is invalid* here</span>
+<span class="sd">        but *accepted but prefix discovery necessary* there, and ``131`` means</span>
+<span class="sd">        *incorrect interface identifier length* here but *home registration not</span>
+<span class="sd">        supported* there.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Fast Binding Update accepted [:rfc:`5568#section-6.2.3`]</span>
+    <span class="n">Fast_Binding_Update_accepted</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#: Fast Binding Update accepted but NCoA is invalid; use the NCoA supplied in</span>
+    <span class="c1">#: the "alternate" care-of address option [:rfc:`5568#section-6.2.3`]</span>
+    <span class="n">Fast_Binding_Update_accepted_but_NCoA_is_invalid</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1">#: Reason unspecified [:rfc:`5568#section-6.2.3`]</span>
+    <span class="n">Reason_unspecified</span> <span class="o">=</span> <span class="mi">128</span>
+
+    <span class="c1">#: Administratively prohibited [:rfc:`5568#section-6.2.3`]</span>
+    <span class="n">Administratively_prohibited</span> <span class="o">=</span> <span class="mi">129</span>
+
+    <span class="c1">#: Insufficient resources [:rfc:`5568#section-6.2.3`]</span>
+    <span class="n">Insufficient_resources</span> <span class="o">=</span> <span class="mi">130</span>
+
+    <span class="c1">#: Incorrect interface identifier length [:rfc:`5568#section-6.2.3`]</span>
+    <span class="n">Incorrect_interface_identifier_length</span> <span class="o">=</span> <span class="mi">131</span>
+
+<div class="viewcode-block" id="FastBindingAcknowledgmentStatus.get">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.get">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Key to get enum item.</span>
+<span class="sd">            default: Default value if not found.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
+
+
+<div class="viewcode-block" id="FastBindingAcknowledgmentStatus._missing_">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="c1">#: Unassigned</span>
+        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="IPv6AddressPrefixCode">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPv6AddressPrefixCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""[IPv6AddressPrefixCode] Mobility Header IPv6 Address/Prefix Option Codes.</span>
+
+<span class="sd">    Option codes of the mobility header IPv6 address/prefix option, which</span>
+<span class="sd">    identify which address the option carries, c.f.,</span>
+<span class="sd">    :rfc:`5568#section-6.4.2`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        :rfc:`5568#section-6.4.2` defines these values inline and IANA keeps no</span>
+<span class="sd">        registry of them, so the enumeration lives here rather than in</span>
+<span class="sd">        :mod:`pcapkit.const.mh`. The identical code space of the neighbor</span>
+<span class="sd">        discovery IP address/prefix option of :rfc:`5568#section-6.4.1` is</span>
+<span class="sd">        likewise unregistered.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Old Care-of Address [:rfc:`5568#section-6.4.2`]</span>
+    <span class="n">Old_Care_of_Address</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1">#: New Care-of Address [:rfc:`5568#section-6.4.2`]</span>
+    <span class="n">New_Care_of_Address</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="c1">#: NAR's IP address [:rfc:`5568#section-6.4.2`]</span>
+    <span class="n">NAR_IP_address</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c1">#: NAR's Prefix, sent in PrRtAdv; the prefix length field contains the number</span>
+    <span class="c1">#: of valid leading bits in the prefix [:rfc:`5568#section-6.4.2`]</span>
+    <span class="n">NAR_Prefix</span> <span class="o">=</span> <span class="mi">4</span>
+
+<div class="viewcode-block" id="IPv6AddressPrefixCode.get">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.get">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6AddressPrefixCode'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Key to get enum item.</span>
+<span class="sd">            default: Default value if not found.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">IPv6AddressPrefixCode</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IPv6AddressPrefixCode</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="n">IPv6AddressPrefixCode</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">IPv6AddressPrefixCode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
+
+
+<div class="viewcode-block" id="IPv6AddressPrefixCode._missing_">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6AddressPrefixCode'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="c1">#: Unassigned</span>
+        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+</div>
+
+
+
 <div class="viewcode-block" id="MH">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MH</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_MH</span><span class="p">,</span> <span class="n">Schema_MH</span><span class="p">],</span>
          <span class="n">schema</span><span class="o">=</span><span class="n">Schema_MH</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_MH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Mobility Header.</span>
 
-<span class="sd">    This class currently supports parsing og the following MH message types,</span>
-<span class="sd">    which are resgitered in the :attr:`self.__message__ &lt;pcapkit.protocols.internet.mh.MH.__message__&gt;`</span>
+<span class="sd">    This class currently supports parsing of the following MH message types,</span>
+<span class="sd">    which are registered in the :attr:`self.__message__ &lt;pcapkit.protocols.internet.mh.MH.__message__&gt;`</span>
 <span class="sd">    attribute:</span>
 
 <span class="sd">    .. list-table::</span>
@@ -651,6 +831,24 @@
 <span class="sd">       * - :attr:`~pcapkit.const.mh.packet.Packet.Binding_Error`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_be`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_be`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.mh.packet.Packet.Fast_Binding_Update`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_fbu`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_fbu`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.mh.packet.Packet.Fast_Binding_Acknowledgment`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_fback`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_fback`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.mh.packet.Packet.Fast_Neighbor_Advertisement`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_fna`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_fna`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.mh.packet.Packet.Experimental_Mobility_Header`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_emh`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_emh`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.mh.packet.Packet.Handover_Initiate_Message`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_hi`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_hi`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.mh.packet.Packet.Handover_Acknowledge_Message`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_hack`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_hack`</span>
 
 <span class="sd">    This class currently supports parsing the following MH options, which are</span>
 <span class="sd">    registered in the :attr:`self.__option__ &lt;pcapkit.protocols.internet.mh.MH.__option__&gt;`</span>
@@ -714,6 +912,15 @@
 <span class="sd">       * - :attr:`~pcapkit.const.mh.option.Option.Care_of_Test`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_ct`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_ct`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.mh.option.Option.Experimental_Mobility_Option`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_exp`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_exp`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.mh.option.Option.Binding_Authorization_Data_for_FMIPv6`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_badf`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_badf`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.mh.option.Option.Mobility_Header_IPv6_Address_Prefix`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_ipv6_ap`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_ipv6_ap`</span>
 
 <span class="sd">    This class currently supports parsing of the following MH CGA extensions,</span>
 <span class="sd">    which are registered in the :attr:`self.__extension__ &lt;pcapkit.protocols.internet.mh.MH.__extension__&gt;`</span>
@@ -751,6 +958,12 @@
             <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Update</span><span class="p">:</span> <span class="s1">'bu'</span><span class="p">,</span>
             <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Acknowledgement</span><span class="p">:</span> <span class="s1">'ba'</span><span class="p">,</span>
             <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Error</span><span class="p">:</span> <span class="s1">'be'</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Fast_Binding_Update</span><span class="p">:</span> <span class="s1">'fbu'</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Fast_Binding_Acknowledgment</span><span class="p">:</span> <span class="s1">'fback'</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Fast_Neighbor_Advertisement</span><span class="p">:</span> <span class="s1">'fna'</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Experimental_Mobility_Header</span><span class="p">:</span> <span class="s1">'emh'</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Handover_Initiate_Message</span><span class="p">:</span> <span class="s1">'hi'</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Handover_Acknowledge_Message</span><span class="p">:</span> <span class="s1">'hack'</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]</span>
 
@@ -779,6 +992,9 @@
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Permanent_Home_Keygen_Token</span><span class="p">:</span> <span class="s1">'phkt'</span><span class="p">,</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Care_of_Test_Init</span><span class="p">:</span> <span class="s1">'ct_init'</span><span class="p">,</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Care_of_Test</span><span class="p">:</span> <span class="s1">'ct'</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Experimental_Mobility_Option</span><span class="p">:</span> <span class="s1">'exp'</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Binding_Authorization_Data_for_FMIPv6</span><span class="p">:</span> <span class="s1">'badf'</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Mobility_Header_IPv6_Address_Prefix</span><span class="p">:</span> <span class="s1">'ipv6_ap'</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]</span>
 
@@ -1473,6 +1689,304 @@
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
             <span class="n">home</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">home</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="MH._read_msg_fbu">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_msg_fbu">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_msg_fbu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_FastBindingUpdateMessage'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_MH'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_FastBindingUpdateMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read MH fast binding update (FBU) message type.</span>
+
+<span class="sd">        Structure of MH Fast Binding Update Message [:rfc:`5568#section-6.2.2`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |          Sequence #           |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |A|H|L|K|       Reserved        |            Lifetime           |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           .                        Mobility Options                       .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :rfc:`5568#section-6.2.2` states that the FBU is *identical* to the</span>
+<span class="sd">            Mobile IPv6 binding update (BU) message, so the lifetime is read in</span>
+<span class="sd">            units of 4 seconds exactly as in :meth:`_read_msg_bu`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastBindingUpdateMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">ack</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'A'</span><span class="p">]),</span>
+            <span class="n">home</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'H'</span><span class="p">]),</span>
+            <span class="n">lla_compat</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'L'</span><span class="p">]),</span>
+            <span class="n">key_mngt</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'K'</span><span class="p">]),</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="MH._read_msg_fback">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_msg_fback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_msg_fback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_FastBindingAcknowledgmentMessage'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_MH'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_FastBindingAcknowledgmentMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read MH fast binding acknowledgment (FBack) message type.</span>
+
+<span class="sd">        Structure of MH Fast Binding Acknowledgment Message [:rfc:`5568#section-6.2.3`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |     Status    |K|  Reserved   |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |            Sequence #         |            Lifetime           |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           .                        Mobility Options                       .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :rfc:`5568#section-6.2.3` defines the FBack status values inline</span>
+<span class="sd">            instead of drawing them from the IANA *Status Codes* registry, whose</span>
+<span class="sd">            values ``1`` and ``131`` mean something else entirely. The status is</span>
+<span class="sd">            therefore reported as a</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`,</span>
+<span class="sd">            which is local to this module, rather than being mislabelled as a</span>
+<span class="sd">            :class:`~pcapkit.const.mh.status_code.StatusCode`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastBindingAcknowledgmentMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
+            <span class="n">key_mngt</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'K'</span><span class="p">]),</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="MH._read_msg_fna">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_msg_fna">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_msg_fna</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_FastNeighborAdvertisementMessage'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_MH'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_FastNeighborAdvertisementMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read MH fast neighbor advertisement (FNA) message type.</span>
+
+<span class="sd">        Structure of MH Fast Neighbor Advertisement Message [:rfc:`4068#section-6.3.3`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |           Reserved            |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           .                        Mobility Options                       .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The FNA message is **deprecated** by :rfc:`5568#section-8`, which</span>
+<span class="sd">            replaces it with the unsolicited neighbor advertisement (UNA) of</span>
+<span class="sd">            :rfc:`4861`. Its wire format is therefore taken from :rfc:`4068`,</span>
+<span class="sd">            the specification :rfc:`5568` obsoletes, since a NAR is still</span>
+<span class="sd">            permitted to process the message as specified there.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastNeighborAdvertisementMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="MH._read_msg_emh">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_msg_emh">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_msg_emh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ExperimentalMessage'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_MH'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ExperimentalMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read MH experimental mobility header message type.</span>
+
+<span class="sd">        Structure of MH Experimental Mobility Header Message [:rfc:`5096#section-3`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           | Payload Proto |  Header Len   |   MH Type     |   Reserved    |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |           Checksum            |                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               |</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           .                       Message Data                            .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :rfc:`5096#section-3` defines no fields beyond those of the mobility</span>
+<span class="sd">            header itself, so the message data is carried opaquely -- its layout</span>
+<span class="sd">            is whatever the experiment in question defines. Two bytes of padding</span>
+<span class="sd">            are required when no data is present.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ExperimentalMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="MH._read_msg_hi">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_msg_hi">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_msg_hi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HandoverInitiateMessage'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_MH'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HandoverInitiateMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read MH handover initiate (HI) message type.</span>
+
+<span class="sd">        Structure of MH Handover Initiate Message [:rfc:`5568#section-6.2.1.1`,</span>
+<span class="sd">        :rfc:`5949#section-6.1.1`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |          Sequence #           |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |S|U|P|F| Resv  |      Code     |                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                        Mobility Options                       .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :rfc:`5568` defines only the ``S`` and ``U`` flags; the ``P`` and</span>
+<span class="sd">            ``F`` flags, and code values ``2`` and ``3``, are added by</span>
+<span class="sd">            :rfc:`5949#section-6.1.1`. All four flags are registered in the IANA</span>
+<span class="sd">            *Handover Initiate Flags* registry, hence all four are parsed here.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HandoverInitiateMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">assign</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'S'</span><span class="p">]),</span>
+            <span class="n">buffer</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'U'</span><span class="p">]),</span>
+            <span class="n">proxy</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]),</span>
+            <span class="n">forward</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'F'</span><span class="p">]),</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="MH._read_msg_hack">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_msg_hack">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_msg_hack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HandoverAcknowledgeMessage'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_MH'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HandoverAcknowledgeMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read MH handover acknowledge (HAck) message type.</span>
+
+<span class="sd">        Structure of MH Handover Acknowledge Message [:rfc:`5568#section-6.2.1.2`,</span>
+<span class="sd">        :rfc:`5949#section-6.1.2`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |          Sequence #           |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |U|P|F| Reserved|      Code     |                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                        Mobility Options                       .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :rfc:`5568` reserves the whole first octet of the message data; the</span>
+<span class="sd">            ``U``, ``P`` and ``F`` flags carved out of it, and code values ``5``</span>
+<span class="sd">            and ``6``, are added by :rfc:`5949#section-6.1.2`. All three flags</span>
+<span class="sd">            are registered in the IANA *Handover Acknowledge Flags* registry,</span>
+<span class="sd">            hence all three are parsed here.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HandoverAcknowledgeMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">buffer</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'U'</span><span class="p">]),</span>
+            <span class="n">proxy</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]),</span>
+            <span class="n">forward</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'F'</span><span class="p">]),</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -2191,6 +2705,156 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 
+<div class="viewcode-block" id="MH._read_opt_exp">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_exp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_exp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ExperimentalMobilityOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ExperimentalMobilityOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read MH experimental mobility option.</span>
+
+<span class="sd">        Structure of MH Experimental Mobility option [:rfc:`5096#section-4`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |     Type      |    Length     |        Data .....</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ExperimentalMobilityOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="MH._read_opt_badf">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_badf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_badf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_BADFOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_BADFOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read MH binding authorization data for FMIPv6 (BADF) option.</span>
+
+<span class="sd">        Structure of MH Binding Authorization Data for FMIPv6 option</span>
+<span class="sd">        [:rfc:`5568#section-6.4.5`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |   Type = 21   | Option Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                              SPI                              |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                         Authenticator                         |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :rfc:`5568#section-6.4.5` defines the option length as *the length of</span>
+<span class="sd">            the Authenticator in bytes*, i.e. it does **not** cover the 4-byte</span>
+<span class="sd">            SPI, unlike every other mobility option, whose length covers all of</span>
+<span class="sd">            its option data. The wording is inherited from the :rfc:`6275`</span>
+<span class="sd">            binding authorization data option (type ``5``), which carries no SPI</span>
+<span class="sd">            and for which the two readings coincide. Because :rfc:`5568` also</span>
+<span class="sd">            requires this option to be the **last** mobility option present, the</span>
+<span class="sd">            discrepancy never has to be resolved in order to find the following</span>
+<span class="sd">            option, so the literal reading is used here and the reported</span>
+<span class="sd">            :attr:`~pcapkit.protocols.data.internet.mh.Option.length` accounts</span>
+<span class="sd">            for the extra 4 bytes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BADFOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span>  <span class="c1"># 2 bytes for type &amp; length, 4 bytes for SPI</span>
+            <span class="n">spi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">spi</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="MH._read_opt_ipv6_ap">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_ipv6_ap">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_ipv6_ap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_IPv6AddressPrefixOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv6AddressPrefixOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read MH mobility header IPv6 address/prefix option.</span>
+
+<span class="sd">        Structure of MH Mobility Header IPv6 Address/Prefix option</span>
+<span class="sd">        [:rfc:`5568#section-6.4.2`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |     Type      |    Length     |  Option-Code  | Prefix Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                     IPv6 Address/Prefix                       +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        The option code identifies which address the option carries, c.f.,</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`. It, too,</span>
+<span class="sd">        is defined inline by :rfc:`5568#section-6.4.2` with no IANA registry</span>
+<span class="sd">        behind it, hence the enumeration is local to this module.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :rfc:`5568` prints the type as ``17``, which is the *neighbor</span>
+<span class="sd">            discovery* option type of its sibling in</span>
+<span class="sd">            :rfc:`5568#section-6.4.1`. Errata ID 1816 (verified) corrects it to</span>
+<span class="sd">            the IANA-assigned mobility option type ``34``, which is what this</span>
+<span class="sd">            handler is registered against.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">18</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv6AddressPrefixOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">IPv6AddressPrefixCode</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">),</span>
+            <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
+            <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
     <span class="c1"># TODO: Implement other options.</span>
 
 <div class="viewcode-block" id="MH._read_cga_extensions">
@@ -2644,6 +3308,279 @@
         <span class="k">return</span> <span class="n">Schema_BindingErrorMessage</span><span class="p">(</span>
             <span class="n">status</span><span class="o">=</span><span class="n">status_val</span><span class="p">,</span>
             <span class="n">home</span><span class="o">=</span><span class="n">home</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._make_msg_fbu">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_fbu">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_fbu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_FastBindingUpdateMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># MUST be set, c.f., RFC 5568, section 6.2.2</span>
+                      <span class="n">home</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># MUST be set, c.f., RFC 5568, section 6.2.2</span>
+                      <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                      <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                      <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int | timedelta'</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># reasonable default value</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_FastBindingUpdateMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make MH fast binding update (FBU) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            seq: Sequence number.</span>
+<span class="sd">            ack: Acknowledgement flag.</span>
+<span class="sd">            home: Home registration flag.</span>
+<span class="sd">            lla_compat: LLA compatibility flag.</span>
+<span class="sd">            key_mngt: Key management mobility option flag.</span>
+<span class="sd">            lifetime: Lifetime in seconds or timedelta.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">seq</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">seq</span>
+            <span class="n">ack</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">ack</span>
+            <span class="n">home</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">home</span>
+            <span class="n">lla_compat</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">lla_compat</span>
+            <span class="n">key_mngt</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">key_mngt</span>
+            <span class="n">lifetime_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lifetime_val</span> <span class="o">=</span> <span class="n">lifetime</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_FastBindingUpdateMessage</span><span class="p">(</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'A'</span><span class="p">:</span> <span class="n">ack</span><span class="p">,</span>
+                <span class="s1">'H'</span><span class="p">:</span> <span class="n">home</span><span class="p">,</span>
+                <span class="s1">'L'</span><span class="p">:</span> <span class="n">lla_compat</span><span class="p">,</span>
+                <span class="s1">'K'</span><span class="p">:</span> <span class="n">key_mngt</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lifetime_val</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._make_msg_fback">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_fback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_fback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_FastBindingAcknowledgmentMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">status</span><span class="p">:</span> <span class="s1">'FastBindingAcknowledgmentStatus | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="o">.</span><span class="n">Fast_Binding_Update_accepted</span><span class="p">,</span>
+                        <span class="n">status_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">status_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                        <span class="n">status_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int | timedelta'</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># reasonable default value</span>
+                        <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_FastBindingAcknowledgmentMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make MH fast binding acknowledgment (FBack) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            status: Status code, c.f.,</span>
+<span class="sd">                :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`.</span>
+<span class="sd">            status_default: Default status code.</span>
+<span class="sd">            status_namespace: Status code namespace.</span>
+<span class="sd">            status_reversed: Reverse status code namespace.</span>
+<span class="sd">            key_mngt: Key management mobility option flag.</span>
+<span class="sd">            seq: Sequence number.</span>
+<span class="sd">            lifetime: Lifetime in seconds or timedelta.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">status_val</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">status</span>
+            <span class="n">key_mngt</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">key_mngt</span>
+            <span class="n">seq</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">seq</span>
+            <span class="n">lifetime_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">status_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">status_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">status_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
+                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">status_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">lifetime_val</span> <span class="o">=</span> <span class="n">lifetime</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_FastBindingAcknowledgmentMessage</span><span class="p">(</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">status_val</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'K'</span><span class="p">:</span> <span class="n">key_mngt</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lifetime_val</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._make_msg_fna">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_fna">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_fna</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_FastNeighborAdvertisementMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_FastNeighborAdvertisementMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make MH fast neighbor advertisement (FNA) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_FastNeighborAdvertisementMessage</span><span class="p">(</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._make_msg_emh">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_emh">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_emh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_ExperimentalMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>  <span class="c1"># 2 bytes of padding, c.f., RFC 5096, section 3</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ExperimentalMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make MH experimental mobility header message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            data: Experimental message data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">return</span> <span class="n">Schema_ExperimentalMessage</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._make_msg_hi">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_hi">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_hi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_HandoverInitiateMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">assign</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">proxy</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">forward</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverInitiateStatus | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_HandoverInitiateStatus</span><span class="o">.</span><span class="n">FBU_with_the_PCoA_as_source_IP_address</span><span class="p">,</span>
+                     <span class="n">code_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">code_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                     <span class="n">code_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HandoverInitiateMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make MH handover initiate (HI) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            seq: Sequence number.</span>
+<span class="sd">            assign: Assigned address configuration flag.</span>
+<span class="sd">            buffer: Buffer flag.</span>
+<span class="sd">            proxy: Proxy flag.</span>
+<span class="sd">            forward: Forwarding flag.</span>
+<span class="sd">            code: Code.</span>
+<span class="sd">            code_default: Default code.</span>
+<span class="sd">            code_namespace: Code namespace.</span>
+<span class="sd">            code_reversed: Reverse code namespace.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">seq</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">seq</span>
+            <span class="n">assign</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">assign</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">buffer</span>
+            <span class="n">proxy</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">proxy</span>
+            <span class="n">forward</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">forward</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">code</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">code_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">code_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
+                                        <span class="nb">reversed</span><span class="o">=</span><span class="n">code_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_HandoverInitiateMessage</span><span class="p">(</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'S'</span><span class="p">:</span> <span class="n">assign</span><span class="p">,</span>
+                <span class="s1">'U'</span><span class="p">:</span> <span class="n">buffer</span><span class="p">,</span>
+                <span class="s1">'P'</span><span class="p">:</span> <span class="n">proxy</span><span class="p">,</span>
+                <span class="s1">'F'</span><span class="p">:</span> <span class="n">forward</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">code_val</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._make_msg_hack">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_hack">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_hack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_HandoverAcknowledgeMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">proxy</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">forward</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverACKStatus | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_HandoverACKStatus</span><span class="o">.</span><span class="n">Handover_Accepted_with_NCoA_valid</span><span class="p">,</span>
+                       <span class="n">code_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">code_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                       <span class="n">code_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HandoverAcknowledgeMessage'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make MH handover acknowledge (HAck) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            seq: Sequence number.</span>
+<span class="sd">            buffer: Buffer flag.</span>
+<span class="sd">            proxy: Proxy flag.</span>
+<span class="sd">            forward: Forwarding flag.</span>
+<span class="sd">            code: Code.</span>
+<span class="sd">            code_default: Default code.</span>
+<span class="sd">            code_namespace: Code namespace.</span>
+<span class="sd">            code_reversed: Reverse code namespace.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">seq</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">seq</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">buffer</span>
+            <span class="n">proxy</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">proxy</span>
+            <span class="n">forward</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">forward</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">code</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">code_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">code_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
+                                        <span class="nb">reversed</span><span class="o">=</span><span class="n">code_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_HandoverAcknowledgeMessage</span><span class="p">(</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'U'</span><span class="p">:</span> <span class="n">buffer</span><span class="p">,</span>
+                <span class="s1">'P'</span><span class="p">:</span> <span class="n">proxy</span><span class="p">,</span>
+                <span class="s1">'F'</span><span class="p">:</span> <span class="n">forward</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">code_val</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -3251,6 +4188,119 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
             <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._make_opt_exp">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_exp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_exp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_ExperimentalMobilityOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ExperimentalMobilityOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make MH experimental mobility option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            data: Experimental data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">return</span> <span class="n">Schema_ExperimentalMobilityOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._make_opt_badf">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_badf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_badf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_BADFOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">spi</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_BADFOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make MH binding authorization data for FMIPv6 (BADF) option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            spi: Security parameter index.</span>
+<span class="sd">            data: Authenticator.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The ``length`` field counts the authenticator only, excluding the</span>
+<span class="sd">            SPI, c.f., :meth:`_read_opt_badf`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spi</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">spi</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Schema_BADFOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">spi</span><span class="o">=</span><span class="n">spi</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MH._make_opt_ipv6_ap">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_ipv6_ap">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_ipv6_ap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_IPv6AddressPrefixOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">code</span><span class="p">:</span> <span class="s1">'IPv6AddressPrefixCode | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">IPv6AddressPrefixCode</span><span class="o">.</span><span class="n">New_Care_of_Address</span><span class="p">,</span>
+                          <span class="n">code_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">code_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                          <span class="n">code_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+                          <span class="n">address</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv6Address'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv6AddressPrefixOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make MH mobility header IPv6 address/prefix option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            code: Option code, c.f.,</span>
+<span class="sd">                :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.</span>
+<span class="sd">            code_default: Default option code.</span>
+<span class="sd">            code_namespace: Option code namespace.</span>
+<span class="sd">            code_reversed: Reverse option code namespace.</span>
+<span class="sd">            prefix_length: Prefix length.</span>
+<span class="sd">            address: IPv6 address/prefix.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">code</span>
+            <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix_length</span>
+            <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">code_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">code_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
+                                        <span class="nb">reversed</span><span class="o">=</span><span class="n">code_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">prefix_length</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid prefix length: </span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Schema_IPv6AddressPrefixOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">code_val</span><span class="p">,</span>
+            <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
+            <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

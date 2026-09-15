@@ -433,6 +433,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.handover_ack_status</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandoverACKStatus</span> <span class="k">as</span> <span class="n">Enum_HandoverACKStatus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.handover_initiate_flag</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">HandoverInitiateFlag</span> <span class="k">as</span> <span class="n">Enum_HandoverInitiateFlag</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.handover_initiate_status</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">HandoverInitiateStatus</span> <span class="k">as</span> <span class="n">Enum_HandoverInitiateStatus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.home_address_reply</span><span class="w"> </span><span class="kn">import</span> <span class="n">HomeAddressReply</span> <span class="k">as</span> <span class="n">Enum_HomeAddressReply</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.lla_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLACode</span> <span class="k">as</span> <span class="n">Enum_LLACode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.lma_mag_suboption</span><span class="w"> </span><span class="kn">import</span> \
@@ -468,14 +470,16 @@
     <span class="s1">'Packet'</span><span class="p">,</span>
     <span class="s1">'UnknownMessage'</span><span class="p">,</span> <span class="s1">'BindingRefreshRequestMessage'</span><span class="p">,</span> <span class="s1">'HomeTestInitMessage'</span><span class="p">,</span> <span class="s1">'CareofTestInitMessage'</span><span class="p">,</span>
     <span class="s1">'HomeTestMessage'</span><span class="p">,</span> <span class="s1">'CareofTestMessage'</span><span class="p">,</span> <span class="s1">'BindingUpdateMessage'</span><span class="p">,</span> <span class="s1">'BindingAcknowledgementMessage'</span><span class="p">,</span>
-    <span class="s1">'BindingErrorMessage'</span><span class="p">,</span>
+    <span class="s1">'BindingErrorMessage'</span><span class="p">,</span> <span class="s1">'FastBindingUpdateMessage'</span><span class="p">,</span> <span class="s1">'FastBindingAcknowledgmentMessage'</span><span class="p">,</span>
+    <span class="s1">'FastNeighborAdvertisementMessage'</span><span class="p">,</span> <span class="s1">'ExperimentalMessage'</span><span class="p">,</span> <span class="s1">'HandoverInitiateMessage'</span><span class="p">,</span>
+    <span class="s1">'HandoverAcknowledgeMessage'</span><span class="p">,</span>
 
     <span class="s1">'Option'</span><span class="p">,</span>
     <span class="s1">'UnassignedOption'</span><span class="p">,</span> <span class="s1">'PadOption'</span><span class="p">,</span> <span class="s1">'BindingRefreshAdviceOption'</span><span class="p">,</span> <span class="s1">'AlternateCareofAddressOption'</span><span class="p">,</span>
     <span class="s1">'NonceIndicesOption'</span><span class="p">,</span> <span class="s1">'AuthorizationDataOption'</span><span class="p">,</span> <span class="s1">'MobileNetworkPrefixOption'</span><span class="p">,</span>
     <span class="s1">'LinkLayerAddressOption'</span><span class="p">,</span> <span class="s1">'MNIDOption'</span><span class="p">,</span> <span class="s1">'AuthOption'</span><span class="p">,</span> <span class="s1">'MesgIDOption'</span><span class="p">,</span> <span class="s1">'CGAParametersRequestOption'</span><span class="p">,</span>
     <span class="s1">'CGAParametersOption'</span><span class="p">,</span> <span class="s1">'SignatureOption'</span><span class="p">,</span> <span class="s1">'PermanentHomeKeygenTokenOption'</span><span class="p">,</span> <span class="s1">'CareofTestInitOption'</span><span class="p">,</span>
-    <span class="s1">'CareofTestOption'</span><span class="p">,</span>
+    <span class="s1">'CareofTestOption'</span><span class="p">,</span> <span class="s1">'ExperimentalMobilityOption'</span><span class="p">,</span> <span class="s1">'BADFOption'</span><span class="p">,</span> <span class="s1">'IPv6AddressPrefixOption'</span><span class="p">,</span>
 
     <span class="s1">'CGAParameter'</span><span class="p">,</span>
 
@@ -528,6 +532,46 @@
 <span class="w">        </span><span class="sd">"""Flags for :attr:`BindingAcknowledgementMessage.flags`."""</span>
 
         <span class="n">K</span><span class="p">:</span> <span class="s1">'int'</span></div>
+
+
+<div class="viewcode-block" id="FastBindingUpdateMessageFlags">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.FastBindingUpdateMessageFlags">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FastBindingUpdateMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Flags for :attr:`FastBindingUpdateMessage.flags`."""</span>
+
+        <span class="n">A</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">H</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">L</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">K</span><span class="p">:</span> <span class="s1">'int'</span></div>
+
+
+<div class="viewcode-block" id="FastBindingAcknowledgmentMessageFlags">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.FastBindingAcknowledgmentMessageFlags">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FastBindingAcknowledgmentMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Flags for :attr:`FastBindingAcknowledgmentMessage.flags`."""</span>
+
+        <span class="n">K</span><span class="p">:</span> <span class="s1">'int'</span></div>
+
+
+<div class="viewcode-block" id="HandoverInitiateMessageFlags">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.HandoverInitiateMessageFlags">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">HandoverInitiateMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Flags for :attr:`HandoverInitiateMessage.flags`."""</span>
+
+        <span class="n">S</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">U</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">P</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">F</span><span class="p">:</span> <span class="s1">'int'</span></div>
+
+
+<div class="viewcode-block" id="HandoverAcknowledgeMessageFlags">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.HandoverAcknowledgeMessageFlags">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">HandoverAcknowledgeMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Flags for :attr:`HandoverAcknowledgeMessage.flags`."""</span>
+
+        <span class="n">U</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">P</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">F</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 
@@ -998,6 +1042,81 @@
 
 
 
+<div class="viewcode-block" id="ExperimentalMobilityOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.ExperimentalMobilityOption">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExperimentalMobilityOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Experimental_Mobility_Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Experimental Mobility options."""</span>
+
+    <span class="c1">#: Experimental data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="BADFOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.BADFOption">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BADFOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Binding_Authorization_Data_for_FMIPv6</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Binding Authorization Data for FMIPv6 (BADF) options.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Per :rfc:`5568#section-6.4.5`, the ``length`` field of this option counts</span>
+<span class="sd">        the :attr:`data` (authenticator) bytes **only** -- it excludes the 4-byte</span>
+<span class="sd">        :attr:`spi` field, unlike every other mobility option, whose length covers</span>
+<span class="sd">        all option data. The option is therefore 6 bytes longer than its declared</span>
+<span class="sd">        length, which is why :rfc:`5568` also requires it to be the **last**</span>
+<span class="sd">        mobility option present.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Security parameter index. ``0`` is reserved for authenticators computed</span>
+    <span class="c1">#: using SEND-based handover keys.</span>
+    <span class="n">spi</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="c1">#: Authenticator.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">spi</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="IPv6AddressPrefixOption">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.IPv6AddressPrefixOption">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPv6AddressPrefixOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Mobility_Header_IPv6_Address_Prefix</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Mobility Header IPv6 Address/Prefix options.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The option codes of :rfc:`5568#section-6.4.2` are defined inline by the</span>
+<span class="sd">        RFC with no IANA registry behind them, so their enumeration lives in</span>
+<span class="sd">        :class:`pcapkit.protocols.internet.mh.IPv6AddressPrefixCode` rather than</span>
+<span class="sd">        in :mod:`pcapkit.const.mh`. Being module-local, it cannot be imported</span>
+<span class="sd">        here without a circular import, so :attr:`code` carries the raw wire</span>
+<span class="sd">        integer and the enumeration is applied when</span>
+<span class="sd">        :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_ipv6_ap` builds the</span>
+<span class="sd">        data model -- the same split as</span>
+<span class="sd">        :class:`pcapkit.protocols.misc.pcapng.PacketDirection` and the</span>
+<span class="sd">        ``epb_flags`` option schema.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Option code, c.f.,</span>
+    <span class="c1">#: :class:`pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.</span>
+    <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Prefix length.</span>
+    <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: IPv6 address/prefix.</span>
+    <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address | int | bytes | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
 <span class="c1"># TODO: Implement other options.</span>
 
 
@@ -1235,6 +1354,182 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_BindingError'</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="FastBindingUpdateMessage">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.FastBindingUpdateMessage">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FastBindingUpdateMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Fast_Binding_Update</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Fast Binding Update (FBU) messages."""</span>
+
+    <span class="c1">#: Sequence number.</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Flags.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'FastBindingUpdateMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'A'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'H'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'L'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'K'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Lifetime. One time unit is 4 seconds.</span>
+    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'FastBindingUpdateMessageFlags'</span><span class="p">,</span>
+                     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="FastBindingAcknowledgmentMessage">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.FastBindingAcknowledgmentMessage">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FastBindingAcknowledgmentMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Fast_Binding_Acknowledgment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Fast Binding Acknowledgment (FBack) messages.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The status values of :rfc:`5568#section-6.2.3` are defined inline by the</span>
+<span class="sd">        RFC and are absent from the IANA *Status Codes* registry, so their</span>
+<span class="sd">        enumeration lives in</span>
+<span class="sd">        :class:`pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`</span>
+<span class="sd">        rather than in :mod:`pcapkit.const.mh`. Being module-local, it cannot be</span>
+<span class="sd">        imported here without a circular import, so :attr:`status` carries the</span>
+<span class="sd">        raw wire integer and the enumeration is applied when</span>
+<span class="sd">        :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_fback` builds the data</span>
+<span class="sd">        model.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Status, c.f.,</span>
+    <span class="c1">#: :class:`pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`.</span>
+    <span class="n">status</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Flags.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'FastBindingAcknowledgmentMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'K'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Sequence number.</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Lifetime. One time unit is 4 seconds.</span>
+    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'FastBindingAcknowledgmentMessageFlags'</span><span class="p">,</span>
+                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="FastNeighborAdvertisementMessage">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.FastNeighborAdvertisementMessage">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FastNeighborAdvertisementMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Fast_Neighbor_Advertisement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Fast Neighbor Advertisement (FNA) messages."""</span>
+
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="ExperimentalMessage">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.ExperimentalMessage">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExperimentalMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Experimental_Mobility_Header</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Experimental Mobility Header messages."""</span>
+
+    <span class="c1">#: Experimental message data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="HandoverInitiateMessage">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.HandoverInitiateMessage">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HandoverInitiateMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Handover_Initiate_Message</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Handover Initiate (HI) messages."""</span>
+
+    <span class="c1">#: Sequence number.</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Flags.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'HandoverInitiateMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'S'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'U'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'P'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'F'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Code.</span>
+    <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverInitiateStatus'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_HandoverInitiateStatus</span><span class="p">)</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'HandoverInitiateMessageFlags'</span><span class="p">,</span>
+                     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverInitiateStatus'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="HandoverAcknowledgeMessage">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.HandoverAcknowledgeMessage">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HandoverAcknowledgeMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Handover_Acknowledge_Message</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH Handover Acknowledge (HAck) messages."""</span>
+
+    <span class="c1">#: Sequence number.</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Flags.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'HandoverAcknowledgeMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'U'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'P'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'F'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Code.</span>
+    <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverACKStatus'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_HandoverACKStatus</span><span class="p">)</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'HandoverAcknowledgeMessageFlags'</span><span class="p">,</span>
+                     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverACKStatus'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
