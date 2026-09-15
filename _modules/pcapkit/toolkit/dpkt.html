@@ -609,10 +609,23 @@
                      <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv6</span><span class="o">.</span><span class="n">src</span><span class="p">)),</span>            <span class="c1"># source IP address</span>
                 <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span>
                      <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv6</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>            <span class="c1"># destination IP address</span>
-                <span class="n">ipv6</span><span class="o">.</span><span class="n">flow</span><span class="p">,</span>                                       <span class="c1"># label</span>
+                <span class="c1"># NOTE: The reassembly key is the Fragment header's Identification</span>
+                <span class="c1"># (:rfc:`8200#section-4.5`), not the IPv6 header's Flow Label. The</span>
+                <span class="c1"># label is optional and routinely zero, so keying on it collapses</span>
+                <span class="c1"># every datagram between one address pair into a single buffer and</span>
+                <span class="c1"># interleaves their fragments; it also disagreed with ``bufid[2]``</span>
+                <span class="c1"># in every other engine, which feeds</span>
+                <span class="c1"># :attr:`pcapkit.foundation.reassembly.data.ip.DatagramID.id`.</span>
+                <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                                    <span class="c1"># identification</span>
                 <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nxt</span><span class="p">),</span>               <span class="c1"># next header field in IPv6 Fragment Header</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                           <span class="c1"># original packet range number</span>
+            <span class="c1"># NOTE: ``IP6FragmentHeader.frag_off`` is a ``__bit_fields__`` property</span>
+            <span class="c1"># over the 13-bit on-wire Fragment Offset, i.e. already shifted out of</span>
+            <span class="c1"># the flags word, so it counts 8-octet units (:rfc:`8200#section-4.5`).</span>
+            <span class="c1"># The reassembly machinery indexes the datagram buffer with ``fo``, so</span>
+            <span class="c1"># the units have to become octets here, exactly as</span>
+            <span class="c1"># :func:`pcapkit.toolkit.scapy.ipv6_reassembly` does.</span>
             <span class="n">fo</span><span class="o">=</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">frag_off</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>                           <span class="c1"># fragment offset</span>
             <span class="n">ihl</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span>                                         <span class="c1"># header length, only headers before IPv6-Frag</span>
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">m_flag</span><span class="p">),</span>                           <span class="c1"># more fragment flag</span>
