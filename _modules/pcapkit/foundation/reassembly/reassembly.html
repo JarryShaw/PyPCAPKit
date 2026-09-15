@@ -317,6 +317,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/functools.html">Auxiliary Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/logging.html">Logging System</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -417,6 +418,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
@@ -429,6 +431,10 @@
     <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="s1">'_DT'</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Reassembly'</span><span class="p">]</span>
+
+<span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
+<span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="c1"># packet</span>
 <span class="n">_PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Info'</span><span class="p">)</span>
@@ -622,6 +628,8 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'fetch'</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cached</span>
 
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: flushing </span><span class="si">%d</span><span class="s1"> outstanding buffer(s)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">))</span>
+
         <span class="n">temp_dtgram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_DT]</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">bufid</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">temp_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
@@ -629,6 +637,8 @@
             <span class="p">)</span>
         <span class="n">temp_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">temp_dtgram</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: fetched </span><span class="si">%d</span><span class="s1"> datagram(s)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'fetch'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -658,6 +668,7 @@
 <span class="sd">            packets: list of packet dicts to be reassembled</span>
 
 <span class="sd">        """</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: reassembling </span><span class="si">%d</span><span class="s1"> packet(s)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">packets</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">packet</span> <span class="ow">in</span> <span class="n">packets</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
@@ -724,6 +735,9 @@
         <span class="c1">#: list[_DT]: List reassembled datagram. This list is used</span>
         <span class="c1">#: to store reassembled datagrams.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_DT]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1"> reassembly initialised (strict=</span><span class="si">%s</span><span class="s1">, store=</span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span> <span class="n">store</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'_PT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Call packet reassembly.</span>

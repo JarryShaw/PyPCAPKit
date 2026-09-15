@@ -316,6 +316,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/functools.html">Auxiliary Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/logging.html">Logging System</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -7001,6 +7002,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.config_port">config_port (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.configure">configure() (in module pcapkit.utilities.logging)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.confluent">confluent (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.method.Method.CONNECT">CONNECT (pcapkit.const.http.method.Method attribute)</a>
@@ -8173,6 +8176,10 @@
           <li><a href="pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.SwitchField.default">(pcapkit.corekit.fields.misc.SwitchField property)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.DEFAULT_DATE_FORMAT">DEFAULT_DATE_FORMAT (in module pcapkit.utilities.logging)</a>
+</li>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.DEFAULT_FORMAT">DEFAULT_FORMAT (in module pcapkit.utilities.logging)</a>
+</li>
         <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.TCI.dei">dei (pcapkit.protocols.data.link.vlan.TCI attribute)</a>
 
         <ul>
@@ -8311,7 +8318,7 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.device_info">device_info (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.logging.DEVMODE">DEVMODE (in module pcapkit.utilities.logging)</a>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.DEVMODE">DEVMODE (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.DevModeWarning">DevModeWarning</a>
 </li>
@@ -8401,10 +8408,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.di_msg">di_msg (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.di_traceware">di_traceware (pcapkit.const.reg.apptype.AppType attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.di_traceware">di_traceware (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.HostIDParameter.di_type">di_type (pcapkit.protocols.data.internet.hip.HostIDParameter attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.diagmond">diagmond (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -9811,6 +9818,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.enrp_sctp_tls">enrp_sctp_tls (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.ensure_output">ensure_output() (in module pcapkit.utilities.logging)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.ent_engine">ent_engine (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.entexthigh">entexthigh (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -9869,15 +9878,15 @@
     environment variable
 
         <ul>
-          <li><a href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE">PCAPKIT_DEVMODE</a>, <a href="pcapkit/utilities/index.html#index-0">[1]</a>
+          <li><a href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE">PCAPKIT_DEVMODE</a>, <a href="pcapkit/utilities/logging.html#index-0">[1]</a>, <a href="pcapkit/utilities/logging.html#index-1">[2]</a>, <a href="pcapkit/utilities/logging.html#index-2">[3]</a>, <a href="pcapkit/utilities/logging.html#index-3">[4]</a>, <a href="pcapkit/utilities/logging.html#index-6">[5]</a>, <a href="pcapkit/utilities/logging.html#index-7">[6]</a>, <a href="pep.html#index-4">[7]</a>
 </li>
           <li><a href="pcapkit/index.html#envvar-PCAPKIT_HTTP_PROXY">PCAPKIT_HTTP_PROXY</a>, <a href="pcapkit/vendor/default.html#index-0">[1]</a>
 </li>
           <li><a href="pcapkit/index.html#envvar-PCAPKIT_HTTPS_PROXY">PCAPKIT_HTTPS_PROXY</a>, <a href="pcapkit/vendor/default.html#index-1">[1]</a>
 </li>
-          <li><a href="pcapkit/index.html#envvar-PCAPKIT_SPHINX">PCAPKIT_SPHINX</a>, <a href="pcapkit/utilities/index.html#index-2">[1]</a>
+          <li><a href="pcapkit/index.html#envvar-PCAPKIT_SPHINX">PCAPKIT_SPHINX</a>, <a href="pcapkit/utilities/logging.html#index-5">[1]</a>
 </li>
-          <li><a href="pcapkit/index.html#envvar-PCAPKIT_VERBOSE">PCAPKIT_VERBOSE</a>, <a href="pcapkit/utilities/index.html#index-1">[1]</a>
+          <li><a href="pcapkit/index.html#envvar-PCAPKIT_VERBOSE">PCAPKIT_VERBOSE</a>, <a href="pcapkit/utilities/logging.html#index-4">[1]</a>
 </li>
         </ul></li>
         <li><a href="pcapkit/const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber.EOOL">EOOL (pcapkit.const.ipv4.option_number.OptionNumber attribute)</a>
@@ -11384,6 +11393,8 @@
 </li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.TransportFormatListParameter.formats">formats (pcapkit.protocols.schema.internet.hip.TransportFormatListParameter attribute)</a>
 </li>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.formatter">formatter (in module pcapkit.utilities.logging)</a>
+</li>
         <li><a href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.FormatWarning">FormatWarning</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.Formerly_PUP_Addr_Trans_Invalid_as_an_Ethertype_since_1983_Use_0x0A01">Formerly_PUP_Addr_Trans_Invalid_as_an_Ethertype_since_1983_Use_0x0A01 (pcapkit.const.reg.ethertype.EtherType attribute)</a>
@@ -11846,6 +11857,8 @@
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.get">(pcapkit.protocols.internet.mh.IPv6AddressPrefixCode static method)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.get_logger">get_logger() (in module pcapkit.utilities.logging)</a>
+</li>
         <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.get_payload">get_payload() (pcapkit.protocols.schema.schema.Schema method)</a>
 </li>
         <li><a href="pcapkit/vendor/default.html#pcapkit.vendor.default.get_proxies">get_proxies() (in module pcapkit.vendor.default)</a>
@@ -11914,10 +11927,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.glrpc">glrpc (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.gmrupdateserv">gmrupdateserv (pcapkit.const.reg.apptype.AppType attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.gmrupdateserv">gmrupdateserv (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.GMTP">GMTP (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.gnmi_gnoi">gnmi_gnoi (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -12223,6 +12236,8 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.haipe_discover">haipe_discover (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.haipe_otnk">haipe_otnk (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.handler">handler (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.handoff_type.HandoffType.Handoff_between_mobile_access_gateways_for_the_same_interface">Handoff_between_mobile_access_gateways_for_the_same_interface (pcapkit.const.mh.handoff_type.HandoffType attribute)</a>
 </li>
@@ -16700,7 +16715,7 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.logcabin">logcabin (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.logging.logger">logger (in module pcapkit.utilities.logging)</a>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.logger">logger (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.logicnode">logicnode (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -18464,7 +18479,7 @@
 </li>
           <li><a href="pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions">pcapkit.utilities.exceptions</a>
 </li>
-          <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities.logging">pcapkit.utilities.logging</a>
+          <li><a href="pcapkit/utilities/logging.html#module-pcapkit.utilities.logging">pcapkit.utilities.logging</a>
 </li>
           <li><a href="pcapkit/utilities/warnings.html#module-pcapkit.utilities.warnings">pcapkit.utilities.warnings</a>
 </li>
@@ -24884,7 +24899,7 @@
     pcapkit.utilities.logging
 
         <ul>
-          <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities.logging">module</a>
+          <li><a href="pcapkit/utilities/logging.html#module-pcapkit.utilities.logging">module</a>
 </li>
         </ul></li>
         <li>
@@ -25848,15 +25863,15 @@
           <li><a href="pcapkit/vendor/vlan.html#module-pcapkit.vendor.vlan.priority_level">module</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/utilities/index.html#index-0">PCAPKIT_DEVMODE</a>
+        <li><a href="pcapkit/utilities/logging.html#index-0">PCAPKIT_DEVMODE</a>, <a href="pcapkit/utilities/logging.html#index-1">[1]</a>, <a href="pcapkit/utilities/logging.html#index-2">[2]</a>, <a href="pcapkit/utilities/logging.html#index-3">[3]</a>, <a href="pcapkit/utilities/logging.html#index-6">[4]</a>, <a href="pcapkit/utilities/logging.html#index-7">[5]</a>, <a href="pep.html#index-4">[6]</a>
 </li>
         <li><a href="pcapkit/vendor/default.html#index-0">PCAPKIT_HTTP_PROXY</a>
 </li>
         <li><a href="pcapkit/vendor/default.html#index-1">PCAPKIT_HTTPS_PROXY</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#index-2">PCAPKIT_SPHINX</a>
+        <li><a href="pcapkit/utilities/logging.html#index-5">PCAPKIT_SPHINX</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#index-1">PCAPKIT_VERBOSE</a>
+        <li><a href="pcapkit/utilities/logging.html#index-4">PCAPKIT_VERBOSE</a>
 </li>
         <li><a href="pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG">PCAPNG (class in pcapkit.foundation.engines.pcapng)</a>
 
@@ -30069,10 +30084,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_7283">reserved_7283 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_7420">reserved_7420 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_7471">reserved_7471 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_7474">reserved_7474 (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -30448,6 +30463,8 @@
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.enumerating_algorithm.EnumeratingAlgorithm.Reserved_for_use_by_3GPP2">Reserved_for_use_by_3GPP2 (pcapkit.const.mh.enumerating_algorithm.EnumeratingAlgorithm attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_iana">reserved_iana (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.reset">reset() (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IPv4Record.resol">resol (pcapkit.protocols.schema.misc.pcapng.IPv4Record attribute)</a>
 
@@ -32029,6 +32046,8 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.roomcast_capi">roomcast_capi (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.roomcast_mapi">roomcast_mapi (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.ROOT_LOGGER_NAME">ROOT_LOGGER_NAME (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.rootd">rootd (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -34140,7 +34159,7 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.spg">spg (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.logging.SPHINX_TYPE_CHECKING">SPHINX_TYPE_CHECKING (in module pcapkit.utilities.logging)</a>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.SPHINX_TYPE_CHECKING">SPHINX_TYPE_CHECKING (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.sphinxapi">sphinxapi (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -37818,7 +37837,7 @@
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.veracity">veracity (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/utilities/index.html#pcapkit.utilities.logging.VERBOSE">VERBOSE (in module pcapkit.utilities.logging)</a>
+        <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.VERBOSE">VERBOSE (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_VerdictOption.verdict">verdict (pcapkit.protocols.data.misc.pcapng.EPB_VerdictOption attribute)</a>
 
