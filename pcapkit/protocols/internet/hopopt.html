@@ -755,6 +755,18 @@ attribute:</p>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option occupies a single octet and carries no
+<code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field, so its
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code> is
+<code class="docutils literal notranslate"><span class="pre">1</span></code> rather than <code class="docutils literal notranslate"><span class="pre">len</span> <span class="pre">+</span> <span class="pre">2</span></code>. That one-octet wire shape is enforced
+by <a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PadOption" title="pcapkit.protocols.schema.internet.hopopt.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a>
+itself, which sizes both the length octet and the padding data from
+the option type; <code class="docutils literal notranslate"><span class="pre">clen</span></code> is therefore always <code class="docutils literal notranslate"><span class="pre">0</span></code> here for a
+parsed <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>, and the check below only guards a schema built by
+hand.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1233,6 +1245,15 @@ attribute:</p>
 <dd class="field-odd"><p>Tuple of options and total length of options.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The returned length is that of the options area alone, so it is the
+value <a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.make" title="pcapkit.protocols.internet.hopopt.HOPOPT.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> needs for <code class="docutils literal notranslate"><span class="pre">hdr_ext_len</span></code>. Since the two octets
+of the fixed header precede it, an options area is well formed only
+when it is 6 octets short of a multiple of 8 – including when it
+holds no real options at all, in which case it is 6 octets of pure
+padding rather than empty.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1266,7 +1287,8 @@ attribute:</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></span>) – option type value</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.PadOption" title="pcapkit.protocols.data.internet.hopopt.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
-<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – padding length</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – value of the <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field, i.e. the number of
+padding octets <em>after</em> the two octets of the option header</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
@@ -1277,6 +1299,14 @@ attribute:</p>
 <dd class="field-odd"><p>Constructured option schema.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_PadOption.length</span></code> counts the
+<em>whole</em> option, whereas <code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema_PadOption.len</span></code> is the
+<code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field – two octets fewer, and absent altogether for
+a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. <code class="docutils literal notranslate"><span class="pre">opt</span></code> used to be ignored here, so re-making a parsed
+padding option silently collapsed it to a single <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1741,6 +1771,12 @@ the option by itself.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hopopt.</span></span><span class="sig-name descname"><span class="pre">PadOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hopopt.html#PadOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.hopopt.PadOption" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.Option" title="pcapkit.protocols.schema.internet.hopopt.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Header schema for HOPOPT padding options.</p>
+<p>The two padding options do <strong>not</strong> share a wire shape: a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is
+a lone type octet, whereas a <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option is a type octet, an
+<code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> octet, and that many padding octets [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>].
+Both the <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> octet (<a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.Option.len" title="pcapkit.protocols.schema.internet.hopopt.Option.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.len</span></code></a>) and the padding data
+(<a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PadOption.pad" title="pcapkit.protocols.schema.internet.hopopt.PadOption.pad"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.pad</span></code></a>) are therefore sized from the option type,
+so that a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option consumes exactly one octet.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hopopt.PadOption.pad">
 <span class="sig-name descname"><span class="pre">pad</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">pad&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.hopopt.PadOption.pad" title="Link to this definition">¶</a></dt>
@@ -2445,6 +2481,41 @@ conforms to this specification.</p>
 <dd class="field-odd"><p>MPL Seed-ID length.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hopopt.pad_opt_data_len">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hopopt.</span></span><span class="sig-name descname"><span class="pre">pad_opt_data_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hopopt.html#pad_opt_data_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.hopopt.pad_opt_data_len" title="Link to this definition">¶</a></dt>
+<dd><p>Return the length of the padding data of a padding option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Padding option unpacked schema.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of padding octets carried after the option header, i.e. the
+value of the <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field of a <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option, and zero for
+a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option, which carries no such field.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is a single octet with neither an <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>
+field nor any option data (c.f. <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>), which is why
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.Option.len" title="pcapkit.protocols.schema.internet.hopopt.Option.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.len</span></code></a> is declared as a
+<a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a> and is skipped
+for it. A skipped conditional field is <em>recorded</em> in the packet data as
+<a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.NoValue" title="pcapkit.corekit.fields.field.NoValue"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoValue</span></code></a>, rather than being left
+out of it, so the test below has to be on the <strong>value</strong> and not on the
+presence of the key: <code class="docutils literal notranslate"><span class="pre">pkt.get('len',</span> <span class="pre">0)</span></code> on its own hands that
+<a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoValueType</span></code></a> straight to
+<a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField" title="pcapkit.corekit.fields.strings.PaddingField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaddingField</span></code></a>, where it becomes
+an unusable <a class="reference external" href="https://docs.python.org/3/library/struct.html#module-struct" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">struct</span></code></a> template and surfaces much later as an opaque
+<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> – which is exactly how a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option used to
+fail to parse.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">

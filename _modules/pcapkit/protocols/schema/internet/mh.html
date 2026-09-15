@@ -619,6 +619,42 @@
 
 
 
+<div class="viewcode-block" id="pad_opt_data_len">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.pad_opt_data_len">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pad_opt_data_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the length of the padding data of a padding option.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Padding option unpacked schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Number of padding octets carried after the option header, i.e. the</span>
+<span class="sd">        value of the ``Option Length`` field of a ``PadN`` option, and zero for</span>
+<span class="sd">        a ``Pad1`` option, which carries no such field.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        A ``Pad1`` option is a single octet with neither an ``Option Length``</span>
+<span class="sd">        field nor any option data (c.f. :rfc:`6275#section-6.2.5`), which is why</span>
+<span class="sd">        :attr:`Option.length` is declared as a</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped</span>
+<span class="sd">        for it. A skipped conditional field is *recorded* in the packet data as</span>
+<span class="sd">        :data:`~pcapkit.corekit.fields.field.NoValue`, rather than being left</span>
+<span class="sd">        out of it, so the test below has to be on the **value** and not on the</span>
+<span class="sd">        presence of the key: ``pkt.get('length', 0)`` on its own hands that</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.field.NoValueType` straight to</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes</span>
+<span class="sd">        an unusable :mod:`struct` template and surfaces much later as an opaque</span>
+<span class="sd">        :exc:`struct.error` -- which is exactly how a ``Pad1`` option used to</span>
+<span class="sd">        fail to parse.</span>
+
+<span class="sd">    """</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># ``NoValue`` (skipped) or :obj:`None` (unset)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">length</span></div>
+
+
+
 <div class="viewcode-block" id="MH">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.MH">[docs]</a>
 <span class="nd">@schema_final</span>
@@ -701,10 +737,20 @@
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span>
                               <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Header schema for MH padding options."""</span>
+<span class="w">    </span><span class="sd">"""Header schema for MH padding options.</span>
+
+<span class="sd">    The two padding options do **not** share a wire shape: a ``Pad1`` option is</span>
+<span class="sd">    a lone type octet, whereas a ``PadN`` option is a type octet, an</span>
+<span class="sd">    ``Option Length`` octet, and that many padding octets</span>
+<span class="sd">    [:rfc:`6275#section-6.2.5`]. Both the ``Option Length`` octet</span>
+<span class="sd">    (:attr:`Option.length`) and the padding data</span>
+<span class="sd">    (:attr:`self.data &lt;PadOption.data&gt;`) are therefore sized from the option</span>
+<span class="sd">    type, so that a ``Pad1`` option consumes exactly one octet.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Option data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pad_opt_data_len</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>

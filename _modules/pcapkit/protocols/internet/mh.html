@@ -1175,9 +1175,16 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'MH: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: The header has to be a multiple of 8 octets, so the message data</span>
+        <span class="c1"># needs padding until ``len(data) + 6`` is aligned. Rounding ``length`` up</span>
+        <span class="c1"># without emitting that padding -- which is what ``math.ceil`` used to do</span>
+        <span class="c1"># here -- declares a header longer than the bytes that follow it, and the</span>
+        <span class="c1"># re-parse then reads whatever happens to be past the end of the buffer.</span>
+        <span class="n">data_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pad_mh_message</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">Schema_MH</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_val</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">type_val</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data_val</span><span class="p">,</span>
@@ -3588,6 +3595,111 @@
 
     <span class="c1"># TODO: Implement other message types.</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_pad_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_PadOption], int]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make the padding options needed to align the header to 8 octets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            offset: Number of octets emitted so far, **counting the six octets</span>
+<span class="sd">                of the fixed header** (``Payload Proto``, ``Header Len``,</span>
+<span class="sd">                ``MH Type``, ``Reserved`` and ``Checksum``) as well as the whole</span>
+<span class="sd">                message data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of the padding option schemas and the number of octets they</span>
+<span class="sd">            occupy.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The Mobility Header is a multiple of 8 octets and</span>
+<span class="sd">            :attr:`~pcapkit.protocols.schema.internet.mh.MH.length` counts those</span>
+<span class="sd">            units less one [:rfc:`6275#section-6.1.1`]. Its fixed part is</span>
+<span class="sd">            **six** octets, not the two of an IPv6 options header, so it is</span>
+<span class="sd">            ``len(data) + 6`` that has to be aligned -- which means the message</span>
+<span class="sd">            data is well formed only when it is 2 octets past a multiple of 8,</span>
+<span class="sd">            a different modulus from the one the extension headers use.</span>
+
+<span class="sd">            A ``PadN`` option spends two octets on its own type and</span>
+<span class="sd">            ``Option Length`` fields before any padding data, so occupying</span>
+<span class="sd">            ``pad_len`` octets means an ``Option Length`` of ``pad_len - 2``.</span>
+<span class="sd">            One or two octets are padded with ``Pad1`` options instead, that</span>
+<span class="sd">            being the only form which can occupy a single octet</span>
+<span class="sd">            [:rfc:`6275#section-6.2.5`]; two octets need two separate ``Pad1``</span>
+<span class="sd">            schemas, since a schema instance is mutable and must not be shared</span>
+<span class="sd">            between two entries of the option list.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[],</span> <span class="mi">0</span>
+
+        <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">offset</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pad_len</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pad_len</span><span class="p">)],</span> <span class="n">pad_len</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)],</span> <span class="n">pad_len</span>  <span class="c1"># type: ignore[arg-type]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pad_mh_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Schema_Packet | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Packet | bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Pad an MH message so that the Mobility Header aligns to 8 octets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Constructed message data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The message data, with padding options appended if any were needed.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The padding goes into the message's mobility options, which is where</span>
+<span class="sd">            :rfc:`6275#section-6.2.5` puts it. A message whose body is opaque has</span>
+<span class="sd">            nowhere to put it --</span>
+<span class="sd">            :class:`~pcapkit.protocols.schema.internet.mh.UnknownMessage` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.schema.internet.mh.ExperimentalMessage`</span>
+<span class="sd">            carry raw bytes and no options, as does a ``data`` argument given</span>
+<span class="sd">            directly as :obj:`bytes` -- so for those the padding is appended to the</span>
+<span class="sd">            message body itself and a</span>
+<span class="sd">            :class:`~pcapkit.utilities.warnings.ProtocolWarning` says so.</span>
+
+<span class="sd">            Appending is necessary rather than optional: ``length`` is</span>
+<span class="sd">            ``(len(data) + 6) // 8 - 1``, which floors, so leaving an opaque body</span>
+<span class="sd">            short emitted 10, 12 or 14 octets while declaring 8, and a parser reads</span>
+<span class="sd">            8 and misinterprets the remainder. Since the caller asked for a packet</span>
+<span class="sd">            to be built and the shortfall is recoverable, completing it beats</span>
+<span class="sd">            refusing -- the warning is there because the emitted body is then not</span>
+<span class="sd">            byte-for-byte what was handed in.</span>
+
+<span class="sd">        """</span>
+        <span class="n">pad_opts</span><span class="p">,</span> <span class="n">pad_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pad_options</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pad_len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+
+        <span class="n">options</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># NOTE: The ``isinstance`` test comes first so that the type checker can</span>
+        <span class="c1"># narrow ``data`` for the assignment below; at runtime ``getattr`` has</span>
+        <span class="c1"># already covered the :obj:`bytes` case by returning :obj:`None`.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: message data of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets carries no '</span>
+                 <span class="sa">f</span><span class="s1">'mobility options to hold padding, so </span><span class="si">{</span><span class="n">pad_len</span><span class="si">}</span><span class="s1"> octet(s) were '</span>
+                 <span class="s1">'appended to the message body to align the header'</span><span class="p">,</span>
+                 <span class="n">ProtocolWarning</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span> <span class="o">*</span> <span class="n">pad_len</span>
+
+            <span class="c1"># An opaque schema body -- UnknownMessage, ExperimentalMessage -- keeps</span>
+            <span class="c1"># its content in ``data`` rather than in options, so that is where the</span>
+            <span class="c1"># octets go. Rebound rather than mutated in place so that ``len()`` and</span>
+            <span class="c1"># ``pack()`` see the change, exactly as for the options branch below.</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: message data of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets needs '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">pad_len</span><span class="si">}</span><span class="s1"> octet(s) of padding, but the body is neither bytes '</span>
+                    <span class="s1">'nor a schema carrying bytes, so there is nowhere to put it'</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span> <span class="o">*</span> <span class="n">pad_len</span>
+            <span class="k">return</span> <span class="n">data</span>
+
+        <span class="c1"># NOTE: Rebinding the attribute rather than mutating the list in place is</span>
+        <span class="c1"># what marks the schema as updated, so that ``len()`` and ``pack()`` take</span>
+        <span class="c1"># the padding into account.</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> <span class="o">+</span> <span class="n">pad_opts</span>
+        <span class="k">return</span> <span class="n">data</span>
+
 <div class="viewcode-block" id="MH._make_mh_options">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_mh_options">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mh_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Schema_Option | bytes]'</span><span class="p">:</span>
@@ -3675,15 +3787,25 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            length: Padding length.</span>
+<span class="sd">            length: Value of the ``Option Length`` field, i.e. the number of</span>
+<span class="sd">                padding octets *after* the two octets of the option header.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            :attr:`Data_PadOption.length</span>
+<span class="sd">            &lt;pcapkit.protocols.data.internet.mh.PadOption.length&gt;` counts the</span>
+<span class="sd">            *whole* option, whereas :attr:`Schema_PadOption.length</span>
+<span class="sd">            &lt;pcapkit.protocols.schema.internet.mh.PadOption.length&gt;` is the</span>
+<span class="sd">            ``Option Length`` field -- two octets fewer, and absent altogether</span>
+<span class="sd">            for a ``Pad1``. Copying one into the other unconverted is why</span>
+<span class="sd">            re-making a parsed ``PadN`` used to come back two octets too long.</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span>  <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="k">else</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">2</span>
 
         <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')</span>

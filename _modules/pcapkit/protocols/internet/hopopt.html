@@ -742,11 +742,18 @@
         <span class="n">next_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">next_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">next_namespace</span><span class="p">,</span>
                                       <span class="nb">reversed</span><span class="o">=</span><span class="n">next_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hopopt_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">total_length</span> <span class="o">-</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
+        <span class="c1"># NOTE: No options at all is not the same thing as no options area: the</span>
+        <span class="c1"># header is at least 8 octets, 2 of which are the fixed part, so the</span>
+        <span class="c1"># remaining 6 have to be padding options rather than nothing. Passing the</span>
+        <span class="c1"># empty list through the same path is what produces them -- returning</span>
+        <span class="c1"># ``[], 0`` here instead declared an 8-octet header and emitted 2.</span>
+        <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hopopt_options</span><span class="p">(</span>
+            <span class="n">options</span> <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[])</span>
+
+        <span class="c1"># NOTE: ``_make_hopopt_options`` has aligned the header, so this division</span>
+        <span class="c1"># is exact; rounding up here used to hide the 6-octet shortfall that the</span>
+        <span class="c1"># per-option alignment left behind.</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_length</span> <span class="o">-</span> <span class="mi">6</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
 
         <span class="k">return</span> <span class="n">Schema_HOPOPT</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_value</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
@@ -966,6 +973,17 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``code`` is **NOT** ``0`` or ``1``.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            A ``Pad1`` option occupies a single octet and carries no</span>
+<span class="sd">            ``Opt Data Len`` field, so its</span>
+<span class="sd">            :attr:`~pcapkit.protocols.data.internet.hopopt.PadOption.length` is</span>
+<span class="sd">            ``1`` rather than ``len + 2``. That one-octet wire shape is enforced</span>
+<span class="sd">            by :class:`~pcapkit.protocols.schema.internet.hopopt.PadOption`</span>
+<span class="sd">            itself, which sizes both the length octet and the padding data from</span>
+<span class="sd">            the option type; ``clen`` is therefore always ``0`` here for a</span>
+<span class="sd">            parsed ``Pad1``, and the check below only guards a schema built by</span>
+<span class="sd">            hand.</span>
 
 <span class="sd">        """</span>
         <span class="n">code</span><span class="p">,</span> <span class="n">clen</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span>
@@ -1644,6 +1662,47 @@
         <span class="k">return</span> <span class="n">opt</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_pad_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_PadOption], int]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make the padding options needed to align the header to 8 octets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            offset: Number of octets emitted so far, **counting the two octets</span>
+<span class="sd">                of the fixed header** (``Next Header`` and ``Hdr Ext Len``) as</span>
+<span class="sd">                well as every option already in the list.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of the padding option schemas and the number of octets they</span>
+<span class="sd">            occupy.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            It is the *whole* extension header, fixed part included, that has to</span>
+<span class="sd">            be a multiple of 8 octets [:rfc:`8200#section-4.3`] -- which is why</span>
+<span class="sd">            the alignment is computed from ``offset`` rather than from the</span>
+<span class="sd">            length of the option that has just been emitted. Aligning each</span>
+<span class="sd">            option to 8 octets on its own leaves the options area a multiple of</span>
+<span class="sd">            8 octets long, whereas :meth:`read` sizes it as</span>
+<span class="sd">            ``hdr_ext_len * 8 + 6`` -- six short of a multiple of 8 -- so the</span>
+<span class="sd">            constructed header declared 6 octets more than it actually carried.</span>
+
+<span class="sd">            A ``PadN`` option spends two octets on its own type and</span>
+<span class="sd">            ``Opt Data Len`` fields before any padding data, so occupying</span>
+<span class="sd">            ``pad_len`` octets means an ``Opt Data Len`` of ``pad_len - 2``.</span>
+<span class="sd">            One or two octets are padded with ``Pad1`` options instead, that</span>
+<span class="sd">            being the only form which can occupy a single octet</span>
+<span class="sd">            [:rfc:`8200#section-4.2`]; two octets need two separate ``Pad1``</span>
+<span class="sd">            schemas, since a schema instance is mutable and must not be shared</span>
+<span class="sd">            between two entries of the option list.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[],</span> <span class="mi">0</span>
+
+        <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">offset</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pad_len</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pad_len</span><span class="p">)],</span> <span class="n">pad_len</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)],</span> <span class="n">pad_len</span>  <span class="c1"># type: ignore[arg-type]</span>
+
 <div class="viewcode-block" id="HOPOPT._make_hopopt_options">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._make_hopopt_options">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_hopopt_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_Option | bytes], int]'</span><span class="p">:</span>
@@ -1654,6 +1713,14 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple of options and total length of options.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The returned length is that of the options area alone, so it is the</span>
+<span class="sd">            value :meth:`make` needs for ``hdr_ext_len``. Since the two octets</span>
+<span class="sd">            of the fixed header precede it, an options area is well formed only</span>
+<span class="sd">            when it is 6 octets short of a multiple of 8 -- including when it</span>
+<span class="sd">            holds no real options at all, in which case it is 6 octets of pure</span>
+<span class="sd">            padding rather than empty.</span>
 
 <span class="sd">        """</span>
         <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1693,18 +1760,15 @@
                 <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
                 <span class="n">total_length</span> <span class="o">+=</span> <span class="n">opt_len</span>
 
-                <span class="c1"># force alignment to 8 octets</span>
-                <span class="k">if</span> <span class="n">opt_len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">:</span>
-                    <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">opt_len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">pad_len</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
-                        <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad_len</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                <span class="c1"># force alignment of the header (fixed part included) to 8 octets</span>
+                <span class="n">pad_opts</span><span class="p">,</span> <span class="n">pad_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pad_options</span><span class="p">(</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">options_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pad_opts</span><span class="p">)</span>
+                <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
 
-                    <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">pad_len</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># need 2 Pad1 options</span>
-                        <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
-                    <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
+            <span class="c1"># an options area holding nothing at all is still 6 octets long</span>
+            <span class="n">pad_opts</span><span class="p">,</span> <span class="n">pad_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pad_options</span><span class="p">(</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">options_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pad_opts</span><span class="p">)</span>
+            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
             <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
 
         <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1727,18 +1791,15 @@
             <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
             <span class="n">total_length</span> <span class="o">+=</span> <span class="n">opt_len</span>
 
-            <span class="c1"># force alignment to 8 octets</span>
-            <span class="k">if</span> <span class="n">opt_len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">:</span>
-                <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">opt_len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">pad_len</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
-                    <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad_len</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="c1"># force alignment of the header (fixed part included) to 8 octets</span>
+            <span class="n">pad_opts</span><span class="p">,</span> <span class="n">pad_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pad_options</span><span class="p">(</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">options_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pad_opts</span><span class="p">)</span>
+            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
 
-                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">pad_len</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># need 2 Pad1 options</span>
-                    <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
-                <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
+        <span class="c1"># an options area holding nothing at all is still 6 octets long</span>
+        <span class="n">pad_opts</span><span class="p">,</span> <span class="n">pad_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pad_options</span><span class="p">(</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">options_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pad_opts</span><span class="p">)</span>
+        <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
         <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span></div>
 
 
@@ -1779,13 +1840,26 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: option type value</span>
 <span class="sd">            opt: option data</span>
-<span class="sd">            length: padding length</span>
+<span class="sd">            length: value of the ``Opt Data Len`` field, i.e. the number of</span>
+<span class="sd">                padding octets *after* the two octets of the option header</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructured option schema.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            :attr:`Data_PadOption.length</span>
+<span class="sd">            &lt;pcapkit.protocols.data.internet.hopopt.PadOption.length&gt;` counts the</span>
+<span class="sd">            *whole* option, whereas :attr:`Schema_PadOption.len</span>
+<span class="sd">            &lt;pcapkit.protocols.schema.internet.hopopt.PadOption.len&gt;` is the</span>
+<span class="sd">            ``Opt Data Len`` field -- two octets fewer, and absent altogether for</span>
+<span class="sd">            a ``Pad1``. ``opt`` used to be ignored here, so re-making a parsed</span>
+<span class="sd">            padding option silently collapsed it to a single ``Pad1``.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="k">else</span> <span class="n">opt</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">2</span>
+
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1">#raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>

@@ -2550,7 +2550,8 @@ handler is registered against.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></span>) – Option type.</p></li>
 <li><p><strong>option</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PadOption" title="pcapkit.protocols.data.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Option data model.</p></li>
-<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Padding length.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> field, i.e. the number of
+padding octets <em>after</em> the two octets of the option header.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -2561,6 +2562,14 @@ handler is registered against.</p>
 <dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_PadOption.length</span></code> counts the
+<em>whole</em> option, whereas <code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema_PadOption.length</span></code> is the
+<code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> field – two octets fewer, and absent altogether
+for a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. Copying one into the other unconverted is why
+re-making a parsed <code class="docutils literal notranslate"><span class="pre">PadN</span></code> used to come back two octets too long.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -2572,7 +2581,8 @@ handler is registered against.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></span>) – Option type.</p></li>
 <li><p><strong>option</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PadOption" title="pcapkit.protocols.data.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Option data model.</p></li>
-<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Padding length.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> field, i.e. the number of
+padding octets <em>after</em> the two octets of the option header.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -2583,6 +2593,14 @@ handler is registered against.</p>
 <dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_PadOption.length</span></code> counts the
+<em>whole</em> option, whereas <code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema_PadOption.length</span></code> is the
+<code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> field – two octets fewer, and absent altogether
+for a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. Copying one into the other unconverted is why
+re-making a parsed <code class="docutils literal notranslate"><span class="pre">PadN</span></code> used to come back two octets too long.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -3523,6 +3541,13 @@ of valid leading bits in the prefix [<span class="target" id="index-73"></span><
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.mh.</span></span><span class="sig-name descname"><span class="pre">PadOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/mh.html#PadOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.PadOption" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Option" title="pcapkit.protocols.schema.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
 <p>Header schema for MH padding options.</p>
+<p>The two padding options do <strong>not</strong> share a wire shape: a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is
+a lone type octet, whereas a <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option is a type octet, an
+<code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> octet, and that many padding octets
+[<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html#section-6.2.5"><strong>RFC 6275 Section 6.2.5</strong></a>]. Both the <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> octet
+(<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Option.length" title="pcapkit.protocols.schema.internet.mh.Option.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.length</span></code></a>) and the padding data
+(<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PadOption.data" title="pcapkit.protocols.schema.internet.mh.PadOption.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.data</span></code></a>) are therefore sized from the option
+type, so that a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option consumes exactly one octet.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.PadOption.data">
 <span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.PadOption.data" title="Link to this definition">¶</a></dt>
@@ -3685,13 +3710,13 @@ of valid leading bits in the prefix [<span class="target" id="index-73"></span><
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.MesgIDOption.seconds">
 <span class="sig-name descname"><span class="pre">seconds</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">seconds&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.MesgIDOption.seconds" title="Link to this definition">¶</a></dt>
-<dd><p>Timestamp (seconds since January 1st, 1970, c.f., <span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
+<dd><p>Timestamp (seconds since January 1st, 1970, c.f., <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.MesgIDOption.fraction">
 <span class="sig-name descname"><span class="pre">fraction</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">fraction&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.MesgIDOption.fraction" title="Link to this definition">¶</a></dt>
-<dd><p>Timestamp fractions (1/2**32 seconds per unit, c.f., <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
+<dd><p>Timestamp fractions (1/2**32 seconds per unit, c.f., <span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3796,7 +3821,7 @@ of valid leading bits in the prefix [<span class="target" id="index-73"></span><
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.CGAParametersOption.parameters">
 <span class="sig-name descname"><span class="pre">parameters</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAParameter" title="pcapkit.protocols.schema.internet.mh.CGAParameter"><span class="pre">CGAParameter</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ListField</span> <span class="pre">parameters&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.CGAParametersOption.parameters" title="Link to this definition">¶</a></dt>
-<dd><p>CGA parameters, c.f., <span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
+<dd><p>CGA parameters, c.f., <span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3906,11 +3931,11 @@ of valid leading bits in the prefix [<span class="target" id="index-73"></span><
 <p>Header schema for MH Binding Authorization Data for FMIPv6 (BADF) options.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Per <span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.5"><strong>RFC 5568 Section 6.4.5</strong></a>, the <code class="docutils literal notranslate"><span class="pre">length</span></code> field of this option counts
+<p>Per <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.5"><strong>RFC 5568 Section 6.4.5</strong></a>, the <code class="docutils literal notranslate"><span class="pre">length</span></code> field of this option counts
 the <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BADFOption.data" title="pcapkit.protocols.schema.internet.mh.BADFOption.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> (authenticator) bytes <strong>only</strong> – it excludes the 4-byte
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BADFOption.spi" title="pcapkit.protocols.schema.internet.mh.BADFOption.spi"><code class="xref py py-attr docutils literal notranslate"><span class="pre">spi</span></code></a> field, unlike every other mobility option, whose length covers
 all option data. The option is therefore 6 bytes longer than its declared
-length, which is why <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> also requires it to be the <strong>last</strong>
+length, which is why <span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> also requires it to be the <strong>last</strong>
 mobility option present.</p>
 </div>
 <dl class="py attribute">
@@ -3935,7 +3960,7 @@ using SEND-based handover keys.</p>
 <p>Header schema for MH Mobility Header IPv6 Address/Prefix options.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The option codes of <span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> are defined inline by the
+<p>The option codes of <span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> are defined inline by the
 RFC with no IANA registry behind them, so their enumeration lives in
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh.IPv6AddressPrefixCode</span></code></a> rather than
 in <a class="reference internal" href="../../const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>. Being module-local, it cannot be imported
@@ -4248,7 +4273,7 @@ data model – the same split as
 <p>Header schema for MH Fast Binding Acknowledgment (FBack) messages.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The status values of <span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> are defined inline by the
+<p>The status values of <span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> are defined inline by the
 RFC and are absent from the IANA <em>Status Codes</em> registry, so their
 enumeration lives in
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus</span></code></a>
@@ -4579,6 +4604,41 @@ corresponding to the subtype.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.pad_opt_data_len">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.mh.</span></span><span class="sig-name descname"><span class="pre">pad_opt_data_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/mh.html#pad_opt_data_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.pad_opt_data_len" title="Link to this definition">¶</a></dt>
+<dd><p>Return the length of the padding data of a padding option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Padding option unpacked schema.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of padding octets carried after the option header, i.e. the
+value of the <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> field of a <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option, and zero for
+a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option, which carries no such field.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is a single octet with neither an <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code>
+field nor any option data (c.f. <span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html#section-6.2.5"><strong>RFC 6275 Section 6.2.5</strong></a>), which is why
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Option.length" title="pcapkit.protocols.schema.internet.mh.Option.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.length</span></code></a> is declared as a
+<a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a> and is skipped
+for it. A skipped conditional field is <em>recorded</em> in the packet data as
+<a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.NoValue" title="pcapkit.corekit.fields.field.NoValue"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoValue</span></code></a>, rather than being left
+out of it, so the test below has to be on the <strong>value</strong> and not on the
+presence of the key: <code class="docutils literal notranslate"><span class="pre">pkt.get('length',</span> <span class="pre">0)</span></code> on its own hands that
+<a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a> straight to
+<a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField" title="pcapkit.corekit.fields.strings.PaddingField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaddingField</span></code></a>, where it becomes
+an unusable <a class="reference external" href="https://docs.python.org/3/library/struct.html#module-struct" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">struct</span></code></a> template and surfaces much later as an opaque
+<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> – which is exactly how a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option used to
+fail to parse.</p>
+</div>
+</dd></dl>
+
 </section>
 </section>
 <section id="module-pcapkit.protocols.data.internet.mh">
@@ -4801,7 +4861,7 @@ corresponding to the subtype.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.MesgIDOption.ntp_timestamp">
 <span class="sig-name descname"><span class="pre">ntp_timestamp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.mh.NTPTimestamp" title="pcapkit.protocols.internet.mh.NTPTimestamp"><span class="pre">NTPTimestamp</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.MesgIDOption.ntp_timestamp" title="Link to this definition">¶</a></dt>
-<dd><p>NTP timestamp, c.f., <span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
+<dd><p>NTP timestamp, c.f., <span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -4877,7 +4937,7 @@ corresponding to the subtype.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.CGAParametersOption.parameters">
 <span class="sig-name descname"><span class="pre">parameters</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAParameter" title="pcapkit.protocols.data.internet.mh.CGAParameter"><span class="pre">CGAParameter</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.CGAParametersOption.parameters" title="Link to this definition">¶</a></dt>
-<dd><p>CGA parameters, c.f., <span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
+<dd><p>CGA parameters, c.f., <span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -5001,7 +5061,7 @@ the CGA Parameter Data Structure, reset otherwise.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.IPv6AddressPrefixOption.code">
 <span class="sig-name descname"><span class="pre">code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><span class="pre">IPv6AddressPrefixCode</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.IPv6AddressPrefixOption.code" title="Link to this definition">¶</a></dt>
-<dd><p>Option code, c.f., <span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>. The codes are defined inline
+<dd><p>Option code, c.f., <span class="target" id="index-85"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>. The codes are defined inline
 by the RFC with no IANA registry behind them, so this field carries the
 module-local
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a>.</p>
@@ -5317,7 +5377,7 @@ significant, so the pair cannot always be fused into a network.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.FastBindingAcknowledgmentMessage.status">
 <span class="sig-name descname"><span class="pre">status</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><span class="pre">FastBindingAcknowledgmentStatus</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.FastBindingAcknowledgmentMessage.status" title="Link to this definition">¶</a></dt>
-<dd><p>Status. <span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> defines the FBack status values inline
+<dd><p>Status. <span class="target" id="index-86"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> defines the FBack status values inline
 rather than drawing them from the IANA <em>Status Codes</em> registry, so this
 field carries the module-local
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a>
