@@ -14,9 +14,6 @@ payload that matches its own ``Content-Length`` is evidence that the ordering
 and the duplicate were both handled. See the module docstring of
 :file:`examples/generators/legacy.py`.
 
-One expectation here is skipped rather than asserted: see
-:class:`IPv6FragmentPayloadTests`.
-
 """
 from __future__ import annotations
 
@@ -244,9 +241,9 @@ class IPv6FragmentReassemblyTests(EndToEndTestCase):
     """IPv6 fragment reassembly over :file:`ipv6.pcap`.
 
     Frames 13 to 16 are one 4778 octet UDP datagram fragmented into
-    1448/1448/1448/434 octets. What is asserted here is which frames were
-    collected and that the datagram is reported complete -- both of which are
-    right. Its *contents* are not, so they live in the skipped test below.
+    1448/1448/1448/434 octets. Asserted here are which frames were collected and
+    that the datagram is reported complete; its *contents* are asserted in
+    :class:`IPv6FragmentPayloadTests` below.
 
     """
 
@@ -274,39 +271,39 @@ class IPv6FragmentReassemblyTests(EndToEndTestCase):
         self.assertEqual(int(datagram.id.proto), 17)
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class IPv6FragmentPayloadTests(EndToEndTestCase):
-    """What the reassembled IPv6 datagram should contain.
+    """What the reassembled IPv6 datagram contains.
 
-    Kept apart from :class:`IPv6FragmentReassemblyTests` so the skip covers only
-    the payload, and the assertions that are correct today keep running.
+    Kept apart from :class:`IPv6FragmentReassemblyTests` because these are the
+    assertions on the datagram's octets, which are what the two defects recorded
+    below used to get wrong while the frame collection and the ``completed`` flag
+    stayed right.
 
     """
 
-    @unittest.skip('blocked on IPv6 fragment offsets being used as byte offsets while the '
-                   'field is in eight-octet units (pcapkit/protocols/internet/ipv6_frag.py:141)')
     def test_the_four_fragments_reassemble_into_the_whole_datagram(self) -> None:
-        """The reassembled payload should be the four fragments, in order.
+        """The reassembled payload is the four fragments, in order.
 
-        It is not. ``pcapkit/protocols/internet/ipv4.py:274`` scales the IPv4
-        fragment offset into octets (``int(schema.flags['offset']) * 8``), but
-        ``pcapkit/protocols/internet/ipv6_frag.py:141`` passes the IPv6 one
-        through unscaled (``offset=schema.flags['offset']``), and
-        ``pcapkit/toolkit/pcap.py:115`` then hands it to the reassembly
-        machinery as ``fo``, which is a byte offset. The four fragments are
-        therefore placed at octets 0, 181, 362 and 543 instead of 0, 1448, 2896
-        and 4344, so they overwrite one another and the datagram comes out 977
-        octets long -- ``543 + 434`` -- while still reporting
-        ``completed=True``.
+        This is a regression test for two fixed defects, which is why it asserts
+        the exact octet count rather than only that the payload is non-empty.
 
-        Measured on this fixture: ``len(datagram.payload)`` is 977, and the
-        assertion below expects 4778.
+        The first was the fragment offset scaling.
+        ``pcapkit/protocols/internet/ipv6_frag.py`` passed the IPv6 fragment
+        offset through unscaled where the IPv4 path scaled it into octets, and
+        ``pcapkit/toolkit/pcap.py`` then handed it to the reassembly machinery as
+        ``fo``, which is an octet offset. The four fragments landed at octets 0,
+        181, 362 and 543 instead of 0, 1448, 2896 and 4344, overwrote one
+        another, and the datagram came out 977 octets long -- ``543 + 434`` --
+        while still reporting ``completed=True``. That is what the assertion on
+        ``len(datagram.payload)`` pins.
 
-        A second defect is visible in the same call and is left alone here:
-        ``pcapkit/toolkit/pcap.py:111`` keys the reassembly buffer on the IPv6
-        header's flow label rather than on the fragment header's identification,
-        so ``datagram.id.id`` is 0 where the fixture's identification is 110308.
-        One fragmented datagram cannot show the consequence, so no assertion is
-        made about it either way.
+        The second was the buffer identifier. ``pcapkit/toolkit/pcap.py`` keyed
+        the reassembly buffer on the IPv6 header's flow label rather than on the
+        fragment header's identification, so ``datagram.id.id`` came out 0 where
+        this fixture's identification is 110308. One fragmented datagram cannot
+        show the merging that the wrong key causes, but it does show the wrong
+        value, so the identification is asserted here.
 
         """
         extractor = self.extract(fin=sample_path('ipv6.pcap'), nofile=True, store=True,
@@ -320,6 +317,8 @@ class IPv6FragmentPayloadTests(EndToEndTestCase):
         self.assertEqual([len(fragment) for fragment in fragments], [1448, 1448, 1448, 434])
         self.assertEqual(len(datagram.payload), 4778)
         self.assertEqual(bytes(datagram.payload), b''.join(fragments))
+        # the fragment header's identification, not the flow label, which is 0
+        self.assertEqual(datagram.id.id, 110308)
 
 
 if __name__ == '__main__':
