@@ -486,7 +486,15 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             packet = {}
 
         packet.update(self.__dict__)
+        # NOTE: ``pre_unpack`` is called here as well as from the unpacking path
+        # since a schema may seed ``packet`` keys that both paths need, as
+        # ``pcapkit.protocols.schema.internet.hip.EncryptedParameter`` does.
+        # ``pre_pack`` is what carries the packing-only preparation, such as the
+        # PCAP-NG section header block's byte order magic, which no field of the
+        # schema holds and which therefore cannot be recovered from
+        # ``self.__dict__`` above.
         self.pre_unpack(packet)
+        self.pre_pack(packet)
 
         if '__length__' not in packet:
             packet['__length__'] = -1  # reasonable default value
