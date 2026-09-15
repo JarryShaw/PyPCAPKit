@@ -330,7 +330,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         Returns:
             Hardware address. If ``htype`` is ``1``, i.e. MAC address,
-            returns ``:`` seperated *hex* encoded MAC address.
+            returns ``:`` separated *hex* encoded MAC address.
 
         """
         if htype == Enum_Hardware.Ethernet:  # Ethernet
@@ -371,7 +371,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         Returns:
             Hardware address. If ``htype`` is ``1``, i.e. MAC address,
-            returns ``:`` seperated *hex* encoded MAC address.
+            returns ``:`` separated *hex* encoded MAC address.
 
         """
         _addr = addr.encode() if isinstance(addr, str) else addr

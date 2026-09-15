@@ -84,7 +84,7 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
         tcp = cast('Packet', packet.tcp)
 
         data = TF_TCP_Packet(  # type: ignore[type-var]
-            protocol=Enum_LinkType.get(packet.layers[0].layer_name.upper()),  # data link type from global header
+            protocol=Enum_LinkType.get(packet.layers[0].layer_name.upper()),     # data link type from global header
             index=int(packet.number),                                            # frame number
             frame=packet2dict(packet),                                           # extracted packet
             syn=bool(int(tcp.flags_syn)),                                        # TCP synchronise (SYN) flag

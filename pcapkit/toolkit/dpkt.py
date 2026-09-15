@@ -69,7 +69,7 @@ def packet2chain(packet: 'Packet') -> 'str':
         packet: DPKT packet.
 
     Returns:
-        Colon (``:``) seperated list of protocol chain.
+        Colon (``:``) separated list of protocol chain.
 
     """
     chain = [type(packet).__name__]

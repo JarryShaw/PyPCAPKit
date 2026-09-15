@@ -57,7 +57,7 @@ def packet2chain(packet: 'Packet') -> 'str':
         packet: Scapy packet.
 
     Returns:
-        Colon (``:``) seperated list of protocol chain.
+        Colon (``:``) separated list of protocol chain.
 
     Raises:
         ModuleNotFound: If `Scapy`_ is not installed.
@@ -137,7 +137,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
                 cast('IPv4Address',
                      ipaddress.ip_address(ipv4.dst)),  # destination IP address
                 ipv4.id,                               # identification
-                Enum_TransType.get(ipv4.proto),     # payload protocol type
+                Enum_TransType.get(ipv4.proto),        # payload protocol type
             ),
             num=count,                                 # original packet range number
             fo=ipv4.frag,                              # fragment offset
@@ -191,7 +191,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
                 cast('IPv6Address',
                      ipaddress.ip_address(ipv6.dst)),     # destination IP address
                 ipv6_frag.id,                             # identification
-                Enum_TransType.get(ipv6_frag.nh),      # next header field in IPv6 Fragment Header
+                Enum_TransType.get(ipv6_frag.nh),         # next header field in IPv6 Fragment Header
             ),
             num=count,                                    # original packet range number
             # NOTE: Scapy reports ``IPv6ExtHdrFragment.offset`` in on-wire 8-octet
@@ -285,7 +285,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         tcp = cast('TCP', packet['TCP'])
 
         data = TF_TCP_Packet(  # type: ignore[type-var]
-            protocol=Enum_LinkType.get(packet.name.upper()),  # data link type from global header
+            protocol=Enum_LinkType.get(packet.name.upper()),     # data link type from global header
             index=count,                                         # frame number
             frame=packet2dict(packet),                           # extracted packet
             syn=bool(tcp.flags.S),                               # TCP synchronise (SYN) flag

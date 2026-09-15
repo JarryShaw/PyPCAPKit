@@ -1331,7 +1331,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             addr: MAC address.
 
         Returns:
-            Colon (``:``) seperated *hex* encoded MAC address.
+            Colon (``:``) separated *hex* encoded MAC address.
 
         """
         if py38:
@@ -1347,7 +1347,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             addr: EUI address.
 
         Returns:
-            Colon (``:``) seperated *hex* encoded EUI address.
+            Colon (``:``) separated *hex* encoded EUI address.
 
         """
         if py38:

@@ -204,16 +204,16 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
 
         frame_info = cast('Packet', frame.info)
         data = TF_TCP_Packet(  # type: ignore[type-var]
-            protocol=frame.linktype,                 # data link type from global header
-            index=frame_info.number,                 # frame number
+            protocol=frame.linktype,                      # data link type from global header
+            index=frame_info.number,                      # frame number
             frame=block2frame(frame_info, nanosecond=nanosecond),
-                                                     # extracted frame info
-            syn=tcp_info.flags.syn,                  # TCP synchronise (SYN) flag
-            fin=tcp_info.flags.fin,                  # TCP finish (FIN) flag
-            src=ip_info.src,                         # source IP
-            dst=ip_info.dst,                         # destination IP
-            srcport=tcp_info.srcport.port,           # TCP source port
-            dstport=tcp_info.dstport.port,           # TCP destination port
+                                                          # extracted frame info
+            syn=tcp_info.flags.syn,                       # TCP synchronise (SYN) flag
+            fin=tcp_info.flags.fin,                       # TCP finish (FIN) flag
+            src=ip_info.src,                              # source IP
+            dst=ip_info.dst,                              # destination IP
+            srcport=tcp_info.srcport.port,                # TCP source port
+            dstport=tcp_info.dstport.port,                # TCP destination port
             timestamp=float(frame_info.timestamp_epoch),  # frame timestamp
         )
         return data

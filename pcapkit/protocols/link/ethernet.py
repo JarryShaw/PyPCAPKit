@@ -222,7 +222,7 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
             addr: MAC address.
 
         Returns:
-            Colon (``:``) seperated *hex* encoded MAC address.
+            Colon (``:``) separated *hex* encoded MAC address.
 
         """
         if py38:
