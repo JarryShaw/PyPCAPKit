@@ -18,7 +18,7 @@ outside development mode. After the first such error the extracted stack was
 *empty*, the ``for``/``else`` branch ran, and every subsequent warning in the
 process got ``-1``.
 
-Three groups of test here, because they fail for different reasons:
+Three groups of tests here, because they fail for different reasons:
 
 * :class:`StacklevelArithmeticTests` -- the derivation and both clamps, over
   synthetic frames, including the shapes no real stack under :program:`pytest`
