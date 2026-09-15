@@ -749,16 +749,29 @@
 <span class="c1"># alone. Calling reset() here instead would detach a host application's</span>
 <span class="c1"># handlers merely because it imported pcapkit after configuring logging.</span>
 <span class="c1">#</span>
-<span class="c1"># The membership tests also make re-execution idempotent, which the test suite</span>
-<span class="c1"># relies on when it exercises import-time behaviour: neither the NullHandler</span>
-<span class="c1"># nor the devmode stderr handler can be stacked twice.</span>
+<span class="c1"># Re-execution has to be idempotent too, which the test suite relies on when it</span>
+<span class="c1"># exercises import-time behaviour. That rules out an identity test for the</span>
+<span class="c1"># devmode handler: ``handler`` is built when this module runs, so re-executing</span>
+<span class="c1"># it yields a *new* object every time and ``handler not in logger.handlers``</span>
+<span class="c1"># would be true on each pass, stacking one stderr handler per reload. The test</span>
+<span class="c1"># is therefore on what would actually duplicate -- a stream handler already</span>
+<span class="c1"># writing to the same stream.</span>
 <span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NullHandler</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_writes_to</span><span class="p">(</span><span class="n">candidate</span><span class="p">:</span> <span class="s1">'logging.Handler'</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether ``candidate`` is a stream handler already writing to ``stream``."""</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">)</span> <span class="ow">and</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="s1">'stream'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="n">stream</span>
+    <span class="p">)</span>
+
 
 <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
     <span class="c1"># development mode keeps the historical behaviour: everything, on stderr</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">handler</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">_writes_to</span><span class="p">(</span><span class="n">installed</span><span class="p">,</span> <span class="n">handler</span><span class="o">.</span><span class="n">stream</span><span class="p">)</span> <span class="k">for</span> <span class="n">installed</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
 </pre></div>
         </article>
