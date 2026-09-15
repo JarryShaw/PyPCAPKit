@@ -3042,11 +3042,17 @@ class MH(Internet[Data_MH, Schema_MH],
             :class:`~pcapkit.protocols.schema.internet.mh.UnknownMessage` and
             :class:`~pcapkit.protocols.schema.internet.mh.ExperimentalMessage`
             carry raw bytes and no options, as does a ``data`` argument given
-            directly as :obj:`bytes` -- so such a body is left exactly as it was
-            and the shortfall is reported through a
-            :class:`~pcapkit.utilities.warnings.ProtocolWarning`. Silently
-            declaring a length that the body does not match is what used to
-            happen, and it sends the parser off the end of the buffer.
+            directly as :obj:`bytes` -- so for those the padding is appended to the
+            message body itself and a
+            :class:`~pcapkit.utilities.warnings.ProtocolWarning` says so.
+
+            Appending is necessary rather than optional: ``length`` is
+            ``(len(data) + 6) // 8 - 1``, which floors, so leaving an opaque body
+            short emitted 10, 12 or 14 octets while declaring 8, and a parser reads
+            8 and misinterprets the remainder. Since the caller asked for a packet
+            to be built and the shortfall is recoverable, completing it beats
+            refusing -- the warning is there because the emitted body is then not
+            byte-for-byte what was handed in.
 
         """
         pad_opts, pad_len = self._make_pad_options(len(data) + 6)
@@ -3058,9 +3064,24 @@ class MH(Internet[Data_MH, Schema_MH],
         # narrow ``data`` for the assignment below; at runtime ``getattr`` has
         # already covered the :obj:`bytes` case by returning :obj:`None`.
         if isinstance(data, bytes) or options is None:
-            warn(f'{self.alias}: message data of {len(data)} octets needs {pad_len} '
-                 'octets of padding to align the header, but carries no mobility '
-                 'options to hold it', ProtocolWarning)
+            warn(f'{self.alias}: message data of {len(data)} octets carries no '
+                 f'mobility options to hold padding, so {pad_len} octet(s) were '
+                 'appended to the message body to align the header',
+                 ProtocolWarning)
+            if isinstance(data, bytes):
+                return data + b'\x00' * pad_len
+
+            # An opaque schema body -- UnknownMessage, ExperimentalMessage -- keeps
+            # its content in ``data`` rather than in options, so that is where the
+            # octets go. Rebound rather than mutated in place so that ``len()`` and
+            # ``pack()`` see the change, exactly as for the options branch below.
+            body = getattr(data, 'data', None)
+            if not isinstance(body, bytes):
+                raise ProtocolError(
+                    f'{self.alias}: message data of {len(data)} octets needs '
+                    f'{pad_len} octet(s) of padding, but the body is neither bytes '
+                    'nor a schema carrying bytes, so there is nowhere to put it')
+            data.data = body + b'\x00' * pad_len
             return data
 
         # NOTE: Rebinding the attribute rather than mutating the list in place is

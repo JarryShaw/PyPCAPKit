@@ -590,7 +590,11 @@ class MHUnitTests(unittest.TestCase):
                 data=SimpleNamespace(data=b'read'),
             )
             self.assertEqual(proto.read(extension=True).data, b'read')
-            self.assertEqual(proto.make(type=custom_packet, data={'value': b'dict'}).data, b'dict')
+            # this constructor returns raw bytes, and 6 + 4 octets is 6 short of
+            # 16, so the body is padded to align the header; before that it emitted
+            # 10 octets while declaring 8
+            self.assertEqual(proto.make(type=custom_packet, data={'value': b'dict'}).data,
+                             b'dict' + b'\x00' * 6)
             unknown_message = data.UnknownMessage(
                 next=TransType.UDP,
                 length=2,
@@ -598,7 +602,10 @@ class MHUnitTests(unittest.TestCase):
                 chksum=b'',
                 data=b'model',
             )
-            self.assertEqual(proto.make(type=custom_packet, data=unknown_message).data, b'model')
+            # likewise raw bytes out of the constructor: 6 + 5 octets is 5 short of
+            # 16, so the body is padded rather than the header misdeclared
+            self.assertEqual(proto.make(type=custom_packet, data=unknown_message).data,
+                             b'model' + b'\x00' * 5)
 
             parsed_options = proto._read_mh_options([
                 SimpleNamespace(type=custom_option, data=b'opt'),
@@ -1590,12 +1597,14 @@ class MHUnitTests(unittest.TestCase):
                                           chksum=parsed.chksum, data=parsed)), raw)
 
     def test_mh_opaque_message_body_cannot_be_padded(self) -> None:
-        """An unpaddable message body is reported rather than silently misdeclared.
+        """An opaque message body is padded to alignment, with a warning.
 
-        A message whose body is raw bytes carries no mobility options, so there is
-        nowhere to put the padding the header needs. Declaring a ``Header Len``
-        that the body does not match is what used to happen, and the re-parse then
-        read past the end of the buffer.
+        A message whose body is raw bytes carries no mobility options, so the
+        padding goes into the body itself. Warning and returning it unchanged was
+        not enough: ``length`` is ``(len(data) + 6) // 8 - 1``, which floors, so the
+        header shipped declaring 8 octets while emitting 10, 12 or 14, and a parser
+        reads 8 and misinterprets the rest.
+
         """
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
@@ -1604,15 +1613,28 @@ class MHUnitTests(unittest.TestCase):
 
         proto = object.__new__(MH)
 
-        # 4 octets of body: 6 + 4 = 10, which is 6 octets short of 16
-        with self.assertWarns(ProtocolWarning):
-            self.assertEqual(proto._pad_mh_message(b'\x00\x01\x02\x03'), b'\x00\x01\x02\x03')
+        # each of these previously emitted 6 + n octets while declaring only 8
+        for n in (4, 6, 8):
+            with self.subTest(body=n):
+                with mock.patch('pcapkit.protocols.internet.mh.warn') as warned:
+                    padded = proto._pad_mh_message(b'\x00' * n)
+                self.assertEqual(warned.call_count, 1)
+                self.assertIs(warned.call_args.args[1], ProtocolWarning)
 
-        # a body that is already aligned goes through untouched and unremarked
-        import warnings as _warnings
-        with _warnings.catch_warnings():
-            _warnings.simplefilter('error')
-            self.assertEqual(proto._pad_mh_message(b'\x00\x02'), b'\x00\x02')
+                # the emitted header is now exactly what it declares
+                total = 6 + len(padded)
+                self.assertEqual(total % 8, 0)
+                self.assertEqual(((len(padded) + 6) // 8) * 8, total)
+
+        # an already-aligned body needs no padding, is returned untouched, and says
+        # nothing -- the warning is only for a body the caller will not get back
+        # byte-for-byte
+        for n in (2, 10):
+            with self.subTest(body=n):
+                body = b'\x00' * n
+                with mock.patch('pcapkit.protocols.internet.mh.warn') as warned:
+                    self.assertIs(proto._pad_mh_message(body), body)
+                warned.assert_not_called()
 
         # and the whole header still comes out 8-octet aligned when it can be padded
         raw = bytes(MH(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
