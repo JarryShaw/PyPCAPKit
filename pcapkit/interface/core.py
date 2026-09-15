@@ -22,10 +22,11 @@ from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.utilities.exceptions import FormatError
 
 if TYPE_CHECKING:
-    from typing import IO, Optional, Type
+    from typing import IO, Iterable, Mapping, Optional, Type
 
     from typing_extensions import Literal
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.foundation.extraction import Engines, Formats, Layers, Protocols, VerboseHandler
     from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
     from pcapkit.foundation.traceflow.traceflow import TraceFlowBase as TraceFlow
@@ -67,7 +68,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
             trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
             ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
             buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
-            no_eof: 'bool' = False) -> 'Extractor':
+            no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
+            context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None) -> 'Extractor':  # context settings # pylint: disable=line-too-long
     """Extract a PCAP file.
 
     Arguments:
@@ -112,6 +114,18 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
 
         no_eof: if not raise :exc:`EOFError` when reach EOF
 
+        context: caller supplied parsing context for protocols that need
+            information not carried on the wire, keyed by protocol index ID --
+            c.f. :mod:`pcapkit.corekit.context`. The motivating case is
+            :class:`~pcapkit.protocols.internet.esp.ESP`, which needs the
+            Security Association to find the trailer and decrypt the payload::
+
+                >>> from pcapkit.protocols.internet.esp import (Cipher, ESPContext,
+                ...                                            SecurityAssociation)
+                >>> sa = SecurityAssociation(spi=0x4321, encryption=Cipher.AES_CBC,
+                ...                          encryption_key=key)
+                >>> extraction = pcapkit.extract('esp.pcap', context=ESPContext(sa))
+
     Returns:
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
 
@@ -128,7 +142,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                      trace=trace, trace_fout=trace_fout, trace_format=trace_format,
                      trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond,
                      buffer_size=buffer_size, buffer_path=buffer_path, buffer_save=buffer_save,
-                     no_eof=no_eof)
+                     no_eof=no_eof, context=context)
 
 
 def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False) -> 'Reassembly':

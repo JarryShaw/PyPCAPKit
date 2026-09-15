@@ -411,5 +411,6 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 self.__proto__[proto] = protocol  # update mapping upon import
 
         next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
-                         alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto)
+                         alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto,
+                         __context__=self._exctx)
         return next_

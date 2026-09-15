@@ -110,7 +110,7 @@ __all__ = [
 
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer
 
-    'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer
+    'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',      # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
 

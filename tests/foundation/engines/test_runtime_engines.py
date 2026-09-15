@@ -29,6 +29,11 @@ class OutputSink:
 
 
 def make_extractor(**overrides):
+    # imported lazily: setUp purges ``pcapkit`` from sys.modules, so the class
+    # has to be fetched from the freshly imported package rather than bound at
+    # module import time
+    from pcapkit.corekit.context import ContextRegistry
+
     sink = OutputSink()
     reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock())
     trace = types.SimpleNamespace(tcp=mock.Mock())
@@ -56,6 +61,7 @@ def make_extractor(**overrides):
         '_frnum': 0,
         '_exlyr': 'none',
         '_exptl': 'null',
+        '_exctx': ContextRegistry(),
         '_vfunc': mock.Mock(),
         'magic_number': b'\xa1\xb2\xc3\xd4',
     }

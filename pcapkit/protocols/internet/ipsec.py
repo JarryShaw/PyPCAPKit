@@ -9,11 +9,9 @@
 only, which is a base class for Internet Protocol
 Security (IPsec) protocol family [*]_, eg.
 :class:`~pcapkit.protocols.internet.ah.AH` and
-:class:`~pcapkit.protocols.internet.esp.ESP` [*]_.
+:class:`~pcapkit.protocols.internet.esp.ESP`.
 
 .. [*] https://en.wikipedia.org/wiki/IPsec
-.. [*] :class:`~pcapkit.protocols.internet.esp.ESP`
-       class is currently **NOT** implemented.
 
 """
 from typing import TYPE_CHECKING, Generic

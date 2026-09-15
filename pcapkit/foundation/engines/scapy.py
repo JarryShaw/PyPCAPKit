@@ -77,7 +77,10 @@ class Scapy(Engine['ScapyPacket']):
         Warns:
             AttributeWarning: If :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                 and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
-                is provided as the Scapy engine currently does not support such operations.
+                is provided as the Scapy engine currently does not support such operations;
+                or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
+                is provided, as the Scapy engine does not parse with :mod:`pcapkit`'s own
+                protocol implementations.
 
         """
         ext = self._extractor
@@ -85,6 +88,12 @@ class Scapy(Engine['ScapyPacket']):
         if ext._exlyr != 'none' or ext._exptl != 'null':
             warn("'Extractor(engine=scapy)' does not support protocol and layer threshold; "
                  f"'layer={ext._exlyr}' and 'protocol={ext._exptl}' ignored",
+                 AttributeWarning, stacklevel=stacklevel())
+
+        if ext._exctx:
+            warn("'Extractor(engine=scapy)' does not parse with pcapkit's own protocol "
+                 "implementations, so the parsing context supplied through "
+                 "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         # setup verbose handler

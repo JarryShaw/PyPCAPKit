@@ -8,7 +8,7 @@ IPsec - Internet Protocol Security
 only, which is a base class for Internet Protocol
 Security (IPsec) protocol family [*]_, eg.
 :class:`~pcapkit.protocols.internet.ah.AH` and
-:class:`~pcapkit.protocols.internet.esp.ESP` [*]_.
+:class:`~pcapkit.protocols.internet.esp.ESP`.
 
 .. autoclass:: pcapkit.protocols.internet.ipsec.IPsec
    :no-members:
@@ -22,4 +22,3 @@ Security (IPsec) protocol family [*]_, eg.
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/IPsec
-.. [*] :class:`~pcapkit.protocols.internet.esp.ESP` class is currently **NOT** implemented.

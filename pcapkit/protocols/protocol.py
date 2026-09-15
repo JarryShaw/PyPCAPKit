@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, o
 import aenum
 import chardet
 
+from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols import data as data_module
@@ -50,10 +51,13 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal, Self
 
+    from pcapkit.corekit.context import ProtocolContext
+
 __all__ = ['ProtocolBase']
 
 _PT = TypeVar('_PT', bound='Data')
 _ST = TypeVar('_ST', bound='Schema')
+_CTX = TypeVar('_CTX', bound='ProtocolContext')
 
 # readable characters' order list
 readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
@@ -118,6 +122,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )
+
+    #: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.
+    #: :meth:`self.__init__ <Protocol.__init__>` replaces this with a real
+    #: :class:`~pcapkit.corekit.context.ContextRegistry`; the class level
+    #: :data:`None` is what an instance built without going through
+    #: ``__init__`` -- e.g. ``object.__new__(SomeProtocol)`` -- sees, so that
+    #: reading it is always safe.
+    _exctx: 'Optional[ContextRegistry]' = None
 
     ##########################################################################
     # Properties.
@@ -196,6 +208,19 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     def schema(self) -> '_ST':
         """Schema data of the protocol."""
         return self.__header__
+
+    # caller supplied parsing context
+    @property
+    def context(self) -> 'ContextRegistry':
+        """Caller supplied parsing context.
+
+        See Also:
+            :mod:`pcapkit.corekit.context` for what this channel is for, and
+            :meth:`self._get_context <ProtocolBase._get_context>` for how a
+            protocol implementation reaches its own entry.
+
+        """
+        return ContextRegistry.make(self._exctx)
 
     ##########################################################################
     # Methods.
@@ -503,6 +528,12 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 (:attr:`self._exlayer <pcapkit.protocols.protocol.Protocol._exlayer>`).
             _protocol (Union[str, Protocol, Type[Protocol]]): Parse packet until ``_protocol``
                 (:attr:`self._exproto <pcapkit.protocols.protocol.Protocol._exproto>`).
+            __context__ (Union[ContextRegistry, ProtocolContext, Mapping[str, ProtocolContext], Iterable[ProtocolContext]]):
+                Caller supplied parsing context (:attr:`self._exctx <pcapkit.protocols.protocol.Protocol._exctx>`),
+                c.f. :mod:`pcapkit.corekit.context`. It is consumed here rather
+                than being forwarded to :meth:`self.read <Protocol.read>`, and is
+                propagated to nested layers by
+                :meth:`self._import_next_layer <ProtocolBase._import_next_layer>`.
             **kwargs: Arbitrary keyword arguments.
 
         """
@@ -514,6 +545,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         self._exlayer = kwargs.pop('_layer', None)  # type: Optional[str]
         #: str: Parse packet until such protocol.
         self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | ProtocolBase | Type[ProtocolBase]]
+        #: pcapkit.corekit.context.ContextRegistry: Caller supplied parsing context.
+        # NOTE: Every nested layer normalises the context it was handed, so an
+        # already-normalised registry is adopted as-is: ``make()`` copies, and
+        # paying for a dict copy per protocol in a capture buys nothing when the
+        # contexts are shared regardless.
+        __context__ = kwargs.pop('__context__', None)
+        self._exctx = (__context__ if isinstance(__context__, ContextRegistry)
+                       else ContextRegistry.make(__context__))  # type: ContextRegistry
         #: bool: If terminate parsing next layer of protocol.
         self._sigterm = self._check_term_threshold()
 
@@ -762,6 +801,31 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _get_context(self, cls: 'Optional[Type[_CTX]]' = None) -> 'Optional[_CTX]':
+        """Get the caller supplied context for this protocol, if any.
+
+        The lookup is keyed on :meth:`self.id <ProtocolBase.id>`, so a
+        protocol finds its own context without knowing how the caller spelled
+        the registry.
+
+        Args:
+            cls: Expected context class; when given, a context registered
+                under this protocol's name but of another type is ignored
+                rather than returned for the implementation to trip over.
+
+        Returns:
+            The matching context, or :data:`None` when the caller supplied
+            none.
+
+        See Also:
+            :mod:`pcapkit.corekit.context`
+
+        """
+        registry = self._exctx
+        if registry is None:
+            return None
+        return registry.match(self.id(), cls)
 
     def _get_payload(self) -> 'bytes':
         """Get payload from :attr:`self.__header__ <Protocol.__header__>`.
@@ -1154,7 +1218,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 self.__proto__[proto] = protocol  # update mapping upon import
 
         next_ = protocol(file_, length, alias=proto, packet=packet,
-                         layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
+                         layer=self._exlayer, protocol=self._exproto,
+                         __context__=self._exctx)  # type: ignore[abstract]
         return next_
 
     def _check_term_threshold(self) -> bool:

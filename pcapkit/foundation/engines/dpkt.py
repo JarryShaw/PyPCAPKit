@@ -82,7 +82,10 @@ class DPKT(Engine['DPKTPacket']):
         Warns:
             AttributeWarning: If :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                 and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
-                is provided as the DPKT engine currently does not support such operations.
+                is provided as the DPKT engine currently does not support such operations;
+                or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
+                is provided, as the DPKT engine does not parse with :mod:`pcapkit`'s own
+                protocol implementations.
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
@@ -98,6 +101,12 @@ class DPKT(Engine['DPKTPacket']):
         if ext._exlyr != 'none' or ext._exptl != 'null':
             warn("'Extractor(engine=dpkt)' does not support protocol and layer threshold; "
                  f"'layer={ext._exlyr}' and 'protocol={ext._exptl}' ignored",
+                 AttributeWarning, stacklevel=stacklevel())
+
+        if ext._exctx:
+            warn("'Extractor(engine=dpkt)' does not parse with pcapkit's own protocol "
+                 "implementations, so the parsing context supplied through "
+                 "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         # setup verbose handler

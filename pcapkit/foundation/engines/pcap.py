@@ -143,7 +143,8 @@ class PCAP(Engine[Frame]):
 
         # read frame header
         frame = Frame(ext._ifile, num=ext._frnum+1, header=self._gbhdr.info,
-                      layer=ext._exlyr, protocol=ext._exptl, nanosecond=self._nnsec)
+                      layer=ext._exlyr, protocol=ext._exptl, nanosecond=self._nnsec,
+                      __context__=ext._exctx)
         ext._frnum += 1
 
         # verbose output

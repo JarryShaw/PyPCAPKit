@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from dictdumper.dumper import Dumper
 
+from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.io import SeekableReader
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
@@ -43,7 +44,7 @@ from pcapkit.utilities.warnings import (EngineWarning, ExtractionWarning, Format
 if TYPE_CHECKING:
     from io import BufferedReader
     from types import ModuleType, TracebackType
-    from typing import IO, Any, Callable, DefaultDict, Optional, Type, Union
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Mapping, Optional, Type, Union
 
     from dpkt.dpkt import Packet as DPKTPacket
     from pyshark.packet.packet import Packet as PySharkPacket
@@ -141,6 +142,8 @@ class Extractor(Generic[_P]):
         _exptl: 'Protocols'
         #: Extract til layer.
         _exlyr: 'Layers'
+        #: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.
+        _exctx: 'ContextRegistry'
         #: Extraction engine name.
         _exnam: 'Engines'
         #: Extraction engine instance.
@@ -638,7 +641,8 @@ class Extractor(Generic[_P]):
                  trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
                  ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
                  buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
-                 no_eof: 'bool' = False) -> 'None':
+                 no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None) -> 'None':  # context settings # pylint: disable=line-too-long
         """Initialise PCAP Reader.
 
         Args:
@@ -682,6 +686,16 @@ class Extractor(Generic[_P]):
             buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
 
             no_eof: if raise :exc:`EOFError` when EOF
+
+            context: caller supplied parsing context for protocols that need
+                information not carried on the wire, keyed by protocol index
+                ID -- c.f. :mod:`pcapkit.corekit.context`. Accepts a
+                :class:`~pcapkit.corekit.context.ContextRegistry`, a single
+                :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping,
+                or any iterable of contexts. The channel is honoured by the
+                ``default``, ``pcap`` and ``pcapng`` engines, which parse with
+                :mod:`pcapkit`'s own protocol implementations; the third party
+                engines ignore it.
 
         Warns:
             pcapkit.utilities.warnings.FormatWarning: Warns under following circumstances:
@@ -737,6 +751,7 @@ class Extractor(Generic[_P]):
         self._exptl = protocol or 'null'                              # extract til protocol
         self._exlyr = cast('Layers', (layer or 'none').lower())       # extract til layer
         self._exnam = cast('Engines', (engine or 'default').lower())  # extract using engine
+        self._exctx = ContextRegistry.make(context)                   # caller supplied context
 
         if reassembly:
             reasm_obj_ipv4 = reasm_obj_ipv6 = reasm_obj_tcp = None
