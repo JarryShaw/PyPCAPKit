@@ -3,7 +3,7 @@ User Defined Warnings
 
 .. module:: pcapkit.utilities.warnings
 
-:mod:`pcapkit.warnings` refined built-in warnings.
+:mod:`pcapkit.utilities.warnings` refined built-in warnings.
 
 How a Warning Is Reported
 -------------------------

@@ -4,7 +4,7 @@
 
 .. module:: pcapkit.utilities.warnings
 
-:mod:`pcapkit.warnings` refined built-in warnings.
+:mod:`pcapkit.utilities.warnings` refined built-in warnings.
 
 Every warning :mod:`pcapkit` reports goes through :func:`warn`, which reports it
 **exactly once on each of two channels**:

@@ -106,7 +106,7 @@ class BaseError(Exception):
         * :data:`sys.tracebacklimit` is process-global, so it is only set for a
           loud error -- a quiet one used as control flow must not truncate the
           tracebacks of unrelated exceptions for the rest of the process.
-        * In Python 2.7, :func:`trace.print_stack(limit)` dose not support negative limit.
+        * In Python 2.7, :func:`trace.print_stack(limit)` does not support negative limit.
 
     See Also:
         :func:`pcapkit.utilities.exceptions.stacklevel`
