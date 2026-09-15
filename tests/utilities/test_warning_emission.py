@@ -1,4 +1,4 @@
-"""Regression tests for GH-363 -- one :func:`~pcapkit.utilities.warnings.warn`
+"""Regression tests for #363 -- one :func:`~pcapkit.utilities.warnings.warn`
 call must produce exactly one record on each channel.
 
 The emission model, which these tests pin:
@@ -13,7 +13,7 @@ The emission model, which these tests pin:
 
 Before the fix the counts were: 1 outside development mode (the
 :mod:`warnings` emission was swallowed by the filter the constructor installed --
-see GH-364) and 3 in development mode (two log records, from ``warn()`` and again
+see #364) and 3 in development mode (two log records, from ``warn()`` and again
 from ``BaseWarning.__init__``, plus the :mod:`warnings` emission).
 
 """
