@@ -2,7 +2,7 @@ name: "Python Compatibility"
 
 on:
   push:
-    branches: [main, ]
+    branches: [main]
   pull_request:
     branches: [main]
   schedule:
@@ -11,9 +11,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: python-compatibility-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   compatibility:
-    name: Python ${{ matrix.python-version }}
+    # Named "Python ${{ matrix.python-version }}" until now, which collided
+    # exactly with the Unit Tests matrix job of the same name: `gh pr checks`
+    # showed two rows reading `Python 3.10`, one a 13-second import smoke test
+    # and one a three-minute test run, with nothing to tell them apart.
+    name: Compat Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental == true }}
     strategy:

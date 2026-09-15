@@ -2,25 +2,43 @@ name: GitHub Pages
 
 on:
   push:
-    branches: [main, ]
+    branches: [main]
   schedule:
     - cron: '0 2 * * 6'
   pull_request:
-    branches:
-      - '**'
+    # Was '**', which matched pull requests against every branch and made this
+    # the one workflow that fired outside the main-targeting set the others
+    # use. Every pull request here targets main, so '**' only ever added runs.
+    branches: [main]
 
 permissions:
   contents: write
 
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  # Nothing is published on a pull request -- the Deploy step below is skipped
+  # -- so the gate only earns its runners when a real publish follows. The docs
+  # build still runs on pull requests, which is the part that actually
+  # validates a documentation change.
   unit-tests:
-    name: Unit Tests
+    name: Docs test gate
+    if: ${{ github.event_name != 'pull_request' }}
     permissions:
       contents: read
     uses: ./.github/workflows/unit-tests.yml
+    with:
+      gate-only: true
 
   deploy-pages:
     needs: [ unit-tests ]
+    # `needs` cannot itself be conditional, so a skipped gate (pull requests)
+    # has to be accepted explicitly -- by default this job would inherit the
+    # skip. `!cancelled()` rather than `always()` so that cancelling the run
+    # still cancels the docs build; a gate that actually failed still blocks.
+    if: ${{ !cancelled() && needs.unit-tests.result != 'failure' }}
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     runs-on: macos-latest
     steps:

@@ -12,13 +12,27 @@ on:
 
 name: Create Release
 
+# A `workflow_run` trigger runs against the tip of the default branch, not
+# against the sha of the run that triggered it, so two Vendor Update runs
+# completing close together produce two Create Release runs evaluating the
+# *same* tip -- observed on 78ec96afb (runs 34894022730 and 34894646592, six
+# minutes apart) and on 1e0ebc53b. Both would then read PCAPKIT_TAG_EXISTS
+# before either had tagged, which is a double-publish race. Serialise instead:
+# never cancel a release run, just make the second wait and find the tag
+# already there.
+concurrency:
+  group: create-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   unit-tests:
-    name: Unit Tests
+    name: Release test gate
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
     uses: ./.github/workflows/unit-tests.yml
+    with:
+      gate-only: true
 
   version_check:
     name: Check Version
@@ -93,7 +107,10 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
 
   tag:
-    name: Conda Tag
+    # "(release)" distinguishes this from the identically named job in
+    # cron-conda.yml; both workflows run on a push to main, so the two produced
+    # two check rows reading `Conda Tag` with nothing to tell them apart.
+    name: Conda Tag (release)
     runs-on: ubuntu-latest
     permissions: {}
     needs: [ version_check ]
@@ -224,7 +241,7 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
 
   conda:
-    name: Conda deployment of package for platform ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    name: Conda deployment (release) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
