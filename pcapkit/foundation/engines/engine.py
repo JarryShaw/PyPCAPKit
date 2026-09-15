@@ -103,6 +103,37 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
         return self._extractor
 
     ##########################################################################
+    # Availability.
+    ##########################################################################
+
+    @classmethod
+    def unsupported_reason(cls) -> 'Optional[str]':
+        """Why this engine cannot run in this environment, if it cannot.
+
+        Engines are normally gated by whether their third-party module imports,
+        which :meth:`pcapkit.foundation.extraction.Extractor.import_test` decides.
+        This hook is for the cases that question cannot answer -- most often a
+        dependency that installs cleanly and only fails when it is *used*, so the
+        import test passes and the error escapes from the engine's constructor as
+        a hard failure instead of degrading to the default engine.
+
+        The default is :data:`None`, i.e. always available; override it only where
+        there is a real limitation, and return a short phrase naming the *cause*
+        rather than merely refusing, since the string is shown to the user.
+
+        Returns:
+            A phrase describing the limitation, or :data:`None` when the engine is
+            usable here.
+
+        See Also:
+            :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile` overrides
+            this, because ``pypcapfile`` installs on Python 3.12 and newer and then
+            raises :exc:`ModuleNotFoundError` on first use.
+
+        """
+        return None
+
+    ##########################################################################
     # Data models.
     ##########################################################################
 
