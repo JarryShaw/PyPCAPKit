@@ -84,6 +84,17 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. important::
 
+   `PyPCAP`_ publishes no wheels, so installing it compiles a C extension and
+   needs both the :manpage:`libpcap(3)` headers and its shared library on the
+   system -- a header alone is not enough. It is therefore **not** part of the
+   ``all`` extra, and is installed on its own once libpcap is available:
+
+   .. code-block:: shell
+
+      pip install pypcapkit[PyPCAP]
+
+.. important::
+
    `PyPCAP`_ is a :manpage:`libpcap(3)` binding aimed primarily at live capture.
    Offline it performs **no protocol dissection**: each frame is the
    ``(timestamp, bytes)`` pair that :c:func:`pcap_next_ex` produced. Reassembly

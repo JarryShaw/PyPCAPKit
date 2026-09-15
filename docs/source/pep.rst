@@ -77,7 +77,8 @@ New Engines
    ``engine='pypcap'`` selects :class:`pcapkit.foundation.engines.pypcap.PyPCAP`;
    each has a matching :mod:`pcapkit.toolkit` module
    (:mod:`pcapkit.toolkit.pypcapfile`, :mod:`pcapkit.toolkit.pypcap`), a
-   ``pyproject.toml`` extra (``PyPCAPFile``, ``PyPCAP``, both in ``all``), docs
+   ``pyproject.toml`` extra (``PyPCAPFile``, which ``all`` includes, and
+   ``PyPCAP``, which it deliberately does not -- see below), docs
    under :doc:`pcapkit/foundation/engines/index`, and tests under
    ``tests/foundation/engines/`` and ``tests/toolkit/``. Both were verified
    end-to-end against the sample captures: each agrees with the ``default`` engine
@@ -97,7 +98,12 @@ New Engines
      fixed list of prefixes for ``pcap.h``. It builds once :program:`libpcap`'s
      headers are visible under ``sys.prefix`` and ``pcap.c`` is regenerated with
      Cython 3. That is a packaging problem upstream rather than an engine problem,
-     but it does mean ``pip install pypcapkit[PyPCAP]`` can fail to build.
+     but it does mean ``pip install pypcapkit[PyPCAP]`` can fail to build. Since
+     there is no wheel to fall back on, the extra is kept **out of** ``all``:
+     otherwise ``pip install pypcapkit[all]`` would demand a compiler and the
+     libpcap development files from every user, and it broke the docs, conda and
+     release workflows -- all of which install ``.[all]`` -- on the macOS runner,
+     where :file:`pcap.h` is present but no ``libpcap.dylib`` is.
 
    Both engines support less than the ``default`` engine does, deliberately and
    noisily: `pypcap`_ performs no protocol dissection, so it disables reassembly
