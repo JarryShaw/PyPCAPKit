@@ -10,20 +10,31 @@ generally provided per user's requests.
 
 """
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.foundation.engines.dpkt import DPKT as DPKT_Engine
+from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
+from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
+from pcapkit.foundation.engines.pypcapfile import PyPCAPFile as PyPCAPFile_Engine
+from pcapkit.foundation.engines.scapy import Scapy as Scapy_Engine
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.utilities.exceptions import stacklevel
-from pcapkit.utilities.warnings import EngineWarning, warn
+from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Callable, Optional
 
     from typing_extensions import Literal
 
     from pcapkit.foundation.extraction import Packet
+    from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Data
+
+    #: A toolkit's ``tcp_reassembly`` adapter. The pcapkit-native adapters take only
+    #: the frame; the third-party ones also accept a ``count`` keyword -- hence the
+    #: open ``...`` parameter list, which lets both call shapes type-check.
+    ReassemblyAdapter = Callable[..., 'Optional[TCP_Data]']
 
     ByteOrder = Literal['little', 'big']
     Formats = Literal['pcap', 'json', 'tree', 'plist']
@@ -83,20 +94,70 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
              EngineWarning, stacklevel=stacklevel())
         engine = None
 
+    # NOTE: the DPKT and Scapy engines hand their frames to the flow tracer as plain
+    # :obj:`dict`\\ s, which the PCAP trace dumper cannot re-serialise -- it reaches
+    # for ``frame.packet`` and dies with ``AttributeError: 'dict' object has no
+    # attribute 'packet'`` (GH-399). The tracer defaults an unset ``format`` to
+    # ``'pcap'``, so following a stream through either engine crashes *during
+    # extraction*, before the reassembly below ever runs. :class:`Extractor
+    # <pcapkit.foundation.extraction.Extractor>` already substitutes a dict-capable
+    # format for the PyShark and PyPCAPFile engines but deliberately leaves DPKT and
+    # Scapy out (see the note at its ``trace`` setup); apply the same remedy here so
+    # the stream is followed rather than crashed on. A caller that never asked for a
+    # trace format (``None``) is quietly upgraded; an explicit but unusable one is
+    # replaced with a warning, since it is a request that cannot be honoured.
+    if engine is not None and engine.lower() in ('dpkt', 'scapy') and format in ('pcap', 'cap', None):
+        if format is not None:
+            warn(f"extraction engine {engine} cannot write '{format}' trace files; "
+                 "using 'json' instead", FormatWarning, stacklevel=stacklevel())
+        format = 'json'
+
     extraction = Extractor(fin=fin, fout=None, format=None, auto=True, extension=extension,
                            store=True, files=False, nofile=True, verbose=verbose, engine=engine,
                            layer=None, protocol=None, ip=False, ipv4=False, ipv6=False, tcp=True,
                            reassembly=False, trace=True, trace_fout=fout, trace_format=format,
                            trace_byteorder=byteorder, trace_nanosecond=nanosecond)  # type: ignore[var-annotated]
 
-    fallback = False
-    if extraction.engine == 'dpkt':  # type: ignore[comparison-overlap]
-        from pcapkit.toolkit.dpkt import tcp_reassembly  # pylint: disable=import-outside-toplevel
-    elif extraction.engine == 'scapy':  # type: ignore[comparison-overlap]
-        from pcapkit.toolkit.scapy import tcp_reassembly  # isort: skip # pylint: disable=import-outside-toplevel
+    # NOTE: ``Extractor.engine`` returns the running engine *instance* (see
+    # :meth:`Extractor.engine <pcapkit.foundation.extraction.Extractor.engine>`),
+    # never its name -- so the historical ``extraction.engine == 'dpkt'`` compared an
+    # object against a string and was *always* :data:`False`. Every capture then fell
+    # through to the pcapkit adapter, which crashed on DPKT frames and silently
+    # returned no streams on Scapy frames (GH-399). Dispatch on the engine *type*
+    # instead, and via :func:`isinstance` so that a third-party engine subclassing a
+    # built-in still reaches the adapter that matches its frames.
+    #
+    # The adapter and its call convention are chosen together: the pcapkit-native
+    # adapters (:mod:`~pcapkit.toolkit.pcap` and :mod:`~pcapkit.toolkit.pcapng`) read
+    # the frame number straight off the dissected frame and accept no ``count``,
+    # whereas the third-party adapters have no such number and must be handed the
+    # frame index as ``count`` -- so the two forms are not interchangeable.
+    exeng = extraction.engine
+    tcp_reassembly = None  # type: Optional[ReassemblyAdapter]
+    pass_count = True
+    if isinstance(exeng, PCAP_Engine):
+        from pcapkit.toolkit import pcap as tk_pcap  # isort: skip # pylint: disable=import-outside-toplevel
+        tcp_reassembly, pass_count = cast('ReassemblyAdapter', tk_pcap.tcp_reassembly), False
+    elif isinstance(exeng, PCAPNG_Engine):
+        from pcapkit.toolkit import pcapng as tk_pcapng  # isort: skip # pylint: disable=import-outside-toplevel
+        tcp_reassembly, pass_count = cast('ReassemblyAdapter', tk_pcapng.tcp_reassembly), False
+    elif isinstance(exeng, DPKT_Engine):
+        from pcapkit.toolkit import dpkt as tk_dpkt  # isort: skip # pylint: disable=import-outside-toplevel
+        tcp_reassembly = cast('ReassemblyAdapter', tk_dpkt.tcp_reassembly)
+    elif isinstance(exeng, Scapy_Engine):
+        from pcapkit.toolkit import scapy as tk_scapy  # isort: skip # pylint: disable=import-outside-toplevel
+        tcp_reassembly = cast('ReassemblyAdapter', tk_scapy.tcp_reassembly)
+    elif isinstance(exeng, PyPCAPFile_Engine):
+        from pcapkit.toolkit import pypcapfile as tk_pypcapfile  # isort: skip # pylint: disable=import-outside-toplevel
+        tcp_reassembly = cast('ReassemblyAdapter', tk_pypcapfile.tcp_reassembly)
     else:
-        from pcapkit.toolkit.pcap import tcp_reassembly  # type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel
-        fallback = True
+        # A third-party engine pcapkit ships no reassembly adapter for. Falling back
+        # to the pcapkit adapter is exactly the GH-399 failure mode -- a wrong or empty
+        # result indistinguishable from a real one -- so warn and return no streams
+        # rather than reassemble frames whose shape we cannot parse.
+        warn(f'unsupported extraction engine for TCP stream following: {exeng.name}; '
+             'returning no streams', EngineWarning, stacklevel=stacklevel())
+        return ()
 
     streams = []  # type: list[Stream]
     frames = extraction.frame
@@ -108,10 +169,10 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
             frame = frames[index-1]
             packets.append(frame)
 
-            if fallback:
-                data = tcp_reassembly(frame)
-            else:
+            if pass_count:
                 data = tcp_reassembly(frame, count=index)
+            else:
+                data = tcp_reassembly(frame)
 
             if data is not None:
                 reassembly(data)
