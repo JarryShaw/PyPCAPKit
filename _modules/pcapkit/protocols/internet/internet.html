@@ -253,6 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
@@ -292,6 +293,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
@@ -324,6 +326,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -343,6 +346,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -455,6 +459,8 @@
 <span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_route.IPv6_Route`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Frag`</span>
 <span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.ESP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.esp.ESP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.AH`</span>
 <span class="sd">         - :class:`pcapkit.protocols.internet.ah.AH`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`</span>
@@ -492,6 +498,7 @@
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6'</span><span class="p">,</span>       <span class="s1">'IPv6'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_route'</span><span class="p">,</span> <span class="s1">'IPv6_Route'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_frag'</span><span class="p">,</span>  <span class="s1">'IPv6_Frag'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">ESP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.esp'</span><span class="p">,</span>        <span class="s1">'ESP'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>              <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ah'</span><span class="p">,</span>         <span class="s1">'AH'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_NoNxt</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span>            <span class="s1">'Raw'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_opts'</span><span class="p">,</span>  <span class="s1">'IPv6_Opts'</span><span class="p">),</span>
@@ -654,7 +661,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># update mapping upon import</span>
 
         <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>  <span class="c1"># type: ignore[abstract]</span>
-                         <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">)</span>
+                         <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span>
+                         <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">next_</span></div>
 </div>
 

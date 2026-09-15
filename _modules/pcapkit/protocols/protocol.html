@@ -253,6 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
@@ -292,6 +293,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
@@ -324,6 +326,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -343,6 +346,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -424,6 +428,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">chardet</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">data_module</span>
@@ -446,10 +451,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolContext</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ProtocolBase'</span><span class="p">]</span>
 
 <span class="n">_PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Data'</span><span class="p">)</span>
 <span class="n">_ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_ST'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Schema'</span><span class="p">)</span>
+<span class="n">_CTX</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_CTX'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'ProtocolContext'</span><span class="p">)</span>
 
 <span class="c1"># readable characters' order list</span>
 <span class="n">readable</span> <span class="o">=</span> <span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">char</span><span class="p">:</span> <span class="ow">not</span> <span class="n">char</span><span class="o">.</span><span class="n">isspace</span><span class="p">(),</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span><span class="p">)]</span>
@@ -519,6 +527,14 @@
     <span class="n">__proto__</span><span class="p">:</span> <span class="s1">'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
     <span class="p">)</span>
+
+    <span class="c1">#: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.</span>
+    <span class="c1">#: :meth:`self.__init__ &lt;Protocol.__init__&gt;` replaces this with a real</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.context.ContextRegistry`; the class level</span>
+    <span class="c1">#: :data:`None` is what an instance built without going through</span>
+    <span class="c1">#: ``__init__`` -- e.g. ``object.__new__(SomeProtocol)`` -- sees, so that</span>
+    <span class="c1">#: reading it is always safe.</span>
+    <span class="n">_exctx</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry]'</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -597,6 +613,19 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">schema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_ST'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Schema data of the protocol."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
+
+    <span class="c1"># caller supplied parsing context</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ContextRegistry'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Caller supplied parsing context.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :mod:`pcapkit.corekit.context` for what this channel is for, and</span>
+<span class="sd">            :meth:`self._get_context &lt;ProtocolBase._get_context&gt;` for how a</span>
+<span class="sd">            protocol implementation reaches its own entry.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">ContextRegistry</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -904,6 +933,12 @@
 <span class="sd">                (:attr:`self._exlayer &lt;pcapkit.protocols.protocol.Protocol._exlayer&gt;`).</span>
 <span class="sd">            _protocol (Union[str, Protocol, Type[Protocol]]): Parse packet until ``_protocol``</span>
 <span class="sd">                (:attr:`self._exproto &lt;pcapkit.protocols.protocol.Protocol._exproto&gt;`).</span>
+<span class="sd">            __context__ (Union[ContextRegistry, ProtocolContext, Mapping[str, ProtocolContext], Iterable[ProtocolContext]]):</span>
+<span class="sd">                Caller supplied parsing context (:attr:`self._exctx &lt;pcapkit.protocols.protocol.Protocol._exctx&gt;`),</span>
+<span class="sd">                c.f. :mod:`pcapkit.corekit.context`. It is consumed here rather</span>
+<span class="sd">                than being forwarded to :meth:`self.read &lt;Protocol.read&gt;`, and is</span>
+<span class="sd">                propagated to nested layers by</span>
+<span class="sd">                :meth:`self._import_next_layer &lt;ProtocolBase._import_next_layer&gt;`.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        """</span>
@@ -915,6 +950,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'_layer'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[str]</span>
         <span class="c1">#: str: Parse packet until such protocol.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'_protocol'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[str | ProtocolBase | Type[ProtocolBase]]</span>
+        <span class="c1">#: pcapkit.corekit.context.ContextRegistry: Caller supplied parsing context.</span>
+        <span class="c1"># NOTE: Every nested layer normalises the context it was handed, so an</span>
+        <span class="c1"># already-normalised registry is adopted as-is: ``make()`` copies, and</span>
+        <span class="c1"># paying for a dict copy per protocol in a capture buys nothing when the</span>
+        <span class="c1"># contexts are shared regardless.</span>
+        <span class="n">__context__</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__context__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span> <span class="o">=</span> <span class="p">(</span><span class="n">__context__</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">__context__</span><span class="p">,</span> <span class="n">ContextRegistry</span><span class="p">)</span>
+                       <span class="k">else</span> <span class="n">ContextRegistry</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">__context__</span><span class="p">))</span>  <span class="c1"># type: ContextRegistry</span>
         <span class="c1">#: bool: If terminate parsing next layer of protocol.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_term_threshold</span><span class="p">()</span>
 
@@ -1163,6 +1206,31 @@
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="s1">'Optional[Type[_CTX]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[_CTX]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Get the caller supplied context for this protocol, if any.</span>
+
+<span class="sd">        The lookup is keyed on :meth:`self.id &lt;ProtocolBase.id&gt;`, so a</span>
+<span class="sd">        protocol finds its own context without knowing how the caller spelled</span>
+<span class="sd">        the registry.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cls: Expected context class; when given, a context registered</span>
+<span class="sd">                under this protocol's name but of another type is ignored</span>
+<span class="sd">                rather than returned for the implementation to trip over.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The matching context, or :data:`None` when the caller supplied</span>
+<span class="sd">            none.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :mod:`pcapkit.corekit.context`</span>
+
+<span class="sd">        """</span>
+        <span class="n">registry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span>
+        <span class="k">if</span> <span class="n">registry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">registry</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">(),</span> <span class="bp">cls</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Get payload from :attr:`self.__header__ &lt;Protocol.__header__&gt;`.</span>
@@ -1555,7 +1623,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># update mapping upon import</span>
 
         <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span>
-                         <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+                         <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span>
+                         <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
         <span class="k">return</span> <span class="n">next_</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_term_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>

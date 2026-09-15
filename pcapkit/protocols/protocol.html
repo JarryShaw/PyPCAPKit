@@ -260,6 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
@@ -299,6 +300,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/module.html">Module Descriptor</a></li>
@@ -331,6 +333,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -998,6 +1002,11 @@ be included when <a class="reference internal" href="../corekit/infoclass.html#p
 (<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exlayer" title="pcapkit.protocols.protocol.Protocol._exlayer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exlayer</span></code></a>).</p></li>
 <li><p><strong>_protocol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str</span></code>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Type[Protocol]]</span></code>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_protocol</span></code>
 (<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exproto" title="pcapkit.protocols.protocol.Protocol._exproto"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exproto</span></code></a>).</p></li>
+<li><p><strong>__context__</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[ContextRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping[str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext]</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable[ProtocolContext]]</span></code>) – Caller supplied parsing context (<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exctx</span></code>),
+c.f. <a class="reference internal" href="../corekit/context.html#module-1" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a>. It is consumed here rather
+than being forwarded to <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.read</span></code></a>, and is
+propagated to nested layers by
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code>.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>

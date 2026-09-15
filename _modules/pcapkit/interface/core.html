@@ -253,6 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
@@ -292,6 +293,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
@@ -324,6 +326,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -343,6 +346,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -418,10 +422,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span><span class="p">,</span> <span class="n">ProtocolContext</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engines</span><span class="p">,</span> <span class="n">Formats</span><span class="p">,</span> <span class="n">Layers</span><span class="p">,</span> <span class="n">Protocols</span><span class="p">,</span> <span class="n">VerboseHandler</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyBase</span> <span class="k">as</span> <span class="n">Reassembly</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowBase</span> <span class="k">as</span> <span class="n">TraceFlow</span>
@@ -465,7 +470,8 @@
             <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
             <span class="n">ip</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
             <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># buffer settings # pylint: disable=line-too-long</span>
-            <span class="n">no_eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Extractor'</span><span class="p">:</span>
+            <span class="n">no_eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                                                                      <span class="c1"># EOF settings # pylint: disable=line-too-long</span>
+            <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Extractor'</span><span class="p">:</span>  <span class="c1"># context settings # pylint: disable=line-too-long</span>
 <span class="w">    </span><span class="sd">"""Extract a PCAP file.</span>
 
 <span class="sd">    Arguments:</span>
@@ -510,6 +516,18 @@
 
 <span class="sd">        no_eof: if not raise :exc:`EOFError` when reach EOF</span>
 
+<span class="sd">        context: caller supplied parsing context for protocols that need</span>
+<span class="sd">            information not carried on the wire, keyed by protocol index ID --</span>
+<span class="sd">            c.f. :mod:`pcapkit.corekit.context`. The motivating case is</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.esp.ESP`, which needs the</span>
+<span class="sd">            Security Association to find the trailer and decrypt the payload::</span>
+
+<span class="sd">                &gt;&gt;&gt; from pcapkit.protocols.internet.esp import (Cipher, ESPContext,</span>
+<span class="sd">                ...                                            SecurityAssociation)</span>
+<span class="sd">                &gt;&gt;&gt; sa = SecurityAssociation(spi=0x4321, encryption=Cipher.AES_CBC,</span>
+<span class="sd">                ...                          encryption_key=key)</span>
+<span class="sd">                &gt;&gt;&gt; extraction = pcapkit.extract('esp.pcap', context=ESPContext(sa))</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        An :class:`~pcapkit.foundation.extraction.Extractor` object.</span>
 
@@ -526,7 +544,7 @@
                      <span class="n">trace</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">trace_fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
                      <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">,</span>
                      <span class="n">buffer_size</span><span class="o">=</span><span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_path</span><span class="o">=</span><span class="n">buffer_path</span><span class="p">,</span> <span class="n">buffer_save</span><span class="o">=</span><span class="n">buffer_save</span><span class="p">,</span>
-                     <span class="n">no_eof</span><span class="o">=</span><span class="n">no_eof</span><span class="p">)</span></div>
+                     <span class="n">no_eof</span><span class="o">=</span><span class="n">no_eof</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span></div>
 
 
 

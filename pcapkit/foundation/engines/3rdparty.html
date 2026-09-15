@@ -260,6 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
@@ -299,6 +300,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
@@ -331,6 +333,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -449,7 +453,10 @@ as an iterator from <a class="reference external" href="https://scapy.readthedoc
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>AttributeWarning</strong> – If <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
 and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
-is provided as the Scapy engine currently does not support such operations.</p>
+is provided as the Scapy engine currently does not support such operations;
+or if <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exctx</span></code>
+is provided, as the Scapy engine does not parse with <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own
+protocol implementations.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
@@ -528,7 +535,10 @@ as an iterator from <a class="reference external" href="https://dpkt.readthedocs
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>AttributeWarning</strong> – If <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
 and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
-is provided as the DPKT engine currently does not support such operations.</p>
+is provided as the DPKT engine currently does not support such operations;
+or if <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exctx</span></code>
+is provided, as the DPKT engine does not parse with <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own
+protocol implementations.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the file format is not supported, i.e., not a PCAP
@@ -617,6 +627,9 @@ is provided as the PyShark engine currently does not
 support such operations.</p></li>
 <li><p>if reassembly is enabled, as the PyShark engine currently
 does not support such operation.</p></li>
+<li><p>if <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exctx</span></code>
+is provided, as the PyShark engine does not parse with
+<a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own protocol implementations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

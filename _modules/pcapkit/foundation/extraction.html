@@ -253,6 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
@@ -292,6 +293,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
@@ -324,6 +326,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -343,6 +346,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -418,6 +422,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeekableReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_dumper</span>
@@ -439,7 +444,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferedReader</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleType</span><span class="p">,</span> <span class="n">TracebackType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">dpkt.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">DPKTPacket</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">PySharkPacket</span>
@@ -539,6 +544,8 @@
         <span class="n">_exptl</span><span class="p">:</span> <span class="s1">'Protocols'</span>
         <span class="c1">#: Extract til layer.</span>
         <span class="n">_exlyr</span><span class="p">:</span> <span class="s1">'Layers'</span>
+        <span class="c1">#: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.</span>
+        <span class="n">_exctx</span><span class="p">:</span> <span class="s1">'ContextRegistry'</span>
         <span class="c1">#: Extraction engine name.</span>
         <span class="n">_exnam</span><span class="p">:</span> <span class="s1">'Engines'</span>
         <span class="c1">#: Extraction engine instance.</span>
@@ -1065,7 +1072,8 @@
                  <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
                  <span class="n">ip</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
                  <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># buffer settings # pylint: disable=line-too-long</span>
-                 <span class="n">no_eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                 <span class="n">no_eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                                                                      <span class="c1"># EOF settings # pylint: disable=line-too-long</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># context settings # pylint: disable=line-too-long</span>
 <span class="w">        </span><span class="sd">"""Initialise PCAP Reader.</span>
 
 <span class="sd">        Args:</span>
@@ -1109,6 +1117,16 @@
 <span class="sd">            buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 
 <span class="sd">            no_eof: if raise :exc:`EOFError` when EOF</span>
+
+<span class="sd">            context: caller supplied parsing context for protocols that need</span>
+<span class="sd">                information not carried on the wire, keyed by protocol index</span>
+<span class="sd">                ID -- c.f. :mod:`pcapkit.corekit.context`. Accepts a</span>
+<span class="sd">                :class:`~pcapkit.corekit.context.ContextRegistry`, a single</span>
+<span class="sd">                :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping,</span>
+<span class="sd">                or any iterable of contexts. The channel is honoured by the</span>
+<span class="sd">                ``default``, ``pcap`` and ``pcapng`` engines, which parse with</span>
+<span class="sd">                :mod:`pcapkit`'s own protocol implementations; the third party</span>
+<span class="sd">                engines ignore it.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.FormatWarning: Warns under following circumstances:</span>
@@ -1164,6 +1182,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">=</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="s1">'null'</span>                              <span class="c1"># extract til protocol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Layers'</span><span class="p">,</span> <span class="p">(</span><span class="n">layer</span> <span class="ow">or</span> <span class="s1">'none'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>       <span class="c1"># extract til layer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Engines'</span><span class="p">,</span> <span class="p">(</span><span class="n">engine</span> <span class="ow">or</span> <span class="s1">'default'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>  <span class="c1"># extract using engine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span> <span class="o">=</span> <span class="n">ContextRegistry</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>                   <span class="c1"># caller supplied context</span>
 
         <span class="k">if</span> <span class="n">reassembly</span><span class="p">:</span>
             <span class="n">reasm_obj_ipv4</span> <span class="o">=</span> <span class="n">reasm_obj_ipv6</span> <span class="o">=</span> <span class="n">reasm_obj_tcp</span> <span class="o">=</span> <span class="kc">None</span>

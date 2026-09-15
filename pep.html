@@ -260,6 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
@@ -299,6 +300,7 @@
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/module.html">Module Descriptor</a></li>
@@ -331,6 +333,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -448,15 +452,19 @@ but not yet done. Namely, grouped by each TCP/IP layer and ordered by protocol
 name alphabetically,</p>
 <ul class="simple">
 <li><p>Link Layer: DSL, EAPOL, FDDI, ISDN, PPP</p></li>
-<li><p>Internet Layer: ECN, ESP, ICMP, ICMPv6, IGMP, NDP, Shim6</p></li>
+<li><p>Internet Layer: ECN, ICMP, ICMPv6, IGMP, NDP, Shim6</p></li>
 <li><p>Transport Layer: DCCP, QUIC, RSVP</p></li>
 <li><p>Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP,
 ONC/RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL, XMPP</p></li>
 </ul>
-<p>Specifically, I have attempted to implement <strong>ESP</strong> several years ago, and I
-abandoned the implementation in the <cite>NotImplemented</cite> folder due to some design
-flaws within PyPCAPKit at that time. But now, the protocol should be able to
-implement quite smoothly.</p>
+<p><strong>ESP</strong> – abandoned in the <code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code> folder for years, because of
+design flaws within PyPCAPKit at the time – is now implemented, c.f.
+<a class="reference internal" href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>. It parses without keys, and
+decrypts when a Security Association is supplied through the protocol keyed
+<a class="reference internal" href="pcapkit/corekit/context.html#module-1" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a> channel. What is still wanted there is wider
+algorithm coverage: ChaCha20-Poly1305 [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7634.html"><strong>RFC 7634</strong></a>], AES-CCM [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4309.html"><strong>RFC 4309</strong></a>] and
+AES-XCBC integrity [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3566.html"><strong>RFC 3566</strong></a>] are not implemented, and neither are Extended
+Sequence Numbers.</p>
 <p>More over, <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> requires some help to
 implement all the <em>message data</em> types, you can find more information in the
 specific file.</p>

@@ -253,6 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
@@ -292,6 +293,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
@@ -324,6 +326,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -343,6 +346,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -617,7 +621,8 @@
 
 <div class="viewcode-block" id="IPv4.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv4'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,arguments-differ</span>
+             <span class="n">__packet__</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv4'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read Internet Protocol version 4 (IPv4).</span>
 
 <span class="sd">        Structure of IPv4 header [:rfc:`791`]:</span>
@@ -642,6 +647,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
+<span class="sd">            __packet__: Optional packet data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -685,7 +691,16 @@
                 <span class="p">(</span><span class="s1">'options'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)),</span>
             <span class="p">])</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">)</span></div>
+        <span class="c1"># update packet info</span>
+        <span class="k">if</span> <span class="n">__packet__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">__packet__</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">__packet__</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">'src'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>
+            <span class="s1">'dst'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
+        <span class="p">})</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span>
+                                       <span class="n">packet</span><span class="o">=</span><span class="n">__packet__</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="IPv4.make">

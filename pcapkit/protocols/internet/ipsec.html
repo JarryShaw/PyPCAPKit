@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/internet/ipsec.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.internet.ipsec contains IPsec only, which is a base class for Internet Protocol Security (IPsec) protocol family*, eg. AH and ESP †. Footnotes*, https://en.wikipedia.org/wiki/IPse..." />
-<meta name="description" content="pcapkit.protocols.internet.ipsec contains IPsec only, which is a base class for Internet Protocol Security (IPsec) protocol family*, eg. AH and ESP †. Footnotes*, https://en.wikipedia.org/wiki/IPse..." />
+<meta property="og:description" content="pcapkit.protocols.internet.ipsec contains IPsec only, which is a base class for Internet Protocol Security (IPsec) protocol family*, eg. AH and ESP. Footnotes*, https://en.wikipedia.org/wiki/IPsec" />
+<meta name="description" content="pcapkit.protocols.internet.ipsec contains IPsec only, which is a base class for Internet Protocol Security (IPsec) protocol family*, eg. AH and ESP. Footnotes*, https://en.wikipedia.org/wiki/IPsec" />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="AH - Authentication Header" href="ah.html"><link rel="prev" title="HOPOPT - IPv6 Hop-by-Hop Options" href="hopopt.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -260,6 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipx.html">IPX - Internetwork Packet Exchange</a></li>
@@ -299,6 +300,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
@@ -331,6 +333,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -415,9 +419,9 @@
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.ipsec" title="pcapkit.protocols.internet.ipsec"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipsec</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a>
 only, which is a base class for Internet Protocol
-Security (IPsec) protocol family <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, eg.
+Security (IPsec) protocol family <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, eg.
 <a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a> and
-<code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a>.</p>
+<a class="reference internal" href="esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipsec.IPsec">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipsec.</span></span><span class="sig-name descname"><span class="pre">IPsec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipsec.html#IPsec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipsec.IPsec" title="Link to this definition">¶</a></dt>
@@ -425,7 +429,7 @@ Security (IPsec) protocol family <a class="footnote-reference brackets" href="#i
 <p>Abstract base class for IPsec protocol family.</p>
 <ul class="simple">
 <li><p>Authentication Header (<a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a>) [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html"><strong>RFC 4302</strong></a>]</p></li>
-<li><p>Encapsulating Security Payload (<code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code>) [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>]</p></li>
+<li><p>Encapsulating Security Payload (<a class="reference internal" href="esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>) [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>]</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -453,13 +457,9 @@ Security (IPsec) protocol family <a class="footnote-reference brackets" href="#i
 
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id3" role="doc-footnote">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/IPsec">https://en.wikipedia.org/wiki/IPsec</a></p>
-</aside>
-<aside class="footnote brackets" id="id4" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> class is currently <strong>NOT</strong> implemented.</p>
 </aside>
 </aside>
 </section>

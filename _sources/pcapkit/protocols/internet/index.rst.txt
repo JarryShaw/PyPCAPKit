@@ -21,13 +21,14 @@ internet layer, with detailed implementation and methods.
    hopopt
    ipsec
    ah
+   esp
    hip
    mh
    ipx
 
 .. todo::
 
-   Implements ECN, ESP, ICMP, ICMPv6, IGMP, Shim6.
+   Implements ECN, ICMP, ICMPv6, IGMP, Shim6.
 
 Protocol Registry
 -----------------
