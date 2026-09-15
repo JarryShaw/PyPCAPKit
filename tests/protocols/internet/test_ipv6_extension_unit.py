@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import importlib.util
+import io
 from ipaddress import ip_address
 import types
 import unittest
@@ -472,10 +473,16 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual(proto.read(length=8), 'decoded')
         decode.assert_called_once()
 
+        # NOTE: "No options" is not the same as "no options area". The header is at
+        # least (0 + 1) * 8 = 8 octets and 2 of those are the fixed part, so the
+        # remaining 6 have to be padding options -- an empty options list is not a
+        # thing that can go on the wire, and asserting for one here used to pass
+        # only because ``make`` emitted a 2-octet header while declaring 8.
         made_empty = proto.make(next=TransType.TCP)
         self.assertEqual(made_empty.next, TransType.TCP)
         self.assertEqual(made_empty.len, 0)
-        self.assertEqual(made_empty.options, [])
+        self.assertEqual([type(item).__name__ for item in made_empty.options], ['PadOption'])
+        self.assertEqual(len(bytes(made_empty)), 8)
 
         made_with_option = proto.make(
             next=TransType.UDP,
@@ -825,11 +832,19 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             seq=3,
         ).flags['dup'])
 
+        # NOTE: The lengths below are the length of the *options area*, and the two
+        # octets of the fixed header precede it, so a well-formed options area is 6
+        # octets short of a multiple of 8 -- never a multiple of 8 itself. Each
+        # assertion is followed by the octet count that justifies it, since these
+        # numbers used to be 6 too large (or to account padding that was emitted two
+        # octets longer than it was counted as).
+
         options, total_length = make_options([
             b'\x00',
             bytes([Option.CALIPSO]) + b'123456789',
         ])
-        self.assertEqual(total_length, 16)
+        # 10 octets of CALIPSO + a 4-octet PadN = 14; 2 + 14 = 16 = 2 * 8
+        self.assertEqual(total_length, 14)
         self.assertEqual([type(item).__name__ if not isinstance(item, bytes) else 'bytes' for item in options],
                          ['bytes', 'PadOption'])
         schema_options, schema_length = make_options([
@@ -837,21 +852,31 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             schema.PadOption(type=Option.Pad1, len=0),
             (Option.PadN, {}),
         ])
-        self.assertEqual(schema_length, 8)
+        # the 8-octet option + a 6-octet PadN = 14; 2 + 14 = 16 = 2 * 8
+        self.assertEqual(schema_length, 14)
         self.assertEqual(type(schema_options[0]).__name__, 'UnassignedOption')
 
+        # NOTE: Two ``Pad1`` options are emitted when the shortfall is exactly 2
+        # octets, i.e. when ``2 + opt_len`` is 6 past a multiple of 8. That is a
+        # 4-octet option, not the 6-octet one this case used to pass -- 2 + 6 is
+        # already aligned and now needs no padding at all.
         pad1_options, pad1_length = make_options([
-            bytes([Option.CALIPSO]) + b'12345',
+            bytes([Option.CALIPSO]) + b'123',
         ])
-        self.assertEqual(pad1_length, 8)
+        # 4 octets of CALIPSO + two 1-octet Pad1 = 6; 2 + 6 = 8
+        self.assertEqual(pad1_length, 6)
         self.assertEqual([type(item).__name__ if not isinstance(item, bytes) else 'bytes'
                           for item in pad1_options], ['bytes', 'PadOption', 'PadOption'])
 
+        # NOTE: Likewise, the option that needs no padding is the 6-octet one; the
+        # 8-octet option this case used to pass leaves 2 + 8 = 10 and now draws 6
+        # octets of padding.
         no_pad_options, no_pad_length = make_options([
-            bytes([Option.CALIPSO]) + b'1234567',
+            bytes([Option.CALIPSO]) + b'12345',
         ])
-        self.assertEqual(no_pad_length, 8)
-        self.assertEqual(no_pad_options, [bytes([Option.CALIPSO]) + b'1234567'])
+        # 6 octets of CALIPSO, nothing else; 2 + 6 = 8
+        self.assertEqual(no_pad_length, 6)
+        self.assertEqual(no_pad_options, [bytes([Option.CALIPSO]) + b'12345'])
 
         dict_options, dict_length = make_options(OrderedMultiDict([
             (Option.Pad1, data.PadOption(type=Option.Pad1, length=1, **base)),
@@ -863,9 +888,25 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             (Option.get(254), data.UnassignedOption(type=Option.get(254),
                                                     length=6, data=b'abcd', **base)),
         ]))
-        self.assertEqual(dict_length, 24)
+        # 3 (tun) + 3 (PadN) + 8 + 6 + 1 + 1 (two Pad1) = 22; 2 + 22 = 24 = 3 * 8
+        self.assertEqual(dict_length, 22)
         self.assertEqual(type(dict_options[0]).__name__, 'TunnelEncapsulationLimitOption')
         self.assertEqual(type(dict_options[-3]).__name__, 'UnassignedOption')
+
+        # every options area the constructor produces has to leave the whole header
+        # a multiple of 8 octets long, and to account for exactly what it emitted
+        for label, (built, built_len) in {
+                'bytes + padn': (options, total_length),
+                'schema + padn': (schema_options, schema_length),
+                'two pad1': (pad1_options, pad1_length),
+                'no padding': (no_pad_options, no_pad_length),
+                'from dict': (dict_options, dict_length),
+        }.items():
+            with self.subTest(options=label):
+                emitted = b''.join(item if isinstance(item, bytes) else item.pack()
+                                   for item in built)
+                self.assertEqual(len(emitted), built_len)
+                self.assertEqual((built_len + 2) % 8, 0)
 
     def test_hopopt_option_constructors_cover_branchy_values(self) -> None:
         from pcapkit.protocols.internet.hopopt import HOPOPT
@@ -1283,6 +1324,197 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         with_dst = route_schema.RPL(cmpr_i=8, cmpr_e=8, pad={'pad_len': 0}, addresses=suffixes)
         with_dst.post_process({'dst': ip_address('2001:db8::ffff')})
         self.assertEqual([str(item) for item in with_dst.ip], ['2001:db8::1', '2001:db8::2'])
+
+    def _assert_padding_options_parse_from_the_wire(self, protocol_cls: type) -> None:
+        """A ``Pad1`` option must consume exactly one octet, wherever it sits.
+
+        Per :rfc:`8200#section-4.2` the two padding options do not share a wire
+        shape: ``Pad1`` is a lone type octet with no ``Opt Data Len`` field at
+        all, while ``PadN`` is a type octet, a length octet, and that many data
+        octets. Reading a length octet that is not there consumes the *next*
+        option's type byte instead, so every case below puts something after
+        the padding -- which is what made the defect visible.
+
+        The header is ``next`` = 59 (``IPv6-NoNxt``) with a header extension
+        length of 0, i.e. an 8-octet header whose options area is the 6 octets
+        that follow. A parse that mis-sizes any one option therefore also fails
+        the ``counter != length`` check at the end of the option loop.
+
+        """
+        from pcapkit.const.ipv6.option import Option
+
+        header = b'\x3b\x00'
+        cases = (
+            ('pad1 then padn',
+             b'\x00' + b'\x01\x03\x00\x00\x00',
+             [(Option.Pad1, 1), (Option.PadN, 5)]),
+            ('pad1 then a real option then pad1',
+             b'\x00' + b'\x05\x02\x00\x00' + b'\x00',
+             [(Option.Pad1, 1), (Option.Router_Alert, 4), (Option.Pad1, 1)]),
+            ('six pad1 in a row',
+             b'\x00' * 6,
+             [(Option.Pad1, 1)] * 6),
+            ('pad1 as the final octet',
+             b'\x01\x03\x00\x00\x00' + b'\x00',
+             [(Option.PadN, 5), (Option.Pad1, 1)]),
+            ('padn is unaffected',
+             b'\x01\x04\x00\x00\x00\x00',
+             [(Option.PadN, 6)]),
+            ('pad1 run then a minimal padn',
+             b'\x00\x00\x00' + b'\x01\x01\x00',
+             [(Option.Pad1, 1), (Option.Pad1, 1), (Option.Pad1, 1), (Option.PadN, 3)]),
+        )
+
+        for name, options, expected in cases:
+            with self.subTest(case=name):
+                raw = header + options
+                proto = protocol_cls(raw, extension=True)
+
+                self.assertEqual(proto.info.length, 8)
+                self.assertEqual(
+                    [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
+                    expected,
+                )
+
+                # the reader and the writer must agree: repacking the parsed
+                # schema has to give back the very bytes it was read from
+                self.assertEqual(bytes(proto.__header__), raw)
+
+    def test_hopopt_padding_options_parse_from_the_wire(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_padding_options_parse_from_the_wire(HOPOPT)
+
+    def test_ipv6_opts_padding_options_parse_from_the_wire(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_padding_options_parse_from_the_wire(IPv6_Opts)
+
+    def _assert_padding_option_schema_sizes_itself(self, protocol_cls: type) -> None:
+        """The padding option schema, on its own.
+
+        :func:`~pcapkit.protocols.schema.internet.hopopt.pad_opt_data_len` is
+        the whole of the read-side fix, so it is tested directly as well as
+        through a parse: it has to read a skipped conditional field -- which is
+        recorded as :data:`~pcapkit.corekit.fields.field.NoValue`, not omitted --
+        as zero padding octets rather than passing it on to
+        :class:`~pcapkit.corekit.fields.strings.PaddingField`.
+
+        """
+        from pcapkit.const.ipv6.option import Option
+        from pcapkit.corekit.fields.field import NoValue
+        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
+        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+
+        schema = hopopt_schema if protocol_cls.__name__ == 'HOPOPT' else opts_schema
+
+        self.assertEqual(schema.pad_opt_data_len({}), 0)
+        self.assertEqual(schema.pad_opt_data_len({'len': NoValue}), 0)
+        self.assertEqual(schema.pad_opt_data_len({'len': None}), 0)
+        self.assertEqual(schema.pad_opt_data_len({'len': 4}), 4)
+
+        # a Pad1 option on its own: one octet read, and the octet after it left
+        # alone for whatever comes next
+        stream = io.BytesIO(b'\x00\x2a')
+        pad1 = schema.PadOption.unpack(stream, 2, {})
+        self.assertEqual(pad1.type, Option.Pad1)
+        self.assertEqual(pad1.len, 0)
+        self.assertEqual(len(pad1), 1)
+        self.assertEqual(bytes(pad1), b'\x00')
+        self.assertEqual(stream.tell(), 1)
+
+        # a PadN option still spans its length octet plus that many data octets
+        stream = io.BytesIO(b'\x01\x02\xaa\xbb\xcc')
+        padn = schema.PadOption.unpack(stream, 5, {})
+        self.assertEqual(padn.type, Option.PadN)
+        self.assertEqual(padn.len, 2)
+        self.assertEqual(len(padn), 4)
+        self.assertEqual(bytes(padn), b'\x01\x02\xaa\xbb')
+        self.assertEqual(stream.tell(), 4)
+
+    def _assert_constructed_header_round_trips(self, protocol_cls: type) -> None:
+        """Construction has to produce a header that parses back to itself.
+
+        Constructing one of these protocols packs the header and immediately
+        re-parses the bytes, so any disagreement between the declared
+        ``Hdr Ext Len`` and the octets actually emitted surfaces here as a
+        :exc:`~pcapkit.utilities.exceptions.ProtocolError` from :meth:`read`.
+        Every case below therefore both exercises the padding branches and
+        proves that ``(hdr_ext_len + 1) * 8`` is the real length of the header.
+
+        The option lengths are chosen for the padding they draw: the whole
+        header, its two fixed octets included, has to be a multiple of 8, so an
+        option of ``8n + 5`` octets needs a single ``Pad1``, one of ``8n + 4``
+        needs two, and anything else needs a ``PadN``.
+
+        """
+        from pcapkit.const.ipv6.option import Option
+        from pcapkit.const.reg.transtype import TransType
+
+        cases = (
+            # a 5-octet option leaves one octet, which only a Pad1 can fill
+            ('one pad1', [(Option.get(250), {'data': b'abc'})], 8,
+             [(Option.get(250), 5), (Option.Pad1, 1)]),
+            # a 4-octet option leaves two, i.e. two Pad1 rather than a PadN
+            ('two pad1', [(Option.Router_Alert, {'alert': 0})], 8,
+             [(Option.Router_Alert, 4), (Option.Pad1, 1), (Option.Pad1, 1)]),
+            # three or more spare octets are a PadN, whose own two octets of
+            # overhead have to come out of the padding it is asked to occupy
+            ('padn', [(Option.Tunnel_Encapsulation_Limit, {'limit': 3})], 8,
+             [(Option.Tunnel_Encapsulation_Limit, 3), (Option.PadN, 3)]),
+            # an option that already lands on the boundary draws no padding
+            ('no padding', [(Option.Jumbo_Payload, {'jumbo_len': 70000})], 8,
+             [(Option.Jumbo_Payload, 6)]),
+            # more than one option, each aligned in turn
+            ('two options', [(Option.Tunnel_Encapsulation_Limit, {'limit': 3}),
+                             (Option.Router_Alert, {'alert': 0})], 16,
+             [(Option.Tunnel_Encapsulation_Limit, 3), (Option.PadN, 3),
+              (Option.Router_Alert, 4), (Option.PadN, 4)]),
+            # an option needing more than 8 octets of its own
+            ('long option', [(Option.Home_Address, {'addr': '2001:db8::3'})], 24,
+             [(Option.Home_Address, 18), (Option.PadN, 4)]),
+            # no options at all is 6 octets of padding, not an empty header
+            ('no options', [], 8, [(Option.PadN, 6)]),
+        )
+
+        for name, options, size, expected in cases:
+            with self.subTest(case=name):
+                built = protocol_cls(next=TransType.IPv6_NoNxt, options=list(options))
+                raw = bytes(built)
+
+                self.assertEqual(len(raw), size)
+                self.assertEqual(len(raw) % 8, 0)
+                # the declared length and the emitted length must be the same
+                self.assertEqual((raw[1] + 1) * 8, len(raw))
+
+                parsed = protocol_cls(raw, extension=True)
+                self.assertEqual(parsed.info.length, size)
+                self.assertEqual(
+                    [(code, opt.length)
+                     for code, opt in parsed.info.options.items(multi=True)],
+                    expected,
+                )
+                self.assertEqual(bytes(parsed.__header__), raw)
+
+    def test_hopopt_padding_option_schema_sizes_itself(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_padding_option_schema_sizes_itself(HOPOPT)
+
+    def test_ipv6_opts_padding_option_schema_sizes_itself(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_padding_option_schema_sizes_itself(IPv6_Opts)
+
+    def test_hopopt_constructed_header_round_trips(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_constructed_header_round_trips(HOPOPT)
+
+    def test_ipv6_opts_constructed_header_round_trips(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_constructed_header_round_trips(IPv6_Opts)
 
     def test_option_registries_are_not_clobbered_by_a_nested_enum_registry(self) -> None:
         """Option type 0 must resolve to the padding option in every module.

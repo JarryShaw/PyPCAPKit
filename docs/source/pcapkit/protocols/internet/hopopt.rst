@@ -218,6 +218,7 @@ Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: pcapkit.protocols.schema.internet.hopopt.mpl_opt_seed_id_len
+.. autofunction:: pcapkit.protocols.schema.internet.hopopt.pad_opt_data_len
 
 .. autofunction:: pcapkit.protocols.schema.internet.hopopt.smf_dpd_data_selector
 .. autofunction:: pcapkit.protocols.schema.internet.hopopt.smf_i_dpd_tid_selector

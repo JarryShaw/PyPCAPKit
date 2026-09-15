@@ -334,11 +334,18 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
 
-        if options is not None:
-            options_value, total_length = self._make_hopopt_options(options)
-            length = math.ceil((total_length - 6) / 8)
-        else:
-            options_value, length = [], 0
+        # NOTE: No options at all is not the same thing as no options area: the
+        # header is at least 8 octets, 2 of which are the fixed part, so the
+        # remaining 6 have to be padding options rather than nothing. Passing the
+        # empty list through the same path is what produces them -- returning
+        # ``[], 0`` here instead declared an 8-octet header and emitted 2.
+        options_value, total_length = self._make_hopopt_options(
+            options if options is not None else [])
+
+        # NOTE: ``_make_hopopt_options`` has aligned the header, so this division
+        # is exact; rounding up here used to hide the 6-octet shortfall that the
+        # per-option alignment left behind.
+        length = (total_length - 6) // 8
 
         return Schema_HOPOPT(
             next=next_value,  # type: ignore[arg-type]
@@ -537,6 +544,17 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Raises:
             ProtocolError: If ``code`` is **NOT** ``0`` or ``1``.
+
+        Note:
+            A ``Pad1`` option occupies a single octet and carries no
+            ``Opt Data Len`` field, so its
+            :attr:`~pcapkit.protocols.data.internet.hopopt.PadOption.length` is
+            ``1`` rather than ``len + 2``. That one-octet wire shape is enforced
+            by :class:`~pcapkit.protocols.schema.internet.hopopt.PadOption`
+            itself, which sizes both the length octet and the padding data from
+            the option type; ``clen`` is therefore always ``0`` here for a
+            parsed ``Pad1``, and the check below only guards a schema built by
+            hand.
 
         """
         code, clen = schema.type, schema.len
@@ -1175,6 +1193,47 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
         return opt
 
+    def _make_pad_options(self, offset: 'int') -> 'tuple[list[Schema_PadOption], int]':
+        """Make the padding options needed to align the header to 8 octets.
+
+        Args:
+            offset: Number of octets emitted so far, **counting the two octets
+                of the fixed header** (``Next Header`` and ``Hdr Ext Len``) as
+                well as every option already in the list.
+
+        Returns:
+            Tuple of the padding option schemas and the number of octets they
+            occupy.
+
+        Note:
+            It is the *whole* extension header, fixed part included, that has to
+            be a multiple of 8 octets [:rfc:`8200#section-4.3`] -- which is why
+            the alignment is computed from ``offset`` rather than from the
+            length of the option that has just been emitted. Aligning each
+            option to 8 octets on its own leaves the options area a multiple of
+            8 octets long, whereas :meth:`read` sizes it as
+            ``hdr_ext_len * 8 + 6`` -- six short of a multiple of 8 -- so the
+            constructed header declared 6 octets more than it actually carried.
+
+            A ``PadN`` option spends two octets on its own type and
+            ``Opt Data Len`` fields before any padding data, so occupying
+            ``pad_len`` octets means an ``Opt Data Len`` of ``pad_len - 2``.
+            One or two octets are padded with ``Pad1`` options instead, that
+            being the only form which can occupy a single octet
+            [:rfc:`8200#section-4.2`]; two octets need two separate ``Pad1``
+            schemas, since a schema instance is mutable and must not be shared
+            between two entries of the option list.
+
+        """
+        if offset % 8 == 0:
+            return [], 0
+
+        pad_len = 8 - (offset % 8)
+        if pad_len <= 2:
+            return [self._make_opt_pad(Enum_Option.Pad1, length=0)  # type: ignore[arg-type]
+                    for _ in range(pad_len)], pad_len
+        return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
+
     def _make_hopopt_options(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for HOPOPT.
 
@@ -1183,6 +1242,14 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Returns:
             Tuple of options and total length of options.
+
+        Note:
+            The returned length is that of the options area alone, so it is the
+            value :meth:`make` needs for ``hdr_ext_len``. Since the two octets
+            of the fixed header precede it, an options area is well formed only
+            when it is 6 octets short of a multiple of 8 -- including when it
+            holds no real options at all, in which case it is 6 octets of pure
+            padding rather than empty.
 
         """
         total_length = 0
@@ -1222,18 +1289,15 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                 options_list.append(opt)
                 total_length += opt_len
 
-                # force alignment to 8 octets
-                if opt_len % 8:
-                    pad_len = 8 - (opt_len % 8)
-                    if pad_len in (1, 2):
-                        pad_opt = self._make_opt_pad(Enum_Option.Pad1, length=0)  # type: ignore[arg-type]
-                    else:
-                        pad_opt = self._make_opt_pad(Enum_Option.PadN, length=pad_len)  # type: ignore[arg-type]
+                # force alignment of the header (fixed part included) to 8 octets
+                pad_opts, pad_len = self._make_pad_options(total_length + 2)
+                options_list.extend(pad_opts)
+                total_length += pad_len
 
-                    options_list.append(pad_opt)
-                    if pad_len == 2:  # need 2 Pad1 options
-                        options_list.append(pad_opt)
-                    total_length += pad_len
+            # an options area holding nothing at all is still 6 octets long
+            pad_opts, pad_len = self._make_pad_options(total_length + 2)
+            options_list.extend(pad_opts)
+            total_length += pad_len
             return options_list, total_length
 
         options_list = []
@@ -1256,18 +1320,15 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             options_list.append(opt)
             total_length += opt_len
 
-            # force alignment to 8 octets
-            if opt_len % 8:
-                pad_len = 8 - (opt_len % 8)
-                if pad_len in (1, 2):
-                    pad_opt = self._make_opt_pad(Enum_Option.Pad1, length=0)  # type: ignore[arg-type]
-                else:
-                    pad_opt = self._make_opt_pad(Enum_Option.PadN, length=pad_len)  # type: ignore[arg-type]
+            # force alignment of the header (fixed part included) to 8 octets
+            pad_opts, pad_len = self._make_pad_options(total_length + 2)
+            options_list.extend(pad_opts)
+            total_length += pad_len
 
-                options_list.append(pad_opt)
-                if pad_len == 2:  # need 2 Pad1 options
-                    options_list.append(pad_opt)
-                total_length += pad_len
+        # an options area holding nothing at all is still 6 octets long
+        pad_opts, pad_len = self._make_pad_options(total_length + 2)
+        options_list.extend(pad_opts)
+        total_length += pad_len
         return options_list, total_length
 
     def _make_opt_none(self, code: 'Enum_Option', opt: 'Optional[Data_UnassignedOption]' = None, *,
@@ -1302,13 +1363,26 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         Args:
             code: option type value
             opt: option data
-            length: padding length
+            length: value of the ``Opt Data Len`` field, i.e. the number of
+                padding octets *after* the two octets of the option header
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructured option schema.
 
+        Note:
+            :attr:`Data_PadOption.length
+            <pcapkit.protocols.data.internet.hopopt.PadOption.length>` counts the
+            *whole* option, whereas :attr:`Schema_PadOption.len
+            <pcapkit.protocols.schema.internet.hopopt.PadOption.len>` is the
+            ``Opt Data Len`` field -- two octets fewer, and absent altogether for
+            a ``Pad1``. ``opt`` used to be ignored here, so re-making a parsed
+            padding option silently collapsed it to a single ``Pad1``.
+
         """
+        if opt is not None:
+            length = 0 if opt.type == Enum_Option.Pad1 else opt.length - 2
+
         if code == Enum_Option.Pad1 and length != 0:
             #raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
             warn(f'{self.alias}: [OptNo {code}] invalid format', ProtocolWarning)

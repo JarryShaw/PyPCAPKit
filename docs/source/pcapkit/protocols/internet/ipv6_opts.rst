@@ -218,6 +218,7 @@ Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.mpl_opt_seed_id_len
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.pad_opt_data_len
 
 .. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.smf_dpd_data_selector
 .. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_tid_selector
