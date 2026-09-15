@@ -126,18 +126,6 @@ Engine         Performance (ms per packet)
 ``pypcapfile``  *not measured* [2]_
 ============== ===========================
 
-.. [1] `PyPCAP`_ could not be installed on the machine available for
-   benchmarking, so no figure was taken. Its 1.3.0 sdist compiles a C extension
-   and needs `libpcap`_'s headers *and* shared library present, and the
-   pre-generated ``pcap.c`` it ships does not compile on Python 3.12 or newer
-   (see `Installation`_). Rather than publish a number measured on different
-   hardware and a different Python from the rows above -- which would not be
-   comparable with them -- the cell is left empty.
-
-.. [2] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
-   could only be timed on an older interpreter than the rows above were measured
-   with. That number would not be comparable, so the cell is left empty.
-
 Both figures will be filled in once the two engines can be timed on the same
 host, capture and iteration count as the existing rows.
 
@@ -310,3 +298,15 @@ engine, and is not needed by the test suite.
 .. _libpcap: https://www.tcpdump.org
 .. _DictDumper: https://github.com/JarryShaw/DictDumper
 .. _engine support documentation: https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/engines/index.html
+
+.. [1] `PyPCAP`_ could not be installed on the machine available for
+   benchmarking, so no figure was taken. Its 1.3.0 sdist compiles a C extension
+   and needs `libpcap`_'s headers *and* shared library present, and the
+   pre-generated ``pcap.c`` it ships does not compile on Python 3.12 or newer
+   (see `Installation`_). Rather than publish a number measured on different
+   hardware and a different Python from the rows above -- which would not be
+   comparable with them -- the cell is left empty.
+
+.. [2] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
+   could only be timed on an older interpreter than the rows above were measured
+   with. That number would not be comparable, so the cell is left empty.
