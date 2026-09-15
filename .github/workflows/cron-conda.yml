@@ -10,12 +10,15 @@ on:
     branches: [main]
 
 # This workflow commits and pushes, so a cancelled run can leave the bump
-# half-applied -- queue superseded runs rather than killing them.
-# One group per run, never cancelled. This publishes to Anaconda, so like the
-# release path a run must neither be interrupted nor dropped while pending; and as
-# a scheduled job its value is tied to when it ran, not to the commit it ran on.
+# half-applied. Kept keyed on the ref, unlike the validation workflows: this
+# publishes to Anaconda, and letting two runs upload the same version
+# concurrently is worse than dropping a superseded duplicate.
+#
+# Note this group is not what serialises the repository writes -- the
+# `conda-update` job below carries its own `repository-maintenance` group, shared
+# with cron-vendor, and that is what actually stops two jobs committing at once.
 concurrency:
-  group: conda-update-${{ github.run_id }}
+  group: conda-update-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
