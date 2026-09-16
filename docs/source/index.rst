@@ -196,10 +196,10 @@ Engine         Performance (ms per packet)
 ``dpkt``        0.010390_056723
 ``scapy``       0.091690_233567
 ``pcapkit``     0.200390_390390
-``pyshark``    24.682185_018351 [3]_
-``pypcap``      *not measured* [1]_
-``pcap_ct``     *not measured* [4]_
-``pypcapfile``  *not measured* [2]_
+``pyshark``    24.682185_018351 [#pyshark-historical]_
+``pypcap``      *not measured* [#pypcap-not-measured]_
+``pcap_ct``     *not measured* [#pcap-ct-not-measured]_
+``pypcapfile``  *not measured* [#pypcapfile-not-measured]_
 ============== ===========================
 
 .. warning::
@@ -436,19 +436,7 @@ Indices and tables
 .. _libpcap: https://www.tcpdump.org
 .. _DictDumper: https://github.com/JarryShaw/DictDumper
 
-.. [1] `PyPCAP`_ could not be installed on the machine available for
-   benchmarking, so no figure was taken. Its 1.3.0 sdist compiles a C extension
-   and needs `libpcap`_'s headers *and* shared library present, and the
-   pre-generated ``pcap.c`` it ships does not compile on Python 3.12 or newer
-   (see `Installation`_). Rather than publish a number measured on different
-   hardware and a different Python from the rows above -- which would not be
-   comparable with them -- the cell is left empty.
-
-.. [2] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
-   could only be timed on an older interpreter than the rows above were measured
-   with. That number would not be comparable, so the cell is left empty.
-
-.. [3] This figure is **historical**. `PyShark`_ 0.6 builds its event loop with
+.. [#pyshark-historical] This figure is **historical**. `PyShark`_ 0.6 builds its event loop with
    ``asyncio.get_event_loop_policy().get_event_loop()``, and Python 3.14 made
    :func:`asyncio.get_event_loop` raise :exc:`RuntimeError` when no current event
    loop exists rather than quietly creating one -- measured working on 3.10 and
@@ -456,8 +444,20 @@ Indices and tables
    number cannot be reproduced on a current interpreter; it stands as what was
    measured when it could be.
 
-.. [4] `pcap-ct`_ was verified working on Python 3.10 and 3.14, so unlike the two
+.. [#pypcap-not-measured] `PyPCAP`_ could not be installed on the machine available for
+   benchmarking, so no figure was taken. Its 1.3.0 sdist compiles a C extension
+   and needs `libpcap`_'s headers *and* shared library present, and the
+   pre-generated ``pcap.c`` it ships does not compile on Python 3.12 or newer
+   (see `Installation`_). Rather than publish a number measured on different
+   hardware and a different Python from the rows above -- which would not be
+   comparable with them -- the cell is left empty.
+
+.. [#pcap-ct-not-measured] `pcap-ct`_ was verified working on Python 3.10 and 3.14, so unlike the two
    rows above it *could* be timed -- but only on the machine this engine was added
    on, which is neither the hardware nor the operating system the rows above were
    measured with. A number from it would not be comparable, so the cell is left
    empty rather than filled with something misleading.
+
+.. [#pypcapfile-not-measured] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
+   could only be timed on an older interpreter than the rows above were measured
+   with. That number would not be comparable, so the cell is left empty.

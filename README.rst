@@ -85,7 +85,7 @@ respectively; ``engine='default'`` (also spelled ``'pcapkit'``) is ``pcapkit``'s
 own parser and the only one with no third-party requirement.
 
 `PyPCAP`_ and `pcap-ct`_ are two independent distributions of the same
-:manpage:`libpcap(3)` interface, and both install a top-level ``pcap`` module, so
+``libpcap(3)`` interface, and both install a top-level ``pcap`` module, so
 they are two engines rather than one. Upstream `PyPCAP`_ stops at Python 3.11;
 `pcap-ct`_ covers 3.10 and newer. **Install exactly one of them** -- with both
 present, ``pcap-ct`` wins the import and the other becomes unselectable, which
@@ -165,10 +165,10 @@ Engine         Performance (ms per packet)
 ``dpkt``        0.010390_056723
 ``scapy``       0.091690_233567
 ``pcapkit``     0.200390_390390
-``pyshark``    24.682185_018351 [3]_
-``pypcap``      *not measured* [1]_
-``pcap_ct``     *not measured* [4]_
-``pypcapfile``  *not measured* [2]_
+``pyshark``    24.682185_018351 [#pyshark-historical]_
+``pypcap``      *not measured* [#pypcap-not-measured]_
+``pcap_ct``     *not measured* [#pcap-ct-not-measured]_
+``pypcapfile``  *not measured* [#pypcapfile-not-measured]_
 ============== ===========================
 
 **These figures are historical, and three of the rows can no longer be
@@ -312,7 +312,7 @@ package.
      ``tshark``) from your platform's package manager.
    - Requires Python **3.13 or older**. ``pyshark`` 0.6 builds its event loop
      with ``asyncio.get_event_loop_policy().get_event_loop()``, and from Python
-     **3.14** :func:`asyncio.get_event_loop` raises ``RuntimeError`` when there
+     **3.14** ``asyncio.get_event_loop()`` raises ``RuntimeError`` when there
      is no current event loop instead of quietly creating one. Measured: a loop
      is returned silently on 3.10 and 3.11, returned with a
      ``DeprecationWarning`` on 3.12, and refused on 3.14. (3.13 was not available
@@ -430,7 +430,15 @@ engine, and is not needed by the test suite.
 .. _DictDumper: https://github.com/JarryShaw/DictDumper
 .. _engine support documentation: https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/engines/index.html
 
-.. [1] `PyPCAP`_ could not be installed on the machine available for
+.. [#pyshark-historical] This figure is **historical**. `PyShark`_ 0.6 builds its event loop with
+   ``asyncio.get_event_loop_policy().get_event_loop()``, and Python 3.14 made
+   ``asyncio.get_event_loop()`` raise ``RuntimeError`` when no current event
+   loop exists rather than quietly creating one -- measured working on 3.10 and
+   3.11, working with a ``DeprecationWarning`` on 3.12, and raising on 3.14. The
+   number therefore cannot be reproduced on a current interpreter; it stands as
+   what was measured when it could be.
+
+.. [#pypcap-not-measured] `PyPCAP`_ could not be installed on the machine available for
    benchmarking, so no figure was taken. Its 1.3.0 sdist compiles a C extension
    and needs `libpcap`_'s headers *and* shared library present, and the
    pre-generated ``pcap.c`` it ships does not compile on Python 3.12 or newer
@@ -438,20 +446,12 @@ engine, and is not needed by the test suite.
    hardware and a different Python from the rows above -- which would not be
    comparable with them -- the cell is left empty.
 
-.. [2] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
-   could only be timed on an older interpreter than the rows above were measured
-   with. That number would not be comparable, so the cell is left empty.
-
-.. [3] This figure is **historical**. `PyShark`_ 0.6 builds its event loop with
-   ``asyncio.get_event_loop_policy().get_event_loop()``, and Python 3.14 made
-   :func:`asyncio.get_event_loop` raise ``RuntimeError`` when no current event
-   loop exists rather than quietly creating one -- measured working on 3.10 and
-   3.11, working with a ``DeprecationWarning`` on 3.12, and raising on 3.14. The
-   number therefore cannot be reproduced on a current interpreter; it stands as
-   what was measured when it could be.
-
-.. [4] `pcap-ct`_ was verified working on Python 3.10 and 3.14, so unlike the two
+.. [#pcap-ct-not-measured] `pcap-ct`_ was verified working on Python 3.10 and 3.14, so unlike the two
    rows above it *could* be timed -- but only on the machine this engine was added
    on, which is neither the hardware nor the operating system the rows above were
    measured with. A number from it would not be comparable, so the cell is left
    empty rather than filled with something misleading.
+
+.. [#pypcapfile-not-measured] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
+   could only be timed on an older interpreter than the rows above were measured
+   with. That number would not be comparable, so the cell is left empty.
