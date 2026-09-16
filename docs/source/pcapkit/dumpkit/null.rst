@@ -1,7 +1,7 @@
 Null Dumper
 ===========
 
-.. module:: pcapkit.dumper.null
+.. module:: pcapkit.dumpkit.null
 
 :mod:`pcapkit.dumpkit.null` is the dumper for :mod:`pcapkit` implementation,
 specifically for **NotImplemented** format, which is alike those described in

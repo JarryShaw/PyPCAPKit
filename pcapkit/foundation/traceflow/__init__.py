@@ -5,7 +5,7 @@
 
 .. module:: pcapkit.foundation.traceflow
 
-:mod:`pcapkit.traceflow` implements flow tracing functions for
+:mod:`pcapkit.foundation.traceflow` implements flow tracing functions for
 :mod:`pcapkit` package.
 
 .. note::

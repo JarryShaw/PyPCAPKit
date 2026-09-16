@@ -31,17 +31,26 @@ Terminology
             bufid = tuple(
                 ipv6.src,                   # source IP address
                 ipv6.dst,                   # destination IP address
-                ipv6.label,                 # label
+                ipv6_frag.id,               # identification
                 ipv6_frag.next,             # next header field in IPv6 Fragment Header
             ),
             num = frame.number,             # original packet range number
-            fo = ipv6_frag.offset,          # fragment offset
+            fo = ipv6_frag.offset,          # fragment offset, in octets
             ihl = ipv6.hdr_len,             # header length, only headers before IPv6-Frag
             mf = ipv6_frag.mf,              # more fragment flag
-            tl = ipv6.len,                  # total length, header includes
+            tl = ipv6.hdr_len
+                 + ipv6.raw_len,            # total length, header includes
             header = ipv6.header,           # raw bytes type header before IPv6-Frag
             payload = ipv6.payload,         # raw bytearray type payload after IPv6-Frag
           )
+
+       .. note::
+
+          The reassembly key is the Fragment header's *Identification*
+          (:rfc:`8200#section-4.5`), not the IPv6 header's *Flow Label*. The
+          label is optional and routinely zero, so keying on it collapses
+          every datagram between one address pair into a single buffer and
+          interleaves their fragments.
 
    reasm.ipv6.datagram
        Data structure for **reassembled IPv6 datagram** (element from
@@ -56,24 +65,25 @@ Terminology
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv6Address) ipv6.src
            |     |            |--> 'dst' --> (IPv6Address) ipv6.dst
-           |     |            |--> 'id' --> (int) ipv6.label
-           |     |            |--> 'proto' --> (EtherType) ipv6_frag.next
+           |     |            |--> 'id' --> (int) ipv6_frag.id
+           |     |            |--> 'proto' --> (TransType) ipv6_frag.next
            |     |--> 'index' : (tuple) packet numbers
            |     |               |--> (int) original packet range number
-           |     |--> 'payload' : (bytes) reassembled IPv4 packet
+           |     |--> 'header' : (bytes) header before IPv6-Frag
+           |     |--> 'payload' : (bytes) reassembled IPv6 payload
            |     |--> 'packet' : (Protocol) parsed reassembled payload
            |--> (Info) data
            |     |--> 'completed' : (bool) False --> not implemented
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv6Address) ipv6.src
            |     |            |--> 'dst' --> (IPv6Address) ipv6.dst
-           |     |            |--> 'id' --> (int) ipv6.id
-           |     |            |--> 'proto' --> (EtherType) ipv6_frag.next
+           |     |            |--> 'id' --> (int) ipv6_frag.id
+           |     |            |--> 'proto' --> (TransType) ipv6_frag.next
            |     |--> 'index' : (tuple) packet numbers
            |     |               |--> (int) original packet range number
-           |     |--> 'header' : (bytes) IPv4 header
-           |     |--> 'payload' : (tuple) partially reassembled IPv4 payload
-           |     |                 |--> (bytes) IPv4 payload fragment
+           |     |--> 'header' : (bytes) header before IPv6-Frag
+           |     |--> 'payload' : (tuple) partially reassembled IPv6 payload
+           |     |                 |--> (bytes) IPv6 payload fragment
            |     |                 |--> ...
            |     |--> 'packet' : (None)
            |--> (Info) data ...
@@ -88,8 +98,8 @@ Terminology
           (dict) buffer --> memory buffer for reassembly
            |--> (tuple) BUFID : (dict)
            |     |--> ipv6.src       |
-           |     |--> ipc6.dst       |
-           |     |--> ipv6.label     |
+           |     |--> ipv6.dst       |
+           |     |--> ipv6_frag.id   |
            |     |--> ipv6_frag.next |
            |                         |--> 'TDL' : (int) total data length
            |                         |--> RCVBT : (bytearray) fragment received bit table

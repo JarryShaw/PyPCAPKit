@@ -66,10 +66,11 @@ Extration Engines
 
 .. note::
 
-   These constants predate the `PyPCAP`_ and `PyPCAPFile`_ engines and no
-   equivalents were added for them, so those two are selected by their literal
-   ``engine=`` values -- ``'pypcap'`` and ``'pypcapfile'`` -- rather than through
-   a named constant. Any engine registered at runtime with
+   These constants predate the `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_ engines
+   and no equivalents were added for them, so those three are selected by their
+   literal ``engine=`` values -- ``'pypcap'``, ``'pcap_ct'`` and
+   ``'pypcapfile'`` -- rather than through a named constant. Any engine
+   registered at runtime with
    :func:`~pcapkit.foundation.registry.foundation.register_extractor_engine` is
    likewise addressed by its string name.
 
@@ -79,4 +80,5 @@ Extration Engines
       supports, and the installation prerequisites the third-party ones carry.
 
 .. _PyPCAP: https://github.com/pynetwork/pypcap
+.. _pcap-ct: https://pypi.org/project/pcap-ct/
 .. _PyPCAPFile: https://github.com/kisom/pypcapfile

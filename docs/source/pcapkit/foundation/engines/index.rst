@@ -122,9 +122,10 @@ so it is worth knowing in advance.
 |                                                                 | loop with :func:`asyncio.get_event_loop`, which raises from   |
 |                                                                 | 3.14                                                          |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
-| :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`              | `libpcap`_ headers and library, a C compiler, and Python      |
-|                                                                 | **3.11 or older** -- ``pypcap`` 1.3.0 publishes no wheel and  |
-|                                                                 | its pre-generated :file:`pcap.c` does not compile on 3.12+    |
+| :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`              | :manpage:`libpcap(3)` headers and library, a C compiler, and  |
+|                                                                 | Python **3.11 or older** -- ``pypcap`` 1.3.0 publishes no     |
+|                                                                 | wheel and its pre-generated :file:`pcap.c` does not compile   |
+|                                                                 | on 3.12+                                                      |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`            | a system ``libpcap.so.1`` at *run* time -- nothing to build,  |
 |                                                                 | since ``pcap-ct`` and ``libpcap`` ship pure-Python wheels,    |
@@ -137,7 +138,7 @@ so it is worth knowing in advance.
 
 Every one of these constraints is also enforced in code rather than only
 documented: each engine overrides
-:meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`, which
+:meth:`~pcapkit.foundation.engines.engine.Engine.unsupported_reason`, which
 :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` consults
 *before* the import test, so asking for an engine that cannot run here produces
 one warning naming the actual cause and a clean fall back to the built-in parser.
@@ -214,4 +215,3 @@ actually got, via
 .. _PyPCAP: https://github.com/pynetwork/pypcap
 .. _pcap-ct: https://pypi.org/project/pcap-ct/
 .. _PyPCAPFile: https://github.com/kisom/pypcapfile
-.. _libpcap: https://www.tcpdump.org

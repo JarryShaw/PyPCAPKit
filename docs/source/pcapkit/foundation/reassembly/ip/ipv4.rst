@@ -32,10 +32,10 @@ Terminology
                 ipv4.src,                   # source IP address
                 ipv4.dst,                   # destination IP address
                 ipv4.id,                    # identification
-                ipv4.proto,                 # payload protocol type
+                ipv4.protocol,              # payload protocol type
             ),
             num = frame.number,             # original packet range number
-            fo = ipv4.frag_offset,          # fragment offset
+            fo = ipv4.offset,               # fragment offset, in octets
             ihl = ipv4.hdr_len,             # internet header length
             mf = ipv4.flags.mf,             # more fragment flag
             tl = ipv4.len,                  # total length, header includes
@@ -57,7 +57,7 @@ Terminology
            |     |            |--> 'src' --> (IPv4Address) ipv4.src
            |     |            |--> 'dst' --> (IPv4Address) ipv4.dst
            |     |            |--> 'id' --> (int) ipv4.id
-           |     |            |--> 'proto' --> (EtherType) ipv4.proto
+           |     |            |--> 'proto' --> (TransType) ipv4.protocol
            |     |--> 'index' : (tuple) packet numbers
            |     |               |--> (int) original packet range number
            |     |--> 'header' : (bytes) IPv4 header
@@ -69,7 +69,7 @@ Terminology
            |     |            |--> 'src' --> (IPv4Address) ipv4.src
            |     |            |--> 'dst' --> (IPv4Address) ipv4.dst
            |     |            |--> 'id' --> (int) ipv4.id
-           |     |            |--> 'proto' --> (EtherType) ipv4.proto
+           |     |            |--> 'proto' --> (TransType) ipv4.protocol
            |     |--> 'index' : (tuple) packet numbers
            |     |               |--> (int) original packet range number
            |     |--> 'header' : (bytes) IPv4 header
@@ -91,7 +91,7 @@ Terminology
            |     |--> ipv4.src       |
            |     |--> ipv4.dst       |
            |     |--> ipv4.id        |
-           |     |--> ipv4.proto     |
+           |     |--> ipv4.protocol  |
            |                         |--> 'TDL' : (int) total data length
            |                         |--> 'RCVBT' : (bytearray) fragment received bit table
            |                         |               |--> (bytes) b'\\x00' -> not received
