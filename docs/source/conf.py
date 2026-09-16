@@ -8,14 +8,22 @@ import datetime
 import importlib
 import logging
 import os
+import pkgutil
 import sys
 import typing
 from typing import TYPE_CHECKING
 
+# NB: a private module of ``sphinx-autodoc-typehints``, used deliberately -- see
+# ``bind_type_checking_names`` below for what it buys and why reimplementing it
+# here would be worse. If a future release moves it the import fails loudly at
+# build time, which is the outcome to want: the alternative is a build that
+# silently goes back to emitting unresolvable annotations.
+from sphinx_autodoc_typehints._resolver import resolve_type_guarded_imports
+
 import pcapkit
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, List
+    from typing import Any, Dict, List, Optional
     from sphinx.application import Sphinx
 
 os.environ['PCAPKIT_SPHINX'] = '1'
@@ -137,6 +145,16 @@ typehints_fully_qualified = False
 always_document_param_types = False
 typehints_document_rtype = True
 
+# NB: a ``:rtype: None`` field says nothing the rendered signature has not already
+# said, and injecting it is actively harmful in one measured case: for a docstring
+# whose field list is followed by a directive,
+# ``sphinx_autodoc_typehints`` computes an insertion point *inside* that directive
+# and splits it from its content. ``PCAP_CT.run`` was the case -- its trailing
+# ``Note:`` lost its body and the build reported ``Content block expected for the
+# "note" directive; none found``. Skipping the ``None`` returns removes the noise
+# and the corruption together; non-``None`` returns are still documented.
+typehints_document_rtype_none = False
+
 toc_object_entries = False
 
 # Add any paths that contain templates here, relative to this directory.
@@ -207,6 +225,111 @@ def maybe_skip_member(app: 'Sphinx', what: str, name: str,  # pylint: disable=un
     return skip
 
 
+def bind_type_checking_names(app: 'Sphinx') -> None:
+    """Execute every ``pcapkit`` module's ``if TYPE_CHECKING:`` block.
+
+    Annotations throughout the package are quoted and their types imported only
+    under :data:`~typing.TYPE_CHECKING`, which is right at runtime and awkward
+    here. Autodoc reads a class attribute's type with
+    :func:`typing.get_type_hints`, and a single unresolvable name makes that raise
+    :exc:`NameError` for the *whole class*; Sphinx then falls back to the raw
+    ``__annotations__`` strings. So ``pre: 'ToSPrecedence'`` was rendered as the
+    bare word ``ToSPrecedence``, which the Python domain has to resolve by
+    suffix-matching -- and both :class:`pcapkit.const.ipv4.tos_pre.ToSPrecedence`
+    and its generator :class:`pcapkit.vendor.ipv4.tos_pre.ToSPrecedence` end in
+    it. That is where the bulk of the ``more than one target found`` warnings came
+    from, and roughly half of the links Sphinx picked went to the vendor crawler
+    rather than to the enumeration the attribute actually holds.
+
+    Binding the guarded names into each module up front lets
+    :func:`typing.get_type_hints` succeed, so the annotation is stringified from
+    the resolved object and carries its full dotted path. Nothing is suppressed:
+    the references are qualified rather than silenced.
+
+    ``sphinx-autodoc-typehints`` already does this per module, lazily, for the
+    objects it processes -- but it skips classes outright, since it keys off
+    ``__globals__`` which a class does not have, so class attributes never
+    benefited. Its implementation is reused rather than rewritten because it
+    executes the block one statement at a time, so an unimportable optional
+    dependency (``pcap``, ``pcapfile``) cannot strand the names declared after it.
+
+    One consequence is worth knowing before it is met as a mystery: making the
+    annotations resolvable also makes a malformed one **fatal**. A quoted
+    annotation with stray whitespace inside the quotes -- ``rank: ' int'``, the
+    space that belongs after the colon typed one character late -- is meaningless
+    to a type checker and was previously harmless here, because these annotations
+    failed earlier with :exc:`NameError`, which
+    :func:`sphinx.util.typing.get_type_hints` catches. Now they resolve, and Python
+    3.14's :mod:`annotationlib` rejects the leading space with a
+    :exc:`SyntaxError` that :func:`~sphinx.util.typing.get_type_hints` does *not*
+    catch, so it aborts the whole build. Two such annotations existed and both are
+    fixed at source; a third would stop the build rather than be worked around
+    here, which is the right way round for a typo.
+
+    Args:
+        app: Sphinx application.
+
+    """
+    for info in pkgutil.walk_packages(pcapkit.__path__, 'pcapkit.',
+                                      onerror=lambda name: None):
+        try:
+            module = importlib.import_module(info.name)
+        except Exception as exc:  # pylint: disable=broad-except
+            # A module that cannot be imported has no documentable annotations
+            # either, so this is not worth failing the build over -- but it is
+            # worth saying out loud rather than passing silently.
+            logger.info('skipped unimportable module %s: %s', info.name, exc)
+            continue
+        resolve_type_guarded_imports(app.config.autodoc_mock_imports, module)
+
+
+def claim_attribute_signature(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
+                              obj: 'Any', options: 'Dict[str, Any]',  # pylint: disable=unused-argument
+                              signature: 'Optional[str]',  # pylint: disable=unused-argument
+                              return_annotation: 'Optional[str]') -> 'Optional[tuple]':  # pylint: disable=unused-argument
+    """Stop a class-valued attribute being given the class's own signature.
+
+    Several class attributes here hold a *class* as their value --
+    :attr:`Protocol.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>` and
+    the ``__protocol_type__`` of each reassembly and flow-tracing class. Autodoc
+    documents them as attributes, so it collects no signature for them, but
+    ``sphinx_autodoc_typehints`` keys its own handler off ``callable(obj)`` alone,
+    sees a class, and hands one back. Sphinx 9.1 then stores it with
+    ``signatures[0] = ...`` on a list it never populated, which raises
+    ``IndexError: list assignment index out of range`` -- and autodoc turns that
+    into ``error while formatting signature for ...`` and drops the member from the
+    page entirely.
+
+    Claiming the event first is what prevents that. The returned value has to be
+    non-:data:`None` to win ``emit_firstresult`` yet must not look like a
+    ``(args, retann)`` pair, so it is the empty tuple: falsy, and of the wrong
+    length for the ``len(result) == 2`` guard Sphinx applies before unpacking. An
+    attribute has no signature of its own to lose, so nothing is suppressed here
+    beyond a value that was never meaningful.
+
+    ``callable(obj)`` keeps this off ordinary attributes and off properties, whose
+    ``obj`` is the :class:`property` itself and therefore not callable -- those
+    already resolve correctly and are left alone.
+
+    Args:
+        app: Sphinx application.
+        what: Type of the object being documented.
+        name: Fully qualified name of the object.
+        obj: The object itself.
+        options: Directive options.
+        signature: Signature autodoc has so far, if any.
+        return_annotation: Return annotation autodoc has so far, if any.
+
+    Returns:
+        The empty tuple for a class-valued attribute, to claim the event without
+        recording a signature; :data:`None` otherwise, to let other handlers run.
+
+    """
+    if what in {'attribute', 'property'} and callable(obj):
+        return ()
+    return None
+
+
 def remove_module_docstring(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
                             obj: 'Any', options: 'Dict[str, Any]', lines: 'List[str]') -> None:  # pylint: disable=unused-argument
     if what == "module" and "pcapkit" in name:
@@ -243,7 +366,12 @@ def source_read(app: 'Sphinx', docname: str, source_text: str) -> 'None':  # pyl
 def setup(app: 'Sphinx') -> None:
     #app.connect('autodoc-process-docstring', process_docstring, 0)
     #app.connect("autodoc-process-docstring", remove_module_docstring)
+    app.connect('builder-inited', bind_type_checking_names)
     app.connect('autodoc-skip-member', maybe_skip_member)
+    # NB: below ``sphinx_autodoc_typehints``, which connects at the default 500 and
+    # would otherwise win the tie on registration order -- conf.py's ``setup`` runs
+    # after the extensions in ``extensions`` have been set up.
+    app.connect('autodoc-process-signature', claim_attribute_signature, priority=400)
     #app.connect('source-read', source_read)
     #app.connect('autodoc-process-docstring', process_fields)
 

@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from scapy.packet import Packet as ScapyPacket
     from typing_extensions import Literal
 
+    from pcapkit.corekit.context import ProtocolContext
     from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
     from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
     from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
