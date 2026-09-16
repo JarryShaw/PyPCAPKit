@@ -433,6 +433,16 @@
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
+<span class="c1"># NB: declared above the ``TYPE_CHECKING`` block, not below it, so that</span>
+<span class="c1"># ``CallbackFn`` can name ``_IT`` outright. As a quoted forward reference it was</span>
+<span class="c1"># resolvable only from this module's namespace, and every module that spells</span>
+<span class="c1"># ``CallbackFn`` in an annotation -- ``pcapkit.foundation.registry.foundation``</span>
+<span class="c1"># does -- has to evaluate the alias in its own.</span>
+<span class="n">_DT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_DT'</span><span class="p">)</span>
+<span class="n">_BT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_BT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Info'</span><span class="p">)</span>
+<span class="n">_IT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_IT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Info'</span><span class="p">)</span>
+<span class="n">_PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Info'</span><span class="p">)</span>
+
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
@@ -441,12 +451,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
 
-    <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">'_IT'</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
-
-<span class="n">_DT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_DT'</span><span class="p">)</span>
-<span class="n">_BT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_BT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Info'</span><span class="p">)</span>
-<span class="n">_IT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_IT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Info'</span><span class="p">)</span>
-<span class="n">_PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Info'</span><span class="p">)</span>
+    <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">_IT</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="TraceFlowMeta">

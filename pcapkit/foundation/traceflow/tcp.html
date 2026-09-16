@@ -444,9 +444,6 @@ TCP flows from a series of packets and connections.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_AT</span></code>, IPv4Address, IPv6Address)]</span>) – a flow packet (<a class="reference internal" href="#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>)</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -501,6 +498,12 @@ flow label itself.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__protocol_name__">
 <span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TCP'</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__protocol_name__" title="Link to this definition">¶</a></dt>
 <dd><p>Protocol name of current reassembly object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__protocol_type__">
+<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.TCP'&gt;</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__protocol_type__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol of current reassembly object.</p>
 </dd></dl>
 
 </dd></dl>
@@ -586,7 +589,7 @@ is as following:</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.protocol">
-<span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_LinkType</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.protocol" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.protocol" title="Link to this definition">¶</a></dt>
 <dd><p>Data link type from global header.</p>
 </dd></dl>
 
@@ -598,7 +601,7 @@ is as following:</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.frame">
-<span class="sig-name descname"><span class="pre">frame</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Data_Frame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType.dict" title="pcapkit.const.reg.apptype.AppType.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.frame" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">frame</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.Frame" title="pcapkit.protocols.data.misc.pcap.frame.Frame"><span class="pre">Frame</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType.dict" title="pcapkit.const.reg.apptype.AppType.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.frame" title="Link to this definition">¶</a></dt>
 <dd><p>Extracted frame info.</p>
 </dd></dl>
 
@@ -616,13 +619,13 @@ is as following:</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.src">
-<span class="sig-name descname"><span class="pre">src</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.pcapkit.corekit.fields.ipaddress._AT" title="pcapkit.corekit.fields.ipaddress.pcapkit.corekit.fields.ipaddress._AT"><span class="pre">_AT</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.src" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">src</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.pcapkit.foundation.traceflow.data.tcp._AT" title="pcapkit.foundation.traceflow.tcp.pcapkit.foundation.traceflow.data.tcp._AT"><span class="pre">_AT</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.src" title="Link to this definition">¶</a></dt>
 <dd><p>Source IP.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.dst">
-<span class="sig-name descname"><span class="pre">dst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.pcapkit.corekit.fields.ipaddress._AT" title="pcapkit.corekit.fields.ipaddress.pcapkit.corekit.fields.ipaddress._AT"><span class="pre">_AT</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.dst" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.pcapkit.foundation.traceflow.data.tcp._AT" title="pcapkit.foundation.traceflow.tcp.pcapkit.foundation.traceflow.data.tcp._AT"><span class="pre">_AT</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.dst" title="Link to this definition">¶</a></dt>
 <dd><p>Destination IP.</p>
 </dd></dl>
 
@@ -667,7 +670,7 @@ is as following:</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Buffer.fpout">
-<span class="sig-name descname"><span class="pre">fpout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper"><span class="pre">Dumper</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.fpout" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fpout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><span class="pre">Dumper</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.fpout" title="Link to this definition">¶</a></dt>
 <dd><p>Output dumper object.</p>
 </dd></dl>
 

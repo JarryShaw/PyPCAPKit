@@ -461,9 +461,6 @@ or if <code class="xref py py-attr docutils literal notranslate"><span class="pr
 is provided, as the Scapy engine does not parse with <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own
 protocol implementations.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -546,9 +543,6 @@ protocol implementations.</p>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the file format is not supported, i.e., not a PCAP
     and/or PCAP-NG file.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -723,9 +717,6 @@ is provided, as the PyShark engine does not parse with
 <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own protocol implementations.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -754,11 +745,6 @@ for more operational information.</p>
 <dd><p>Close engine.</p>
 <p>This method is to be used for closing the engine instance. It is to
 close the engine instance after the extraction process is finished.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -936,9 +922,6 @@ either operation.</p></li>
     <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> can only open a savefile by name.</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -969,11 +952,6 @@ for more operational information.</p>
 idempotent, as <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor._cleanup</span></code></a> and
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.__exit__</span></code>
 may both reach it, and <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcap.pcap.close()</span></code> is not safe to call twice.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1279,9 +1257,8 @@ either operation.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p>The PCAP-NG rejection is a deliberate narrowing, and the reason is
 that the alternative is <em>unpredictable</em> rather than merely limited.
 <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> can read a PCAP-NG savefile, but how well
@@ -1305,9 +1282,7 @@ type applied to every frame.
 per-interface blocks properly and does not depend on the host’s
 library at all, so PCAP-NG is routed there rather than read
 approximately – or wrongly – here.</p>
-</p>
-</dd>
-</dl>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1356,11 +1331,6 @@ this engine’s business to depend on a pre-release’s undocumented
 forgiveness, and the flag also covers the case of an engine that was
 never opened.</p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1489,9 +1459,6 @@ type, in which case frames are left undecoded.</p></li>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the file format is not supported, i.e., not a PCAP
     file. <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> reads libpcap savefiles only.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>

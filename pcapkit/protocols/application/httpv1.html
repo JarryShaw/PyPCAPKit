@@ -442,7 +442,7 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 <p>This class implements Hypertext Transfer Protocol (HTTP/1.*).</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTP.alias">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alias</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'HTTP/0.9'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HTTP/1.0'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HTTP/1.1'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTP.alias" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alias</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'HTTP/0.9'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HTTP/1.0'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HTTP/1.1'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTP.alias" title="Link to this definition">¶</a></dt>
 <dd><p>Acronym of current protocol.</p>
 </dd></dl>
 
@@ -656,7 +656,7 @@ header-field    :==:    field-name ":" OWS field-value OWS
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.HTTP.body">
-<span class="sig-name descname"><span class="pre">body</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.HTTP.body" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">body</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.HTTP.body" title="Link to this definition">¶</a></dt>
 <dd><p>HTTP body.</p>
 </dd></dl>
 
@@ -669,7 +669,7 @@ header-field    :==:    field-name ":" OWS field-value OWS
 <p>Data model for HTTP/1.* header line.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.Header.type">
-<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">HTTP_Type</span></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.Header.type" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.httpv1.Type" title="pcapkit.protocols.application.httpv1.Type"><span class="pre">Type</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.Header.type" title="Link to this definition">¶</a></dt>
 <dd><p>Receipt type.</p>
 </dd></dl>
 
@@ -682,13 +682,13 @@ header-field    :==:    field-name ":" OWS field-value OWS
 <p>Data model for HTTP/1.* request header line.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.RequestHeader.type">
-<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">HTTP_Type</span></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.RequestHeader.type" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.httpv1.Type" title="pcapkit.protocols.application.httpv1.Type"><span class="pre">Type</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.RequestHeader.type" title="Link to this definition">¶</a></dt>
 <dd><p>HTTP request header line.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.RequestHeader.method">
-<span class="sig-name descname"><span class="pre">method</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_Method</span></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.RequestHeader.method" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">method</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><span class="pre">Method</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.RequestHeader.method" title="Link to this definition">¶</a></dt>
 <dd><p>HTTP method.</p>
 </dd></dl>
 
@@ -713,7 +713,7 @@ header-field    :==:    field-name ":" OWS field-value OWS
 <p>Data model for HTTP/1.* response header line.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.ResponseHeader.type">
-<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">HTTP_Type</span></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.ResponseHeader.type" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.httpv1.Type" title="pcapkit.protocols.application.httpv1.Type"><span class="pre">Type</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.ResponseHeader.type" title="Link to this definition">¶</a></dt>
 <dd><p>HTTP response header line.</p>
 </dd></dl>
 
@@ -725,7 +725,7 @@ header-field    :==:    field-name ":" OWS field-value OWS
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.ResponseHeader.status">
-<span class="sig-name descname"><span class="pre">status</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_StatusCode</span></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.ResponseHeader.status" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">status</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/http.html#pcapkit.const.http.status_code.StatusCode" title="pcapkit.const.http.status_code.StatusCode"><span class="pre">StatusCode</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.ResponseHeader.status" title="Link to this definition">¶</a></dt>
 <dd><p>HTTP response status.</p>
 </dd></dl>
 

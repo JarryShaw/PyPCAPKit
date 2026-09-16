@@ -484,8 +484,12 @@
     <span class="n">Flags</span> <span class="o">=</span> <span class="n">Schema_FrameType</span><span class="o">.</span><span class="n">Flags</span>
 
     <span class="n">FrameParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="s1">'header'</span><span class="p">)],</span> <span class="n">Data_HTTP</span><span class="p">]</span>
+    <span class="c1"># NB: ``Flags`` is bound just above, so it goes in unquoted. Quoting it left a</span>
+    <span class="c1"># bare ``ForwardRef('Flags')`` inside the alias, which every *other* module</span>
+    <span class="c1"># that spells ``FrameConstructor`` in an annotation then had to resolve in its</span>
+    <span class="c1"># own namespace -- where the name does not exist.</span>
     <span class="n">FrameConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">]),</span>
-                                 <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="s1">'Flags'</span><span class="p">]]</span>
+                                 <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="n">Flags</span><span class="p">]]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HTTP'</span><span class="p">]</span>
 

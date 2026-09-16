@@ -475,9 +475,6 @@ each hole bound.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet" title="pcapkit.foundation.reassembly.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – <a class="reference internal" href="#term-reasm.tcp.packet"><span class="xref std std-term">info</span></a> dict of packets to be reassembled</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -505,6 +502,12 @@ each hole bound.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__protocol_name__">
 <span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TCP'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_name__" title="Link to this definition">¶</a></dt>
 <dd><p>Protocol name of current reassembly object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__">
+<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.TCP'&gt;</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol of current reassembly object.</p>
 </dd></dl>
 
 </dd></dl>
@@ -867,7 +870,7 @@ own sequence number. Absolute, not an offset into any payload buffer.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Datagram.id">
-<span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID" title="pcapkit.foundation.reassembly.data.tcp.DatagramID"><span class="pre">DatagramID</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.pcapkit.corekit.fields.ipaddress._AT" title="pcapkit.corekit.fields.ipaddress.pcapkit.corekit.fields.ipaddress._AT"><span class="pre">_AT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.id" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID" title="pcapkit.foundation.reassembly.data.tcp.DatagramID"><span class="pre">DatagramID</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.tcp.pcapkit.foundation.reassembly.data.tcp._AT"><span class="pre">_AT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.id" title="Link to this definition">¶</a></dt>
 <dd><p>Original packet identifier.</p>
 </dd></dl>
 
@@ -891,7 +894,7 @@ own sequence number. Absolute, not an offset into any payload buffer.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Datagram.packet">
-<span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">Protocol</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="Link to this definition">¶</a></dt>
 <dd><p>Parsed reassembled payload.</p>
 </dd></dl>
 

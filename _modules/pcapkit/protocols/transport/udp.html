@@ -468,7 +468,7 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol</span>
+    <span class="c1">#: DefaultDict[int, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol</span>
     <span class="c1">#: index mapping for decoding next layer, c.f.</span>
     <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.transport.transport.Transport._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>

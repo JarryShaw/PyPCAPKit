@@ -963,7 +963,7 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[Enum_LinkType, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for</span>
+    <span class="c1">#: DefaultDict[Enum_LinkType, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol index mapping for</span>
     <span class="c1">#: decoding next layer, c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="c1">#: The values should be a tuple representing the module name and class name,</span>

@@ -528,9 +528,6 @@ should be as <code class="docutils literal notranslate"><span class="pre">{proto
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -780,6 +777,12 @@ certain protocols are not in any layer, such as
 &amp; <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
 The values should be a tuple representing the module name and class name,
 or a <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__schema__">
+<span class="sig-name descname"><span class="pre">__schema__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.protocol.pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol.pcapkit.protocols.protocol._ST"><span class="pre">_ST</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol header schema definition.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1074,12 +1077,9 @@ shape, rather than one call site at a time.</p>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
 </dl>
 <p>This method is called when a subclass of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> is defined.
-It is used to set the <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__schema__</span></code>
+It is used to set the <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="pcapkit.protocols.protocol.Protocol.__schema__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__schema__</span></code></a>
 attribute of the subclass.</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
