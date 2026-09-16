@@ -82,7 +82,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_LinkType, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol index mapping for
+    #: DefaultDict[Enum_LinkType, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol index mapping for
     #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name, or
