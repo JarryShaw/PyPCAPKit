@@ -192,6 +192,10 @@ __all__ = [
     'FTP',
     'FTP_Request', 'FTP_Response',
 
+    # NG Application Protocol
+    'NGAP',
+    'NGAP_IE', 'NGAP_Choice', 'NGAP_BitString', 'NGAP_Sequence',
+
     # Hypertext Transfer Protocol (HTTP/1.*)
     'HTTPv1',
     'HTTPv1_Header',

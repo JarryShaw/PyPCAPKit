@@ -123,6 +123,7 @@ __all__ = [
 
     # Application Layer Protocols
     'FTP',
+    'NGAP',
     'HTTPv1',
     'HTTPv2',
     'HTTPv2_FrameType',

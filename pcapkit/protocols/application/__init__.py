@@ -12,6 +12,10 @@ application layer, with detailed implementation and methods.
 # TODO: Implements BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT,
 #       NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP,
 #       SSH, TELNET, TLS/SSL, XMPP.
+#
+# NB: NGAP below is the one protocol here whose decoder is an optional
+#     dependency, c.f. pcapkit.protocols.application.ngap. Importing the module
+#     is free -- ``pycrate`` is imported inside the parse path, not here.
 
 # Base Class for Internet Layer
 from pcapkit.protocols.application.application import Application
@@ -20,6 +24,7 @@ from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.application.ftp import FTP, FTP_DATA
 from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+from pcapkit.protocols.application.ngap import NGAP
 
 # Deprecated / Base Classes
 from pcapkit.protocols.application.http import HTTP
@@ -31,4 +36,5 @@ __all__ = [
     'APPTYPE',
     'FTP', 'FTP_DATA',
     'HTTP', 'HTTPv1', 'HTTPv2',
+    'NGAP',
 ]

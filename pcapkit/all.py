@@ -115,7 +115,7 @@ __all__ = [
                                                             # IPv6 Extension Header
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer
     'FTP', 'FTP_DATA',                                      # Application Layer
-    'HTTP',
+    'HTTP', 'NGAP',
     'Schema', 'schema',                                     # Protocol Schema
     'Data', 'data',                                         # Protocol Data
 

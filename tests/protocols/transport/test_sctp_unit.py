@@ -19,6 +19,7 @@ of mistake:
 
 from __future__ import annotations
 
+import contextlib
 import importlib.util
 import unittest
 from unittest import mock
@@ -58,7 +59,8 @@ class SCTPUnitTests(unittest.TestCase):
     # NOTE: Unlike the sibling TCP/UDP unit tests, this module does not purge
     # and re-import :mod:`pcapkit` per test: nothing here depends on import-time
     # behaviour, and the re-import costs several seconds a test. Every test that
-    # mutates a class-level registry restores it in a ``finally``.
+    # mutates a class-level registry restores it -- ``__proto__`` through the
+    # ``_proto_registry`` helper below, the sub-registries in a ``finally``.
 
     ##########################################################################
     # Helpers.
@@ -72,6 +74,28 @@ class SCTPUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport.sctp import SCTP
 
         return SCTP(io.BytesIO(raw), len(raw))
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _proto_registry():
+        """Restore ``SCTP.__proto__`` on the way out, defaults included.
+
+        ``SCTP.__proto__.clear()`` was a sound teardown while the registry
+        started empty. It is not one now: NGAP is registered on PPIDs 60 and 66
+        by default, and clearing the registry leaves every later test in the
+        process running against a registry that no import repopulates -- an
+        order-dependent failure that only appears in whichever test happens to
+        run second.
+
+        """
+        from pcapkit.protocols.transport.sctp import SCTP
+
+        saved = dict(SCTP.__proto__)
+        try:
+            yield SCTP.__proto__
+        finally:
+            SCTP.__proto__.clear()
+            SCTP.__proto__.update(saved)
 
     @staticmethod
     def _build(chunks, **kwargs) -> bytes:
@@ -832,23 +856,48 @@ class SCTPUnitTests(unittest.TestCase):
     ##########################################################################
 
     def test_ppid_dispatch_hook(self) -> None:
+        """The two NGAP PPIDs dispatch, and a junk payload still degrades.
+
+        Both PPIDs are registered as defaults on
+        :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+        rather than by a ``register_sctp`` call at import time, so the assertion
+        is on the registry's declared contents.
+
+        ``b'ngap-pdu'`` is not an aligned PER ``NGAP-PDU``, which is the point:
+        the failure has to reach :class:`Raw` through
+        :func:`~pcapkit.utilities.decorators.beholder` rather than escape, and
+        the payload has to keep the PPID's name while doing so. That path is
+        also what a capture parsed *without* ``pycrate`` installed takes on
+        every NGAP packet.
+
+        """
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+        from pcapkit.protocols.application.ngap import NGAP
         from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport import sctp as sctp_module
         from pcapkit.protocols.transport.sctp import SCTP
 
         NGAP_PPID = PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol  # noqa: E501
+        DTLS_PPID = PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP  # noqa: E501
         self.assertEqual(int(NGAP_PPID), 60)
+        self.assertEqual(int(DTLS_PPID), 66)
+
+        for ppid in (NGAP_PPID, DTLS_PPID):
+            with self.subTest(ppid=int(ppid)):
+                self.assertIn(ppid, SCTP.__proto__)
+                entry = SCTP.__proto__[ppid]
+                module = getattr(entry, 'module', None)
+                if module is None:      # already imported by an earlier test
+                    self.assertIs(entry, NGAP)
+                else:
+                    self.assertEqual(module, 'pcapkit.protocols.application.ngap')
+                    self.assertEqual(entry.name, 'NGAP')
 
         raw = self._build([(Chunk.Payload_Data,
                             dict(I=True, U=True, B=True, E=True, tsn=1, ppid=NGAP_PPID,
                                  data=b'ngap-pdu'))])
 
-        # With nothing registered on the PPID, the payload is raw -- but it is
-        # still named after the PPID it arrived with, the way an unregistered
-        # transport type is (``IPv4:Use_for_experimentation_and_testing_253``),
-        # rather than being anonymised to a bare ``Raw``.
-        self.assertNotIn(NGAP_PPID, SCTP.__proto__)
         proto = self._packet(raw)
         self.assertEqual(proto.ppid, NGAP_PPID)
         self.assertIsInstance(proto.payload, Raw)
@@ -856,17 +905,19 @@ class SCTPUnitTests(unittest.TestCase):
         self.assertEqual(str(proto.protochain),
                          'SCTP:PayloadProtocolIdentifier_3GPP_NG_Application_Protocol')
 
-        # This is exactly the call a future NGAP class makes.
-        try:
-            SCTP.register(NGAP_PPID, Raw)
+        # A PPID registered over the default dispatches to the new class. The
+        # overwrite warning is expected here -- 60 is no longer a free slot --
+        # and is asserted rather than allowed to litter the test output.
+        with self._proto_registry():
+            with mock.patch.object(sctp_module, 'warn') as warned:
+                SCTP.register(NGAP_PPID, Raw)
+            self.assertEqual(warned.call_count, 1)
             self.assertIs(SCTP.__proto__[NGAP_PPID], Raw)
             self.assertIs(SCTP.__proto__[60], Raw)
 
             proto = self._packet(raw)
             self.assertIsInstance(proto.payload, Raw)
             self.assertEqual(bytes(proto.payload), b'ngap-pdu')
-        finally:
-            SCTP.__proto__.clear()
 
     def test_unregistered_ppid_does_not_mutate_the_class_registry(self) -> None:
         """An unregistered PPID reaches :class:`Raw` without touching ``__proto__``.
@@ -899,7 +950,7 @@ class SCTPUnitTests(unittest.TestCase):
                             dict(I=True, U=True, B=True, E=True, tsn=1,
                                  ppid=UNREGISTERED, data=b'unknown-pdu'))])
 
-        try:
+        with self._proto_registry():
             before = set(SCTP.__proto__)
             self.assertNotIn(UNREGISTERED, before)
 
@@ -934,8 +985,6 @@ class SCTPUnitTests(unittest.TestCase):
             with mock.patch.object(sctp_module, 'warn') as warned:
                 SCTP.register(UNREGISTERED, Raw)
             self.assertEqual(warned.call_count, 0)
-        finally:
-            SCTP.__proto__.clear()
 
     def test_packet_without_a_data_chunk_has_no_payload(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
@@ -975,25 +1024,25 @@ class SCTPUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport import sctp as sctp_module
         from pcapkit.protocols.transport.sctp import SCTP
 
-        try:
-            SCTP.register(60, Raw)
+        # 4243 rather than 60: NGAP holds 60 by default, so registering it once
+        # would already be the overwrite this test means to trigger on the
+        # *second* call, and the assertion on the call count would pass for the
+        # wrong reason.
+        with self._proto_registry():
+            SCTP.register(4243, Raw)
             with mock.patch.object(sctp_module, 'warn') as warned:
-                SCTP.register(60, Raw)
+                SCTP.register(4243, Raw)
             self.assertEqual(warned.call_count, 1)
             self.assertIn('payload protocol identifier', warned.call_args.args[0])
-        finally:
-            SCTP.__proto__.clear()
 
     def test_register_sctp_wrapper_writes_the_ppid_registry(self) -> None:
         from pcapkit.foundation.registry.protocols import register_sctp
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.transport.sctp import SCTP
 
-        try:
-            register_sctp(60, 'pcapkit.protocols.misc.raw', 'Raw')
-            self.assertIs(SCTP.__proto__[60], Raw)
-        finally:
-            SCTP.__proto__.clear()
+        with self._proto_registry():
+            register_sctp(4243, 'pcapkit.protocols.misc.raw', 'Raw')
+            self.assertIs(SCTP.__proto__[4243], Raw)
 
     ##########################################################################
     # Sub-registry registration.
