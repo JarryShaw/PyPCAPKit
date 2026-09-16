@@ -120,7 +120,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             'xml': (ModuleDescriptor('dictdumper', 'PLIST'), '.plist'),
             'json': (ModuleDescriptor('dictdumper', 'JSON'), '.json'),
             'tree': (ModuleDescriptor('dictdumper', 'Tree'), '.txt'),
-            'text': (ModuleDescriptor('dictdumper', 'Text'), '.txt'),
+            'text': (ModuleDescriptor('dictdumper', 'Tree'), '.txt'),
             'txt': (ModuleDescriptor('dictdumper', 'Tree'), '.txt'),
         },
     )  # type: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]
