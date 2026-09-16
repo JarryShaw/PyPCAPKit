@@ -226,9 +226,14 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
             Unpacked field value.
 
         """
+        # NOTE: ``length`` recomputes struct.calcsize() on every read, so the
+        # three reads this method used to make were three calcsize() calls for
+        # one value.
+        length = self.length
+
         if not isinstance(buffer, bytes):
-            buffer = buffer.read(self.length)
-        value = struct.unpack(self.template, buffer[:self.length].rjust(self.length, b'\x00'))[0]
+            buffer = buffer.read(length)
+        value = struct.unpack(self.template, buffer[:length].rjust(length, b'\x00'))[0]
         return self.post_process(value, packet)
 
 

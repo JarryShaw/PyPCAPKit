@@ -615,24 +615,29 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         for field in self.__fields__.values():
             field = field(packet)
 
+            # NOTE: ``Field.length`` recomputes struct.calcsize() on every read,
+            # so it is read once per field here rather than at each use.
             if isinstance(field, PayloadField):
-                payload_length = field.length or cast('int', packet['__length__'])
+                length = field.length
+                payload_length = length or cast('int', packet['__length__'])
 
                 payload = data.read(payload_length)
                 self.__buffer__[field.name] = payload
 
-                packet['__length__'] -= field.length
+                packet['__length__'] -= length
                 packet[field.name] = payload
 
                 setattr(self, field.name, payload)
                 continue
 
             if isinstance(field, PaddingField):
-                byte = data.read(field.length)
+                length = field.length
+
+                byte = data.read(length)
                 self.__buffer__[field.name] = byte
 
                 packet[field.name] = byte
-                packet['__length__'] -= field.length
+                packet['__length__'] -= length
 
                 setattr(self, field.name, byte)
                 continue
@@ -645,7 +650,9 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                     continue
                 field = field.field(packet)
 
-            byte = data.read(field.length)
+            length = field.length
+
+            byte = data.read(length)
             self.__buffer__[field.name] = byte
 
             value = field.unpack(byte, packet.copy())
@@ -657,18 +664,18 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 packet['__option_padding__'] = field.option_padding
 
             if isinstance(field, ForwardMatchField):
-                data.seek(-field.length, io.SEEK_CUR)
+                data.seek(-length, io.SEEK_CUR)
             elif isinstance(field, OptionField) and field.option_padding > 0:
                 # the option list ended before the declared field length was
                 # exhausted; give the unconsumed remainder back to ``data``
                 # so that the following fields can read it
                 data.seek(-field.option_padding, io.SEEK_CUR)
-                consumed = field.length - field.option_padding
+                consumed = length - field.option_padding
 
                 self.__buffer__[field.name] = byte[:consumed]
                 packet['__length__'] -= consumed
             else:
-                packet['__length__'] -= field.length
+                packet['__length__'] -= length
 
             if packet['__length__'] < 0:
                 warn(f'packet length < 0: {packet["__length__"]}',
