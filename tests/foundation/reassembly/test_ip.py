@@ -110,5 +110,128 @@ class IPReassemblyTests(unittest.TestCase):
         )
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class DeferredAnalysisTests(unittest.TestCase):
+    """``Datagram.packet`` is analysed on first read, not at submit time.
+
+    The analysis is a second full parse of the reassembled payload, and a
+    datagram is submitted for *every* frame -- ``pcapkit/toolkit/pcap.py``
+    dismisses an IPv4 frame only when its **DF** flag is set, so a frame with
+    ``DF=0, MF=0, FO=0`` is not fragmented in any sense and still arrives here.
+    On ``http.pcap``, which holds no fragments at all, that was 1117 re-parses
+    per extraction and 86% of the cost of IP reassembly.
+
+    What a caller sees must not change, which is why the assertions below are
+    about *when* the analyser runs and not only about what it returns.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def _reassemble(self, *, calls: 'list'):
+        """One complete, unfragmented datagram, and the analyser's call log."""
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip import IP
+
+        class Analyzer:
+            @classmethod
+            def analyze(cls, proto: object, payload: bytes) -> object:
+                calls.append((proto, payload))
+                return {'proto': proto, 'payload': payload}
+
+        class TestIP(IP):
+            __protocol_type__ = Analyzer
+
+        src = ip_address('192.0.2.1')
+        dst = ip_address('198.51.100.2')
+        reasm = TestIP()
+        reasm(Packet((src, dst, 42, TransType.UDP), 1, 0, 20, False, 25,
+                     b'ip-header', bytearray(b'hello')))
+        datagram, = reasm.datagram
+        return datagram
+
+    def test_submitting_a_datagram_does_not_analyse_it(self) -> None:
+        calls = []  # type: list
+        datagram = self._reassemble(calls=calls)
+
+        # the datagram is complete and its payload is there, but nothing has been
+        # parsed -- which is the whole point
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'hello')
+        self.assertEqual(calls, [])
+
+    def test_reading_packet_analyses_once_and_keeps_the_result(self) -> None:
+        calls = []  # type: list
+        datagram = self._reassemble(calls=calls)
+
+        first = datagram.packet
+        self.assertEqual(first, {'proto': datagram.id.proto, 'payload': b'hello'})
+        self.assertEqual(len(calls), 1)
+
+        # a second read must not re-parse, and must be the same object rather
+        # than an equal one -- a caller holding ``datagram.packet`` and reading it
+        # again would otherwise get a different parse tree each time
+        self.assertIs(datagram.packet, first)
+        self.assertEqual(len(calls), 1)
+
+    def test_the_mapping_view_reports_packet_and_forces_the_analysis(self) -> None:
+        """``dict(datagram)`` and friends must not expose the deferral.
+
+        ``Info`` builds its mapping view out of ``__dict__``, so a lazy field is
+        one that can silently vanish from ``to_dict()``, ``keys()`` and ``repr()``
+        -- or, worse, show up there as the placeholder object.
+
+        """
+        for reader in ('to_dict', 'str', 'repr', 'getitem', 'get', 'items'):
+            with self.subTest(reader=reader):
+                calls = []  # type: list
+                datagram = self._reassemble(calls=calls)
+
+                # every view lists the field before anything has been read
+                self.assertIn('packet', datagram)
+                self.assertIn('packet', sorted(datagram))
+                self.assertIn('packet', datagram.keys())
+                self.assertEqual(calls, [])
+
+                expected = {'proto': datagram.id.proto, 'payload': b'hello'}
+                if reader == 'to_dict':
+                    self.assertEqual(datagram.to_dict()['packet'], expected)
+                elif reader == 'str':
+                    self.assertIn("'payload': b'hello'", str(datagram))
+                elif reader == 'repr':
+                    self.assertIn("'payload': b'hello'", repr(datagram))
+                elif reader == 'getitem':
+                    self.assertEqual(datagram['packet'], expected)
+                elif reader == 'get':
+                    self.assertEqual(datagram.get('packet'), expected)
+                else:
+                    self.assertEqual(dict(datagram.items())['packet'], expected)
+                self.assertEqual(len(calls), 1)
+
+    def test_an_unknown_attribute_still_raises(self) -> None:
+        """The lazy read is reached through ``__getattr__``, which must not swallow."""
+        calls = []  # type: list
+        datagram = self._reassemble(calls=calls)
+
+        self.assertFalse(hasattr(datagram, 'nope'))
+        with self.assertRaises(AttributeError):
+            datagram.nope  # pylint: disable=pointless-statement
+        self.assertEqual(calls, [])
+
+    def test_the_deferred_holder_is_a_plain_callable(self) -> None:
+        """It has to be callable and comparable by identity, nothing more."""
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.foundation.reassembly.data.ip import Deferred
+
+        seen = []  # type: list
+        deferred = Deferred(lambda proto, payload: seen.append((proto, payload)) or 'parsed',
+                            TransType.UDP, b'hello')
+        self.assertEqual(seen, [])
+        self.assertEqual(deferred(), 'parsed')
+        self.assertEqual(seen, [(TransType.UDP, b'hello')])
+
+
 if __name__ == '__main__':
     unittest.main()

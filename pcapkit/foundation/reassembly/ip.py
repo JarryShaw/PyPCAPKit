@@ -17,7 +17,7 @@ however, this implement still used the elder one.
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
-                                                   Packet)
+                                                   Deferred, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
 
 if TYPE_CHECKING:
@@ -196,7 +196,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 ret.append(packet)
         # if datagram is reassembled in whole
         else:
-            payload = datagram[:TDL]
+            payload = bytes(datagram[:TDL])
             packet = Datagram(
                 completed=True,
                 id=DatagramID(
@@ -207,8 +207,13 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 ),
                 index=tuple(index),
                 header=header,
-                payload=bytes(payload),
-                packet=self.protocol.analyze(bufid[3], bytes(payload)),
+                payload=payload,
+                # NOTE: ``analyze`` is a second full parse of the payload, and a
+                # datagram is submitted for every frame rather than only for the
+                # fragmented ones, so running it here charges every caller for a
+                # result most of them never read. ``Deferred`` postpones it to the
+                # first read of ``Datagram.packet``.
+                packet=Deferred(self.protocol.analyze, bufid[3], payload),
             )
             ret.append(packet)
 
