@@ -325,23 +325,35 @@ file formats:
 |                     +-----------------------------------------------------------+----------------------------------------+
 |                     | :class:`pcapkit.foundation.engines.pypcap.PyPCAP`         | PCAP only, and from a file on disk     |
 |                     +-----------------------------------------------------------+----------------------------------------+
+|                     | :class:`pcapkit.foundation.engines.pcap_ct.PCAP_CT`       | PCAP only, and from a file on disk     |
+|                     +-----------------------------------------------------------+----------------------------------------+
 |                     | :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile` | PCAP only                              |
 +---------------------+-----------------------------------------------------------+----------------------------------------+
 
 .. note::
 
    An engine is free to support less than :class:`~pcapkit.foundation.extraction.Extractor`
-   offers, and several do. `PyPCAP`_ performs no protocol dissection whatsoever, so
-   it supports neither reassembly nor flow tracing; `PyPCAPFile`_ has no IPv6
-   decoder, so it supports IPv4 and TCP reassembly but not IPv6. What matters is
-   that the gap is *announced* -- each engine warns, or raises, for the capability
-   it cannot provide, rather than silently producing an empty result. See
+   offers, and several do. `PyPCAP`_ and `pcap-ct`_ perform no protocol dissection
+   whatsoever, so they support neither reassembly nor flow tracing; `PyPCAPFile`_
+   has no IPv6 decoder, so it supports IPv4 and TCP reassembly but not IPv6. What
+   matters is that the gap is *announced* -- each engine warns, or raises, for the
+   capability it cannot provide, rather than silently producing an empty result. See
    :doc:`pcapkit/foundation/engines/index` for the full table.
+
+.. note::
+
+   `PyPCAP`_ and `pcap-ct`_ are two distributions of one :manpage:`libpcap(3)`
+   interface, and both install a top-level :mod:`pcap` module, so they are two
+   engines rather than one: ``engine='pypcap'`` and ``engine='pcap_ct'``. Upstream
+   `PyPCAP`_ cannot be installed on Python 3.12 or newer, and `pcap-ct`_ can --
+   which is why both exist. See
+   :doc:`pcapkit/foundation/engines/index` for which to pick.
 
 .. _Scapy: https://scapy.net
 .. _DPKT: https://dpkt.readthedocs.io
 .. _PyShark: https://kiminewt.github.io/pyshark
 .. _PyPCAP: https://github.com/pynetwork/pypcap
+.. _pcap-ct: https://pypi.org/project/pcap-ct/
 .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
 Samples

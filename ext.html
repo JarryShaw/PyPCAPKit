@@ -818,7 +818,7 @@ file formats:</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcapng.PCAPNG</span></code></a></p></td>
 <td><p>PCAP-NG only</p></td>
 </tr>
-<tr class="row-even"><td rowspan="5"><p>Third-party Engines</p></td>
+<tr class="row-even"><td rowspan="6"><p>Third-party Engines</p></td>
 <td><p><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.scapy.Scapy</span></code></a></p></td>
 <td><p>all formats supported by <a class="reference external" href="https://scapy.net">Scapy</a></p></td>
 </tr>
@@ -831,7 +831,10 @@ file formats:</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcap.PyPCAP</span></code></a></p></td>
 <td><p>PCAP only, and from a file on disk</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcapfile.PyPCAPFile</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcap_ct.PCAP_CT</span></code></a></p></td>
+<td><p>PCAP only, and from a file on disk</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcapfile.PyPCAPFile</span></code></a></p></td>
 <td><p>PCAP only</p></td>
 </tr>
 </tbody>
@@ -840,12 +843,21 @@ file formats:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>An engine is free to support less than <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
-offers, and several do. <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> performs no protocol dissection whatsoever, so
-it supports neither reassembly nor flow tracing; <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6
-decoder, so it supports IPv4 and TCP reassembly but not IPv6. What matters is
-that the gap is <em>announced</em> – each engine warns, or raises, for the capability
-it cannot provide, rather than silently producing an empty result. See
+offers, and several do. <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> perform no protocol dissection
+whatsoever, so they support neither reassembly nor flow tracing; <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a>
+has no IPv6 decoder, so it supports IPv4 and TCP reassembly but not IPv6. What
+matters is that the gap is <em>announced</em> – each engine warns, or raises, for the
+capability it cannot provide, rather than silently producing an empty result. See
 <a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> for the full table.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> are two distributions of one <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>
+interface, and both install a top-level <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module, so they are two
+engines rather than one: <code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> and <code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code>. Upstream
+<a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> cannot be installed on Python 3.12 or newer, and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> can –
+which is why both exist. See
+<a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> for which to pick.</p>
 </div>
 <section id="id1">
 <h4>Samples<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>

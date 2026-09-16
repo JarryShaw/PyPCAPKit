@@ -411,6 +411,7 @@
 <span class="sd">.. _PyShark: https://kiminewt.github.io/pyshark</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span> <span class="k">as</span> <span class="n">Engine</span>
@@ -422,6 +423,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'PyShark'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.capture.file_capture</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileCapture</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">PySharkPacket</span>
 
@@ -458,6 +461,104 @@
 
     <span class="c1">#: Engine module name.</span>
     <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">'pyshark'</span>
+
+    <span class="c1">#: First Python version `PyShark`_ does not work on, as a ``(major, minor)``</span>
+    <span class="c1">#: pair. Released 0.6 builds its event loop with</span>
+    <span class="c1">#: ``asyncio.get_event_loop_policy().get_event_loop()``, and Python 3.14 made</span>
+    <span class="c1">#: :func:`asyncio.get_event_loop` raise :exc:`RuntimeError` when no current</span>
+    <span class="c1">#: event loop exists instead of quietly creating one.</span>
+    <span class="n">PYTHON_CEILING</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Class methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="PyShark.unsupported_reason">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unsupported_reason</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Why this engine cannot run here, or :data:`None` when it can.</span>
+
+<span class="sd">        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*</span>
+<span class="sd">        the import test, because neither of the two things that stop this engine</span>
+<span class="sd">        is visible to an import. `PyShark`_ imports perfectly well and then fails</span>
+<span class="sd">        when it is used, which without this hook escapes from :meth:`run` as a hard</span>
+<span class="sd">        error rather than degrading to the default engine with a warning.</span>
+
+<span class="sd">        **The interpreter.** ``pyshark`` 0.6 does</span>
+<span class="sd">        ``asyncio.get_event_loop_policy().get_event_loop()`` at</span>
+<span class="sd">        :file:`pyshark/capture/capture.py:183`, in a fresh interpreter with no</span>
+<span class="sd">        running loop. Measured on four interpreters: 3.10 and 3.11 return a loop</span>
+<span class="sd">        silently, 3.12 returns one with a :exc:`DeprecationWarning`, and 3.14</span>
+<span class="sd">        raises ``RuntimeError: There is no current event loop in thread</span>
+<span class="sd">        'MainThread'``. Hence :attr:`PYTHON_CEILING` is ``(3, 14)``. Python 3.13 was</span>
+<span class="sd">        not available on the machine this was measured on; it is expected to work,</span>
+<span class="sd">        since it is on the deprecated-but-functional side of that progression, and</span>
+<span class="sd">        that expectation is the one thing here that is inferred rather than</span>
+<span class="sd">        observed.</span>
+
+<span class="sd">        **The** :program:`tshark` **binary.** ``pyshark`` is a wrapper around</span>
+<span class="sd">        Wireshark's command-line tool and does no parsing itself, so it is useless</span>
+<span class="sd">        without it. The check delegates to ``pyshark``'s own</span>
+<span class="sd">        ``get_process_path()`` rather than calling :func:`shutil.which`, because</span>
+<span class="sd">        the two are not equivalent and ``which`` would refuse setups that work:</span>
+<span class="sd">        ``pyshark`` looks at ``tshark_path`` in its :file:`config.ini` *first*, and</span>
+<span class="sd">        then at :envvar:`PATH` on POSIX, at both Program Files directories on</span>
+<span class="sd">        Windows, and at :file:`/Applications/Wireshark.app` on macOS. Asking</span>
+<span class="sd">        ``pyshark`` gets all of that for free and cannot disagree with what</span>
+<span class="sd">        ``pyshark`` will do a moment later.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Deliberately **not cached**, and the cost was measured rather than</span>
+<span class="sd">            assumed: the failing path -- which is the expensive one, since it</span>
+<span class="sd">            exhausts every candidate -- takes about 290 microseconds with 39</span>
+<span class="sd">            :envvar:`PATH` entries, against about 120 for a bare</span>
+<span class="sd">            :func:`shutil.which`. This runs once per</span>
+<span class="sd">            :class:`~pcapkit.foundation.extraction.Extractor`, not once per frame,</span>
+<span class="sd">            so it is far below the cost of opening the capture. Caching would trade</span>
+<span class="sd">            that for an answer about the *environment* that cannot change within</span>
+<span class="sd">            the process -- so installing Wireshark, or fixing</span>
+<span class="sd">            :envvar:`PATH`, would not take effect until restart. The Windows path</span>
+<span class="sd">            does more work than the POSIX one (two Program Files directories, and</span>
+<span class="sd">            :func:`shutil.which` there would multiply by ``PATHEXT``), but it is</span>
+<span class="sd">            still a bounded handful of :func:`os.stat` calls.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A short phrase naming the limitation, or :data:`None`.</span>
+
+<span class="sd">        .. _PyShark: https://kiminewt.github.io/pyshark</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">PYTHON_CEILING</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'pyshark does not support Python '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">; it builds its event '</span>
+                    <span class="s1">'loop with `asyncio.get_event_loop_policy().get_event_loop()`, which '</span>
+                    <span class="s1">'raises RuntimeError '</span>
+                    <span class="s1">'from Python 3.14 when no current event loop exists'</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.tshark.tshark</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_process_path</span>  <span class="c1"># isort:skip</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="c1"># Not installed, which is ``Extractor.import_test``'s business -- it</span>
+            <span class="c1"># reports that case in its own words, and answering here as well would</span>
+            <span class="c1"># produce two warnings for one problem. An ImportError from a *renamed*</span>
+            <span class="c1"># upstream helper lands here too, and the engine then simply proceeds</span>
+            <span class="c1"># as it did before this check existed.</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">get_process_path</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
+            <span class="c1"># ``TSharkNotFoundException`` by name, but caught broadly: the whole</span>
+            <span class="c1"># point is to turn any failure to locate the binary into a reason</span>
+            <span class="c1"># rather than let it escape, and upstream is free to raise something</span>
+            <span class="c1"># else. Its own message lists every path it searched, which is exactly</span>
+            <span class="c1"># what the user needs, so it is quoted rather than summarised.</span>
+            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'pyshark requires Wireshark</span><span class="se">\'</span><span class="s1">s `tshark` binary, which pyshark '</span>
+                    <span class="sa">f</span><span class="s1">'could not find -- </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>

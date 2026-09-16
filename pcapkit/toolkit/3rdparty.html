@@ -1010,6 +1010,161 @@ protocol tree, since <a class="reference external" href="https://github.com/pyne
 
 </section>
 </section>
+<section id="module-pcapkit.toolkit.pcap_ct">
+<span id="pcap-ct-tools"></span><h2>pcap-ct Tools<a class="headerlink" href="#module-pcapkit.toolkit.pcap_ct" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="#module-pcapkit.toolkit.pcap_ct" title="pcapkit.toolkit.pcap_ct"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap_ct</span></code></a> contains all you need for
+<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> handy usage with <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> engine. All reforming
+functions returns with a flag to indicate if usable for
+its caller.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> is an independent reimplementation of the <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> interface, so
+this module is deliberately a sibling of <a class="reference internal" href="#module-pcapkit.toolkit.pypcap" title="pcapkit.toolkit.pypcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcap</span></code></a> rather
+than an alias of it: each engine names its own adapter, so a change made for
+one cannot quietly alter the other.</p>
+<p>Like <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> it performs no protocol dissection, so the reassembly and flow
+tracing adapters below cannot be implemented. They are defined all the same,
+so that reaching for one fails with an explanatory
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a> rather than an
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ImportError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImportError</span></code></a>.</p>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pcap_ct.ipv4_reassembly">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap_ct.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap_ct.ipv4_reassembly" title="Link to this definition">¶</a></dt>
+<dd><p>Make data for IPv4 reassembly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes.</p></li>
+<li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – Always, as <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> provides no IPv4 layer to read.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Packet" title="pcapkit.foundation.reassembly.data.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pcap_ct.ipv6_reassembly">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">ipv6_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap_ct.html#ipv6_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap_ct.ipv6_reassembly" title="Link to this definition">¶</a></dt>
+<dd><p>Make data for IPv6 reassembly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes.</p></li>
+<li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – Always, as <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> provides no IPv6 layer to read.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Packet" title="pcapkit.foundation.reassembly.data.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pcap_ct.tcp_reassembly">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">tcp_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap_ct.html#tcp_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap_ct.tcp_reassembly" title="Link to this definition">¶</a></dt>
+<dd><p>Make data for TCP reassembly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes.</p></li>
+<li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – Always, as <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> provides no TCP layer to read.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Packet" title="pcapkit.foundation.reassembly.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pcap_ct.tcp_traceflow">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap_ct.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap_ct.tcp_traceflow" title="Link to this definition">¶</a></dt>
+<dd><p>Trace packet flow for TCP.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes.</p></li>
+<li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Timestamp of the packet.</p></li>
+<li><p><strong>data_link</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – Data link layer protocol (from the capture handle).</p></li>
+<li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – Always, as <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> provides no TCP layer to read.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="id14">
+<h3>Auxiliary Functions<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pcap_ct.packet2chain">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">packet2chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap_ct.html#packet2chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap_ct.packet2chain" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch pcap-ct packet protocol chain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
+<li><p><strong>data_link</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – Data link type, from the capture handle.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Colon (<code class="docutils literal notranslate"><span class="pre">:</span></code>) separated list of protocol chain.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> does not dissect the packet, the chain is only ever the
+link layer type followed by <code class="docutils literal notranslate"><span class="pre">Raw</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">ETHERNET:Raw</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pcap_ct.packet2dict">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap_ct.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap_ct.packet2dict" title="Link to this definition">¶</a></dt>
+<dd><p>Convert pcap-ct packet into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
+<li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Timestamp of packet, as returned by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
+<li><p><strong>data_link</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – Data link type, from the capture handle.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of packet data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The mapping carries the captured bytes verbatim rather than a decoded
+protocol tree, since <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> does not decode anything.</p>
+</div>
+</dd></dl>
+
+</section>
+</section>
 <section id="module-pcapkit.toolkit.pypcapfile">
 <span id="pypcapfile-tools"></span><h2>PyPCAPFile Tools<a class="headerlink" href="#module-pcapkit.toolkit.pypcapfile" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> contains all you need for
@@ -1138,8 +1293,8 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 </div>
 </dd></dl>
 
-<section id="id11">
-<h3>Auxiliary Functions<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<section id="id18">
+<h3>Auxiliary Functions<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile.packet2timestamp">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">packet2timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#packet2timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.packet2timestamp" title="Link to this definition">¶</a></dt>
@@ -1330,8 +1485,12 @@ see the module notes.</p>
 <li><a class="reference internal" href="#id7">Auxiliary Functions</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#module-pcapkit.toolkit.pcap_ct">pcap-ct Tools</a><ul>
+<li><a class="reference internal" href="#id14">Auxiliary Functions</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pypcapfile">PyPCAPFile Tools</a><ul>
-<li><a class="reference internal" href="#id11">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id18">Auxiliary Functions</a></li>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 </ul>
 </li>

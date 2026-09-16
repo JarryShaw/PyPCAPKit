@@ -471,11 +471,14 @@
     <span class="c1"># NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; both</span>
     <span class="c1"># copies need updating when a new engine lands. The duplication predates the</span>
     <span class="c1"># engines added here and is left as-is on purpose.</span>
-    <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">]</span>
+    <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span>
+                      <span class="s1">'pypcapfile'</span><span class="p">]</span>
     <span class="n">Layers</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'link'</span><span class="p">,</span> <span class="s1">'internet'</span><span class="p">,</span> <span class="s1">'transport'</span><span class="p">,</span> <span class="s1">'application'</span><span class="p">,</span> <span class="s1">'none'</span><span class="p">]</span>
 
-    <span class="c1"># NOTE: the PyPCAP engine performs no dissection, so its "packet" is the</span>
-    <span class="c1"># ``(timestamp, bytes)`` pair that ``pcap.pcap`` yields.</span>
+    <span class="c1"># NOTE: the PyPCAP and PCAP_CT engines perform no dissection, so their</span>
+    <span class="c1"># "packet" is the ``(timestamp, bytes)`` pair that ``pcap.pcap`` yields.</span>
+    <span class="c1"># One member covers both: they read the same interface, from two independent</span>
+    <span class="c1"># distributions of it.</span>
     <span class="n">Packet</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Frame</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">,</span> <span class="n">ScapyPacket</span><span class="p">,</span> <span class="n">DPKTPacket</span><span class="p">,</span> <span class="n">PySharkPacket</span><span class="p">,</span>
                    <span class="n">PCAPFilePacket</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span>
 
@@ -615,6 +618,13 @@
         <span class="s1">'dpkt'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.dpkt'</span><span class="p">,</span> <span class="s1">'DPKT'</span><span class="p">),</span>
         <span class="s1">'pyshark'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.pyshark'</span><span class="p">,</span> <span class="s1">'PyShark'</span><span class="p">),</span>
         <span class="s1">'pypcap'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.pypcap'</span><span class="p">,</span> <span class="s1">'PyPCAP'</span><span class="p">),</span>
+        <span class="c1"># NOTE: ``pcap-ct`` is a separate distribution that reimplements the</span>
+        <span class="c1"># ``pypcap`` interface, and it installs the same top-level ``pcap``</span>
+        <span class="c1"># module. It gets its own entry rather than sharing ``pypcap``'s because</span>
+        <span class="c1"># the two are independent projects with different install requirements</span>
+        <span class="c1"># and different Python version coverage; ``PCAP_CT.__engine_module__``</span>
+        <span class="c1"># explains how ``import_test`` tells them apart.</span>
+        <span class="s1">'pcap_ct'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.pcap_ct'</span><span class="p">,</span> <span class="s1">'PCAP_CT'</span><span class="p">),</span>
         <span class="s1">'pypcapfile'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.pypcapfile'</span><span class="p">,</span> <span class="s1">'PyPCAPFile'</span><span class="p">),</span>
     <span class="p">}</span>  <span class="c1"># type: dict[str, ModuleDescriptor[Engine] | Type[Engine]]</span>
 
@@ -859,6 +869,7 @@
 <span class="sd">        * Scapy driver: :class:`pcapkit.foundation.engines.scapy.Scapy`</span>
 <span class="sd">        * PyShark driver: :class:`pcapkit.foundation.engines.pyshark.PyShark`</span>
 <span class="sd">        * PyPCAP driver: :class:`pcapkit.foundation.engines.pypcap.PyPCAP`</span>
+<span class="sd">        * pcap-ct driver: :class:`pcapkit.foundation.engines.pcap_ct.PCAP_CT`</span>
 <span class="sd">        * PyPCAPFile driver: :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`</span>
 
 <span class="sd">        Warns:</span>

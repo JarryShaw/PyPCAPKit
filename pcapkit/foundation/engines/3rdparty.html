@@ -589,6 +589,28 @@ for more operational information.</p>
 <span id="pyshark-support"></span><h2>PyShark Support<a class="headerlink" href="#module-pcapkit.foundation.engines.pyshark" title="Link to this heading">¶</a></h2>
 <p>This module contains the implementation for <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> engine
 support, as is used by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> has <strong>two</strong> requirements beyond installing it, and neither is
+visible to an import – the package imports cleanly and then fails when used,
+which is why
+<a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason" title="pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a> checks
+both up front.</p>
+<p><strong>Python 3.13 or older.</strong> <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> 0.6 builds its event loop with
+<code class="docutils literal notranslate"><span class="pre">asyncio.get_event_loop_policy().get_event_loop()</span></code>. Measured in a fresh
+interpreter with no running loop: 3.10 and 3.11 return a loop silently, 3.12
+returns one with a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#DeprecationWarning" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a>, and <strong>3.14 raises</strong>
+<code class="docutils literal notranslate"><span class="pre">RuntimeError:</span> <span class="pre">There</span> <span class="pre">is</span> <span class="pre">no</span> <span class="pre">current</span> <span class="pre">event</span> <span class="pre">loop</span> <span class="pre">in</span> <span class="pre">thread</span> <span class="pre">'MainThread'</span></code>. Python
+3.13 was not available to measure and is expected to work, being on the
+deprecated-but-functional side of that change.</p>
+<p><strong>Wireshark’s</strong> <strong class="program">tshark</strong> <strong>binary.</strong> <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> shells out to it and
+parses nothing itself. It need not be on <span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code>: <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> consults
+<code class="docutils literal notranslate"><span class="pre">tshark_path</span></code> in its <code class="file docutils literal notranslate"><span class="pre">config.ini</span></code> first, then <span class="target" id="index-1"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code> on POSIX,
+both Program Files directories on Windows, and
+<code class="file docutils literal notranslate"><span class="pre">/Applications/Wireshark.app</span></code> on macOS. The check delegates to
+<code class="docutils literal notranslate"><span class="pre">pyshark</span></code>’s own resolver for exactly that reason, so a correctly configured
+install off <span class="target" id="index-2"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code> is not refused.</p>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pyshark.</span></span><span class="sig-name descname"><span class="pre">PyShark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pyshark.html#PyShark"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark" title="Link to this definition">¶</a></dt>
@@ -609,6 +631,72 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark.__engine_module__">
 <span class="sig-name descname"><span class="pre">__engine_module__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyshark'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark.__engine_module__" title="Link to this definition">¶</a></dt>
 <dd><p>Engine module name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark.PYTHON_CEILING">
+<span class="sig-name descname"><span class="pre">PYTHON_CEILING</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(3,</span> <span class="pre">14)</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark.PYTHON_CEILING" title="Link to this definition">¶</a></dt>
+<dd><p>First Python version <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> does not work on, as a <code class="docutils literal notranslate"><span class="pre">(major,</span> <span class="pre">minor)</span></code>
+pair. Released 0.6 builds its event loop with
+<code class="docutils literal notranslate"><span class="pre">asyncio.get_event_loop_policy().get_event_loop()</span></code>, and Python 3.14 made
+<a class="reference external" href="https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.get_event_loop" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.get_event_loop()</span></code></a> raise <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a> when no current
+event loop exists instead of quietly creating one.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unsupported_reason</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pyshark.html#PyShark.unsupported_reason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason" title="Link to this definition">¶</a></dt>
+<dd><p>Why this engine cannot run here, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when it can.</p>
+<p>Consulted by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor.run()</span></code></a> <em>before</em>
+the import test, because neither of the two things that stop this engine
+is visible to an import. <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> imports perfectly well and then fails
+when it is used, which without this hook escapes from <a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark.run" title="pcapkit.foundation.engines.pyshark.PyShark.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> as a hard
+error rather than degrading to the default engine with a warning.</p>
+<p><strong>The interpreter.</strong> <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> 0.6 does
+<code class="docutils literal notranslate"><span class="pre">asyncio.get_event_loop_policy().get_event_loop()</span></code> at
+<code class="file docutils literal notranslate"><span class="pre">pyshark/capture/capture.py:183</span></code>, in a fresh interpreter with no
+running loop. Measured on four interpreters: 3.10 and 3.11 return a loop
+silently, 3.12 returns one with a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#DeprecationWarning" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a>, and 3.14
+raises <code class="docutils literal notranslate"><span class="pre">RuntimeError:</span> <span class="pre">There</span> <span class="pre">is</span> <span class="pre">no</span> <span class="pre">current</span> <span class="pre">event</span> <span class="pre">loop</span> <span class="pre">in</span> <span class="pre">thread</span>
+<span class="pre">'MainThread'</span></code>. Hence <a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark.PYTHON_CEILING" title="pcapkit.foundation.engines.pyshark.PyShark.PYTHON_CEILING"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PYTHON_CEILING</span></code></a> is <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">14)</span></code>. Python 3.13 was
+not available on the machine this was measured on; it is expected to work,
+since it is on the deprecated-but-functional side of that progression, and
+that expectation is the one thing here that is inferred rather than
+observed.</p>
+<p><strong>The</strong> <strong class="program">tshark</strong> <strong>binary.</strong> <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> is a wrapper around
+Wireshark’s command-line tool and does no parsing itself, so it is useless
+without it. The check delegates to <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>’s own
+<code class="docutils literal notranslate"><span class="pre">get_process_path()</span></code> rather than calling <a class="reference external" href="https://docs.python.org/3/library/shutil.html#shutil.which" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">shutil.which()</span></code></a>, because
+the two are not equivalent and <code class="docutils literal notranslate"><span class="pre">which</span></code> would refuse setups that work:
+<code class="docutils literal notranslate"><span class="pre">pyshark</span></code> looks at <code class="docutils literal notranslate"><span class="pre">tshark_path</span></code> in its <code class="file docutils literal notranslate"><span class="pre">config.ini</span></code> <em>first</em>, and
+then at <span class="target" id="index-3"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code> on POSIX, at both Program Files directories on
+Windows, and at <code class="file docutils literal notranslate"><span class="pre">/Applications/Wireshark.app</span></code> on macOS. Asking
+<code class="docutils literal notranslate"><span class="pre">pyshark</span></code> gets all of that for free and cannot disagree with what
+<code class="docutils literal notranslate"><span class="pre">pyshark</span></code> will do a moment later.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Deliberately <strong>not cached</strong>, and the cost was measured rather than
+assumed: the failing path – which is the expensive one, since it
+exhausts every candidate – takes about 290 microseconds with 39
+<span class="target" id="index-4"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code> entries, against about 120 for a bare
+<a class="reference external" href="https://docs.python.org/3/library/shutil.html#shutil.which" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">shutil.which()</span></code></a>. This runs once per
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>, not once per frame,
+so it is far below the cost of opening the capture. Caching would trade
+that for an answer about the <em>environment</em> that cannot change within
+the process – so installing Wireshark, or fixing
+<span class="target" id="index-5"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code>, would not take effect until restart. The Windows path
+does more work than the POSIX one (two Program Files directories, and
+<a class="reference external" href="https://docs.python.org/3/library/shutil.html#shutil.which" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">shutil.which()</span></code></a> there would multiply by <code class="docutils literal notranslate"><span class="pre">PATHEXT</span></code>), but it is
+still a bounded handful of <a class="reference external" href="https://docs.python.org/3/library/os.html#os.stat" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.stat()</span></code></a> calls.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A short phrase naming the limitation, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -699,6 +787,48 @@ system – a header alone is not enough. It is therefore <strong>not</strong> pa
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>PyPCAP<span class="o">]</span>
 </pre></div>
 </div>
+<p><strong>On Python 3.12 and newer it cannot be installed at all</strong>, which is why the
+extra carries a <code class="docutils literal notranslate"><span class="pre">python_version</span> <span class="pre">&lt;</span> <span class="pre">'3.12'</span></code> marker. <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> 1.3.0 ships a
+<code class="docutils literal notranslate"><span class="pre">pcap.c</span></code> pre-generated by Cython 0.29.32 and never runs Cython at build
+time, and that generated C does not compile against the 3.12+ C API. Measured
+on four interpreters with libpcap present and found:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Python</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcap</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>3.10</p></td>
+<td><p>builds, imports</p></td>
+</tr>
+<tr class="row-odd"><td><p>3.11</p></td>
+<td><p>builds, imports</p></td>
+</tr>
+<tr class="row-even"><td><p>3.12</p></td>
+<td><p><strong>fails</strong> – <code class="docutils literal notranslate"><span class="pre">ob_digit</span></code>, <code class="docutils literal notranslate"><span class="pre">curexc_traceback</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>3.14</p></td>
+<td><p><strong>fails</strong> – those, plus <code class="docutils literal notranslate"><span class="pre">ma_version_tag</span></code> and the
+<code class="docutils literal notranslate"><span class="pre">_PyLong_AsByteArray</span></code> arity</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Upstream is unmaintained – one doc-only commit since 1.3.0, and its Python
+3.12 issue (<a class="reference external" href="https://github.com/pynetwork/pypcap/issues/116">pynetwork/pypcap#116</a>) has been open and
+uncommented since May 2024 – so the cap is not expected to lift. Use
+<a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> on 3.12 and newer.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> installs the same top-level <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module as <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>. This
+engine therefore checks which of the two it got and raises
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a> when it is <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a>,
+naming <code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code> in the message. Running <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> under the
+<code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> name would report an engine that is not the one in use, and the two
+have different install requirements and different version coverage to report.</p>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -733,9 +863,25 @@ neither can be derived without an IP or TCP layer to read.</p></li>
 <p>It also requires the input to be a real file on disk, because
 <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> opens by <em>name</em> – there is no way to hand
 <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> an already-open Python stream.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This engine is upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> specifically, which cannot be installed
+on Python 3.12 or newer: it ships no wheels and its <code class="docutils literal notranslate"><span class="pre">pcap.c</span></code> was
+pre-generated by Cython 0.29.32, which does not compile against the
+3.12+ C API. <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> is an independent reimplementation of the same
+interface that does install there, and
+<a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> is the engine for it.</p>
+<p>Because <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> installs the same top-level <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module, this
+engine checks which distribution it got and refuses the other one rather
+than running under the wrong name – see <code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code>.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>extractor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a></span>) – <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If the installed <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> is <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> rather than
+    upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>.</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -747,7 +893,9 @@ neither can be derived without an IP or TCP layer to read.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.__engine_module__">
 <span class="sig-name descname"><span class="pre">__engine_module__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pcap'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__engine_module__" title="Link to this definition">¶</a></dt>
-<dd><p>Engine module name.</p>
+<dd><p>Engine module name. Note that this cannot separate the two distributions
+that own it – see <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.engines._pcap_backend.probe()</span></code>
+and <code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code>, which is where that is done.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -847,6 +995,400 @@ may both reach it, and <code class="xref py py-meth docutils literal notranslate
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP._closed">
 <span class="sig-name descname"><span class="pre">_closed</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP._closed" title="Link to this definition">¶</a></dt>
+<dd><p>Closed flag, so that the handle is not closed twice.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.foundation.engines.pcap_ct">
+<span id="pcap-ct-support"></span><h2>pcap-ct Support<a class="headerlink" href="#module-pcapkit.foundation.engines.pcap_ct" title="Link to this heading">¶</a></h2>
+<p>This module contains the implementation for <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> engine
+support, as is used by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> is an independent <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a> reimplementation of the <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>
+interface, by a different author, on top of the <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a> distribution. It is
+a <strong>separate engine</strong> rather than a second backend for
+<a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a>: select it with
+<code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code>.</p>
+<p>Its reason for existing is coverage. Upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> stops at Python 3.11
+(see the note under <a class="reference internal" href="#pypcap-support">PyPCAP Support</a> above); <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> and <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a> both
+publish <code class="docutils literal notranslate"><span class="pre">py3-none-any</span></code> wheels, so <strong>installing</strong> this engine needs no
+compiler and no <code class="docutils literal notranslate"><span class="pre">pcap.h</span></code>:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>PCAP_CT<span class="o">]</span>
+</pre></div>
+</div>
+<p>Verified end to end on Python <strong>3.10.20</strong> and <strong>3.14.7</strong>: both read
+<code class="file docutils literal notranslate"><span class="pre">examples/captures/in.pcap</span></code> through <code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code> and return the
+same six frames with identical timestamps. So the two engines together cover
+every interpreter the project supports, and <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> covers all of it on
+its own:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Engine</p></th>
+<th class="head"><p>Python</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> (<code class="docutils literal notranslate"><span class="pre">pypcap</span></code>)</p></td>
+<td><p>3.10, 3.11</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> (<code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code>)</p></td>
+<td><p>3.10 and newer</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>A system</strong> <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> <strong>is still required at run time</strong>, and this
+is the easiest thing to get wrong about <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a>. <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a> ships a vendored
+<code class="file docutils literal notranslate"><span class="pre">libpcap.so</span></code> under <code class="docutils literal notranslate"><span class="pre">_platform/{linux,macos,windows}/</span></code> but does <strong>not</strong>
+use it by default: its <code class="file docutils literal notranslate"><span class="pre">libpcap.cfg</span></code> reads <code class="docutils literal notranslate"><span class="pre">LIBPCAP</span> <span class="pre">=</span> <span class="pre">None</span></code> as
+published, which sends the loader to <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.util.find_library" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ctypes.util.find_library()</span></code></a>, so what
+gets mapped is the host’s <code class="docutils literal notranslate"><span class="pre">libpcap.so.1</span></code>.</p>
+<p>Measured, not assumed: the same <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> 1.11.0b29 wheel loaded
+<code class="file docutils literal notranslate"><span class="pre">/usr/lib64/libpcap.so.1.5.3</span></code> under one interpreter on this host and
+linuxbrew’s 1.11.0 under another, purely because their loader search paths
+differ. Setting <code class="docutils literal notranslate"><span class="pre">LIBPCAP</span> <span class="pre">=</span> <span class="pre">tcpdump</span></code> in <code class="file docutils literal notranslate"><span class="pre">libpcap.cfg</span></code> selects the
+vendored copy instead, which reports libpcap 1.10.6.</p>
+<p>With no system <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> at all, <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcap</span></code> raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> rather than <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ImportError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImportError</span></code></a>, which would escape
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.import_test" title="pcapkit.foundation.extraction.Extractor.import_test"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.import_test</span></code></a> and abort the
+extraction. <code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAP_CT.unsupported_reason</span></code> detects it and
+reports it as an ordinary “engine unavailable”, so the extraction falls back to
+the default engine with a warning naming the missing library.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Both distributions are pre-releases.</strong> <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> 1.3.0b3 and <code class="docutils literal notranslate"><span class="pre">libpcap</span></code>
+1.11.0b29 are the newest published versions, and neither project has ever
+published a stable release – which is also why <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> resolves them
+without <code class="docutils literal notranslate"><span class="pre">--pre</span></code>. <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> further documents itself as tracking the
+<a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> <strong>1.2.3</strong> interface rather than 1.3.0.</p>
+<p>Every attribute this engine touches – the <code class="docutils literal notranslate"><span class="pre">pcap.pcap(name=...,</span> <span class="pre">promisc=...)</span></code>
+constructor, <code class="xref py py-meth docutils literal notranslate"><span class="pre">datalink()</span></code>, <code class="docutils literal notranslate"><span class="pre">snaplen</span></code>, iteration yielding
+<code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code>, and <code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code> – is present on both and
+was measured to behave identically, byte for byte and timestamp for timestamp,
+on <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> 1.3.0b3 against <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> 1.3.0. That is a statement about the
+versions tested, not a guarantee from upstream. <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> is therefore not
+included in the <code class="docutils literal notranslate"><span class="pre">all</span></code> extra: a beta should be asked for by name.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Being the same interface, <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> has the same limits. It performs <strong>no
+protocol dissection</strong>: each frame is the <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> pair that
+<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_next_ex()</span></code> produced. Reassembly and flow tracing are therefore
+unavailable regardless of which backend is installed, and are disabled – with
+an <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – when requested;
+the adapters in <a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pcap_ct" title="pcapkit.toolkit.pcap_ct"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap_ct</span></code></a> raise
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a> rather than fail
+obscurely. It also reads from a file on disk only, because
+<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> opens a savefile by <em>name</em>; a non-file input is
+rejected with an <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>.</p>
+<p>The timestamp is seconds since the epoch as a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>. <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> opens
+savefiles asking for nanosecond precision via
+<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline_with_tstamp_precision()</span></code>, so a microsecond-resolution
+savefile is scaled up by <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> rather than truncated; for
+<code class="file docutils literal notranslate"><span class="pre">examples/captures/in.pcap</span></code> the result matches each record header’s
+<code class="docutils literal notranslate"><span class="pre">ts_sec</span> <span class="pre">+</span> <span class="pre">ts_usec</span> <span class="pre">*</span> <span class="pre">1e-6</span></code> exactly.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PCAP-NG is rejected with a
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a>, for both engines, and the
+reason is that accepting it would be <em>unpredictable</em> rather than merely
+limited. <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> can read a PCAP-NG savefile, but how well
+depends on the version the host provides – which, per the warning above, the
+<a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a> wheel does not pin. Both measured on
+<code class="file docutils literal notranslate"><span class="pre">examples/captures/dhcp.pcapng</span></code>:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>System libpcap</p></th>
+<th class="head"><p>Result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.11.0</p></td>
+<td><p>correct – the same four frames and the same sub-second
+timestamps as
+<a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>1.5.3</p></td>
+<td><p>four frames, but nonsense sub-second timestamps
+(<code class="docutils literal notranslate"><span class="pre">1102274184.0000002</span></code> and the like), silently and with no
+error</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Even on a good version, <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_datalink()</span></code> reports a single link type for
+the whole file, so a capture whose interfaces differ would have one interface’s
+link type applied to every frame.
+<a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> reads the per-interface
+blocks properly and does not depend on the host’s library at all, so PCAP-NG is
+routed there rather than read approximately – or wrongly – here.</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">PCAP_CT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcap_ct.html#PCAP_CT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RawFrame</span></code>]</p>
+<p>pcap-ct engine support.</p>
+<p><a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> is a <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a> reimplementation of the <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> API on top of
+the <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a> package, which supplies the <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> bindings
+(and ships a vendored copy of the library that it does not, by default, use
+– see the warning below). Both distributions install a
+top-level <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module and expose the same interface, so this engine is
+a sibling of <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> rather than a
+replacement for it – see <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__engine_module__" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__engine_module__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine_module__</span></code></a> for how the two are told
+apart, and <a class="reference internal" href="#"><span class="doc">the engine documentation</span></a> for which one to install.</p>
+<p>It exists because upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> cannot be installed on a current
+interpreter: it ships no wheels and its <code class="docutils literal notranslate"><span class="pre">pcap.c</span></code> was pre-generated by
+Cython 0.29.32, which does not compile against the Python 3.12+ C API.
+<a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> and <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a> both publish <code class="docutils literal notranslate"><span class="pre">py3-none-any</span></code> wheels, so <strong>installing</strong>
+this engine needs no compiler and no <code class="docutils literal notranslate"><span class="pre">pcap.h</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It does still need a <strong>system</strong> <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> at <em>run</em> time, and
+this is easy to get wrong: <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a> ships a vendored
+<code class="file docutils literal notranslate"><span class="pre">libpcap.so</span></code> under <code class="file docutils literal notranslate"><span class="pre">_platform/</span><em><span class="pre">linux,macos,windows</span></em><span class="pre">/</span></code> but does
+<strong>not</strong> use it by default. Its <code class="file docutils literal notranslate"><span class="pre">libpcap.cfg</span></code> reads <code class="docutils literal notranslate"><span class="pre">LIBPCAP</span> <span class="pre">=</span> <span class="pre">None</span></code>
+as published, which sends its loader to
+<a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.util.find_library" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ctypes.util.find_library()</span></code></a>, so the library actually mapped is the
+host’s <code class="docutils literal notranslate"><span class="pre">libpcap.so.1</span></code>. Measured on this host: the same
+<code class="docutils literal notranslate"><span class="pre">libpcap</span></code> 1.11.0b29 wheel loaded <code class="docutils literal notranslate"><span class="pre">/usr/lib64/libpcap.so.1.5.3</span></code> under one
+interpreter and linuxbrew’s 1.11.0 under another, purely because their
+loader search paths differ.</p>
+<p>Two consequences. With no system <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> at all,
+<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcap</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> – not <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ImportError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImportError</span></code></a> – which
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code> exists partly to catch. And the
+<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> <em>version</em> in play is a property of the host rather
+than of the wheel, which is why the PCAP-NG note on <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.run" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> does not
+rely on it. Setting <code class="docutils literal notranslate"><span class="pre">LIBPCAP</span> <span class="pre">=</span> <span class="pre">tcpdump</span></code> in <code class="file docutils literal notranslate"><span class="pre">libpcap.cfg</span></code> selects the
+vendored copy instead – verified loading, and reporting libpcap 1.10.6.</p>
+</div>
+<p>Being the same interface, it has the same limits. Offline, <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> is a
+savefile reader and nothing more: iteration yields the <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code>
+pair from <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_next_ex()</span></code> and no protocol dissection is performed.
+Consequently this engine</p>
+<ul class="simple">
+<li><p>returns each frame as a <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> rather than as
+a parsed packet object, and</p></li>
+<li><p>disables both reassembly and flow tracing, warning as it does so, since
+neither can be derived without an IP or TCP layer to read.</p></li>
+</ul>
+<p>It also requires the input to be a real file on disk, because
+<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> opens by <em>name</em> – there is no way to hand
+<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> an already-open Python stream.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Both distributions are published as pre-releases only – <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code>
+1.3.0b3 and <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> 1.11.0b29 at the time of writing – and
+<code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> documents itself as tracking the <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> <strong>1.2.3</strong> API
+rather than 1.3.0. Every attribute this engine touches is present and
+behaves identically on both (measured on <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> 1.3.0b3 against
+<code class="docutils literal notranslate"><span class="pre">pypcap</span></code> 1.3.0), but that is a statement about the versions tested, not
+a guarantee from upstream.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a></span>) – <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__engine_name__">
+<span class="sig-name descname"><span class="pre">__engine_name__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PCAP_CT'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__engine_name__" title="Link to this definition">¶</a></dt>
+<dd><p>Engine name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__engine_module__">
+<span class="sig-name descname"><span class="pre">__engine_module__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pcap._pcap'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__engine_module__" title="Link to this definition">¶</a></dt>
+<dd><p>Engine module name. Note that this is <code class="docutils literal notranslate"><span class="pre">pcap._pcap</span></code>, not <code class="docutils literal notranslate"><span class="pre">pcap</span></code>:
+<a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> and upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> both install a top-level <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code>,
+so importing that name cannot tell which of the two is present, and
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.import_test" title="pcapkit.foundation.extraction.Extractor.import_test"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.import_test</span></code></a> decides engine
+availability by import alone. <code class="docutils literal notranslate"><span class="pre">pcap._pcap</span></code> is the <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a>
+implementation module; upstream ships <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> as a single extension
+module rather than a package, so the submodule import fails there and the
+two engines stay distinguishable.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.dlink">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dlink</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.dlink" title="Link to this definition">¶</a></dt>
+<dd><p>Data link layer protocol, as reported by the capture handle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcap_ct.html#PCAP_CT.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialise the engine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>EngineWarning</strong> – If both distributions that provide <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> are
+installed. Only one of them can win the import – measured on
+Python 3.10 with both present, the <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> package wins and
+upstream’s extension module is shadowed – so the other is
+unreachable, and nothing else would say why
+<code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> had stopped working.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If the environment cannot support this engine, for
+    either of the reasons <code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code> describes. That
+    hook is only consulted by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a>, which degrades to
+    the default engine with a warning; constructing the engine
+    directly bypasses it, so this is the backstop for that path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcap_ct.html#PCAP_CT.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.run" title="Link to this definition">¶</a></dt>
+<dd><p>Call <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> to extract PCAP files.</p>
+<p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._expkg" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a>
+as <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code>, <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._handle" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT._handle"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._handle</span></code></a> as the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> capture handle and <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._extmp" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a> as an iterator over it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AttributeWarning</strong> – Warns under following circumstances:</p>
+<ul class="simple">
+<li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
+and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
+is provided as the pcap-ct engine currently does not
+support such operations.</p></li>
+<li><p>if reassembly and/or flow tracing is enabled, as the pcap-ct
+engine performs no protocol dissection and so cannot support
+either operation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the file format is not supported, i.e., not a PCAP
+    file. PCAP-NG is rejected explicitly even though the vendored
+    <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> can read one – see the note below.</p></li>
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If the input is not a file on disk, as
+    <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> can only open a savefile by name.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<p>The PCAP-NG rejection is a deliberate narrowing, and the reason is
+that the alternative is <em>unpredictable</em> rather than merely limited.
+<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> can read a PCAP-NG savefile, but how well
+depends on the version the host happens to provide – which, per the
+warning in this class’s docstring, is not something the <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a>
+wheel pins. Both measured on
+<code class="file docutils literal notranslate"><span class="pre">examples/captures/dhcp.pcapng</span></code>:</p>
+<ul class="simple">
+<li><p>against libpcap <strong>1.11.0</strong> it reads correctly, yielding the same
+four frames and the same sub-second timestamps as
+<a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>;</p></li>
+<li><p>against libpcap <strong>1.5.3</strong> it yields the four frames but with
+nonsense sub-second timestamps – <code class="docutils literal notranslate"><span class="pre">1102274184.0000002</span></code> and the
+like – silently, with no error.</p></li>
+</ul>
+<p>Even on a good version it cannot represent more than one interface:
+<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_datalink()</span></code> returns a single link type for the whole file,
+so a capture whose interfaces differ would have one interface’s link
+type applied to every frame.
+<a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> reads the
+per-interface blocks properly and does not depend on the host’s
+library at all, so PCAP-NG is routed there rather than read
+approximately – or wrongly – here.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.read_frame">
+<span class="sig-name descname"><span class="pre">read_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcap_ct.html#PCAP_CT.read_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.read_frame" title="Link to this definition">¶</a></dt>
+<dd><p>Read frames with pcap-ct engine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> pair as yielded by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The timestamp is seconds since the epoch as a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>.
+<a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> opens savefiles with
+<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline_with_tstamp_precision()</span></code> asking for
+nanosecond precision, so a microsecond-resolution savefile is scaled
+up by <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> rather than truncated; the resulting
+value matches the record header’s <code class="docutils literal notranslate"><span class="pre">ts_sec</span> <span class="pre">+</span> <span class="pre">ts_usec</span> <span class="pre">*</span> <span class="pre">1e-6</span></code>
+exactly for <code class="file docutils literal notranslate"><span class="pre">examples/captures/in.pcap</span></code>.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Please refer to <a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcap.PCAP.read_frame" title="pcapkit.foundation.engines.pcap.PCAP.read_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAP.read_frame</span></code></a>
+for more operational information.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcap_ct.html#PCAP_CT.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.close" title="Link to this definition">¶</a></dt>
+<dd><p>Close engine.</p>
+<p>This method closes the underlying <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> handle. It is
+idempotent, as <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor._cleanup</span></code></a> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.__exit__</span></code>
+may both reach it.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> 1.3.0b3’s own <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcap.pcap.close()</span></code> happens to tolerate
+a second call, where upstream <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> 1.3.0 segfaults on one. The
+<a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._closed" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT._closed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_closed</span></code></a> flag is kept regardless: it is not
+this engine’s business to depend on a pre-release’s undocumented
+forgiveness, and the flag also covers the case of an engine that was
+never opened.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT._expkg">
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcap</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._expkg" title="Link to this definition">¶</a></dt>
+<dd><p>Engine extraction package.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT._handle">
+<span class="sig-name descname"><span class="pre">_handle</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Handle</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._handle" title="Link to this definition">¶</a></dt>
+<dd><p>Capture handle, kept separately from the iterator it is read through
+so that <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.close" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a> does not depend on <code class="docutils literal notranslate"><span class="pre">iter(handle)</span> <span class="pre">is</span> <span class="pre">handle</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT._extmp">
+<span class="sig-name descname"><span class="pre">_extmp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">RawFrame</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._extmp" title="Link to this definition">¶</a></dt>
+<dd><p>Engine extraction temporary storage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT._dlink">
+<span class="sig-name descname"><span class="pre">_dlink</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_LinkType</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._dlink" title="Link to this definition">¶</a></dt>
+<dd><p>Data link layer protocol, from the capture handle.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT._closed">
+<span class="sig-name descname"><span class="pre">_closed</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._closed" title="Link to this definition">¶</a></dt>
 <dd><p>Closed flag, so that the handle is not closed twice.</p>
 </dd></dl>
 
@@ -1155,6 +1697,7 @@ the extraction, but it should not pass silently either.</p>
 <li><a class="reference internal" href="#module-pcapkit.foundation.engines.dpkt">DPKT Support</a></li>
 <li><a class="reference internal" href="#module-pcapkit.foundation.engines.pyshark">PyShark Support</a></li>
 <li><a class="reference internal" href="#module-pcapkit.foundation.engines.pypcap">PyPCAP Support</a></li>
+<li><a class="reference internal" href="#module-pcapkit.foundation.engines.pcap_ct">pcap-ct Support</a></li>
 <li><a class="reference internal" href="#module-pcapkit.foundation.engines.pypcapfile">PyPCAPFile Support</a><ul>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 </ul>

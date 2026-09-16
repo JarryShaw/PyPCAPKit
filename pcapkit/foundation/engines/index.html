@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/engines/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.engines is a collection of engines support for pcapkit, including but not limited to the built-in PCAP and PCAP-NG file support, Scapy, PyShark, DPKT, PyPCAP and PyPCAPFile 3rd p..." />
-<meta name="description" content="pcapkit.foundation.engines is a collection of engines support for pcapkit, including but not limited to the built-in PCAP and PCAP-NG file support, Scapy, PyShark, DPKT, PyPCAP and PyPCAPFile 3rd p..." />
+<meta property="og:description" content="pcapkit.foundation.engines is a collection of engines support for pcapkit, including but not limited to the built-in PCAP and PCAP-NG file support, Scapy, PyShark, DPKT, PyPCAP, pcap-ct and PyPCAPF..." />
+<meta name="description" content="pcapkit.foundation.engines is a collection of engines support for pcapkit, including but not limited to the built-in PCAP and PCAP-NG file support, Scapy, PyShark, DPKT, PyPCAP, pcap-ct and PyPCAPF..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Base Engine" href="engine.html"><link rel="prev" title="File Extractor" href="../extraction.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -420,7 +420,8 @@
 <p><a class="reference internal" href="#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines</span></code></a> is a collection of engines
 support for <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, including but not limited to the
 built-in PCAP and <a class="reference external" href="https://wiki.wireshark.org/Development/PcapNg">PCAP-NG</a> file support, <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>,
-<a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>, <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 3rd party engine support.</p>
+<a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>, <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>, <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 3rd party engine
+support.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>For more information on customisation and extension, please
@@ -443,6 +444,7 @@ refer to <a class="reference internal" href="../../../ext.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.dpkt">DPKT Support</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.pyshark">PyShark Support</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.pypcap">PyPCAP Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.pcap_ct">pcap-ct Support</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3rdparty.html#module-pcapkit.foundation.engines.pypcapfile">PyPCAPFile Support</a></li>
 </ul>
 </li>
@@ -471,6 +473,7 @@ class hierarchy of <a class="reference internal" href="#module-pcapkit.foundatio
         DPKT
         PyShark
         PyPCAP
+        PCAP_CT
         PyPCAPFile
     end
     B --&gt; third-party
@@ -490,6 +493,7 @@ class hierarchy of <a class="reference internal" href="#module-pcapkit.foundatio
     click DPKT &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT&quot;
     click PyShark &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark&quot;
     click PyPCAP &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP&quot;
+    click PCAP_CT &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT&quot;
     click PyPCAPFile &quot;/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile&quot;
     </pre><p>Not every engine can do everything <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
 offers, and the ones that cannot say so rather than quietly doing less:</p>
@@ -513,7 +517,12 @@ savefiles on disk only, otherwise
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a> /
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a></p></td>
+<td><p>the same gaps as <code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> above – it reads the same
+interface, so no dissection, no reassembly and no flow
+tracing, and PCAP savefiles on disk only</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a></p></td>
 <td><p>no IPv6 decoder, hence no IPv6 reassembly – disabled with an
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a>, and
 <a class="reference internal" href="../../toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.ipv6_reassembly" title="pcapkit.toolkit.pypcapfile.ipv6_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv6_reassembly()</span></code></a> raises;
@@ -545,29 +554,120 @@ so it is worth knowing in advance.</p>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a>,
 <a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a></p></td>
-<td><p>nothing – both ship pure-Python wheels</p></td>
+<td><p>nothing – both ship pure-Python wheels, and both were
+measured reading a capture on Python 3.14, so neither
+overrides <code class="docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark" title="pcapkit.foundation.engines.pyshark.PyShark"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyShark</span></code></a></p></td>
-<td><p>Wireshark’s <strong class="program">tshark</strong> binary on <code class="docutils literal notranslate"><span class="pre">PATH</span></code></p></td>
+<td><p>Wireshark’s <strong class="program">tshark</strong> binary – on <span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code>, or
+wherever <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>’s <code class="file docutils literal notranslate"><span class="pre">config.ini</span></code> points – <strong>and</strong>
+Python <strong>3.13 or older</strong>: <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> 0.6 builds its event
+loop with <a class="reference external" href="https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.get_event_loop" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.get_event_loop()</span></code></a>, which raises from
+3.14</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a></p></td>
-<td><p><a class="reference external" href="https://www.tcpdump.org">libpcap</a> headers and library, a C compiler, and Python
+<td><p><a href="#id2"><span class="problematic" id="id3">`libpcap`_</span></a> headers and library, a C compiler, and Python
 <strong>3.11 or older</strong> – <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> 1.3.0 publishes no wheel and
 its pre-generated <code class="file docutils literal notranslate"><span class="pre">pcap.c</span></code> does not compile on 3.12+</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a></p></td>
+<td><p>a system <code class="docutils literal notranslate"><span class="pre">libpcap.so.1</span></code> at <em>run</em> time – nothing to build,
+since <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> and <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> ship pure-Python wheels,
+but see the warning below: the vendored library those wheels
+carry is not what gets loaded by default</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a></p></td>
 <td><p>Python <strong>3.11 or older</strong> – <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> 0.12.0 imports the
 <code class="docutils literal notranslate"><span class="pre">imp</span></code> module, removed in Python 3.12</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>Every one of these constraints is also enforced in code rather than only
+documented: each engine overrides
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code>, which
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a> consults
+<em>before</em> the import test, so asking for an engine that cannot run here produces
+one warning naming the actual cause and a clean fall back to the built-in parser.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../../../index.html"><span class="doc">PyPCAPKit - Comprehensive Network Packet Analysis Library</span></a> covers the installation prerequisites in full,
 including how <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>’s <code class="file docutils literal notranslate"><span class="pre">setup.py</span></code> looks for <code class="file docutils literal notranslate"><span class="pre">pcap.h</span></code> and why
 a Homebrew <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> is not always found.</p>
 </div>
+</section>
+<section id="two-engines-one-interface-choosing-between-pypcap-and-pcap-ct">
+<h2>Two engines, one interface: choosing between PyPCAP and PCAP_CT<a class="headerlink" href="#two-engines-one-interface-choosing-between-pypcap-and-pcap-ct" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> and
+<a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> read the same
+<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> interface from two independent distributions, both of which
+install a top-level <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module. They are separate engines because they
+are separate projects, with different authors, different install requirements
+and different interpreter coverage:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Engine (<code class="docutils literal notranslate"><span class="pre">engine=</span></code>)</p></th>
+<th class="head"><p>Distribution</p></th>
+<th class="head"><p>Python</p></th>
+<th class="head"><p>What it needs</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a>
+(<code class="docutils literal notranslate"><span class="pre">'pypcap'</span></code>)</p></td>
+<td><p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> 1.3.0
+(stable)</p></td>
+<td><p>3.10, 3.11 only</p></td>
+<td><p>to build: a C compiler, <code class="docutils literal notranslate"><span class="pre">pcap.h</span></code> and a system
+libpcap – no wheels are published</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a>
+(<code class="docutils literal notranslate"><span class="pre">'pcap_ct'</span></code>)</p></td>
+<td><p><a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> 1.3.0b3
++ <a href="#id4"><span class="problematic" id="id5">`libpcap`_</span></a>
+1.11.0b29 (<strong>beta</strong>)</p></td>
+<td><p>3.10 and newer</p></td>
+<td><p>to install: nothing – <code class="docutils literal notranslate"><span class="pre">py3-none-any</span></code> wheels.
+At run time: a system <code class="docutils literal notranslate"><span class="pre">libpcap.so.1</span></code> all the
+same – see the warning below</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Neither engine dissects anything, so the capability gaps in the table above are
+identical for both and are a property of <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>, not of the
+distribution: <strong>reassembly and flow tracing are unavailable whichever one is
+installed.</strong> Pick on availability, not on features.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> needs no toolchain to <em>install</em>, but it does need a system
+<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> to <em>run</em>. <a href="#id6"><span class="problematic" id="id7">`libpcap`_</span></a> ships a vendored
+<code class="file docutils literal notranslate"><span class="pre">libpcap.so</span></code> and, as published, does not use it: its
+<code class="file docutils literal notranslate"><span class="pre">libpcap.cfg</span></code> says <code class="docutils literal notranslate"><span class="pre">LIBPCAP</span> <span class="pre">=</span> <span class="pre">None</span></code>, which sends the loader to
+<a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.util.find_library" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ctypes.util.find_library()</span></code></a>. With no system library at all
+<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcap</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> rather than <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ImportError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImportError</span></code></a>;
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAP_CT.unsupported_reason</span></code> catches that
+and turns it into an ordinary fall back to the default engine, instead of the
+hard error it would otherwise be.</p>
+</div>
+<p><strong>The two distributions collide, so install exactly one.</strong> Both own the top-level
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module, and pip will happily install both – measured on Python 3.10,
+the <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> package then wins the import and upstream’s extension module is
+shadowed and unreachable. Each engine therefore detects which distribution it
+actually got, via
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.engines._pcap_backend.probe()</span></code>, and:</p>
+<ul class="simple">
+<li><p>reports it – <code class="xref py py-attr docutils literal notranslate"><span class="pre">PyPCAP.backend</span></code> and
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">PCAP_CT.backend</span></code>
+name the distribution, version and file actually in use, so a bug report about
+“the pypcap engine” says which one ran;</p></li>
+<li><p>declines to run on the other one, through <code class="docutils literal notranslate"><span class="pre">unsupported_reason()</span></code>, with a
+message naming the <code class="docutils literal notranslate"><span class="pre">engine=</span></code> string that does want it; and</p></li>
+<li><p>warns with an <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineWarning</span></code></a> when it finds
+both installed, since that state makes one of the two engines permanently
+unselectable and nothing else would explain why.</p></li>
+</ul>
 </section>
 </section>
 
@@ -628,6 +728,7 @@ a Homebrew <code class="docutils literal notranslate"><span class="pre">libpcap<
             <ul>
 <li><a class="reference internal" href="#">Engine Support</a><ul>
 <li><a class="reference internal" href="#availability">Availability</a></li>
+<li><a class="reference internal" href="#two-engines-one-interface-choosing-between-pypcap-and-pcap-ct">Two engines, one interface: choosing between PyPCAP and PCAP_CT</a></li>
 </ul>
 </li>
 </ul>
