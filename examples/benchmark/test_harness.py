@@ -1363,6 +1363,40 @@ class TestHostileReasons:
         assert reason in text
         assert '\\*' not in text
 
+    def test_the_emulation_note_is_escaped_too(self):
+        """`--emulated` is outside text as much as any reason is.
+
+        `run.sh` composes that sentence itself, which makes it safe in practice and is
+        exactly why it was the last channel left unescaped. It still arrives on the
+        command line, and it reaches markup in two places -- a provenance row and a bold
+        paragraph -- so a value with a stray ``*`` in it would break the snippet from a
+        direction nobody was watching.
+
+        """
+        docutils_core = pytest.importorskip('docutils.core')
+        from docutils.utils import SystemMessage  # pylint: disable=import-outside-toplevel
+
+        emulated = 'Measured under **emulation**: a linux/amd64 image on an `arm64 host.'
+        docs = self._documents('an ordinary reason')
+        rows = report.collect(docs)
+        for snippet in (report.render_versions_rst(rows, docs, (), emulated),
+                        report.render_rst(rows, docs, emulated=emulated)):
+            messages = []
+            try:
+                docutils_core.publish_doctree(
+                    snippet,
+                    settings_overrides={
+                        'halt_level': 2, 'report_level': 2, 'warning_stream': messages,
+                        'input_encoding': 'unicode', 'output_encoding': 'unicode',
+                    },
+                )
+            except SystemMessage as exc:  # pragma: no cover - only on a real failure
+                pytest.fail(f'docutils rejected the emulation note: {exc}\n\n{snippet}')
+            assert not messages, f'docutils warned: {messages}\n\n{snippet}'
+
+        # ...and the operator still sees it as it was written.
+        assert emulated in report.render_text(rows, docs, emulated=emulated)
+
 
 class TestFixedFormatting:
     """Formatting for a column read downwards rather than a value read alone."""

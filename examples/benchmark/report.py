@@ -758,6 +758,9 @@ def _provenance(documents: 'Sequence[dict[str, Any]]', image: 'Optional[str]',
     pairs.append(('Python', f"{implementations} {', '.join(versions)}"))
     pairs.append(('Architecture', f"``{first['machine']}``"))
     if emulated:
+        # Raw, like a missing-version reason and for the same reason: this value is also
+        # consumed by the plain-text report, so escaping it here would put backslashes in
+        # front of the operator. The two RST renderers escape it at their own boundary.
         pairs.append(('Emulation', emulated))
     pairs.append(('Capture', f"``{capture['name']}`` -- {capture['bytes']} bytes, "
                              f"SHA-256 ``{capture['sha256'][:16]}...``"))
@@ -994,7 +997,12 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
         lines.append('')
 
     if emulated:
-        lines.append(f'**{emulated}** Timings taken under emulation are not comparable with')
+        # `run.sh` composes this sentence itself today, which makes it safe today. It
+        # still arrives through `--emulated` on the command line, so it is outside text by
+        # every test that matters, and the one channel of it left unescaped would be the
+        # one nobody thought about.
+        lines.append(f'**{_escape(emulated)}** Timings taken under emulation are not '
+                     f'comparable with')
         lines.append('native ones, and an absolute figure taken that way describes the emulator')
         lines.append('as much as the interpreter. Re-run natively before publishing.')
         lines.append('')
@@ -1022,6 +1030,11 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
 
     """
     marked = overlapping(rows)
+    # Escaped once, here at the boundary where this snippet stops being data and starts
+    # being markup, and used for both places it appears below. See the note in
+    # :func:`_provenance` for why that function is handed the escaped form rather than
+    # doing this itself.
+    emulated_rst = _escape(emulated) if emulated else emulated
     lines = []  # type: list[str]
 
     lines.append('Test Environment')
@@ -1029,7 +1042,7 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
     lines.append('')
     lines.append('.. list-table::')
     lines.append('')
-    for label, value in _provenance(documents, image, emulated):
+    for label, value in _provenance(documents, image, emulated_rst):
         lines.append(f'   * - {label}')
         lines.append(f'     - {value}')
     for label, value in _missing_pairs(documents, missing):
@@ -1148,7 +1161,8 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
         lines.append('')
 
     if emulated:
-        lines.append(f'**{emulated}** Timings taken under emulation are not comparable with native')
+        lines.append(f'**{emulated_rst}** Timings taken under emulation are not comparable '
+                     f'with native')
         lines.append('ones, and the ratios are only as trustworthy as the emulator is uniform')
         lines.append('across the work each engine does. Re-run natively before publishing.')
         lines.append('')
