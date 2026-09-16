@@ -11,37 +11,32 @@ turning the bytes of a text field into a :obj:`str`.
 
 """
 
-import functools
+import collections
+import hashlib
+from typing import TYPE_CHECKING
 
 import chardet
 
 __all__ = ['detect']
 
-#: How many distinct bytestrings :func:`detect` will remember. Bounded
-#: so that a capture full of never-repeating text cannot retain all of it.
+if TYPE_CHECKING:
+    from collections import OrderedDict
+
+#: How many distinct bytestrings :func:`detect` will remember. Bounded so that a
+#: capture full of never-repeating text cannot retain all of it.
 DETECT_CACHE_SIZE = 1024
 
-#: Longest bytestring :func:`detect` will put in the cache. Chosen from
-#: measurement: across ``http.pcap``, ``http6.cap`` and
-#: ``many_interfaces.pcapng`` every value reaching detection was at most 116
-#: octets, with a 95th percentile of 52, so this keeps every repeating string a
-#: real capture presents while capping what the cache can retain.
-DETECT_CACHE_MAX_BYTES = 256
+#: Digest length, in octets, of the key :func:`detect` caches under. 32 octets is
+#: 256 bits, so a collision -- which would hand one bytestring another's verdict
+#: -- is not a thing that happens; halving :func:`~hashlib.blake2b`'s default 64
+#: halves what the cache retains per entry for no practical loss.
+DETECT_DIGEST_SIZE = 32
 
-
-@functools.lru_cache(maxsize=DETECT_CACHE_SIZE)
-def _detect_cached(value: 'bytes') -> 'str':
-    """Detect the character set of a short ``value``, memoised.
-
-    Args:
-        value: Bytestring whose encoding is to be detected.
-
-    Returns:
-        Name of the detected encoding, or ``'utf-8'`` where detection declines
-        to name one.
-
-    """
-    return chardet.detect(value)['encoding'] or 'utf-8'
+#: Detected encodings, keyed by digest of the bytes they were detected from, least
+#: recently used first. An :class:`~collections.OrderedDict` rather than
+#: :func:`functools.lru_cache` because the cache key is a digest of the argument
+#: rather than the argument itself, which ``lru_cache`` cannot express.
+_cache = collections.OrderedDict()  # type: OrderedDict[bytes, str]
 
 
 def detect(value: 'bytes') -> 'str':
@@ -51,37 +46,46 @@ def detect(value: 'bytes') -> 'str':
     single most expensive step in turning a text field into a :obj:`str`. The
     strings a capture presents repeat heavily -- an HTTP-heavy capture asked for
     the encoding of ``b'Connection'`` once per message and got the same answer
-    every time -- so the verdict is memoised on the bytes rather than recomputed.
-    The result is by construction the one :func:`chardet.detect` would have
-    returned.
+    every time -- so the verdict is memoised rather than recomputed. The result is
+    by construction the one :func:`chardet.detect` would have returned.
 
-    Long values bypass the cache. :meth:`ProtocolBase.decode
-    <pcapkit.protocols.protocol.ProtocolBase.decode>` is public, so a caller may
-    hand this an entire payload, and :func:`~functools.lru_cache` bounds how many
-    entries it keeps rather than how large they are -- 1024 multi-megabyte
-    payloads would be retained for the life of the process. Skipping the cache
-    above :data:`DETECT_CACHE_MAX_BYTES` costs such a call nothing it was not
-    already paying, since a payload that size is unlikely to recur anyway.
+    The cache is keyed on a :func:`~hashlib.blake2b` digest of the bytes rather
+    than on the bytes themselves. A cache bounded by entry *count* is not bounded
+    in size, and :meth:`ProtocolBase.decode
+    <pcapkit.protocols.protocol.ProtocolBase.decode>` is public, so keying on the
+    value would let :data:`DETECT_CACHE_SIZE` whole payloads be retained for the
+    life of the process. A fixed-width digest caps that at
+    :data:`DETECT_CACHE_SIZE` × :data:`DETECT_DIGEST_SIZE` regardless of what is
+    passed, and hashing is cheap beside a detection that already walks the same
+    bytes.
 
     Note:
-        Keying the cache on a *prefix* of a long value would bound the memory
-        while still caching it, but it is not sound: :func:`chardet.detect` is
-        statistical over the whole sequence, so a prefix can disagree with the
-        value it came from. Measured on realistic inputs, an ASCII header
-        followed by a UTF-8, Latin-1 or CP1251 body is detected as ``ascii`` from
-        its first 256 octets and correctly otherwise -- three disagreements in
-        six cases, each of which would decode the body wrongly. Hashing the full
-        value would be both sound and bounded, and is the thing to reach for if a
-        capture ever does present large recurring text.
+        Two cheaper-looking alternatives are both wrong. Keying on a *prefix* is
+        unsound, since :func:`chardet.detect` is statistical over the whole
+        sequence: measured on realistic inputs, an ASCII header followed by a
+        UTF-8, Latin-1 or CP1251 body is detected as ``ascii`` from its first 256
+        octets and correctly otherwise -- three disagreements in six cases, each
+        of which would decode the body wrongly. Skipping the cache above a size
+        threshold is sound but leans on sample captures being representative of
+        real traffic, which they are not: a capture full of large repeated text is
+        exactly the case that most wants the cache.
 
     Args:
         value: Bytestring whose encoding is to be detected.
 
     Returns:
-        Name of the detected encoding, or ``'utf-8'`` where detection declines
-        to name one.
+        Name of the detected encoding, or ``'utf-8'`` where detection declines to
+        name one.
 
     """
-    if len(value) > DETECT_CACHE_MAX_BYTES:
-        return chardet.detect(value)['encoding'] or 'utf-8'
-    return _detect_cached(value)
+    digest = hashlib.blake2b(value, digest_size=DETECT_DIGEST_SIZE).digest()
+    try:
+        charset = _cache[digest]
+    except KeyError:
+        charset = chardet.detect(value)['encoding'] or 'utf-8'
+        _cache[digest] = charset
+        if len(_cache) > DETECT_CACHE_SIZE:
+            _cache.popitem(last=False)
+    else:
+        _cache.move_to_end(digest)
+    return charset

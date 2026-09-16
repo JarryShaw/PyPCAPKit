@@ -16,4 +16,4 @@ which is why it lives here rather than beside either of them.
 
 .. autodata:: pcapkit.utilities.chardet.DETECT_CACHE_SIZE
 
-.. autodata:: pcapkit.utilities.chardet.DETECT_CACHE_MAX_BYTES
+.. autodata:: pcapkit.utilities.chardet.DETECT_DIGEST_SIZE
