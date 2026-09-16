@@ -26,6 +26,7 @@ This module is a helper for the demos, not a demo itself.
 
 """
 
+import platform
 import sys
 from typing import TYPE_CHECKING
 
@@ -83,6 +84,14 @@ def unavailable(exc: 'Exception') -> 'str | None':
         version = '.'.join(str(part) for part in sys.version_info[:3])
         return (f'{exc} -- pyshark asks for an implicit asyncio event loop, '
                 f'which Python {version} no longer provides (pyshark bug, not pcapkit)')
+
+    # The prerelease pcap-ct/libpcap wheels are platform-neutral, but their
+    # bundled configuration currently asks macOS to load Linux's libc.so.6.
+    # That makes the optional engine unavailable on this host, not a failure in
+    # the extraction being benchmarked.
+    if isinstance(exc, OSError) and 'libc.so.6' in str(exc):
+        return (f'pcap-ct/libpcap cannot load its Linux libc.so.6 dependency on '
+                f'{platform.system()}')
 
     return None
 
