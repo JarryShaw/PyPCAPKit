@@ -225,45 +225,6 @@ def maybe_skip_member(app: 'Sphinx', what: str, name: str,  # pylint: disable=un
     return skip
 
 
-def strip_annotation_whitespace(module: 'Any') -> None:
-    """Trim stray whitespace from a module's quoted class annotations.
-
-    ``rank:' int'`` -- the space that belongs after the colon typed inside the
-    quotes instead -- is meaningless to a type checker but fatal here. Python
-    3.14's :mod:`annotationlib` requires a forward reference to be a bare
-    expression and raises :exc:`SyntaxError` on the leading space;
-    :func:`sphinx.util.typing.get_type_hints` catches :exc:`NameError`,
-    :exc:`AttributeError`, :exc:`TypeError` and :exc:`KeyError` but *not*
-    :exc:`SyntaxError`, so the exception escapes and aborts the whole build. It
-    went unnoticed only because the annotations used to fail earlier, with
-    :exc:`NameError`, before :func:`bind_type_checking_names` made them resolvable.
-
-    One instance is fixed at source, in
-    :mod:`pcapkit.protocols.data.internet.hopopt`. Its twin in
-    :mod:`pcapkit.protocols.data.internet.ipv6_opts` is left to #413, which has
-    that file open, so this normalisation stands in until then -- and says so on
-    each one it touches rather than absorbing it quietly.
-
-    Args:
-        module: Module whose classes should be normalised.
-
-    """
-    for obj in list(vars(module).values()):
-        if not isinstance(obj, type) or getattr(obj, '__module__', None) != module.__name__:
-            continue
-        try:
-            annotations = obj.__annotations__
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.info('could not read annotations of %r: %s', obj, exc)
-            continue
-        for key, value in list(annotations.items()):
-            if isinstance(value, str) and value != value.strip():
-                logger.warning('stray whitespace in annotation %s.%s = %r; trimming it here, '
-                               'but fix it at source -- Python 3.14 rejects it outright',
-                               obj.__qualname__, key, value)
-                annotations[key] = value.strip()
-
-
 def bind_type_checking_names(app: 'Sphinx') -> None:
     """Execute every ``pcapkit`` module's ``if TYPE_CHECKING:`` block.
 
@@ -292,6 +253,19 @@ def bind_type_checking_names(app: 'Sphinx') -> None:
     executes the block one statement at a time, so an unimportable optional
     dependency (``pcap``, ``pcapfile``) cannot strand the names declared after it.
 
+    One consequence is worth knowing before it is met as a mystery: making the
+    annotations resolvable also makes a malformed one **fatal**. A quoted
+    annotation with stray whitespace inside the quotes -- ``rank: ' int'``, the
+    space that belongs after the colon typed one character late -- is meaningless
+    to a type checker and was previously harmless here, because these annotations
+    failed earlier with :exc:`NameError`, which
+    :func:`sphinx.util.typing.get_type_hints` catches. Now they resolve, and Python
+    3.14's :mod:`annotationlib` rejects the leading space with a
+    :exc:`SyntaxError` that :func:`~sphinx.util.typing.get_type_hints` does *not*
+    catch, so it aborts the whole build. Two such annotations existed and both are
+    fixed at source; a third would stop the build rather than be worked around
+    here, which is the right way round for a typo.
+
     Args:
         app: Sphinx application.
 
@@ -307,7 +281,6 @@ def bind_type_checking_names(app: 'Sphinx') -> None:
             logger.info('skipped unimportable module %s: %s', info.name, exc)
             continue
         resolve_type_guarded_imports(app.config.autodoc_mock_imports, module)
-        strip_annotation_whitespace(module)
 
 
 def claim_attribute_signature(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
