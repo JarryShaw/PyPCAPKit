@@ -261,20 +261,50 @@ the thread raised when only PCAP was supported.
 Maybe Even Faster?
 ------------------
 
-**Still open.** Benchmarking put the builtin default engine at roughly 4x
-Scapy and 10x DPKT, which is an acceptable price for what it decodes, but the
-original proposal in the thread stands: fold consecutive ``_read_xxxxxx`` calls
-into a single ``file.read`` so that the number of IO calls and the duplicated
-:func:`struct.unpack` work both come down.
+**Partly done.** The measured benchmark this section used to ask for now exists,
+and acting on it cut extraction time on a 1117-frame HTTP capture by about 46%
+with byte-identical output. Four things were wrong on the hot path, none of them
+the ones the thread predicted:
 
-Note that the parsing path has been rewritten since that was written. Protocols
-no longer read fields inline; they declare a
-:class:`~pcapkit.protocols.schema.schema.Schema` of field descriptors and let
-:meth:`~pcapkit.protocols.schema.schema.Schema.unpack` drive it. The batching
-idea still applies, but it belongs in the schema and field machinery now rather
-than in each protocol's ``_read_`` methods, and the sketch in the thread no
-longer maps onto the code. A measured benchmark showing where the time actually
-goes would be the useful first contribution here.
+* character-set detection was uncached, and accounted for 30% of an HTTP
+  extraction -- 3011 :func:`chardet.detect` calls over 163 distinct
+  bytestrings;
+* every field of every protocol was copied through the generic
+  :func:`copy.copy` machinery, 63207 times per extraction;
+* :attr:`Field.length <pcapkit.corekit.fields.field.FieldBase.length>` recomputes
+  :func:`struct.calcsize` on each read and was read two to four times per field;
+* :meth:`Schema.__setattr__ <pcapkit.protocols.schema.schema.Schema.__setattr__>`
+  re-entered itself once per field assigned.
+
+Two predictions the profiling **contradicted**, recorded so nobody spends time on
+them again: :class:`~pcapkit.corekit.infoclass.Info` construction -- the usual
+suspect -- is 0.0% of its own cost and 4.4% of a parse, and the logging
+integration is 0.03% even in the heaviest shape, since every call site is a lazy
+``%s``. The IO-batching idea the thread proposed was never the bottleneck.
+
+Three larger wins remain, all outside the parse path and each wanting its own
+review:
+
+* **The flow dumper reopens its output file once per frame** and rebuilds a whole
+  :class:`~pcapkit.protocols.misc.pcap.frame.Frame` to obtain bytes it already
+  holds (``pcapkit/dumpkit/pcap.py:94,128``). That is 80% of the flow-tracing
+  cost, and a counterfactual left 330 of 331 output files byte-identical. This is
+  the best-evidenced and lowest-risk piece of work on this page.
+* :meth:`analyze() <pcapkit.foundation.reassembly.ip.IP_Reassembly.analyze>`
+  **runs eagerly on every frame, fragmented or not**, because
+  ``pcapkit/toolkit/pcap.py:53`` filters only on the *DF* flag. A capture with no
+  fragments at all still produces one "datagram" per frame -- 86% of the
+  IP-reassembly cost plus a 133 ms garbage-collection bill. Making the ``packet``
+  field lazy is mechanical; whether unfragmented frames should be emitted at all
+  is a design question worth settling first.
+* **Every option is parsed twice** (``pcapkit/corekit/fields/collections.py:262-270``):
+  2274 schema unpacks for 1137 options, the pre-parse always discarded. About
+  15% of a PCAP-NG extraction, and the riskiest of the three.
+
+Two traps for anyone benchmarking this library. ``reassembly=True`` and
+``trace=True`` are **no-ops** without ``ip=``/``tcp=``, so a benchmark that passes
+only the switch measures nothing; and timing several capture shapes in one
+process inflates them by up to 73%, so each shape wants its own interpreter.
 
 Logging Integration
 -------------------
