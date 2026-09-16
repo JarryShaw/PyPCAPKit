@@ -106,14 +106,20 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     # :obj:`dict`\\ s, which the PCAP trace dumper cannot re-serialise -- it reaches
     # for ``frame.packet`` and dies with ``AttributeError: 'dict' object has no
     # attribute 'packet'`` (#399). The tracer defaults an unset ``format`` to
-    # ``'pcap'``, so following a stream through either engine crashes *during
-    # extraction*, before the reassembly below ever runs. :class:`Extractor
-    # <pcapkit.foundation.extraction.Extractor>` already substitutes a dict-capable
-    # format for the PyShark and PyPCAPFile engines but deliberately leaves DPKT and
-    # Scapy out (see the note at its ``trace`` setup); apply the same remedy here so
-    # the stream is followed rather than crashed on. A caller that never asked for a
-    # trace format (``None``) is quietly upgraded; an explicit but unusable one is
-    # replaced with a warning, since it is a request that cannot be honoured.
+    # ``'pcap'``, so following a stream through either engine would crash *during
+    # extraction*, before the reassembly below ever runs.
+    #
+    # :class:`Extractor <pcapkit.foundation.extraction.Extractor>` now guards both
+    # engines itself, so this is no longer what keeps the extraction alive -- it is
+    # what keeps it *quiet*. The two guards choose the same replacement format and so
+    # produce byte-identical traces; they differ only in when they complain. The
+    # Extractor warns for every substitution it makes, including the one nobody asked
+    # for, whereas here an unset ``format`` is not a request and is upgraded silently,
+    # and only an explicit but unusable one draws a warning -- with a message naming
+    # the engine's limitation rather than the ``trace_format=`` argument this function
+    # does not expose. Removing this therefore would not change any trace file, but it
+    # would make ``follow_tcp_stream(engine='dpkt')`` warn about a default the caller
+    # never chose.
     if engine is not None and engine.lower() in ('dpkt', 'scapy') and format in ('pcap', 'cap', None):
         if format is not None:
             warn(f"extraction engine {engine} cannot write '{format}' trace files; "
