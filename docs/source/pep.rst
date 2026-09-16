@@ -12,14 +12,15 @@ Help Wanted
    genuinely still open is asked for. Please leave notes in the thread rather
    than against this page.
 
-As PyPCAPKit reaches its *16k* lines of code and *800th* commit, I figure it
-would be a better idea to record the project enhancement proposals here in
-the discussion thread. The proposals and/or notes will be documented and
-maintained here.
+As PyPCAPKit reached its *16k* lines of code and *800th* commit, it seemed
+better to record the project's enhancement proposals somewhere durable than to
+leave them scattered. They were raised in the discussion thread, and this page
+is where they are kept up to date.
 
-Pull requests for the existing proposals and any new ideas are highly welcomed
-and encouraged. Should you have any questions, please leave a note either in
-this thread or under the `Q&A category discussions <https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a>`__.
+Pull requests for anything still open, and new ideas of your own, are very
+welcome. For questions, leave a note in the `discussion thread
+<https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ or under the `Q&A
+category <https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a>`__.
 
 Wish you enjoy **PyPCAPKit**!!!
 
