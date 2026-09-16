@@ -55,6 +55,8 @@ The following table shows all available protocol classes in :mod:`pcapkit`:
 |                                                                  |                |                       | :class:`pcapkit.protocols.internet.ipsec.IPsec`             |
 +                                                                  +                + IPsec Family          +-------------------------------------------------------------+
 |                                                                  |                |                       | :class:`pcapkit.protocols.internet.ah.AH`                   |
++                                                                  +                +                       +-------------------------------------------------------------+
+|                                                                  |                |                       | :class:`pcapkit.protocols.internet.esp.ESP`                 |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.internet.ipx.IPX`                                                          |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
