@@ -468,21 +468,24 @@ implemented) when submit</p></li>
 <dl class="glossary">
 <dt id="term-reasm.ipv4.packet">reasm.ipv4.packet<a class="headerlink" href="#term-reasm.ipv4.packet" title="Link to this term">¶</a></dt><dd><p>Data structure for <strong>IPv4 datagram reassembly</strong>
 (<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4.reassembly</span></code></a>)
-is as following:</p>
+is as following, with <code class="docutils literal notranslate"><span class="pre">ipv4</span></code> the protocol instance
+(<code class="docutils literal notranslate"><span class="pre">frame['IPv4']</span></code>) and <code class="docutils literal notranslate"><span class="pre">ipv4_info</span></code> its <code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code>
+– the header fields come off the latter, the raw octets off the former:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">packet_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-  <span class="n">bufid</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-      <span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                   <span class="c1"># source IP address</span>
-      <span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                   <span class="c1"># destination IP address</span>
-      <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                    <span class="c1"># identification</span>
-      <span class="n">ipv4</span><span class="o">.</span><span class="n">proto</span><span class="p">,</span>                 <span class="c1"># payload protocol type</span>
+  <span class="n">bufid</span> <span class="o">=</span> <span class="p">(</span>
+      <span class="n">ipv4_info</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>              <span class="c1"># source IP address</span>
+      <span class="n">ipv4_info</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>              <span class="c1"># destination IP address</span>
+      <span class="n">ipv4_info</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>               <span class="c1"># identification</span>
+      <span class="n">ipv4_info</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>         <span class="c1"># payload protocol type</span>
   <span class="p">),</span>
-  <span class="n">num</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>             <span class="c1"># original packet range number</span>
-  <span class="n">fo</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">frag_offset</span><span class="p">,</span>          <span class="c1"># fragment offset</span>
-  <span class="n">ihl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span>             <span class="c1"># internet header length</span>
-  <span class="n">mf</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>             <span class="c1"># more fragment flag</span>
-  <span class="n">tl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                  <span class="c1"># total length, header includes</span>
-  <span class="n">header</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>           <span class="c1"># raw bytes type header</span>
-  <span class="n">payload</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>         <span class="c1"># raw bytearray type payload</span>
+  <span class="n">num</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>        <span class="c1"># original packet range number</span>
+  <span class="n">fo</span> <span class="o">=</span> <span class="n">ipv4_info</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>          <span class="c1"># fragment offset, in octets</span>
+  <span class="n">ihl</span> <span class="o">=</span> <span class="n">ipv4_info</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span>        <span class="c1"># internet header length</span>
+  <span class="n">mf</span> <span class="o">=</span> <span class="n">ipv4_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>        <span class="c1"># more fragment flag</span>
+  <span class="n">tl</span> <span class="o">=</span> <span class="n">ipv4_info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>             <span class="c1"># total length, header includes</span>
+  <span class="n">header</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>    <span class="c1"># raw bytes type header</span>
+  <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span>
+      <span class="n">ipv4</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>       <span class="c1"># raw bytearray type payload</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -497,7 +500,7 @@ is as following:</p>
  |     |            |--&gt; 'src' --&gt; (IPv4Address) ipv4.src
  |     |            |--&gt; 'dst' --&gt; (IPv4Address) ipv4.dst
  |     |            |--&gt; 'id' --&gt; (int) ipv4.id
- |     |            |--&gt; 'proto' --&gt; (EtherType) ipv4.proto
+ |     |            |--&gt; 'proto' --&gt; (TransType) ipv4.protocol
  |     |--&gt; 'index' : (tuple) packet numbers
  |     |               |--&gt; (int) original packet range number
  |     |--&gt; 'header' : (bytes) IPv4 header
@@ -509,7 +512,7 @@ is as following:</p>
  |     |            |--&gt; 'src' --&gt; (IPv4Address) ipv4.src
  |     |            |--&gt; 'dst' --&gt; (IPv4Address) ipv4.dst
  |     |            |--&gt; 'id' --&gt; (int) ipv4.id
- |     |            |--&gt; 'proto' --&gt; (EtherType) ipv4.proto
+ |     |            |--&gt; 'proto' --&gt; (TransType) ipv4.protocol
  |     |--&gt; 'index' : (tuple) packet numbers
  |     |               |--&gt; (int) original packet range number
  |     |--&gt; 'header' : (bytes) IPv4 header
@@ -529,7 +532,7 @@ is as following:</p>
  |     |--&gt; ipv4.src       |
  |     |--&gt; ipv4.dst       |
  |     |--&gt; ipv4.id        |
- |     |--&gt; ipv4.proto     |
+ |     |--&gt; ipv4.protocol  |
  |                         |--&gt; 'TDL' : (int) total data length
  |                         |--&gt; 'RCVBT' : (bytearray) fragment received bit table
  |                         |               |--&gt; (bytes) b'\\x00' -&gt; not received

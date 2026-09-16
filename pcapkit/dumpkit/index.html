@@ -446,8 +446,8 @@ of <a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.d
     A --&gt; Tree &amp; XML &amp; JSON
 
     subgraph pcapkit [PyPCAPKit Dumpers]
-        DumperBase --&gt; Dumper --&gt; PCAPIO &amp; NotImplementedIO
-        Dumper --&gt; E([user customisation ...])
+        DumperBase --&gt; PCAPIO &amp; NotImplementedIO
+        DumperBase --&gt; Dumper --&gt; E([user customisation ...])
     end
     A --&gt; DumperBase
 
@@ -462,7 +462,7 @@ of <a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.d
     click DumperBase &quot;/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase&quot;
     click Dumper &quot;/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper&quot;
     click PCAPIO &quot;/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO&quot;
-    click NotImplementedIO &quot;/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.NotImplementedIO&quot;
+    click NotImplementedIO &quot;/pcapkit/dumpkit/null.html#pcapkit.dumpkit.null.NotImplementedIO&quot;
     </pre></section>
 
         </article>

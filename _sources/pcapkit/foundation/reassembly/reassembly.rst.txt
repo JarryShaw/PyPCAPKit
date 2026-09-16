@@ -95,7 +95,7 @@ Type Variables
    Datagram data structure.
 
 .. data:: pcapkit.foundation.reassembly.reassembly._IT
-   :type: pcapkit.corekit.infoclass.Info
+   :type: tuple
 
    Buffer ID data structure.
 

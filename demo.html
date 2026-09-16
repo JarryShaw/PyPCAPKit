@@ -450,8 +450,8 @@ its main interface. Several scenarios are shown as below.</p>
 <li><p>extract a PCAP file and reassemble TCP payload
 (with no output file nor frame storage)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span><span class="p">,</span> <span class="n">extract</span>
-<span class="c1"># set strict to make sure full reassembly</span>
-<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># set reasm_strict to make sure full reassembly</span>
+<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1"># print extracted packet if HTTP in reassembled payloads</span>
 <span class="k">for</span> <span class="n">datagram</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">reassembly</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">datagram</span><span class="o">.</span><span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">HTTP</span> <span class="ow">in</span> <span class="n">datagram</span><span class="o">.</span><span class="n">packet</span><span class="p">:</span>
@@ -469,14 +469,16 @@ its main interface. Several scenarios are shown as below.</p>
 <p>Use command name <code class="docutils literal notranslate"><span class="pre">pcapkit-cli</span> <span class="pre">[...]</span></code> directly (as shown in samples).</p>
 </li>
 <li><p>through Python module</p>
-<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pypcapkit</span> <span class="pre">[...]</span></code> works exactly the same as above.</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pcapkit</span> <span class="pre">[...]</span></code> works exactly the same as above. Note that the
+module name is <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, even though the distribution on PyPI is named
+<code class="docutils literal notranslate"><span class="pre">pypcapkit</span></code>.</p>
 </li>
 </ul>
 <p>Here are some usage samples:</p>
 <ol class="arabic">
 <li><p>export to a macOS Property List
 (<a class="reference external" href="https://developer.apple.com/xcode">Xcode</a> has special support for this format)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--format<span class="w"> </span>plist<span class="w"> </span>--verbose
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--auto-extension<span class="w"> </span>--format<span class="w"> </span>plist<span class="w"> </span>--verbose
 🚨Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>
 Frame<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
 Frame<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
@@ -488,8 +490,15 @@ Frame<span class="w">   </span><span class="m">6</span>:<span class="w"> </span>
 </pre></div>
 </div>
 </li>
-<li><p>export to a JSON file (with no format specified)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--output<span class="w"> </span>out.json<span class="w"> </span>--verbose
+<li><p>export to a JSON file</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The output format is <strong>not</strong> presumed from the output file name, so
+<code class="docutils literal notranslate"><span class="pre">-f</span></code>/<code class="docutils literal notranslate"><span class="pre">--format</span></code> (or the <code class="docutils literal notranslate"><span class="pre">-j</span></code>/<code class="docutils literal notranslate"><span class="pre">--json</span></code> switch) has to be given;
+without it the default tree view is written into whatever file name was
+supplied.</p>
+</div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--auto-extension<span class="w"> </span>--output<span class="w"> </span>out.json<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>--verbose
 🚨Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>
 Frame<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
 Frame<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
@@ -502,7 +511,7 @@ Frame<span class="w">   </span><span class="m">6</span>:<span class="w"> </span>
 </div>
 </li>
 <li><p>export to a text tree view file (without extension autocorrect)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--output<span class="w"> </span>out.txt<span class="w"> </span>--format<span class="w"> </span>tree<span class="w"> </span>--verbose
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span>.pcap<span class="w"> </span>--output<span class="w"> </span>out.txt<span class="w"> </span>--format<span class="w"> </span>tree<span class="w"> </span>--verbose
 🚨Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>
 Frame<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
 Frame<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP

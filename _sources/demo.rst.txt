@@ -40,8 +40,8 @@ its main interface. Several scenarios are shown as below.
    .. code-block:: python
 
       from pcapkit import HTTP, extract
-      # set strict to make sure full reassembly
-      extraction = extract(fin='in.pcap', store=False, nofile=True, reassembly=True, tcp=True, strict=True)
+      # set reasm_strict to make sure full reassembly
+      extraction = extract(fin='in.pcap', store=False, nofile=True, reassembly=True, tcp=True, reasm_strict=True)
       # print extracted packet if HTTP in reassembled payloads
       for datagram in extraction.reassembly.tcp:
           if datagram.packet is not None and HTTP in datagram.packet:
@@ -58,7 +58,9 @@ The CLI (command line interface) of :mod:`pcapkit` has two different access.
 
 * through Python module
 
-  ``python -m pypcapkit [...]`` works exactly the same as above.
+  ``python -m pcapkit [...]`` works exactly the same as above. Note that the
+  module name is ``pcapkit``, even though the distribution on PyPI is named
+  ``pypcapkit``.
 
 Here are some usage samples:
 
@@ -67,7 +69,7 @@ Here are some usage samples:
 
    .. code-block:: shell
 
-      $ pcapkit-cli in --format plist --verbose
+      $ pcapkit-cli in --auto-extension --format plist --verbose
       🚨Loading file 'in.pcap'
       Frame   1: Ethernet:IPv6:IPv6_ICMP
       Frame   2: Ethernet:IPv6:IPv6_ICMP
@@ -77,11 +79,18 @@ Here are some usage samples:
       Frame   6: Ethernet:IPv4:UDP:Raw
       🍺Report file stored in 'out.plist'
 
-2. export to a JSON file (with no format specified)
+2. export to a JSON file
+
+   .. note::
+
+      The output format is **not** presumed from the output file name, so
+      ``-f``/``--format`` (or the ``-j``/``--json`` switch) has to be given;
+      without it the default tree view is written into whatever file name was
+      supplied.
 
    .. code-block:: shell
 
-      $ pcapkit-cli in --output out.json --verbose
+      $ pcapkit-cli in --auto-extension --output out.json --format json --verbose
       🚨Loading file 'in.pcap'
       Frame   1: Ethernet:IPv6:IPv6_ICMP
       Frame   2: Ethernet:IPv6:IPv6_ICMP
@@ -95,7 +104,7 @@ Here are some usage samples:
 
    .. code-block:: shell
 
-      $ pcapkit-cli in --output out.txt --format tree --verbose
+      $ pcapkit-cli in.pcap --output out.txt --format tree --verbose
       🚨Loading file 'in.pcap'
       Frame   1: Ethernet:IPv6:IPv6_ICMP
       Frame   2: Ethernet:IPv6:IPv6_ICMP

@@ -18,7 +18,7 @@ Octets      Bits        Name                    Description
   8          64   ``tcp.ack``               Acknowledgement Number (if ACK set)
   12         96   ``tcp.hdr_len``           Data Offset
   12        100                             Reserved (must be ``\x00``)
-  12        103   ``tcp.flags.ns``          ECN Concealment Protection (NS)
+  12        103   ``tcp.flags.ns``          ECN Concealment Protection (NS) [*]_
   13        104   ``tcp.flags.cwr``         Congestion Window Reduced (CWR)
   13        105   ``tcp.flags.ece``         ECN-Echo (ECE)
   13        106   ``tcp.flags.urg``         Urgent (URG)
@@ -30,7 +30,7 @@ Octets      Bits        Name                    Description
   14        112   ``tcp.window_size``       Size of Receive Window
   16        128   ``tcp.checksum``          Checksum
   18        144   ``tcp.urgent_pointer``    Urgent Pointer (if URG set)
-  20        160   ``tcp.opt``               TCP Options (if data offset > 5)
+  20        160   ``tcp.options``           TCP Options (if data offset > 5)
 ======= ========= ========================= =======================================
 
 .. autoclass:: pcapkit.protocols.transport.tcp.TCP
@@ -532,3 +532,7 @@ Data Models
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Transmission_Control_Protocol
+.. [*] The NS bit is read off the wire but is **not** surfaced in
+   :class:`~pcapkit.protocols.data.transport.tcp.Flags`. :rfc:`3540` was
+   reclassified as Historic, so the field is left unexposed; the row is kept
+   because the bit is part of the header as the RFC defines it.

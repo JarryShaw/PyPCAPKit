@@ -420,7 +420,7 @@
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> only,
 which implements extractor for Mobility Header
-(MH) <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as below:</p>
+(MH) <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as below:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -557,12 +557,12 @@ attribute:</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Pad1" title="pcapkit.const.mh.option.Option.Pad1"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Pad1</span></code></a></p></td>
-<td><p><a class="reference internal" href="#id0" title="pcapkit.protocols.internet.mh.MH._read_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_pad()</span></code></a></p></td>
-<td><p><a class="reference internal" href="#id3" title="pcapkit.protocols.internet.mh.MH._make_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_pad()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_pad" title="pcapkit.protocols.internet.mh.MH._read_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_pad()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_pad" title="pcapkit.protocols.internet.mh.MH._make_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_pad()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.PadN" title="pcapkit.const.mh.option.Option.PadN"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PadN</span></code></a></p></td>
-<td><p><a class="reference internal" href="#id0" title="pcapkit.protocols.internet.mh.MH._read_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_pad()</span></code></a></p></td>
-<td><p><a class="reference internal" href="#id3" title="pcapkit.protocols.internet.mh.MH._make_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_pad()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_pad" title="pcapkit.protocols.internet.mh.MH._read_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_pad()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_pad" title="pcapkit.protocols.internet.mh.MH._make_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_pad()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Binding_Refresh_Advice" title="pcapkit.const.mh.option.Option.Binding_Refresh_Advice"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Binding_Refresh_Advice</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_bra" title="pcapkit.protocols.internet.mh.MH._read_opt_bra"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_bra()</span></code></a></p></td>
@@ -1845,51 +1845,10 @@ hence all three are parsed here.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">_read_opt_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
-<dd><p>Read MH padding option.</p>
-<p>Structure of MH padding option [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0
- 0 1 2 3 4 5 6 7
-+-+-+-+-+-+-+-+-+
-|   Type = 0    |
-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">PadN</span></code> option:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
-|   Type = 1    | Option Length | Option Data
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
-</pre></div>
-</div>
-</li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PadOption" title="pcapkit.protocols.schema.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a></span>) – Parsed option schema.</p></li>
-<li><p><strong>options</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]</span>) – Parsed MH options.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PadOption" title="pcapkit.protocols.data.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructed option data.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_bra">
 <span class="sig-name descname"><span class="pre">_read_opt_bra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_bra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_bra" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH binding refresh advice option.</p>
-<p>Structure of MH Binding Refresh Advice option [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<p>Structure of MH Binding Refresh Advice option [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1919,7 +1878,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_aca">
 <span class="sig-name descname"><span class="pre">_read_opt_aca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_aca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_aca" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH alternate care-of address option.</p>
-<p>Structure of MH Alternate Care-of Address option [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<p>Structure of MH Alternate Care-of Address option [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1955,7 +1914,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_ni">
 <span class="sig-name descname"><span class="pre">_read_opt_ni</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_ni"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_ni" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH nonce indices option.</p>
-<p>Structure of MH Nonce Indices option [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<p>Structure of MH Nonce Indices option [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1985,7 +1944,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_bad">
 <span class="sig-name descname"><span class="pre">_read_opt_bad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_bad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_bad" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH binding authorization data option.</p>
-<p>Structure of MH Binding Authorization Data option [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<p>Structure of MH Binding Authorization Data option [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2019,7 +1978,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_mnp">
 <span class="sig-name descname"><span class="pre">_read_opt_mnp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_mnp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_mnp" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH mobile network prefix option.</p>
-<p>Structure of MH Mobile Network Prefix option [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3963.html"><strong>RFC 3963</strong></a>]:</p>
+<p>Structure of MH Mobile Network Prefix option [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3963.html"><strong>RFC 3963</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2055,7 +2014,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_lla">
 <span class="sig-name descname"><span class="pre">_read_opt_lla</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_lla"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_lla" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH link-layer address (MH-LLA) option.</p>
-<p>Structure of MH Link-Layer Address option [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>]:</p>
+<p>Structure of MH Link-Layer Address option [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2085,7 +2044,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_mn_id">
 <span class="sig-name descname"><span class="pre">_read_opt_mn_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_mn_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_mn_id" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH mobile node identifier option.</p>
-<p>Structure of MH Mobile Node Identifier option [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4283.html"><strong>RFC 4283</strong></a>]:</p>
+<p>Structure of MH Mobile Node Identifier option [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4283.html"><strong>RFC 4283</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2115,7 +2074,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_auth">
 <span class="sig-name descname"><span class="pre">_read_opt_auth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_auth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_auth" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH mobility message authentication option.</p>
-<p>Structure of MH Mobility Message Authentication option [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4285.html"><strong>RFC 4285</strong></a>]:</p>
+<p>Structure of MH Mobility Message Authentication option [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4285.html"><strong>RFC 4285</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2147,7 +2106,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_mesg_id">
 <span class="sig-name descname"><span class="pre">_read_opt_mesg_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_mesg_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_mesg_id" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH mobility message replay protection option.</p>
-<p>Structure of MH Mobility Message Replay Protection option [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4285.html"><strong>RFC 4285</strong></a>]:</p>
+<p>Structure of MH Mobility Message Replay Protection option [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4285.html"><strong>RFC 4285</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2179,7 +2138,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_cga_pr">
 <span class="sig-name descname"><span class="pre">_read_opt_cga_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_cga_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_cga_pr" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH CGA parameters request option.</p>
-<p>Structure of MH CGA Parameters Request option [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<p>Structure of MH CGA Parameters Request option [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2207,7 +2166,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_cga_param">
 <span class="sig-name descname"><span class="pre">_read_opt_cga_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_cga_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_cga_param" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH CGA parameters option.</p>
-<p>Structure of MH CGA Parameters option [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<p>Structure of MH CGA Parameters option [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2241,7 +2200,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_signature">
 <span class="sig-name descname"><span class="pre">_read_opt_signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_signature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_signature" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH signature option.</p>
-<p>Structure of MH Signature option [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<p>Structure of MH Signature option [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2275,7 +2234,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_phkt">
 <span class="sig-name descname"><span class="pre">_read_opt_phkt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_phkt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_phkt" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH permanent home keygen token option.</p>
-<p>Structure of MH Permanent Home Keygen Token option [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<p>Structure of MH Permanent Home Keygen Token option [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2309,7 +2268,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_ct_init">
 <span class="sig-name descname"><span class="pre">_read_opt_ct_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_ct_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_ct_init" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH Care-of Test Init option.</p>
-<p>Structure of MH Care-of Test Init option [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<p>Structure of MH Care-of Test Init option [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2337,7 +2296,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_ct">
 <span class="sig-name descname"><span class="pre">_read_opt_ct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_ct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_ct" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH Care-of Test option.</p>
-<p>Structure of MH Care-of Test option [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<p>Structure of MH Care-of Test option [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2369,7 +2328,7 @@ hence all three are parsed here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_exp">
 <span class="sig-name descname"><span class="pre">_read_opt_exp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_exp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_exp" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH experimental mobility option.</p>
-<p>Structure of MH Experimental Mobility option [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5096.html#section-4"><strong>RFC 5096 Section 4</strong></a>]:</p>
+<p>Structure of MH Experimental Mobility option [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5096.html#section-4"><strong>RFC 5096 Section 4</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2398,7 +2357,7 @@ hence all three are parsed here.</p>
 <span class="sig-name descname"><span class="pre">_read_opt_badf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_badf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_badf" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH binding authorization data for FMIPv6 (BADF) option.</p>
 <p>Structure of MH Binding Authorization Data for FMIPv6 option
-[<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.5"><strong>RFC 5568 Section 6.4.5</strong></a>]:</p>
+[<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.5"><strong>RFC 5568 Section 6.4.5</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2416,12 +2375,12 @@ hence all three are parsed here.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.5"><strong>RFC 5568 Section 6.4.5</strong></a> defines the option length as <em>the length of
+<p><span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.5"><strong>RFC 5568 Section 6.4.5</strong></a> defines the option length as <em>the length of
 the Authenticator in bytes</em>, i.e. it does <strong>not</strong> cover the 4-byte
 SPI, unlike every other mobility option, whose length covers all of
-its option data. The wording is inherited from the <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>
+its option data. The wording is inherited from the <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>
 binding authorization data option (type <code class="docutils literal notranslate"><span class="pre">5</span></code>), which carries no SPI
-and for which the two readings coincide. Because <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> also
+and for which the two readings coincide. Because <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> also
 requires this option to be the <strong>last</strong> mobility option present, the
 discrepancy never has to be resolved in order to find the following
 option, so the literal reading is used here and the reported
@@ -2449,7 +2408,7 @@ for the extra 4 bytes.</p>
 <span class="sig-name descname"><span class="pre">_read_opt_ipv6_ap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_ipv6_ap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_ipv6_ap" title="Link to this definition">¶</a></dt>
 <dd><p>Read MH mobility header IPv6 address/prefix option.</p>
 <p>Structure of MH Mobility Header IPv6 Address/Prefix option
-[<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]:</p>
+[<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2467,13 +2426,13 @@ for the extra 4 bytes.</p>
 </div>
 <p>The option code identifies which address the option carries, c.f.,
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a>. It, too,
-is defined inline by <span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> with no IANA registry
+is defined inline by <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> with no IANA registry
 behind it, hence the enumeration is local to this module.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> prints the type as <code class="docutils literal notranslate"><span class="pre">17</span></code>, which is the <em>neighbor
+<p><span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> prints the type as <code class="docutils literal notranslate"><span class="pre">17</span></code>, which is the <em>neighbor
 discovery</em> option type of its sibling in
-<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.1"><strong>RFC 5568 Section 6.4.1</strong></a>. Errata ID 1816 (verified) corrects it to
+<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.1"><strong>RFC 5568 Section 6.4.1</strong></a>. Errata ID 1816 (verified) corrects it to
 the IANA-assigned mobility option type <code class="docutils literal notranslate"><span class="pre">34</span></code>, which is what this
 handler is registered against.</p>
 </div>
@@ -2535,37 +2494,6 @@ handler is registered against.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_pad">
 <span class="sig-name descname"><span class="pre">_make_opt_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_pad" title="Link to this definition">¶</a></dt>
-<dd><p>Make MH pad option.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></span>) – Option type.</p></li>
-<li><p><strong>option</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PadOption" title="pcapkit.protocols.data.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Option data model.</p></li>
-<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> field, i.e. the number of
-padding octets <em>after</em> the two octets of the option header.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PadOption" title="pcapkit.protocols.schema.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructed option schema.</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_PadOption.length</span></code> counts the
-<em>whole</em> option, whereas <code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema_PadOption.length</span></code> is the
-<code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> field – two octets fewer, and absent altogether
-for a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. Copying one into the other unconverted is why
-re-making a parsed <code class="docutils literal notranslate"><span class="pre">PadN</span></code> used to come back two octets too long.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">_make_opt_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition">¶</a></dt>
 <dd><p>Make MH pad option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2789,7 +2717,7 @@ re-making a parsed <code class="docutils literal notranslate"><span class="pre">
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></span>) – Option type.</p></li>
 <li><p><strong>option</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.MesgIDOption" title="pcapkit.protocols.data.internet.mh.MesgIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MesgIDOption</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Option data model.</p></li>
-<li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.mh.NTPTimestamp" title="pcapkit.protocols.internet.mh.NTPTimestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">NTPTimestamp</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – NTP timestamp, c.f., <span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p></li>
+<li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.mh.NTPTimestamp" title="pcapkit.protocols.internet.mh.NTPTimestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">NTPTimestamp</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – NTP timestamp, c.f., <span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p></li>
 <li><p><strong>interval</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Timestamp interval (since UNIX-epoch).</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -3015,7 +2943,7 @@ SPI, c.f., <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_cga_extensions">
 <span class="sig-name descname"><span class="pre">_read_cga_extensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extensions_schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_cga_extensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_cga_extensions" title="Link to this definition">¶</a></dt>
 <dd><p>Read CGA extensions.</p>
-<p>Structure of CGA extensions [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4581.html"><strong>RFC 4581</strong></a>]:</p>
+<p>Structure of CGA extensions [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4581.html"><strong>RFC 4581</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -3064,7 +2992,7 @@ SPI, c.f., <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_ext_multiprefix">
 <span class="sig-name descname"><span class="pre">_read_ext_multiprefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">extensions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_ext_multiprefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_ext_multiprefix" title="Link to this definition">¶</a></dt>
 <dd><p>Read multi-prefix CGA extension.</p>
-<p>Structure of Multi-Prefix CGA extension [<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5535.html"><strong>RFC 5535</strong></a>]:</p>
+<p>Structure of Multi-Prefix CGA extension [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5535.html"><strong>RFC 5535</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -3246,7 +3174,7 @@ parse the CGA extension by itself.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.NTPTimestamp">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.mh.</span></span><span class="sig-name descname"><span class="pre">NTPTimestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#NTPTimestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.NTPTimestamp" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.internet.mh.NTPTimestamp" title="pcapkit.protocols.internet.mh.NTPTimestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">NTPTimestamp</span></code></a></p>
-<p>NTP timestamp format, c.f., <span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
+<p>NTP timestamp format, c.f., <span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.NTPTimestamp.seconds">
 <span class="sig-name descname"><span class="pre">seconds</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.NTPTimestamp.seconds" title="Link to this definition">¶</a></dt>
@@ -3267,12 +3195,12 @@ parse the CGA extension by itself.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[FastBindingAcknowledgmentStatus] Fast Binding Acknowledgment Status Codes.</p>
 <p>Status values of the fast binding acknowledgment (FBack) message, c.f.,
-<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>. Values below <code class="docutils literal notranslate"><span class="pre">128</span></code> indicate that the fast
+<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>. Values below <code class="docutils literal notranslate"><span class="pre">128</span></code> indicate that the fast
 binding update was accepted by the receiving node, values of <code class="docutils literal notranslate"><span class="pre">128</span></code> and
 above that it was rejected.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> defines these values inline and IANA keeps no
+<p><span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> defines these values inline and IANA keeps no
 registry of them, so the enumeration lives here rather than in
 <a class="reference internal" href="../../const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>. It is also <strong>not</strong> interchangeable with the
 registered <a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.status_code.StatusCode" title="pcapkit.const.mh.status_code.StatusCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatusCode</span></code></a>, since two
@@ -3284,38 +3212,38 @@ supported</em> there.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted">
 <span class="sig-name descname"><span class="pre">Fast_Binding_Update_accepted</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted" title="Link to this definition">¶</a></dt>
-<dd><p>Fast Binding Update accepted [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
+<dd><p>Fast Binding Update accepted [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid">
 <span class="sig-name descname"><span class="pre">Fast_Binding_Update_accepted_but_NCoA_is_invalid</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid" title="Link to this definition">¶</a></dt>
 <dd><p>Fast Binding Update accepted but NCoA is invalid; use the NCoA supplied in
-the “alternate” care-of address option [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
+the “alternate” care-of address option [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Reason_unspecified">
 <span class="sig-name descname"><span class="pre">Reason_unspecified</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">128</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Reason_unspecified" title="Link to this definition">¶</a></dt>
-<dd><p>Reason unspecified [<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
+<dd><p>Reason unspecified [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Administratively_prohibited">
 <span class="sig-name descname"><span class="pre">Administratively_prohibited</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">129</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Administratively_prohibited" title="Link to this definition">¶</a></dt>
-<dd><p>Administratively prohibited [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
+<dd><p>Administratively prohibited [<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Insufficient_resources">
 <span class="sig-name descname"><span class="pre">Insufficient_resources</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">130</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Insufficient_resources" title="Link to this definition">¶</a></dt>
-<dd><p>Insufficient resources [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
+<dd><p>Insufficient resources [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Incorrect_interface_identifier_length">
 <span class="sig-name descname"><span class="pre">Incorrect_interface_identifier_length</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">131</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Incorrect_interface_identifier_length" title="Link to this definition">¶</a></dt>
-<dd><p>Incorrect interface identifier length [<span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
+<dd><p>Incorrect interface identifier length [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3358,38 +3286,38 @@ the “alternate” care-of address option [<span class="target" id="index-62"><
 <p>[IPv6AddressPrefixCode] Mobility Header IPv6 Address/Prefix Option Codes.</p>
 <p>Option codes of the mobility header IPv6 address/prefix option, which
 identify which address the option carries, c.f.,
-<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>.</p>
+<span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> defines these values inline and IANA keeps no
+<p><span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> defines these values inline and IANA keeps no
 registry of them, so the enumeration lives here rather than in
 <a class="reference internal" href="../../const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>. The identical code space of the neighbor
-discovery IP address/prefix option of <span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.1"><strong>RFC 5568 Section 6.4.1</strong></a> is
+discovery IP address/prefix option of <span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.1"><strong>RFC 5568 Section 6.4.1</strong></a> is
 likewise unregistered.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.Old_Care_of_Address">
 <span class="sig-name descname"><span class="pre">Old_Care_of_Address</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.Old_Care_of_Address" title="Link to this definition">¶</a></dt>
-<dd><p>Old Care-of Address [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]</p>
+<dd><p>Old Care-of Address [<span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.New_Care_of_Address">
 <span class="sig-name descname"><span class="pre">New_Care_of_Address</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.New_Care_of_Address" title="Link to this definition">¶</a></dt>
-<dd><p>New Care-of Address [<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]</p>
+<dd><p>New Care-of Address [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.NAR_IP_address">
 <span class="sig-name descname"><span class="pre">NAR_IP_address</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.NAR_IP_address" title="Link to this definition">¶</a></dt>
-<dd><p>NAR’s IP address [<span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]</p>
+<dd><p>NAR’s IP address [<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.NAR_Prefix">
 <span class="sig-name descname"><span class="pre">NAR_Prefix</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.NAR_Prefix" title="Link to this definition">¶</a></dt>
 <dd><p>NAR’s Prefix, sent in PrRtAdv; the prefix length field contains the number
-of valid leading bits in the prefix [<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]</p>
+of valid leading bits in the prefix [<span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>]</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3535,7 +3463,7 @@ of valid leading bits in the prefix [<span class="target" id="index-73"></span><
 <p>The two padding options do <strong>not</strong> share a wire shape: a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is
 a lone type octet, whereas a <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option is a type octet, an
 <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> octet, and that many padding octets
-[<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html#section-6.2.5"><strong>RFC 6275 Section 6.2.5</strong></a>]. Both the <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> octet
+[<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html#section-6.2.5"><strong>RFC 6275 Section 6.2.5</strong></a>]. Both the <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> octet
 (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Option.length" title="pcapkit.protocols.schema.internet.mh.Option.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.length</span></code></a>) and the padding data
 (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PadOption.data" title="pcapkit.protocols.schema.internet.mh.PadOption.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.data</span></code></a>) are therefore sized from the option
 type, so that a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option consumes exactly one octet.</p>
@@ -3701,13 +3629,13 @@ type, so that a <code class="docutils literal notranslate"><span class="pre">Pad
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.MesgIDOption.seconds">
 <span class="sig-name descname"><span class="pre">seconds</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">seconds&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.MesgIDOption.seconds" title="Link to this definition">¶</a></dt>
-<dd><p>Timestamp (seconds since January 1st, 1970, c.f., <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
+<dd><p>Timestamp (seconds since January 1st, 1970, c.f., <span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.MesgIDOption.fraction">
 <span class="sig-name descname"><span class="pre">fraction</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">fraction&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.MesgIDOption.fraction" title="Link to this definition">¶</a></dt>
-<dd><p>Timestamp fractions (1/2**32 seconds per unit, c.f., <span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
+<dd><p>Timestamp fractions (1/2**32 seconds per unit, c.f., <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3812,7 +3740,7 @@ type, so that a <code class="docutils literal notranslate"><span class="pre">Pad
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.CGAParametersOption.parameters">
 <span class="sig-name descname"><span class="pre">parameters</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAParameter" title="pcapkit.protocols.schema.internet.mh.CGAParameter"><span class="pre">CGAParameter</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ListField</span> <span class="pre">parameters&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.CGAParametersOption.parameters" title="Link to this definition">¶</a></dt>
-<dd><p>CGA parameters, c.f., <span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
+<dd><p>CGA parameters, c.f., <span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3922,11 +3850,11 @@ type, so that a <code class="docutils literal notranslate"><span class="pre">Pad
 <p>Header schema for MH Binding Authorization Data for FMIPv6 (BADF) options.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Per <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.5"><strong>RFC 5568 Section 6.4.5</strong></a>, the <code class="docutils literal notranslate"><span class="pre">length</span></code> field of this option counts
+<p>Per <span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.5"><strong>RFC 5568 Section 6.4.5</strong></a>, the <code class="docutils literal notranslate"><span class="pre">length</span></code> field of this option counts
 the <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BADFOption.data" title="pcapkit.protocols.schema.internet.mh.BADFOption.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> (authenticator) bytes <strong>only</strong> – it excludes the 4-byte
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BADFOption.spi" title="pcapkit.protocols.schema.internet.mh.BADFOption.spi"><code class="xref py py-attr docutils literal notranslate"><span class="pre">spi</span></code></a> field, unlike every other mobility option, whose length covers
 all option data. The option is therefore 6 bytes longer than its declared
-length, which is why <span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> also requires it to be the <strong>last</strong>
+length, which is why <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> also requires it to be the <strong>last</strong>
 mobility option present.</p>
 </div>
 <dl class="py attribute">
@@ -3951,7 +3879,7 @@ using SEND-based handover keys.</p>
 <p>Header schema for MH Mobility Header IPv6 Address/Prefix options.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The option codes of <span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> are defined inline by the
+<p>The option codes of <span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> are defined inline by the
 RFC with no IANA registry behind them, so their enumeration lives in
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh.IPv6AddressPrefixCode</span></code></a> rather than
 in <a class="reference internal" href="../../const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>. Being module-local, it cannot be imported
@@ -4264,7 +4192,7 @@ data model – the same split as
 <p>Header schema for MH Fast Binding Acknowledgment (FBack) messages.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The status values of <span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> are defined inline by the
+<p>The status values of <span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> are defined inline by the
 RFC and are absent from the IANA <em>Status Codes</em> registry, so their
 enumeration lives in
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus</span></code></a>
@@ -4615,7 +4543,7 @@ a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is a single octet with neither an <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code>
-field nor any option data (c.f. <span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html#section-6.2.5"><strong>RFC 6275 Section 6.2.5</strong></a>), which is why
+field nor any option data (c.f. <span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html#section-6.2.5"><strong>RFC 6275 Section 6.2.5</strong></a>), which is why
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Option.length" title="pcapkit.protocols.schema.internet.mh.Option.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.length</span></code></a> is declared as a
 <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a> and is skipped
 for it. A skipped conditional field is <em>recorded</em> in the packet data as
@@ -4852,7 +4780,7 @@ fail to parse.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.MesgIDOption.ntp_timestamp">
 <span class="sig-name descname"><span class="pre">ntp_timestamp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.mh.NTPTimestamp" title="pcapkit.protocols.internet.mh.NTPTimestamp"><span class="pre">NTPTimestamp</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.MesgIDOption.ntp_timestamp" title="Link to this definition">¶</a></dt>
-<dd><p>NTP timestamp, c.f., <span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
+<dd><p>NTP timestamp, c.f., <span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -4928,7 +4856,7 @@ fail to parse.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.CGAParametersOption.parameters">
 <span class="sig-name descname"><span class="pre">parameters</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAParameter" title="pcapkit.protocols.data.internet.mh.CGAParameter"><span class="pre">CGAParameter</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.CGAParametersOption.parameters" title="Link to this definition">¶</a></dt>
-<dd><p>CGA parameters, c.f., <span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
+<dd><p>CGA parameters, c.f., <span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -5052,7 +4980,7 @@ the CGA Parameter Data Structure, reset otherwise.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.IPv6AddressPrefixOption.code">
 <span class="sig-name descname"><span class="pre">code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><span class="pre">IPv6AddressPrefixCode</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.IPv6AddressPrefixOption.code" title="Link to this definition">¶</a></dt>
-<dd><p>Option code, c.f., <span class="target" id="index-85"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>. The codes are defined inline
+<dd><p>Option code, c.f., <span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>. The codes are defined inline
 by the RFC with no IANA registry behind them, so this field carries the
 module-local
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a>.</p>
@@ -5368,7 +5296,7 @@ significant, so the pair cannot always be fused into a network.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.FastBindingAcknowledgmentMessage.status">
 <span class="sig-name descname"><span class="pre">status</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><span class="pre">FastBindingAcknowledgmentStatus</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.FastBindingAcknowledgmentMessage.status" title="Link to this definition">¶</a></dt>
-<dd><p>Status. <span class="target" id="index-86"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> defines the FBack status values inline
+<dd><p>Status. <span class="target" id="index-85"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> defines the FBack status values inline
 rather than drawing them from the IANA <em>Status Codes</em> registry, so this
 field carries the module-local
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a>
@@ -5521,7 +5449,7 @@ instead of <a class="reference internal" href="../../const/mh.html#pcapkit.const
 
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id4" role="doc-footnote">
+<aside class="footnote brackets" id="id3" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6">https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6</a></p>
 </aside>

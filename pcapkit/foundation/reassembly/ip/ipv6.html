@@ -468,23 +468,48 @@ implemented) when submit</p></li>
 <dl class="glossary">
 <dt id="term-reasm.ipv6.packet">reasm.ipv6.packet<a class="headerlink" href="#term-reasm.ipv6.packet" title="Link to this term">¶</a></dt><dd><p>Data structure for <strong>IPv6 datagram reassembly</strong>
 (<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6.reassembly</span></code></a>)
-is as following:</p>
+is as following, with <code class="docutils literal notranslate"><span class="pre">ipv6_info</span></code> the IPv6
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ipv6_frag_info</span></code> the Fragment header’s:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">packet_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-  <span class="n">bufid</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-      <span class="n">ipv6</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                   <span class="c1"># source IP address</span>
-      <span class="n">ipv6</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                   <span class="c1"># destination IP address</span>
-      <span class="n">ipv6</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>                 <span class="c1"># label</span>
-      <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>             <span class="c1"># next header field in IPv6 Fragment Header</span>
+  <span class="n">bufid</span> <span class="o">=</span> <span class="p">(</span>
+      <span class="n">ipv6_info</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>              <span class="c1"># source IP address</span>
+      <span class="n">ipv6_info</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>              <span class="c1"># destination IP address</span>
+      <span class="n">ipv6_frag_info</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>          <span class="c1"># identification</span>
+      <span class="n">ipv6_frag_info</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>        <span class="c1"># next header field in IPv6 Fragment Header</span>
   <span class="p">),</span>
-  <span class="n">num</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>             <span class="c1"># original packet range number</span>
-  <span class="n">fo</span> <span class="o">=</span> <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>          <span class="c1"># fragment offset</span>
-  <span class="n">ihl</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span>             <span class="c1"># header length, only headers before IPv6-Frag</span>
-  <span class="n">mf</span> <span class="o">=</span> <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>              <span class="c1"># more fragment flag</span>
-  <span class="n">tl</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                  <span class="c1"># total length, header includes</span>
-  <span class="n">header</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>           <span class="c1"># raw bytes type header before IPv6-Frag</span>
-  <span class="n">payload</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>         <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
+  <span class="n">num</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>        <span class="c1"># original packet range number</span>
+  <span class="n">fo</span> <span class="o">=</span> <span class="n">ipv6_frag_info</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>     <span class="c1"># fragment offset, in octets</span>
+  <span class="n">ihl</span> <span class="o">=</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span>        <span class="c1"># header length, IPv6-Frag included</span>
+  <span class="n">mf</span> <span class="o">=</span> <span class="n">ipv6_frag_info</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>         <span class="c1"># more fragment flag</span>
+  <span class="n">tl</span> <span class="o">=</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">hdr_len</span>
+       <span class="o">+</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">raw_len</span><span class="p">,</span>       <span class="c1"># total length, header includes</span>
+  <span class="n">header</span> <span class="o">=</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span>
+           <span class="o">.</span><span class="n">header</span><span class="p">,</span>               <span class="c1"># raw bytes type header, IPv6-Frag included</span>
+  <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span>
+      <span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span>
+      <span class="o">.</span><span class="n">payload</span><span class="p">),</span>                  <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
 <span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">ihl</span></code> and <code class="docutils literal notranslate"><span class="pre">header</span></code> here <strong>include</strong> the 8-octet Fragment header,
+because <a class="reference internal" href="../../../protocols/internet/ipv6.html#pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len" title="pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.hdr_len</span></code></a>
+counts every extension header it has walked, the Fragment one included.
+The <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> adapters stop short of it and report 40 where
+this one reports 48 for the same packet, so the value is not comparable
+across engines – and <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> says the Fragment header
+is not present in a reassembled packet at all. Tracked as #415; expect
+this line to change when that is fixed.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The reassembly key is the Fragment header’s <em>Identification</em>
+(<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a>), not the IPv6 header’s <em>Flow Label</em>. The
+label is optional and routinely zero, so keying on it collapses
+every datagram between one address pair into a single buffer and
+interleaves their fragments.</p>
 </div>
 </dd>
 <dt id="term-reasm.ipv6.datagram">reasm.ipv6.datagram<a class="headerlink" href="#term-reasm.ipv6.datagram" title="Link to this term">¶</a></dt><dd><p>Data structure for <strong>reassembled IPv6 datagram</strong> (element from
@@ -496,24 +521,25 @@ is as following:</p>
  |     |--&gt; 'id' : (Info) original packet identifier
  |     |            |--&gt; 'src' --&gt; (IPv6Address) ipv6.src
  |     |            |--&gt; 'dst' --&gt; (IPv6Address) ipv6.dst
- |     |            |--&gt; 'id' --&gt; (int) ipv6.label
- |     |            |--&gt; 'proto' --&gt; (EtherType) ipv6_frag.next
+ |     |            |--&gt; 'id' --&gt; (int) ipv6_frag.id
+ |     |            |--&gt; 'proto' --&gt; (TransType) ipv6_frag.next
  |     |--&gt; 'index' : (tuple) packet numbers
  |     |               |--&gt; (int) original packet range number
- |     |--&gt; 'payload' : (bytes) reassembled IPv4 packet
+ |     |--&gt; 'header' : (bytes) header before IPv6-Frag
+ |     |--&gt; 'payload' : (bytes) reassembled IPv6 payload
  |     |--&gt; 'packet' : (Protocol) parsed reassembled payload
  |--&gt; (Info) data
  |     |--&gt; 'completed' : (bool) False --&gt; not implemented
  |     |--&gt; 'id' : (Info) original packet identifier
  |     |            |--&gt; 'src' --&gt; (IPv6Address) ipv6.src
  |     |            |--&gt; 'dst' --&gt; (IPv6Address) ipv6.dst
- |     |            |--&gt; 'id' --&gt; (int) ipv6.id
- |     |            |--&gt; 'proto' --&gt; (EtherType) ipv6_frag.next
+ |     |            |--&gt; 'id' --&gt; (int) ipv6_frag.id
+ |     |            |--&gt; 'proto' --&gt; (TransType) ipv6_frag.next
  |     |--&gt; 'index' : (tuple) packet numbers
  |     |               |--&gt; (int) original packet range number
- |     |--&gt; 'header' : (bytes) IPv4 header
- |     |--&gt; 'payload' : (tuple) partially reassembled IPv4 payload
- |     |                 |--&gt; (bytes) IPv4 payload fragment
+ |     |--&gt; 'header' : (bytes) header before IPv6-Frag
+ |     |--&gt; 'payload' : (tuple) partially reassembled IPv6 payload
+ |     |                 |--&gt; (bytes) IPv6 payload fragment
  |     |                 |--&gt; ...
  |     |--&gt; 'packet' : (None)
  |--&gt; (Info) data ...
@@ -526,8 +552,8 @@ is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(dict) buffer --&gt; memory buffer for reassembly
  |--&gt; (tuple) BUFID : (dict)
  |     |--&gt; ipv6.src       |
- |     |--&gt; ipc6.dst       |
- |     |--&gt; ipv6.label     |
+ |     |--&gt; ipv6.dst       |
+ |     |--&gt; ipv6_frag.id   |
  |     |--&gt; ipv6_frag.next |
  |                         |--&gt; 'TDL' : (int) total data length
  |                         |--&gt; RCVBT : (bytearray) fragment received bit table

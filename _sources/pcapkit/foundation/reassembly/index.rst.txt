@@ -41,9 +41,9 @@ diagram of the class hierarchy of :mod:`pcapkit.foundation.reassembly`:
        click C "/pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly"
        click D "/ext.html#reassembly-and-flow-tracing"
 
-       click IP "/pcapkit/foundation/reassembly/ip/index.html#pcapkit.foundation.reassembly.ip.IP"
-       click IPv4 "/pcapkit/foundation/reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ip.ipv4.IPv4"
-       click IPv6 "/pcapkit/foundation/reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ip.ipv6.IPv6"
+       click IP "/pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP"
+       click IPv4 "/pcapkit/foundation/reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4"
+       click IPv6 "/pcapkit/foundation/reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6"
        click TCP "/pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP"
 
 Auxiliary Data

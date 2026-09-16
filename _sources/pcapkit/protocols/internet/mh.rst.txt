@@ -77,7 +77,6 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_mh_options
    .. automethod:: _read_opt_none
    .. automethod:: _read_opt_pad
-   .. automethod:: _read_opt_pad
    .. automethod:: _read_opt_bra
    .. automethod:: _read_opt_aca
    .. automethod:: _read_opt_ni
@@ -99,7 +98,6 @@ Octets      Bits        Name                    Description
 
    .. automethod:: _make_mh_options
    .. automethod:: _make_opt_none
-   .. automethod:: _make_opt_pad
    .. automethod:: _make_opt_pad
    .. automethod:: _make_opt_bra
    .. automethod:: _make_opt_aca

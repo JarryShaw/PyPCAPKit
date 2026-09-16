@@ -12,6 +12,35 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. _Scapy: https://scapy.net
 
+.. note::
+
+   Constructing this engine imports :mod:`scapy.all`, which is what populates
+   `Scapy`_'s layer registries -- ``conf.l2types`` and the ``bind_layers``
+   payload table, both of which exist only as import side effects of the layer
+   modules. Importing a narrower submodule leaves them empty, and
+   :class:`~scapy.utils.PcapReader` then returns every frame as one opaque
+   :class:`~scapy.packet.Raw` layer without raising, so the engine dissected
+   nothing at all and said so only on :data:`sys.stderr`. See
+   :meth:`Scapy.__init__` for why naming the layer modules individually is not a
+   cheaper route to the same place.
+
+   One side effect is worth knowing about in advance: :mod:`scapy.all` loads
+   :mod:`scapy.layers.dcerpc`, which reaches `Scapy`_'s TLS layer and there
+   triggers a ``CryptographyDeprecationWarning`` from :mod:`cryptography` about
+   finite-field Diffie-Hellman. It concerns a key-exchange code path
+   :mod:`pcapkit` never executes, but it subclasses :exc:`UserWarning` rather
+   than :exc:`DeprecationWarning`, so Python's default filters show it.
+
+   :mod:`pcapkit` deliberately does not filter it away -- it is `Scapy`_'s to
+   emit and the consumer's to silence, on the same footing as every other
+   category (see :mod:`pcapkit.utilities.warnings`)::
+
+      import warnings
+
+      from cryptography.utils import CryptographyDeprecationWarning
+
+      warnings.filterwarnings('ignore', category=CryptographyDeprecationWarning)
+
 .. autoclass:: pcapkit.foundation.engines.scapy.Scapy
    :no-members:
    :show-inheritance:
@@ -19,6 +48,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
 
+   .. automethod:: __init__
    .. automethod:: run
    .. automethod:: read_frame
 
@@ -173,8 +203,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
+   .. autoattribute:: __engine_distribution__
+
+   .. automethod:: unsupported_reason
 
    .. autoproperty:: dlink
+   .. autoproperty:: backend
 
    .. automethod:: run
    .. automethod:: read_frame
@@ -320,8 +354,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
+   .. autoattribute:: __engine_distribution__
+
+   .. automethod:: unsupported_reason
 
    .. autoproperty:: dlink
+   .. autoproperty:: backend
 
    .. automethod:: __init__
    .. automethod:: run
@@ -360,6 +398,9 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: LAYERS
+   .. autoattribute:: PYTHON_CEILING
+
+   .. automethod:: unsupported_reason
 
    .. autoproperty:: dlink
 
@@ -383,3 +424,63 @@ Internal Definitions
 
 .. automethod:: pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder
 .. automethod:: pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode
+
+Backend Detection
+=================
+
+.. module:: pcapkit.foundation.engines._pcap_backend
+
+Two unrelated PyPI distributions install a top-level module named :mod:`pcap` --
+`PyPCAP`_, a Cython binding shipped as a single extension module, and `pcap-ct`_,
+a :mod:`ctypes` reimplementation shipped as a package. They therefore collide,
+and ``import pcap`` resolves to whichever the import system finds first.
+:class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
+:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` each have to know which one
+they actually got rather than assume, and this module is the one place that
+answers it -- deliberately shared, since the two engines must agree and two
+copies of the detection would be two chances to disagree. It is *only* detection,
+and it imports nothing from :mod:`pcapkit`, so it cannot introduce an import
+cycle.
+
+.. autodata:: pcapkit.foundation.engines._pcap_backend.PYPCAP
+
+.. autodata:: pcapkit.foundation.engines._pcap_backend.PCAP_CT
+
+.. autodata:: pcapkit.foundation.engines._pcap_backend.DISTRIBUTIONS
+
+.. autodata:: pcapkit.foundation.engines._pcap_backend.ENGINE_NAMES
+
+.. autoclass:: pcapkit.foundation.engines._pcap_backend.Probe
+   :no-members:
+   :show-inheritance:
+
+   .. note::
+
+      This is an :class:`~pcapkit.corekit.infoclass.Info` subclass, so it is a
+      :class:`~collections.abc.Mapping` rather than a :class:`tuple`: its fields
+      are reached by name, not by position, and it cannot be unpacked as a
+      sequence.
+
+   .. autoattribute:: name
+   .. autoattribute:: version
+   .. autoattribute:: origin
+   .. autoattribute:: failure
+   .. autoattribute:: missing
+   .. autoattribute:: installed
+
+   .. automethod:: describe
+
+.. autofunction:: pcapkit.foundation.engines._pcap_backend.probe
+
+.. autofunction:: pcapkit.foundation.engines._pcap_backend.identify
+
+.. autofunction:: pcapkit.foundation.engines._pcap_backend.installed_distributions
+
+.. autofunction:: pcapkit.foundation.engines._pcap_backend.wrong_backend_reason
+
+.. autofunction:: pcapkit.foundation.engines._pcap_backend.collision_reason
+
+Internal Definitions
+--------------------
+
+.. autofunction:: pcapkit.foundation.engines._pcap_backend._purge

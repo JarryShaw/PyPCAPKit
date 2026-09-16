@@ -472,6 +472,36 @@ value can be set by <a class="reference internal" href="#pcapkit.foundation.engi
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine.unsupported_reason">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unsupported_reason</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.unsupported_reason" title="Link to this definition">¶</a></dt>
+<dd><p>Why this engine cannot run in this environment, if it cannot.</p>
+<p>Engines are normally gated by whether their third-party module imports,
+which <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.import_test" title="pcapkit.foundation.extraction.Extractor.import_test"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor.import_test()</span></code></a> decides.
+This hook is for the cases that question cannot answer – most often a
+dependency that installs cleanly and only fails when it is <em>used</em>, so the
+import test passes and the error escapes from the engine’s constructor as
+a hard failure instead of degrading to the default engine.</p>
+<p>The default is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, i.e. always available; override it only where
+there is a real limitation, and return a short phrase naming the <em>cause</em>
+rather than merely refusing, since the string is shown to the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A phrase describing the limitation, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when the engine is
+usable here.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcapfile.PyPCAPFile</span></code></a> overrides
+this, because <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> installs on Python 3.12 and newer and then
+raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a> on first use.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine.run">
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.run" title="Link to this definition">¶</a></dt>
 <dd><p>Start extraction.</p>
