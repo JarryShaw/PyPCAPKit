@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """text field class"""
 
-import functools
 import urllib.parse as urllib_parse
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
-import chardet
-
 from pcapkit.corekit.fields.field import Field, NoValue
+from pcapkit.utilities.chardet import detect_charset
 from pcapkit.utilities.compat import Dict
 from pcapkit.utilities.exceptions import FieldValueError
 
@@ -17,64 +15,6 @@ __all__ = [
     'BitField',
     'PaddingField',
 ]
-
-#: How many distinct bytestrings :func:`_detect_charset` will remember. Bounded
-#: so that a capture full of never-repeating text cannot retain all of it.
-DETECT_CACHE_SIZE = 1024
-
-#: Longest bytestring :func:`_detect_charset` will put in the cache. Chosen from
-#: measurement: across ``http.pcap``, ``http6.cap`` and
-#: ``many_interfaces.pcapng`` every value reaching detection was at most 116
-#: octets, with a 95th percentile of 52, so this keeps every repeating string a
-#: real capture presents while capping what the cache can retain.
-DETECT_CACHE_MAX_BYTES = 256
-
-
-@functools.lru_cache(maxsize=DETECT_CACHE_SIZE)
-def _detect_charset_cached(value: 'bytes') -> 'str':
-    """Detect the character set of a short ``value``, memoised.
-
-    Args:
-        value: Bytestring whose encoding is to be detected.
-
-    Returns:
-        Name of the detected encoding, or ``'utf-8'`` where detection declines
-        to name one.
-
-    """
-    return chardet.detect(value)['encoding'] or 'utf-8'
-
-
-def _detect_charset(value: 'bytes') -> 'str':
-    """Detect the character set of ``value``.
-
-    :func:`chardet.detect` is a pure function of the bytes handed to it, and the
-    single most expensive step in turning a text field into a :obj:`str`. The
-    strings a capture presents repeat heavily -- an HTTP-heavy capture asked for
-    the encoding of ``b'Connection'`` once per message and got the same answer
-    every time -- so the verdict is memoised on the bytes rather than recomputed.
-    The result is by construction the one :func:`chardet.detect` would have
-    returned.
-
-    Long values bypass the cache. :meth:`ProtocolBase.decode
-    <pcapkit.protocols.protocol.ProtocolBase.decode>` is public, so a caller may
-    hand this an entire payload, and :func:`~functools.lru_cache` bounds how many
-    entries it keeps rather than how large they are -- 1024 multi-megabyte
-    payloads would be retained for the life of the process. Skipping the cache
-    above :data:`DETECT_CACHE_MAX_BYTES` costs such a call nothing it was not
-    already paying, since a payload that size is unlikely to recur anyway.
-
-    Args:
-        value: Bytestring whose encoding is to be detected.
-
-    Returns:
-        Name of the detected encoding, or ``'utf-8'`` where detection declines
-        to name one.
-
-    """
-    if len(value) > DETECT_CACHE_MAX_BYTES:
-        return chardet.detect(value)['encoding'] or 'utf-8'
-    return _detect_charset_cached(value)
 
 if TYPE_CHECKING:
     from typing import Callable, Optional, Tuple
@@ -227,7 +167,7 @@ class StringField(_TextField[str]):
             except UnicodeError:
                 ret = urllib_parse.unquote(value.replace(b'%', rb'\x'), encoding='utf-8', errors='replace')
         else:
-            charset = self._encoding or _detect_charset(value)
+            charset = self._encoding or detect_charset(value)
             try:
                 ret = value.decode(charset, self._errors)
             except UnicodeError:
