@@ -77,7 +77,7 @@ multiset identical).
 | 2 | `5ce03cd77` | `FieldBase.__copy__` | -16.6% | -11% to -15% everywhere |
 | 3 | `0c1387460` | read `Field.length` once | -2.0% | -2% to -3% |
 | 4 | `0aca00690` | `Schema.__setattr__` recursion | -3.7% | -2.6% to -4.2% |
-| ~~5~~ | `1794c43d2`, reverted in `8296e362b` | `OptionField` isinstance taken once | ~~-1.0%~~ | **reverted, see below** |
+| ~~5~~ | `1794c43d2`, reverted in `faef5d649` | `OptionField` isinstance taken once | ~~-1.0%~~ | **reverted, see below** |
 
 (Shas are post-rebase onto `origin/main` at `42eb0d912`. That rebase brought in
 only `examples/benchmark/**` and the `Makefile` from PR #410 — **no `pcapkit/`
