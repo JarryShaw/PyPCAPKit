@@ -4,10 +4,11 @@
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.foundation.reassembly.data.data import Deferred
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
-    'Packet', 'DatagramID', 'Datagram', 'Buffer', 'BufferID', 'Deferred',
+    'Packet', 'DatagramID', 'Datagram', 'Buffer', 'BufferID',
 ]
 
 if TYPE_CHECKING:
@@ -23,51 +24,6 @@ _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 
 #: Buffer ID.
 BufferID: 'TypeAlias' = Tuple[_AT, _AT, int, 'TransType']
-
-
-class Deferred:
-    """A postponed analysis of a reassembled payload.
-
-    :attr:`Datagram.packet` is a second, full parse of the payload the datagram
-    just reassembled, and IP reassembly submits a datagram for *every* frame --
-    not only the fragmented ones, since a frame that is not fragmented in any
-    sense still reaches
-    :meth:`IP.reassembly <pcapkit.foundation.reassembly.ip.IP.reassembly>` and is
-    submitted from there as a trivially complete datagram. Running the parse
-    eagerly therefore re-parsed captures that hold no fragments at all:
-    :file:`http.pcap` has 1117 IPv4 frames and none of them fragmented, and the
-    parse was 86% of the cost of IP reassembly over it.
-
-    Holding the call here defers it to the first read of
-    :attr:`Datagram.packet`, so a caller that wants the parsed payload still gets
-    exactly the object the eager call produced, and one that does not never pays
-    for it.
-
-    Args:
-        analyze: The analyser to call, i.e.
-            :meth:`Protocol.analyze <pcapkit.protocols.protocol.ProtocolBase.analyze>`
-            bound to the reassembly object's protocol.
-        proto: Payload protocol type.
-        payload: Reassembled payload to parse.
-
-    """
-
-    __slots__ = ('analyze', 'proto', 'payload')
-
-    def __init__(self, analyze: 'Callable[[TransType, bytes], Protocol]',
-                 proto: 'TransType', payload: 'bytes') -> 'None':
-        self.analyze = analyze
-        self.proto = proto
-        self.payload = payload
-
-    def __call__(self) -> 'Protocol':
-        """Run the postponed analysis.
-
-        Returns:
-            Parsed payload.
-
-        """
-        return self.analyze(self.proto, self.payload)
 
 
 @info_final
