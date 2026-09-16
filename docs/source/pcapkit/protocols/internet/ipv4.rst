@@ -219,7 +219,7 @@ Data Models
    :show-inheritance:
 
    .. attribute:: del
-      :type: ToSDelay
+      :type: pcapkit.const.ipv4.tos_del.ToSDelay
 
       Delay.
 
@@ -241,7 +241,7 @@ Data Models
    :show-inheritance:
 
    .. attribute:: class
-      :type: OptionClass
+      :type: pcapkit.const.ipv4.option_class.OptionClass
 
       Option class.
 
