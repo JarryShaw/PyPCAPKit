@@ -225,6 +225,14 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     (``NG_Application_Protocol``) and 66 (``NGAP_over_DTLS_over_SCTP``). Every
     other PPID resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.
 
+    Only PPID 60 actually decodes, though. A PPID 66 payload is an NGAP PDU
+    wrapped in a DTLS record, and :mod:`pcapkit` has no DTLS implementation, so
+    those bytes are not aligned PER and the parse degrades to
+    :class:`~pcapkit.protocols.misc.raw.Raw` -- every time, not only when
+    ``pycrate`` is absent. It is registered so that the PPID is *named* in the
+    protochain rather than reported as an unassigned number, which is strictly
+    more than leaving it out would give.
+
     This class currently supports parsing of the following SCTP chunks, which
     are directly mapped to the :class:`pcapkit.const.sctp.chunk.Chunk`
     enumeration:

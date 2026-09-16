@@ -856,19 +856,25 @@ class SCTPUnitTests(unittest.TestCase):
     ##########################################################################
 
     def test_ppid_dispatch_hook(self) -> None:
-        """The two NGAP PPIDs dispatch, and a junk payload still degrades.
+        """Both NGAP PPIDs dispatch, and a junk payload still degrades.
 
         Both PPIDs are registered as defaults on
         :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
         rather than by a ``register_sctp`` call at import time, so the assertion
         is on the registry's declared contents.
 
+        Dispatching is all the two have in common, and the assertion is
+        deliberately no stronger than that. Only PPID 60 can decode: a PPID 66
+        payload is an NGAP PDU inside a DTLS record, and with no DTLS
+        implementation those bytes are never aligned PER, so 66 degrades to
+        :class:`Raw` on every well-formed capture as well as on this junk one.
+
         ``b'ngap-pdu'`` is not an aligned PER ``NGAP-PDU``, which is the point:
         the failure has to reach :class:`Raw` through
         :func:`~pcapkit.utilities.decorators.beholder` rather than escape, and
-        the payload has to keep the PPID's name while doing so. That path is
-        also what a capture parsed *without* ``pycrate`` installed takes on
-        every NGAP packet.
+        the payload has to keep the PPID's name while doing so. For PPID 60 that
+        path is also what a capture parsed *without* ``pycrate`` installed takes
+        on every NGAP packet.
 
         """
         from pcapkit.const.sctp.chunk import Chunk

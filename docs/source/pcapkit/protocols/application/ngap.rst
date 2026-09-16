@@ -39,7 +39,7 @@ Python**, with no compiled extension to build on any platform. Decoding costs
 0.15 ms per PDU, the same order as :mod:`pcapkit`'s own per-packet cost, so
 the generic strategy below is not paying for the convenience.
 
-Generic conversion, not 51 hand-written procedures
+Generic conversion, not 81 hand-written procedures
 --------------------------------------------------
 
 The decoded value tree is mapped into :class:`~pcapkit.corekit.infoclass.Info`
