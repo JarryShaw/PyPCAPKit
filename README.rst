@@ -11,7 +11,8 @@ The PyPCAPKit project is an open source Python program focus on network packet
 parsing and analysis, which works as a comprehensive `PCAP`_ file extraction,
 construction and analysis library.
 
-   The whole project supports **Python 3.6** or later; CI covers 3.10 to 3.14, and 3.15 as an allowed-to-fail leg.
+   The whole project supports **Python 3.6** or later; CI covers 3.10 to 3.14,
+   and 3.15 as an allowed-to-fail leg.
 
 -----
 About
@@ -177,28 +178,6 @@ compared with a measured row.
 Installation
 ------------
 
-   **Note** -- ``pcapkit`` declares support for **Python 3.6 and later**, and CI
-   covers **3.10 through 3.14**, plus 3.15 as an allowed-to-fail leg.
-
-   The sources themselves use 3.8 syntax; the ``bpc-walrus``/``bpc-poseur``
-   backport tools in ``setup.py`` convert it at install time, which is what makes
-   the lower bound possible. Measured: 3.9 and 3.8 import and extract straight
-   from source with no conversion needed, and 3.7 needs the conversion.
-
-   **That conversion is currently blocked by an upstream bug**, so below 3.8 the
-   declaration is intent rather than something that works today: ``bpc-poseur``
-   0.4.3.post1 crashes on positional-only parameters declared on a *method*
-   rather than a plain function, and exits 0 so the build does not notice. The
-   12 such parameters in ``pcapkit/corekit/io.py`` then survive into the
-   installed package and ``import pcapkit`` fails. It is a one-line fix
-   upstream -- ``poseur.py:744`` passes ``cls_ctx=name.name`` where ``name`` is
-   already a parso ``Name`` and wants ``.value`` -- and with it applied,
-   ``walrus`` then ``poseur`` produce a file Python 3.7 parses cleanly. Tracking
-   that fix is what will make 3.6/3.7 real again.
-
-   3.8 and 3.9 are end-of-life and best-effort. Individual *engines* also stop
-   earlier than the library does; see `Engine prerequisites`_.
-
 Simply run the following to install the current version from PyPI:
 
 .. code-block:: shell
@@ -262,23 +241,26 @@ plug-in functions, you may want to install the optional ones:
    # or to do this explicitly
    pip install pypcapkit dpkt scapy pyshark pypcapfile
 
-   **Important** -- The ``all`` extra deliberately excludes both ``pypcap`` and
-   ``pcap-ct``, for different reasons. Everything
-   else in ``all`` is a pure-Python wheel, whereas ``pypcap`` compiles a C
-   extension; pulling it into ``all`` would demand a working compiler and the
-   `libpcap`_ development files from everyone installing ``pypcapkit[all]``.
-   ``pcap-ct`` needs no compiler, but it and its ``libpcap`` dependency are
-   published only as **pre-releases** (1.3.0b3 and 1.11.0b29), and ``all`` should
-   not be how somebody ends up with a beta they did not ask for. Install either
-   explicitly: ``pip install pypcapkit[PyPCAP]`` or
-   ``pip install pypcapkit[PCAP_CT]``.
+Installation Notes
+------------------
 
-   **Install only one of them.** Both distributions own the top-level ``pcap``
-   module, and ``pip`` will install both without complaint. With both present the
-   ``pcap-ct`` package wins the import and ``pypcap``'s extension module is
-   shadowed and unreachable, so ``engine='pypcap'`` stops working. ``pcapkit``
-   detects that state and warns, naming both distributions and which one won, but
-   it cannot undo it.
+ The ``all`` extra deliberately excludes both ``pypcap`` and
+ ``pcap-ct``, for different reasons. Everything
+ else in ``all`` is a pure-Python wheel, whereas ``pypcap`` compiles a C
+ extension; pulling it into ``all`` would demand a working compiler and the
+ `libpcap`_ development files from everyone installing ``pypcapkit[all]``.
+ ``pcap-ct`` needs no compiler, but it and its ``libpcap`` dependency are
+ published only as **pre-releases** (1.3.0b3 and 1.11.0b29), and ``all`` should
+ not be how somebody ends up with a beta they did not ask for. Install either
+ explicitly: ``pip install pypcapkit[PyPCAP]`` or
+ ``pip install pypcapkit[PCAP_CT]``.
+
+ **Install only one of them.** Both distributions own the top-level ``pcap``
+ module, and ``pip`` will install both without complaint. With both present the
+ ``pcap-ct`` package wins the import and ``pypcap``'s extension module is
+ shadowed and unreachable, so ``engine='pypcap'`` stops working. ``pcapkit``
+ detects that state and warns, naming both distributions and which one won, but
+ it cannot undo it.
 
 Engine prerequisites
 --------------------
@@ -335,7 +317,7 @@ package.
      found even though it is installed. Installing into ``sys.prefix``, or into
      ``/opt/libpcap``, is what that search will pick up.
 
-``pcap_ct``
+``pcap-ct``
    The way to drive the same `libpcap`_ interface on Python **3.12 and newer**,
    where ``pypcap`` cannot be built. Nothing to compile and no ``pcap.h`` needed:
    `pcap-ct`_ is a ``ctypes`` reimplementation, and both it and its ``libpcap``
