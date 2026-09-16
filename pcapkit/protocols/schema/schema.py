@@ -666,12 +666,18 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
 
             packet[field.name] = value
 
-            if isinstance(field, OptionField):
+            # NOTE: taken once because both branches below need it. Field classes
+            # carry abc.ABCMeta, so isinstance() against them is a Python-level
+            # __instancecheck__ rather than the C fast path, and every field of
+            # every packet pays for it.
+            is_option = isinstance(field, OptionField)
+
+            if is_option:
                 packet['__option_padding__'] = field.option_padding
 
             if isinstance(field, ForwardMatchField):
                 data.seek(-length, io.SEEK_CUR)
-            elif isinstance(field, OptionField) and field.option_padding > 0:
+            elif is_option and field.option_padding > 0:
                 # the option list ended before the declared field length was
                 # exhausted; give the unconsumed remainder back to ``data``
                 # so that the following fields can read it
