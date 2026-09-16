@@ -52,7 +52,12 @@ release = pcapkit.__version__
 extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.autodoc', 'sphinx.ext.autodoc.typehints',
+    # NB: ``sphinx.ext.autodoc.typehints`` is *not* listed here. It is an
+    # internal submodule of ``sphinx.ext.autodoc`` rather than an extension in
+    # its own right -- it exposes no ``setup()``, so loading it explicitly only
+    # earns a warning. The typehint rendering comes from the third-party
+    # ``sphinx_autodoc_typehints`` below.
+    'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
 
