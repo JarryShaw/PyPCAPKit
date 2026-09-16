@@ -1,10 +1,15 @@
 Parsing Context
 ===============
 
-.. module:: pcapkit.corekit.context
+.. Unlike its sibling pages, this one renders the module docstring through
+   ``automodule`` rather than repeating it as prose. That docstring already
+   carries its own ``.. module::`` directive -- as every module under
+   ``pcapkit`` does -- so there must be no second one here, and ``automodule``
+   itself must not register a third: hence ``:no-index:``.
 
 .. automodule:: pcapkit.corekit.context
    :no-members:
+   :no-index:
 
 .. autoclass:: pcapkit.corekit.context.ProtocolContext
    :no-members:

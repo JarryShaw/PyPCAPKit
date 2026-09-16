@@ -201,7 +201,8 @@ all = [
 ]
 docs = [
     "Sphinx>=6.1.3", "furo",
-    "sphinx-autodoc-typehints", "sphinx-opengraph", "sphinx-copybutton",
+    "sphinx-autodoc-typehints", "sphinxext-opengraph", "sphinx-copybutton",
+    "sphinxcontrib-mermaid",
     "typing-extensions", "mypy-extensions",
 ]
 test = [
