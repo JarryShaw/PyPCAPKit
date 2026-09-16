@@ -21,7 +21,7 @@ class TransportUnitTests(unittest.TestCase):
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.transport.transport import Transport
-        from pcapkit.utilities.exceptions import UnsupportedCall
+        from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall
 
         class DummyTransport(Transport):
             __proto__ = collections.defaultdict(lambda: Raw, {80: Raw})
@@ -49,6 +49,10 @@ class TransportUnitTests(unittest.TestCase):
 
         with self.assertRaises(UnsupportedCall):
             Transport.register(1, Raw)
+        # RegistryError is (BaseError, TypeError), so the bare TypeError this
+        # used to raise is still caught by anyone who was catching it.
+        with self.assertRaises(RegistryError):
+            DummyTransport.register(81, object)  # type: ignore[arg-type]
         with self.assertRaises(TypeError):
             DummyTransport.register(81, object)  # type: ignore[arg-type]
 

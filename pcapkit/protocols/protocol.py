@@ -1178,6 +1178,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                             namespace = cast('dict[int, str]', namespace)
                         index = {v: k for k, v in namespace.items()}[name]
                 else:
+                    # Caught by the handler immediately below and converted, so
+                    # this never escapes -- it is a jump to the shared "name is
+                    # not in namespace" path, not a stdlib exception leaking out
+                    # of the library. A pcapkit exception here would log at
+                    # CRITICAL for something that is handled two lines later.
                     raise KeyError(name)
             except KeyError as error:
                 if default is None:

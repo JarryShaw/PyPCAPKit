@@ -19,7 +19,7 @@ from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
-from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import RegistryError, StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, get_logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -92,7 +92,7 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not issubclass(protocol, Protocol):
-            raise TypeError(f'protocol must be a Protocol subclass, not {protocol!r}')
+            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
             warn(f'port {code} already registered, overwriting', RegistryWarning)
         cls.__proto__[code] = protocol
