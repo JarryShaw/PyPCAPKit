@@ -189,20 +189,31 @@ Measured with ``examples/legacy_smoke/test_time.py``: 1,000 timed
 extractions of ``examples/captures/in.pcap`` per engine and Python version. The
 first extraction is discarded as a warm-up. Values are milliseconds per packet.
 
-============== ======== ======== ======== ======== ========
-Engine          3.10     3.11     3.12     3.13     3.14
-============== ======== ======== ======== ======== ========
-``pcapkit``     0.2516   0.2227   0.2292   0.2168   0.2307
-``dpkt``        0.0170   0.0125   0.0154   0.0125   0.0128
-``scapy``       0.0316   0.0268   0.0268   0.0318   0.0297
-``pyshark``    14.7434  14.8755  14.6006  14.8334   -- [1]_
-``pypcapfile``  0.0163   0.0107   -- [2]_  -- [2]_  -- [2]_
-``pypcap``      -- [3]_  -- [3]_  -- [3]_  -- [3]_  -- [3]_
-``pcap_ct``     -- [4]_  -- [4]_  -- [4]_  -- [4]_  -- [4]_
-============== ======== ======== ======== ======== ========
+=================== ======== ======== ======== ======== ========
+Engine              3.10     3.11     3.12     3.13     3.14
+=================== ======== ======== ======== ======== ========
+``pcapkit``          0.2516   0.2227   0.2292   0.2168   0.2307
+``dpkt``             0.0170   0.0125   0.0154   0.0125   0.0128
+``scapy``            0.0316   0.0268   0.0268   0.0318   0.0297
+``pyshark`` [1]_    14.7434  14.8755  14.6006  14.8334   --
+``pypcapfile`` [2]_  0.0163   0.0107   --       --       --
+``pypcap`` [3]_      --       --       --       --       --
+``pcap_ct`` [4]_     --       --       --       --       --
+=================== ======== ======== ======== ======== ========
 
 The unavailable cells were attempted. They are not zeroes and must not be
 compared with a measured row.
+
+.. [1] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
+   3.14; it ran on 3.10--3.13.
+
+.. [2] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
+
+.. [3] `PyPCAP`_ 1.3.0 could not be built here: its build does not search
+   Homebrew's libpcap library prefix. It is also unsupported on Python 3.12+.
+
+.. [4] The prerelease `pcap-ct`_ / `libpcap`_ wheels currently load Linux
+   ``libc.so.6`` on this macOS host, so their engine could not be preflighted.
 
 Installation
 ============
@@ -421,14 +432,3 @@ Indices and tables
 .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 .. _libpcap: https://www.tcpdump.org
 .. _DictDumper: https://github.com/JarryShaw/DictDumper
-
-.. [1] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
-   3.14; it ran on 3.10--3.13.
-
-.. [2] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
-
-.. [3] `PyPCAP`_ 1.3.0 could not be built here: its build does not search
-   Homebrew's libpcap library prefix. It is also unsupported on Python 3.12+.
-
-.. [4] The prerelease `pcap-ct`_ / `libpcap`_ wheels currently load Linux
-   ``libc.so.6`` on this macOS host, so their engine could not be preflighted.
