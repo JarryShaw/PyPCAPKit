@@ -48,6 +48,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['IPv6']
 

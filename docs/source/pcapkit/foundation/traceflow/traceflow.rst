@@ -27,7 +27,7 @@ which is an abstract base class for all flow tracing classes.
          value can be set by :attr:`__protocol_name__` class attribute.
 
    .. property:: protocol
-      :type: Type[Protocol]
+      :type: typing.Type[pcapkit.protocols.protocol.ProtocolBase]
 
       Protocol of current class.
 
@@ -76,22 +76,22 @@ Internal Definitions
 Type Variables
 --------------
 
-.. data:: pcapkit.foundation.traceflow.traceflow._DT
+.. data:: _DT
    :type: typing.Any
 
    Buffer ID data structure.
 
-.. data:: pcapkit.foundation.traceflow.traceflow._BT
+.. data:: _BT
    :type: pcapkit.corekit.infoclass.Info
 
    Buffer data structure.
 
-.. data:: pcapkit.foundation.traceflow.traceflow._IT
+.. data:: _IT
    :type: pcapkit.corekit.infoclass.Info
 
    Index data structure.
 
-.. data:: pcapkit.foundation.traceflow.traceflow._PT
+.. data:: _PT
    :type: pcapkit.corekit.infoclass.Info
 
    Packet data structure.

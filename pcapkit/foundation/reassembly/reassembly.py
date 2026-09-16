@@ -19,22 +19,11 @@ from pcapkit.protocols.misc.raw import Raw
 from pcapkit.utilities.exceptions import UnsupportedCall
 from pcapkit.utilities.logging import get_logger
 
-if TYPE_CHECKING:
-    from typing import Any, Callable, Optional, Type
-
-    from typing_extensions import Self
-
-    from pcapkit.corekit.infoclass import Info
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
-
-    CallbackFn = Callable[[list['_DT']], None]
-
-__all__ = ['Reassembly']
-
-#: logging.Logger: Module-level logger, a child of the package-wide
-#: :data:`pcapkit.utilities.logging.logger`.
-logger = get_logger(__name__)
-
+# NB: declared above the ``TYPE_CHECKING`` block, not below it, so that
+# ``CallbackFn`` can name ``_DT`` outright. As a quoted forward reference it was
+# resolvable only from this module's namespace, and every module that spells
+# ``CallbackFn`` in an annotation -- ``pcapkit.foundation.registry.foundation``
+# does -- has to evaluate the alias in its own.
 # packet
 _PT = TypeVar('_PT', bound='Info')
 # datagram
@@ -43,6 +32,22 @@ _DT = TypeVar('_DT', bound='Info')
 _IT = TypeVar('_IT', bound='tuple')
 # buffer
 _BT = TypeVar('_BT', bound='Info')
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Optional, Type
+
+    from typing_extensions import Self
+
+    from pcapkit.corekit.infoclass import Info
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+
+    CallbackFn = Callable[[list[_DT]], None]
+
+__all__ = ['Reassembly']
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 class ReassemblyMeta(abc.ABCMeta):

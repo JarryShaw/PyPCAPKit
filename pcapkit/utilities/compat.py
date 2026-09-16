@@ -131,10 +131,18 @@ else:
     List: 'TypeAlias' = list
     Dict: 'TypeAlias' = dict
 
+# The ``else`` branch of each ``sys.version_info`` guard below imports a name
+# that only exists on the newer interpreter, so it never executes on the older
+# one the guard is there to support. Vermin's analysis is static and cannot see
+# that, so it counts these imports anyway and reports the whole library as
+# requiring 3.11 on the strength of three lines that never run below it.
+# ``# novermin`` is Vermin's documented escape hatch for precisely this shape.
+# It is applied per line rather than by turning on ``lax`` mode, so that an
+# *unguarded* use of a new feature anywhere else is still caught.
 if sys.version_info < (3, 11):
     from aenum import StrEnum
 else:
-    from enum import StrEnum
+    from enum import StrEnum  # novermin
 
 if sys.version_info < (3, 8):
     from typing_extensions import final
@@ -188,9 +196,9 @@ if sys.version_info < (3, 11):
     def show_flag_values(value: 'IntFlag') -> 'list[int]':
         return list(_iter_bits_lsb(value))
 else:
-    from enum import show_flag_values  # type: ignore[attr-defined]
+    from enum import show_flag_values  # type: ignore[attr-defined]  # novermin
 
 if sys.version_info < (3, 10):
     from typing_extensions import TypeAlias
 else:
-    from typing import TypeAlias
+    from typing import TypeAlias  # novermin

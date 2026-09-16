@@ -203,6 +203,44 @@ class FollowTCPStreamTests(unittest.TestCase):
         self.assertFalse(any(issubclass(w.category, FormatWarning) for w in caught))
         self.assertEqual(len(streams), IN_PCAP_TCP_STREAMS)
 
+    @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
+    def test_the_local_format_upgrade_is_not_redundant(self) -> None:
+        # Extractor now guards DPKT and Scapy itself, which makes the local upgrade
+        # in follow_tcp_stream look removable. It is not, and this pins the reason so
+        # that deleting it fails here rather than only changing what users see.
+        #
+        # The two guards pick the same replacement format, so the traces are
+        # identical either way; they differ in when they complain. The Extractor
+        # announces every substitution, including for an unset format -- which
+        # follow_tcp_stream does not even expose, since its argument is ``format``.
+        # Here an unset format is upgraded silently. Remove the local guard and
+        # ``follow_tcp_stream(engine='dpkt')`` starts warning about a default the
+        # caller never chose.
+        import pcapkit
+        from pcapkit.utilities.warnings import FormatWarning
+
+        def format_warnings(caught):
+            return [str(w.message) for w in caught if issubclass(w.category, FormatWarning)]
+
+        with warnings.catch_warnings(record=True) as local:
+            warnings.simplefilter('always')
+            streams = self._follow(engine='dpkt', format=None)
+
+        with warnings.catch_warnings(record=True) as core:
+            warnings.simplefilter('always')
+            extraction = pcapkit.extract(fin=sample_path('in.pcap'), engine='dpkt',
+                                         store=True, nofile=True, tcp=True, trace=True,
+                                         trace_fout=self.tmp_dir, trace_format=None)
+
+        # Same work done either way ...
+        self.assertEqual(len(streams), IN_PCAP_TCP_STREAMS)
+        self.assertEqual(len(extraction.trace.tcp), IN_PCAP_TCP_STREAMS)
+
+        # ... and the difference is only in the reporting.
+        self.assertEqual(format_warnings(local), [])
+        self.assertEqual(len(format_warnings(core)), 1)
+        self.assertIn('trace_format=None', format_warnings(core)[0])
+
     def test_engine_without_a_reassembly_adapter_returns_no_streams(self) -> None:
         # An engine pcapkit ships no reassembly adapter for -- a third-party one, or
         # a built-in that grows dict frames -- must not be silently routed to the

@@ -154,6 +154,27 @@ class DumpkitIOTests(unittest.TestCase):
             self.assertIs(dumper(frame), dumper)
             self.assertGreater(pcap_path.stat().st_size, header_size)
 
+    def test_pcap_dumper_cannot_serialise_a_mapping_frame(self) -> None:
+        # Why Extractor substitutes a dict-capable trace format for the DPKT, Scapy,
+        # PyShark and PyPCAPFile engines: their flow-tracing adapters report each
+        # frame as a plain dict from ``packet2dict``, and this dumper reads
+        # ``value.packet`` and ``value.frame_info`` off a dissected Frame. Pinned
+        # here so the guard's justification is checked rather than asserted in a
+        # comment -- if this dumper ever learns to take a mapping, the guard is what
+        # should be revisited.
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.dumpkit.pcap import PCAPIO
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            pcap_path = pathlib.Path(tempdir) / 'mapping.pcap'
+            dumper = PCAPIO(str(pcap_path), protocol=LinkType.ETHERNET,
+                            byteorder='little', nanosecond=False)
+
+            # The shape ``packet2dict`` produces: keys, not attributes.
+            with self.assertRaises(AttributeError) as caught:
+                dumper({'frame_info': {'ts_sec': 1}, 'packet': b'abcd'}, name='Frame 1')
+            self.assertIn('packet', str(caught.exception))
+
 
 if __name__ == '__main__':
     unittest.main()

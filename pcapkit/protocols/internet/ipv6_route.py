@@ -48,12 +48,14 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
-    from typing import IO, Any, Callable, DefaultDict, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
+    from pcapkit.corekit.protochain import ProtoChain
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
     from pcapkit.protocols.schema.internet.ipv6_route import RoutingType as Schema_RoutingType
 
     TypeParser = Callable[[Schema_RoutingType, NamedArg(Schema_IPv6_Route, 'header')], Data_IPv6_Route]
