@@ -411,23 +411,41 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">DPKT</span> <span class="k">as</span> <span class="n">DPKT_Engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAP</span> <span class="k">as</span> <span class="n">PCAP_Engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">PCAPNG_Engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pypcapfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyPCAPFile</span> <span class="k">as</span> <span class="n">PyPCAPFile_Engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scapy</span> <span class="k">as</span> <span class="n">Scapy_Engine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Data</span>
+
+    <span class="c1">#: A toolkit's ``tcp_reassembly`` adapter. The pcapkit-native adapters take only</span>
+    <span class="c1">#: the frame; the third-party ones also accept a ``count`` keyword -- hence the</span>
+    <span class="c1">#: open ``...`` parameter list, which lets both call shapes type-check.</span>
+    <span class="n">ReassemblyAdapter</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="s1">'Optional[TCP_Data]'</span><span class="p">]</span>
 
     <span class="n">ByteOrder</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'little'</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">]</span>
-    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">]</span>
+    <span class="c1">#: Every key registered in :attr:`Extractor.__output__</span>
+    <span class="c1">#: &lt;pcapkit.foundation.extraction.Extractor.__output__&gt;` and in</span>
+    <span class="c1">#: :attr:`TraceFlowBase.__output__</span>
+    <span class="c1">#: &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__&gt;` -- the two</span>
+    <span class="c1">#: registries expose the same eight keys. This used to name only four of them,</span>
+    <span class="c1">#: which made ``'cap'`` and the ``'txt'``/``'xml'`` aliases unspellable for a</span>
+    <span class="c1">#: type checker even though every one of them is accepted at runtime.</span>
+    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'text'</span><span class="p">,</span> <span class="s1">'txt'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">,</span> <span class="s1">'xml'</span><span class="p">]</span>
     <span class="c1"># NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;</span>
     <span class="c1"># both copies need updating when a new engine lands.</span>
     <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">]</span>
@@ -489,20 +507,70 @@
              <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="c1"># NOTE: the DPKT and Scapy engines hand their frames to the flow tracer as plain</span>
+    <span class="c1"># :obj:`dict`\\ s, which the PCAP trace dumper cannot re-serialise -- it reaches</span>
+    <span class="c1"># for ``frame.packet`` and dies with ``AttributeError: 'dict' object has no</span>
+    <span class="c1"># attribute 'packet'`` (#399). The tracer defaults an unset ``format`` to</span>
+    <span class="c1"># ``'pcap'``, so following a stream through either engine crashes *during</span>
+    <span class="c1"># extraction*, before the reassembly below ever runs. :class:`Extractor</span>
+    <span class="c1"># &lt;pcapkit.foundation.extraction.Extractor&gt;` already substitutes a dict-capable</span>
+    <span class="c1"># format for the PyShark and PyPCAPFile engines but deliberately leaves DPKT and</span>
+    <span class="c1"># Scapy out (see the note at its ``trace`` setup); apply the same remedy here so</span>
+    <span class="c1"># the stream is followed rather than crashed on. A caller that never asked for a</span>
+    <span class="c1"># trace format (``None``) is quietly upgraded; an explicit but unusable one is</span>
+    <span class="c1"># replaced with a warning, since it is a request that cannot be honoured.</span>
+    <span class="k">if</span> <span class="n">engine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">engine</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"extraction engine </span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s2"> cannot write '</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">' trace files; "</span>
+                 <span class="s2">"using 'json' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="nb">format</span> <span class="o">=</span> <span class="s1">'json'</span>
+
     <span class="n">extraction</span> <span class="o">=</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
                            <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
                            <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                            <span class="n">reassembly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
                            <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">)</span>  <span class="c1"># type: ignore[var-annotated]</span>
 
-    <span class="n">fallback</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">'dpkt'</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-    <span class="k">elif</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">'scapy'</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+    <span class="c1"># NOTE: ``Extractor.engine`` returns the running engine *instance* (see</span>
+    <span class="c1"># :meth:`Extractor.engine &lt;pcapkit.foundation.extraction.Extractor.engine&gt;`),</span>
+    <span class="c1"># never its name -- so the historical ``extraction.engine == 'dpkt'`` compared an</span>
+    <span class="c1"># object against a string and was *always* :data:`False`. Every capture then fell</span>
+    <span class="c1"># through to the pcapkit adapter, which crashed on DPKT frames and silently</span>
+    <span class="c1"># returned no streams on Scapy frames (#399). Dispatch on the engine *type*</span>
+    <span class="c1"># instead, and via :func:`isinstance` so that a third-party engine subclassing a</span>
+    <span class="c1"># built-in still reaches the adapter that matches its frames.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The adapter and its call convention are chosen together: the pcapkit-native</span>
+    <span class="c1"># adapters (:mod:`~pcapkit.toolkit.pcap` and :mod:`~pcapkit.toolkit.pcapng`) read</span>
+    <span class="c1"># the frame number straight off the dissected frame and accept no ``count``,</span>
+    <span class="c1"># whereas the third-party adapters have no such number and must be handed the</span>
+    <span class="c1"># frame index as ``count`` -- so the two forms are not interchangeable.</span>
+    <span class="n">exeng</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span>
+    <span class="n">tcp_reassembly</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[ReassemblyAdapter]</span>
+    <span class="n">pass_count</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exeng</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap</span> <span class="k">as</span> <span class="n">tk_pcap</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">pass_count</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ReassemblyAdapter'</span><span class="p">,</span> <span class="n">tk_pcap</span><span class="o">.</span><span class="n">tcp_reassembly</span><span class="p">),</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exeng</span><span class="p">,</span> <span class="n">PCAPNG_Engine</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcapng</span> <span class="k">as</span> <span class="n">tk_pcapng</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">pass_count</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ReassemblyAdapter'</span><span class="p">,</span> <span class="n">tk_pcapng</span><span class="o">.</span><span class="n">tcp_reassembly</span><span class="p">),</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exeng</span><span class="p">,</span> <span class="n">DPKT_Engine</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">dpkt</span> <span class="k">as</span> <span class="n">tk_dpkt</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="n">tcp_reassembly</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ReassemblyAdapter'</span><span class="p">,</span> <span class="n">tk_dpkt</span><span class="o">.</span><span class="n">tcp_reassembly</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exeng</span><span class="p">,</span> <span class="n">Scapy_Engine</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">scapy</span> <span class="k">as</span> <span class="n">tk_scapy</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="n">tcp_reassembly</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ReassemblyAdapter'</span><span class="p">,</span> <span class="n">tk_scapy</span><span class="o">.</span><span class="n">tcp_reassembly</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exeng</span><span class="p">,</span> <span class="n">PyPCAPFile_Engine</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">pypcapfile</span> <span class="k">as</span> <span class="n">tk_pypcapfile</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="n">tcp_reassembly</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ReassemblyAdapter'</span><span class="p">,</span> <span class="n">tk_pypcapfile</span><span class="o">.</span><span class="n">tcp_reassembly</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="n">fallback</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># A third-party engine pcapkit ships no reassembly adapter for. Falling back</span>
+        <span class="c1"># to the pcapkit adapter is exactly the #399 failure mode -- a wrong or empty</span>
+        <span class="c1"># result indistinguishable from a real one -- so warn and return no streams</span>
+        <span class="c1"># rather than reassemble frames whose shape we cannot parse.</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine for TCP stream following: </span><span class="si">{</span><span class="n">exeng</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">; '</span>
+             <span class="s1">'returning no streams'</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="k">return</span> <span class="p">()</span>
 
     <span class="n">streams</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Stream]</span>
     <span class="n">frames</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">frame</span>
@@ -514,10 +582,10 @@
             <span class="n">frame</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">packets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">fallback</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pass_count</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">reassembly</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>

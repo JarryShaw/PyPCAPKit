@@ -461,7 +461,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
 
-    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">]</span>
+    <span class="c1">#: Every key registered in :attr:`Extractor.__output__` and in</span>
+    <span class="c1">#: :attr:`TraceFlowBase.__output__</span>
+    <span class="c1">#: &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__&gt;` -- the two</span>
+    <span class="c1">#: registries expose the same eight keys. This used to name only four of them,</span>
+    <span class="c1">#: which made ``'cap'`` and the ``'txt'``/``'xml'`` aliases unspellable for a</span>
+    <span class="c1">#: type checker even though every one of them is accepted at runtime.</span>
+    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'text'</span><span class="p">,</span> <span class="s1">'txt'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">,</span> <span class="s1">'xml'</span><span class="p">]</span>
     <span class="c1"># NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; both</span>
     <span class="c1"># copies need updating when a new engine lands. The duplication predates the</span>
     <span class="c1"># engines added here and is left as-is on purpose.</span>
