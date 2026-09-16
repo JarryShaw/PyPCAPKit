@@ -1,15 +1,23 @@
-"""Unit tests for :mod:`pcapkit.foundation.engines.pypcap`.
+"""Unit tests for :mod:`pcapkit.foundation.engines.pcap_ct`.
 
-The engine itself is exercised with a stand-in for :class:`pcap.pcap`, so that the
+The engine is exercised with a stand-in for :class:`pcap.pcap`, so that the
 routing decisions -- format gating, capability warnings, output, storage, close --
-are covered whether or not `pypcap`_ is installed. End-to-end agreement with the
-``default`` engine lives in :mod:`tests.foundation.engines.test_new_engine_parity`.
+are covered whether or not `pcap-ct`_ is installed. One test at the end runs the
+real backend against a committed capture, and skips when it is absent.
 
+`pcap-ct`_ and upstream `pypcap`_ both install a top-level :mod:`pcap`, so the
+tests here look almost exactly like :mod:`tests.foundation.engines.test_pypcap_engine`.
+They are kept apart because the engines are: each names its own toolkit and its
+own module marker, and a shared test could not tell which of the two it had
+proved anything about.
+
+.. _pcap-ct: https://pypi.org/project/pcap-ct/
 .. _pypcap: https://github.com/pynetwork/pypcap
 
 """
 from __future__ import annotations
 
+import importlib
 import importlib.util
 import io
 import os
@@ -18,15 +26,42 @@ import types
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import close_extractor, purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+
+
+def _importable(*modules: str) -> bool:
+    """Test if every named module can actually be imported."""
+    for module in modules:
+        try:
+            importlib.import_module(module)
+        except ImportError:
+            return False
+    return True
+
+
+#: Whether the `pcap-ct`_ backend is present. Gated on ``pcap._pcap`` rather than
+#: on ``pcap``, for the same reason :attr:`PCAP_CT.__engine_module__
+#: <pcapkit.foundation.engines.pcap_ct.PCAP_CT.__engine_module__>` names it:
+#: upstream `pypcap`_ owns the ``pcap`` name just as legitimately and ships it as
+#: a single extension module, so the submodule import is what tells the two
+#: distributions apart. Importing rather than :func:`importlib.util.find_spec`,
+#: since ``find_spec('pcap._pcap')`` has to import the ``pcap`` parent anyway and
+#: raises rather than answering when that parent is not a package.
+HAS_PCAP_CT = _importable('pcap._pcap')
 
 #: Magic number of a little-endian, microsecond-resolution PCAP savefile.
 PCAP_MAGIC = b'\xd4\xc3\xb2\xa1'
 #: Magic number of a PCAP-NG section header block.
 PCAPNG_MAGIC = b'\x0a\x0d\x0d\x0a'
+
+#: Frame count of :file:`examples/captures/in.pcap`, and the timestamp and
+#: capture length of its first frame. Committed capture, so these are fixed.
+IN_PCAP_FRAMES = 6
+IN_PCAP_FIRST_TIMESTAMP = 1511106545.471719
+IN_PCAP_FIRST_LENGTH = 86
 
 
 class OutputSink:
@@ -46,22 +81,22 @@ class OutputSink:
         return self
 
 
-class FakeHandle:
-    """Stand-in for :class:`pcap.pcap`, yielding ``(timestamp, bytes)`` pairs."""
+class FrameIterator:
+    """Iterator over a :class:`FakeHandle`'s frames, and a separate object from it.
 
-    def __init__(self, frames=None, datalink: int = 1) -> None:
-        self.frames = list(frames if frames is not None else [(1.5, b'payload')])
-        self._iter = None
-        self._datalink = datalink
+    It carries a ``close`` of its own purely so that closing the wrong thing is
+    observable. The engine keeps the handle and the iterator apart precisely so
+    that :meth:`PCAP_CT.close <pcapkit.foundation.engines.pcap_ct.PCAP_CT.close>`
+    does not have to assume ``iter(handle) is handle``, and a stand-in that
+    iterated itself would make that distinction untestable.
+
+    """
+
+    def __init__(self, frames) -> None:
+        self._iter = iter(frames)
         self.closed = 0
-        self.setup = 0
-
-    def datalink(self) -> int:
-        return self._datalink
 
     def __iter__(self):
-        self.setup += 1
-        self._iter = iter(self.frames)
         return self
 
     def __next__(self):
@@ -71,8 +106,30 @@ class FakeHandle:
         self.closed += 1
 
 
+class FakeHandle:
+    """Stand-in for :class:`pcap.pcap`, yielding ``(timestamp, bytes)`` pairs."""
+
+    def __init__(self, frames=None, datalink: int = 1) -> None:
+        self.frames = list(frames if frames is not None else [(1.5, b'payload')])
+        self.iterator: FrameIterator | None = None
+        self._datalink = datalink
+        self.closed = 0
+        self.setup = 0
+
+    def datalink(self) -> int:
+        return self._datalink
+
+    def __iter__(self) -> FrameIterator:
+        self.setup += 1
+        self.iterator = FrameIterator(self.frames)
+        return self.iterator
+
+    def close(self) -> None:
+        self.closed += 1
+
+
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
-class PyPCAPEngineTests(unittest.TestCase):
+class PCAP_CTEngineTests(unittest.TestCase):
     def setUp(self) -> None:
         purge_modules(['pcapkit'])
 
@@ -114,13 +171,23 @@ class PyPCAPEngineTests(unittest.TestCase):
         return types.SimpleNamespace(**values), sink
 
     def engine(self, extractor):
-        from pcapkit.foundation.engines.pypcap import PyPCAP
+        from pcapkit.foundation.engines import _pcap_backend
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
 
-        engine = PyPCAP.__new__(PyPCAP)
+        # ``__new__`` rather than the constructor: ``PCAP_CT.__init__`` insists on
+        # the real ``pcap-ct`` being importable, and these tests are meant to run
+        # with neither ``pcap-ct`` nor ``pypcap`` installed. The constructor gets
+        # its own tests below, against a stand-in module.
+        engine = PCAP_CT.__new__(PCAP_CT)
         engine._expkg = types.SimpleNamespace(pcap=FakeHandle)
+        engine._handle = None
         engine._extmp = None
         engine._dlink = None
         engine._closed = False
+        engine._backend = _pcap_backend.Probe(
+            _pcap_backend.PCAP_CT, '1.3.0b3', '/stub/site-packages/pcap/__init__.py',
+            None, False, ('pcap-ct',),
+        )
         engine._extractor = extractor
         return engine
 
@@ -135,8 +202,7 @@ class PyPCAPEngineTests(unittest.TestCase):
         ``from ._pcap import *``, so the submodule ends up bound as an attribute;
         upstream ``pypcap`` ships a single extension module with no such
         attribute. That difference is what
-        :func:`pcapkit.foundation.engines._pcap_backend.identify` keys on, so the
-        stand-in only has to reproduce it.
+        :func:`pcapkit.foundation.engines._pcap_backend.identify` keys on.
 
         """
         module = types.ModuleType('pcap')
@@ -155,97 +221,105 @@ class PyPCAPEngineTests(unittest.TestCase):
         return mock.patch.object(_pcap_backend, 'installed_distributions',
                                  return_value=names)
 
-    def test_unsupported_reason_is_silent_on_upstream_pypcap(self) -> None:
-        from pcapkit.foundation.engines.pypcap import PyPCAP
-
-        with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=False)}):
-            with self.installed('pypcap'):
-                self.assertIsNone(PyPCAP.unsupported_reason())
-
-    def test_unsupported_reason_names_pcap_ct_and_the_engine_for_it(self) -> None:
-        from pcapkit.foundation.engines.pypcap import PyPCAP
+    def test_unsupported_reason_is_silent_on_pcap_ct(self) -> None:
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
 
         with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=True)}):
             with self.installed('pcap-ct'):
-                reason = PyPCAP.unsupported_reason()
+                self.assertIsNone(PCAP_CT.unsupported_reason())
+
+    def test_unsupported_reason_names_upstream_pypcap_and_its_engine(self) -> None:
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
+
+        with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=False)}):
+            with self.installed('pypcap'):
+                reason = PCAP_CT.unsupported_reason()
 
         self.assertIsNotNone(reason)
-        self.assertIn('pcap-ct', reason)
-        self.assertIn('engine=pcap_ct', reason)
+        self.assertIn('pypcap', reason)
+        self.assertIn('engine=pypcap', reason)
+
+    def test_unsupported_reason_reports_a_missing_system_libpcap(self) -> None:
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
+
+        # The important case, and measured rather than hypothetical: ``pcap-ct``
+        # imports the ``libpcap`` distribution, whose Linux loader raises
+        # ``OSError: Cannot find libpcap.so library`` when no system libpcap is
+        # findable. OSError is not an ImportError, so ``Extractor.import_test``
+        # lets it through and the extraction dies. Reporting it here turns that
+        # into the ordinary "engine unavailable" fall back.
+        with mock.patch('importlib.import_module',
+                        side_effect=OSError('Cannot find libpcap.so library')):
+            with self.installed('pcap-ct'):
+                reason = PCAP_CT.unsupported_reason()
+
+        self.assertIsNotNone(reason)
+        self.assertIn('installed but unusable', reason)
+        self.assertIn('Cannot find libpcap.so library', reason)
 
     def test_unsupported_reason_is_silent_when_no_pcap_is_installed(self) -> None:
-        from pcapkit.foundation.engines.pypcap import PyPCAP
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
 
-        # Not this hook's business: ``Extractor.import_test`` reports an absent
-        # module in its own words, and answering here as well would produce two
-        # warnings for one problem.
         with mock.patch('importlib.import_module', side_effect=ImportError('no pcap')):
             with self.installed():
-                self.assertIsNone(PyPCAP.unsupported_reason())
+                self.assertIsNone(PCAP_CT.unsupported_reason())
 
-    def test_unsupported_reason_is_not_a_python_version_check(self) -> None:
-        from pcapkit.foundation.engines.pypcap import PyPCAP
+    def test_unsupported_reason_declares_no_python_version_bound(self) -> None:
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
 
-        # Upstream cannot be *installed* on 3.12+, but the verdict is about which
-        # distribution is present rather than which interpreter is running: an
-        # upstream build that somebody got working on a newer Python must not be
-        # refused, and on 3.10/3.11 the version says nothing useful because either
-        # distribution could be the one in place.
+        # Verified against real installations on 3.10.20 and 3.14.7, both of which
+        # read in.pcap identically, so this engine covers the whole supported
+        # range and must not refuse either end of it.
+        for version in ((3, 10, 0, 'final', 0), (3, 14, 0, 'final', 0)):
+            with self.subTest(version=version):
+                with mock.patch.dict('sys.modules',
+                                     {'pcap': self.fake_pcap_module(is_pcap_ct=True)}):
+                    with self.installed('pcap-ct'):
+                        with mock.patch('sys.version_info', version):
+                            self.assertIsNone(PCAP_CT.unsupported_reason())
+
+    def test_init_refuses_upstream_pypcap_and_names_the_engine_for_it(self) -> None:
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        extractor, _ = self.make_extractor()
         with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=False)}):
             with self.installed('pypcap'):
-                with mock.patch('sys.version_info', (3, 14, 0, 'final', 0)):
-                    self.assertIsNone(PyPCAP.unsupported_reason())
-
-    def test_init_refuses_pcap_ct_and_names_the_engine_that_wants_it(self) -> None:
-        from pcapkit.foundation.engines.pypcap import PyPCAP
-        from pcapkit.utilities.exceptions import UnsupportedCall
-
-        extractor, _ = self.make_extractor()
-        with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=True)}):
-            with self.installed('pcap-ct'):
                 with self.assertRaises(UnsupportedCall) as caught:
-                    PyPCAP(extractor)
+                    PCAP_CT(extractor)
 
-        # the message has to be actionable: the whole reason this refuses rather
-        # than running is that ``pcap-ct`` has an engine of its own
         message = str(caught.exception)
-        self.assertIn('pcap-ct', message)
-        self.assertIn('engine=pcap_ct', message)
-        self.assertIn('1.3.0b3', message)
+        self.assertIn('pypcap', message)
+        self.assertIn('engine=pypcap', message)
 
-    def test_init_accepts_upstream_pypcap_and_reports_the_backend(self) -> None:
-        from pcapkit.foundation.engines.pypcap import PyPCAP
+    def test_init_accepts_pcap_ct_and_reports_the_backend(self) -> None:
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
 
         extractor, _ = self.make_extractor()
-        module = self.fake_pcap_module(is_pcap_ct=False)
+        module = self.fake_pcap_module(is_pcap_ct=True)
         with mock.patch.dict('sys.modules', {'pcap': module}):
-            with self.installed('pypcap'):
-                engine = PyPCAP(extractor)
+            with self.installed('pcap-ct'):
+                engine = PCAP_CT(extractor)
 
         self.assertIs(engine._expkg, module)
-        self.assertIsNone(engine._extmp)
+        self.assertIsNone(engine._handle)
         self.assertFalse(engine._closed)
 
-        # "the PyPCAP engine" is not a complete statement of what ran, since two
-        # distributions answer to it -- ``backend`` says which one did
-        self.assertIn('pypcap', engine.backend)
-        self.assertIn('1.3.0', engine.backend)
-        self.assertIn('pcap.cpython-310.so', engine.backend)
+        self.assertIn('pcap-ct', engine.backend)
+        self.assertIn('1.3.0b3', engine.backend)
+        self.assertIn('pcap/__init__.py', engine.backend)
 
     def test_init_warns_when_both_distributions_are_installed(self) -> None:
-        from pcapkit.foundation.engines.pypcap import PyPCAP
-        from pcapkit.utilities.exceptions import UnsupportedCall
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
         from pcapkit.utilities.warnings import EngineWarning
 
-        # Measured on Python 3.10 with both installed: the ``pcap-ct`` package
-        # wins the import and upstream's extension module is shadowed, so this
-        # engine becomes permanently unselectable. Nothing else would say why.
+        # This engine still works in that state -- ``pcap-ct`` is the one that wins
+        # the import -- so it warns and carries on rather than refusing.
         extractor, _ = self.make_extractor()
         with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=True)}):
             with self.installed('pypcap', 'pcap-ct'):
-                with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
-                    with self.assertRaises(UnsupportedCall):
-                        PyPCAP(extractor)
+                with mock.patch('pcapkit.foundation.engines.pcap_ct.warn') as warn:
+                    engine = PCAP_CT(extractor)
 
         collisions = [call.args[0] for call in warn.call_args_list
                       if len(call.args) > 1 and call.args[1] is EngineWarning]
@@ -253,16 +327,17 @@ class PyPCAPEngineTests(unittest.TestCase):
         self.assertIn('pypcap', collisions[0])
         self.assertIn('pcap-ct', collisions[0])
         self.assertIn('shadowed', collisions[0])
+        self.assertIn('pcap-ct', engine.backend)
 
     def test_init_does_not_warn_when_only_one_is_installed(self) -> None:
-        from pcapkit.foundation.engines.pypcap import PyPCAP
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
         from pcapkit.utilities.warnings import EngineWarning
 
         extractor, _ = self.make_extractor()
-        with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=False)}):
-            with self.installed('pypcap'):
-                with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
-                    PyPCAP(extractor)
+        with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=True)}):
+            with self.installed('pcap-ct'):
+                with mock.patch('pcapkit.foundation.engines.pcap_ct.warn') as warn:
+                    PCAP_CT(extractor)
 
         self.assertEqual([call for call in warn.call_args_list
                           if len(call.args) > 1 and call.args[1] is EngineWarning], [])
@@ -282,9 +357,15 @@ class PyPCAPEngineTests(unittest.TestCase):
             engine.run()
 
         ctor.assert_called_once_with(name=self.ifnm, promisc=False)
-        self.assertIs(engine._extmp, handle)
-        self.assertEqual(handle.setup, 1)
         self.assertEqual(engine.dlink, LinkType.ETHERNET)
+
+        # the handle and the iterator are held separately, and it is the iterator
+        # that frames are read through
+        self.assertIs(engine._handle, handle)
+        self.assertEqual(handle.setup, 1)
+        self.assertIs(engine._extmp, handle.iterator)
+        self.assertIsNot(engine._extmp, handle)
+        self.assertEqual(next(engine._extmp), (1.5, b'payload'))
 
     def test_run_warns_on_layer_and_protocol_threshold(self) -> None:
         from pcapkit.utilities.warnings import AttributeWarning
@@ -297,15 +378,18 @@ class PyPCAPEngineTests(unittest.TestCase):
                 extractor, _ = self.make_extractor(**overrides)
                 engine = self.engine(extractor)
                 with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
-                    with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
+                    with mock.patch('pcapkit.foundation.engines.pcap_ct.warn') as warn:
                         engine.run()
                 self.assertEqual(warn.call_count, 1)
                 self.assertIn('protocol and layer threshold', warn.call_args.args[0])
                 self.assertIs(warn.call_args.args[1], AttributeWarning)
 
-    def test_run_rejects_pcapng_rather_than_yielding_no_frames(self) -> None:
+    def test_run_rejects_pcapng_rather_than_reading_it_approximately(self) -> None:
         from pcapkit.utilities.exceptions import FormatError
 
+        # the vendored libpcap *can* read a PCAP-NG savefile, but only ever reports
+        # one link type for it, so the engine refuses rather than applying one
+        # interface's link type to every frame
         extractor, _ = self.make_extractor(magic_number=PCAPNG_MAGIC)
         engine = self.engine(extractor)
         with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()) as ctor:
@@ -330,7 +414,7 @@ class PyPCAPEngineTests(unittest.TestCase):
                                            _ipv6=True, _tcp=True)
         engine = self.engine(extractor)
         with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
-            with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
+            with mock.patch('pcapkit.foundation.engines.pcap_ct.warn') as warn:
                 engine.run()
 
         messages = [call.args[0] for call in warn.call_args_list
@@ -421,15 +505,51 @@ class PyPCAPEngineTests(unittest.TestCase):
 
     def test_close_is_idempotent_and_tolerates_an_unopened_engine(self) -> None:
         extractor, _, engine = self.prepared()
-        handle = engine._extmp
+        handle = engine._handle
 
         engine.close()
         engine.close()
         self.assertEqual(handle.closed, 1)
+        # the savefile belongs to the handle, not to the iterator read off it
+        self.assertEqual(handle.iterator.closed, 0)
 
         extractor, _ = self.make_extractor()
         unopened = self.engine(extractor)
         unopened.close()  # must not raise
+
+    ##########################################################################
+    # The real backend.
+    ##########################################################################
+
+    @unittest.skipUnless(HAS_PCAP_CT, 'pcap-ct not installed')
+    def test_the_real_backend_reads_a_committed_capture(self) -> None:
+        from pcapkit.foundation.engines.pcap_ct import PCAP_CT
+        from pcapkit.interface import extract
+        from pcapkit.utilities.warnings import EngineWarning
+
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            extractor = extract(fin=sample_path('in.pcap'), engine='pcap_ct',
+                                store=True, nofile=True)
+        self.addCleanup(close_extractor, extractor)
+
+        # A missing engine module only warns and falls back to pcapkit's own
+        # parser, so a successful extraction proves nothing on its own -- it is the
+        # absence of that warning, plus the engine actually on the extractor, that
+        # says this ran through ``pcap-ct``.
+        engines = [call.args[0] for call in warn.call_args_list
+                   if len(call.args) > 1 and call.args[1] is EngineWarning]
+        self.assertEqual(engines, [], "'pcap_ct' was replaced by the fallback engine")
+        self.assertEqual(extractor._exnam, 'pcap_ct')
+        self.assertIsInstance(extractor.engine, PCAP_CT)
+        self.assertEqual(type(extractor.engine).__engine_name__, 'PCAP_CT')
+
+        self.assertEqual(extractor.length, IN_PCAP_FRAMES)
+        self.assertEqual(len(extractor.frame), IN_PCAP_FRAMES)
+
+        # a fallback would have produced ``Frame`` objects, not bare pairs
+        timestamp, packet = extractor.frame[0]
+        self.assertEqual(timestamp, IN_PCAP_FIRST_TIMESTAMP)
+        self.assertEqual(len(packet), IN_PCAP_FIRST_LENGTH)
 
 
 if __name__ == '__main__':

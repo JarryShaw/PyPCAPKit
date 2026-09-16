@@ -39,7 +39,7 @@ __all__ = ['ENGINES', 'unavailable', 'ran_as_asked', 'report', 'preflight']
 #: ``'pcapkit'``) and is the only one with no third-party requirement; further
 #: engines can be added at runtime with
 #: :func:`pcapkit.foundation.registry.foundation.register_extractor_engine`.
-ENGINES = ('default', 'pyshark', 'scapy', 'dpkt')
+ENGINES = ('default', 'pyshark', 'scapy', 'dpkt', 'pypcap', 'pcap_ct', 'pypcapfile')
 
 #: ``__engine_name__`` of the driver each ``engine=`` value should end up using.
 #: ``'default'`` and ``'pcapkit'`` pick their parser from the file's magic number,
@@ -50,6 +50,9 @@ ENGINE_DRIVERS = {
     'dpkt': ('DPKT',),
     'scapy': ('Scapy',),
     'pyshark': ('PyShark',),
+    'pypcap': ('PyPCAP',),
+    'pcap_ct': ('PCAP_CT',),
+    'pypcapfile': ('PyPCAPFile',),
 }
 
 
@@ -101,6 +104,34 @@ def ran_as_asked(engine: 'str', extraction: 'Extractor') -> 'tuple[str, bool]':
     return driver, driver in ENGINE_DRIVERS.get(engine, (engine,))
 
 
+def _declared_reason(engine: 'str') -> 'str | None':
+    """What the engine itself says about running here, if it says anything.
+
+    Looks the engine class up in ``Extractor.__engine__`` and asks its
+    ``unsupported_reason()``. Returns :data:`None` for ``'default'``, for an engine
+    name the registry does not know, or for anything that goes wrong on the way --
+    this is a nicety for the demos' skip messages, and must never be the reason one
+    of them fails.
+
+    Args:
+        engine: Engine name, as passed to ``pcapkit.extract``.
+
+    Returns:
+        The engine's own reason, or :data:`None`.
+
+    """
+    try:
+        from pcapkit.foundation.extraction import Extractor
+
+        registered = Extractor.__engine__.get(engine)
+        if registered is None:
+            return None
+        klass = getattr(registered, 'klass', registered)
+        return klass.unsupported_reason()
+    except Exception:  # pylint: disable=broad-except
+        return None
+
+
 def report(engine: 'str', detail: 'str') -> 'None':
     """Print one line of an engine report.
 
@@ -132,6 +163,16 @@ def preflight(engine: 'str', fin: 'str') -> 'str | None':
 
     """
     import pcapkit  # imported here so this module stays importable on its own
+
+    # Ask the engine first. ``unsupported_reason`` is the same preflight check
+    # ``Extractor.run`` consults, and it names the actual cause -- a Python
+    # ceiling, a missing tshark, a missing libpcap, the wrong ``pcap``
+    # distribution. Without it the fallback branch below is all that fires, and it
+    # can only guess "its package is not installed", which is wrong whenever the
+    # package is installed and unusable.
+    reason = _declared_reason(engine)
+    if reason is not None:
+        return reason
 
     try:
         extraction = pcapkit.extract(fin=fin, store=False, nofile=True, verbose=False,

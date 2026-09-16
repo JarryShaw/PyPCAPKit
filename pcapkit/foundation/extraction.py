@@ -70,11 +70,14 @@ if TYPE_CHECKING:
     # NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; both
     # copies need updating when a new engine lands. The duplication predates the
     # engines added here and is left as-is on purpose.
-    Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pypcapfile']
+    Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct',
+                      'pypcapfile']
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
-    # NOTE: the PyPCAP engine performs no dissection, so its "packet" is the
-    # ``(timestamp, bytes)`` pair that ``pcap.pcap`` yields.
+    # NOTE: the PyPCAP and PCAP_CT engines perform no dissection, so their
+    # "packet" is the ``(timestamp, bytes)`` pair that ``pcap.pcap`` yields.
+    # One member covers both: they read the same interface, from two independent
+    # distributions of it.
     Packet = Union[Frame, PCAPNG, ScapyPacket, DPKTPacket, PySharkPacket,
                    PCAPFilePacket, tuple[float, bytes]]
 
@@ -212,6 +215,13 @@ class Extractor(Generic[_P]):
         'dpkt': ModuleDescriptor('pcapkit.foundation.engines.dpkt', 'DPKT'),
         'pyshark': ModuleDescriptor('pcapkit.foundation.engines.pyshark', 'PyShark'),
         'pypcap': ModuleDescriptor('pcapkit.foundation.engines.pypcap', 'PyPCAP'),
+        # NOTE: ``pcap-ct`` is a separate distribution that reimplements the
+        # ``pypcap`` interface, and it installs the same top-level ``pcap``
+        # module. It gets its own entry rather than sharing ``pypcap``'s because
+        # the two are independent projects with different install requirements
+        # and different Python version coverage; ``PCAP_CT.__engine_module__``
+        # explains how ``import_test`` tells them apart.
+        'pcap_ct': ModuleDescriptor('pcapkit.foundation.engines.pcap_ct', 'PCAP_CT'),
         'pypcapfile': ModuleDescriptor('pcapkit.foundation.engines.pypcapfile', 'PyPCAPFile'),
     }  # type: dict[str, ModuleDescriptor[Engine] | Type[Engine]]
 
@@ -442,6 +452,7 @@ class Extractor(Generic[_P]):
         * Scapy driver: :class:`pcapkit.foundation.engines.scapy.Scapy`
         * PyShark driver: :class:`pcapkit.foundation.engines.pyshark.PyShark`
         * PyPCAP driver: :class:`pcapkit.foundation.engines.pypcap.PyPCAP`
+        * pcap-ct driver: :class:`pcapkit.foundation.engines.pcap_ct.PCAP_CT`
         * PyPCAPFile driver: :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
 
         Warns:

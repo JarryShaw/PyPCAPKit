@@ -8,6 +8,16 @@ proves the engine ran first -- by the recorded engine name, the engine class, an
 the absence of any :class:`~pcapkit.utilities.warnings.EngineWarning` -- and only
 then compares.
 
+This module is named ``*_runtime.py`` deliberately, which puts it in the
+fixture-dependent tier (see :mod:`tests._tiers`). It reads ``arp.pcap``,
+``tcp.pcap``, ``ipv4.pcap`` and ``test.pcapng``, none of which git tracks --
+:file:`examples/generators/make_samples.py` writes them -- so it cannot be
+unit-tier, and it was one only because the guard added in GitHub pull request #393
+could not see it: the reads go through ``sample_path(capture)`` with a *variable*,
+which only the runtime half of the guard catches, and that half was never reached
+on a machine where the engine packages were absent and every test skipped.
+Installing an engine made all four reads fail at once.
+
 Note also that the frame objects a stored extraction hands back are not a usable
 source of raw bytes: :attr:`Frame.packet
 <pcapkit.protocols.protocol.ProtocolBase.packet>` re-reads from the (by then
@@ -46,7 +56,17 @@ def _importable(*modules: str) -> bool:
     return True
 
 
-HAS_PYPCAP = _importable('pcap')
+#: Whether upstream ``pypcap`` is installed, as opposed to ``pcap-ct``.
+#:
+#: Both distributions own the top-level :mod:`pcap` name, so ``_importable('pcap')``
+#: alone is not the question these tests want to ask: ``pcap-ct`` is driven by
+#: :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` and
+#: :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` refuses it outright, so
+#: letting it satisfy this gate would run the ``pypcap`` tests against an engine
+#: that declines to start. ``pcap-ct`` ships :mod:`pcap` as a package whose
+#: ``__init__`` does ``from ._pcap import *``; upstream ships a single extension
+#: module, which has no such submodule.
+HAS_PYPCAP = _importable('pcap') and not _importable('pcap._pcap')
 HAS_PYPCAPFILE = _importable('pcapfile.savefile', 'pcapfile.linklayer')
 
 #: Captures the parity comparison runs over. All are Ethernet PCAP savefiles.

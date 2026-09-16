@@ -10,6 +10,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 """
+import sys
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase as Engine
@@ -21,6 +22,8 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['PyShark']
 
 if TYPE_CHECKING:
+    from typing import Optional
+
     from pyshark.capture.file_capture import FileCapture
     from pyshark.packet.packet import Packet as PySharkPacket
 
@@ -55,6 +58,100 @@ class PyShark(Engine['PySharkPacket']):
 
     #: Engine module name.
     __engine_module__ = 'pyshark'
+
+    #: First Python version `PyShark`_ does not work on, as a ``(major, minor)``
+    #: pair. Released 0.6 builds its event loop with
+    #: ``asyncio.get_event_loop_policy().get_event_loop()``, and Python 3.14 made
+    #: :func:`asyncio.get_event_loop` raise :exc:`RuntimeError` when no current
+    #: event loop exists instead of quietly creating one.
+    PYTHON_CEILING = (3, 14)
+
+    ##########################################################################
+    # Class methods.
+    ##########################################################################
+
+    @classmethod
+    def unsupported_reason(cls) -> 'Optional[str]':
+        """Why this engine cannot run here, or :data:`None` when it can.
+
+        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
+        the import test, because neither of the two things that stop this engine
+        is visible to an import. `PyShark`_ imports perfectly well and then fails
+        when it is used, which without this hook escapes from :meth:`run` as a hard
+        error rather than degrading to the default engine with a warning.
+
+        **The interpreter.** ``pyshark`` 0.6 does
+        ``asyncio.get_event_loop_policy().get_event_loop()`` at
+        :file:`pyshark/capture/capture.py:183`, in a fresh interpreter with no
+        running loop. Measured on four interpreters: 3.10 and 3.11 return a loop
+        silently, 3.12 returns one with a :exc:`DeprecationWarning`, and 3.14
+        raises ``RuntimeError: There is no current event loop in thread
+        'MainThread'``. Hence :attr:`PYTHON_CEILING` is ``(3, 14)``. Python 3.13 was
+        not available on the machine this was measured on; it is expected to work,
+        since it is on the deprecated-but-functional side of that progression, and
+        that expectation is the one thing here that is inferred rather than
+        observed.
+
+        **The** :program:`tshark` **binary.** ``pyshark`` is a wrapper around
+        Wireshark's command-line tool and does no parsing itself, so it is useless
+        without it. The check delegates to ``pyshark``'s own
+        ``get_process_path()`` rather than calling :func:`shutil.which`, because
+        the two are not equivalent and ``which`` would refuse setups that work:
+        ``pyshark`` looks at ``tshark_path`` in its :file:`config.ini` *first*, and
+        then at :envvar:`PATH` on POSIX, at both Program Files directories on
+        Windows, and at :file:`/Applications/Wireshark.app` on macOS. Asking
+        ``pyshark`` gets all of that for free and cannot disagree with what
+        ``pyshark`` will do a moment later.
+
+        Note:
+            Deliberately **not cached**, and the cost was measured rather than
+            assumed: the failing path -- which is the expensive one, since it
+            exhausts every candidate -- takes about 290 microseconds with 39
+            :envvar:`PATH` entries, against about 120 for a bare
+            :func:`shutil.which`. This runs once per
+            :class:`~pcapkit.foundation.extraction.Extractor`, not once per frame,
+            so it is far below the cost of opening the capture. Caching would trade
+            that for an answer about the *environment* that cannot change within
+            the process -- so installing Wireshark, or fixing
+            :envvar:`PATH`, would not take effect until restart. The Windows path
+            does more work than the POSIX one (two Program Files directories, and
+            :func:`shutil.which` there would multiply by ``PATHEXT``), but it is
+            still a bounded handful of :func:`os.stat` calls.
+
+        Returns:
+            A short phrase naming the limitation, or :data:`None`.
+
+        .. _PyShark: https://kiminewt.github.io/pyshark
+
+        """
+        if sys.version_info[:2] >= cls.PYTHON_CEILING:
+            return (f'pyshark does not support Python '
+                    f'{sys.version_info[0]}.{sys.version_info[1]}; it builds its event '
+                    'loop with `asyncio.get_event_loop()`, which raises RuntimeError '
+                    'from Python 3.14 when no current event loop exists')
+
+        try:
+            from pyshark.tshark.tshark import get_process_path  # isort:skip
+        except ImportError:
+            # Not installed, which is ``Extractor.import_test``'s business -- it
+            # reports that case in its own words, and answering here as well would
+            # produce two warnings for one problem. An ImportError from a *renamed*
+            # upstream helper lands here too, and the engine then simply proceeds
+            # as it did before this check existed.
+            return None
+
+        try:
+            get_process_path()
+        except Exception as exc:  # pylint: disable=broad-except
+            # ``TSharkNotFoundException`` by name, but caught broadly: the whole
+            # point is to turn any failure to locate the binary into a reason
+            # rather than let it escape, and upstream is free to raise something
+            # else. Its own message lists every path it searched, which is exactly
+            # what the user needs, so it is quoted rather than summarised.
+            return (f'pyshark requires Wireshark\'s `tshark` binary, which pyshark '
+                    f'could not find -- {exc}')
+
+        return None
 
     ##########################################################################
     # Data models.

@@ -122,6 +122,46 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.toolkit.pypcap.packet2dict
 
+pcap-ct Tools
+=============
+
+.. module:: pcapkit.toolkit.pcap_ct
+
+:mod:`pcapkit.toolkit.pcap_ct` contains all you need for
+:mod:`pcapkit` handy usage with `pcap-ct`_ engine. All reforming
+functions returns with a flag to indicate if usable for
+its caller.
+
+.. _pcap-ct: https://pypi.org/project/pcap-ct/
+
+.. note::
+
+   `pcap-ct`_ is an independent reimplementation of the `PyPCAP`_ interface, so
+   this module is deliberately a sibling of :mod:`pcapkit.toolkit.pypcap` rather
+   than an alias of it: each engine names its own adapter, so a change made for
+   one cannot quietly alter the other.
+
+   Like `PyPCAP`_ it performs no protocol dissection, so the reassembly and flow
+   tracing adapters below cannot be implemented. They are defined all the same,
+   so that reaching for one fails with an explanatory
+   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than an
+   :exc:`ImportError`.
+
+.. autofunction:: pcapkit.toolkit.pcap_ct.ipv4_reassembly
+
+.. autofunction:: pcapkit.toolkit.pcap_ct.ipv6_reassembly
+
+.. autofunction:: pcapkit.toolkit.pcap_ct.tcp_reassembly
+
+.. autofunction:: pcapkit.toolkit.pcap_ct.tcp_traceflow
+
+Auxiliary Functions
+-------------------
+
+.. autofunction:: pcapkit.toolkit.pcap_ct.packet2chain
+
+.. autofunction:: pcapkit.toolkit.pcap_ct.packet2dict
+
 PyPCAPFile Tools
 ================
 
