@@ -585,16 +585,32 @@ Each was a listed suspect. Each was measured and dismissed.
 - **`pylint` and `mypy` parity** against the pristine tree, checked per commit via
   `/tmp/pcapprof/lint_diff.sh` and `/tmp/pcapprof/mypy_diff.sh`: identical message
   multisets, 124 mypy errors either side. This is what caught change 5.
-- On test *counts*: a first attempt to baseline the suite ran against a
-  `git archive` of the older base commit `5e4378d9b` and reported 764 passed / 35
-  skipped, i.e. **more** skips than the branch's 17. That is an artifact of
-  comparing two different commits in two different tree layouts, not a signal
-  about these changes, so it was superseded by a properly isolated run: the same
-  tree as `HEAD` with **only the four touched source files** reverted to
-  `origin/main`, in `/tmp/pcapkit-iso`, result in `/tmp/pcapprof/iso-suite.txt`.
-  That is the comparison to trust. Note in general that these optimisations cannot
-  change the *collected* count — they would surface as failures, not as fewer
-  tests.
+### On the test counts, since they look alarming and are not
+
+| tree | passed | skipped | **total** | failed |
+|---|---|---|---|---|
+| this branch, in the real worktree | 782 | 17 | **799** | 0 |
+| `/tmp/pcapkit-iso` — same tree, **only the four touched files reverted** to `origin/main` | 764 | 35 | **799** | 0 |
+
+**Same 799 collected, zero failures either side.** The 18-test difference is
+entirely `tests/test_tier_guard.py`, which skips when git cannot be run — the
+comparison trees are unpacked `git archive` tarballs, not checkouts, and the skip
+reason says so verbatim: *"git cannot answer here: git could not be run in
+/tmp/pcapkit-iso — either the executable is missing or this is not a checkout,
+e.g. an unpacked source tarball"* (`test_tier_guard.py:317`, `:323`, `:360`, and
+15 more). Nothing to do with these changes.
+
+So **run any comparison suite inside a real checkout**, or those 18 tests
+silently stop running. That also means the first baseline attempt (a
+`git archive` of the older base `5e4378d9b`, reporting the same 764/35) said
+nothing useful and was superseded by the isolated run above — which is the only
+comparison that varies *just* the four source files.
+
+The brief expected "~806 passed, 17 skipped": the **17 skips match exactly**, and
+the pass count differs because this host collects 799 tests where the brief's
+collected 823 — a difference present identically with and without these changes,
+so it is environment (optional engine packages), not the branch. In general these
+optimisations cannot reduce the collected count; they would surface as failures.
 
 ## What is not covered, and what to do next
 
