@@ -279,6 +279,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -476,7 +477,17 @@ therefore keyed by PPID rather than by port number, and is populated through
 <span class="gp">&gt;&gt;&gt; </span><span class="n">SCTP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">NGAP</span><span class="p">)</span>  <span class="c1"># equivalent, PPID given as a plain integer</span>
 </pre></div>
 </div>
-<p>No PPID is registered by default.</p>
+<p>Two PPIDs are registered by default, both to
+<a class="reference internal" href="../application/ngap.html#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>: 60
+(<code class="docutils literal notranslate"><span class="pre">NG_Application_Protocol</span></code>) and 66 (<code class="docutils literal notranslate"><span class="pre">NGAP_over_DTLS_over_SCTP</span></code>). Every
+other PPID resolves to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
+<p>Only PPID 60 actually decodes, though. A PPID 66 payload is an NGAP PDU
+wrapped in a DTLS record, and <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has no DTLS implementation, so
+those bytes are not aligned PER and the parse degrades to
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> – every time, not only when
+<code class="docutils literal notranslate"><span class="pre">pycrate</span></code> is absent. It is registered so that the PPID is <em>named</em> in the
+protochain rather than reported as an unassigned number, which is strictly
+more than leaving it out would give.</p>
 <p>This class currently supports parsing of the following SCTP chunks, which
 are directly mapped to the <a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.chunk.Chunk" title="pcapkit.const.sctp.chunk.Chunk"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.sctp.chunk.Chunk</span></code></a>
 enumeration:</p>

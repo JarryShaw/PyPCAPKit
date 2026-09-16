@@ -271,6 +271,7 @@
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -644,6 +645,8 @@
         </ul></li>
         <li><a href="pcapkit/corekit/context.html#pcapkit.corekit.context.ContextRegistry.__len__">__len__() (pcapkit.corekit.context.ContextRegistry method)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP.__length_hint__">__length_hint__() (pcapkit.protocols.application.ngap.NGAP method)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__message__">__message__ (pcapkit.protocols.internet.mh.MH attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__mp_option__">__mp_option__ (pcapkit.protocols.transport.tcp.TCP attribute)</a>
@@ -816,6 +819,8 @@
           <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP._closed">(pcapkit.foundation.engines.pypcap.PyPCAP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap._convert">_convert() (in module pcapkit.protocols.application.ngap)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp._CRYPTO">_CRYPTO (in module pcapkit.protocols.internet.esp)</a>
 </li>
         <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._declf">_declf (pcapkit.foundation.engines.pypcapfile.PyPCAPFile attribute)</a>
@@ -936,6 +941,8 @@
           <li><a href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.Type._generate_next_value_">(pcapkit.protocols.application.ftp.Type static method)</a>
 </li>
           <li><a href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.Type._generate_next_value_">(pcapkit.protocols.application.httpv1.Type static method)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.PDUKind._generate_next_value_">(pcapkit.protocols.application.ngap.PDUKind static method)</a>
 </li>
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.TLSKeyLabel._generate_next_value_">(pcapkit.protocols.misc.pcapng.TLSKeyLabel static method)</a>
 </li>
@@ -1082,6 +1089,8 @@
           <li><a href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP._make_data">(pcapkit.protocols.application.httpv1.HTTP class method)</a>
 </li>
           <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_data">(pcapkit.protocols.application.httpv2.HTTP class method)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP._make_data">(pcapkit.protocols.application.ngap.NGAP class method)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH._make_data">(pcapkit.protocols.internet.ah.AH class method)</a>
 </li>
@@ -1905,6 +1914,8 @@
 </li>
           <li><a href="pcapkit/const/vlan.html#pcapkit.const.vlan.priority_level.PriorityLevel._missing_">(pcapkit.const.vlan.priority_level.PriorityLevel class method)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.Criticality._missing_">(pcapkit.protocols.application.ngap.Criticality class method)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_">(pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus class method)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_">(pcapkit.protocols.internet.mh.IPv6AddressPrefixCode class method)</a>
@@ -1922,9 +1933,13 @@
 </li>
         <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP._payload_bytes">_payload_bytes() (pcapkit.protocols.internet.esp.ESP static method)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap._PDU_LOCK">_PDU_LOCK (in module pcapkit.protocols.application.ngap)</a>
+</li>
         <li><a href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow._PT">_PT (in module pcapkit.foundation.traceflow.traceflow)</a>
 </li>
         <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend._purge">_purge() (in module pcapkit.foundation.engines._pcap_backend)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap._PYCRATE">_PYCRATE (in module pcapkit.protocols.application.ngap)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4._QSOption">_QSOption (class in pcapkit.protocols.schema.internet.ipv4)</a>
 </li>
@@ -2555,6 +2570,8 @@
         <li><a href="pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor._request">_request() (pcapkit.vendor.default.Vendor method)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp._resolve">_resolve() (in module pcapkit.protocols.internet.esp)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap._revert">_revert() (in module pcapkit.protocols.application.ngap)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.SecurityAssociation._split_key">_split_key() (pcapkit.protocols.internet.esp.SecurityAssociation static method)</a>
 </li>
@@ -5144,6 +5161,8 @@
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.bitspeer">bitspeer (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.BitString">BitString (class in pcapkit.protocols.data.application.ngap)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.bittorrent">bittorrent (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/vlan.html#pcapkit.const.vlan.priority_level.PriorityLevel.BK">BK (pcapkit.const.vlan.priority_level.PriorityLevel attribute)</a>
@@ -6320,6 +6339,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.chmd">chmd (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.Choice">Choice (class in pcapkit.protocols.data.application.ngap)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.choiceview_agt">choiceview_agt (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.choiceview_clt">choiceview_clt (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -7436,6 +7457,14 @@
 </li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.Parameter.critical">critical (pcapkit.protocols.data.internet.hip.Parameter attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.Criticality">Criticality (class in pcapkit.protocols.application.ngap)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.IE.criticality">criticality (pcapkit.protocols.data.application.ngap.IE attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.NGAP.criticality">(pcapkit.protocols.data.application.ngap.NGAP attribute)</a>
+</li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.crmsbits">crmsbits (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.Cronus_Direct">Cronus_Direct (pcapkit.const.reg.ethertype.EtherType attribute)</a>
@@ -7870,6 +7899,8 @@
           <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PingFrame.data">(pcapkit.protocols.schema.application.httpv2.PingFrame attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.UnassignedFrame.data">(pcapkit.protocols.schema.application.httpv2.UnassignedFrame attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.schema.application.ngap.NGAP.data">(pcapkit.protocols.schema.application.ngap.NGAP attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter.data">(pcapkit.protocols.schema.internet.hip.EncryptedParameter attribute)</a>
 </li>
@@ -8504,10 +8535,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.di_traceware">di_traceware (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.HostIDParameter.di_type">di_type (pcapkit.protocols.data.internet.hip.HostIDParameter attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.HostIDParameter.di_type">di_type (pcapkit.protocols.data.internet.hip.HostIDParameter attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.diagmond">diagmond (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.diagnose_proc">diagnose_proc (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -13508,6 +13539,8 @@
 </li>
           <li><a href="pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.id">(pcapkit.foundation.reassembly.data.tcp.Datagram attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.IE.id">(pcapkit.protocols.data.application.ngap.IE attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.OverlayIDParameter.id">(pcapkit.protocols.data.internet.hip.OverlayIDParameter attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.SEQParameter.id">(pcapkit.protocols.data.internet.hip.SEQParameter attribute)</a>
@@ -13661,6 +13694,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.idxp">idxp (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.IE">IE (class in pcapkit.protocols.data.application.ngap)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.iec_104">iec_104 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.iec_104_sec">iec_104_sec (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -13738,6 +13773,8 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_Local_Experimental_Ethertype_0x88B6">IEEE_Std_802_Local_Experimental_Ethertype_0x88B6 (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_OUI_Extended_Ethertype">IEEE_Std_802_OUI_Extended_Ethertype (pcapkit.const.reg.ethertype.EtherType attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.NGAP.ies">ies (pcapkit.protocols.data.application.ngap.NGAP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.ies_lm">ies_lm (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -13894,6 +13931,8 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.IGMP">IGMP (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.igmpv3lite">igmpv3lite (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.Criticality.ignore">ignore (pcapkit.protocols.application.ngap.Criticality attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.igo_incognito">igo_incognito (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -14265,14 +14304,16 @@
         </ul></li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.setting.Setting.INITIAL_WINDOW_SIZE">INITIAL_WINDOW_SIZE (pcapkit.const.http.setting.Setting attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.PDUKind.INITIATING_MESSAGE">INITIATING_MESSAGE (pcapkit.protocols.application.ngap.PDUKind attribute)</a>
+</li>
         <li><a href="pcapkit/const/sctp.html#pcapkit.const.sctp.chunk.Chunk.Initiation">Initiation (pcapkit.const.sctp.chunk.Chunk attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/sctp.html#pcapkit.const.sctp.chunk.Chunk.Initiation_Acknowledgement">Initiation_Acknowledgement (pcapkit.const.sctp.chunk.Chunk attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.initlsmsad">initlsmsad (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.innergroup">innergroup (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.innosys">innosys (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -15677,16 +15718,18 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.kftp_data">kftp_data (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.kfxaclicensing">kfxaclicensing (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.kind">kind (pcapkit.const.ftp.return_code.ReturnCode attribute)</a>
 
         <ul>
           <li><a href="pcapkit/dumpkit/null.html#pcapkit.dumpkit.null.NotImplementedIO.kind">(pcapkit.dumpkit.null.NotImplementedIO property)</a>
 </li>
           <li><a href="pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO.kind">(pcapkit.dumpkit.pcap.PCAPIO property)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.NGAP.kind">(pcapkit.protocols.data.application.ngap.NGAP attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Option.kind">(pcapkit.protocols.data.transport.tcp.Option attribute)</a>
 </li>
@@ -16076,7 +16119,11 @@
 </li>
           <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.length">(pcapkit.protocols.application.httpv2.HTTP property)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP.length">(pcapkit.protocols.application.ngap.NGAP property)</a>
+</li>
           <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.HTTP.length">(pcapkit.protocols.data.application.httpv2.HTTP attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.BitString.length">(pcapkit.protocols.data.application.ngap.BitString attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/ah.html#pcapkit.protocols.data.internet.ah.AH.length">(pcapkit.protocols.data.internet.ah.AH attribute)</a>
 </li>
@@ -16779,6 +16826,8 @@
 </li>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.option.Option.Load_Information_Mobility_Option">Load_Information_Mobility_Option (pcapkit.const.mh.option.Option attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.load_pycrate">load_pycrate() (in module pcapkit.protocols.application.ngap)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.loadav">loadav (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.loaprobe">loaprobe (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -17157,6 +17206,8 @@
           <li><a href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP.make">(pcapkit.protocols.application.httpv1.HTTP method)</a>
 </li>
           <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.make">(pcapkit.protocols.application.httpv2.HTTP method)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP.make">(pcapkit.protocols.application.ngap.NGAP method)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.make">(pcapkit.protocols.internet.ah.AH method)</a>
 </li>
@@ -17577,6 +17628,8 @@
 
         <ul>
           <li><a href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.data.application.httpv1.ResponseHeader.message">(pcapkit.protocols.data.application.httpv1.ResponseHeader attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.NGAP.message">(pcapkit.protocols.data.application.ngap.NGAP attribute)</a>
 </li>
         </ul></li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage.MESSAGE_NOT_RELAYED">MESSAGE_NOT_RELAYED (pcapkit.const.hip.notify_message.NotifyMessage attribute)</a>
@@ -18391,6 +18444,8 @@
 </li>
           <li><a href="pcapkit/protocols/application/httpv2.html#module-pcapkit.protocols.application.httpv2">pcapkit.protocols.application.httpv2</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.application.ngap">pcapkit.protocols.application.ngap</a>
+</li>
           <li><a href="pcapkit/protocols/index.html#module-pcapkit.protocols.data">pcapkit.protocols.data</a>
 </li>
           <li><a href="pcapkit/protocols/application/index.html#module-pcapkit.protocols.data.application">pcapkit.protocols.data.application</a>
@@ -18400,6 +18455,8 @@
           <li><a href="pcapkit/protocols/application/httpv1.html#module-pcapkit.protocols.data.application.httpv1">pcapkit.protocols.data.application.httpv1</a>
 </li>
           <li><a href="pcapkit/protocols/application/httpv2.html#module-pcapkit.protocols.data.application.httpv2">pcapkit.protocols.data.application.httpv2</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.data.application.ngap">pcapkit.protocols.data.application.ngap</a>
 </li>
           <li><a href="pcapkit/protocols/index.html#module-pcapkit.protocols.data.data">pcapkit.protocols.data.data</a>
 </li>
@@ -18536,6 +18593,8 @@
           <li><a href="pcapkit/protocols/application/httpv1.html#module-pcapkit.protocols.schema.application.httpv1">pcapkit.protocols.schema.application.httpv1</a>
 </li>
           <li><a href="pcapkit/protocols/application/httpv2.html#module-pcapkit.protocols.schema.application.httpv2">pcapkit.protocols.schema.application.httpv2</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.schema.application.ngap">pcapkit.protocols.schema.application.ngap</a>
 </li>
           <li><a href="pcapkit/protocols/internet/index.html#module-pcapkit.protocols.schema.internet">pcapkit.protocols.schema.internet</a>
 </li>
@@ -19621,6 +19680,10 @@
 </li>
           <li><a href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.name">(pcapkit.protocols.application.http.HTTP property)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP.name">(pcapkit.protocols.application.ngap.NGAP property)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.Choice.name">(pcapkit.protocols.data.application.ngap.Choice attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.IF_NameOption.name">(pcapkit.protocols.data.misc.pcapng.IF_NameOption attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NS_DNSNameOption.name">(pcapkit.protocols.data.misc.pcapng.NS_DNSNameOption attribute)</a>
@@ -20278,10 +20341,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.newwavesearch">newwavesearch (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.nexentamv">nexentamv (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.nexgen">nexgen (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.nexgen_aux">nexgen_aux (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -20366,6 +20429,14 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.ng_umds">ng_umds (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP">NGAP (class in pcapkit.protocols.application.ngap)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.NGAP">(class in pcapkit.protocols.data.application.ngap)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.schema.application.ngap.NGAP">(class in pcapkit.protocols.schema.application.ngap)</a>
+</li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.ngr_keydist">ngr_keydist (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.nhci">nhci (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -20715,7 +20786,11 @@
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.packet.Packet.NOTIFY">NOTIFY (pcapkit.const.hip.packet.Packet attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.notify">notify (pcapkit.const.reg.apptype.AppType attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.Criticality.notify">(pcapkit.protocols.application.ngap.Criticality attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.notify_srvr">notify_srvr (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage">NotifyMessage (class in pcapkit.const.hip.notify_message)</a>
@@ -24262,6 +24337,13 @@
 </li>
         </ul></li>
         <li>
+    pcapkit.protocols.application.ngap
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.application.ngap">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.protocols.data
 
         <ul>
@@ -24294,6 +24376,13 @@
 
         <ul>
           <li><a href="pcapkit/protocols/application/httpv2.html#module-pcapkit.protocols.data.application.httpv2">module</a>
+</li>
+        </ul></li>
+        <li>
+    pcapkit.protocols.data.application.ngap
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.data.application.ngap">module</a>
 </li>
         </ul></li>
         <li>
@@ -24781,6 +24870,13 @@
 </li>
         </ul></li>
         <li>
+    pcapkit.protocols.schema.application.ngap
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.schema.application.ngap">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.protocols.schema.internet
 
         <ul>
@@ -24878,6 +24974,8 @@
           <li><a href="pcapkit/protocols/link/arp.html#module-pcapkit.protocols.schema.link.arp">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.schema.link.ethernet
 
@@ -24885,8 +24983,6 @@
           <li><a href="pcapkit/protocols/link/ethernet.html#module-pcapkit.protocols.schema.link.ethernet">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.schema.link.l2tp
 
@@ -26224,6 +26320,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.pdtp">pdtp (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.PDUKind">PDUKind (class in pcapkit.protocols.application.ngap)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.pduncs">pduncs (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.pe_mike">pe_mike (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -27000,6 +27098,10 @@
 </li>
         <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend.probe">probe() (in module pcapkit.foundation.engines._pcap_backend)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.NGAP.procedure">procedure (pcapkit.protocols.data.application.ngap.NGAP attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.ProcedureCode">ProcedureCode (class in pcapkit.protocols.application.ngap)</a>
+</li>
         <li><a href="pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.process">process() (pcapkit.vendor.default.Vendor method)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.procos_lm">procos_lm (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -27199,6 +27301,8 @@
         <li><a href="pcapkit/corekit/context.html#pcapkit.corekit.context.ProtocolContext">ProtocolContext (class in pcapkit.corekit.context)</a>
 </li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError">ProtocolError</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.ProtocolIE">ProtocolIE (class in pcapkit.protocols.application.ngap)</a>
 </li>
         <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolMeta">ProtocolMeta (class in pcapkit.protocols.protocol)</a>
 </li>
@@ -28330,6 +28434,8 @@
 </li>
           <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.read">(pcapkit.protocols.application.httpv2.HTTP method)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP.read">(pcapkit.protocols.application.ngap.NGAP method)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.read">(pcapkit.protocols.internet.ah.AH method)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP.read">(pcapkit.protocols.internet.esp.ESP method)</a>
@@ -28796,6 +28902,8 @@
         <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command.REIN">REIN (pcapkit.const.ftp.command.Command attribute)</a>
 </li>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.status_code.StatusCode.REINIT_SA_WITH_HAC">REINIT_SA_WITH_HAC (pcapkit.const.mh.status_code.StatusCode attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.Criticality.reject">reject (pcapkit.protocols.application.ngap.Criticality attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.ToSField.rel">rel (pcapkit.protocols.data.internet.ipv4.ToSField attribute)</a>
 </li>
@@ -30357,10 +30465,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_7471">reserved_7471 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_7474">reserved_7474 (pcapkit.const.reg.apptype.AppType attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_7474">reserved_7474 (pcapkit.const.reg.apptype.AppType attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_7478">reserved_7478 (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.reserved_7508">reserved_7508 (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -33440,6 +33548,8 @@
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.SEQParameter">(class in pcapkit.protocols.schema.internet.hip)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.Sequence">Sequence (class in pcapkit.protocols.data.application.ngap)</a>
+</li>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.status_code.StatusCode.Sequence_number_out_of_window">Sequence_number_out_of_window (pcapkit.const.mh.status_code.StatusCode attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.seraph">seraph (pcapkit.const.reg.apptype.AppType attribute)</a>
@@ -35063,6 +35173,8 @@
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.upa_status.UpdateNotificationACKStatus.SUCCESS">SUCCESS (pcapkit.const.mh.upa_status.UpdateNotificationACKStatus attribute)</a>
 </li>
         <li><a href="pcapkit/const/sctp.html#pcapkit.const.sctp.parameter.Parameter.Success_Indication">Success_Indication (pcapkit.const.sctp.parameter.Parameter attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.PDUKind.SUCCESSFUL_OUTCOME">SUCCESSFUL_OUTCOME (pcapkit.protocols.application.ngap.PDUKind attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.sugarlock_rcp">sugarlock_rcp (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
@@ -36843,6 +36955,8 @@
 </li>
           <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.HTTP.type">(pcapkit.protocols.data.application.httpv2.HTTP attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.IE.type">(pcapkit.protocols.data.application.ngap.IE attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.HIP.type">(pcapkit.protocols.data.internet.hip.HIP attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.Locator.type">(pcapkit.protocols.data.internet.hip.Locator attribute)</a>
@@ -37718,6 +37832,8 @@
           <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.revocation_trigger.RevocationTrigger.Unspecified">(pcapkit.const.mh.revocation_trigger.RevocationTrigger attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.PDUKind.UNSUCCESSFUL_OUTCOME">UNSUCCESSFUL_OUTCOME (pcapkit.protocols.application.ngap.PDUKind attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESPStatus.UNSUPPORTED">UNSUPPORTED (pcapkit.protocols.internet.esp.ESPStatus attribute)</a>
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.registration_failure.RegistrationFailure.Unsupported_certificate">Unsupported_certificate (pcapkit.const.hip.registration_failure.RegistrationFailure attribute)</a>
@@ -38002,9 +38118,17 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.valisys_lm">valisys_lm (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.RouterAlertOption.value">value (pcapkit.protocols.data.internet.hopopt.RouterAlertOption attribute)</a>
+        <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.BitString.value">value (pcapkit.protocols.data.application.ngap.BitString attribute)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.Choice.value">(pcapkit.protocols.data.application.ngap.Choice attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.IE.value">(pcapkit.protocols.data.application.ngap.IE attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.data.application.ngap.NGAP.value">(pcapkit.protocols.data.application.ngap.NGAP attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.RouterAlertOption.value">(pcapkit.protocols.data.internet.hopopt.RouterAlertOption attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.data.internet.ipv6_opts.RouterAlertOption.value">(pcapkit.protocols.data.internet.ipv6_opts.RouterAlertOption attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_VerdictOption.value">(pcapkit.protocols.data.misc.pcapng.EPB_VerdictOption attribute)</a>
@@ -38288,12 +38412,12 @@
 </li>
         <li><a href="pcapkit/const/vlan.html#pcapkit.const.vlan.priority_level.PriorityLevel.VI">VI (pcapkit.const.vlan.priority_level.PriorityLevel attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType.via_ftp">via_ftp (pcapkit.const.reg.apptype.AppType attribute)</a>
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.VIA_RVS">VIA_RVS (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.ViaRVSParameter">ViaRVSParameter (class in pcapkit.protocols.data.internet.hip)</a>
 
         <ul>

@@ -1,0 +1,1983 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>pcapkit.protocols.application.ngap - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">PyPCAPKit</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../pcapkit/index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/index.html">Packets Reassembly</a><input aria-label="Toggle navigation of Packets Reassembly" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input aria-label="Toggle navigation of IP Datagram Reassembly" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/registry.html">Registry Management</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/collections.html">Container Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/functools.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/logging.html">Logging System</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for pcapkit.protocols.application.ngap</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=line-too-long</span>
+<span class="sd">"""NGAP - NG application protocol</span>
+<span class="sd">====================================</span>
+
+<span class="sd">.. module:: pcapkit.protocols.application.ngap</span>
+
+<span class="sd">:mod:`pcapkit.protocols.application.ngap` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.application.ngap.NGAP` only,</span>
+<span class="sd">which implements extractor for the NG Application Protocol</span>
+<span class="sd">(NGAP) [*]_, as specified in 3GPP TS 38.413.</span>
+
+<span class="sd">NGAP is the control plane between a 5G RAN node (gNB or ng-eNB) and an AMF.</span>
+<span class="sd">It runs over SCTP and is named by the DATA chunk's *payload protocol</span>
+<span class="sd">identifier* rather than by a port, so :class:`NGAP` is registered on</span>
+<span class="sd">:attr:`SCTP.__proto__ &lt;pcapkit.protocols.transport.sctp.SCTP.__proto__&gt;` under</span>
+<span class="sd">PPID 60 (``NG_Application_Protocol``) and PPID 66</span>
+<span class="sd">(``NGAP_over_DTLS_over_SCTP``), c.f.</span>
+<span class="sd">:func:`pcapkit.foundation.registry.protocols.register_sctp`.</span>
+
+<span class="sd">An SCTP DATA chunk that names NGAP carries exactly one ``NGAP-PDU``, encoded</span>
+<span class="sd">in **aligned PER** (ALIGNED PACKED ENCODING RULES, :abbr:`APER`). There is no</span>
+<span class="sd">header to read and no framing to resolve: the whole payload is the encoding,</span>
+<span class="sd">and none of its structure is visible until an ASN.1 decoder has run over it.</span>
+
+<span class="sd">Decoding therefore needs the optional |pycrate|_ dependency</span>
+<span class="sd">(``pip install pypcapkit[NGAP]``). :mod:`pcapkit` imports and works without</span>
+<span class="sd">it; an NGAP payload simply degrades to the opaque payload path, exactly as an</span>
+<span class="sd">unregistered PPID would, because</span>
+<span class="sd">:meth:`SCTP._import_next_layer &lt;pcapkit.protocols.transport.sctp.SCTP._import_next_layer&gt;`</span>
+<span class="sd">is wrapped in :func:`~pcapkit.utilities.decorators.beholder` and falls back to</span>
+<span class="sd">:class:`~pcapkit.protocols.misc.raw.Raw`.</span>
+
+<span class="sd">Why |pycrate|_ rather than a PER codec of our own</span>
+<span class="sd">-------------------------------------------------</span>
+
+<span class="sd">Two things make it the cheaper answer. |pycrate|_ **ships NGAP already</span>
+<span class="sd">compiled**, at ``pycrate_asn1dir/NGAP.py``, so the 3GPP ASN.1 source does not</span>
+<span class="sd">have to be vendored here and tracked across releases; and it is **pure</span>
+<span class="sd">Python**, with no compiled extension to build on any platform. Decoding costs</span>
+<span class="sd">0.15 ms per PDU, the same order as :mod:`pcapkit`'s own per-packet cost, so</span>
+<span class="sd">the generic strategy below is not paying for the convenience.</span>
+
+<span class="sd">Generic conversion, not 81 hand-written procedures</span>
+<span class="sd">--------------------------------------------------</span>
+
+<span class="sd">The decoded value tree is mapped into :class:`~pcapkit.corekit.infoclass.Info`</span>
+<span class="sd">objects **structurally**, by ASN.1 shape rather than by procedure:</span>
+
+<span class="sd">===============================  ==========================================================</span>
+<span class="sd">ASN.1 / |pycrate|_ shape          :mod:`pcapkit` model</span>
+<span class="sd">===============================  ==========================================================</span>
+<span class="sd">``SEQUENCE`` / ``SET`` (a dict)   :class:`~pcapkit.protocols.data.application.ngap.Sequence`</span>
+<span class="sd">``SEQUENCE OF`` (a list)          :obj:`list`</span>
+<span class="sd">``CHOICE`` / open type            :class:`~pcapkit.protocols.data.application.ngap.Choice`</span>
+<span class="sd">``BIT STRING``                    :class:`~pcapkit.protocols.data.application.ngap.BitString`</span>
+<span class="sd">``INTEGER``, ``OCTET STRING``,    kept as :obj:`int`, :obj:`bytes`, :obj:`str`</span>
+<span class="sd">``ENUMERATED``, ``BOOLEAN``</span>
+<span class="sd">===============================  ==========================================================</span>
+
+<span class="sd">That is a deliberate trade. Every one of the 81 elementary procedures and 438</span>
+<span class="sd">protocol IEs works on the day it is decoded, and a new 3GPP release needs no</span>
+<span class="sd">code change here; what is given up is per-IE typing, so an IE's value is</span>
+<span class="sd">reported in the specification's own shape rather than as a</span>
+<span class="sd">:mod:`pcapkit`-specific model. The fields worth reading at a glance -- the PDU</span>
+<span class="sd">kind, procedure code, criticality, message type name and the IE list -- are</span>
+<span class="sd">surfaced as first-class fields on</span>
+<span class="sd">:class:`~pcapkit.protocols.data.application.ngap.NGAP` regardless.</span>
+
+<span class="sd">Known limitations</span>
+<span class="sd">-----------------</span>
+
+<span class="sd">* **PPID 66 payloads are not decoded.** ``NGAP_over_DTLS_over_SCTP`` wraps the</span>
+<span class="sd">  ``NGAP-PDU`` in a DTLS record, and :mod:`pcapkit` implements no DTLS, so the</span>
+<span class="sd">  bytes reaching :meth:`NGAP.read` are not an APER encoding. The PPID is</span>
+<span class="sd">  registered so that it is *named* rather than anonymous; the payload itself</span>
+<span class="sd">  degrades to :class:`~pcapkit.protocols.misc.raw.Raw`.</span>
+<span class="sd">* **The specification version is |pycrate|_'s, not this package's.** The IE and</span>
+<span class="sd">  procedure enumerations below were generated from ``NGAP_Constants`` of</span>
+<span class="sd">  |pycrate|_ 0.8.1 (Release-18-era: 81 procedure codes, 438 protocol IE IDs,</span>
+<span class="sd">  highest 443). A |pycrate|_ that carries a newer NGAP will decode IEs that</span>
+<span class="sd">  :class:`ProcedureCode` and :class:`ProtocolIE` do not name; both extend</span>
+<span class="sd">  themselves at lookup time rather than failing, so such a value is reported</span>
+<span class="sd">  as ``Unassigned_&lt;n&gt;``.</span>
+<span class="sd">* **NGAP over a fragmented SCTP association is not reassembled.** A DATA chunk</span>
+<span class="sd">  is decoded on its own, so an ``NGAP-PDU`` split across chunks by SCTP</span>
+<span class="sd">  fragmentation fails to decode rather than being reassembled first.</span>
+<span class="sd">* **Private IEs (``PrivateMessage``) carry no schema.** Their contents are</span>
+<span class="sd">  vendor defined, so the generic conversion reports whatever ASN.1 shape the</span>
+<span class="sd">  encoding declares and cannot name the fields.</span>
+
+<span class="sd">.. |pycrate| replace:: ``pycrate``</span>
+<span class="sd">.. _pycrate: https://github.com/pycrate-org/pycrate</span>
+
+<span class="sd">.. [*] https://en.wikipedia.org/wiki/NG_Application_Protocol</span>
+
+<span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ngap</span><span class="w"> </span><span class="kn">import</span> <span class="n">IE</span> <span class="k">as</span> <span class="n">Data_IE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ngap</span><span class="w"> </span><span class="kn">import</span> <span class="n">NGAP</span> <span class="k">as</span> <span class="n">Data_NGAP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ngap</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitString</span> <span class="k">as</span> <span class="n">Data_BitString</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ngap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Choice</span> <span class="k">as</span> <span class="n">Data_Choice</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ngap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span> <span class="k">as</span> <span class="n">Data_Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.ngap</span><span class="w"> </span><span class="kn">import</span> <span class="n">NGAP</span> <span class="k">as</span> <span class="n">Schema_NGAP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NGAP'</span><span class="p">,</span> <span class="s1">'PDUKind'</span><span class="p">,</span> <span class="s1">'Criticality'</span><span class="p">,</span> <span class="s1">'ProcedureCode'</span><span class="p">,</span> <span class="s1">'ProtocolIE'</span><span class="p">]</span>
+
+<span class="c1">#: Cached ``NGAP-PDU`` object, c.f. :func:`load_pycrate`. :data:`NotImplemented`</span>
+<span class="c1">#: means the import has not been attempted yet, and :data:`None` that it was</span>
+<span class="c1">#: attempted and |pycrate|_ is not installed -- three states, so a capture full</span>
+<span class="c1">#: of NGAP packets does not pay for a failing import on every frame.</span>
+<span class="n">_PYCRATE</span> <span class="o">=</span> <span class="bp">NotImplemented</span>  <span class="c1"># type: Any</span>
+
+<span class="c1">#: Guards the module-level ``NGAP-PDU`` object returned by :func:`load_pycrate`.</span>
+<span class="c1">#: That object is *stateful*: :meth:`from_aper` stores the decoded value on it</span>
+<span class="c1">#: and :meth:`get_val` hands back the decoder's own containers rather than</span>
+<span class="c1">#: copies, so two decodes running concurrently through it would each see the</span>
+<span class="c1">#: other's tree. The lock is held across the conversion, not merely across the</span>
+<span class="c1">#: decode, for that second reason.</span>
+<span class="n">_PDU_LOCK</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="load_pycrate">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.load_pycrate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_pycrate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Load the optional |pycrate|_ ``NGAP-PDU`` object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``pycrate_asn1dir.NGAP.NGAP_PDU_Descriptions.NGAP_PDU``, the ``CHOICE``</span>
+<span class="sd">        over ``initiatingMessage`` / ``successfulOutcome`` /</span>
+<span class="sd">        ``unsuccessfulOutcome`` that is the entry point of the compiled</span>
+<span class="sd">        specification, or :data:`None` when |pycrate|_ is not installed.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The import is attempted at most once and the outcome is cached. It is</span>
+<span class="sd">        not free even when it succeeds -- ``pycrate_asn1dir.NGAP`` is a 4.9 MB</span>
+<span class="sd">        module -- which is the other reason it happens here rather than at</span>
+<span class="sd">        module import: neither ``import pcapkit`` nor the documentation build</span>
+<span class="sd">        should pay for it.</span>
+
+<span class="sd">    """</span>
+    <span class="k">global</span> <span class="n">_PYCRATE</span>  <span class="c1"># pylint: disable=global-statement</span>
+
+    <span class="k">if</span> <span class="n">_PYCRATE</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pycrate_asn1dir.NGAP</span><span class="w"> </span><span class="kn">import</span> \
+                <span class="n">NGAP_PDU_Descriptions</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="n">_PYCRATE</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_PYCRATE</span> <span class="o">=</span> <span class="n">NGAP_PDU_Descriptions</span><span class="o">.</span><span class="n">NGAP_PDU</span>
+    <span class="k">return</span> <span class="n">_PYCRATE</span></div>
+
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Enumerations.</span>
+<span class="c1">#</span>
+<span class="c1"># These are 3GPP TS 38.413 specification values, not an IANA registry with a</span>
+<span class="c1"># crawlable page, so they live here rather than in pcapkit.const and have no</span>
+<span class="c1"># vendor crawler. The SCTP payload protocol identifiers *are* IANA's, and are</span>
+<span class="c1"># used from pcapkit.const.sctp.payload_protocol_identifier rather than</span>
+<span class="c1"># duplicated here.</span>
+<span class="c1">#</span>
+<span class="c1"># The two large enumerations below were generated from pycrate 0.8.1's</span>
+<span class="c1"># ``NGAP_Constants`` at authoring time and pasted in. Nothing at import time</span>
+<span class="c1"># needs pycrate to define them.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="PDUKind">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.PDUKind">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PDUKind</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Which alternative of the ``NGAP-PDU`` ``CHOICE`` a PDU is.</span>
+
+<span class="sd">    The values are spelled as the ASN.1 identifiers, so that a name decoded by</span>
+<span class="sd">    |pycrate|_ resolves by value.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: A procedure's request, or a class 2 procedure's only message.</span>
+    <span class="n">INITIATING_MESSAGE</span> <span class="o">=</span> <span class="s1">'initiatingMessage'</span>
+    <span class="c1">#: A class 1 procedure's successful response.</span>
+    <span class="n">SUCCESSFUL_OUTCOME</span> <span class="o">=</span> <span class="s1">'successfulOutcome'</span>
+    <span class="c1">#: A class 1 procedure's unsuccessful response.</span>
+    <span class="n">UNSUCCESSFUL_OUTCOME</span> <span class="o">=</span> <span class="s1">'unsuccessfulOutcome'</span></div>
+
+
+
+<div class="viewcode-block" id="Criticality">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.Criticality">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Criticality</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""[Criticality] What a receiver must do with an IE it does not understand.</span>
+
+<span class="sd">    Members are named for the ASN.1 identifiers rather than upper-cased, so</span>
+<span class="sd">    that :meth:`Criticality.get` resolves a name decoded by |pycrate|_ through</span>
+<span class="sd">    the standard member map. The values are the ``ENUMERATED`` indices, which</span>
+<span class="sd">    is what goes on the wire.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Reject the whole message.</span>
+    <span class="n">reject</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1">#: Ignore the IE and carry on.</span>
+    <span class="n">ignore</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1">#: Ignore the IE, carry on, and report it.</span>
+    <span class="n">notify</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str | Criticality'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Criticality'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+
+<span class="sd">        Unlike :meth:`ProcedureCode.get` and :meth:`ProtocolIE.get`, this takes</span>
+<span class="sd">        no ``default``: those two extend themselves through</span>
+<span class="sd">        :func:`~aenum.extend_enum` when a newer specification names a code this</span>
+<span class="sd">        release does not, which is the right answer for a registry that grows.</span>
+<span class="sd">        ``Criticality`` cannot grow. It is an ASN.1 ``ENUMERATED`` with no</span>
+<span class="sd">        extension marker, so a fourth value is unencodable and a lookup for one</span>
+<span class="sd">        is a bug rather than a version skew -- see :meth:`_missing_`. A</span>
+<span class="sd">        ``default`` parameter here would have to be ignored, and one that is</span>
+<span class="sd">        declared, documented and ignored is worse than one that is absent.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Key to get enum item.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The matching member.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If ``key`` names no member. Raised for an unknown name as</span>
+<span class="sd">                well as an unknown value, so that the two ways of getting this</span>
+<span class="sd">                wrong do not report differently.</span>
+
+<span class="sd">        :meta private:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Criticality</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">key</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Criticality</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Criticality</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Criticality</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+<div class="viewcode-block" id="Criticality._missing_">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.Criticality._missing_">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: Always. ``Criticality`` is an ``ENUMERATED`` with no</span>
+<span class="sd">                extension marker, so a fourth value cannot be encoded and a</span>
+<span class="sd">                lookup for one is a bug rather than a newer specification.</span>
+
+<span class="sd">        """</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ProcedureCode">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.ProcedureCode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProcedureCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""[ProcedureCode] NGAP elementary procedure codes, 3GPP TS 38.413."""</span>
+
+    <span class="n">AMFConfigurationUpdate</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">AMFStatusIndication</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">CellTrafficTrace</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">DeactivateTrace</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">DownlinkNASTransport</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">DownlinkNonUEAssociatedNRPPaTransport</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">DownlinkRANConfigurationTransfer</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">DownlinkRANStatusTransfer</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">DownlinkUEAssociatedNRPPaTransport</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">ErrorIndication</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">HandoverCancel</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">HandoverNotification</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">HandoverPreparation</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">HandoverResourceAllocation</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">InitialContextSetup</span> <span class="o">=</span> <span class="mi">14</span>
+    <span class="n">InitialUEMessage</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">LocationReportingControl</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">LocationReportingFailureIndication</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">LocationReport</span> <span class="o">=</span> <span class="mi">18</span>
+    <span class="n">NASNonDeliveryIndication</span> <span class="o">=</span> <span class="mi">19</span>
+    <span class="n">NGReset</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">NGSetup</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="n">OverloadStart</span> <span class="o">=</span> <span class="mi">22</span>
+    <span class="n">OverloadStop</span> <span class="o">=</span> <span class="mi">23</span>
+    <span class="n">Paging</span> <span class="o">=</span> <span class="mi">24</span>
+    <span class="n">PathSwitchRequest</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">PDUSessionResourceModify</span> <span class="o">=</span> <span class="mi">26</span>
+    <span class="n">PDUSessionResourceModifyIndication</span> <span class="o">=</span> <span class="mi">27</span>
+    <span class="n">PDUSessionResourceRelease</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">PDUSessionResourceSetup</span> <span class="o">=</span> <span class="mi">29</span>
+    <span class="n">PDUSessionResourceNotify</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">PrivateMessage</span> <span class="o">=</span> <span class="mi">31</span>
+    <span class="n">PWSCancel</span> <span class="o">=</span> <span class="mi">32</span>
+    <span class="n">PWSFailureIndication</span> <span class="o">=</span> <span class="mi">33</span>
+    <span class="n">PWSRestartIndication</span> <span class="o">=</span> <span class="mi">34</span>
+    <span class="n">RANConfigurationUpdate</span> <span class="o">=</span> <span class="mi">35</span>
+    <span class="n">RerouteNASRequest</span> <span class="o">=</span> <span class="mi">36</span>
+    <span class="n">RRCInactiveTransitionReport</span> <span class="o">=</span> <span class="mi">37</span>
+    <span class="n">TraceFailureIndication</span> <span class="o">=</span> <span class="mi">38</span>
+    <span class="n">TraceStart</span> <span class="o">=</span> <span class="mi">39</span>
+    <span class="n">UEContextModification</span> <span class="o">=</span> <span class="mi">40</span>
+    <span class="n">UEContextRelease</span> <span class="o">=</span> <span class="mi">41</span>
+    <span class="n">UEContextReleaseRequest</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">UERadioCapabilityCheck</span> <span class="o">=</span> <span class="mi">43</span>
+    <span class="n">UERadioCapabilityInfoIndication</span> <span class="o">=</span> <span class="mi">44</span>
+    <span class="n">UETNLABindingRelease</span> <span class="o">=</span> <span class="mi">45</span>
+    <span class="n">UplinkNASTransport</span> <span class="o">=</span> <span class="mi">46</span>
+    <span class="n">UplinkNonUEAssociatedNRPPaTransport</span> <span class="o">=</span> <span class="mi">47</span>
+    <span class="n">UplinkRANConfigurationTransfer</span> <span class="o">=</span> <span class="mi">48</span>
+    <span class="n">UplinkRANStatusTransfer</span> <span class="o">=</span> <span class="mi">49</span>
+    <span class="n">UplinkUEAssociatedNRPPaTransport</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">WriteReplaceWarning</span> <span class="o">=</span> <span class="mi">51</span>
+    <span class="n">SecondaryRATDataUsageReport</span> <span class="o">=</span> <span class="mi">52</span>
+    <span class="n">UplinkRIMInformationTransfer</span> <span class="o">=</span> <span class="mi">53</span>
+    <span class="n">DownlinkRIMInformationTransfer</span> <span class="o">=</span> <span class="mi">54</span>
+    <span class="n">RetrieveUEInformation</span> <span class="o">=</span> <span class="mi">55</span>
+    <span class="n">UEInformationTransfer</span> <span class="o">=</span> <span class="mi">56</span>
+    <span class="n">RANCPRelocationIndication</span> <span class="o">=</span> <span class="mi">57</span>
+    <span class="n">UEContextResume</span> <span class="o">=</span> <span class="mi">58</span>
+    <span class="n">UEContextSuspend</span> <span class="o">=</span> <span class="mi">59</span>
+    <span class="n">UERadioCapabilityIDMapping</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">HandoverSuccess</span> <span class="o">=</span> <span class="mi">61</span>
+    <span class="n">UplinkRANEarlyStatusTransfer</span> <span class="o">=</span> <span class="mi">62</span>
+    <span class="n">DownlinkRANEarlyStatusTransfer</span> <span class="o">=</span> <span class="mi">63</span>
+    <span class="n">AMFCPRelocationIndication</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">ConnectionEstablishmentIndication</span> <span class="o">=</span> <span class="mi">65</span>
+    <span class="n">BroadcastSessionModification</span> <span class="o">=</span> <span class="mi">66</span>
+    <span class="n">BroadcastSessionRelease</span> <span class="o">=</span> <span class="mi">67</span>
+    <span class="n">BroadcastSessionSetup</span> <span class="o">=</span> <span class="mi">68</span>
+    <span class="n">DistributionSetup</span> <span class="o">=</span> <span class="mi">69</span>
+    <span class="n">DistributionRelease</span> <span class="o">=</span> <span class="mi">70</span>
+    <span class="n">MulticastSessionActivation</span> <span class="o">=</span> <span class="mi">71</span>
+    <span class="n">MulticastSessionDeactivation</span> <span class="o">=</span> <span class="mi">72</span>
+    <span class="n">MulticastSessionUpdate</span> <span class="o">=</span> <span class="mi">73</span>
+    <span class="n">MulticastGroupPaging</span> <span class="o">=</span> <span class="mi">74</span>
+    <span class="n">BroadcastSessionReleaseRequired</span> <span class="o">=</span> <span class="mi">75</span>
+    <span class="n">TimingSynchronisationStatus</span> <span class="o">=</span> <span class="mi">76</span>
+    <span class="n">TimingSynchronisationStatusReport</span> <span class="o">=</span> <span class="mi">77</span>
+    <span class="n">MTCommunicationHandling</span> <span class="o">=</span> <span class="mi">78</span>
+    <span class="n">RANPagingRequest</span> <span class="o">=</span> <span class="mi">79</span>
+    <span class="n">BroadcastSessionTransport</span> <span class="o">=</span> <span class="mi">80</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str | ProcedureCode'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProcedureCode'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Key to get enum item.</span>
+<span class="sd">            default: Default value if not found.</span>
+
+<span class="sd">        :meta private:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">ProcedureCode</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">key</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ProcedureCode</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ProcedureCode</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="n">ProcedureCode</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ProcedureCode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProcedureCode'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ProtocolIE">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.ProtocolIE">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProtocolIE</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""[ProtocolIE-ID] NGAP protocol IE identifiers, 3GPP TS 38.413.</span>
+
+<span class="sd">    An IE's ID name and the name of the open type its value is keyed under</span>
+<span class="sd">    differ in places -- IE 21 is ``id-DefaultPagingDRX`` but its value arrives</span>
+<span class="sd">    keyed ``PagingDRX`` -- so</span>
+<span class="sd">    :attr:`IE.type &lt;pcapkit.protocols.data.application.ngap.IE.type&gt;` carries</span>
+<span class="sd">    the latter alongside this.</span>
+
+<span class="sd">    """</span>
+
+    <span class="n">AllowedNSSAI</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">AMFName</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">AMFOverloadResponse</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">AMFSetID</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">AMF_TNLAssociationFailedToSetupList</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">AMF_TNLAssociationSetupList</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">AMF_TNLAssociationToAddList</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">AMF_TNLAssociationToRemoveList</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">AMF_TNLAssociationToUpdateList</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">AMFTrafficLoadReductionIndication</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">AMF_UE_NGAP_ID</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">AssistanceDataForPaging</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">BroadcastCancelledAreaList</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">BroadcastCompletedAreaList</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">CancelAllWarningMessages</span> <span class="o">=</span> <span class="mi">14</span>
+    <span class="n">Cause</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">CellIDListForRestart</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">ConcurrentWarningMessageInd</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">CoreNetworkAssistanceInformationForInactive</span> <span class="o">=</span> <span class="mi">18</span>
+    <span class="n">CriticalityDiagnostics</span> <span class="o">=</span> <span class="mi">19</span>
+    <span class="n">DataCodingScheme</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">DefaultPagingDRX</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="n">DirectForwardingPathAvailability</span> <span class="o">=</span> <span class="mi">22</span>
+    <span class="n">EmergencyAreaIDListForRestart</span> <span class="o">=</span> <span class="mi">23</span>
+    <span class="n">EmergencyFallbackIndicator</span> <span class="o">=</span> <span class="mi">24</span>
+    <span class="n">EUTRA_CGI</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">FiveG_S_TMSI</span> <span class="o">=</span> <span class="mi">26</span>
+    <span class="n">GlobalRANNodeID</span> <span class="o">=</span> <span class="mi">27</span>
+    <span class="n">GUAMI</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">HandoverType</span> <span class="o">=</span> <span class="mi">29</span>
+    <span class="n">IMSVoiceSupportIndicator</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">IndexToRFSP</span> <span class="o">=</span> <span class="mi">31</span>
+    <span class="n">InfoOnRecommendedCellsAndRANNodesForPaging</span> <span class="o">=</span> <span class="mi">32</span>
+    <span class="n">LocationReportingRequestType</span> <span class="o">=</span> <span class="mi">33</span>
+    <span class="n">MaskedIMEISV</span> <span class="o">=</span> <span class="mi">34</span>
+    <span class="n">MessageIdentifier</span> <span class="o">=</span> <span class="mi">35</span>
+    <span class="n">MobilityRestrictionList</span> <span class="o">=</span> <span class="mi">36</span>
+    <span class="n">NASC</span> <span class="o">=</span> <span class="mi">37</span>
+    <span class="n">NAS_PDU</span> <span class="o">=</span> <span class="mi">38</span>
+    <span class="n">NASSecurityParametersFromNGRAN</span> <span class="o">=</span> <span class="mi">39</span>
+    <span class="n">NewAMF_UE_NGAP_ID</span> <span class="o">=</span> <span class="mi">40</span>
+    <span class="n">NewSecurityContextInd</span> <span class="o">=</span> <span class="mi">41</span>
+    <span class="n">NGAP_Message</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">NGRAN_CGI</span> <span class="o">=</span> <span class="mi">43</span>
+    <span class="n">NGRANTraceID</span> <span class="o">=</span> <span class="mi">44</span>
+    <span class="n">NR_CGI</span> <span class="o">=</span> <span class="mi">45</span>
+    <span class="n">NRPPa_PDU</span> <span class="o">=</span> <span class="mi">46</span>
+    <span class="n">NumberOfBroadcastsRequested</span> <span class="o">=</span> <span class="mi">47</span>
+    <span class="n">OldAMF</span> <span class="o">=</span> <span class="mi">48</span>
+    <span class="n">OverloadStartNSSAIList</span> <span class="o">=</span> <span class="mi">49</span>
+    <span class="n">PagingDRX</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">PagingOrigin</span> <span class="o">=</span> <span class="mi">51</span>
+    <span class="n">PagingPriority</span> <span class="o">=</span> <span class="mi">52</span>
+    <span class="n">PDUSessionResourceAdmittedList</span> <span class="o">=</span> <span class="mi">53</span>
+    <span class="n">PDUSessionResourceFailedToModifyListModRes</span> <span class="o">=</span> <span class="mi">54</span>
+    <span class="n">PDUSessionResourceFailedToSetupListCxtRes</span> <span class="o">=</span> <span class="mi">55</span>
+    <span class="n">PDUSessionResourceFailedToSetupListHOAck</span> <span class="o">=</span> <span class="mi">56</span>
+    <span class="n">PDUSessionResourceFailedToSetupListPSReq</span> <span class="o">=</span> <span class="mi">57</span>
+    <span class="n">PDUSessionResourceFailedToSetupListSURes</span> <span class="o">=</span> <span class="mi">58</span>
+    <span class="n">PDUSessionResourceHandoverList</span> <span class="o">=</span> <span class="mi">59</span>
+    <span class="n">PDUSessionResourceListCxtRelCpl</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">PDUSessionResourceListHORqd</span> <span class="o">=</span> <span class="mi">61</span>
+    <span class="n">PDUSessionResourceModifyListModCfm</span> <span class="o">=</span> <span class="mi">62</span>
+    <span class="n">PDUSessionResourceModifyListModInd</span> <span class="o">=</span> <span class="mi">63</span>
+    <span class="n">PDUSessionResourceModifyListModReq</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">PDUSessionResourceModifyListModRes</span> <span class="o">=</span> <span class="mi">65</span>
+    <span class="n">PDUSessionResourceNotifyList</span> <span class="o">=</span> <span class="mi">66</span>
+    <span class="n">PDUSessionResourceReleasedListNot</span> <span class="o">=</span> <span class="mi">67</span>
+    <span class="n">PDUSessionResourceReleasedListPSAck</span> <span class="o">=</span> <span class="mi">68</span>
+    <span class="n">PDUSessionResourceReleasedListPSFail</span> <span class="o">=</span> <span class="mi">69</span>
+    <span class="n">PDUSessionResourceReleasedListRelRes</span> <span class="o">=</span> <span class="mi">70</span>
+    <span class="n">PDUSessionResourceSetupListCxtReq</span> <span class="o">=</span> <span class="mi">71</span>
+    <span class="n">PDUSessionResourceSetupListCxtRes</span> <span class="o">=</span> <span class="mi">72</span>
+    <span class="n">PDUSessionResourceSetupListHOReq</span> <span class="o">=</span> <span class="mi">73</span>
+    <span class="n">PDUSessionResourceSetupListSUReq</span> <span class="o">=</span> <span class="mi">74</span>
+    <span class="n">PDUSessionResourceSetupListSURes</span> <span class="o">=</span> <span class="mi">75</span>
+    <span class="n">PDUSessionResourceToBeSwitchedDLList</span> <span class="o">=</span> <span class="mi">76</span>
+    <span class="n">PDUSessionResourceSwitchedList</span> <span class="o">=</span> <span class="mi">77</span>
+    <span class="n">PDUSessionResourceToReleaseListHOCmd</span> <span class="o">=</span> <span class="mi">78</span>
+    <span class="n">PDUSessionResourceToReleaseListRelCmd</span> <span class="o">=</span> <span class="mi">79</span>
+    <span class="n">PLMNSupportList</span> <span class="o">=</span> <span class="mi">80</span>
+    <span class="n">PWSFailedCellIDList</span> <span class="o">=</span> <span class="mi">81</span>
+    <span class="n">RANNodeName</span> <span class="o">=</span> <span class="mi">82</span>
+    <span class="n">RANPagingPriority</span> <span class="o">=</span> <span class="mi">83</span>
+    <span class="n">RANStatusTransfer_TransparentContainer</span> <span class="o">=</span> <span class="mi">84</span>
+    <span class="n">RAN_UE_NGAP_ID</span> <span class="o">=</span> <span class="mi">85</span>
+    <span class="n">RelativeAMFCapacity</span> <span class="o">=</span> <span class="mi">86</span>
+    <span class="n">RepetitionPeriod</span> <span class="o">=</span> <span class="mi">87</span>
+    <span class="n">ResetType</span> <span class="o">=</span> <span class="mi">88</span>
+    <span class="n">RoutingID</span> <span class="o">=</span> <span class="mi">89</span>
+    <span class="n">RRCEstablishmentCause</span> <span class="o">=</span> <span class="mi">90</span>
+    <span class="n">RRCInactiveTransitionReportRequest</span> <span class="o">=</span> <span class="mi">91</span>
+    <span class="n">RRCState</span> <span class="o">=</span> <span class="mi">92</span>
+    <span class="n">SecurityContext</span> <span class="o">=</span> <span class="mi">93</span>
+    <span class="n">SecurityKey</span> <span class="o">=</span> <span class="mi">94</span>
+    <span class="n">SerialNumber</span> <span class="o">=</span> <span class="mi">95</span>
+    <span class="n">ServedGUAMIList</span> <span class="o">=</span> <span class="mi">96</span>
+    <span class="n">SliceSupportList</span> <span class="o">=</span> <span class="mi">97</span>
+    <span class="n">SONConfigurationTransferDL</span> <span class="o">=</span> <span class="mi">98</span>
+    <span class="n">SONConfigurationTransferUL</span> <span class="o">=</span> <span class="mi">99</span>
+    <span class="n">SourceAMF_UE_NGAP_ID</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">SourceToTarget_TransparentContainer</span> <span class="o">=</span> <span class="mi">101</span>
+    <span class="n">SupportedTAList</span> <span class="o">=</span> <span class="mi">102</span>
+    <span class="n">TAIListForPaging</span> <span class="o">=</span> <span class="mi">103</span>
+    <span class="n">TAIListForRestart</span> <span class="o">=</span> <span class="mi">104</span>
+    <span class="n">TargetID</span> <span class="o">=</span> <span class="mi">105</span>
+    <span class="n">TargetToSource_TransparentContainer</span> <span class="o">=</span> <span class="mi">106</span>
+    <span class="n">TimeToWait</span> <span class="o">=</span> <span class="mi">107</span>
+    <span class="n">TraceActivation</span> <span class="o">=</span> <span class="mi">108</span>
+    <span class="n">TraceCollectionEntityIPAddress</span> <span class="o">=</span> <span class="mi">109</span>
+    <span class="n">UEAggregateMaximumBitRate</span> <span class="o">=</span> <span class="mi">110</span>
+    <span class="n">UE_associatedLogicalNG_connectionList</span> <span class="o">=</span> <span class="mi">111</span>
+    <span class="n">UEContextRequest</span> <span class="o">=</span> <span class="mi">112</span>
+    <span class="n">UE_NGAP_IDs</span> <span class="o">=</span> <span class="mi">114</span>
+    <span class="n">UEPagingIdentity</span> <span class="o">=</span> <span class="mi">115</span>
+    <span class="n">UEPresenceInAreaOfInterestList</span> <span class="o">=</span> <span class="mi">116</span>
+    <span class="n">UERadioCapability</span> <span class="o">=</span> <span class="mi">117</span>
+    <span class="n">UERadioCapabilityForPaging</span> <span class="o">=</span> <span class="mi">118</span>
+    <span class="n">UESecurityCapabilities</span> <span class="o">=</span> <span class="mi">119</span>
+    <span class="n">UnavailableGUAMIList</span> <span class="o">=</span> <span class="mi">120</span>
+    <span class="n">UserLocationInformation</span> <span class="o">=</span> <span class="mi">121</span>
+    <span class="n">WarningAreaList</span> <span class="o">=</span> <span class="mi">122</span>
+    <span class="n">WarningMessageContents</span> <span class="o">=</span> <span class="mi">123</span>
+    <span class="n">WarningSecurityInfo</span> <span class="o">=</span> <span class="mi">124</span>
+    <span class="n">WarningType</span> <span class="o">=</span> <span class="mi">125</span>
+    <span class="n">AdditionalUL_NGU_UP_TNLInformation</span> <span class="o">=</span> <span class="mi">126</span>
+    <span class="n">DataForwardingNotPossible</span> <span class="o">=</span> <span class="mi">127</span>
+    <span class="n">DL_NGU_UP_TNLInformation</span> <span class="o">=</span> <span class="mi">128</span>
+    <span class="n">NetworkInstance</span> <span class="o">=</span> <span class="mi">129</span>
+    <span class="n">PDUSessionAggregateMaximumBitRate</span> <span class="o">=</span> <span class="mi">130</span>
+    <span class="n">PDUSessionResourceFailedToModifyListModCfm</span> <span class="o">=</span> <span class="mi">131</span>
+    <span class="n">PDUSessionResourceFailedToSetupListCxtFail</span> <span class="o">=</span> <span class="mi">132</span>
+    <span class="n">PDUSessionResourceListCxtRelReq</span> <span class="o">=</span> <span class="mi">133</span>
+    <span class="n">PDUSessionType</span> <span class="o">=</span> <span class="mi">134</span>
+    <span class="n">QosFlowAddOrModifyRequestList</span> <span class="o">=</span> <span class="mi">135</span>
+    <span class="n">QosFlowSetupRequestList</span> <span class="o">=</span> <span class="mi">136</span>
+    <span class="n">QosFlowToReleaseList</span> <span class="o">=</span> <span class="mi">137</span>
+    <span class="n">SecurityIndication</span> <span class="o">=</span> <span class="mi">138</span>
+    <span class="n">UL_NGU_UP_TNLInformation</span> <span class="o">=</span> <span class="mi">139</span>
+    <span class="n">UL_NGU_UP_TNLModifyList</span> <span class="o">=</span> <span class="mi">140</span>
+    <span class="n">WarningAreaCoordinates</span> <span class="o">=</span> <span class="mi">141</span>
+    <span class="n">PDUSessionResourceSecondaryRATUsageList</span> <span class="o">=</span> <span class="mi">142</span>
+    <span class="n">HandoverFlag</span> <span class="o">=</span> <span class="mi">143</span>
+    <span class="n">SecondaryRATUsageInformation</span> <span class="o">=</span> <span class="mi">144</span>
+    <span class="n">PDUSessionResourceReleaseResponseTransfer</span> <span class="o">=</span> <span class="mi">145</span>
+    <span class="n">RedirectionVoiceFallback</span> <span class="o">=</span> <span class="mi">146</span>
+    <span class="n">UERetentionInformation</span> <span class="o">=</span> <span class="mi">147</span>
+    <span class="n">S_NSSAI</span> <span class="o">=</span> <span class="mi">148</span>
+    <span class="n">PSCellInformation</span> <span class="o">=</span> <span class="mi">149</span>
+    <span class="n">LastEUTRAN_PLMNIdentity</span> <span class="o">=</span> <span class="mi">150</span>
+    <span class="n">MaximumIntegrityProtectedDataRate_DL</span> <span class="o">=</span> <span class="mi">151</span>
+    <span class="n">AdditionalDLForwardingUPTNLInformation</span> <span class="o">=</span> <span class="mi">152</span>
+    <span class="n">AdditionalDLUPTNLInformationForHOList</span> <span class="o">=</span> <span class="mi">153</span>
+    <span class="n">AdditionalNGU_UP_TNLInformation</span> <span class="o">=</span> <span class="mi">154</span>
+    <span class="n">AdditionalDLQosFlowPerTNLInformation</span> <span class="o">=</span> <span class="mi">155</span>
+    <span class="n">SecurityResult</span> <span class="o">=</span> <span class="mi">156</span>
+    <span class="n">ENDC_SONConfigurationTransferDL</span> <span class="o">=</span> <span class="mi">157</span>
+    <span class="n">ENDC_SONConfigurationTransferUL</span> <span class="o">=</span> <span class="mi">158</span>
+    <span class="n">OldAssociatedQosFlowList_ULendmarkerexpected</span> <span class="o">=</span> <span class="mi">159</span>
+    <span class="n">CNTypeRestrictionsForEquivalent</span> <span class="o">=</span> <span class="mi">160</span>
+    <span class="n">CNTypeRestrictionsForServing</span> <span class="o">=</span> <span class="mi">161</span>
+    <span class="n">NewGUAMI</span> <span class="o">=</span> <span class="mi">162</span>
+    <span class="n">ULForwarding</span> <span class="o">=</span> <span class="mi">163</span>
+    <span class="n">ULForwardingUP_TNLInformation</span> <span class="o">=</span> <span class="mi">164</span>
+    <span class="n">CNAssistedRANTuning</span> <span class="o">=</span> <span class="mi">165</span>
+    <span class="n">CommonNetworkInstance</span> <span class="o">=</span> <span class="mi">166</span>
+    <span class="n">NGRAN_TNLAssociationToRemoveList</span> <span class="o">=</span> <span class="mi">167</span>
+    <span class="n">TNLAssociationTransportLayerAddressNGRAN</span> <span class="o">=</span> <span class="mi">168</span>
+    <span class="n">EndpointIPAddressAndPort</span> <span class="o">=</span> <span class="mi">169</span>
+    <span class="n">LocationReportingAdditionalInfo</span> <span class="o">=</span> <span class="mi">170</span>
+    <span class="n">SourceToTarget_AMFInformationReroute</span> <span class="o">=</span> <span class="mi">171</span>
+    <span class="n">AdditionalULForwardingUPTNLInformation</span> <span class="o">=</span> <span class="mi">172</span>
+    <span class="n">SCTP_TLAs</span> <span class="o">=</span> <span class="mi">173</span>
+    <span class="n">SelectedPLMNIdentity</span> <span class="o">=</span> <span class="mi">174</span>
+    <span class="n">RIMInformationTransfer</span> <span class="o">=</span> <span class="mi">175</span>
+    <span class="n">GUAMIType</span> <span class="o">=</span> <span class="mi">176</span>
+    <span class="n">SRVCCOperationPossible</span> <span class="o">=</span> <span class="mi">177</span>
+    <span class="n">TargetRNC_ID</span> <span class="o">=</span> <span class="mi">178</span>
+    <span class="n">RAT_Information</span> <span class="o">=</span> <span class="mi">179</span>
+    <span class="n">ExtendedRATRestrictionInformation</span> <span class="o">=</span> <span class="mi">180</span>
+    <span class="n">QosMonitoringRequest</span> <span class="o">=</span> <span class="mi">181</span>
+    <span class="n">SgNB_UE_X2AP_ID</span> <span class="o">=</span> <span class="mi">182</span>
+    <span class="n">AdditionalRedundantDL_NGU_UP_TNLInformation</span> <span class="o">=</span> <span class="mi">183</span>
+    <span class="n">AdditionalRedundantDLQosFlowPerTNLInformation</span> <span class="o">=</span> <span class="mi">184</span>
+    <span class="n">AdditionalRedundantNGU_UP_TNLInformation</span> <span class="o">=</span> <span class="mi">185</span>
+    <span class="n">AdditionalRedundantUL_NGU_UP_TNLInformation</span> <span class="o">=</span> <span class="mi">186</span>
+    <span class="n">CNPacketDelayBudgetDL</span> <span class="o">=</span> <span class="mi">187</span>
+    <span class="n">CNPacketDelayBudgetUL</span> <span class="o">=</span> <span class="mi">188</span>
+    <span class="n">ExtendedPacketDelayBudget</span> <span class="o">=</span> <span class="mi">189</span>
+    <span class="n">RedundantCommonNetworkInstance</span> <span class="o">=</span> <span class="mi">190</span>
+    <span class="n">RedundantDL_NGU_TNLInformationReused</span> <span class="o">=</span> <span class="mi">191</span>
+    <span class="n">RedundantDL_NGU_UP_TNLInformation</span> <span class="o">=</span> <span class="mi">192</span>
+    <span class="n">RedundantDLQosFlowPerTNLInformation</span> <span class="o">=</span> <span class="mi">193</span>
+    <span class="n">RedundantQosFlowIndicator</span> <span class="o">=</span> <span class="mi">194</span>
+    <span class="n">RedundantUL_NGU_UP_TNLInformation</span> <span class="o">=</span> <span class="mi">195</span>
+    <span class="n">TSCTrafficCharacteristics</span> <span class="o">=</span> <span class="mi">196</span>
+    <span class="n">RedundantPDUSessionInformation</span> <span class="o">=</span> <span class="mi">197</span>
+    <span class="n">UsedRSNInformation</span> <span class="o">=</span> <span class="mi">198</span>
+    <span class="n">IAB_Authorized</span> <span class="o">=</span> <span class="mi">199</span>
+    <span class="n">IAB_Supported</span> <span class="o">=</span> <span class="mi">200</span>
+    <span class="n">IABNodeIndication</span> <span class="o">=</span> <span class="mi">201</span>
+    <span class="n">NB_IoT_PagingDRX</span> <span class="o">=</span> <span class="mi">202</span>
+    <span class="n">NB_IoT_Paging_eDRXInfo</span> <span class="o">=</span> <span class="mi">203</span>
+    <span class="n">NB_IoT_DefaultPagingDRX</span> <span class="o">=</span> <span class="mi">204</span>
+    <span class="n">Enhanced_CoverageRestriction</span> <span class="o">=</span> <span class="mi">205</span>
+    <span class="n">Extended_ConnectedTime</span> <span class="o">=</span> <span class="mi">206</span>
+    <span class="n">PagingAssisDataforCEcapabUE</span> <span class="o">=</span> <span class="mi">207</span>
+    <span class="n">WUS_Assistance_Information</span> <span class="o">=</span> <span class="mi">208</span>
+    <span class="n">UE_DifferentiationInfo</span> <span class="o">=</span> <span class="mi">209</span>
+    <span class="n">NB_IoT_UEPriority</span> <span class="o">=</span> <span class="mi">210</span>
+    <span class="n">UL_CP_SecurityInformation</span> <span class="o">=</span> <span class="mi">211</span>
+    <span class="n">DL_CP_SecurityInformation</span> <span class="o">=</span> <span class="mi">212</span>
+    <span class="n">TAI</span> <span class="o">=</span> <span class="mi">213</span>
+    <span class="n">UERadioCapabilityForPagingOfNB_IoT</span> <span class="o">=</span> <span class="mi">214</span>
+    <span class="n">LTEV2XServicesAuthorized</span> <span class="o">=</span> <span class="mi">215</span>
+    <span class="n">NRV2XServicesAuthorized</span> <span class="o">=</span> <span class="mi">216</span>
+    <span class="n">LTEUESidelinkAggregateMaximumBitrate</span> <span class="o">=</span> <span class="mi">217</span>
+    <span class="n">NRUESidelinkAggregateMaximumBitrate</span> <span class="o">=</span> <span class="mi">218</span>
+    <span class="n">PC5QoSParameters</span> <span class="o">=</span> <span class="mi">219</span>
+    <span class="n">AlternativeQoSParaSetList</span> <span class="o">=</span> <span class="mi">220</span>
+    <span class="n">CurrentQoSParaSetIndex</span> <span class="o">=</span> <span class="mi">221</span>
+    <span class="n">CEmodeBrestricted</span> <span class="o">=</span> <span class="mi">222</span>
+    <span class="n">EUTRA_PagingeDRXInformation</span> <span class="o">=</span> <span class="mi">223</span>
+    <span class="n">CEmodeBSupport_Indicator</span> <span class="o">=</span> <span class="mi">224</span>
+    <span class="n">LTEM_Indication</span> <span class="o">=</span> <span class="mi">225</span>
+    <span class="n">EndIndication</span> <span class="o">=</span> <span class="mi">226</span>
+    <span class="n">EDT_Session</span> <span class="o">=</span> <span class="mi">227</span>
+    <span class="n">UECapabilityInfoRequest</span> <span class="o">=</span> <span class="mi">228</span>
+    <span class="n">PDUSessionResourceFailedToResumeListRESReq</span> <span class="o">=</span> <span class="mi">229</span>
+    <span class="n">PDUSessionResourceFailedToResumeListRESRes</span> <span class="o">=</span> <span class="mi">230</span>
+    <span class="n">PDUSessionResourceSuspendListSUSReq</span> <span class="o">=</span> <span class="mi">231</span>
+    <span class="n">PDUSessionResourceResumeListRESReq</span> <span class="o">=</span> <span class="mi">232</span>
+    <span class="n">PDUSessionResourceResumeListRESRes</span> <span class="o">=</span> <span class="mi">233</span>
+    <span class="n">UE_UP_CIoT_Support</span> <span class="o">=</span> <span class="mi">234</span>
+    <span class="n">Suspend_Request_Indication</span> <span class="o">=</span> <span class="mi">235</span>
+    <span class="n">Suspend_Response_Indication</span> <span class="o">=</span> <span class="mi">236</span>
+    <span class="n">RRC_Resume_Cause</span> <span class="o">=</span> <span class="mi">237</span>
+    <span class="n">RGLevelWirelineAccessCharacteristics</span> <span class="o">=</span> <span class="mi">238</span>
+    <span class="n">W_AGFIdentityInformation</span> <span class="o">=</span> <span class="mi">239</span>
+    <span class="n">GlobalTNGF_ID</span> <span class="o">=</span> <span class="mi">240</span>
+    <span class="n">GlobalTWIF_ID</span> <span class="o">=</span> <span class="mi">241</span>
+    <span class="n">GlobalW_AGF_ID</span> <span class="o">=</span> <span class="mi">242</span>
+    <span class="n">UserLocationInformationW_AGF</span> <span class="o">=</span> <span class="mi">243</span>
+    <span class="n">UserLocationInformationTNGF</span> <span class="o">=</span> <span class="mi">244</span>
+    <span class="n">AuthenticatedIndication</span> <span class="o">=</span> <span class="mi">245</span>
+    <span class="n">TNGFIdentityInformation</span> <span class="o">=</span> <span class="mi">246</span>
+    <span class="n">TWIFIdentityInformation</span> <span class="o">=</span> <span class="mi">247</span>
+    <span class="n">UserLocationInformationTWIF</span> <span class="o">=</span> <span class="mi">248</span>
+    <span class="n">DataForwardingResponseERABList</span> <span class="o">=</span> <span class="mi">249</span>
+    <span class="n">IntersystemSONConfigurationTransferDL</span> <span class="o">=</span> <span class="mi">250</span>
+    <span class="n">IntersystemSONConfigurationTransferUL</span> <span class="o">=</span> <span class="mi">251</span>
+    <span class="n">SONInformationReport</span> <span class="o">=</span> <span class="mi">252</span>
+    <span class="n">UEHistoryInformationFromTheUE</span> <span class="o">=</span> <span class="mi">253</span>
+    <span class="n">ManagementBasedMDTPLMNList</span> <span class="o">=</span> <span class="mi">254</span>
+    <span class="n">MDTConfiguration</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="n">PrivacyIndicator</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="n">TraceCollectionEntityURI</span> <span class="o">=</span> <span class="mi">257</span>
+    <span class="n">NPN_Support</span> <span class="o">=</span> <span class="mi">258</span>
+    <span class="n">NPN_AccessInformation</span> <span class="o">=</span> <span class="mi">259</span>
+    <span class="n">NPN_PagingAssistanceInformation</span> <span class="o">=</span> <span class="mi">260</span>
+    <span class="n">NPN_MobilityInformation</span> <span class="o">=</span> <span class="mi">261</span>
+    <span class="n">TargettoSource_Failure_TransparentContainer</span> <span class="o">=</span> <span class="mi">262</span>
+    <span class="n">NID</span> <span class="o">=</span> <span class="mi">263</span>
+    <span class="n">UERadioCapabilityID</span> <span class="o">=</span> <span class="mi">264</span>
+    <span class="n">UERadioCapability_EUTRA_Format</span> <span class="o">=</span> <span class="mi">265</span>
+    <span class="n">DAPSRequestInfo</span> <span class="o">=</span> <span class="mi">266</span>
+    <span class="n">DAPSResponseInfoList</span> <span class="o">=</span> <span class="mi">267</span>
+    <span class="n">EarlyStatusTransfer_TransparentContainer</span> <span class="o">=</span> <span class="mi">268</span>
+    <span class="n">NotifySourceNGRANNode</span> <span class="o">=</span> <span class="mi">269</span>
+    <span class="n">ExtendedSliceSupportList</span> <span class="o">=</span> <span class="mi">270</span>
+    <span class="n">ExtendedTAISliceSupportList</span> <span class="o">=</span> <span class="mi">271</span>
+    <span class="n">ConfiguredTACIndication</span> <span class="o">=</span> <span class="mi">272</span>
+    <span class="n">Extended_RANNodeName</span> <span class="o">=</span> <span class="mi">273</span>
+    <span class="n">Extended_AMFName</span> <span class="o">=</span> <span class="mi">274</span>
+    <span class="n">GlobalCable_ID</span> <span class="o">=</span> <span class="mi">275</span>
+    <span class="n">QosMonitoringReportingFrequency</span> <span class="o">=</span> <span class="mi">276</span>
+    <span class="n">QosFlowParametersList</span> <span class="o">=</span> <span class="mi">277</span>
+    <span class="n">QosFlowFeedbackList</span> <span class="o">=</span> <span class="mi">278</span>
+    <span class="n">BurstArrivalTimeDownlink</span> <span class="o">=</span> <span class="mi">279</span>
+    <span class="n">ExtendedUEIdentityIndexValue</span> <span class="o">=</span> <span class="mi">280</span>
+    <span class="n">PduSessionExpectedUEActivityBehaviour</span> <span class="o">=</span> <span class="mi">281</span>
+    <span class="n">MicoAllPLMN</span> <span class="o">=</span> <span class="mi">282</span>
+    <span class="n">QosFlowFailedToSetupList</span> <span class="o">=</span> <span class="mi">283</span>
+    <span class="n">SourceTNLAddrInfo</span> <span class="o">=</span> <span class="mi">284</span>
+    <span class="n">ExtendedReportIntervalMDT</span> <span class="o">=</span> <span class="mi">285</span>
+    <span class="n">SourceNodeID</span> <span class="o">=</span> <span class="mi">286</span>
+    <span class="n">NRNTNTAIInformation</span> <span class="o">=</span> <span class="mi">287</span>
+    <span class="n">UEContextReferenceAtSource</span> <span class="o">=</span> <span class="mi">288</span>
+    <span class="n">LastVisitedPSCellList</span> <span class="o">=</span> <span class="mi">289</span>
+    <span class="n">IntersystemSONInformationRequest</span> <span class="o">=</span> <span class="mi">290</span>
+    <span class="n">IntersystemSONInformationReply</span> <span class="o">=</span> <span class="mi">291</span>
+    <span class="n">EnergySavingIndication</span> <span class="o">=</span> <span class="mi">292</span>
+    <span class="n">IntersystemResourceStatusUpdate</span> <span class="o">=</span> <span class="mi">293</span>
+    <span class="n">SuccessfulHandoverReportList</span> <span class="o">=</span> <span class="mi">294</span>
+    <span class="n">MBS_AreaSessionID</span> <span class="o">=</span> <span class="mi">295</span>
+    <span class="n">MBS_QoSFlowsToBeSetupList</span> <span class="o">=</span> <span class="mi">296</span>
+    <span class="n">MBS_QoSFlowsToBeSetupModList</span> <span class="o">=</span> <span class="mi">297</span>
+    <span class="n">MBS_ServiceArea</span> <span class="o">=</span> <span class="mi">298</span>
+    <span class="n">MBS_SessionID</span> <span class="o">=</span> <span class="mi">299</span>
+    <span class="n">MBS_DistributionReleaseRequestTransfer</span> <span class="o">=</span> <span class="mi">300</span>
+    <span class="n">MBS_DistributionSetupRequestTransfer</span> <span class="o">=</span> <span class="mi">301</span>
+    <span class="n">MBS_DistributionSetupResponseTransfer</span> <span class="o">=</span> <span class="mi">302</span>
+    <span class="n">MBS_DistributionSetupUnsuccessfulTransfer</span> <span class="o">=</span> <span class="mi">303</span>
+    <span class="n">MulticastSessionActivationRequestTransfer</span> <span class="o">=</span> <span class="mi">304</span>
+    <span class="n">MulticastSessionDeactivationRequestTransfer</span> <span class="o">=</span> <span class="mi">305</span>
+    <span class="n">MulticastSessionUpdateRequestTransfer</span> <span class="o">=</span> <span class="mi">306</span>
+    <span class="n">MulticastGroupPagingAreaList</span> <span class="o">=</span> <span class="mi">307</span>
+    <span class="n">MBS_SupportIndicator</span> <span class="o">=</span> <span class="mi">309</span>
+    <span class="n">MBSSessionFailedtoSetupList</span> <span class="o">=</span> <span class="mi">310</span>
+    <span class="n">MBSSessionFailedtoSetuporModifyList</span> <span class="o">=</span> <span class="mi">311</span>
+    <span class="n">MBSSessionSetupResponseList</span> <span class="o">=</span> <span class="mi">312</span>
+    <span class="n">MBSSessionSetuporModifyResponseList</span> <span class="o">=</span> <span class="mi">313</span>
+    <span class="n">MBSSessionSetupFailureTransfer</span> <span class="o">=</span> <span class="mi">314</span>
+    <span class="n">MBSSessionSetupRequestTransfer</span> <span class="o">=</span> <span class="mi">315</span>
+    <span class="n">MBSSessionSetupResponseTransfer</span> <span class="o">=</span> <span class="mi">316</span>
+    <span class="n">MBSSessionToReleaseList</span> <span class="o">=</span> <span class="mi">317</span>
+    <span class="n">MBSSessionSetupRequestList</span> <span class="o">=</span> <span class="mi">318</span>
+    <span class="n">MBSSessionSetuporModifyRequestList</span> <span class="o">=</span> <span class="mi">319</span>
+    <span class="n">MBS_ActiveSessionInformation_SourcetoTargetList</span> <span class="o">=</span> <span class="mi">323</span>
+    <span class="n">MBS_ActiveSessionInformation_TargettoSourceList</span> <span class="o">=</span> <span class="mi">324</span>
+    <span class="n">OnboardingSupport</span> <span class="o">=</span> <span class="mi">325</span>
+    <span class="n">TimeSyncAssistanceInfo</span> <span class="o">=</span> <span class="mi">326</span>
+    <span class="n">SurvivalTime</span> <span class="o">=</span> <span class="mi">327</span>
+    <span class="n">QMCConfigInfo</span> <span class="o">=</span> <span class="mi">328</span>
+    <span class="n">QMCDeactivation</span> <span class="o">=</span> <span class="mi">329</span>
+    <span class="n">PDUSessionPairID</span> <span class="o">=</span> <span class="mi">331</span>
+    <span class="n">NR_PagingeDRXInformation</span> <span class="o">=</span> <span class="mi">332</span>
+    <span class="n">RedCapIndication</span> <span class="o">=</span> <span class="mi">333</span>
+    <span class="n">TargetNSSAIInformation</span> <span class="o">=</span> <span class="mi">334</span>
+    <span class="n">UESliceMaximumBitRateList</span> <span class="o">=</span> <span class="mi">335</span>
+    <span class="n">M4ReportAmount</span> <span class="o">=</span> <span class="mi">336</span>
+    <span class="n">M5ReportAmount</span> <span class="o">=</span> <span class="mi">337</span>
+    <span class="n">M6ReportAmount</span> <span class="o">=</span> <span class="mi">338</span>
+    <span class="n">M7ReportAmount</span> <span class="o">=</span> <span class="mi">339</span>
+    <span class="n">IncludeBeamMeasurementsIndication</span> <span class="o">=</span> <span class="mi">340</span>
+    <span class="n">ExcessPacketDelayThresholdConfiguration</span> <span class="o">=</span> <span class="mi">341</span>
+    <span class="n">PagingCause</span> <span class="o">=</span> <span class="mi">342</span>
+    <span class="n">PagingCauseIndicationForVoiceService</span> <span class="o">=</span> <span class="mi">343</span>
+    <span class="n">PEIPSassistanceInformation</span> <span class="o">=</span> <span class="mi">344</span>
+    <span class="n">FiveG_ProSeAuthorized</span> <span class="o">=</span> <span class="mi">345</span>
+    <span class="n">FiveG_ProSeUEPC5AggregateMaximumBitRate</span> <span class="o">=</span> <span class="mi">346</span>
+    <span class="n">FiveG_ProSePC5QoSParameters</span> <span class="o">=</span> <span class="mi">347</span>
+    <span class="n">MBSSessionModificationFailureTransfer</span> <span class="o">=</span> <span class="mi">348</span>
+    <span class="n">MBSSessionModificationRequestTransfer</span> <span class="o">=</span> <span class="mi">349</span>
+    <span class="n">MBSSessionModificationResponseTransfer</span> <span class="o">=</span> <span class="mi">350</span>
+    <span class="n">MBS_QoSFlowToReleaseList</span> <span class="o">=</span> <span class="mi">351</span>
+    <span class="n">MBS_SessionTNLInfo5GC</span> <span class="o">=</span> <span class="mi">352</span>
+    <span class="n">TAINSAGSupportList</span> <span class="o">=</span> <span class="mi">353</span>
+    <span class="n">SourceNodeTNLAddrInfo</span> <span class="o">=</span> <span class="mi">354</span>
+    <span class="n">NGAPIESupportInformationRequestList</span> <span class="o">=</span> <span class="mi">355</span>
+    <span class="n">NGAPIESupportInformationResponseList</span> <span class="o">=</span> <span class="mi">356</span>
+    <span class="n">MBS_SessionFSAIDList</span> <span class="o">=</span> <span class="mi">357</span>
+    <span class="n">MBSSessionReleaseResponseTransfer</span> <span class="o">=</span> <span class="mi">358</span>
+    <span class="n">ManagementBasedMDTPLMNModificationList</span> <span class="o">=</span> <span class="mi">359</span>
+    <span class="n">EarlyMeasurement</span> <span class="o">=</span> <span class="mi">360</span>
+    <span class="n">BeamMeasurementsReportConfiguration</span> <span class="o">=</span> <span class="mi">361</span>
+    <span class="n">HFCNode_ID_new</span> <span class="o">=</span> <span class="mi">362</span>
+    <span class="n">GlobalCable_ID_new</span> <span class="o">=</span> <span class="mi">363</span>
+    <span class="n">TargetHomeENB_ID</span> <span class="o">=</span> <span class="mi">364</span>
+    <span class="n">HashedUEIdentityIndexValue</span> <span class="o">=</span> <span class="mi">365</span>
+    <span class="n">ExtendedMobilityInformation</span> <span class="o">=</span> <span class="mi">366</span>
+    <span class="n">NetworkControlledRepeaterAuthorized</span> <span class="o">=</span> <span class="mi">367</span>
+    <span class="n">AdditionalCancelledlocationReportingReferenceIDList</span> <span class="o">=</span> <span class="mi">368</span>
+    <span class="n">Selected_Target_SNPN_Identity</span> <span class="o">=</span> <span class="mi">369</span>
+    <span class="n">EquivalentSNPNsList</span> <span class="o">=</span> <span class="mi">370</span>
+    <span class="n">SelectedNID</span> <span class="o">=</span> <span class="mi">371</span>
+    <span class="n">SupportedUETypeList</span> <span class="o">=</span> <span class="mi">372</span>
+    <span class="n">AerialUEsubscriptionInformation</span> <span class="o">=</span> <span class="mi">373</span>
+    <span class="n">NR_A2X_ServicesAuthorized</span> <span class="o">=</span> <span class="mi">374</span>
+    <span class="n">LTE_A2X_ServicesAuthorized</span> <span class="o">=</span> <span class="mi">375</span>
+    <span class="n">NR_A2X_UE_PC5_AggregateMaximumBitRate</span> <span class="o">=</span> <span class="mi">376</span>
+    <span class="n">LTE_A2X_UE_PC5_AggregateMaximumBitRate</span> <span class="o">=</span> <span class="mi">377</span>
+    <span class="n">A2X_PC5_QoS_Parameters</span> <span class="o">=</span> <span class="mi">378</span>
+    <span class="n">FiveGProSeLayer2Multipath</span> <span class="o">=</span> <span class="mi">379</span>
+    <span class="n">FiveGProSeLayer2UEtoUERelay</span> <span class="o">=</span> <span class="mi">380</span>
+    <span class="n">FiveGProSeLayer2UEtoUERemote</span> <span class="o">=</span> <span class="mi">381</span>
+    <span class="n">CandidateRelayUEInformationList</span> <span class="o">=</span> <span class="mi">382</span>
+    <span class="n">SuccessfulPSCellChangeReportList</span> <span class="o">=</span> <span class="mi">383</span>
+    <span class="n">IntersystemMobilityFailureforVoiceFallback</span> <span class="o">=</span> <span class="mi">384</span>
+    <span class="n">TargetCellCRNTI</span> <span class="o">=</span> <span class="mi">385</span>
+    <span class="n">TimeSinceFailure</span> <span class="o">=</span> <span class="mi">386</span>
+    <span class="n">RANTimingSynchronisationStatusInfo</span> <span class="o">=</span> <span class="mi">387</span>
+    <span class="n">RAN_TSSRequestType</span> <span class="o">=</span> <span class="mi">388</span>
+    <span class="n">RAN_TSSScope</span> <span class="o">=</span> <span class="mi">389</span>
+    <span class="n">ClockQualityReportingControlInfo</span> <span class="o">=</span> <span class="mi">390</span>
+    <span class="n">RANfeedbacktype</span> <span class="o">=</span> <span class="mi">391</span>
+    <span class="n">QoSFlowTSCList</span> <span class="o">=</span> <span class="mi">392</span>
+    <span class="n">TSCTrafficCharacteristicsFeedback</span> <span class="o">=</span> <span class="mi">393</span>
+    <span class="n">DownlinkTLContainer</span> <span class="o">=</span> <span class="mi">394</span>
+    <span class="n">UplinkTLContainer</span> <span class="o">=</span> <span class="mi">395</span>
+    <span class="n">ANPacketDelayBudgetUL</span> <span class="o">=</span> <span class="mi">396</span>
+    <span class="n">QosFlowAdditionalInfoList</span> <span class="o">=</span> <span class="mi">397</span>
+    <span class="n">AssistanceInformationQoE_Meas</span> <span class="o">=</span> <span class="mi">398</span>
+    <span class="n">MBSCommServiceType</span> <span class="o">=</span> <span class="mi">399</span>
+    <span class="n">MobileIAB_Authorized</span> <span class="o">=</span> <span class="mi">400</span>
+    <span class="n">MobileIAB_MTUserLocationInformation</span> <span class="o">=</span> <span class="mi">401</span>
+    <span class="n">MobileIABNodeIndication</span> <span class="o">=</span> <span class="mi">402</span>
+    <span class="n">NoPDUSessionIndication</span> <span class="o">=</span> <span class="mi">403</span>
+    <span class="n">MobileIAB_Supported</span> <span class="o">=</span> <span class="mi">404</span>
+    <span class="n">CN_MT_CommunicationHandling</span> <span class="o">=</span> <span class="mi">405</span>
+    <span class="n">FiveGCAction</span> <span class="o">=</span> <span class="mi">406</span>
+    <span class="n">PagingPolicyDifferentiation</span> <span class="o">=</span> <span class="mi">407</span>
+    <span class="n">DL_Signalling</span> <span class="o">=</span> <span class="mi">408</span>
+    <span class="n">PNI_NPN_AreaScopeofMDT</span> <span class="o">=</span> <span class="mi">409</span>
+    <span class="n">PNI_NPNBasedMDT</span> <span class="o">=</span> <span class="mi">410</span>
+    <span class="n">SNPN_CellBasedMDT</span> <span class="o">=</span> <span class="mi">411</span>
+    <span class="n">SNPN_TAIBasedMDT</span> <span class="o">=</span> <span class="mi">412</span>
+    <span class="n">SNPN_BasedMDT</span> <span class="o">=</span> <span class="mi">413</span>
+    <span class="n">Partially_Allowed_NSSAI</span> <span class="o">=</span> <span class="mi">414</span>
+    <span class="n">AssociatedSessionID</span> <span class="o">=</span> <span class="mi">415</span>
+    <span class="n">MBS_AssistanceInformation</span> <span class="o">=</span> <span class="mi">416</span>
+    <span class="n">BroadcastTransportFailureTransfer</span> <span class="o">=</span> <span class="mi">417</span>
+    <span class="n">BroadcastTransportRequestTransfer</span> <span class="o">=</span> <span class="mi">418</span>
+    <span class="n">BroadcastTransportResponseTransfer</span> <span class="o">=</span> <span class="mi">419</span>
+    <span class="n">TimeBasedHandoverInformation</span> <span class="o">=</span> <span class="mi">420</span>
+    <span class="n">DLDiscarding</span> <span class="o">=</span> <span class="mi">421</span>
+    <span class="n">PDUsetQoSParameters</span> <span class="o">=</span> <span class="mi">422</span>
+    <span class="n">PDUSetbasedHandlingIndicator</span> <span class="o">=</span> <span class="mi">423</span>
+    <span class="n">N6JitterInformation</span> <span class="o">=</span> <span class="mi">424</span>
+    <span class="n">ECNMarkingorCongestionInformationReportingRequest</span> <span class="o">=</span> <span class="mi">425</span>
+    <span class="n">ECNMarkingorCongestionInformationReportingStatus</span> <span class="o">=</span> <span class="mi">426</span>
+    <span class="n">ERedCapIndication</span> <span class="o">=</span> <span class="mi">427</span>
+    <span class="n">XrDeviceWith2Rx</span> <span class="o">=</span> <span class="mi">428</span>
+    <span class="n">UserPlaneErrorIndicator</span> <span class="o">=</span> <span class="mi">429</span>
+    <span class="n">SLPositioningRangingServiceInfo</span> <span class="o">=</span> <span class="mi">430</span>
+    <span class="n">PDUSessionListMTCommHReq</span> <span class="o">=</span> <span class="mi">431</span>
+    <span class="n">MaximumDataBurstVolume</span> <span class="o">=</span> <span class="mi">432</span>
+    <span class="n">MN_only_MDT_collection</span> <span class="o">=</span> <span class="mi">433</span>
+    <span class="n">MBS_NGUFailureIndication</span> <span class="o">=</span> <span class="mi">434</span>
+    <span class="n">UserPlaneFailureIndication</span> <span class="o">=</span> <span class="mi">435</span>
+    <span class="n">UserPlaneFailureIndicationReport</span> <span class="o">=</span> <span class="mi">436</span>
+    <span class="n">SourceSN_to_TargetSN_QMCInfo</span> <span class="o">=</span> <span class="mi">437</span>
+    <span class="n">QoERVQoEReportingPaths</span> <span class="o">=</span> <span class="mi">438</span>
+    <span class="n">UserLocationInformationN3IWF_without_PortNumber</span> <span class="o">=</span> <span class="mi">439</span>
+    <span class="n">AUN3DeviceAccessInfo</span> <span class="o">=</span> <span class="mi">440</span>
+    <span class="n">TAIMBSSupportList</span> <span class="o">=</span> <span class="mi">441</span>
+    <span class="n">ExtendedBackupAMFName</span> <span class="o">=</span> <span class="mi">442</span>
+    <span class="n">ExtendedOldAMF</span> <span class="o">=</span> <span class="mi">443</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str | ProtocolIE'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolIE'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Key to get enum item.</span>
+<span class="sd">            default: Default value if not found.</span>
+
+<span class="sd">        :meta private:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">ProtocolIE</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">key</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ProtocolIE</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ProtocolIE</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="n">ProtocolIE</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ProtocolIE</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolIE'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Value tree conversion.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="_convert">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap._convert">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_convert</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert a |pycrate|_ decoded value into :mod:`pcapkit` data models.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: A node of the tree returned by ``NGAP_PDU.get_val()``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The same tree, with mappings as</span>
+<span class="sd">        :class:`~pcapkit.protocols.data.application.ngap.Sequence`, ``CHOICE``</span>
+<span class="sd">        pairs as :class:`~pcapkit.protocols.data.application.ngap.Choice`, and</span>
+<span class="sd">        ``BIT STRING`` pairs as</span>
+<span class="sd">        :class:`~pcapkit.protocols.data.application.ngap.BitString`.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The two 2-tuple shapes are told apart by their first element, which is</span>
+<span class="sd">        unambiguous: |pycrate|_ spells a ``CHOICE`` as ``(name, value)`` with a</span>
+<span class="sd">        :obj:`str` name and a ``BIT STRING`` as ``(bits, length)`` with two</span>
+<span class="sd">        :obj:`int`. Any other tuple is passed through with its members</span>
+<span class="sd">        converted, so an ASN.1 construct not listed above degrades to its own</span>
+<span class="sd">        shape rather than being mangled into one of these.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Data_Sequence</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">_convert</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_convert</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">Data_Choice</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="n">_convert</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">Data_BitString</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">length</span><span class="o">=</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_convert</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="_revert">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap._revert">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_revert</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert :mod:`pcapkit` data models back into a |pycrate|_ value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: A node of a tree produced by :func:`_convert`, or the equivalent</span>
+<span class="sd">            plain Python value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The same tree in the shape ``NGAP_PDU.set_val()`` expects.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        :class:`~pcapkit.protocols.data.application.ngap.Choice` and</span>
+<span class="sd">        :class:`~pcapkit.protocols.data.application.ngap.BitString` are tested</span>
+<span class="sd">        before :class:`~pcapkit.corekit.infoclass.Info`, since they are</span>
+<span class="sd">        subclasses of it and would otherwise be reverted to mappings.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Data_Choice</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">_revert</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Data_BitString</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_revert</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">value</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_revert</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_revert</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Protocol.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="NGAP">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NGAP</span><span class="p">(</span><span class="n">Application</span><span class="p">[</span><span class="n">Data_NGAP</span><span class="p">,</span> <span class="n">Schema_NGAP</span><span class="p">],</span>
+           <span class="n">data</span><span class="o">=</span><span class="n">Data_NGAP</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Schema_NGAP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""This class implements NG Application Protocol."""</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["NG Application Protocol"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of current protocol."""</span>
+        <span class="k">return</span> <span class="s1">'NG Application Protocol'</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header length of current protocol.</span>
+
+<span class="sd">        NGAP prefixes its payload with nothing and carries no next layer, so the</span>
+<span class="sd">        whole ``NGAP-PDU`` *is* the header and this is its length. That is not</span>
+<span class="sd">        :meth:`self.__length_hint__ &lt;NGAP.__length_hint__&gt;`, which reports the</span>
+<span class="sd">        four-octet prefix common to every PDU rather than this PDU's size.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="NGAP.read">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_NGAP'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read NG Application Protocol (NGAP).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If |pycrate|_ is not installed, or if the payload is</span>
+<span class="sd">                not a well formed aligned PER ``NGAP-PDU``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
+
+        <span class="n">pdu</span> <span class="o">=</span> <span class="n">load_pycrate</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pdu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'NGAP: decoding needs the optional "pycrate" dependency, '</span>
+                                <span class="s1">'which is not installed; pip install pypcapkit[NGAP]'</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">_PDU_LOCK</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># NOTE: `reset_val()` must not be called here, tempting though it</span>
+                <span class="c1"># looks before a decode into a reused object. It walks all 318</span>
+                <span class="c1"># submodules of the compiled specification and costs ~105 ms,</span>
+                <span class="c1"># some 700x the ~0.15 ms of the decode itself; and `from_aper()`</span>
+                <span class="c1"># overwrites the stored value outright, so it would buy nothing</span>
+                <span class="c1"># even if it were free.</span>
+                <span class="n">pdu</span><span class="o">.</span><span class="n">from_aper</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">kind</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">pdu</span><span class="o">.</span><span class="n">get_val</span><span class="p">()</span>
+
+                <span class="n">message</span><span class="p">,</span> <span class="n">message_body</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s1">'value'</span><span class="p">]</span>
+
+                <span class="c1"># NOTE: converted while the lock is held, because `get_val()`</span>
+                <span class="c1"># returns the decoder's own containers rather than copies -- the</span>
+                <span class="c1"># next decode through this module-level object rewrites them.</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">_convert</span><span class="p">(</span><span class="n">message_body</span><span class="p">)</span>
+
+                <span class="n">ies</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Data_IE]</span>
+                <span class="k">for</span> <span class="n">ie</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'protocolIEs'</span><span class="p">)</span> <span class="ow">or</span> <span class="p">():</span>
+                    <span class="n">choice</span> <span class="o">=</span> <span class="n">ie</span><span class="p">[</span><span class="s1">'value'</span><span class="p">]</span>
+                    <span class="n">ies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data_IE</span><span class="p">(</span>
+                        <span class="nb">id</span><span class="o">=</span><span class="n">ProtocolIE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ie</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]),</span>
+                        <span class="n">criticality</span><span class="o">=</span><span class="n">Criticality</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ie</span><span class="p">[</span><span class="s1">'criticality'</span><span class="p">]),</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="n">choice</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="n">choice</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="p">))</span>
+
+                <span class="n">ngap</span> <span class="o">=</span> <span class="n">Data_NGAP</span><span class="p">(</span>
+                    <span class="n">kind</span><span class="o">=</span><span class="n">PDUKind</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+                    <span class="n">procedure</span><span class="o">=</span><span class="n">ProcedureCode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">'procedureCode'</span><span class="p">]),</span>
+                    <span class="n">criticality</span><span class="o">=</span><span class="n">Criticality</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">'criticality'</span><span class="p">]),</span>
+                    <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
+                    <span class="n">ies</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ies</span><span class="p">),</span>
+                    <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
+                <span class="c1"># NOTE: a ProtocolError raised inside this block is already</span>
+                <span class="c1"># specific about what went wrong, so it must not be caught below</span>
+                <span class="c1"># and relabelled "malformed NGAP-PDU". Nothing here raises one</span>
+                <span class="c1"># today; this is what keeps that true of the next edit.</span>
+                <span class="k">raise</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="c1"># NOTE: `Exception` rather than something narrower on purpose.</span>
+                <span class="c1"># pycrate signals a bad encoding from two unrelated hierarchies</span>
+                <span class="c1"># -- `pycrate_asn1rt.err.ASN1Err` and `pycrate_core.charpy.</span>
+                <span class="c1"># CharpyErr` -- and a truncated payload can also surface as</span>
+                <span class="c1"># `KeyError` or `IndexError` from inside the codec. None of them</span>
+                <span class="c1"># is a pcapkit exception, and letting one escape would make an</span>
+                <span class="c1"># NGAP packet fail differently from every other protocol.</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'NGAP: malformed NGAP-PDU: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">return</span> <span class="n">ngap</span></div>
+
+
+<div class="viewcode-block" id="NGAP.make">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">kind</span><span class="p">:</span> <span class="s1">'PDUKind | str'</span> <span class="o">=</span> <span class="n">PDUKind</span><span class="o">.</span><span class="n">INITIATING_MESSAGE</span><span class="p">,</span>
+             <span class="n">procedure</span><span class="p">:</span> <span class="s1">'Optional[ProcedureCode | int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">criticality</span><span class="p">:</span> <span class="s1">'Criticality | int | str'</span> <span class="o">=</span> <span class="n">Criticality</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span>
+             <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_NGAP'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            kind: Which ``NGAP-PDU`` alternative to construct.</span>
+<span class="sd">            procedure: Procedure code.</span>
+<span class="sd">            criticality: Criticality of the procedure.</span>
+<span class="sd">            message: Name of the message type, e.g. ``NGSetupRequest``.</span>
+<span class="sd">            value: Message body, either as</span>
+<span class="sd">                :class:`~pcapkit.protocols.data.application.ngap.Sequence` from</span>
+<span class="sd">                a previous :meth:`read` or as the plain Python value</span>
+<span class="sd">                |pycrate|_ expects.</span>
+<span class="sd">            data: Pre-encoded ``NGAP-PDU``. When given, it is used verbatim and</span>
+<span class="sd">                every other argument is ignored, which is also the only path</span>
+<span class="sd">                that does not need |pycrate|_.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is not given and either ``procedure`` or</span>
+<span class="sd">                ``message`` is missing, if |pycrate|_ is not installed, or if</span>
+<span class="sd">                the arguments do not describe a message the specification can</span>
+<span class="sd">                encode.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Schema_NGAP</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">procedure</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s2">"NGAP: 'procedure' and 'message' are required "</span>
+                                <span class="s2">"when 'data' is not given"</span><span class="p">)</span>
+
+        <span class="n">pdu</span> <span class="o">=</span> <span class="n">load_pycrate</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pdu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'NGAP: encoding needs the optional "pycrate" dependency, '</span>
+                                <span class="s1">'which is not installed; pip install pypcapkit[NGAP]'</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">_PDU_LOCK</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">pdu</span><span class="o">.</span><span class="n">set_val</span><span class="p">((</span><span class="n">PDUKind</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s1">'procedureCode'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ProcedureCode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">procedure</span><span class="p">)),</span>
+                    <span class="s1">'criticality'</span><span class="p">:</span> <span class="n">Criticality</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">criticality</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s1">'value'</span><span class="p">:</span> <span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">_revert</span><span class="p">(</span><span class="n">value</span><span class="p">)),</span>
+                <span class="p">}))</span>
+                <span class="n">encoded</span> <span class="o">=</span> <span class="n">pdu</span><span class="o">.</span><span class="n">to_aper</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="c1"># NOTE: same reasoning as the read path -- pycrate's encoder</span>
+                <span class="c1"># raises from its own hierarchies, none of them pcapkit's.</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'NGAP: cannot encode NGAP-PDU: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">return</span> <span class="n">Schema_NGAP</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">encoded</span><span class="p">)</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="NGAP.__length_hint__">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP.__length_hint__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[4]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object.</span>
+
+<span class="sd">        Every ``NGAP-PDU`` opens with the same four octets under aligned PER --</span>
+<span class="sd">        the ``CHOICE`` index, the procedure code, the criticality, and the</span>
+<span class="sd">        first octet of the open type's length determinant -- so four is the</span>
+<span class="sd">        fixed prefix NGAP has in place of a header. It is not a minimum PDU</span>
+<span class="sd">        length: the smallest complete ``NGAP-PDU`` measured here, a message</span>
+<span class="sd">        whose ``protocolIEs`` list is empty, is seven octets.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="mi">4</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="NGAP._make_data">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP._make_data">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_NGAP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: protocol data</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Key-value pairs for protocol construction.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">'kind'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+            <span class="s1">'procedure'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">procedure</span><span class="p">,</span>
+            <span class="s1">'criticality'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">criticality</span><span class="p">,</span>
+            <span class="s1">'message'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+            <span class="s1">'value'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s1">'data'</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2026, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=187fdd2d"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    </body>
+</html>

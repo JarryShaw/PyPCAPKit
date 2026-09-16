@@ -272,6 +272,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -623,7 +624,18 @@
 <span class="sd">       &gt;&gt;&gt; SCTP.register(Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol, NGAP)</span>
 <span class="sd">       &gt;&gt;&gt; SCTP.register(60, NGAP)  # equivalent, PPID given as a plain integer</span>
 
-<span class="sd">    No PPID is registered by default.</span>
+<span class="sd">    Two PPIDs are registered by default, both to</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.ngap.NGAP`: 60</span>
+<span class="sd">    (``NG_Application_Protocol``) and 66 (``NGAP_over_DTLS_over_SCTP``). Every</span>
+<span class="sd">    other PPID resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.</span>
+
+<span class="sd">    Only PPID 60 actually decodes, though. A PPID 66 payload is an NGAP PDU</span>
+<span class="sd">    wrapped in a DTLS record, and :mod:`pcapkit` has no DTLS implementation, so</span>
+<span class="sd">    those bytes are not aligned PER and the parse degrades to</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw` -- every time, not only when</span>
+<span class="sd">    ``pycrate`` is absent. It is registered so that the PPID is *named* in the</span>
+<span class="sd">    protochain rather than reported as an unassigned number, which is strictly</span>
+<span class="sd">    more than leaving it out would give.</span>
 
 <span class="sd">    This class currently supports parsing of the following SCTP chunks, which</span>
 <span class="sd">    are directly mapped to the :class:`pcapkit.const.sctp.chunk.Chunk`</span>
@@ -746,7 +758,15 @@
     <span class="c1">#:    :class:`~pcapkit.protocols.transport.udp.UDP`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
-        <span class="p">{},</span>
+        <span class="p">{</span>
+            <span class="c1"># PPID 66 is NGAP wrapped in a DTLS record rather than a bare</span>
+            <span class="c1"># NGAP-PDU, and pcapkit implements no DTLS. It is registered anyway</span>
+            <span class="c1"># so that the PPID is *named*: the payload then fails in NGAP's own</span>
+            <span class="c1"># decoder and `beholder` degrades it to Raw, which is where an</span>
+            <span class="c1"># unregistered PPID would have left it regardless.</span>
+            <span class="n">Enum_PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NG_Application_Protocol</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ngap'</span><span class="p">,</span> <span class="s1">'NGAP'</span><span class="p">),</span>  <span class="c1"># NGAP</span>
+            <span class="n">Enum_PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ngap'</span><span class="p">,</span> <span class="s1">'NGAP'</span><span class="p">),</span>  <span class="c1"># NGAP over DTLS</span>
+        <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]</span>
 
     <span class="c1">#: DefaultDict[Enum_Chunk, str | tuple[ChunkParser, ChunkConstructor]]: Chunk</span>

@@ -272,6 +272,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -518,6 +519,10 @@
         <span class="c1"># extract self object &amp; args</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'R_beholder'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="n">proto</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">proto</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="kc">None</span>
@@ -540,8 +545,38 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">'The following error occurred while parsing the packet:'</span><span class="p">)</span>
                 <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
 
-            <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
-            <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
+            <span class="c1"># NOTE: ``self._get_payload()`` rather than</span>
+            <span class="c1"># ``self.__header__.get_payload()``, which it wraps. The two agree</span>
+            <span class="c1"># for every protocol whose payload is a schema field, and differ for</span>
+            <span class="c1"># the two that override it: SCTP carries user data inside a DATA</span>
+            <span class="c1"># chunk and PCAP-NG inside a block, so neither header schema has a</span>
+            <span class="c1"># ``payload`` field at all. Going through the schema there raises</span>
+            <span class="c1"># ProtocolUnbound('unknown field: payload') *from the recovery path*,</span>
+            <span class="c1"># turning a next-layer parse failure that should have degraded to</span>
+            <span class="c1"># Raw into a crash. Unreachable until something was registered on an</span>
+            <span class="c1"># SCTP payload protocol identifier, which NGAP now is.</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>
+
+            <span class="c1"># NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so</span>
+            <span class="c1"># a payload that failed to parse still reports the code it arrived</span>
+            <span class="c1"># with, which is what ``Data_Raw.protocol`` means. A plain integer has</span>
+            <span class="c1"># no ``name`` and still renders as ``Raw`` in the protochain, c.f.</span>
+            <span class="c1"># ``Raw.__post_init__``, so this only adds a name where the registry</span>
+            <span class="c1"># key is an enumeration.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Measured, because the layers differ and it is easy to state this too</span>
+            <span class="c1"># broadly: SCTP's unregistered path keeps its enumeration -- an unknown</span>
+            <span class="c1"># PPID gives ``SCTP:Unassigned_4243`` and ``protocol=4243`` -- so</span>
+            <span class="c1"># without this line, *registering* NGAP on PPID 60 would have made a</span>
+            <span class="c1"># failed parse report a bare ``SCTP:Raw`` and ``protocol=None``, less</span>
+            <span class="c1"># than the same bytes gave while unregistered. TCP's unregistered path</span>
+            <span class="c1"># does not: an unknown port yields ``protocol=None`` already, because</span>
+            <span class="c1"># ``Transport._decode_next_layer`` resolves ports through</span>
+            <span class="c1"># ``__proto__`` and never reaches here. So this makes the *failure*</span>
+            <span class="c1"># path uniform while the *unknown* paths stay inconsistent with each</span>
+            <span class="c1"># other, which is #418 rather than something to fix from inside a</span>
+            <span class="c1"># decorator.</span>
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'R_beholder'</span><span class="p">,</span> <span class="n">next_</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">behold</span></div>
 
