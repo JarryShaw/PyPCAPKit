@@ -12,6 +12,7 @@ origin. Please refer to :doc:`ip` for more information.
 """
 from typing import TYPE_CHECKING
 
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.ip import IP
 from pcapkit.protocols.internet.ipv6 import IPv6 as IPv6_Protocol
 
@@ -21,19 +22,18 @@ if TYPE_CHECKING:
 __all__ = ['IPv6']
 
 #: Length of the fixed IPv6 header, i.e. the offset of the first extension
-#: header (:rfc:`8200#section-3`).
+#: header (:rfc:`8200#section-3`). A literal because it is a *byte offset* into
+#: the header rather than a protocol number, so no enumeration carries it.
 _IPV6_HDR_LEN = 40
 
-#: Offset of the Next Header field within the fixed IPv6 header.
+#: Offset of the Next Header field within the fixed IPv6 header. A literal for
+#: the same reason as :data:`_IPV6_HDR_LEN`.
 _IPV6_NEXT_HEADER = 6
 
-#: Next Header value of the IPv6 Fragment header (:rfc:`8200#section-4.5`).
-_NH_IPV6_FRAG = 44
-
-#: Next Header value of the Authentication Header. It is the one extension
-#: header that does not measure its length in 8-octet units
-#: (:rfc:`4302#section-2.2`), so the header walk below has to special-case it.
-_NH_AH = 51
+#: Next Header value of the Authentication Header. Named here only to record
+#: *why* the walk below singles it out: it is the one extension header that does
+#: not measure its length in 8-octet units (:rfc:`4302#section-2.2`).
+_NH_AH = Enum_TransType.AH
 
 
 def _next_header_offset(header: 'bytes') -> 'int':
@@ -138,6 +138,6 @@ class IPv6(IP):
         if len(header) < _IPV6_HDR_LEN:
             return header
         offset = _next_header_offset(header)
-        if header[offset] != _NH_IPV6_FRAG:
+        if header[offset] != Enum_TransType.IPv6_Frag:
             return header
         return header[:offset] + bytes((int(proto),)) + header[offset + 1:]
