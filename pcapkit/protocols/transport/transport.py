@@ -108,13 +108,8 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
             instance.
 
         """
-        if ports[0] in cls.__proto__:
-            protocol = cls.__proto__[ports[0]]
-        else:
-            protocol = cls.__proto__[ports[1]]
-
-        if isinstance(protocol, ModuleDescriptor):
-            protocol = protocol.klass
+        protocol = cls._lookup_next_layer(
+            cls.__proto__, ports[0] if ports[0] in cls.__proto__ else ports[1])
 
         payload_io = io.BytesIO(payload)
         try:

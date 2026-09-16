@@ -160,6 +160,59 @@ class InternetBaseUnitTests(unittest.TestCase):
         self.assertEqual(from_header.file, b'header-payload')
         self.assertEqual(from_header.length, len(b'header-payload'))
 
+    def test_dispatching_an_unregistered_transtype_leaves_the_registry_alone(self) -> None:
+        """Parsing must not write to the shared ``Internet.__proto__``.
+
+        The registry is a :class:`collections.defaultdict` on a class attribute
+        shared by every :class:`~pcapkit.protocols.internet.internet.Internet`
+        subclass instance in the process, so a lookup that inserts the key it
+        missed turns ordinary parsing into registration. It grows the registry
+        once per distinct unknown protocol number seen, and it makes
+        :func:`~pcapkit.foundation.registry.protocols.register_transtype` warn
+        about an overwrite of something nobody ever registered.
+
+        ICMP is the cheapest demonstration: it has a well-known number that the
+        default registry does *not* carry, so a 24-byte IPv4 datagram declaring
+        ``proto=1`` is enough to leak it.
+
+        """
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.foundation.registry.protocols import register_transtype
+        from pcapkit.protocols.internet.internet import Internet
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.misc.raw import Raw
+
+        # version/IHL, ToS, total length 24, id, flags/offset, TTL, proto=ICMP,
+        # checksum, 127.0.0.1 -> 127.0.0.1, then four bytes of payload.
+        packet = bytes.fromhex('450000180000000040010000' '7f000001' '7f000001') + b'abcd'
+        self.assertEqual(len(packet), 24)
+
+        registry = Internet.__dict__['__proto__']
+        before = set(registry)
+        self.assertNotIn(TransType.ICMP, before)
+
+        try:
+            ip = IPv4(packet)
+
+            # The payload is still reachable as Raw, labelled with the protocol
+            # number it arrived with -- only the registry write is gone.
+            self.assertIsInstance(ip.payload, Raw)
+            self.assertEqual(bytes(ip.payload), b'abcd')
+            self.assertEqual(ip.payload.info.protocol, TransType.ICMP)
+            self.assertEqual(set(registry), before)
+
+            # A second datagram must behave identically; a class-level leak from
+            # the first would show up here rather than above.
+            self.assertIsInstance(IPv4(packet).payload, Raw)
+            self.assertEqual(set(registry), before)
+
+            # And the number is still registrable without a bogus warning.
+            with mock.patch('pcapkit.protocols.internet.internet.warn') as warn:
+                register_transtype(TransType.ICMP, Raw)
+            self.assertEqual(warn.call_count, 0)
+        finally:
+            registry.pop(TransType.ICMP, None)
+
 
 if __name__ == '__main__':
     unittest.main()

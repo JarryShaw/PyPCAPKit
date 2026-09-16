@@ -46,7 +46,7 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import IO, Any, DefaultDict, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal, Self
@@ -412,10 +412,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             instance.
 
         """
-        protocol = cls.__proto__[proto]
-        if isinstance(protocol, ModuleDescriptor):
-            protocol = protocol.klass
-            cls.__proto__[proto] = protocol  # update mapping upon import
+        protocol = cls._lookup_next_layer(cls.__proto__, proto)
 
         payload_io = io.BytesIO(payload)
         try:
@@ -1235,6 +1232,50 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         return proto.from_data(data[name])
 
+    @staticmethod
+    def _lookup_next_layer(registry: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]',
+                           proto: 'int') -> 'Type[ProtocolBase]':
+        """Look up the protocol class registered for a next layer code.
+
+        Arguments:
+            registry: next layer protocol registry, i.e. :attr:`self.__proto__
+                <ProtocolBase.__proto__>`. Passed in rather than read from the
+                class, so that a caller reaching the registry through an
+                instance keeps doing so.
+            proto: next layer protocol index
+
+        Returns:
+            The class registered for ``proto``, or the fallback ``registry``
+            declares -- normally :class:`~pcapkit.protocols.misc.raw.Raw` -- when
+            ``proto`` is not registered.
+
+        Important:
+            ``registry`` is a :class:`collections.defaultdict`, so indexing it
+            with an unregistered code would *insert* that code. It is
+            class-level -- shared by every instance in the process -- so parsing
+            a single packet with an unregistered code would grow it, and make
+            :meth:`self.register <ProtocolBase.register>` afterwards report that
+            code as already registered. The fallback is therefore read from the
+            default factory rather than through a lookup that records it.
+
+            Resolving a :class:`~pcapkit.corekit.module.ModuleDescriptor` is
+            still written back, since that is memoisation of an import for a
+            code that *is* registered rather than a new entry.
+
+        """
+        if proto in registry:
+            protocol = registry[proto]
+            if isinstance(protocol, ModuleDescriptor):
+                protocol = protocol.klass
+                registry[proto] = protocol  # update mapping upon import
+            return protocol
+
+        fallback = cast('Callable[[], ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]',
+                        registry.default_factory)()
+        if isinstance(fallback, ModuleDescriptor):
+            return fallback.klass
+        return fallback
+
     def _decode_next_layer(self, dict_: '_PT', proto: 'int', length: 'Optional[int]' = None, *,
                            packet: 'Optional[dict[str, Any]]' = None) -> '_PT':
         r"""Decode next layer protocol.
@@ -1298,10 +1339,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
-            protocol = self.__proto__[proto]  # type: ignore[assignment]
-            if isinstance(protocol, ModuleDescriptor):
-                protocol = protocol.klass  # type: ignore[unreachable]
-                self.__proto__[proto] = protocol  # update mapping upon import
+            protocol = self._lookup_next_layer(self.__proto__, proto)
 
         next_ = protocol(file_, length, alias=proto, packet=packet,
                          layer=self._exlayer, protocol=self._exproto,

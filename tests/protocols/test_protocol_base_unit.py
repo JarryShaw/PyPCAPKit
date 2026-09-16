@@ -335,6 +335,53 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         no_stop._exproto = 'raw'
         self.assertFalse(no_stop._check_term_threshold())
 
+    def test_lookup_next_layer_reads_the_fallback_without_recording_it(self) -> None:
+        """A missed lookup must not turn into a registration.
+
+        ``__proto__`` is a :class:`collections.defaultdict` on a class
+        attribute, so ``__proto__[code]`` inserts every code it is handed. The
+        insertion is worth nothing -- the value is the fallback the factory
+        would have produced anyway -- and it costs a spurious "already
+        registered" warning on the next real
+        :meth:`~pcapkit.protocols.protocol.ProtocolBase.register` call.
+
+        Resolving a :class:`~pcapkit.corekit.module.ModuleDescriptor` for a code
+        that *is* registered still writes back, since that is memoisation of an
+        import rather than a new entry.
+
+        """
+        DummyProtocol, _, _ = self._make_protocol_class()
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.protocols.misc.raw import Raw
+
+        DummyProtocol.__proto__ = collections.defaultdict(
+            lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
+            {7: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')},
+        )
+
+        registry = DummyProtocol.__proto__
+
+        # A miss resolves to the declared fallback and leaves no trace.
+        self.assertIs(DummyProtocol._lookup_next_layer(registry, 99), Raw)
+        self.assertNotIn(99, registry)
+        self.assertEqual(set(registry), {7})
+
+        # A hit resolves the descriptor once and keeps the resolved class.
+        self.assertIs(DummyProtocol._lookup_next_layer(registry, 7), Raw)
+        self.assertIs(registry[7], Raw)
+
+        # A class registered directly is returned as it is.
+        registry[8] = Raw
+        self.assertIs(DummyProtocol._lookup_next_layer(registry, 8), Raw)
+
+        # ``analyze`` and ``_import_next_layer`` both go through the lookup, so
+        # neither of them records an unregistered code either.
+        self.assertIsInstance(DummyProtocol.analyze(99, b'body'), Raw)
+        proto = DummyProtocol(packet=b'abpayload')
+        proto._sigterm = False
+        self.assertIsInstance(proto._import_next_layer(99, 3), Raw)
+        self.assertEqual(set(DummyProtocol.__proto__), {7, 8})
+
     def test_make_payload_branches(self) -> None:
         DummyProtocol, DummyData, _ = self._make_protocol_class()
         from pcapkit.protocols.misc.null import NoPayload

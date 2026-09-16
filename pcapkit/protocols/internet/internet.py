@@ -245,10 +245,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
-            protocol = self.__proto__[proto]  # type: ignore[assignment]
-            if isinstance(protocol, ModuleDescriptor):
-                protocol = protocol.klass  # type: ignore[unreachable]
-                self.__proto__[proto] = protocol  # update mapping upon import
+            protocol = self._lookup_next_layer(self.__proto__, proto)
 
         next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
                          alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto,
