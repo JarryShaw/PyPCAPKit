@@ -588,10 +588,12 @@
 <div class="viewcode-block" id="Frame.unpack">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.unpack">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Frame'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Unpack (parse) packet data.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Unpack (parse) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
+<span class="sd">            \_seek_set (int): File offset before reading, forwarded to</span>
+<span class="sd">                :meth:`self.read &lt;read&gt;` through ``**kwargs``.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -612,12 +614,17 @@
 
 <div class="viewcode-block" id="Frame.read">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_read</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Frame'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_read</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+             <span class="n">_seek_set</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Frame'</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Read each block after global header.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of data to be read.</span>
 <span class="sd">            \_read: If the class is called in a parsing scenario.</span>
+<span class="sd">            \_seek_set: File offset of the record's own first octet, i.e. where</span>
+<span class="sd">                the stream stood before :meth:`self.unpack &lt;unpack&gt;` consumed</span>
+<span class="sd">                the record; see the note in the parsing branch below for why it</span>
+<span class="sd">                cannot be recovered from the stream once we get here.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -639,7 +646,18 @@
         <span class="n">_irat</span> <span class="o">=</span> <span class="n">_epch</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">_irat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">_irat</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># NOTE: Anchored to UTC, and aware rather than naive. ``ts_sec`` is an</span>
+            <span class="c1"># offset from the UNIX epoch, so the instant it names does not depend</span>
+            <span class="c1"># on where the file is read; a bare ``fromtimestamp`` renders it in</span>
+            <span class="c1"># the reading host's zone and drops the offset, leaving a datetime</span>
+            <span class="c1"># that reads as a different wall-clock time on every machine and</span>
+            <span class="c1"># cannot be compared against an aware one at all. The ``except``</span>
+            <span class="c1"># branch below has always returned an aware UTC datetime, and the</span>
+            <span class="c1"># PCAP-NG reader returns one too -- the same</span>
+            <span class="c1"># :attr:`Data_Frame.time &lt;pcapkit.protocols.data.misc.pcap.frame.Frame.time&gt;`</span>
+            <span class="c1"># field is filled from there by</span>
+            <span class="c1"># :func:`pcapkit.toolkit.pcapng.block2frame`, so the two have to agree.</span>
+            <span class="n">_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">_irat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">_irat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: invalid timestamp: </span><span class="si">{</span><span class="n">_epch</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="n">_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
@@ -664,15 +682,27 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># NOTE: We create a copy of the frame data here for parsing</span>
             <span class="c1"># scenarios to keep the original frame data intact.</span>
-            <span class="n">seek_cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="c1">#</span>
+            <span class="c1"># NOTE: The record spans ``self.length + incl_len`` octets, and by</span>
+            <span class="c1"># the time we get here :meth:`self.unpack &lt;unpack&gt;` has consumed</span>
+            <span class="c1"># *all* of them -- the schema's payload field carries the</span>
+            <span class="c1"># ``incl_len`` octets of packet data, not just the 16-octet record</span>
+            <span class="c1"># header. So the frame's own start cannot be reached by seeking</span>
+            <span class="c1"># backwards over ``self.length`` alone: that lands ``incl_len``</span>
+            <span class="c1"># octets too late and captures the tail of this record followed by</span>
+            <span class="c1"># the head of the next one (see #357). It is recorded before the</span>
+            <span class="c1"># unpack instead, in :meth:`self.__post_init__ &lt;__post_init__&gt;`, and</span>
+            <span class="c1"># seeked to absolutely -- which is what the PCAP-NG reader has</span>
+            <span class="c1"># always done, c.f. :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.</span>
+            <span class="n">seek_cur</span> <span class="o">=</span> <span class="n">_seek_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span>
 
             <span class="c1"># move backward to the beginning of the frame</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">_seek_set</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
             <span class="c1">#: bytes: Raw frame data.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span><span class="p">)</span>
 
-            <span class="c1"># move backward to the beginning of frame's payload</span>
+            <span class="c1"># move forward to the beginning of the next frame</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
             <span class="c1">#: io.BytesIO: Source data stream.</span>
@@ -772,9 +802,13 @@
             <span class="n">_read</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="c1">#: io.BytesIO: Source packet stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">file</span>
+        <span class="c1"># NOTE: Taken *before* the unpack, which advances the stream past the</span>
+        <span class="c1"># whole record; :meth:`self.read &lt;read&gt;` needs the record's own start and</span>
+        <span class="c1"># cannot work it out afterwards. See the note there.</span>
+        <span class="n">_seek_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
 
         <span class="c1">#: pcapkit.corekit.infoclass.Info: Parsed packet data.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">_read</span><span class="o">=</span><span class="n">_read</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">_read</span><span class="o">=</span><span class="n">_read</span><span class="p">,</span> <span class="n">_seek_set</span><span class="o">=</span><span class="n">_seek_set</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[16]'</span><span class="p">:</span>

@@ -758,7 +758,9 @@ and <code class="docutils literal notranslate"><span class="pre">extension</span
 <li><p>input filename</p></li>
 <li><p>output filename / directory name</p></li>
 <li><p>output format</p></li>
-<li><p>output file extension (without <code class="docutils literal notranslate"><span class="pre">.</span></code>)</p></li>
+<li><p>output file extension, bare, i.e. <strong>without</strong> the leading <code class="docutils literal notranslate"><span class="pre">.</span></code>, so
+that a caller composing a per-frame filename writes
+<code class="docutils literal notranslate"><span class="pre">f'{name}.{ext}'</span></code></p></li>
 <li><p>if split each frame into different files</p></li>
 </ol>
 <dl class="field-list simple">

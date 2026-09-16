@@ -1138,12 +1138,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ts_timezone</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'timezone'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Timezone of the current block."""</span>
+<span class="w">        </span><span class="sd">"""Timezone of the current block.</span>
+
+<span class="sd">        Defaults to UTC when the capture names no ``if_tzone``, for the reason</span>
+<span class="sd">        given in :meth:`self._get_timezone &lt;_get_timezone&gt;`.</span>
+
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1">#raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'")</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute 'ts_timezone'"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_local_timezone</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>
 
         <span class="n">info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_timezone</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span><span class="p">)</span>
@@ -1579,7 +1584,23 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_local_timezone</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'timezone'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Get local timezone."""</span>
+<span class="w">        </span><span class="sd">"""Get local timezone.</span>
+
+<span class="sd">        Warning:</span>
+<span class="sd">            Not used when reconstructing a block timestamp, and must not be:</span>
+<span class="sd">            a PCAP-NG timestamp is an offset from the UNIX epoch, so mixing the</span>
+<span class="sd">            *reading* host's zone into it makes one file parse to different</span>
+<span class="sd">            instants on different machines (see #361).</span>
+<span class="sd">            :meth:`self._get_timezone &lt;_get_timezone&gt;` returns</span>
+<span class="sd">            :attr:`datetime.timezone.utc` instead when the capture names no</span>
+<span class="sd">            ``if_tzone``.</span>
+
+<span class="sd">            It also answers for *today* rather than for the capture's own</span>
+<span class="sd">            instant -- ``America/New_York`` reports ``-04:00`` all year, so a</span>
+<span class="sd">            December timestamp would get EDT's offset and not EST's -- which is</span>
+<span class="sd">            a second reason it cannot stand in for a capture's timezone.</span>
+
+<span class="sd">        """</span>
         <span class="n">tzinfo</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">astimezone</span><span class="p">()</span><span class="o">.</span><span class="n">tzinfo</span>
         <span class="k">if</span> <span class="n">tzinfo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>
@@ -1668,17 +1689,25 @@
 <span class="sd">            Timezone of the current block.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: UTC, not the host's timezone, is the default in both branches</span>
+        <span class="c1"># below. A capture carries no timezone of its own unless it says so, and</span>
+        <span class="c1"># draft-ietf-opsawg-pcapng-02 §4.3 defines the block timestamp as an</span>
+        <span class="c1"># offset from 1970-01-01 00:00:00 UTC with no timezone term at all --</span>
+        <span class="c1"># so substituting whatever zone the *reading* machine happens to sit in</span>
+        <span class="c1"># made the same file parse to different instants on different hosts</span>
+        <span class="c1"># (see #361). ``_get_resolution`` and ``_get_offset`` fall back to the</span>
+        <span class="c1"># format's own defaults in this situation; this is the matching one.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'")</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute '_get_timezone'"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_local_timezone</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>
 
         <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_interface</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span><span class="o">.</span><span class="n">options</span>
         <span class="n">tzone</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Data_IF_TZoneOption]'</span><span class="p">,</span>
                      <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tzone</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">tzone</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_local_timezone</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>
         <span class="k">return</span> <span class="n">tzone</span><span class="o">.</span><span class="n">timezone</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_linktype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_LinkType'</span><span class="p">:</span>
@@ -1718,20 +1747,32 @@
 
         <span class="n">timestamp_raw</span> <span class="o">=</span> <span class="p">(</span><span class="n">timestamp_high</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span><span class="p">)</span> <span class="o">|</span> <span class="n">timestamp_low</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
+            <span class="c1"># NOTE: This *is* the UTC epoch the docstring above promises, and it</span>
+            <span class="c1"># is returned as such. It used to have ``tzone.utcoffset(None)``</span>
+            <span class="c1"># added to it, which is wrong twice over: the block timestamp is an</span>
+            <span class="c1"># offset from the UNIX epoch, so it is timezone-independent by</span>
+            <span class="c1"># definition (draft-ietf-opsawg-pcapng-02 §4.3 spells out the</span>
+            <span class="c1"># arithmetic and has no timezone term), and the same draft §4.2 says</span>
+            <span class="c1"># of ``if_tzone`` that it "SHOULD NOT be used" and of ``if_tsoffset``</span>
+            <span class="c1"># that it is "not intended to be used as an offset between local time</span>
+            <span class="c1"># and UTC". Adding the offset also made the two return values</span>
+            <span class="c1"># contradict each other, since ``ts_datetime`` below was always built</span>
+            <span class="c1"># from the unshifted value (see #361).</span>
             <span class="n">timestamp_epoch</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">timestamp_raw</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_resolution</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span> <span class="o">+</span> \
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_offset</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span>
-            <span class="n">ts_decimal</span> <span class="o">=</span> <span class="n">timestamp_epoch</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span>
-                <span class="n">tzone</span><span class="o">.</span><span class="n">utcoffset</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
 
         <span class="n">ts_ratio</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># NOTE: ``tzone`` survives only here, as the zone the instant is</span>
+            <span class="c1"># *rendered* in -- which is all a ``tzinfo`` can affect on an aware</span>
+            <span class="c1"># datetime. It never moves the instant itself.</span>
             <span class="n">ts_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_ratio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">ts_ratio</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tzone</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1">] invalid timestamp: </span><span class="si">{</span><span class="n">ts_decimal</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1">] invalid timestamp: </span><span class="si">{</span><span class="n">timestamp_epoch</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
                  <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="n">ts_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="n">ts_datetime</span><span class="p">,</span> <span class="n">ts_decimal</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">ts_datetime</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PCAPNG._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_data">[docs]</a>
@@ -1757,12 +1798,22 @@
 <span class="w">        </span><span class="sd">"""Make timestamp.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            timestamp: Timestamp in seconds since UNIX-Epoch.</span>
+<span class="sd">            timestamp: Timestamp in seconds since UNIX-Epoch, in UTC, i.e. as</span>
+<span class="sd">                :meth:`self._read_timestamp &lt;_read_timestamp&gt;` returns it.</span>
 <span class="sd">            interface_id: Interface ID that the current block associates with.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Tuple of timestamp in higher and lower 32-bit integer value</span>
-<span class="sd">            based on the given offset and timezone conversion.</span>
+<span class="sd">            Tuple of timestamp in higher and lower 32-bit integer value,</span>
+<span class="sd">            scaled by the interface's ``if_tsresol`` and shifted by its</span>
+<span class="sd">            ``if_tsoffset``.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            No timezone conversion happens here, and none should: the field this</span>
+<span class="sd">            builds is defined as an offset from the UNIX epoch. The docstring</span>
+<span class="sd">            used to promise a "timezone conversion" that the code never</span>
+<span class="sd">            performed, which made it look as though the read side's timezone</span>
+<span class="sd">            shift had a counterpart here (it did not, so a read followed by a</span>
+<span class="sd">            write drifted by the host's UTC offset -- see #361).</span>
 
 <span class="sd">        """</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
