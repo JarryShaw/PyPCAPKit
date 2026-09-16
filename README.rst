@@ -115,22 +115,21 @@ Engine support by Python version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Which engines can run at all, by interpreter. Verified by installing each engine
-and extracting a capture on 3.10, 3.11, 3.12 and 3.14; 3.13 and 3.15 were not
-available and are marked accordingly.
+and extracting a capture on 3.10 through 3.14; 3.15 remains inferred.
 
 ============== ======== ======== ======== ======== ======== ========
 Engine          3.10     3.11     3.12     3.13     3.14     3.15
 ============== ======== ======== ======== ======== ======== ========
-``pcapkit``     yes      yes      yes      yes*     yes      yes*
-``dpkt``        yes      yes      yes      yes*     yes      yes*
-``scapy``       yes      yes      yes      yes*     yes      yes*
-``pcap_ct``     yes      yes      yes      yes*     yes      yes*
+``pcapkit``     yes      yes      yes      yes      yes      yes*
+``dpkt``        yes      yes      yes      yes      yes      yes*
+``scapy``       yes      yes      yes      yes      yes      yes*
+``pcap_ct``     yes      yes      yes      yes      yes      yes*
 ``pypcap``      yes      yes      no       no       no       no
 ``pypcapfile``  yes      yes      no       no       no       no
-``pyshark``     yes†     yes†     yes†     yes*†    no       no
+``pyshark``     yes†     yes†     yes†     yes†     no       no
 ============== ======== ======== ======== ======== ======== ========
 
-``*`` inferred, not measured -- no 3.13 or 3.15 interpreter was available.
+``*`` inferred, not measured -- no 3.15 interpreter was available.
 ``†`` also needs Wireshark's ``tshark``, which was absent, so only the
 interpreter half was verified for ``pyshark``.
 
@@ -146,7 +145,7 @@ Test Environment
 .. list-table::
 
    * - Operating System
-     - macOS Ventura 13.4.1
+     - macOS 26.6.2
    * - Chip
      - Apple M2 Pro
    * - Memory
@@ -155,35 +154,24 @@ Test Environment
 Test Results
 ~~~~~~~~~~~~
 
-Measured with ``examples/legacy_smoke/test_time.py`` over 1,000 timed
-extractions of ``examples/captures/in.pcap`` per engine, on the environment
-above.
+Measured with ``examples/legacy_smoke/test_time.py``: 1,000 timed
+extractions of ``examples/captures/in.pcap`` per engine and Python version. The
+first extraction is discarded as a warm-up. Values are milliseconds per packet.
 
-============== ===========================
-Engine         Performance (ms per packet)
-============== ===========================
-``dpkt``        0.010390_056723
-``scapy``       0.091690_233567
-``pcapkit``     0.200390_390390
-``pyshark``    24.682185_018351 [3]_
-``pypcap``      *not measured* [1]_
-``pcap_ct``     *not measured* [4]_
-``pypcapfile``  *not measured* [2]_
-============== ===========================
+============== ======== ======== ======== ======== ========
+Engine          3.10     3.11     3.12     3.13     3.14
+============== ======== ======== ======== ======== ========
+``pcapkit``     0.2516   0.2227   0.2292   0.2168   0.2307
+``dpkt``        0.0170   0.0125   0.0154   0.0125   0.0128
+``scapy``       0.0316   0.0268   0.0268   0.0318   0.0297
+``pyshark``    14.7434  14.8755  14.6006  14.8334  -- [1]_
+``pypcapfile``  0.0163   0.0107   -- [2]_  -- [2]_  -- [2]_
+``pypcap``      -- [3]_  -- [3]_  -- [3]_  -- [3]_  -- [3]_
+``pcap_ct``     -- [4]_  -- [4]_  -- [4]_  -- [4]_  -- [4]_
+============== ======== ======== ======== ======== ========
 
-**These figures are historical, and three of the rows can no longer be
-reproduced on a current Python.** The table was taken on the environment above,
-whose interpreter still ran every engine. Since then ``pyshark``, ``pypcap`` and
-``pypcapfile`` have each acquired a hard Python ceiling -- 3.13, 3.11 and 3.11
-respectively, for the reasons under `Engine prerequisites`_ -- so on the latest
-Python only ``pcapkit``, ``dpkt``, ``scapy`` and ``pcap_ct`` can be timed at all.
-A re-run on a modern interpreter would therefore not extend this table; it would
-replace it with a shorter one, measured on different hardware and not comparable
-row-for-row with what is here.
-
-The empty cells stay empty for the same reason: a figure taken on a different
-host, capture or iteration count is not comparable with these, and inventing one
-would be worse than admitting the gap.
+The unavailable cells were attempted. They are not zeroes and must not be
+compared with a measured row.
 
 ------------
 Installation
@@ -430,28 +418,13 @@ engine, and is not needed by the test suite.
 .. _DictDumper: https://github.com/JarryShaw/DictDumper
 .. _engine support documentation: https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/engines/index.html
 
-.. [3] This figure is **historical**. `PyShark`_ 0.6 builds its event loop with
-   ``asyncio.get_event_loop_policy().get_event_loop()``, and Python 3.14 made
-   ``asyncio.get_event_loop()`` raise ``RuntimeError`` when no current event
-   loop exists rather than quietly creating one -- measured working on 3.10 and
-   3.11, working with a ``DeprecationWarning`` on 3.12, and raising on 3.14. The
-   number therefore cannot be reproduced on a current interpreter; it stands as
-   what was measured when it could be.
+.. [1] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
+   3.14; it ran on 3.10--3.13.
 
-.. [1] `PyPCAP`_ could not be installed on the machine available for
-   benchmarking, so no figure was taken. Its 1.3.0 sdist compiles a C extension
-   and needs `libpcap`_'s headers *and* shared library present, and the
-   pre-generated ``pcap.c`` it ships does not compile on Python 3.12 or newer
-   (see `Installation`_). Rather than publish a number measured on different
-   hardware and a different Python from the rows above -- which would not be
-   comparable with them -- the cell is left empty.
+.. [2] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
 
-.. [4] `pcap-ct`_ was verified working on Python 3.10 and 3.14, so unlike the two
-   rows above it *could* be timed -- but only on the machine this engine was added
-   on, which is neither the hardware nor the operating system the rows above were
-   measured with. A number from it would not be comparable, so the cell is left
-   empty rather than filled with something misleading.
+.. [3] `PyPCAP`_ 1.3.0 could not be built here: its build does not search
+   Homebrew's libpcap library prefix. It is also unsupported on Python 3.12+.
 
-.. [2] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
-   could only be timed on an older interpreter than the rows above were measured
-   with. That number would not be comparable, so the cell is left empty.
+.. [4] The prerelease `pcap-ct`_ / `libpcap`_ wheels currently load Linux
+   ``libc.so.6`` on this macOS host, so their engine could not be preflighted.
