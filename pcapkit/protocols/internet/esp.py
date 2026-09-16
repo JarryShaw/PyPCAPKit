@@ -167,9 +167,10 @@ import hashlib
 import hmac
 import ipaddress
 import os
-from typing import TYPE_CHECKING, NamedTuple, overload
+from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.esp.cipher import Cipher
+from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.const.esp.integrity import Integrity
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.context import ProtocolContext
@@ -285,7 +286,8 @@ def _resolve(registry: 'Type[Cipher] | Type[Integrity]', value: 'Any',
     raise ProtocolError(f'unknown ESP {kind} algorithm: {value!r}')
 
 
-class CipherSuite(NamedTuple):
+@info_final
+class CipherSuite(Info):
     """Parameters of an ESP encryption algorithm :mod:`pcapkit` implements.
 
     A member of :class:`Cipher <pcapkit.const.esp.cipher.Cipher>` records only
@@ -343,7 +345,8 @@ class CipherSuite(NamedTuple):
         return suite
 
 
-class IntegritySuite(NamedTuple):
+@info_final
+class IntegritySuite(Info):
     """Parameters of an ESP integrity algorithm :mod:`pcapkit` implements.
 
     As with :class:`CipherSuite`, membership of :data:`INTEGRITY_SUITES` --
