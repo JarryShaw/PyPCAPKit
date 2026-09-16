@@ -3,11 +3,19 @@
 
 This is the measuring half of the benchmark suite; :mod:`report` is the reporting
 half. One invocation covers one Python environment and writes a JSON document
-describing what it measured. The suite runs it more than once -- once per
-virtualenv in the container -- because ``pypcap`` and ``pcap_ct`` both provide the
-top-level :mod:`pcap` module and cannot be installed side by side, so no single
-environment can hold every engine. :mod:`report` stitches the runs together on the
-``default`` engine, which is present in all of them.
+describing what it measured. The suite runs it many times over, because an
+environment here is a *(Python version, ``pcap`` distribution)* pair and the matrix
+covers several of each:
+
+* several interpreters, one image apiece, because the point of the exercise is a
+  table with a column per Python version;
+* one or two virtualenvs per interpreter, because ``pypcap`` and ``pcap_ct`` both
+  provide the top-level :mod:`pcap` module and cannot be installed side by side, so
+  no single environment can hold every engine -- and only one virtualenv where
+  ``pypcap`` cannot be installed at all.
+
+:mod:`report` stitches the runs together on the ``default`` engine, which is present
+in every one of them.
 
 Methodology is inherited from :file:`examples/legacy_smoke/test_time.py` so the
 figures stay comparable in kind with what the project has already published:
@@ -28,11 +36,13 @@ entirely. Every single extraction therefore has its driver checked against
 rather than reported -- see :func:`measure`.
 
 **An engine that cannot run is recorded, not omitted.** :func:`preflight` asks the
-engine's own ``unsupported_reason()`` first, since that is the check
-:meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` itself
-consults and it names the actual cause. The engine is then reported with
-``status='unmeasured'`` and that reason, so a gap in the table is visibly a gap
-with an explanation rather than a missing row or a zero.
+engine's own ``unsupported_reason()``, since that is the check :meth:`Extractor.run
+<pcapkit.foundation.extraction.Extractor.run>` itself consults and it names the
+actual cause. Ahead of it sits one thing the engine cannot know -- whether the image
+even tried to install it, which on 3.12 and newer it does not for ``pypcap``; see
+:func:`_not_attempted`. Either way the engine is reported with
+``status='unmeasured'`` and a reason, so a gap in the table is visibly a gap with an
+explanation rather than a missing row or a zero.
 
 """
 
@@ -97,6 +107,15 @@ DISTRIBUTIONS = (
 #: outside the container, where the directory does not exist and its absence simply
 #: means nothing was recorded.
 INSTALL_FAILURES = os.environ.get('BENCH_INSTALL_FAILURES', '/opt/install-failures')
+
+#: Directory where the image records a package it did not even try to install,
+#: because the interpreter cannot hold it. Separate from :data:`INSTALL_FAILURES`
+#: because the two are different findings that a single directory would flatten into
+#: one: ``pypcap`` on 3.12 is not a build this image got wrong, it is an engine the
+#: interpreter rules out, and reporting the second as the first sends the next reader
+#: looking for a compiler problem that does not exist. Overridable for the same
+#: reason as above.
+NOT_ATTEMPTED = os.environ.get('BENCH_NOT_ATTEMPTED', '/opt/not-attempted')
 
 
 def _distribution_versions() -> 'dict[str, Optional[str]]':
@@ -302,6 +321,35 @@ def _unavailable(exc: 'Exception') -> 'Optional[str]':
     return None
 
 
+def _recorded_note(directory: 'str', engine: 'str', separator: 'str') -> 'Optional[str]':
+    """One line of whatever *directory* records about *engine*.
+
+    Args:
+        directory: Directory the image writes its notes into.
+        engine: Engine name, as passed to ``pcapkit.extract``.
+        separator: What to join the recorded lines with. Not a detail: pip output is
+            a sequence of distinct records and needs a visible separator to stay
+            legible once flattened, while a note written as prose is one sentence
+            wrapped for the Dockerfile and reads as gibberish if pipes are inserted
+            at its wrap points.
+
+    Returns:
+        The note, flattened, or :data:`None` when there is none.
+
+    """
+    path = os.path.join(directory, f'{engine}.txt')
+    try:
+        with open(path, encoding='utf-8', errors='replace') as file:
+            recorded = file.read()
+    except OSError:
+        return None
+    # Collapsed to one line and capped: this ends up in a table cell and a bullet in
+    # the emitted RST, where a dozen lines of pip output would be unreadable. The
+    # full text stays in the image for anyone who needs it.
+    flattened = separator.join(line.strip() for line in recorded.splitlines() if line.strip())
+    return flattened[:400] + (' ...' if len(flattened) > 400 else '') or None
+
+
 def _install_failure(engine: 'str') -> 'Optional[str]':
     """What the image recorded about this engine's package failing to install.
 
@@ -321,17 +369,32 @@ def _install_failure(engine: 'str') -> 'Optional[str]':
         recorded -- which is the normal case, including outside the container.
 
     """
-    path = os.path.join(INSTALL_FAILURES, f'{engine}.txt')
-    try:
-        with open(path, encoding='utf-8', errors='replace') as file:
-            recorded = file.read()
-    except OSError:
-        return None
-    # Collapsed to one line and capped: this ends up in a table cell and a bullet in
-    # the emitted RST, where a dozen lines of pip output would be unreadable. The
-    # full text stays in the image for anyone who needs it.
-    flattened = ' | '.join(line.strip() for line in recorded.splitlines() if line.strip())
-    return flattened[:400] + (' ...' if len(flattened) > 400 else '') or None
+    return _recorded_note(INSTALL_FAILURES, engine, ' | ')
+
+
+def _not_attempted(engine: 'str') -> 'Optional[str]':
+    """What the image recorded about not trying to install this engine at all.
+
+    The matrix runs one image per Python version, and ``pypcap`` cannot be installed
+    on 3.12 or newer -- its pre-generated ``pcap.c`` does not compile against that C
+    API. Building a ``pypcap`` virtualenv there would be minutes of compiling to
+    produce nothing, so the image does not, and records that instead.
+
+    That distinction has to survive into the report. Left to the engine's own
+    :meth:`unsupported_reason`, the answer on a 3.12 image is "the installed ``pcap``
+    module is ``pcap-ct``, not ``pypcap``" -- correct, and a description of the
+    consequence rather than the cause. The reader is owed the cause, which is a fact
+    about the interpreter, not about how this image happened to be assembled.
+
+    Args:
+        engine: Engine name, as passed to ``pcapkit.extract``.
+
+    Returns:
+        A one-line summary of the recorded note, or :data:`None` when there is none
+        -- the normal case for every engine that was installed.
+
+    """
+    return _recorded_note(NOT_ATTEMPTED, engine, ' ')
 
 
 def preflight(engine: 'str', capture: 'str') -> 'tuple[Optional[str], Optional[str]]':
@@ -340,6 +403,13 @@ def preflight(engine: 'str', capture: 'str') -> 'tuple[Optional[str], Optional[s
     Done before the timed rounds rather than during them: a failure partway
     through a thousand extractions throws the whole repeat away, and an engine
     this environment does not have is not a measurement at all.
+
+    Three sources are consulted, in this order, and the order is the point: what the
+    image recorded about not installing the engine at all (:func:`_not_attempted`),
+    then the engine's own ``unsupported_reason()``, then an actual attempt. The first
+    wins outright where it exists, since an engine the interpreter rules out cannot
+    describe its own ceiling -- it can only report what it finds in the environment
+    that ceiling produced.
 
     Args:
         engine: Engine name to try.
@@ -356,6 +426,17 @@ def preflight(engine: 'str', capture: 'str') -> 'tuple[Optional[str], Optional[s
             than the engine being unavailable in this environment.
 
     """
+    # An engine the interpreter rules out is answered here and nowhere else. The
+    # recorded note *replaces* the engine's own reason rather than being appended to
+    # it, which is the opposite of how a build failure is handled below, and
+    # deliberately: the engine can only describe what it finds in this environment,
+    # and on an interpreter where the package cannot be installed at all that
+    # description is a symptom. Nothing is lost by dropping it, because it is
+    # derivable from the note -- whereas the note is not derivable from it.
+    not_attempted = _not_attempted(engine)
+    if not_attempted is not None:
+        return not_attempted, None
+
     # Computed up front and appended to whichever reason comes back, because a
     # recorded build failure explains every one of them: an engine whose package
     # never installed will report "not installed", and the interesting part is the
@@ -625,6 +706,19 @@ def run(capture: 'str', engines: 'tuple[str, ...]', rounds: 'int', repeats: 'int
         # revision the image was built from is set by the Dockerfile and is the
         # only thing that does.
         'pcapkit_revision': os.environ.get('PCAPKIT_REVISION') or None,
+        # Which image produced this document. The matrix runs one image per Python
+        # version, so a report covering several of them cannot name a single image the
+        # way a one-interpreter run could: the reference has to travel with the
+        # measurement rather than be passed to the report alongside it.
+        'image': os.environ.get('BENCH_IMAGE') or None,
+        # The base image, by digest, as `python-images.txt` pinned it. Recorded here
+        # and deliberately not rendered: the JSON is a published artefact and is where
+        # provenance this fine-grained belongs, whereas a row per version in the
+        # report's provenance block would push the facts a reader does need off the
+        # top of the table. It is also recoverable from the pins file at the
+        # `pcapkit` revision above, which is what makes leaving it out of the prose
+        # safe rather than lossy.
+        'base_image': os.environ.get('PCAPKIT_BASE_IMAGE') or None,
         'python': platform.python_version(),
         'implementation': platform.python_implementation(),
         'machine': platform.machine(),

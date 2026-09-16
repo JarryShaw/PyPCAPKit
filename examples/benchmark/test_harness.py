@@ -10,6 +10,10 @@ tested without a stopwatch are tested here:
   entire justification for reporting ratios at all;
 * the stitching of several environments into one table, which is what makes the
   mutually exclusive ``pypcap`` and ``pcap_ct`` reportable together;
+* the per-version grid, where the arithmetic is the opposite -- absolute
+  milliseconds, pooled across the virtualenvs of one interpreter and never divided
+  across two of them -- and where a version that could not be measured has to come
+  out as an explained column of ``--`` rather than as an absent column;
 * the overlap marking, which is what stops the report claiming a gap it did not
   measure;
 * that the emitted reStructuredText parses under **plain docutils** with no
@@ -41,7 +45,8 @@ SPHINX_ONLY_ROLES = (':mod:', ':func:', ':class:', ':meth:', ':attr:', ':data:',
 
 
 def document(environment, measurements, unmeasured=None, repeats=2, packages=None,
-             failures=None, discarded=None):
+             failures=None, discarded=None, python='3.11.14', image=None,
+             tshark='TShark (Wireshark) 4.0.17'):
     """Build a :mod:`benchmark`-shaped document from plain numbers.
 
     Args:
@@ -53,6 +58,16 @@ def document(environment, measurements, unmeasured=None, repeats=2, packages=Non
         packages: Resolved package versions, with :data:`None` for a package this
             environment does not have. Defaults to the real shape of the ``pypcap``
             environment, i.e. ``pypcap`` present and ``pcap-ct`` absent.
+        failures: Mapping of engine name to passes that failed outright.
+        discarded: Mapping of engine name to how many extractions were discarded
+            per pass.
+        python: Interpreter version, which is what decides the column a document
+            lands in -- see :func:`report.python_series`.
+        image: Reference of the image this was measured in. The matrix runs one per
+            Python version, so this travels with the document rather than being
+            passed to the report alongside it.
+        tshark: Resolved ``tshark`` banner, or :data:`None` where the binary is
+            absent.
 
     Returns:
         A document :mod:`report` can consume.
@@ -87,14 +102,16 @@ def document(environment, measurements, unmeasured=None, repeats=2, packages=Non
         'schema': 1,
         'environment': environment,
         'pcapkit_revision': 'abc1234',
-        'python': '3.11.14',
+        'image': image,
+        'base_image': 'python:3.11-slim-bookworm@sha256:5282',
+        'python': python,
         'implementation': 'CPython',
         'machine': 'aarch64',
         'capture': {'name': 'in.pcap', 'bytes': 605, 'sha256': 'a' * 64},
         'rounds': 1000,
         'repeats': repeats,
         'packages': packages,
-        'tshark': 'TShark (Wireshark) 4.0.17',
+        'tshark': tshark,
         'libpcap': 'libpcap version 1.10.3',
         'results': results,
     }
@@ -699,6 +716,548 @@ class TestInstallFailure:
         benchmark = pytest.importorskip('benchmark')
         monkeypatch.setattr(benchmark, 'INSTALL_FAILURES', str(tmp_path / 'absent'))
         assert benchmark._install_failure('pypcap') is None  # pylint: disable=protected-access
+
+
+def matrix(versions=('3.10', '3.11', '3.12', '3.13', '3.14'), missing_pyshark=('3.14',),
+           missing_pypcapfile=('3.12', '3.13', '3.14'), pypcap_on=('3.10', '3.11')):
+    """A whole matrix run, shaped the way `run.sh` actually produces one.
+
+    One document per (Python version, ``pcap`` provider) pair, with the real
+    engine-support ceilings: two virtualenvs where ``pypcap`` can be installed and one
+    where it cannot, ``pypcapfile`` gone from 3.12, ``pyshark`` gone from 3.14.
+
+    Args:
+        versions: Python series to include.
+        missing_pyshark: Series where ``pyshark`` cannot run.
+        missing_pypcapfile: Series where ``pypcapfile`` cannot run.
+        pypcap_on: Series that get a second, ``pypcap`` virtualenv.
+
+    Returns:
+        A list of documents :mod:`report` can consume.
+
+    """
+    documents = []
+    for index, series in enumerate(versions):
+        # Deliberately drifting per version, so a test cannot pass by accident on
+        # figures that are all the same number.
+        base = 0.20 + index * 0.01
+        shared = {'default': [base, base * 1.01],
+                  'dpkt': [base / 20, base / 20 * 1.02],
+                  'scapy': [base / 7, base / 7 * 1.01]}
+        unmeasured = {}
+        if series in missing_pyshark:
+            unmeasured['pyshark'] = f'pyshark does not support Python {series}'
+        else:
+            shared['pyshark'] = [base * 70, base * 71]
+        if series in missing_pypcapfile:
+            unmeasured['pypcapfile'] = f'pypcapfile does not support Python {series}'
+        else:
+            shared['pypcapfile'] = [base / 15, base / 15 * 1.01]
+
+        ct_unmeasured = dict(unmeasured)
+        ct_unmeasured['pypcap'] = (
+            'the installed `pcap` module is pcap-ct, not pypcap' if series in pypcap_on else
+            'pypcap is not installable on this interpreter, so it was not built into this image'
+        )
+        documents.append(document(
+            f'{series}-pcap_ct', dict(shared, pcap_ct=[base / 25, base / 25 * 1.01]),
+            ct_unmeasured, python=f'{series}.7',
+            image=f'pcapkit-benchmark:py{series} (sha256:{index}{index})',
+            packages={'dpkt': '1.9.8', 'pypcap': None, 'pcap-ct': '1.3.0b3'}))
+
+        if series in pypcap_on:
+            documents.append(document(
+                f'{series}-pypcap', dict(shared, pypcap=[base / 32, base / 32 * 1.01]),
+                dict(unmeasured, pcap_ct='the installed `pcap` module is pypcap, not pcap-ct'),
+                python=f'{series}.7',
+                image=f'pcapkit-benchmark:py{series} (sha256:{index}{index})'))
+    return documents
+
+
+class TestVersionSeries:
+    """Which column a document lands in, and in what order the columns go."""
+
+    def test_series_comes_from_the_interpreter_not_the_label(self):
+        """The recorded version wins over the environment's name.
+
+        These are not the same kind of fact. The label is a name the runner chose
+        when it started the container; the version is what the interpreter answered
+        once it was running. If they ever disagree -- a mislabelled build, a
+        hand-edited document -- filing the numbers under the label would put one
+        interpreter's figures in another's column, silently, which is the whole class
+        of error this harness is built to refuse.
+
+        """
+        doc = document('3.12-pcap_ct', {'default': [0.2]}, python='3.11.14')
+        assert report.python_series(doc) == '3.11'
+
+    def test_columns_are_ordered_numerically(self):
+        """3.9 comes before 3.10, which no string sort of these gets right."""
+        docs = [document('3.9-pcap_ct', {'default': [0.2]}, python='3.9.18'),
+                document('3.10-pcap_ct', {'default': [0.2]}, python='3.10.19'),
+                document('3.11-pcap_ct', {'default': [0.2]}, python='3.11.14')]
+        assert report.version_columns(docs) == ['3.9', '3.10', '3.11']
+
+    def test_two_virtualenvs_of_one_version_are_one_column(self):
+        """A column is a Python version, not an environment."""
+        docs = matrix(versions=('3.11',))
+        assert len(docs) == 2
+        assert report.version_columns(docs) == ['3.11']
+
+    def test_a_version_that_produced_nothing_still_gets_a_column(self):
+        """A version that could not be built is a gap, not a question never asked.
+
+        Dropping the column would make "we could not measure this" indistinguishable
+        from "this was not part of the run", and a reader has no way to tell those
+        apart from the table alone.
+
+        """
+        docs = matrix(versions=('3.11',))
+        assert report.version_columns(docs, [('3.15', 'no image')]) == ['3.11', '3.15']
+
+
+class TestAbsolutesByVersion:
+    """The per-version grid, which is milliseconds rather than ratios."""
+
+    def test_a_cell_pools_both_virtualenvs_of_that_interpreter(self):
+        """Both environments measure the same engine on the same Python.
+
+        So both readings belong in that interpreter's cell: they differ only in which
+        ``pcap`` provider happened to be installed alongside, which is nothing to do
+        with the engine being timed.
+
+        """
+        docs = matrix(versions=('3.11',))
+        grid = report.absolutes_by_version(docs)
+        # `dpkt` is in both environments, twice each; `pypcap` only in the one.
+        assert len(grid['dpkt']['3.11']) == 4
+        assert len(grid['pypcap']['3.11']) == 2
+
+    def test_a_pass_without_a_baseline_still_has_an_absolute_figure(self):
+        """A missing baseline costs a ratio, not a measurement.
+
+        :func:`report.collect` must drop such a pass, since there is nothing to divide
+        by. The absolute figure is complete on its own, and discarding it here would
+        lose a real measurement to a rule that does not apply to it.
+
+        """
+        docs = [document('3.11-pcap_ct', {'default': [0.2], 'dpkt': [0.02, 0.03]})]
+        rows = {row.engine: row for row in report.collect(docs)}
+        assert len(rows['dpkt'].ratios) == 1
+
+        grid = report.absolutes_by_version(docs)
+        assert grid['dpkt']['3.11'] == pytest.approx([0.02, 0.03])
+
+    def test_an_engine_measured_nowhere_has_no_cell(self):
+        """An engine no interpreter ran contributes nothing to the grid."""
+        docs = matrix(versions=('3.12',))
+        assert '3.12' not in report.absolutes_by_version(docs).get('pypcap', {})
+
+
+class TestUnmeasuredByVersion:
+    """Explaining the empty cells, and only the empty ones."""
+
+    def test_measured_in_one_virtualenv_is_not_a_gap(self):
+        """``pypcap`` has a figure for 3.11 even though one environment lacks it.
+
+        The mutual exclusion is real and is reported in the ratio table's per-row
+        reasons, but it is not a gap in *this* table: the cell is filled. A footnote
+        explaining a cell that is not empty is a footnote that contradicts the table
+        it annotates.
+
+        """
+        docs = matrix(versions=('3.11',))
+        reasons = report.unmeasured_by_version(docs)
+        assert 'pypcap' not in reasons
+        assert 'pcap_ct' not in reasons
+
+    def test_a_genuinely_empty_cell_keeps_its_reason(self):
+        """Where no environment measured it, the reason survives."""
+        docs = matrix(versions=('3.12',))
+        reasons = report.unmeasured_by_version(docs)
+        assert 'not installable on this interpreter' in reasons['pypcap']['3.12']
+        assert 'pypcapfile does not support Python 3.12' in reasons['pypcapfile']['3.12']
+
+    def test_environments_disagreeing_about_one_cell_report_both(self):
+        """Two reasons for one empty cell are both kept, attributed.
+
+        A disagreement is the informative case -- an engine unavailable in the
+        ``pypcap`` environment because of the ``pcap`` collision is a different fact
+        from the same engine unavailable because ``tshark`` is missing -- so picking
+        one of them would throw away the half that explains the other.
+
+        """
+        docs = [document('3.11-pypcap', {'default': [0.2]},
+                         {'pyshark': 'no tshark binary'}),
+                document('3.11-pcap_ct', {'default': [0.2]},
+                         {'pyshark': 'python too new'})]
+        reason = report.unmeasured_by_version(docs)['pyshark']['3.11']
+        assert 'in 3.11-pypcap, no tshark binary' in reason
+        assert 'in 3.11-pcap_ct, python too new' in reason
+
+
+class TestVersionsMarkup:
+    """The per-version table as it will be pasted into README.rst."""
+
+    def _snippet(self, missing=(), emulated=None, **kwargs):
+        """Render the per-version snippet from a whole matrix run."""
+        docs = matrix(**kwargs)
+        rows = report.collect(docs)
+        return report.render_versions_rst(rows, docs, missing, emulated), docs, rows
+
+    def test_no_sphinx_only_roles(self):
+        """Only literals, because docutils renders unknown roles as errors."""
+        snippet, _, _ = self._snippet()
+        for role in SPHINX_ONLY_ROLES:
+            assert role not in snippet, f'{role} is Sphinx-only and breaks on GitHub'
+
+    def test_parses_under_plain_docutils(self):
+        """The snippet renders cleanly with the parser GitHub actually uses.
+
+        A simple table is the format most easily broken by a cell that outgrows its
+        column rule, and this table's cells are generated from measurements -- so the
+        width that works today is not evidence about the width a slower engine
+        produces tomorrow.
+
+        """
+        docutils_core = pytest.importorskip('docutils.core')
+        from docutils.utils import SystemMessage  # pylint: disable=import-outside-toplevel
+
+        snippet, _, _ = self._snippet(missing=[('3.15', 'the image failed to build')])
+        messages = []
+        try:
+            docutils_core.publish_doctree(
+                snippet,
+                settings_overrides={
+                    'halt_level': 2, 'report_level': 2, 'warning_stream': messages,
+                    'input_encoding': 'unicode', 'output_encoding': 'unicode',
+                },
+            )
+        except SystemMessage as exc:  # pragma: no cover - only on a real failure
+            pytest.fail(f'docutils rejected the snippet: {exc}\n\n{snippet}')
+        assert not messages, f'docutils warned: {messages}\n\n{snippet}'
+
+    def test_the_figures_are_absolute_and_never_a_ratio(self):
+        """Milliseconds, said in words, and no ratio anywhere in the snippet.
+
+        Ratios are normalised inside one environment, so a ratio between two columns
+        of this table would describe neither interpreter. The baseline row is the test
+        that this has not been confused: in the ratio table ``pcapkit`` is 1 by
+        definition, and here it must carry its own measured milliseconds like every
+        other row.
+
+        """
+        snippet, _, _ = self._snippet(versions=('3.11',))
+        assert 'milliseconds per' in snippet
+        assert 'ratio' not in snippet.lower()
+        assert 'relative' not in snippet.lower()
+        assert '*baseline*' not in snippet
+
+        pcapkit_row = [line for line in snippet.splitlines()
+                       if line.startswith('``pcapkit``')][0]
+        # 0.20 and 0.202 from each of the two virtualenvs, so the median of the four
+        # pooled readings -- and emphatically not the 1 the ratio table gives it.
+        assert '0.2010' in pcapkit_row
+
+    def test_columns_are_labelled_comparable_with_each_other_only(self):
+        """The one caveat absolute figures need, in the snippet rather than beside it."""
+        snippet, _, _ = self._snippet()
+        assert 'compared with each other' in snippet
+        assert 'may not be' in snippet
+        assert 'another machine' in snippet
+
+    def test_an_unmeasured_cell_is_a_dash(self):
+        """Never a zero, and never an absent row."""
+        snippet, _, _ = self._snippet()
+        pypcap_row = [line for line in snippet.splitlines()
+                      if line.startswith('``pypcap``')][0]
+        # Measured on 3.10 and 3.11, unmeasurable on the three newer interpreters.
+        assert pypcap_row.count('--') == 3
+
+    def test_every_engine_has_a_row_whatever_it_managed(self):
+        """A row per engine, in the same order as the ratio table.
+
+        The two tables are read together, and an engine that moves between them costs
+        the reader the ability to carry their eye from one to the other.
+
+        """
+        snippet, _, rows = self._snippet()
+        positions = [snippet.index(f'``{row.label}``') for row in rows]
+        assert positions == sorted(positions)
+        assert len(positions) == len(rows)
+
+    def test_an_engine_with_a_gap_is_marked_and_explained(self):
+        """The mark points at a reason, and the reason is the engine's own."""
+        snippet, _, _ = self._snippet()
+        assert f'``pypcapfile`` {report.UNMEASURED_MARK}' in snippet
+        assert 'pypcapfile does not support Python 3.12' in snippet
+
+    def test_a_fully_measured_engine_is_not_marked(self):
+        """No mark on a row with nothing to explain."""
+        snippet, _, _ = self._snippet()
+        assert f'``dpkt`` {report.UNMEASURED_MARK}' not in snippet
+
+    def test_one_reason_covering_several_versions_is_stated_once(self):
+        """Notes are grouped by reason, not one bullet per empty cell.
+
+        With five columns and seven engines the ungrouped form runs to more lines than
+        the table it annotates, and reads as though each repetition were a separate
+        finding.
+
+        """
+        snippet, _, _ = self._snippet()
+        note = [line for line in snippet.splitlines()
+                if line.startswith('* ``pypcap``')]
+        assert len(note) == 1
+        assert '3.12, 3.13, 3.14' in note[0]
+
+    def test_a_missing_version_is_a_marked_column_of_dashes(self):
+        """A version that produced nothing says so in the table and in a note."""
+        snippet, _, _ = self._snippet(
+            missing=[('3.15', 'the py3.15 image failed to build')])
+        assert f'3.15 {report.UNMEASURED_MARK}' in snippet
+        assert '* Python 3.15 -- not measured at all: the py3.15 image failed to build' in snippet
+
+    def test_a_missing_version_does_not_blame_the_engines(self):
+        """No engine is marked for a column that never ran.
+
+        The column's own note explains every blank in it, and tagging each engine as
+        well would attribute someone else's build failure to seven engines that were
+        never given the chance to fail.
+
+        """
+        snippet, _, _ = self._snippet(versions=('3.11',),
+                                      missing=[('3.15', 'the image failed to build')])
+        assert f'3.15 {report.UNMEASURED_MARK}' in snippet
+        assert f'``dpkt`` {report.UNMEASURED_MARK}' not in snippet
+        assert f'``scapy`` {report.UNMEASURED_MARK}' not in snippet
+
+    def test_a_partly_measured_version_is_not_called_unmeasured(self):
+        """A version can have both figures and a failure note, and both are true.
+
+        `run.sh` copies out whatever a container wrote before it died, so a 3.11 whose
+        second virtualenv crashed arrives with real measurements *and* a recorded
+        reason. Calling that column "not measured at all" would contradict the numbers
+        printed in it, and suppressing the engines' own gap reasons -- as a column with
+        nothing in it rightly does -- would leave those gaps unexplained.
+
+        """
+        snippet, _, _ = self._snippet(
+            versions=('3.11', '3.12'),
+            missing=[('3.11', 'the 3.11-pypcap container exited non-zero')])
+        assert 'not measured at all' not in snippet
+        assert 'the run did not complete' in snippet
+        # The column keeps its figures...
+        dpkt_row = [line for line in snippet.splitlines() if line.startswith('``dpkt``')][0]
+        assert dpkt_row.count('--') == 0
+        # ...and an engine with a real gap in it is still marked and still explained.
+        assert f'``pypcapfile`` {report.UNMEASURED_MARK}' in snippet
+        assert 'pypcapfile does not support Python 3.12' in snippet
+
+    def test_emulation_warning_reaches_the_snippet(self):
+        """An absolute figure taken under emulation describes the emulator."""
+        snippet, _, _ = self._snippet(
+            emulated='Measured under emulation: linux/amd64 on arm64.')
+        assert 'emulation' in snippet.lower()
+        assert 'not comparable with' in snippet
+
+    def test_figure_columns_all_share_one_width(self):
+        """A ragged table of like quantities reads as unlike quantities."""
+        snippet, _, _ = self._snippet()
+        rule = [line for line in snippet.splitlines() if line.startswith('====')][0]
+        widths = [len(run) for run in rule.split()]
+        assert len(set(widths[1:])) == 1
+
+
+class TestMatrixProvenance:
+    """What the Test Environment block says once there is more than one interpreter."""
+
+    def test_every_interpreter_is_named(self):
+        """Naming only the first would describe one column and imply it stood for all."""
+        docs = matrix()
+        snippet = report.render_rst(report.collect(docs), docs)
+        for version in ('3.10.7', '3.11.7', '3.12.7', '3.13.7', '3.14.7'):
+            assert version in snippet
+
+    def test_each_version_names_the_image_it_came_from(self):
+        """The image is the only thing tying a column to a specific build."""
+        docs = matrix(versions=('3.11', '3.12'))
+        snippet = report.render_rst(report.collect(docs), docs)
+        assert 'Image (3.11)' in snippet
+        assert 'Image (3.12)' in snippet
+
+    def test_a_single_interpreter_still_reports_one_image(self):
+        """One version, one image, one row -- not a row labelled with its own version."""
+        docs = matrix(versions=('3.11',))
+        snippet = report.render_rst(report.collect(docs), docs)
+        assert 'Image (3.11)' not in snippet
+        assert 'pcapkit-benchmark:py3.11' in snippet
+
+    def test_distinct_tshark_versions_are_all_reported(self):
+        """``pyshark``'s figures are as much about tshark as about the package.
+
+        Every image in the matrix is built on the same Debian precisely so that this
+        line has one entry, which makes a second entry the signal that something in
+        the base images has drifted apart -- so all of them are reported rather than
+        just the first.
+
+        """
+        docs = [document('3.11-pcap_ct', {'default': [0.2]}, python='3.11.14',
+                         tshark='TShark (Wireshark) 4.0.17'),
+                document('3.12-pcap_ct', {'default': [0.2]}, python='3.12.12',
+                         tshark='TShark (Wireshark) 4.2.2')]
+        snippet = report.render_rst(report.collect(docs), docs)
+        assert '4.0.17' in snippet
+        assert '4.2.2' in snippet
+
+    def test_a_missing_version_is_recorded_in_the_provenance(self):
+        """The ratio table pools the interpreters, so it has to say which ones."""
+        docs = matrix(versions=('3.11',))
+        snippet = report.render_rst(report.collect(docs), docs,
+                                    missing=[('3.15', 'the image failed to build')])
+        assert 'Python 3.15 (not measured)' in snippet
+        assert 'the image failed to build' in snippet
+
+    def test_a_partly_measured_version_says_partly(self):
+        """A version that contributed figures before failing is not "not measured"."""
+        docs = matrix(versions=('3.11',))
+        snippet = report.render_rst(report.collect(docs), docs,
+                                    missing=[('3.11', 'one container exited non-zero')])
+        assert 'Python 3.11 (partly measured)' in snippet
+
+    def test_pooling_across_interpreters_is_declared(self):
+        """A ratio pooled over five interpreters must not read as one interpreter's."""
+        docs = matrix()
+        snippet = report.render_rst(report.collect(docs), docs)
+        assert 'pooled across every environment' in snippet
+
+        # ...and not claimed on a run that had only one interpreter to pool.
+        single = matrix(versions=('3.11',))
+        assert 'pooled across every environment' not in \
+            report.render_rst(report.collect(single), single)
+
+    def test_the_two_tables_do_not_share_a_heading(self):
+        """Two sections named "Test Results" in one README is one too many.
+
+        Both snippets are pasted into the same document, and a reader then has no way
+        to say which table a sentence underneath is about.
+
+        """
+        docs = matrix(versions=('3.11',))
+        rows = report.collect(docs)
+        assert 'Test Results (Relative)' in report.render_rst(rows, docs)
+        assert 'Test Results (Relative)' not in report.render_versions_rst(rows, docs)
+
+
+class TestFixedFormatting:
+    """Formatting for a column read downwards rather than a value read alone."""
+
+    @pytest.mark.parametrize(('value', 'expected'), [
+        (0.017, '0.0170'),
+        (14.7434, '14.7434'),
+        (0.2516, '0.2516'),
+    ])
+    def test_four_decimal_places_whatever_the_magnitude(self, value, expected):
+        """Decimal points line up, which is what makes a column scannable.
+
+        Significant figures -- which every other number in the report uses -- would
+        give ``0.01700`` and ``14.74`` different numbers of decimal places in the same
+        column. Four places is also what the hand-maintained table in README.rst has
+        always used, so a regenerated table diffs its numbers rather than its layout.
+
+        """
+        assert report._fixed(value) == expected  # pylint: disable=protected-access
+
+
+class TestMissingArgument:
+    """The interface `run.sh` uses to get a build failure into the table."""
+
+    def _one_document(self, tmp_path):
+        """Write a minimal single-environment document to disk."""
+        path = tmp_path / '3.11-pcap_ct.json'
+        path.write_text(json.dumps(document('3.11-pcap_ct', {'default': [0.2, 0.2]})),
+                        encoding='utf-8')
+        return path
+
+    def test_a_reason_becomes_a_column_and_a_note(self, tmp_path, capsys):
+        """What run.sh records is what the reader sees."""
+        path = self._one_document(tmp_path)
+        assert report.main([str(path), '--missing', '3.15=no released image exists',
+                            '--versions-rst-out', str(tmp_path / 'versions.rst')]) == 0
+        snippet = (tmp_path / 'versions.rst').read_text(encoding='utf-8')
+        assert '3.15' in snippet
+        assert 'no released image exists' in snippet
+
+    def test_a_version_without_a_reason_is_rejected(self, tmp_path):
+        """A gap whose note says nothing is the outcome --missing exists to prevent."""
+        path = self._one_document(tmp_path)
+        with pytest.raises(SystemExit):
+            report.main([str(path), '--missing', '3.15'])
+        with pytest.raises(SystemExit):
+            report.main([str(path), '--missing', '3.15='])
+
+
+class TestNotAttempted:
+    """An engine the interpreter rules out, told apart from one that failed here."""
+
+    def test_the_recorded_note_is_the_reason(self, monkeypatch, tmp_path):
+        """The image says why it did not try, and that is what reaches the table."""
+        benchmark = pytest.importorskip('benchmark')
+        (tmp_path / 'pypcap.txt').write_text(
+            'pypcap is not installable on this interpreter, so it was not built into\n'
+            'this image: its pcap.c does not compile against the 3.12+ C API.\n',
+            encoding='utf-8')
+        monkeypatch.setattr(benchmark, 'NOT_ATTEMPTED', str(tmp_path))
+        recorded = benchmark._not_attempted('pypcap')  # pylint: disable=protected-access
+        assert 'not installable on this interpreter' in recorded
+        # Collapsed to one line, since it lands in a table cell and an RST bullet.
+        assert '\n' not in recorded
+
+    def test_it_replaces_the_engine_s_own_reason(self, monkeypatch, tmp_path):
+        """The cause wins over the symptom.
+
+        On a 3.12 image the engine's own ``unsupported_reason()`` says the installed
+        ``pcap`` module is ``pcap-ct`` -- true, and a description of how this image was
+        assembled rather than of why it had to be. The reader is owed the interpreter
+        ceiling, and stacking both would bury it behind the consequence.
+
+        """
+        benchmark = pytest.importorskip('benchmark')
+        (tmp_path / 'pypcap.txt').write_text(
+            'pypcap is not installable on this interpreter.\n', encoding='utf-8')
+        monkeypatch.setattr(benchmark, 'NOT_ATTEMPTED', str(tmp_path))
+        monkeypatch.setattr(benchmark, '_declared_reason',
+                            lambda engine: 'the installed `pcap` module is pcap-ct, not pypcap')
+
+        reason, driver = benchmark.preflight('pypcap', str(tmp_path / 'unused.pcap'))
+        assert reason == 'pypcap is not installable on this interpreter.'
+        assert 'pcap-ct' not in reason
+        assert driver is None
+
+    def test_an_engine_that_was_attempted_records_nothing(self, monkeypatch, tmp_path):
+        """The normal case, for every engine the image did install."""
+        benchmark = pytest.importorskip('benchmark')
+        monkeypatch.setattr(benchmark, 'NOT_ATTEMPTED', str(tmp_path / 'absent'))
+        assert benchmark._not_attempted('dpkt') is None  # pylint: disable=protected-access
+
+    def test_prose_is_rejoined_as_prose_and_log_output_is_not(self, monkeypatch, tmp_path):
+        """A wrapped sentence comes back as a sentence, pip output keeps its records.
+
+        Both notes are flattened to one line, because both end up in a table cell and
+        an RST bullet -- but they are not the same kind of text. Measured: the
+        interpreter-ceiling note joined with the pip separator read ``not built into
+        this | image: pypcap 1.3.0 ships ...``, which is the Dockerfile's line wrapping
+        leaking into a published table.
+
+        """
+        benchmark = pytest.importorskip('benchmark')
+        (tmp_path / 'pypcap.txt').write_text('one sentence wrapped\nacross two lines.\n',
+                                             encoding='utf-8')
+        monkeypatch.setattr(benchmark, 'NOT_ATTEMPTED', str(tmp_path))
+        monkeypatch.setattr(benchmark, 'INSTALL_FAILURES', str(tmp_path))
+        assert benchmark._not_attempted('pypcap') == 'one sentence wrapped across two lines.'
+        assert benchmark._install_failure('pypcap') == \
+            'one sentence wrapped | across two lines.'
 
 
 class TestRoundTrip:
