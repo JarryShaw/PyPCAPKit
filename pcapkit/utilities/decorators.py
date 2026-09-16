@@ -112,6 +112,10 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
         # extract self object & args
         self = cast('R_beholder', args[0])
         try:
+            proto = args[1]
+        except IndexError:
+            proto = None
+        try:
             length = cast('int', args[2])
         except IndexError:
             length = None
@@ -134,8 +138,29 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
                 logger.error('The following error occurred while parsing the packet:')
                 traceback.print_exc()
 
-            file_ = self.__header__.get_payload()
-            next_ = protocol(file_, length, error=str(exc))
+            # NOTE: ``self._get_payload()`` rather than
+            # ``self.__header__.get_payload()``, which it wraps. The two agree
+            # for every protocol whose payload is a schema field, and differ for
+            # the two that override it: SCTP carries user data inside a DATA
+            # chunk and PCAP-NG inside a block, so neither header schema has a
+            # ``payload`` field at all. Going through the schema there raises
+            # ProtocolUnbound('unknown field: payload') *from the recovery path*,
+            # turning a next-layer parse failure that should have degraded to
+            # Raw into a crash. Unreachable until something was registered on an
+            # SCTP payload protocol identifier, which NGAP now is.
+            file_ = self._get_payload()
+
+            # NOTE: ``alias=proto`` matches what the success path passes, so a
+            # payload that failed to parse is still named after the protocol
+            # number it arrived with -- ``SCTP:PayloadProtocolIdentifier_3GPP_NG
+            # _Application_Protocol`` rather than a bare ``SCTP:Raw``. Without
+            # it, registering a protocol on a number made the output *less*
+            # informative than leaving the number unregistered, since an
+            # unregistered number reaches Raw through the success path and keeps
+            # its name. A plain integer has no ``name`` and still renders as
+            # ``Raw``, c.f. ``Raw.__post_init__``, so this only adds a name where
+            # the registry key is an enumeration.
+            next_ = protocol(file_, length, error=str(exc), alias=proto)
             return cast('R_beholder', next_)
     return behold
 
