@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pep.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="As PyPCAPKit reaches its 16k lines of code and 800th commit, I figure it would be a better idea to record the project enchancement proposals here in the discussion thread. The proposals and/or note..." />
-<meta name="description" content="As PyPCAPKit reaches its 16k lines of code and 800th commit, I figure it would be a better idea to record the project enchancement proposals here in the discussion thread. The proposals and/or note..." />
+<meta property="og:description" content="As PyPCAPKit reached its 16k lines of code and 800th commit, it seemed better to record the project’s enhancement proposals somewhere durable than to leave them scattered. They were raised in the d..." />
+<meta name="description" content="As PyPCAPKit reached its 16k lines of code and 800th commit, it seemed better to record the project’s enhancement proposals somewhere durable than to leave them scattered. They were raised in the d..." />
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="How to …" href="demo.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -419,63 +419,139 @@
 <h1>Help Wanted<a class="headerlink" href="#help-wanted" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>This is a copy of the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a>
-started on the GitHub. The documentation is <strong>only</strong> used as a backup
-reference to the original discussion thread.</p>
+<p>This page mirrors the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a> started on GitHub.
+The thread holds the proposals as they were first raised, together with a
+comment recording which of them have since landed; this page is the
+maintained copy, kept in step with the code. So where a proposal has been
+implemented it is described as implemented here, and only the work that is
+genuinely still open is asked for. Please leave notes in the thread rather
+than against this page.</p>
 </div>
-<p>As PyPCAPKit reaches its <em>16k</em> lines of code and <em>800th</em> commit, I figure it
-would be a better idea to record the project enchancement proposals here in
-the discussion thread. The proposals and/or notes will be documented and
-maintained here.</p>
-<p>Pull requests for the existing proposals and any new ideas are highly welcomed
-and encouraged. Should you have any questions, please leave a note either in
-this thread or under the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a">Q&amp;A category discussions</a>.</p>
+<p>As PyPCAPKit reached its <em>16k</em> lines of code and <em>800th</em> commit, it seemed
+better to record the project’s enhancement proposals somewhere durable than to
+leave them scattered. They were raised in the discussion thread, and this page
+is where they are kept up to date.</p>
+<p>Pull requests for anything still open, and new ideas of your own, are very
+welcome. For questions, leave a note in the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a> or under the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a">Q&amp;A
+category</a>.</p>
 <p>Wish you enjoy <strong>PyPCAPKit</strong>!!!</p>
 <section id="more-protocols-more">
 <h2>More Protocols, More!!!<a class="headerlink" href="#more-protocols-more" title="Link to this heading">¶</a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><strong>SCTP</strong> is now <strong>done</strong>. It is implemented as a first-class transport layer
-protocol per <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html"><strong>RFC 9260</strong></a>: the common header, all thirteen chunk types the
-RFC defines, chunk parameters, error causes, and CRC32c checksum
-verification. Chunk types, parameters and error causes that are registered
-but not yet implemented fall through to the generic handlers rather than
-failing the extraction.</p>
-<p>One note on how it differs from its siblings. The next layer is dispatched
-on the DATA chunk’s <em>payload protocol identifier</em> through
-<a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_sctp" title="pcapkit.foundation.registry.protocols.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a>, not on port
-numbers, so <a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_apptype" title="pcapkit.foundation.registry.protocols.register_apptype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_apptype()</span></code></a>
-deliberately does not fan out to it.</p>
-</div>
 <p>As you may have noticed, there are some protocol-named files under the
 <code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code> folders. These protocols are what I planned to implement
 but not yet done. Namely, grouped by each TCP/IP layer and ordered by protocol
 name alphabetically,</p>
 <ul class="simple">
-<li><p>Link Layer: DSL, EAPOL, FDDI, ISDN, PPP</p></li>
-<li><p>Internet Layer: ECN, ICMP, ICMPv6, IGMP, NDP, Shim6</p></li>
-<li><p>Transport Layer: DCCP, QUIC, RSVP</p></li>
+<li><p>Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP</p></li>
+<li><p>Internet Layer: ECN, ICMP, ICMPv6, IGMP, Shim6</p></li>
+<li><p>Transport Layer: DCCP, RSVP</p></li>
 <li><p>Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP,
 ONC/RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL, XMPP</p></li>
 </ul>
-<p><strong>ESP</strong> – abandoned in the <code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code> folder for years, because of
-design flaws within PyPCAPKit at the time – is now implemented, c.f.
-<a class="reference internal" href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>. It parses without keys, and
-decrypts when a Security Association is supplied through the protocol keyed
-<a class="reference internal" href="pcapkit/corekit/context.html#module-1" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a> channel. What is still wanted there is wider
-algorithm coverage: ChaCha20-Poly1305 [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7634.html"><strong>RFC 7634</strong></a>], AES-CCM [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4309.html"><strong>RFC 4309</strong></a>] and
-AES-XCBC integrity [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3566.html"><strong>RFC 3566</strong></a>] are not implemented, and neither are Extended
-Sequence Numbers.</p>
-<p>More over, <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> requires some help to
-implement all the <em>message data</em> types, you can find more information in the
-specific file.</p>
+<p>Each of those files is empty, so any one of them is a self-contained piece of
+work: a schema class, a data class and a protocol class, as sketched in
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/251">discussion #251</a>.
+That thread asks for <strong>NGAP</strong> (5G, application layer), which is not on the list
+above and has no stub, and the reply to it is the closest thing the project has
+to a step-by-step guide for adding a protocol – worth reading before starting
+any of these.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Two entries differ from the list in the discussion thread, and both are
+corrections rather than progress. <strong>NDP</strong> is shown under the link layer
+because that is where its stub actually lives, at
+<code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/link/NotImplemented/ndp.py</span></code>; there is no
+<code class="docutils literal notranslate"><span class="pre">ndp.py</span></code> under the internet layer. <strong>QUIC</strong> has been dropped because no
+stub for it exists anywhere in the tree – the thread lists it, but the file
+was never created.</p>
+<p><strong>ESP</strong> and <strong>SCTP</strong> have left the list because they are now implemented,
+and neither left a stub behind.</p>
+</div>
+<section id="sctp">
+<h3>SCTP<a class="headerlink" href="#sctp" title="Link to this heading">¶</a></h3>
+<p><strong>Done.</strong> <a class="reference internal" href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> is a first-class
+transport layer protocol implemented per <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html"><strong>RFC 9260</strong></a>: the common header, all
+thirteen chunk types the RFC defines, its eight chunk parameters, its thirteen
+error causes, and CRC32c checksum verification.</p>
+<p>One note on how it differs from its siblings. The next layer is dispatched
+on the DATA chunk’s <em>payload protocol identifier</em> through
+<a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_sctp" title="pcapkit.foundation.registry.protocols.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a>, not on port
+numbers, so <a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_apptype" title="pcapkit.foundation.registry.protocols.register_apptype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_apptype()</span></code></a>
+deliberately does not fan out to it.</p>
+<p>What is still wanted is the registered-but-unimplemented type codes. IANA
+registers considerably more than <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html"><strong>RFC 9260</strong></a> defines, and the surplus falls
+through to the generic handlers rather than failing the extraction – so a
+capture using one parses, but yields an opaque chunk instead of its fields.
+As things stand that is 17 of the 30 registered chunk types, 24 of the 32
+chunk parameters and 10 of the 23 error causes; <a class="reference internal" href="pcapkit/const/sctp.html"><span class="doc">SCTP Constant Enumerations</span></a>
+lists them all.</p>
+</section>
+<section id="esp">
+<h3>ESP<a class="headerlink" href="#esp" title="Link to this heading">¶</a></h3>
+<p><strong>Done.</strong> <a class="reference internal" href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> – abandoned in the
+<code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code> folder for years, because of design flaws within PyPCAPKit
+at the time – now parses without keys, and decrypts when a Security
+Association is supplied through the protocol keyed
+<a class="reference internal" href="pcapkit/corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a> channel.</p>
+<p>What is still wanted there is wider algorithm coverage. The two enumerations
+under <a class="reference internal" href="pcapkit/const/esp.html"><span class="doc">ESP Constant Enumerations</span></a> carry every transform IANA has registered, but
+only five encryption and five integrity algorithms are actually applied, as
+listed by <a class="reference internal" href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a> and
+<a class="reference internal" href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.INTEGRITY_SUITES" title="pcapkit.protocols.internet.esp.INTEGRITY_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">INTEGRITY_SUITES</span></code></a>. Specifically not
+implemented: ChaCha20-Poly1305 [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7634.html"><strong>RFC 7634</strong></a>], AES-CCM [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4309.html"><strong>RFC 4309</strong></a>], AES-XCBC
+integrity [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3566.html"><strong>RFC 3566</strong></a>], and Extended Sequence Numbers.</p>
+</section>
+<section id="mobility-header">
+<h3>Mobility Header<a class="headerlink" href="#mobility-header" title="Link to this heading">¶</a></h3>
+<p><strong>Partly done</strong>, and still the section of this page with the most work left in
+it. <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> has the FMIPv6 fast-handover
+messages [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>] – Handover Initiate, Handover Acknowledge, FBU, FBack
+and FNA – along with the options they need. What remains is the rest of the
+registry:</p>
+<ul class="simple">
+<li><p><strong>10 of the 24 registered message data types</strong>, namely Home Agent Switch,
+Heartbeat, Binding Revocation, Localized Routing Initiation and
+Acknowledgment, Update Notification and its Acknowledgement, Flow Binding,
+Subscription Query and Subscription Response.</p></li>
+<li><p><strong>51 of the 71 registered options</strong> – broadly the PMIPv6, NEMO and
+flow-binding block, including Home Network Prefix, Handoff Indicator, Access
+Technology Type, Timestamp, GRE Key, Binding Identifier and the QoS options.</p></li>
+<li><p><strong>3 of the 4 CGA extensions</strong>; only Multi-Prefix is implemented.</p></li>
+</ul>
+<p>Each of those falls through to a generic handler, so nothing breaks – the
+fields simply are not decoded. The <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">TODO</span></code> markers in
+<code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/internet/mh.py</span></code> sit at the exact dispatch tables that need
+entries, and the file documents the shape each handler takes.</p>
+</section>
+</section>
+<section id="pcapng-support">
+<h2>PCAPNG Support<a class="headerlink" href="#pcapng-support" title="Link to this heading">¶</a></h2>
+<p><strong>Done.</strong> The builtin default engine parses PCAP-NG files;
+<a class="reference internal" href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> implements the format, with its
+block and option enumerations under <a class="reference internal" href="pcapkit/const/pcapng.html"><span class="doc">PCAPNG Constant Enumerations</span></a>. This closes
+the request in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/35">#35</a>, which
+the thread raised when only PCAP was supported.</p>
+</section>
+<section id="maybe-even-faster">
+<h2>Maybe Even Faster?<a class="headerlink" href="#maybe-even-faster" title="Link to this heading">¶</a></h2>
+<p><strong>Still open.</strong> Benchmarking put the builtin default engine at roughly 4x
+Scapy and 10x DPKT, which is an acceptable price for what it decodes, but the
+original proposal in the thread stands: fold consecutive <code class="docutils literal notranslate"><span class="pre">_read_xxxxxx</span></code> calls
+into a single <code class="docutils literal notranslate"><span class="pre">file.read</span></code> so that the number of IO calls and the duplicated
+<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.unpack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.unpack()</span></code></a> work both come down.</p>
+<p>Note that the parsing path has been rewritten since that was written. Protocols
+no longer read fields inline; they declare a
+<a class="reference internal" href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> of field descriptors and let
+<a class="reference internal" href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> drive it. The batching
+idea still applies, but it belongs in the schema and field machinery now rather
+than in each protocol’s <code class="docutils literal notranslate"><span class="pre">_read_</span></code> methods, and the sketch in the thread no
+longer maps onto the code. A measured benchmark showing where the time actually
+goes would be the useful first contribution here.</p>
 </section>
 <section id="logging-integration">
 <h2>Logging Integration<a class="headerlink" href="#logging-integration" title="Link to this heading">¶</a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Largely <strong>done</strong>. <a class="reference internal" href="pcapkit/utilities/logging.html#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a> is no longer a single flat
-logger with a hard-wired handler. It now provides:</p>
+<p><strong>Done.</strong> <a class="reference internal" href="pcapkit/utilities/logging.html#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a> is no longer a single flat logger
+with a hard-wired handler. It now provides:</p>
 <ul class="simple">
 <li><p>a <strong>logger hierarchy</strong> rooted at <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, with every module logging
 through its own child obtained from
@@ -484,7 +560,7 @@ through its own child obtained from
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code>;</p></li>
 <li><p><strong>library-safe defaults</strong> – importing <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> attaches only a
 <a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.NullHandler" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.NullHandler</span></code></a> and sets no level, leaving the destination and
-verbosity to the application. <span class="target" id="index-4"></span><a class="reference internal" href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> still bootstraps the
+verbosity to the application. <span class="target" id="index-6"></span><a class="reference internal" href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> still bootstraps the
 historical <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> handler at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>;</p></li>
 <li><p>a <strong>runtime configuration API</strong> –
 <a class="reference internal" href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.configure" title="pcapkit.utilities.logging.configure"><code class="xref py py-func docutils literal notranslate"><span class="pre">configure()</span></code></a>,
@@ -504,22 +580,14 @@ file without descending into per-field parsing.</p></li>
 </ul>
 <p>See <a class="reference internal" href="pcapkit/utilities/logging.html"><span class="doc">Logging System</span></a> for the configuration recipes, including
 the one-line restore of the pre-existing <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> output.</p>
-<p>What remains wanted is the two items called out there as deliberately out of
-scope: <a class="reference internal" href="pcapkit/utilities/functools.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> still double-reports every
-warning through both <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a>, and
-<a class="reference internal" href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a> still mutates the global
-warning filters with <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.simplefilter" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.simplefilter()</span></code></a>.</p>
-</div>
-<p>Originally: as PyPCAPKit now has the <a class="reference internal" href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.logging.logger</span></code></a> in
-place, I’m expecting to fully extend its functionality in the entire module.
-Ideas and contributions are welcomed to integrate the logging system into
-PyPCAPKit.</p>
+<p>One item remains wanted, called out there as deliberately out of scope:
+<a class="reference internal" href="pcapkit/utilities/functools.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> still reports every warning twice, once
+through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> and once through <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a>, so an application that
+has routed <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> into <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> sees each one of them twice.</p>
 </section>
 <section id="new-engines">
 <h2>New Engines<a class="headerlink" href="#new-engines" title="Link to this heading">¶</a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><strong>Done</strong>, for both candidates. <code class="docutils literal notranslate"><span class="pre">engine='pypcapfile'</span></code> selects
+<p><strong>Done, for both candidates.</strong> <code class="docutils literal notranslate"><span class="pre">engine='pypcapfile'</span></code> selects
 <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcapfile.PyPCAPFile</span></code></a> and
 <code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> selects <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcap.PyPCAP</span></code></a>;
 each has a matching <a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> module
@@ -570,15 +638,24 @@ build. Since there is no wheel to fall back on, the extra is kept <strong>out of
 the libpcap development files from every user, and it broke the docs, conda
 and release workflows – all of which install <code class="docutils literal notranslate"><span class="pre">.[all]</span></code> – on the macOS
 runner, where <code class="file docutils literal notranslate"><span class="pre">pcap.h</span></code> is present but no <code class="docutils literal notranslate"><span class="pre">libpcap.dylib</span></code> is.</p>
-<p>There is a way out that has not been adopted yet: <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> re-implements the <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> API in
-pure Python over <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a> and depends on <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a>, which bundles prebuilt
-<code class="docutils literal notranslate"><span class="pre">libpcap</span></code> binaries for Linux, macOS and Windows. Both ship
-<code class="docutils literal notranslate"><span class="pre">py3-none-any</span></code> wheels, so neither needs a compiler, <code class="file docutils literal notranslate"><span class="pre">pcap.h</span></code> or a
-system <code class="docutils literal notranslate"><span class="pre">libpcap</span></code>. Swapping the extra to <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> was verified to drive
-<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> on <strong>Python 3.14</strong>,
-agreeing with the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine on frame count. Both are still beta
-releases and <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> targets the <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> 1.2.3 API, which is why this
-is recorded as an option rather than done.</p>
+<p>This is now solved, though not by changing the <code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> extra. <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> re-implements the <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> API in pure
+Python over <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a>, and it is wired up as a <strong>separate engine</strong>,
+<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a>, selected with
+<code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code> and installed with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[PCAP_CT]</span></code>. It
+works on every supported interpreter, verified on 3.10 and 3.14.</p>
+<p>A separate engine rather than a second backend because the two are <strong>mutually
+exclusive</strong>: both distributions own the import name <code class="docutils literal notranslate"><span class="pre">pcap</span></code>, and with both
+installed <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> wins the import while upstream’s extension module is
+shadowed and unreachable. Each engine detects which backend it actually got and
+says so, rather than one <code class="docutils literal notranslate"><span class="pre">engine=</span></code> string silently meaning two different
+implementations.</p>
+<p>Two caveats remain. Both distributions are still beta releases, and <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code>
+targets the <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> 1.2.3 API – within what this engine uses, but worth
+knowing. And despite the <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a> wheel
+bundling prebuilt binaries, a runtime <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> shared library is still
+required: that wheel’s published configuration sets <code class="docutils literal notranslate"><span class="pre">LIBPCAP</span> <span class="pre">=</span> <span class="pre">None</span></code>, which
+sends the loader to <code class="docutils literal notranslate"><span class="pre">find_library(&quot;pcap&quot;)</span></code>. No compiler and no
+<code class="file docutils literal notranslate"><span class="pre">pcap.h</span></code> are needed; a <code class="docutils literal notranslate"><span class="pre">libpcap.so.1</span></code> is.</p>
 </li>
 </ul>
 <p>Both engines support less than the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine does, deliberately and
@@ -588,42 +665,42 @@ reassembly while keeping IPv4 and TCP. Each gap is announced through an
 <a class="reference internal" href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> or an outright exception
 rather than by silently returning nothing –
 <a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> tabulates them.</p>
-<p>The engine interface has since been refactored, so this no longer means adding
-handler methods to <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>. A new
-engine subclasses <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.engine.Engine</span></code></a> and
-implements just two methods, <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine.run" title="pcapkit.foundation.engines.engine.Engine.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>
+<p>Adding a further engine no longer means adding handler methods to
+<a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>, as the thread describes: the
+engine interface has been refactored since. A new engine subclasses
+<a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.engine.Engine</span></code></a> and implements just two
+methods, <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine.run" title="pcapkit.foundation.engines.engine.Engine.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>
 and <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine.read_frame" title="pcapkit.foundation.engines.engine.Engine.read_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_frame()</span></code></a>; subclassing
 registers it automatically. See <a class="reference internal" href="ext.html"><span class="doc">Customisation &amp; Extensions</span></a> for a worked example. What does
 still apply is the unified auxiliary tools in <a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a>, where
 each engine has a matching module.</p>
-</div>
-<p>Originally: although PyPCAPKit already has support for some popular PCAP parsing
-libraries, I’m expecting to extend the list of supported engines furthermore. The
-candidate engines include:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://github.com/pynetwork/pypcap">pypcap</a></p></li>
-<li><p><a class="reference external" href="https://github.com/kisom/pypcapfile">pypcapfile</a></p></li>
-</ul>
 </section>
 <section id="test-cases">
 <h2>Test Cases<a class="headerlink" href="#test-cases" title="Link to this heading">¶</a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Largely <strong>done</strong>. There is now a systematic unit test suite under <code class="docutils literal notranslate"><span class="pre">tests/</span></code>
-(84 modules), bundled with the distribution, and it runs in CI against Python
-3.10 through 3.14 (see <code class="docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>). The sample
-captures the runtime, regression and integration tiers read are not tracked in
-git, so <code class="docutils literal notranslate"><span class="pre">examples/generators/make_samples.py</span></code> (<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">samples</span></code>) rebuilds them
-from source.</p>
-<p>What remains wanted is coverage rather than infrastructure: the protocols and
-the registered-but-unhandled type codes listed above have no tests because
-they have no implementation yet.</p>
-</div>
-<p>Originally: PyPCAPKit still does not have a systematic testing suite to be
-bundled with it. The only test cases I have worked out are those in the
-<code class="docutils literal notranslate"><span class="pre">/tests</span></code> folder - mostly functional tests. As PyPCAPKit is growing bigger and
-bigger, a comprehensive test suite is coming much more of demand for a more
-reliable development process.</p>
+<p><strong>Largely done.</strong> There is now a systematic test suite under <code class="docutils literal notranslate"><span class="pre">tests/</span></code> – 91
+modules matching <code class="docutils literal notranslate"><span class="pre">test_*.py</span></code> – and it runs in CI against Python 3.10
+through 3.14, plus an allowed-to-fail 3.15 leg, per
+<code class="docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>.</p>
+<p>The suite is split by what a test needs rather than by what it covers, and
+<code class="docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code> enforces the split. The <strong>unit</strong> tier may read only
+captures committed to the repository; the <strong>fixture-dependent</strong> tier – which
+is <code class="docutils literal notranslate"><span class="pre">tests/integration/</span></code> together with every <code class="docutils literal notranslate"><span class="pre">*_runtime.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">*_regression.py</span></code> module – may also read the generated sample captures.
+Those samples are not tracked in git, so
+<code class="docutils literal notranslate"><span class="pre">examples/generators/make_samples.py</span></code> (<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">samples</span></code>) rebuilds them from
+source, and the tier guard raises rather than letting a unit-tier module
+quietly depend on a file that may not exist.</p>
+<p>What remains wanted is <strong>coverage rather than infrastructure</strong>: the protocols and
+the registered-but-unhandled type codes listed above have no tests because they
+have no implementation yet.</p>
+<p>The original ask also included <strong>shipping the suite</strong>, and that is now a
+deliberate decision rather than an omission. <code class="docutils literal notranslate"><span class="pre">tests</span></code> is excluded from the wheel
+by <code class="docutils literal notranslate"><span class="pre">[tool.setuptools.packages.find]</span></code> in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>; the sdist does carry
+all 91 modules, so a distribution packager building from source has them. The
+wheel stays lean because the suite could not run from an installed package
+anyway: the generated sample captures are not shipped, and <code class="docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>
+resolves paths from a repository root that an installed package does not have.
+Anyone wanting to run the tests wants the repository, which is where they are.</p>
 </section>
 </section>
 
@@ -675,7 +752,14 @@ reliable development process.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Help Wanted</a><ul>
-<li><a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a></li>
+<li><a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a><ul>
+<li><a class="reference internal" href="#sctp">SCTP</a></li>
+<li><a class="reference internal" href="#esp">ESP</a></li>
+<li><a class="reference internal" href="#mobility-header">Mobility Header</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pcapng-support">PCAPNG Support</a></li>
+<li><a class="reference internal" href="#maybe-even-faster">Maybe Even Faster?</a></li>
 <li><a class="reference internal" href="#logging-integration">Logging Integration</a></li>
 <li><a class="reference internal" href="#new-engines">New Engines</a></li>
 <li><a class="reference internal" href="#test-cases">Test Cases</a></li>

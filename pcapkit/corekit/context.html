@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/context.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Parsing Context: pcapkit.corekit.context provides a protocol keyed channel for caller supplied information that a protocol needs in order to parse a packet, but that is not carried on the wire. Mos..." />
-<meta name="description" content="Parsing Context: pcapkit.corekit.context provides a protocol keyed channel for caller supplied information that a protocol needs in order to parse a packet, but that is not carried on the wire. Mos..." />
+<meta property="og:description" content="pcapkit.corekit.context provides a protocol keyed channel for caller supplied information that a protocol needs in order to parse a packet, but that is not carried on the wire. Most protocols are s..." />
+<meta name="description" content="pcapkit.corekit.context provides a protocol keyed channel for caller supplied information that a protocol needs in order to parse a packet, but that is not carried on the wire. Most protocols are s..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Info Class" href="infoclass.html"><link rel="prev" title="Miscellaneous Fields" href="fields/misc.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -417,9 +417,7 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.corekit.context">
 <span id="parsing-context"></span><h1>Parsing Context<a class="headerlink" href="#module-pcapkit.corekit.context" title="Link to this heading">¶</a></h1>
-<section id="module-1">
-<span id="id1"></span><h2>Parsing Context<a class="headerlink" href="#module-1" title="Link to this heading">¶</a></h2>
-<p id="module-0"><a class="reference internal" href="#module-1" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a> provides a <em>protocol keyed</em> channel for
+<p><a class="reference internal" href="#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a> provides a <em>protocol keyed</em> channel for
 caller supplied information that a protocol needs in order to parse a
 packet, but that is <strong>not</strong> carried on the wire.</p>
 <p>Most protocols are self describing – every length, offset and type that
@@ -431,19 +429,17 @@ length of the <code class="docutils literal notranslate"><span class="pre">Integ
 Association (SA), which is negotiated out of band and is therefore
 knowable only to the caller.</p>
 <p>Rather than adding protocol specific keyword arguments to
-<a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>, such information is
-passed as a <a class="reference internal" href="#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> – a mapping of protocol index ID
-(c.f. <code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.id</span></code>)
-to a <a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> instance. The registry is handed to
-<a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> once, and is then
+<a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>, such information is passed
+as a <a class="reference internal" href="#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> – a mapping of
+protocol index ID (c.f. <code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.id</span></code>) to a
+<a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> instance. The registry is
+handed to <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> once, and is then
 propagated down the protocol stack by
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._import_next_layer</span></code>,
 so that a protocol nested arbitrarily deep can reach it through
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._get_context</span></code>.</p>
-<div class="admonition-example admonition">
-<p class="admonition-title">Example</p>
 <p>Decoding an ESP tunnel end to end:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pcapkit</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pcapkit</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.esp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Cipher</span><span class="p">,</span> <span class="n">ESPContext</span><span class="p">,</span>
 <span class="gp">... </span>                                           <span class="n">Integrity</span><span class="p">,</span> <span class="n">SecurityAssociation</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sa</span> <span class="o">=</span> <span class="n">SecurityAssociation</span><span class="p">(</span>
@@ -454,7 +450,6 @@ so that a protocol nested arbitrarily deep can reach it through
 <span class="gp">&gt;&gt;&gt; </span><span class="n">extraction</span> <span class="o">=</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="s1">'esp.pcap'</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ESPContext</span><span class="p">(</span><span class="n">sa</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>A context object frequently holds secrets – ESP encryption and
@@ -463,10 +458,9 @@ instance attributes on the protocol object and are <strong>never</strong> writte
 into the protocol’s data model, which is the only thing that reaches
 <a class="reference internal" href="infoclass.html#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict</span></code></a> and,
 from there, the output dumpers. Implementations of
-<a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> are expected to keep secrets out of their
-<a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__repr__" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code></a> as well.</p>
+<a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> are expected to keep
+secrets out of their <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__repr__" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code></a> as well.</p>
 </div>
-</section>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.context.ProtocolContext">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.context.</span></span><span class="sig-name descname"><span class="pre">ProtocolContext</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/context.html#ProtocolContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.context.ProtocolContext" title="Link to this definition">¶</a></dt>
@@ -664,6 +658,14 @@ instance of <code class="docutils literal notranslate"><span class="pre">cls</sp
 
 </dd></dl>
 
+<section id="type-variables">
+<h2>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.corekit.context.pcapkit.corekit.context._CT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.context.</span></span><span class="sig-name descname"><span class="pre">_CT</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><span class="pre">pcapkit.corekit.context.ProtocolContext</span></a></span><a class="headerlink" href="#pcapkit.corekit.context.pcapkit.corekit.context._CT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
 </section>
 
         </article>
@@ -722,7 +724,7 @@ instance of <code class="docutils literal notranslate"><span class="pre">cls</sp
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Parsing Context</a><ul>
-<li><a class="reference internal" href="#module-1">Parsing Context</a></li>
+<li><a class="reference internal" href="#type-variables">Type Variables</a></li>
 </ul>
 </li>
 </ul>

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/internet/esp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="ESP - Encapsulating Security Payload: pcapkit.protocols.internet.esp contains ESP only, which implements extractor for Encapsulating Security Payload (ESP)*, whose structure is described as below:,..." />
-<meta name="description" content="ESP - Encapsulating Security Payload: pcapkit.protocols.internet.esp contains ESP only, which implements extractor for Encapsulating Security Payload (ESP)*, whose structure is described as below:,..." />
+<meta property="og:description" content="pcapkit.protocols.internet.esp contains ESP only, which implements extractor for Encapsulating Security Payload (ESP)*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,,..." />
+<meta name="description" content="pcapkit.protocols.internet.esp contains ESP only, which implements extractor for Encapsulating Security Payload (ESP)*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,,..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="HIP - Host Identity Protocol" href="hip.html"><link rel="prev" title="AH - Authentication Header" href="ah.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -417,12 +417,10 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols.internet.esp">
 <span id="esp-encapsulating-security-payload"></span><h1>ESP - Encapsulating Security Payload<a class="headerlink" href="#module-pcapkit.protocols.internet.esp" title="Link to this heading">¶</a></h1>
-<section id="module-1">
-<span id="id1"></span><h2>ESP - Encapsulating Security Payload<a class="headerlink" href="#module-1" title="Link to this heading">¶</a></h2>
-<p id="module-0"><a class="reference internal" href="#module-1" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> contains
+<p><a class="reference internal" href="#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> only,
 which implements extractor for Encapsulating
-Security Payload (ESP) <a class="footnote-reference brackets" href="#id3" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is
+Security Payload (ESP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is
 described as below:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -478,214 +476,16 @@ fields <em>inside</em> the ciphertext, and leaves the length of the <code class=
 <span class="pre">Check</span> <span class="pre">Value</span></code> to be determined by the Security Association (SA), which is
 negotiated out of band. Therefore:</p>
 <ul class="simple">
-<li><p><strong>Without</strong> SA context, <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> parses the <code class="docutils literal notranslate"><span class="pre">SPI</span></code> and <code class="docutils literal notranslate"><span class="pre">Sequence</span>
-<span class="pre">Number</span></code>, reports the remainder as an opaque encrypted payload, and says
-so through <a class="reference internal" href="#pcapkit.protocols.data.internet.esp.ESP.status" title="pcapkit.protocols.data.internet.esp.ESP.status"><code class="xref py py-attr docutils literal notranslate"><span class="pre">esp.status</span></code></a>.
+<li><p><strong>Without</strong> SA context, <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>
+parses the <code class="docutils literal notranslate"><span class="pre">SPI</span></code> and <code class="docutils literal notranslate"><span class="pre">Sequence</span> <span class="pre">Number</span></code>, reports the remainder as an
+opaque encrypted payload, and says so through
+<a class="reference internal" href="#pcapkit.protocols.data.internet.esp.ESP.status" title="pcapkit.protocols.data.internet.esp.ESP.status"><code class="xref py py-attr docutils literal notranslate"><span class="pre">esp.status</span></code></a>.
 It does <em>not</em> guess at the trailer, and it does not raise.</p></li>
-<li><p><strong>With</strong> SA context, <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> splits off the ICV, verifies integrity,
-decrypts, strips the padding using <code class="docutils literal notranslate"><span class="pre">Pad</span> <span class="pre">Length</span></code>, and dispatches the
-recovered plaintext to the next layer using <code class="docutils literal notranslate"><span class="pre">Next</span> <span class="pre">Header</span></code> – so an
-ESP tunnelled TCP segment decodes as TCP.</p></li>
+<li><p><strong>With</strong> SA context, <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> splits
+off the ICV, verifies integrity, decrypts, strips the padding using
+<code class="docutils literal notranslate"><span class="pre">Pad</span> <span class="pre">Length</span></code>, and dispatches the recovered plaintext to the next layer
+using <code class="docutils literal notranslate"><span class="pre">Next</span> <span class="pre">Header</span></code> – so an ESP tunnelled TCP segment decodes as TCP.</p></li>
 </ul>
-<p>SA context is supplied through the generic, protocol keyed context channel
-in <a class="reference internal" href="../../corekit/context.html#module-1" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pcapkit</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.esp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Cipher</span><span class="p">,</span> <span class="n">ESPContext</span><span class="p">,</span> <span class="n">Integrity</span><span class="p">,</span>
-                                            <span class="n">SecurityAssociation</span><span class="p">)</span>
-
-<span class="n">sa</span> <span class="o">=</span> <span class="n">SecurityAssociation</span><span class="p">(</span>
-    <span class="n">spi</span><span class="o">=</span><span class="mh">0x4321</span><span class="p">,</span>
-    <span class="n">encryption</span><span class="o">=</span><span class="n">Cipher</span><span class="o">.</span><span class="n">AES_CBC</span><span class="p">,</span>
-    <span class="n">encryption_key</span><span class="o">=</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="s1">'90d382b410eeba7ad938c46cec1a82bf'</span><span class="p">),</span>
-    <span class="n">integrity</span><span class="o">=</span><span class="n">Integrity</span><span class="o">.</span><span class="n">HMAC_SHA2_256_128</span><span class="p">,</span>
-    <span class="n">integrity_key</span><span class="o">=</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="s1">'00'</span> <span class="o">*</span> <span class="mi">32</span><span class="p">),</span>
-    <span class="n">destination</span><span class="o">=</span><span class="s1">'192.168.123.100'</span><span class="p">,</span>   <span class="c1"># optional, disambiguates several tunnels</span>
-<span class="p">)</span>
-<span class="n">extraction</span> <span class="o">=</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="s1">'esp.pcap'</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ESPContext</span><span class="p">(</span><span class="n">sa</span><span class="p">))</span>
-</pre></div>
-</div>
-<section id="registered-algorithms-and-supported-ones">
-<h3>Registered algorithms, and supported ones<a class="headerlink" href="#registered-algorithms-and-supported-ones" title="Link to this heading">¶</a></h3>
-<p>ESP has no algorithm registry of its own – an SA’s algorithms are negotiated
-by IKEv2 – so <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> and
-<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> are generated from
-the IKEv2 <em>transform ID</em> sub-registries and enumerate everything <strong>IANA has
-registered</strong>: 3DES, AES-CTR, the AES-CCM and Camellia families,
-ChaCha20-Poly1305, the implicit IV variants of <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8750.html"><strong>RFC 8750</strong></a>, the <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9227.html"><strong>RFC 9227</strong></a>
-MGM suites, and the transforms long since deprecated.</p>
-<p><strong>Registration is not support.</strong> A member of either enumeration says only that
-IANA assigned the transform an ID; what <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> can actually apply is
-the separate, explicit <a class="reference internal" href="#pcapkit.protocols.internet.esp.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.internet.esp.INTEGRITY_SUITES" title="pcapkit.protocols.internet.esp.INTEGRITY_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">INTEGRITY_SUITES</span></code></a>
-tables, and <a class="reference internal" href="#pcapkit.protocols.internet.esp.CipherSuite.get" title="pcapkit.protocols.internet.esp.CipherSuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CipherSuite.get()</span></code></a> / <a class="reference internal" href="#pcapkit.protocols.internet.esp.IntegritySuite.get" title="pcapkit.protocols.internet.esp.IntegritySuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IntegritySuite.get()</span></code></a> refuse
-anything outside them rather than half-working:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Cipher</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ENCR_3DES'</span><span class="p">)</span>          <span class="c1"># registered, so the enum has it</span>
-<span class="go">&lt;Cipher.ENCR_3DES: 3&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">CipherSuite</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ENCR_3DES'</span><span class="p">)</span>     <span class="c1"># but ESP cannot apply it</span>
-<span class="gt">Traceback (most recent call last):</span>
-<span class="w">  </span><span class="c">...</span>
-<span class="gr">pcapkit.utilities.exceptions.ProtocolError</span>: <span class="n">unsupported ESP encryption</span>
-<span class="x">algorithm: ENCR_3DES; pcapkit implements ENCR_NULL, ENCR_AES_CBC,</span>
-<span class="x">ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16</span>
-</pre></div>
-</div>
-<p>Decryption requires the optional <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> dependency
-(<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[crypto]</span></code>). <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> imports and works
-without it; an SA that names an AES suite simply degrades to the opaque
-payload path, with a warning.</p>
-<p>The supported set is anchored on the <em>mandatory to implement</em> algorithms of
-<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a>. The rows marked <code class="docutils literal notranslate"><span class="pre">yes</span></code> are exactly the keys of
-<a class="reference internal" href="#pcapkit.protocols.internet.esp.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a>; everything else the registry lists is enumerated and
-rejected.</p>
-<div class="table-wrapper docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Encryption</p></th>
-<th class="head"><p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a> status</p></th>
-<th class="head"><p>Implemented</p></th>
-<th class="head"><p>Notes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_NULL</span></code></p></td>
-<td><p>MUST</p></td>
-<td><p>yes</p></td>
-<td><p><span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2410.html"><strong>RFC 2410</strong></a>; needs no <code class="docutils literal notranslate"><span class="pre">cryptography</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_CBC</span></code></p></td>
-<td><p>MUST</p></td>
-<td><p>yes</p></td>
-<td><p><span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3602.html"><strong>RFC 3602</strong></a>; 128/192/256-bit keys</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_GCM_16</span></code></p></td>
-<td><p>MUST</p></td>
-<td><p>yes</p></td>
-<td><p><span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a>; 8-octet explicit IV</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_GCM_8</span></code></p></td>
-<td><p>–</p></td>
-<td><p>yes</p></td>
-<td><p><span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a>, 8-octet ICV</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_GCM_12</span></code></p></td>
-<td><p>–</p></td>
-<td><p>yes</p></td>
-<td><p><span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a>, 12-octet ICV</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_CCM_8</span></code></p></td>
-<td><p>SHOULD</p></td>
-<td><p><strong>no</strong></p></td>
-<td><p>registered, not implemented</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_CHACHA20_POLY1305</span></code></p></td>
-<td><p>SHOULD</p></td>
-<td><p><strong>no</strong></p></td>
-<td><p>registered, not implemented</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_3DES</span></code></p></td>
-<td><p>SHOULD NOT</p></td>
-<td><p><strong>no</strong></p></td>
-<td><p>registered, deliberately omitted</p></td>
-</tr>
-<tr class="row-even"><td><p>DES, Blowfish, 3IDEA</p></td>
-<td><p>MUST NOT</p></td>
-<td><p><strong>no</strong></p></td>
-<td><p>registered, deliberately omitted</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>“DES, Blowfish, 3IDEA” above covers <code class="docutils literal notranslate"><span class="pre">ENCR_DES</span></code>, <code class="docutils literal notranslate"><span class="pre">ENCR_DES_IV64</span></code>,
-<code class="docutils literal notranslate"><span class="pre">ENCR_DES_IV32</span></code>, <code class="docutils literal notranslate"><span class="pre">ENCR_BLOWFISH</span></code> and <code class="docutils literal notranslate"><span class="pre">ENCR_3IDEA</span></code>.</p>
-<p>Likewise, the rows marked <code class="docutils literal notranslate"><span class="pre">yes</span></code> below are exactly the keys of
-<a class="reference internal" href="#pcapkit.protocols.internet.esp.INTEGRITY_SUITES" title="pcapkit.protocols.internet.esp.INTEGRITY_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">INTEGRITY_SUITES</span></code></a>:</p>
-<div class="table-wrapper docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Integrity</p></th>
-<th class="head"><p><span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a> status</p></th>
-<th class="head"><p>Implemented</p></th>
-<th class="head"><p>Notes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NONE</span></code></p></td>
-<td><p>MUST (AEAD only)</p></td>
-<td><p>yes</p></td>
-<td><p>for AEAD suites</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_256_128</span></code></p></td>
-<td><p>MUST</p></td>
-<td><p>yes</p></td>
-<td><p><span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4868.html"><strong>RFC 4868</strong></a></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_512_256</span></code></p></td>
-<td><p>SHOULD</p></td>
-<td><p>yes</p></td>
-<td><p><span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4868.html"><strong>RFC 4868</strong></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_384_192</span></code></p></td>
-<td><p>–</p></td>
-<td><p>yes</p></td>
-<td><p><span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4868.html"><strong>RFC 4868</strong></a></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA1_96</span></code></p></td>
-<td><p>MUST-</p></td>
-<td><p>yes</p></td>
-<td><p><span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2404.html"><strong>RFC 2404</strong></a>; still widely captured</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_AES_XCBC_96</span></code></p></td>
-<td><p>SHOULD / MAY</p></td>
-<td><p><strong>no</strong></p></td>
-<td><p>registered, not implemented</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_AES_*_GMAC</span></code></p></td>
-<td><p>MAY</p></td>
-<td><p><strong>no</strong></p></td>
-<td><p>registered, not implemented</p></td>
-</tr>
-<tr class="row-odd"><td><p>MD5, DES-MAC, KPDK-MD5</p></td>
-<td><p>MUST NOT</p></td>
-<td><p><strong>no</strong></p></td>
-<td><p>registered, deliberately omitted</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>“MD5, DES-MAC, KPDK-MD5” above covers <code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_MD5_96</span></code>,
-<code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_MD5_128</span></code>, <code class="docutils literal notranslate"><span class="pre">AUTH_DES_MAC</span></code> and <code class="docutils literal notranslate"><span class="pre">AUTH_KPDK_MD5</span></code>. The registry
-spells the “no integrity algorithm” transform <code class="docutils literal notranslate"><span class="pre">NONE</span></code> rather than
-<code class="docutils literal notranslate"><span class="pre">AUTH_NONE</span></code>, and <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity.NONE" title="pcapkit.const.esp.integrity.Integrity.NONE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Integrity.NONE</span></code></a> follows it.</p>
-<p>Both enumerations additionally carry each transform’s prefix-stripped spelling
-as an alias, since that is how ESP and <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a> name the algorithms, so
-<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher.AES_CBC" title="pcapkit.const.esp.cipher.Cipher.AES_CBC"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Cipher.AES_CBC</span></code></a> and
-<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher.ENCR_AES_CBC" title="pcapkit.const.esp.cipher.Cipher.ENCR_AES_CBC"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Cipher.ENCR_AES_CBC</span></code></a>
-are the same member.</p>
-</section>
-<section id="known-limitations">
-<h3>Known limitations<a class="headerlink" href="#known-limitations" title="Link to this heading">¶</a></h3>
-<ul class="simple">
-<li><p><strong>Extended Sequence Numbers (ESN,</strong> <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> <strong>§2.2.1) are not
-supported.</strong> The high-order 32 bits of an ESN are not transmitted, and a
-stateless parser cannot recover them; they are required both for the ICV
-computation and for the AEAD associated data. An ESN protected packet
-therefore fails the integrity check <em>cleanly</em> rather than being decoded.</p></li>
-<li><p><strong>Traffic Flow Confidentiality (TFC) padding (§2.4) is not detected.</strong>
-TFC padding is indistinguishable from real payload without inspecting the
-inner protocol’s own length field, so it is handed to the next layer as
-part of the plaintext.</p></li>
-<li><p><strong>Anti-replay is not performed.</strong> <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is an analyser, not a
-receiver; the sequence number is reported, never checked.</p></li>
-<li><p>The ICV is <em>verified</em> but a failure is reported rather than raised, so
-that one bad packet does not abort a capture.</p></li>
-</ul>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id3" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">*</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://en.wikipedia.org/wiki/IPsec">https://en.wikipedia.org/wiki/IPsec</a></p>
-</aside>
-</aside>
-</section>
-</section>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.esp.ESP">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.esp.</span></span><span class="sig-name descname"><span class="pre">ESP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/esp.html#ESP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.esp.ESP" title="Link to this definition">¶</a></dt>
@@ -704,7 +504,7 @@ that one bad packet does not abort a capture.</p></li>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Unlike most protocols, this is <em>not</em> just the fixed header:
-<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> puts the trailer and the ICV at the end of the
+<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> puts the trailer and the ICV at the end of the
 packet, and the next layer is recovered from inside the
 ciphertext rather than from the bytes that follow. Every byte
 ESP owns is therefore counted here.</p>
@@ -729,7 +529,7 @@ ESP owns is therefore counted here.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.esp.ESP.read">
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/esp.html#ESP.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.esp.ESP.read" title="Link to this definition">¶</a></dt>
 <dd><p>Read Encapsulating Security Payload.</p>
-<p>Structure of ESP header [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>]:</p>
+<p>Structure of ESP header [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ----
@@ -793,7 +593,7 @@ mode used to reproduce a captured packet byte for byte, and is
 what <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP._make_data" title="pcapkit.protocols.internet.esp.ESP._make_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_data()</span></code></a> drives – re-encrypting a packet that was
 only ever read would change its bytes.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">encrypt=True</span></code> treats <code class="docutils literal notranslate"><span class="pre">payload</span></code> as the inner plaintext: it
-appends <span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> §2.4 padding, the pad length and <code class="docutils literal notranslate"><span class="pre">next</span></code>,
+appends <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> §2.4 padding, the pad length and <code class="docutils literal notranslate"><span class="pre">next</span></code>,
 encrypts the result under the Security Association matching
 <code class="docutils literal notranslate"><span class="pre">spi</span></code>, and appends the resulting ICV.</p></li>
 </ul>
@@ -977,8 +777,23 @@ expected case and does not warrant one.</p></li>
 
 <section id="security-associations">
 <h2>Security Associations<a class="headerlink" href="#security-associations" title="Link to this heading">¶</a></h2>
-<p>SA context is supplied through the generic, protocol keyed channel of
-<a class="reference internal" href="../../corekit/context.html#module-1" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a>.</p>
+<p>SA context is supplied through the generic, protocol keyed context channel
+in <a class="reference internal" href="../../corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pcapkit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.esp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Cipher</span><span class="p">,</span> <span class="n">ESPContext</span><span class="p">,</span> <span class="n">Integrity</span><span class="p">,</span>
+                                            <span class="n">SecurityAssociation</span><span class="p">)</span>
+
+<span class="n">sa</span> <span class="o">=</span> <span class="n">SecurityAssociation</span><span class="p">(</span>
+    <span class="n">spi</span><span class="o">=</span><span class="mh">0x4321</span><span class="p">,</span>
+    <span class="n">encryption</span><span class="o">=</span><span class="n">Cipher</span><span class="o">.</span><span class="n">AES_CBC</span><span class="p">,</span>
+    <span class="n">encryption_key</span><span class="o">=</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="s1">'90d382b410eeba7ad938c46cec1a82bf'</span><span class="p">),</span>
+    <span class="n">integrity</span><span class="o">=</span><span class="n">Integrity</span><span class="o">.</span><span class="n">HMAC_SHA2_256_128</span><span class="p">,</span>
+    <span class="n">integrity_key</span><span class="o">=</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="s1">'00'</span> <span class="o">*</span> <span class="mi">32</span><span class="p">),</span>
+    <span class="n">destination</span><span class="o">=</span><span class="s1">'192.168.123.100'</span><span class="p">,</span>   <span class="c1"># optional, disambiguates several tunnels</span>
+<span class="p">)</span>
+<span class="n">extraction</span> <span class="o">=</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="s1">'esp.pcap'</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ESPContext</span><span class="p">(</span><span class="n">sa</span><span class="p">))</span>
+</pre></div>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.esp.SecurityAssociation">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.esp.</span></span><span class="sig-name descname"><span class="pre">SecurityAssociation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encryption</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;Cipher.ENCR_NULL:</span> <span class="pre">11&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encryption_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">salt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integrity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;Integrity.NONE:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integrity_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icv_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/esp.html#SecurityAssociation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.esp.SecurityAssociation" title="Link to this definition">¶</a></dt>
@@ -994,14 +809,14 @@ single tunnel.</p></li>
 be one <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implements; being in the IANA registry is
 not enough.</p></li>
 <li><p><strong>encryption_key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Encryption keying material. For an AEAD suite this
-is the AES key followed by the 4-octet salt [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a> §8.1],
+is the AES key followed by the 4-octet salt [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a> §8.1],
 unless <code class="docutils literal notranslate"><span class="pre">salt</span></code> is given separately.</p></li>
 <li><p><strong>salt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – AEAD salt, when not appended to <code class="docutils literal notranslate"><span class="pre">encryption_key</span></code>.</p></li>
 <li><p><strong>integrity</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Integrity algorithm, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.esp.IntegritySuite.get" title="pcapkit.protocols.internet.esp.IntegritySuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IntegritySuite.get()</span></code></a>. Must
 be <code class="xref py py-attr docutils literal notranslate"><span class="pre">Integrity.NONE</span></code> for an AEAD suite, which provides its own.</p></li>
 <li><p><strong>integrity_key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Integrity key.</p></li>
 <li><p><strong>icv_length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Override for the ICV length, in octets. Needed for the
-long standing implementation bug noted in <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a> §6, where
+long standing implementation bug noted in <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a> §6, where
 <code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_256_128</span></code> is truncated to 96 rather than 128
 bits.</p></li>
 <li><p><strong>destination</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Outer destination address the SA applies to. IPsec keys
@@ -1010,7 +825,7 @@ address is what lets several tunnels sharing an SPI be told
 apart. Matched only when the outer destination is known to
 <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>; see <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP.read" title="pcapkit.protocols.internet.esp.ESP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ESP.read()</span></code></a>.</p></li>
 <li><p><strong>strict</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether a padding pattern that does not follow the
-monotonically increasing sequence of <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> §2.4 should be
+monotonically increasing sequence of <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> §2.4 should be
 treated as a decryption failure. Only applied when nothing else
 authenticated the packet, since a verified ICV or AEAD tag is a
 far better signal than the padding is. Some implementations pad
@@ -1105,7 +920,7 @@ packet rather than raised as an error from
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.esp.SecurityAssociation.compute_icv">
 <span class="sig-name descname"><span class="pre">compute_icv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/esp.html#SecurityAssociation.compute_icv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.esp.SecurityAssociation.compute_icv" title="Link to this definition">¶</a></dt>
 <dd><p>Compute the ICV over the integrity protected part of the packet.</p>
-<p>The integrity computation of <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> §2.8 covers the SPI, the
+<p>The integrity computation of <span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> §2.8 covers the SPI, the
 Sequence Number, the payload data (including any explicit IV) and
 the explicit ESP trailer – that is, everything transmitted except
 the ICV itself.</p>
@@ -1310,17 +1125,172 @@ parser, in order of preference for otherwise equal matches.</p>
 </section>
 <section id="algorithm-registries">
 <h2>Algorithm Registries<a class="headerlink" href="#algorithm-registries" title="Link to this heading">¶</a></h2>
-<p>The algorithm enumerations are the IANA IKEv2 transform ID registries,
-generated into <a class="reference internal" href="../../const/esp.html#module-pcapkit.const.esp" title="pcapkit.const.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.esp</span></code></a> and re-exported here for convenience:
+<p>ESP has no algorithm registry of its own – an SA’s algorithms are negotiated
+by IKEv2 – so <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> and
+<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> are generated from
+the IKEv2 <em>transform ID</em> sub-registries and enumerate everything <strong>IANA has
+registered</strong>: 3DES, AES-CTR, the AES-CCM and Camellia families,
+ChaCha20-Poly1305, the implicit IV variants of <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8750.html"><strong>RFC 8750</strong></a>, the <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9227.html"><strong>RFC 9227</strong></a>
+MGM suites, and the transforms long since deprecated.</p>
+<p>The enumerations themselves are generated into <a class="reference internal" href="../../const/esp.html#module-pcapkit.const.esp" title="pcapkit.const.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.esp</span></code></a> and
+re-exported here for convenience:
 <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> is
 <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.esp.cipher.Cipher</span></code></a> and <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> is
 <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.esp.integrity.Integrity</span></code></a>.</p>
+<p>Both enumerations additionally carry each transform’s prefix-stripped spelling
+as an alias, since that is how ESP and <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a> name the algorithms, so
+<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher.AES_CBC" title="pcapkit.const.esp.cipher.Cipher.AES_CBC"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Cipher.AES_CBC</span></code></a> and
+<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher.ENCR_AES_CBC" title="pcapkit.const.esp.cipher.Cipher.ENCR_AES_CBC"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Cipher.ENCR_AES_CBC</span></code></a>
+are the same member. The registry spells the “no integrity algorithm”
+transform <code class="docutils literal notranslate"><span class="pre">NONE</span></code> rather than <code class="docutils literal notranslate"><span class="pre">AUTH_NONE</span></code>, and <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity.NONE" title="pcapkit.const.esp.integrity.Integrity.NONE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Integrity.NONE</span></code></a> follows it.</p>
 </section>
 <section id="algorithm-support">
 <h2>Algorithm Support<a class="headerlink" href="#algorithm-support" title="Link to this heading">¶</a></h2>
 <p>A registry enumerates what IANA assigned an ID to, which is far more than
-<a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implements. The tables below are the authority on what an SA may
-actually name, and the two <code class="docutils literal notranslate"><span class="pre">get</span></code> methods refuse anything outside them.</p>
+<a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implements. <strong>Registration is not support.</strong> A member of either
+enumeration says only that IANA assigned the transform an ID; what
+<a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> can actually apply is the separate, explicit
+<a class="reference internal" href="#pcapkit.protocols.internet.esp.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.internet.esp.INTEGRITY_SUITES" title="pcapkit.protocols.internet.esp.INTEGRITY_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">INTEGRITY_SUITES</span></code></a> tables, and
+<a class="reference internal" href="#pcapkit.protocols.internet.esp.CipherSuite.get" title="pcapkit.protocols.internet.esp.CipherSuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CipherSuite.get</span></code></a> /
+<a class="reference internal" href="#pcapkit.protocols.internet.esp.IntegritySuite.get" title="pcapkit.protocols.internet.esp.IntegritySuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IntegritySuite.get</span></code></a>
+refuse anything outside them rather than half-working:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Cipher</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ENCR_3DES'</span><span class="p">)</span>          <span class="c1"># registered, so the enum has it</span>
+<span class="go">&lt;Cipher.ENCR_3DES: 3&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">CipherSuite</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ENCR_3DES'</span><span class="p">)</span>     <span class="c1"># but ESP cannot apply it</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">  </span><span class="c">...</span>
+<span class="gr">pcapkit.utilities.exceptions.ProtocolError</span>: <span class="n">unsupported ESP encryption</span>
+<span class="x">algorithm: ENCR_3DES; pcapkit implements ENCR_NULL, ENCR_AES_CBC,</span>
+<span class="x">ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16</span>
+</pre></div>
+</div>
+<p>Decryption requires the optional <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> dependency
+(<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[crypto]</span></code>). <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> imports and works
+without it; an SA that names an AES suite simply degrades to the opaque
+payload path, with a warning.</p>
+<p>The supported set is anchored on the <em>mandatory to implement</em> algorithms of
+<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a>. The tables below are the authority on what an SA may actually
+name; the rows marked <code class="docutils literal notranslate"><span class="pre">yes</span></code> are exactly the keys of
+<a class="reference internal" href="#pcapkit.protocols.internet.esp.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a>, and everything else the
+registry lists is enumerated and rejected.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Encryption</p></th>
+<th class="head"><p><span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a> status</p></th>
+<th class="head"><p>Implemented</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_NULL</span></code></p></td>
+<td><p>MUST</p></td>
+<td><p>yes</p></td>
+<td><p><span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2410.html"><strong>RFC 2410</strong></a>; needs no <code class="docutils literal notranslate"><span class="pre">cryptography</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_CBC</span></code></p></td>
+<td><p>MUST</p></td>
+<td><p>yes</p></td>
+<td><p><span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3602.html"><strong>RFC 3602</strong></a>; 128/192/256-bit keys</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_GCM_16</span></code></p></td>
+<td><p>MUST</p></td>
+<td><p>yes</p></td>
+<td><p><span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a>; 8-octet explicit IV</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_GCM_8</span></code></p></td>
+<td><p>–</p></td>
+<td><p>yes</p></td>
+<td><p><span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a>, 8-octet ICV</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_GCM_12</span></code></p></td>
+<td><p>–</p></td>
+<td><p>yes</p></td>
+<td><p><span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a>, 12-octet ICV</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_CCM_8</span></code></p></td>
+<td><p>SHOULD</p></td>
+<td><p><strong>no</strong></p></td>
+<td><p>registered, not implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_CHACHA20_POLY1305</span></code></p></td>
+<td><p>SHOULD</p></td>
+<td><p><strong>no</strong></p></td>
+<td><p>registered, not implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_3DES</span></code></p></td>
+<td><p>SHOULD NOT</p></td>
+<td><p><strong>no</strong></p></td>
+<td><p>registered, deliberately omitted</p></td>
+</tr>
+<tr class="row-even"><td><p>DES, Blowfish, 3IDEA</p></td>
+<td><p>MUST NOT</p></td>
+<td><p><strong>no</strong></p></td>
+<td><p>registered, deliberately omitted</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>“DES, Blowfish, 3IDEA” above covers <code class="docutils literal notranslate"><span class="pre">ENCR_DES</span></code>, <code class="docutils literal notranslate"><span class="pre">ENCR_DES_IV64</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ENCR_DES_IV32</span></code>, <code class="docutils literal notranslate"><span class="pre">ENCR_BLOWFISH</span></code> and <code class="docutils literal notranslate"><span class="pre">ENCR_3IDEA</span></code>.</p>
+<p>Likewise, the rows marked <code class="docutils literal notranslate"><span class="pre">yes</span></code> below are exactly the keys of
+<a class="reference internal" href="#pcapkit.protocols.internet.esp.INTEGRITY_SUITES" title="pcapkit.protocols.internet.esp.INTEGRITY_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">INTEGRITY_SUITES</span></code></a>:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Integrity</p></th>
+<th class="head"><p><span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8221.html"><strong>RFC 8221</strong></a> status</p></th>
+<th class="head"><p>Implemented</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NONE</span></code></p></td>
+<td><p>MUST (AEAD only)</p></td>
+<td><p>yes</p></td>
+<td><p>for AEAD suites</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_256_128</span></code></p></td>
+<td><p>MUST</p></td>
+<td><p>yes</p></td>
+<td><p><span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4868.html"><strong>RFC 4868</strong></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_512_256</span></code></p></td>
+<td><p>SHOULD</p></td>
+<td><p>yes</p></td>
+<td><p><span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4868.html"><strong>RFC 4868</strong></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_384_192</span></code></p></td>
+<td><p>–</p></td>
+<td><p>yes</p></td>
+<td><p><span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4868.html"><strong>RFC 4868</strong></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA1_96</span></code></p></td>
+<td><p>MUST-</p></td>
+<td><p>yes</p></td>
+<td><p><span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2404.html"><strong>RFC 2404</strong></a>; still widely captured</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_AES_XCBC_96</span></code></p></td>
+<td><p>SHOULD / MAY</p></td>
+<td><p><strong>no</strong></p></td>
+<td><p>registered, not implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_AES_*_GMAC</span></code></p></td>
+<td><p>MAY</p></td>
+<td><p><strong>no</strong></p></td>
+<td><p>registered, not implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p>MD5, DES-MAC, KPDK-MD5</p></td>
+<td><p>MUST NOT</p></td>
+<td><p><strong>no</strong></p></td>
+<td><p>registered, deliberately omitted</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>“MD5, DES-MAC, KPDK-MD5” above covers <code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_MD5_96</span></code>,
+<code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_MD5_128</span></code>, <code class="docutils literal notranslate"><span class="pre">AUTH_DES_MAC</span></code> and <code class="docutils literal notranslate"><span class="pre">AUTH_KPDK_MD5</span></code>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.esp.CipherSuite">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.esp.</span></span><span class="sig-name descname"><span class="pre">CipherSuite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/esp.html#CipherSuite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.esp.CipherSuite" title="Link to this definition">¶</a></dt>
@@ -1352,7 +1322,7 @@ that provides its own integrity protection.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.esp.CipherSuite.block_size">
 <span class="sig-name descname"><span class="pre">block_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.esp.CipherSuite.block_size" title="Link to this definition">¶</a></dt>
-<dd><p>Cipher block size, in octets. <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> §2.4 additionally requires
+<dd><p>Cipher block size, in octets. <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> §2.4 additionally requires
 the ciphertext to be a multiple of 4 octets, which is why
 <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP.make" title="pcapkit.protocols.internet.esp.ESP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ESP.make()</span></code></a> aligns to <code class="docutils literal notranslate"><span class="pre">max(block_size,</span> <span class="pre">4)</span></code> rather than to this
 value alone.</p>
@@ -1373,7 +1343,7 @@ value alone.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.esp.CipherSuite.salt_length">
 <span class="sig-name descname"><span class="pre">salt_length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.esp.CipherSuite.salt_length" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the salt taken from the keying material [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a> §8.1].</p>
+<dd><p>Length of the salt taken from the keying material [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a> §8.1].</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1524,6 +1494,24 @@ whether IANA registered the transform. See <a class="reference internal" href="#
 </dd></dl>
 
 </section>
+<section id="known-limitations">
+<h2>Known Limitations<a class="headerlink" href="#known-limitations" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Extended Sequence Numbers (ESN,</strong> <span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> <strong>§2.2.1) are not
+supported.</strong> The high-order 32 bits of an ESN are not transmitted, and a
+stateless parser cannot recover them; they are required both for the ICV
+computation and for the AEAD associated data. An ESN protected packet
+therefore fails the integrity check <em>cleanly</em> rather than being decoded.</p></li>
+<li><p><strong>Traffic Flow Confidentiality (TFC) padding (§2.4) is not detected.</strong>
+TFC padding is indistinguishable from real payload without inspecting the
+inner protocol’s own length field, so it is handed to the next layer as
+part of the plaintext.</p></li>
+<li><p><strong>Anti-replay is not performed.</strong> <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is an analyser, not a
+receiver; the sequence number is reported, never checked.</p></li>
+<li><p>The ICV is <em>verified</em> but a failure is reported rather than raised, so
+that one bad packet does not abort a capture.</p></li>
+</ul>
+</section>
 <section id="processing-status">
 <h2>Processing Status<a class="headerlink" href="#processing-status" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -1595,6 +1583,15 @@ e.g. because the optional <a class="reference external" href="https://cryptograp
 that a capture full of ESP packets does not pay for a failing import
 on every frame.</p>
 </div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.esp._CRYPTO">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.esp.</span></span><span class="sig-name descname"><span class="pre">_CRYPTO</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">NotImplemented</span></span><a class="headerlink" href="#pcapkit.protocols.internet.esp._CRYPTO" title="Link to this definition">¶</a></dt>
+<dd><p>Cached <code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography</span></code> primitives, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.esp.load_cryptography" title="pcapkit.protocols.internet.esp.load_cryptography"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_cryptography()</span></code></a>.
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#NotImplemented" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NotImplemented</span></code></a> means the import has not been attempted yet, and
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> that it was attempted and <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> is not installed –
+three states, so a missing dependency is not retried on every frame.</p>
 </dd></dl>
 
 </section>
@@ -1733,6 +1730,13 @@ layer’s data.</p>
 
 </dd></dl>
 
+<p class="rubric">Footnotes</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/IPsec">https://en.wikipedia.org/wiki/IPsec</a></p>
+</aside>
+</aside>
 </section>
 </section>
 
@@ -1792,14 +1796,10 @@ layer’s data.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">ESP - Encapsulating Security Payload</a><ul>
-<li><a class="reference internal" href="#module-1">ESP - Encapsulating Security Payload</a><ul>
-<li><a class="reference internal" href="#registered-algorithms-and-supported-ones">Registered algorithms, and supported ones</a></li>
-<li><a class="reference internal" href="#known-limitations">Known limitations</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#security-associations">Security Associations</a></li>
 <li><a class="reference internal" href="#algorithm-registries">Algorithm Registries</a></li>
 <li><a class="reference internal" href="#algorithm-support">Algorithm Support</a></li>
+<li><a class="reference internal" href="#known-limitations">Known Limitations</a></li>
 <li><a class="reference internal" href="#processing-status">Processing Status</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema.internet.esp">Header Schemas</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.data.internet.esp">Data Models</a></li>
