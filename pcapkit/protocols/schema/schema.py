@@ -382,7 +382,13 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         if name in self.__fields__:
             key = self.__map__.get(name, name)
             self.__dict__[key] = value
-            self.__updated__ = True
+            # NOTE: ``self.__updated__ = True`` would re-enter this method once
+            # per field assigned -- 180297 recursive calls per extraction of
+            # examples/captures/http.pcap -- only to miss the __fields__ test and
+            # fall through to object.__setattr__. ``__updated__`` is an instance
+            # attribute established in __new__, so the direct store is the same
+            # write with none of the round trip.
+            self.__dict__['__updated__'] = True
             return
         return super().__setattr__(name, value)
 
