@@ -22,7 +22,7 @@ figures stay comparable in kind with what the project has already published:
 :data:`ROUNDS` timed extractions of the same capture per engine, timed with
 :func:`time.perf_counter_ns`, first sample discarded as a warm-up, reported as
 milliseconds per packet. The deliberate departures are listed in
-:file:`README.md` under "Departures from the legacy methodology".
+:file:`README.rst` under "Departures from the legacy methodology".
 
 Two properties matter more than the numbers themselves.
 
