@@ -252,23 +252,46 @@ class ExtractorTests(unittest.TestCase):
             no_ext_capture = temp / 'capture'
             no_ext_capture.write_bytes(b'pcap')
 
+            # #358: the returned extension is bare, i.e. carries no leading
+            # dot. ``Extractor.__output__`` spells its extensions *with* the dot
+            # and ``make_name`` normalises it away, because ``_fext`` reaches the
+            # engines, which each compose a per-frame name as
+            # ``f'{name}.{ext._fext}'`` -- leaving the dot on gave
+            # ``Frame 1..json`` on disk. The output filename below keeps exactly
+            # one dot, which is the other half of the same contract.
             self.assertEqual(
                 Extractor.make_name(str(capture), str(temp / 'out'), 'json'),
-                (str(capture), str(temp / 'out.json'), 'json', '.json', False),
+                (str(capture), str(temp / 'out.json'), 'json', 'json', False),
             )
             self.assertEqual(
                 Extractor.make_name(str(capture.with_suffix('')), str(temp / 'raw.out'),
                                     'tree', extension=False),
-                (str(no_ext_capture), str(temp / 'raw.out'), 'tree', '.txt', False),
+                (str(no_ext_capture), str(temp / 'raw.out'), 'tree', 'txt', False),
             )
             self.assertEqual(
                 Extractor.make_name(str(capture), str(temp / 'frames'), 'json', files=True),
-                (str(capture), str(temp / 'frames'), 'json', '.json', True),
+                (str(capture), str(temp / 'frames'), 'json', 'json', True),
             )
             self.assertEqual(
                 Extractor.make_name(str(capture), str(temp / 'ignored'), 'json', nofile=True),
                 (str(capture), None, 'json', None, False),
             )
+
+            # An extension already on ``fout`` is recognised and not appended
+            # twice -- the comparison is against ``f'.{ext}'`` now that ``ext``
+            # is bare, and getting that wrong would give ``out.json.json``.
+            self.assertEqual(
+                Extractor.make_name(str(capture), str(temp / 'kept.json'), 'json')[1],
+                str(temp / 'kept.json'),
+            )
+            # Every registered format, so a newly registered dumper spelling its
+            # extension either way cannot reintroduce the doubled dot.
+            for fmt in ('pcap', 'cap', 'plist', 'xml', 'json', 'tree', 'text', 'txt'):
+                ext = Extractor.make_name(str(capture), str(temp / f'all-{fmt}'), fmt)[3]
+                with self.subTest(format=fmt):
+                    self.assertIsNotNone(ext)
+                    self.assertFalse(ext.startswith('.'))
+                    self.assertEqual(f'Frame 1.{ext}'.count('.'), 1)
 
             stream = io.BytesIO(b'capture')
             stream.name = str(capture)
@@ -473,7 +496,7 @@ class ExtractorTests(unittest.TestCase):
             with mock.patch.object(Extractor, 'run') as run:
                 with mock.patch.object(Extractor, 'make_name',
                                        return_value=(str(capture), str(temp / 'out.json'),
-                                                     'json', '.json', False)):
+                                                     'json', 'json', False)):
                     defaulted = Extractor()
             run.assert_called_once()
             self.assertEqual(defaulted._ifnm, str(capture))

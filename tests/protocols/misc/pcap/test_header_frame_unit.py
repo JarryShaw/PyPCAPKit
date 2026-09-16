@@ -3,12 +3,13 @@ from __future__ import annotations
 import datetime
 import io
 import importlib.util
+import struct
 import unittest
 from decimal import Decimal
 from types import SimpleNamespace
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -314,6 +315,89 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         frame._import_next_layer = mock.Mock(return_value=fake_next_no_chain)
         self.assertIs(frame._decode_next_layer(decoded_no_chain, LinkType.NULL, 0), decoded_no_chain)
         self.assertEqual(decoded_no_chain['protocols'], '')
+
+    def test_frame_data_holds_its_own_record_not_the_next(self) -> None:
+        """A frame's raw data must be the record it parsed, at its own offset.
+
+        #357: :meth:`Frame.read <pcapkit.protocols.misc.pcap.frame.Frame.read>`
+        rewound by ``self.length`` (16) to find the start of the record, but the
+        schema unpack has by then consumed the record header *and* the
+        ``incl_len`` octets of packet data. So the rewind landed ``incl_len``
+        octets too late: every frame captured its own tail followed by the head
+        of the next record, and the final frame came back truncated because the
+        read ran past EOF.
+
+        Checked against the record chain walked straight out of the file, so the
+        assertion does not depend on any of the code under test, and checked for
+        *every* record rather than the first -- the last one is the truncating
+        case.
+
+        """
+        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.header import Header
+
+        path = sample_path('in.pcap')
+        with open(path, 'rb') as stream:
+            raw = stream.read()
+
+        # in.pcap is little-endian (magic d4c3b2a1) with a 24-octet global header
+        self.assertEqual(raw[:4], b'\xd4\xc3\xb2\xa1')
+        records = []
+        offset = 24
+        while offset < len(raw):
+            incl_len, = struct.unpack_from('<I', raw, offset + 8)
+            records.append((offset, 16 + incl_len))
+            offset += 16 + incl_len
+        self.assertEqual(records, [(24, 102), (126, 94), (220, 70),
+                                   (290, 70), (360, 70), (430, 175)])
+
+        with open(path, 'rb') as stream:
+            header = Header(stream)
+            for number, (start, total) in enumerate(records, start=1):
+                # the engine reads frames off one shared handle, so each frame
+                # must leave the cursor on the next record's first octet
+                self.assertEqual(stream.tell(), start)
+
+                frame = Frame(stream, num=number, header=header.info)
+                expected = raw[start:start + total]
+
+                self.assertEqual(bytes(frame), expected)
+                self.assertEqual(len(frame), total)
+                self.assertEqual(frame.packet.header, expected[:16])
+                self.assertEqual(frame.packet.payload, expected[16:])
+                self.assertEqual(frame.info.packet, expected[16:])
+                self.assertEqual(stream.tell(), start + total)
+
+    def test_frame_time_is_timezone_aware_utc(self) -> None:
+        """``Frame.info.time`` names an instant, so it must not be host-local.
+
+        #361 is about the PCAP-NG epoch, but the same family of defect sat
+        here: ``ts_sec`` is an offset from the UNIX epoch, and rendering it with
+        a bare :meth:`datetime.datetime.fromtimestamp` produced a *naive*
+        datetime in whatever zone the reading machine sat in. The instant was
+        right; the object could not be compared with an aware one, and read back
+        as a different wall-clock time on every host.
+
+        """
+        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.header import Header
+
+        path = sample_path('in.pcap')
+        with open(path, 'rb') as stream:
+            raw = stream.read()
+        ts_sec, ts_usec = struct.unpack_from('<II', raw, 24)
+
+        with open(path, 'rb') as stream:
+            header = Header(stream)
+            frame = Frame(stream, num=1, header=header.info)
+
+        self.assertEqual(frame.info.time_epoch,
+                         ts_sec + Decimal(ts_usec) / 1_000_000)
+        self.assertIsNotNone(frame.info.time.tzinfo)
+        self.assertEqual(frame.info.time.utcoffset(), datetime.timedelta(0))
+        self.assertEqual(frame.info.time,
+                         datetime.datetime.fromtimestamp(float(frame.info.time_epoch),
+                                                         datetime.timezone.utc))
 
 
 if __name__ == '__main__':

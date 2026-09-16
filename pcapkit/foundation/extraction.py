@@ -103,7 +103,11 @@ class Extractor(Generic[_P]):
         _ifnm: 'str'
         #: Output file name.
         _ofnm: 'Optional[str]'
-        #: Output file extension.
+        #: Output file extension, bare, i.e. without the leading ``.`` --
+        #: ``'json'``, not ``'.json'``. Normalised by
+        #: :meth:`~pcapkit.foundation.extraction.Extractor.make_name`, whose
+        #: docstring is the contract; the engines compose a per-frame filename
+        #: as ``f'{name}.{ext._fext}'`` and supply the dot themselves.
         _fext: 'Optional[str]'
 
         #: Auto extract flag. It indicates if the extraction process should
@@ -551,7 +555,9 @@ class Extractor(Generic[_P]):
         0. input filename
         1. output filename / directory name
         2. output format
-        3. output file extension (without ``.``)
+        3. output file extension, bare, i.e. **without** the leading ``.``, so
+           that a caller composing a per-frame filename writes
+           ``f'{name}.{ext}'``
         4. if split each frame into different files
 
         Args:
@@ -587,9 +593,19 @@ class Extractor(Generic[_P]):
             ofnm = None
             ext = None
         else:
-            ext = cls.__output__[fmt][1]
-            if ext is None:
+            registered = cls.__output__[fmt][1]
+            if registered is None:
                 raise FormatError(f'unknown output format: {fmt}')
+
+            # NOTE: ``__output__`` spells its extensions with the leading dot,
+            # and so does every ``ext=`` handed to
+            # :func:`pcapkit.foundation.registry.foundation.register_dumper`.
+            # The value we hand back, though, is documented bare and is used
+            # bare -- ``Extractor._fext`` reaches the engines, which each
+            # compose a per-frame name as ``f'{name}.{ext._fext}'``. Leaving the
+            # dot on is what produced ``Frame 1..json`` (see #358), so
+            # normalise it away once, here, rather than at six call sites.
+            ext = registered[1:] if registered.startswith('.') else registered
 
             if (parent := os.path.split(fout)[0]):
                 os.makedirs(parent, exist_ok=True)
@@ -598,7 +614,8 @@ class Extractor(Generic[_P]):
                 ofnm = fout
                 os.makedirs(ofnm, exist_ok=True)
             elif extension:
-                ofnm = fout if os.path.splitext(fout)[1] == ext else f'{fout}{ext}'
+                # NOTE: The dot belongs to the separator here, not to ``ext``.
+                ofnm = fout if os.path.splitext(fout)[1] == f'.{ext}' else f'{fout}.{ext}'
             else:
                 ofnm = fout
 

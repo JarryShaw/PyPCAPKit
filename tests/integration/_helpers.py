@@ -127,12 +127,15 @@ def section_counts(report: 'dict[str, Any]') -> 'collections.Counter[str]':
 def report_stems(directory: 'str') -> 'list[str]':
     """Sorted section names of the reports ``files=True`` wrote into ``directory``.
 
-    Split at the *first* dot on purpose. Per-frame reports are named
-    ``f'{name}.{ext}'`` where ``ext`` already carries its own leading dot
-    (``pcapkit/foundation/engines/pcap.py:117`` and ``:156``, and
-    ``pcapkit/foundation/engines/pcapng.py:311``), so they land on disk as
-    ``Frame 1..json``. Taking the leading component keeps these assertions
-    neutral about how many dots there are, rather than pinning that defect.
+    Split at the *first* dot, which keeps the callers' assertions about *which*
+    sections a report holds independent of what the extension happens to be.
+
+    This used to be neutrality about the number of dots as well: per-frame
+    reports were named ``f'{name}.{ext._fext}'`` while ``_fext`` still carried
+    its own leading dot, so they landed on disk as ``Frame 1..json`` (#358).
+    That is fixed -- the extension is bare now, and
+    :mod:`tests.integration.test_files_output_naming` asserts the real names --
+    so nothing here is working around it any more.
 
     """
     return sorted(entry.name.split('.', 1)[0] for entry in pathlib.Path(directory).iterdir())
