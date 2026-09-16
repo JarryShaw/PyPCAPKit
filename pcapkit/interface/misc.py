@@ -37,7 +37,14 @@ if TYPE_CHECKING:
     ReassemblyAdapter = Callable[..., 'Optional[TCP_Data]']
 
     ByteOrder = Literal['little', 'big']
-    Formats = Literal['pcap', 'json', 'tree', 'plist']
+    #: Every key registered in :attr:`Extractor.__output__
+    #: <pcapkit.foundation.extraction.Extractor.__output__>` and in
+    #: :attr:`TraceFlowBase.__output__
+    #: <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>` -- the two
+    #: registries expose the same eight keys. This used to name only four of them,
+    #: which made ``'cap'`` and the ``'txt'``/``'xml'`` aliases unspellable for a
+    #: type checker even though every one of them is accepted at runtime.
+    Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
     # NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;
     # both copies need updating when a new engine lands.
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pypcapfile']

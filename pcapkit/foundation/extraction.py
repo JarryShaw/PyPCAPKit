@@ -60,7 +60,13 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import PCAPNG
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-    Formats = Literal['pcap', 'json', 'tree', 'plist']
+    #: Every key registered in :attr:`Extractor.__output__` and in
+    #: :attr:`TraceFlowBase.__output__
+    #: <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>` -- the two
+    #: registries expose the same eight keys. This used to name only four of them,
+    #: which made ``'cap'`` and the ``'txt'``/``'xml'`` aliases unspellable for a
+    #: type checker even though every one of them is accepted at runtime.
+    Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
     # NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; both
     # copies need updating when a new engine lands. The duplication predates the
     # engines added here and is left as-is on purpose.
