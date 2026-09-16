@@ -33,7 +33,9 @@ nothing from :mod:`pcapkit`, so it cannot introduce an import cycle.
 import importlib
 import importlib.metadata
 import sys
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING
+
+from pcapkit.corekit.infoclass import Info, info_final
 
 __all__ = [
     'PYPCAP', 'PCAP_CT', 'DISTRIBUTIONS', 'ENGINE_NAMES',
@@ -61,7 +63,8 @@ ENGINE_NAMES = {
 }
 
 
-class Probe(NamedTuple):
+@info_final
+class Probe(Info):
     """What one attempt to import :mod:`pcap` found."""
 
     #: Distribution that provided the imported module -- :data:`PYPCAP`,
