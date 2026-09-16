@@ -688,39 +688,60 @@ first extraction is discarded as a warm-up. Values are milliseconds per packet.<
 <td><p>0.0318</p></td>
 <td><p>0.0297</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> <a class="footnote-reference brackets" href="#id9" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
 <td><p>14.7434</p></td>
 <td><p>14.8755</p></td>
 <td><p>14.6006</p></td>
 <td><p>14.8334</p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id19" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>–</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> <a class="footnote-reference brackets" href="#id10" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
 <td><p>0.0163</p></td>
 <td><p>0.0107</p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id20" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id20" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id20" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id21" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id21" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id21" id="id11" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id21" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id21" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code> <a class="footnote-reference brackets" href="#id11" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id22" id="id14" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id22" id="id15" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id22" id="id16" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id22" id="id17" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
-<td><p>– <a class="footnote-reference brackets" href="#id22" id="id18" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code> <a class="footnote-reference brackets" href="#id12" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <p>The unavailable cells were attempted. They are not zeroes and must not be
 compared with a measured row.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id9" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">1</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> 0.6 cannot create the implicit event loop it expects on Python
+3.14; it ran on 3.10–3.13.</p>
+</aside>
+<aside class="footnote brackets" id="id10" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">2</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 imports <a class="reference external" href="https://docs.python.org/3/library/imp.html#module-imp" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">imp</span></code></a>, which Python removed in 3.12.</p>
+</aside>
+<aside class="footnote brackets" id="id11" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">3</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> 1.3.0 could not be built here: its build does not search
+Homebrew’s libpcap library prefix. It is also unsupported on Python 3.12+.</p>
+</aside>
+<aside class="footnote brackets" id="id12" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">4</a><span class="fn-bracket">]</span></span>
+<p>The prerelease <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> / <a class="reference external" href="https://www.tcpdump.org">libpcap</a> wheels currently load Linux
+<code class="docutils literal notranslate"><span class="pre">libc.so.6</span></code> on this macOS host, so their engine could not be preflighted.</p>
+</aside>
+</aside>
 </section>
 </section>
 </section>
@@ -918,30 +939,6 @@ pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id19" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">1</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> 0.6 cannot create the implicit event loop it expects on Python
-3.14; it ran on 3.10–3.13.</p>
-</aside>
-<aside class="footnote brackets" id="id20" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id6">1</a>,<a role="doc-backlink" href="#id7">2</a>,<a role="doc-backlink" href="#id8">3</a>)</span>
-<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 imports <a class="reference external" href="https://docs.python.org/3/library/imp.html#module-imp" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">imp</span></code></a>, which Python removed in 3.12.</p>
-</aside>
-<aside class="footnote brackets" id="id21" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id9">1</a>,<a role="doc-backlink" href="#id10">2</a>,<a role="doc-backlink" href="#id11">3</a>,<a role="doc-backlink" href="#id12">4</a>,<a role="doc-backlink" href="#id13">5</a>)</span>
-<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> 1.3.0 could not be built here: its build does not search
-Homebrew’s libpcap library prefix. It is also unsupported on Python 3.12+.</p>
-</aside>
-<aside class="footnote brackets" id="id22" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id14">1</a>,<a role="doc-backlink" href="#id15">2</a>,<a role="doc-backlink" href="#id16">3</a>,<a role="doc-backlink" href="#id17">4</a>,<a role="doc-backlink" href="#id18">5</a>)</span>
-<p>The prerelease <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> / <a class="reference external" href="https://www.tcpdump.org">libpcap</a> wheels currently load Linux
-<code class="docutils literal notranslate"><span class="pre">libc.so.6</span></code> on this macOS host, so their engine could not be preflighted.</p>
-</aside>
-</aside>
 </section>
 
         </article>
