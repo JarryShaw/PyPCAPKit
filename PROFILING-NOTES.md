@@ -14,12 +14,16 @@ The editable install in `.venv` points at the **main** checkout, so `PYTHONPATH`
 must name the tree under test or you profile the wrong code:
 
 ```bash
-PY=/local/home/jarryx/GitHub/PyPCAPKit/.venv/bin/python
-WT=/local/home/jarryx/GitHub/PyPCAPKit/.claude/worktrees/agent-a14f0c4dddc25f516
+WT=$(git rev-parse --show-toplevel)   # the tree under test
+PY=python                             # or the interpreter of your choice
 
 $PY examples/generators/make_samples.py          # build the un-committed fixtures
 PYTHONPATH=$WT $PY -m pytest -q                  # 782 passed, 17 skipped
 ```
+
+Every path below is repo-relative for the same reason. The figures here were
+taken with CPython 3.14 on Linux; absolute milliseconds will differ on your
+machine, and only the ratios are meant to carry across.
 
 A subagent found that `PYTHONPATH` alone was not always enough — `sys.path[0]`
 (the cwd) can shadow it, so `PYTHONSAFEPATH=1` is worth adding when the cwd is
