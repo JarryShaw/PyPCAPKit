@@ -66,16 +66,38 @@ class EngineRuntimeTests(unittest.TestCase):
         self.assertGreater(len(bytes(frame)), 0)
 
     @unittest.skipUnless(HAS_PYSHARK, 'pyshark not installed')
-    def test_pyshark_engine_currently_breaks_on_modern_asyncio(self) -> None:
+    def test_pyshark_engine_is_refused_before_asyncio_can_break(self) -> None:
+        """On 3.14 the engine is declined by the preflight, not by pyshark.
+
+        This test used to assert the raw :exc:`AttributeError` from inside
+        ``pyshark``, which was the honest description of the behaviour until
+        :meth:`PyShark.unsupported_reason
+        <pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason>` began
+        answering the question first. The preflight now names the interpreter as
+        the cause and falls back, so the exception never happens -- and the
+        extraction succeeds with ``pcapkit``'s own parser rather than failing.
+
+        """
         from pcapkit.interface import extract
+        from pcapkit.utilities.warnings import EngineWarning
 
         asyncio.set_event_loop(asyncio.new_event_loop())
         if not hasattr(asyncio, 'set_child_watcher'):
             asyncio.set_child_watcher = lambda watcher: None  # type: ignore[attr-defined]
 
         if sys.version_info >= (3, 14):
-            with self.assertRaises(AttributeError):
-                extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True, engine='pyshark')
+            with self.assertWarns(EngineWarning) as caught:
+                extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True, engine='pyshark')
+            self.addCleanup(close_extractor, extractor)
+
+            # The warning has to name the engine and the reason: "engine
+            # unavailable" on its own sends the reader looking at their capture.
+            message = str(caught.warnings[0].message)
+            self.assertIn('PyShark', message)
+            self.assertIn('3.14', message)
+
+            # And the fall back is a working extraction, not an empty one.
+            self.assertEqual(extractor.length, 6)
         else:
             extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True, engine='pyshark')
             self.addCleanup(close_extractor, extractor)
