@@ -607,6 +607,35 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: ``Schema.unpack`` clears ``__updated__`` before returning, but</span>
+        <span class="c1"># ``post_process`` runs after it and assigns fields -- and every field</span>
+        <span class="c1"># assignment sets the flag again (``Schema.__setattr__``). The schema is</span>
+        <span class="c1"># then left marked as needing a re-pack even though its ``__buffer__``</span>
+        <span class="c1"># already holds the octets just read off the wire, so the next</span>
+        <span class="c1"># ``bytes(schema)`` or ``len(schema)`` silently re-packs it.</span>
+        <span class="c1">#</span>
+        <span class="c1"># That re-pack is not merely wasted work: ``Schema.pack`` calls</span>
+        <span class="c1"># ``post_process`` a *second* time, with a packet context rebuilt from</span>
+        <span class="c1"># the schema's own fields and therefore holding none of the enclosing</span>
+        <span class="c1"># layer's, so it overwrites exactly the values ``post_process`` derived</span>
+        <span class="c1"># from that context. It is what discarded the IPv6 source address that</span>
+        <span class="c1"># ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``</span>
+        <span class="c1"># had just resolved: ``OptionField.unpack`` measures each parsed option</span>
+        <span class="c1"># with ``len(data)``, which triggered the re-pack one option later.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``Schema.pack`` already orders the two the other way round -- clear the</span>
+        <span class="c1"># flag *after* ``post_process``, not before -- so match it here and the</span>
+        <span class="c1"># revision made while unpacking survives.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Guarded rather than assigned outright because ``post_process`` may hand</span>
+        <span class="c1"># back something other than a schema: an implementation is free to return</span>
+        <span class="c1"># a nested one instead of ``self``, as</span>
+        <span class="c1"># ``pcapkit.protocols.schema.internet.hopopt._SMFDPDOption`` does, and the</span>
+        <span class="c1"># decorator is also applied to stand-ins in the test suite that return</span>
+        <span class="c1"># the packet mapping. Only a real schema carries the flag.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="s1">'__updated__'</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'R_prepare'</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">unpack</span></div>
 

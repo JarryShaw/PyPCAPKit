@@ -1000,9 +1000,19 @@ be included when <a class="reference internal" href="../corekit/infoclass.html#p
 <li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Source packet stream.</p></li>
 <li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Length of packet data.</p></li>
 <li><p><strong>_layer</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_layer</span></code>
-(<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exlayer" title="pcapkit.protocols.protocol.Protocol._exlayer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exlayer</span></code></a>).</p></li>
+(<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exlayer" title="pcapkit.protocols.protocol.Protocol._exlayer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exlayer</span></code></a>).
+While parsing, the un-prefixed <code class="docutils literal notranslate"><span class="pre">layer</span></code> is accepted as well –
+see the note below.</p></li>
 <li><p><strong>_protocol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str</span></code>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Type[Protocol]]</span></code>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_protocol</span></code>
-(<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exproto" title="pcapkit.protocols.protocol.Protocol._exproto"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exproto</span></code></a>).</p></li>
+(<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exproto" title="pcapkit.protocols.protocol.Protocol._exproto"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exproto</span></code></a>).
+While parsing, the un-prefixed <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is accepted as well –
+see the note below.</p></li>
+<li><p><strong>packet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict[str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Any]</span></code>) – Packet context of the enclosing layer, as
+handed over by
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code>.
+While parsing, it is republished as <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> so that
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a> – and through it the
+schema – can see it; see the note below.</p></li>
 <li><p><strong>__context__</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[ContextRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping[str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext]</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable[ProtocolContext]]</span></code>) – Caller supplied parsing context (<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exctx</span></code>),
 c.f. <a class="reference internal" href="../corekit/context.html#module-1" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a>. It is consumed here rather
 than being forwarded to <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.read</span></code></a>, and is
@@ -1012,6 +1022,17 @@ propagated to nested layers by
 </ul>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Three of the keywords above are <em>out-of-band</em>: they configure the
+parse rather than describing the packet, and every one of them is
+consumed here, at the one point each of a protocol’s producers passes
+through. That is deliberate, and it is what the normalisation below
+relies on – fixing a spelling here fixes it for the engines, for all
+four <code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer</span></code>
+implementations, and for any third party protocol that copied their
+shape, rather than one call site at a time.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
