@@ -26,9 +26,9 @@ import urllib.parse
 from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, overload
 
 import aenum
-import chardet
 
 from pcapkit.corekit.context import ContextRegistry
+from pcapkit.corekit.fields.strings import _detect_charset
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols import data as data_module
@@ -331,7 +331,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         .. _chardet: https://chardet.readthedocs.io
 
         """
-        charset = encoding or chardet.detect(byte)['encoding'] or 'utf-8'
+        charset = encoding or _detect_charset(byte)
         try:
             return byte.decode(charset, errors=errors)
         except UnicodeError:

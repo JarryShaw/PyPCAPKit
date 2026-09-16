@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """text field class"""
 
+import functools
 import urllib.parse as urllib_parse
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
@@ -16,6 +17,33 @@ __all__ = [
     'BitField',
     'PaddingField',
 ]
+
+#: How many distinct bytestrings :func:`_detect_charset` will remember. Bounded
+#: so that a capture full of never-repeating text cannot retain all of it.
+DETECT_CACHE_SIZE = 1024
+
+
+@functools.lru_cache(maxsize=DETECT_CACHE_SIZE)
+def _detect_charset(value: 'bytes') -> 'str':
+    """Detect the character set of ``value``.
+
+    :func:`chardet.detect` is a pure function of the bytes handed to it, and the
+    single most expensive step in turning a text field into a :obj:`str`. The
+    strings a capture presents repeat heavily -- an HTTP-heavy capture asked for
+    the encoding of ``b'Connection'`` once per message and got the same answer
+    every time -- so the verdict is memoised on the bytes rather than recomputed.
+    The result is by construction the one :func:`chardet.detect` would have
+    returned.
+
+    Args:
+        value: Bytestring whose encoding is to be detected.
+
+    Returns:
+        Name of the detected encoding, or ``'utf-8'`` where detection declines
+        to name one.
+
+    """
+    return chardet.detect(value)['encoding'] or 'utf-8'
 
 if TYPE_CHECKING:
     from typing import Callable, Optional, Tuple
@@ -168,7 +196,7 @@ class StringField(_TextField[str]):
             except UnicodeError:
                 ret = urllib_parse.unquote(value.replace(b'%', rb'\x'), encoding='utf-8', errors='replace')
         else:
-            charset = self._encoding or chardet.detect(value)['encoding'] or 'utf-8'
+            charset = self._encoding or _detect_charset(value)
             try:
                 ret = value.decode(charset, self._errors)
             except UnicodeError:
