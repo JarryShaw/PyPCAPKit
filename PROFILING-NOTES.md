@@ -65,9 +65,11 @@ not a hot spot; do not bother optimising it.
 
 ## What landed on `perf/hot-path-wins`
 
-Cumulative on `http.pcap`: **1041.5 ms -> 566.3 ms, -45.6%** (1.84x). Every
-commit was verified byte-identical over the 60-run / 33 MB serialisation diff, and
-the full suite is green.
+Cumulative on `http.pcap`: **1041.5 ms -> 574.4 ms, -44.8%** (1.81x). Every
+commit was verified byte-identical over the 60-run / 33 MB serialisation diff, the
+full suite is green, and both `pylint` and `mypy` report exactly the message set
+the pristine tree does (124 mypy errors either side, identical; pylint message
+multiset identical).
 
 | # | sha | change | `http.pcap` | all captures |
 |---|---|---|---|---|
@@ -75,7 +77,7 @@ the full suite is green.
 | 2 | `5ce03cd77` | `FieldBase.__copy__` | -16.6% | -11% to -15% everywhere |
 | 3 | `0c1387460` | read `Field.length` once | -2.0% | -2% to -3% |
 | 4 | `0aca00690` | `Schema.__setattr__` recursion | -3.7% | -2.6% to -4.2% |
-| 5 | `1794c43d2` | `OptionField` isinstance taken once | -1.0% | -1.2% |
+| ~~5~~ | `1794c43d2`, reverted in `8296e362b` | `OptionField` isinstance taken once | ~~-1.0%~~ | **reverted, see below** |
 
 (Shas are post-rebase onto `origin/main` at `42eb0d912`. That rebase brought in
 only `examples/benchmark/**` and the `Makefile` from PR #410 — **no `pcapkit/`
@@ -85,10 +87,26 @@ the code on this branch. Note that #410 landed a real benchmark harness at
 than through the scratch scripts listed above. It is not collected by `pytest`,
 which has `testpaths = ["tests"]`.)
 
-Per-capture, base -> now: `test.pcap` 28.3 -> 16.8 ms (-40.7%), `ipv4.pcap`
-1.90 -> 1.63 ms (-14.2%), `ipv6.pcap` 5.06 -> 4.38 ms (-13.4%),
-`profile.pcapng` 43.9 -> 35.0 ms (-20.3%), `many_interfaces.pcapng`
-49.6 -> 39.4 ms (-20.5%).
+Per-capture, base -> final: `test.pcap` 28.3 -> 17.0 ms (-39.8%), `ipv4.pcap`
+1.90 -> 1.66 ms (-12.6%), `ipv6.pcap` 5.06 -> 4.37 ms (-13.6%),
+`profile.pcapng` 43.9 -> 35.2 ms (-19.7%), `many_interfaces.pcapng`
+49.6 -> 39.2 ms (-20.9%).
+
+### Why change 5 was reverted — a worked example of the trade going the wrong way
+
+Taking `isinstance(field, OptionField)` once into `is_option` instead of testing
+it inline at `schema.py:656` and `:661` measured a real **-1.0%**. It was reverted
+anyway: storing the result costs **mypy its type narrowing**, so `field` stays
+`FieldBase` in the branches below and `field.option_padding` stops resolving —
+**four new `attr-defined` errors, 124 -> 128 across the package.** A flag variable
+in place of a self-evident test, plus four static-analysis regressions, is not a
+trade worth 1%.
+
+The general lesson for the rest of this list: **check `mypy` and `pylint` parity
+against the pristine tree, not just the test suite.** `/tmp/pcapprof/mypy_diff.sh`
+and `/tmp/pcapprof/lint_diff.sh` do it by diffing message multisets with line
+numbers normalised away. Any narrowing-dependent rewrite in these loops — which
+includes route 3 of finding C below — will hit the same wall.
 
 ### 1. Charset detection was uncached — 30% of an HTTP extraction
 
@@ -187,6 +205,125 @@ it was left alone.
 
 `schema.py:656` and `:661` ran the same `isinstance(field, OptionField)`. Taken
 once now. Small (-1.0%) but it removes a literally duplicated test.
+
+## Reassembly and flow tracing
+
+Measured separately, `http.pcap`, one clean subprocess per shape, warm-up
+discarded, 3 reps pooled over 2 passes (n=6). **Measuring several shapes in one
+process inflates all of them** — the same shape read 1026 ms early in a shared
+process and 594 ms in a clean one, a 73% error that grows monotonically with
+position in the run. Use one process per shape.
+
+```
+shape                             ms   ms/frame     delta   vs base
+baseline-nostore               564.4     0.5053         -
+baseline-store                 576.7     0.5163         -
+reasm-bare  (reassembly=True)  584.0     0.5228      +7.3     +1.3%
+reasm-ip    (+ip=True)        1059.5     0.9485    +482.8    +83.7%
+reasm-tcp   (+tcp=True)        672.6     0.6021     +95.9    +16.6%
+reasm-ip-tcp                  1134.9     1.0160    +558.2    +96.8%
+trace-bare  (trace=True)       587.2     0.5257     +22.8     +4.0%
+trace-tcp-pcap                1413.9     1.2658    +849.5   +150.5%
+trace-tcp-json                1817.4     1.6270   +1253.0   +222.0%
+```
+
+**A trap for anyone benchmarking these:** `reassembly=True` and `trace=True` are
+master switches only (`pcapkit/interface/core.py:61-72`). Without also passing
+`ip`/`ipv4`/`ipv6`/`tcp`, **no per-protocol work happens at all** — `+1.3%` and
+`+4.0%` respectively. A "reassembly benchmark" that passes only `reassembly=True`
+measures nothing.
+
+`reasm_store=False` saves nothing (+98.8% vs +96.8%): the cost is the reassembly
+work, not retaining the datagrams.
+
+**The `foundation/reassembly/` and `foundation/traceflow/` modules are not the
+cost — each is under 1.3% of its run in every shape.** All of it is in what they
+call, which is where the two findings below land. They are the largest single
+opportunities found anywhere in this pass.
+
+### Z1. IP reassembly re-parses every frame, fragmented or not — 86% of its cost
+
+`pcapkit/foundation/reassembly/ip.py:189`:
+
+```python
+packet=self.protocol.analyze(bufid[3], bytes(payload)),
+```
+
+`analyze()` is a **full second parse** of the reassembled payload through TCP and
+HTTP. It is 98.0% of `submit()`'s cumulative time and 33.6% of the whole
+`reasm-ip` run.
+
+And it runs on **every frame**, because nothing filters out unfragmented ones:
+`pcapkit/toolkit/pcap.py:53` dismisses a frame only when **DF is set**
+(`if ipv4_info.flags.df: return None`), so a frame with DF=0, MF=0, FO=0 — not
+fragmented in any sense — passes; `ip.py:73` then sees `not FO and not MF`,
+allocates a buffer, sets TDL and submits. Counted across the fixtures:
+**`http.pcap` has 1117 IPv4 frames, 0 with DF set and 0 actual fragments, and IP
+reassembly still yields 1117 "datagrams".** Same in `tcp.pcap` (4/4),
+`test.pcap` (21/21), `ipv4.pcap` (4/4).
+
+Counterfactual, `submit()` setting `packet=None` (patched in a scratch copy only):
+
+```
+reasm-ip      1059.5 -> 655.3 ms   feature cost +482.8 -> +66.8 ms   analyze() = 416.0 ms = 86.2%
+reasm-tcp      672.6 -> 650.1 ms   feature cost  +95.9 -> +61.6 ms   analyze() =  34.3 ms = 35.8%
+reasm-ip-tcp  1134.9 -> 714.6 ms   feature cost +558.2 -> +126.1 ms  analyze() = 432.1 ms = 77.4%
+```
+
+Retaining those 1117 re-parsed object graphs also makes GC real: `gc.disable()`
+saves 132.6 ms on `reasm-ip` (27% of the feature's cost) but nothing at all on the
+plain baseline or on tracing.
+
+**Two separable questions here, and they should not be conflated.** Whether a
+never-fragmented packet ought to be emitted as a trivially-complete datagram is a
+*design* decision the owner owns — it may well be intended. But `analyze()` being
+eager is not: making `packet` lazy (a cached property evaluated on first access)
+would remove ~86% of the cost with no change to what a caller who reads it sees.
+That is the recommended fix; changing the filter is the owner's call.
+`reassembly/tcp.py:298` has the same eager `analyze()`, but only 222 submits per
+pass (driven by FIN/RST), so it costs proportionally less.
+
+### Z2. The PCAP flow dumper reopens the file and rebuilds the frame per packet — 80% of its cost
+
+`pcapkit/dumpkit/pcap.py:94` and `:128`:
+
+```python
+def __call__(self, value, name=None):
+    with open(self._file, 'ab') as file:        # :94  -- once PER FRAME
+        self._append_value(value, file, name or '')
+
+def _append_value(self, value, file, name):
+    packet = Frame(                             # :128 -- full re-parse PER FRAME
+        nanosecond=self._nsec, num=self._fnum, proto=self._link,
+        packet=value.packet, header=self._ghdr, **value.frame_info,
+    ).data
+    file.write(packet)
+```
+
+`dumpkit/pcap.py:85(__call__)` is **48.70% of the `trace-tcp-pcap` run**, of which
+the `Frame(...)` rebuild is 97%. 4347 `_io.open` calls over 3 reps (1449/pass:
+1117 frame appends + 331 flow-file creations + 1).
+
+Isolating the tracing logic from the dumper, via an unsupported `trace_format` so
+`NotImplementedIO` is installed: **5.8% of the traceflow cost is tracing, 94.2% is
+the dumper.** Split by counterfactual:
+
+```
+trace-tcp-pcap  1413.9 ms baseline (+849.5)
+  keep the file open only            1339.0 ms  ->  -87.6 ms  = 10.3% of feature cost
+  + no Frame() rebuild                743.5 ms  -> -681.2 ms  = 80.2% of feature cost
+```
+
+The rebuild is **provably** redundant: replacing `_append_value` with
+`struct.pack('<IIII', ts_sec, ts_usec, incl_len, orig_len) + value.packet` gives
+**330 of 331 output files byte-identical** to the real dumper's. (The one mismatch
+was an unflushed cached handle in the scratch patch, not a semantic difference.)
+Lowest-risk, best-evidenced fix in this whole document.
+
+`trace_format='json'` sidesteps the re-parse but is the slowest shape measured
+(+222.0%): `dictdumper` is 22.33% of it and `pcapkit/dumpkit/common.py:124`
+(`object_hook`) another 5.39% — a linear chain of up to 9 `isinstance` tests run
+114,469 times per pass, which is where its 6.3M `isinstance` calls come from.
 
 ## Ranked findings NOT acted on
 
@@ -400,15 +537,27 @@ Each was a listed suspect. Each was measured and dismissed.
 - **`pcapkit/utilities/logging.py` on the hot path: NO.** A plain `http.pcap`
   extraction makes **zero** `logger` calls — nothing from `logging` appears
   anywhere in the profile. Every hot-path call site uses lazy `%s` formatting,
-  not f-string interpolation; the only f-string logger call is
-  `pcapkit/vendor/__main__.py:56`, which is not on any parse path. Two calls in
-  `protocol.py` (lines 431, 560) are already commented out. The logging system is
-  clean. (The *warning* path does call the logger — that is finding B, and it is a
-  different thing.)
-- **`pcapkit/corekit/multidict.py`: NO, ~0.5%.** It *is* on the per-field path
-  (`OptionField.unpack`, `_read_tcp_options`, `_read_http_header`) but costs
-  0.037 s of 6.831 s profiled. `MultiDict.__init__` 6702 calls, `add` 11385 calls
-  on `http.pcap`. Not worth touching.
+  not f-string interpolation; the only f-string logger call in the whole package
+  is `pcapkit/vendor/__main__.py:56`, which is not on any parse path. Two calls in
+  `protocol.py` (lines 431, 560) are already commented out. Confirmed again on the
+  heaviest shape measured (`trace-tcp-pcap`): stdlib `logging` is 4944 calls /
+  **0.03%**, and `pcapkit.utilities.logging` contributes **0 runtime calls** —
+  `get_logger` is import-time only. The logger carries only a `NullHandler` and
+  sets no level, so `logger.debug` bails at `isEnabledFor` without formatting.
+  The logging system is clean. (The *warning* path does call the logger
+  unconditionally — that is finding B, a different mechanism.)
+- **`pcapkit/corekit/multidict.py`: NO, under 1%.** It *is* genuinely on the
+  per-packet path (`OptionField.unpack`, `transport/tcp.py:664` for TCP options,
+  `application/httpv1.py:306` for HTTP headers) — 16.9 `add` calls per frame — but
+  costs 0.037 s of 6.831 s profiled on plain `http.pcap`, and 0.82% on the
+  reassembly shape. Microbenched at 206.8 ns per `add`. Not worth touching.
+- **Repeated `enum` lookups: NO, under 1.4%.** All of `pcapkit/const/**` is 42219
+  calls / **0.37%** of the reassembly shape; `aenum` adds another 0.98%; stdlib
+  `enum` never appears. Biggest single site `const/reg/apptype.py:30585(get)`,
+  13404 calls / 0.0161 s. *Caveat:* on the PCAP-NG option path specifically the
+  custom `OptionType.__eq__`/`__hash__` (`const/pcapng/option_type.py:71,77`) do
+  make a registry lookup 3.1x a plain int dict (72.4 ns vs 23.6 ns) — that is
+  finding F, and it sits inside finding A's loop, so fix A first and re-measure.
 - **`ProtoChain` construction: NO, ~0.3%.** All `protochain.py` functions
   together are 0.02 s of 6.831 s profiled on `http.pcap`.
 - **`Protocol._import_next_layer`: NO.** 10053 calls, 0.035 s *tottime*. Its
@@ -425,18 +574,54 @@ Each was a listed suspect. Each was measured and dismissed.
   capture every number came from — the answers differ a lot by capture shape, and
   chardet in particular is ~30% on HTTP and 0% on ARP.
 
-## State at checkpoint / what was in flight
+## Verification status
 
-- Five commits on `perf/hot-path-wins`, all verified. Suite green: **782 passed,
-  17 skipped, 767 subtests passed** in 413 s.
-- The brief expected "~806 passed"; this run reports 782. A pristine-tree suite
-  run was **in flight** to establish whether 782 is the baseline on this host or
-  whether something on this branch changed it. Its result goes in
-  `/tmp/pcapprof/ref-suite.txt`. **Resolve this before trusting the branch** —
-  though note that all five changes were independently shown byte-identical over
-  60 serialisation runs, which is stronger evidence than the count.
-- A second subagent profiling **reassembly and flow tracing** had not reported
-  when this note was written; those two shapes are the gap in the coverage below.
-  Everything else asked for is measured: plain, `store=True`, PCAP-NG, and
-  construction.
-- Not yet done: rebase onto `origin/main` and push.
+- Four surviving optimisation commits, plus one measured-and-reverted. Suite on
+  the branch: **782 passed, 17 skipped, 767 subtests passed** in 413 s. The 17
+  skips are exactly the number expected for this repo.
+- **Serialisation equivalence** is the strongest evidence and it is clean: all 14
+  fixtures, `tree` and `json`, with and without reassembly — 60 runs, 33 MB —
+  byte-identical to the pristine tree after every single commit.
+- **`pylint` and `mypy` parity** against the pristine tree, checked per commit via
+  `/tmp/pcapprof/lint_diff.sh` and `/tmp/pcapprof/mypy_diff.sh`: identical message
+  multisets, 124 mypy errors either side. This is what caught change 5.
+- On test *counts*: a first attempt to baseline the suite ran against a
+  `git archive` of the older base commit `5e4378d9b` and reported 764 passed / 35
+  skipped, i.e. **more** skips than the branch's 17. That is an artifact of
+  comparing two different commits in two different tree layouts, not a signal
+  about these changes, so it was superseded by a properly isolated run: the same
+  tree as `HEAD` with **only the four touched source files** reverted to
+  `origin/main`, in `/tmp/pcapkit-iso`, result in `/tmp/pcapprof/iso-suite.txt`.
+  That is the comparison to trust. Note in general that these optimisations cannot
+  change the *collected* count — they would surface as failures, not as fewer
+  tests.
+
+## What is not covered, and what to do next
+
+All five shapes the brief asked for are measured: plain extraction, `store=True`,
+reassembly, flow tracing, PCAP-NG, and construction (`make` / `pack` / the full
+constructor).
+
+Nothing in Z1, Z2 or A-J is implemented. In the order the numbers justify:
+
+1. **Z2, the PCAP flow dumper** — ~80% of the flow-tracing cost, and the
+   best-evidenced change in this document (330/331 output files byte-identical
+   under the counterfactual). Two independent parts: hold the file open, and stop
+   rebuilding a `Frame` to obtain bytes already in hand. Lowest risk of anything
+   here.
+2. **Z1, eager `analyze()` in IP reassembly** — ~86% of the IP-reassembly cost
+   plus most of a 133 ms GC bill. Make `packet` lazy; leave the "should
+   unfragmented frames be emitted at all" question to the owner.
+3. **A, the double option parse** — ~15% of a PCAP-NG extraction, ~10% of
+   `http.pcap`. Highest risk of the three: it is the option parser for every
+   protocol with TLVs and the rewind arithmetic interacts with
+   `__option_padding__`. Wants its own review with the option-heavy fixtures.
+4. **Caching `Field.length`** — a flat ~2.7-2.9% on *every* shape including the
+   plain baseline, still 79 `calcsize` calls per frame after commit 3. The template
+   is immutable per field instance, so it is pure waste; the work is invalidating
+   the cache at the ~15 sites that assign `_template`. Note the cheap version
+   (memoising `struct.calcsize` itself, which needs no invalidation) only recovers
+   ~0.8% — the property *call*, not `calcsize`, is the bulk. Do the real one.
+5. **B, the unconditional `logger.warning` in `warn()`** — cheap, low risk, but
+   only pays off on malformed-capture and construction workloads.
+6. Then C/D/E/F/H/I, and file J as a bug.
