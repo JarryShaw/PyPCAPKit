@@ -77,9 +77,22 @@ def get_parser() -> 'ArgumentParser':
                         help=('Indicate extraction engine. Note that except '
                               'default or pcapkit engine, all other engines '
                               'need support of corresponding packages.'))
-    parser.add_argument('-P', '--protocol', action='store', dest='protocol', default='null', metavar='PROTOCOL',
+    parser.add_argument('-P', '--protocol', action='store', dest='protocol', default=None, metavar='PROTOCOL',
                         help='Indicate extraction stops after which protocol.')
-    parser.add_argument('-L', '--layer', action='store', dest='layer', default='None', metavar='LAYER',
+    # NOTE: ``choices`` rather than a free-form string, because the layer names
+    # are a closed set (``pcapkit.foundation.extraction.Layers``) and a name
+    # outside it is not rejected anywhere downstream -- it simply never matches a
+    # protocol's ``__layer__`` and the parse silently runs to the top of the
+    # stack, which is the failure mode GH-356 was about. ``type=str.lower`` keeps
+    # ``-L Internet`` working, as it did before the choices were declared, since
+    # ``Extractor.__init__`` lowercases the value anyway.
+    #
+    # The defaults are :data:`None` and not the ``'None'``/``'null'`` strings they
+    # used to be: ``Extractor.__init__`` substitutes its own sentinels for an
+    # omitted value, so passing the strings only worked because it happened to
+    # lowercase ``'None'`` into the sentinel it wanted.
+    parser.add_argument('-L', '--layer', action='store', dest='layer', default=None, metavar='LAYER',
+                        type=str.lower, choices=['link', 'internet', 'transport', 'application', 'none'],
                         help='Indicate extract frames until which layer.')
     parser.add_argument('-B', '--buffer-save', action='store_true', default=False,
                         help='Indicate if store buffer to file when reading from stdin.')

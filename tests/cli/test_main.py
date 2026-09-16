@@ -87,6 +87,68 @@ class CLIMainTests(unittest.TestCase):
         self.assertTrue(args.json)
         self.assertTrue(args.files)
 
+    def test_layer_and_protocol_reach_the_extractor(self) -> None:
+        """``-L``/``-P`` are forwarded under the names ``Extractor`` reads.
+
+        The CLI half of GH-356. The forwarding was always correct -- it is the
+        core that dropped the limits -- so this pins the contract that made it
+        correct: ``Extractor`` takes ``layer=`` and ``protocol=``, and the CLI
+        must not invent its own spelling for either.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, extractor_cls, _ = self._load_cli_module(emoji_module=emoji)
+
+        with mock.patch.object(sys, 'argv', ['pcapkit-cli', 'capture.pcap',
+                                            '-L', 'internet', '-P', 'TCP']):
+            self.assertEqual(module.main(), 0)
+
+        created = extractor_cls.created[-1]
+        self.assertEqual(created.kwargs['layer'], 'internet')
+        self.assertEqual(created.kwargs['protocol'], 'TCP')
+
+    def test_layer_defaults_to_none_and_is_case_insensitive(self) -> None:
+        """An omitted ``-L``/``-P`` forwards :data:`None`, not a sentinel string.
+
+        ``Extractor.__init__`` substitutes its own ``'none'``/``'null'`` for an
+        omitted value, so the CLI has nothing to substitute. It used to pass the
+        strings ``'None'`` and ``'null'``, which only worked because
+        ``Extractor`` happened to lowercase the former into the sentinel it
+        wanted.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, _, _ = self._load_cli_module(emoji_module=emoji)
+
+        parser = module.get_parser()
+
+        bare = parser.parse_args(['input.pcap'])
+        self.assertIsNone(bare.layer)
+        self.assertIsNone(bare.protocol)
+
+        # ``-L Internet`` still works: the value is lowercased before it is
+        # matched against the layer names.
+        self.assertEqual(parser.parse_args(['input.pcap', '-L', 'Internet']).layer, 'internet')
+        self.assertEqual(parser.parse_args(['input.pcap', '--layer', 'LINK']).layer, 'link')
+
+    def test_layer_rejects_a_name_that_is_not_a_layer(self) -> None:
+        """A misspelled ``-L`` fails loudly rather than being ignored.
+
+        The layer names are a closed set and nothing downstream validates them:
+        an unknown name simply never matches a protocol's ``__layer__``, so the
+        parse runs to the top of the stack and the user is given a full report
+        they did not ask for -- silently, which is the failure GH-356 was about.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, _, _ = self._load_cli_module(emoji_module=emoji)
+
+        parser = module.get_parser()
+
+        with mock.patch('sys.stderr', io.StringIO()):
+            with self.assertRaises(SystemExit):
+                parser.parse_args(['input.pcap', '-L', 'nonsense'])
+
     def test_main_uses_json_format_and_stdin_when_requested(self) -> None:
         emoji = types.SimpleNamespace(emojize=lambda text: text)
         module, extractor_cls, _ = self._load_cli_module(emoji_module=emoji)

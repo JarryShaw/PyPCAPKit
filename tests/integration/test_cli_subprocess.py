@@ -14,20 +14,46 @@ relative path could not touch the repository even if one of these grew a bug.
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import subprocess  # nosec: B404
 import sys
 import unittest
 
 from tests._support import sample_path
+from tests._tiers import ROOT
 from tests.integration._helpers import HAS_EMOJI, HAS_RUNTIME, EndToEndTestCase
 
 #: How long a single CLI run is allowed to take. The captures used here are two
-#: to six frames, so this is a hang guard rather than a budget.
+#: to twenty-six frames, so this is a hang guard rather than a budget.
 TIMEOUT = 120
 
 #: Path of the installed console script, if it is on this interpreter's path.
 CLI_SCRIPT = pathlib.Path(sys.executable).with_name('pcapkit-cli')
+
+
+def cli_environment() -> 'dict[str, str]':
+    """This process's environment, with the checkout ahead of :envvar:`PYTHONPATH`.
+
+    Every run below happens in a temporary working directory, so the checkout is
+    *not* on the subprocess's :data:`sys.path` and ``python -m pcapkit`` would
+    import whichever :mod:`pcapkit` is installed instead. With an editable
+    install of this very directory the two are the same file and nothing shows;
+    from a git worktree, or against any other tree than the installed one, they
+    are different files and the subprocess silently tests the wrong one.
+
+    That is a blind spot rather than an inconvenience: a change to
+    :mod:`pcapkit.__main__` can be asserted here and pass on code it never ran.
+    So the tree the tests were collected from is put first, which is what the
+    in-process tiers already do by virtue of :program:`pytest`'s ``rootdir``.
+
+    """
+    environment = dict(os.environ)
+    existing = environment.get('PYTHONPATH')
+    environment['PYTHONPATH'] = (
+        str(ROOT) if not existing else os.pathsep.join((str(ROOT), existing))
+    )
+    return environment
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -40,7 +66,7 @@ class CommandLineTests(EndToEndTestCase):
         completed = subprocess.run(  # nosec: B603
             [sys.executable, '-m', 'pcapkit', *args],
             cwd=str(self.tmp_path), capture_output=True, text=True,
-            timeout=TIMEOUT, check=False,
+            timeout=TIMEOUT, check=False, env=cli_environment(),
         )
         if expect is not None:
             self.assertEqual(completed.returncode, expect,
@@ -107,6 +133,41 @@ class CommandLineTests(EndToEndTestCase):
 
         self.assertTrue((self.tmp_path / 'report.txt').is_file())
 
+    def test_layer_option_stops_the_printed_chain_where_it_names(self) -> None:
+        """``-L`` reaches the parse, not just the argument namespace (GH-356).
+
+        Frame 4 of :file:`http6.cap` is the shortest unambiguous witness: it
+        parses to all four layers unlimited, so each limit shortens the chain the
+        verbose output prints. Every one of these printed the full chain while the
+        limits were inert.
+
+        """
+        capture = sample_path('http6.cap')
+        unlimited = self.run_cli(capture, '-v')
+        link = self.run_cli(capture, '-v', '-L', 'link')
+        internet = self.run_cli(capture, '-v', '-L', 'internet')
+
+        self.assertIn('Frame   4: Ethernet:IPv6:TCP:HTTP/1.1', unlimited.stdout)
+        self.assertIn('Frame   4: Ethernet:Internet_Protocol_version_6', link.stdout)
+        self.assertIn('Frame   4: Ethernet:IPv6:TCP', internet.stdout)
+        for completed in (link, internet):
+            self.assertNotIn('HTTP/1.1', completed.stdout)
+
+    def test_protocol_option_stops_the_printed_chain_where_it_names(self) -> None:
+        """``-P`` likewise, taking a protocol name rather than a layer."""
+        capture = sample_path('http6.cap')
+        stopped = self.run_cli(capture, '-v', '-P', 'TCP')
+
+        self.assertIn('Frame   4: Ethernet:IPv6:TCP:Raw', stopped.stdout)
+        self.assertNotIn('HTTP/1.1', stopped.stdout)
+
+    def test_layer_option_rejects_a_name_that_is_not_a_layer(self) -> None:
+        """A misspelled ``-L`` exits with the usage message instead of being ignored."""
+        completed = self.run_cli(sample_path('in.pcap'), '-L', 'nonsense', expect=2)
+
+        self.assertIn('usage: pcapkit-cli', completed.stderr)
+        self.assertIn('--layer', completed.stderr)
+
     def test_missing_capture_fails_and_names_the_path(self) -> None:
         missing = str(self.tmp_path / 'absent.pcap')
         completed = self.run_cli(missing, '-o', 'report', '-j', expect=None)
@@ -137,7 +198,7 @@ class ConsoleScriptTests(EndToEndTestCase):
         completed = subprocess.run(  # nosec: B603
             [str(CLI_SCRIPT), sample_path('arp.pcap'), '-o', 'report', '-j', '-a'],
             cwd=str(self.tmp_path), capture_output=True, text=True,
-            timeout=TIMEOUT, check=False,
+            timeout=TIMEOUT, check=False, env=cli_environment(),
         )
 
         self.assertEqual(completed.returncode, 0, completed.stderr)

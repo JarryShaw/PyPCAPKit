@@ -526,8 +526,18 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             length: Length of packet data.
             _layer (str): Parse packet until ``_layer``
                 (:attr:`self._exlayer <pcapkit.protocols.protocol.Protocol._exlayer>`).
+                While parsing, the un-prefixed ``layer`` is accepted as well --
+                see the note below.
             _protocol (Union[str, Protocol, Type[Protocol]]): Parse packet until ``_protocol``
                 (:attr:`self._exproto <pcapkit.protocols.protocol.Protocol._exproto>`).
+                While parsing, the un-prefixed ``protocol`` is accepted as well --
+                see the note below.
+            packet (dict[str, Any]): Packet context of the enclosing layer, as
+                handed over by
+                :meth:`self._import_next_layer <ProtocolBase._import_next_layer>`.
+                While parsing, it is republished as ``__packet__`` so that
+                :meth:`self.unpack <Protocol.unpack>` -- and through it the
+                schema -- can see it; see the note below.
             __context__ (Union[ContextRegistry, ProtocolContext, Mapping[str, ProtocolContext], Iterable[ProtocolContext]]):
                 Caller supplied parsing context (:attr:`self._exctx <pcapkit.protocols.protocol.Protocol._exctx>`),
                 c.f. :mod:`pcapkit.corekit.context`. It is consumed here rather
@@ -536,8 +546,28 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 :meth:`self._import_next_layer <ProtocolBase._import_next_layer>`.
             **kwargs: Arbitrary keyword arguments.
 
+        Note:
+            Three of the keywords above are *out-of-band*: they configure the
+            parse rather than describing the packet, and every one of them is
+            consumed here, at the one point each of a protocol's producers passes
+            through. That is deliberate, and it is what the normalisation below
+            relies on -- fixing a spelling here fixes it for the engines, for all
+            four :meth:`_import_next_layer <ProtocolBase._import_next_layer>`
+            implementations, and for any third party protocol that copied their
+            shape, rather than one call site at a time.
+
         """
         #logger.debug('%s(file, %s, **%s)', type(self).__name__, length, kwargs)
+
+        # Whether this instantiation parses an existing packet, as opposed to
+        # constructing a new one. ``file`` is the discriminator the rest of this
+        # method already turns on: ``__post_init__`` reads the stream when there
+        # is one and calls ``self.pack(**kwargs)`` when there is not. It matters
+        # below because ``layer``, ``protocol`` and ``packet`` are out-of-band
+        # only while parsing -- on the construction path they are ordinary
+        # ``make()`` arguments, and consuming them there would silently drop the
+        # value being constructed.
+        parsing = file is not None
 
         #: int: File pointer.
         self._seekset = io.SEEK_SET  # type: int
@@ -545,6 +575,40 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         self._exlayer = kwargs.pop('_layer', None)  # type: Optional[str]
         #: str: Parse packet until such protocol.
         self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | ProtocolBase | Type[ProtocolBase]]
+
+        # NOTE: The parse limits are documented here as ``_layer`` and
+        # ``_protocol``, but no producer in the tree spells them that way. The
+        # engines build the outermost protocol with ``layer=``/``protocol=``
+        # (``pcapkit.foundation.engines.pcap.PCAP.read_frame`` and
+        # ``pcapkit.foundation.engines.pcapng.PCAPNG.read_frame``), every
+        # ``_import_next_layer`` recurses into the next one the same way, and the
+        # un-prefixed pair is also the public spelling that
+        # ``pcapkit.extract(layer=..., protocol=...)`` and the CLI's ``-L``/``-P``
+        # use. Both were therefore dropped into ``**kwargs`` and ignored, so
+        # neither option did anything at all; see GH-356. Accepting both
+        # spellings is what makes them work, and the prefixed one still wins so
+        # that a caller which reads this docstring is not overridden by a limit
+        # its parent happened to be forwarding.
+        if parsing:
+            layer = kwargs.pop('layer', None)
+            protocol = kwargs.pop('protocol', None)
+            if self._exlayer is None:
+                self._exlayer = layer
+            if self._exproto is None:
+                self._exproto = protocol
+
+        # NOTE: ``Extractor.__init__`` substitutes the strings ``'none'`` and
+        # ``'null'`` for an omitted ``layer``/``protocol``
+        # (``pcapkit.foundation.extraction.Extractor.__init__``), and
+        # ``pcapkit.interface.core.extract`` does the same for ``layer``. They are
+        # sentinels meaning "no limit", so recognise them as such instead of
+        # carrying them into ``_check_term_threshold`` on every protocol of every
+        # packet, where they would be compared against real protocol names.
+        if isinstance(self._exlayer, str) and self._exlayer.lower() == 'none':
+            self._exlayer = None
+        if isinstance(self._exproto, str) and self._exproto.lower() == 'null':
+            self._exproto = None
+
         #: pcapkit.corekit.context.ContextRegistry: Caller supplied parsing context.
         # NOTE: Every nested layer normalises the context it was handed, so an
         # already-normalised registry is adopted as-is: ``make()`` copies, and
@@ -555,6 +619,28 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                        else ContextRegistry.make(__context__))  # type: ContextRegistry
         #: bool: If terminate parsing next layer of protocol.
         self._sigterm = self._check_term_threshold()
+
+        # NOTE: The enclosing layer's packet context arrives as ``packet=`` -- the
+        # spelling ``_import_next_layer`` uses -- but the schema layer reads it
+        # from ``__packet__`` (``self.unpack`` below, and the ``pack``/``unpack``
+        # overrides of ``Frame`` and ``PCAPNG``). Nothing bridged the two, so a
+        # schema's ``unpack``/``post_process`` always saw an empty dict however
+        # much the outer layer had put in it: an ``IPv6`` source address never
+        # reached the HOPOPT MPL option that RFC 7731 elides from the wire, and a
+        # destination address never reached the RPL source route header that
+        # RFC 6554 needs it to decompress. Republish it here, for the same reason
+        # the limits above are normalised here. See GH-382.
+        #
+        # A copy rather than the dict itself: ``Schema.unpack`` writes every field
+        # it reads into the context it is given, plus its own ``__length__`` and
+        # ``__option_padding__`` bookkeeping, and the IPv6 extension header walk
+        # hands one dict to each header in turn. Sharing it would leave one
+        # header's fields visible to the next, where a ``ConditionalField`` test
+        # or a length callback could read a sibling's stale value instead of
+        # failing. ``Schema.unpack`` already isolates its own per-field contexts
+        # the same way.
+        if parsing and '__packet__' not in kwargs and isinstance(kwargs.get('packet'), dict):
+            kwargs['__packet__'] = dict(kwargs['packet'])
 
         # post-init customisations
         self.__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
