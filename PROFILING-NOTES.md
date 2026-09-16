@@ -71,11 +71,19 @@ the full suite is green.
 
 | # | sha | change | `http.pcap` | all captures |
 |---|---|---|---|---|
-| 1 | `6573b808c` | memoise charset detection | -30.3% | HTTP/text only |
-| 2 | `9989bae1b` | `FieldBase.__copy__` | -16.6% | -11% to -15% everywhere |
-| 3 | `09a0f301d` | read `Field.length` once | -2.0% | -2% to -3% |
-| 4 | `6f8070658` | `Schema.__setattr__` recursion | -3.7% | -2.6% to -4.2% |
-| 5 | `23b951299` | `OptionField` isinstance taken once | -1.0% | -1.2% |
+| 1 | `fa0920f97` | memoise charset detection | -30.3% | HTTP/text only |
+| 2 | `5ce03cd77` | `FieldBase.__copy__` | -16.6% | -11% to -15% everywhere |
+| 3 | `0c1387460` | read `Field.length` once | -2.0% | -2% to -3% |
+| 4 | `0aca00690` | `Schema.__setattr__` recursion | -3.7% | -2.6% to -4.2% |
+| 5 | `1794c43d2` | `OptionField` isinstance taken once | -1.0% | -1.2% |
+
+(Shas are post-rebase onto `origin/main` at `42eb0d912`. That rebase brought in
+only `examples/benchmark/**` and the `Makefile` from PR #410 — **no `pcapkit/`
+source changed**, so every measurement and equivalence check above still describes
+the code on this branch. Note that #410 landed a real benchmark harness at
+`examples/benchmark/benchmark.py`; future numbers may be better taken through it
+than through the scratch scripts listed above. It is not collected by `pytest`,
+which has `testpaths = ["tests"]`.)
 
 Per-capture, base -> now: `test.pcap` 28.3 -> 16.8 ms (-40.7%), `ipv4.pcap`
 1.90 -> 1.63 ms (-14.2%), `ipv6.pcap` 5.06 -> 4.38 ms (-13.4%),
