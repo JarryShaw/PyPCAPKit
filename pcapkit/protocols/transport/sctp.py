@@ -332,7 +332,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     #: Payload protocol identifier of the first DATA chunk found in the packet.
     _ppid = None  # type: Optional[Enum_PayloadProtocolIdentifier]
 
-    #: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]: Protocol
+    #: DefaultDict[int, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol
     #: index mapping for decoding next layer, c.f.
     #: :meth:`self._decode_next_layer <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.

@@ -240,7 +240,7 @@ class RPLOption(Option):
     #: RPL instance ID.
     id: 'int'
     #: Sender rank.
-    rank:' int'
+    rank: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', flags: 'RPLFlags', id: 'int', rank: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long

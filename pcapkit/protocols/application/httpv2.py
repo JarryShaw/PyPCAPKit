@@ -83,8 +83,12 @@ if TYPE_CHECKING:
     Flags = Schema_FrameType.Flags
 
     FrameParser = Callable[[Schema_FrameType, NamedArg(Schema_HTTP, 'header')], Data_HTTP]
+    # NB: ``Flags`` is bound just above, so it goes in unquoted. Quoting it left a
+    # bare ``ForwardRef('Flags')`` inside the alias, which every *other* module
+    # that spells ``FrameConstructor`` in an annotation then had to resolve in its
+    # own namespace -- where the name does not exist.
     FrameConstructor = Callable[[DefaultArg(Optional[Data_HTTP]),
-                                 KwArg(Any)], Tuple[Schema_FrameType, 'Flags']]
+                                 KwArg(Any)], Tuple[Schema_FrameType, Flags]]
 
 __all__ = ['HTTP']
 
