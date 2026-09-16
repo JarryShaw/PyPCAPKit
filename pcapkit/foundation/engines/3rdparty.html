@@ -447,9 +447,11 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.scapy.Scapy.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/scapy.html#Scapy.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy.run" title="Link to this definition">¶</a></dt>
 <dd><p>Call <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post224)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a> to extract PCAP files.</p>
-<p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="pcapkit.foundation.engines.scapy.Scapy._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a>
-as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#module-scapy.sendrecv" title="(in Scapy v2.7.1rc1.post224)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.sendrecv</span></code></a> and <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._extmp" title="pcapkit.foundation.engines.scapy.Scapy._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a>
-as an iterator from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post224)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>.</p>
+<p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._extmp" title="pcapkit.foundation.engines.scapy.Scapy._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a> as an iterator
+from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post224)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>, reached through
+<a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="pcapkit.foundation.engines.scapy.Scapy._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a> – which <code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code> binds to
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.all</span></code>, since that is the import that populates the layer
+registries <code class="docutils literal notranslate"><span class="pre">sniff</span></code> needs to dissect anything.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>AttributeWarning</strong> – If <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
@@ -486,7 +488,7 @@ for more operational information.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.scapy.Scapy._expkg">
-<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">scapy.sendrecv</span></span><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">scapy.all</span></span><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="Link to this definition">¶</a></dt>
 <dd><p>Engine extraction package.</p>
 </dd></dl>
 

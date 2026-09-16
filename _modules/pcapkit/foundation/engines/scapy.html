@@ -410,6 +410,33 @@
 
 <span class="sd">.. _Scapy: https://scapy.net</span>
 
+<span class="sd">.. note::</span>
+
+<span class="sd">   Constructing this engine imports :mod:`scapy.all`, which is what populates</span>
+<span class="sd">   `Scapy`_'s layer registries -- see :meth:`Scapy.__init__` for why anything</span>
+<span class="sd">   narrower silently returns undissected frames.</span>
+
+<span class="sd">   One side effect is worth knowing about in advance: :mod:`scapy.all` loads</span>
+<span class="sd">   :mod:`scapy.layers.dcerpc`, which reaches `Scapy`_'s TLS layer and there</span>
+<span class="sd">   triggers a ``CryptographyDeprecationWarning`` from :mod:`cryptography` about</span>
+<span class="sd">   finite-field Diffie-Hellman. It is emitted by any complete registry load, not</span>
+<span class="sd">   by :mod:`scapy.all` in particular, and it concerns a key-exchange code path</span>
+<span class="sd">   :mod:`pcapkit` never executes -- but it subclasses :exc:`UserWarning`, not</span>
+<span class="sd">   :exc:`DeprecationWarning`, so Python's default filters show it.</span>
+
+<span class="sd">   :mod:`pcapkit` deliberately does not filter it away. The warning is `Scapy`_'s</span>
+<span class="sd">   to emit and the consumer's to silence, on the same footing as every other</span>
+<span class="sd">   category (see :mod:`pcapkit.utilities.warnings`); hiding a third-party</span>
+<span class="sd">   deprecation notice from inside a constructor would suppress the only advance</span>
+<span class="sd">   warning that a future :mod:`cryptography` release breaks `Scapy`_'s TLS layer.</span>
+<span class="sd">   To silence it, filter it as usual::</span>
+
+<span class="sd">       import warnings</span>
+
+<span class="sd">       from cryptography.utils import CryptographyDeprecationWarning</span>
+
+<span class="sd">       warnings.filterwarnings('ignore', category=CryptographyDeprecationWarning)</span>
+
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -442,10 +469,10 @@
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">scapy.sendrecv</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">scapy.all</span>
 
         <span class="c1">#: Engine extraction package.</span>
-        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'scapy.sendrecv'</span>
+        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'scapy.all'</span>
         <span class="c1">#: Engine extraction temporary storage.</span>
         <span class="n">_extmp</span><span class="p">:</span> <span class="s1">'Iterator[ScapyPacket]'</span>
 
@@ -464,7 +491,41 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">'Extractor'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sendrecv</span> <span class="k">as</span> <span class="n">scapy</span>  <span class="c1"># isort:skip</span>
+<span class="w">        </span><span class="sd">"""Initialise the engine.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: :mod:`scapy.all`, not :mod:`scapy.sendrecv`, and the difference is</span>
+        <span class="c1"># load-bearing rather than cosmetic. Scapy dispatches on two registries that</span>
+        <span class="c1"># exist only as *import side effects* of its layer modules: ``conf.l2types``,</span>
+        <span class="c1"># mapping a capture's link type onto a link-layer class, and the</span>
+        <span class="c1"># ``bind_layers`` payload table. ``scapy/__init__.py`` fills in neither, so</span>
+        <span class="c1"># importing just the sniffing submodule leaves both empty --</span>
+        <span class="c1"># :class:`~scapy.utils.PcapReader` then cannot map even link type 1 (plain</span>
+        <span class="c1"># Ethernet), writes ``unknown LL type [1]/[0x1]`` to stderr and returns every</span>
+        <span class="c1"># frame as one opaque :class:`~scapy.packet.Raw` layer. Nothing raises, so the</span>
+        <span class="c1"># engine used to deliver no dissection whatsoever and announce it only on</span>
+        <span class="c1"># stderr (#406).</span>
+        <span class="c1">#</span>
+        <span class="c1"># Naming the layer modules individually is not a cheaper way to the same</span>
+        <span class="c1"># place: it repairs the link layer and leaves the payload table short, so</span>
+        <span class="c1"># ``dhcp.pcapng`` still comes back as ``Ethernet / IP / UDP / Raw`` rather</span>
+        <span class="c1"># than ``... / UDP / BOOTP / DHCP options``. Enumerating them here would also</span>
+        <span class="c1"># go stale silently -- a link or payload type added by a later scapy would</span>
+        <span class="c1"># regress to ``Raw`` with no error -- whereas :mod:`scapy.all` defers to</span>
+        <span class="c1"># ``conf.load_layers``, which scapy itself keeps current. The cost is the</span>
+        <span class="c1"># layer loading, not the façade: importing :mod:`scapy.layers.all` alone</span>
+        <span class="c1"># measures the same, so there is no complete-but-cheaper option to prefer.</span>
+        <span class="c1">#</span>
+        <span class="c1"># This stays inside ``__init__`` rather than moving to module scope so that</span>
+        <span class="c1"># ``import pcapkit`` does not pay for it; only callers who actually select</span>
+        <span class="c1"># this engine do. And it is bound to :attr:`_expkg`, the attribute</span>
+        <span class="c1"># :meth:`run` calls ``sniff`` on, rather than left as a bare side-effecting</span>
+        <span class="c1"># import -- an import whose value is used cannot be dropped later as unused,</span>
+        <span class="c1"># which is how this class of bug comes back.</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scapy</span><span class="w"> </span><span class="kn">import</span> <span class="nb">all</span> <span class="k">as</span> <span class="n">scapy</span>  <span class="c1"># isort:skip</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">scapy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Iterator[ScapyPacket]'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -480,9 +541,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Call :func:`scapy.sendrecv.sniff` to extract PCAP files.</span>
 
-<span class="sd">        This method assigns :attr:`self._expkg &lt;Scapy._expkg&gt;`</span>
-<span class="sd">        as :mod:`scapy.sendrecv` and :attr:`self._extmp &lt;Scapy._extmp&gt;`</span>
-<span class="sd">        as an iterator from :func:`scapy.sendrecv.sniff`.</span>
+<span class="sd">        This method assigns :attr:`self._extmp &lt;Scapy._extmp&gt;` as an iterator</span>
+<span class="sd">        from :func:`scapy.sendrecv.sniff`, reached through</span>
+<span class="sd">        :attr:`self._expkg &lt;Scapy._expkg&gt;` -- which :meth:`__init__` binds to</span>
+<span class="sd">        :mod:`scapy.all`, since that is the import that populates the layer</span>
+<span class="sd">        registries ``sniff`` needs to dissect anything.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            AttributeWarning: If :attr:`self.extractor._exlyr &lt;pcapkit.foundation.extraction.Extractor._exlyr&gt;`</span>
