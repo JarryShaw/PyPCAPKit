@@ -102,6 +102,7 @@ __all__ = [
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # Engine Macros
+    'PyPCAP', 'PCAP_CT', 'PyPCAPFile',                      # Engine Macros
 
     # pcapkit.protocols
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE', 'APPTYPE',        # Protocol Numbers

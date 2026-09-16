@@ -50,4 +50,4 @@ Type Variables
 --------------
 
 .. data:: pcapkit.foundation.reassembly.data.ip._AT
-   :type: ipaddress.IPv4Address | ipaddress.IPv4Address
+   :type: ipaddress.IPv4Address | ipaddress.IPv6Address

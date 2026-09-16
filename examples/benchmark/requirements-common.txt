@@ -1,0 +1,30 @@
+# Everything present in *both* benchmark environments.
+#
+# Pinned exactly, because an unpinned harness produces numbers nobody can
+# reproduce next month. The engine packages are the point of the pin; ``pcapkit``
+# itself is deliberately absent, since it is installed from the working tree and
+# its "version" is the git revision the image was built from.
+#
+# `pcapkit`'s own runtime dependencies. Pinned as well: they are on the default
+# engine's hot path, so a different `chardet` is a different baseline, and the
+# baseline is what every ratio in the report divides by.
+dictdumper==0.8.4.post6
+chardet==7.6.0
+aenum==3.1.17
+tbtrim==0.3.1
+
+# Engines available in every environment. Only `pypcap` and `pcap_ct` have to be
+# separated -- see requirements-pypcap.txt for why.
+dpkt==1.9.8
+scapy==2.7.0
+pypcapfile==0.12.0
+pyshark==0.6
+
+# `pyshark`'s dependencies. Pinned mostly for `lxml`, which is the only compiled
+# package in the set and therefore the only one whose wheel availability can turn
+# a build into a compile -- it publishes cp311 manylinux wheels for both aarch64
+# and x86_64, so neither architecture needs a compiler for it.
+lxml==6.1.3
+termcolor==3.3.0
+appdirs==1.4.4
+packaging==26.3

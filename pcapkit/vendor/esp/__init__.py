@@ -7,7 +7,7 @@
 
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.internet.esp.ESP` implementations. Available
-enumerations include:
+vendor crawlers include:
 
 .. list-table::
 
@@ -17,10 +17,9 @@ enumerations include:
      - Integrity Algorithm Transform IDs [*]_
 
 ESP has no algorithm registry of its own: an SA's algorithms are negotiated by
-IKEv2, so both enumerations are the corresponding IKEv2 *transform ID*
-sub-registries. They live here rather than under an ``ikev2`` package because
-:class:`~pcapkit.protocols.internet.esp.ESP` is the only thing in
-:mod:`pcapkit` that consumes them.
+IKEv2, so both crawlers pull the corresponding IKEv2 *transform ID*
+sub-registries, which are published as separate CSV files from the IKEv2
+parameters page.
 
 .. [*] https://www.iana.org/assignments/ikev2-parameters/ikev2-parameters.xhtml#ikev2-parameters-5
 .. [*] https://www.iana.org/assignments/ikev2-parameters/ikev2-parameters.xhtml#ikev2-parameters-7

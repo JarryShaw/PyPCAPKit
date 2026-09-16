@@ -195,7 +195,66 @@ def purge_modules(prefixes: Iterable[str]) -> None:
     _reset_abc_caches()
 
 
+def _close_quietly(target: object) -> None:
+    """Call ``target.close()``, swallowing any :exc:`Exception` it raises.
+
+    :exc:`BaseException` is deliberately not caught: a
+    :exc:`KeyboardInterrupt` or a :exc:`SystemExit` arriving during teardown
+    should still end the run.
+
+    Args:
+        target: Object to close, or :data:`None`. Anything without a callable
+            ``close`` attribute is ignored.
+
+    """
+    try:
+        # Inside the ``try`` because the lookup itself can raise: a test double
+        # with ``close`` as a property, or a custom ``__getattr__``, fails here
+        # rather than at the call, and that would defeat the whole point.
+        close = getattr(target, 'close', None)
+        if not callable(close):
+            return
+        close()
+    except Exception:  # pylint: disable=broad-except
+        # This runs from teardown, where raising would replace the real test
+        # failure with a secondary error from cleanup and hide what actually
+        # broke. A half-constructed engine is the common case: the underlying
+        # handle may never have been opened, so closing it raises rather than
+        # being a no-op.
+        pass
+
+
 def close_extractor(extractor: object) -> None:
+    """Release everything an :class:`~pcapkit.foundation.extraction.Extractor` holds.
+
+    Tests that abandon an extractor part-way through a capture never reach
+    :meth:`Extractor._cleanup <pcapkit.foundation.extraction.Extractor._cleanup>`
+    or :meth:`Extractor.__exit__ <pcapkit.foundation.extraction.Extractor.__exit__>`,
+    so nothing in the library closes up after them. Both of those close the
+    input file *and* the engine, and this helper has to do the same: the input
+    file is not the only resource. The ``pcap_ct`` and ``pypcap`` engines hold a
+    live :class:`pcap.pcap` handle, and ``pyshark`` holds a temporary file, so
+    dropping the extractor without closing the engine leaks an OS-level handle
+    per test. Under a suite that builds hundreds of extractors that accumulates
+    into a file-descriptor exhaustion whose failure surfaces somewhere unrelated.
+
+    Closes in the same order the library does -- input file, then engine -- and
+    closes the engine even if closing the input file fails, so one broken
+    resource cannot strand the other.
+
+    Args:
+        extractor: The extractor to close. Deliberately typed :obj:`object` and
+            probed with :func:`getattr`, because teardown also reaches here for
+            extractors that failed part-way through ``__init__`` (in which case
+            ``_exeng`` was never assigned) and for test doubles that stand in
+            for one.
+
+    """
+    # ``_exeng`` is read before the input file is touched so that a failure
+    # closing the stream cannot lose the reference to the engine.
     stream = getattr(extractor, '_ifile', None)
-    if stream is not None and hasattr(stream, 'close'):
-        stream.close()
+    engine = getattr(extractor, '_exeng', None)
+    try:
+        _close_quietly(stream)
+    finally:
+        _close_quietly(engine)

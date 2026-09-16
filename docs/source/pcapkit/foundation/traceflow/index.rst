@@ -11,8 +11,8 @@ Flow Tracing
    a approximate functionality of *Follow TCP Streams* in
    `Wireshark <https://www.wireshark.org/>`__.
 
-:mod:`pcapkit.traceflow` implements flow tracing functions for
-:mod:`pcapkit` package.
+:mod:`pcapkit.foundation.traceflow` implements flow tracing functions
+for :mod:`pcapkit` package.
 
 .. seealso::
 
@@ -43,7 +43,7 @@ diagram of the class hierarchy of :mod:`pcapkit.foundation.traceflow`:
        click A "/pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"
        click B "/pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase"
        click C "/pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow"
-       click D "/ext.html#traceflow-and-flow-tracing"
+       click D "/ext.html#reassembly-and-flow-tracing"
 
        click TCP "/pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP"
 

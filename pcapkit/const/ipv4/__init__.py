@@ -25,11 +25,11 @@ enumerations include:
      - ToS (DS Field) Delay
    * - :class:`IPv4_ToSECN <pcapkit.const.ipv4.tos_ecn.ToSECN>`
      - ToS ECN Field
-   * - :class:`IPv4_ToSPrecedence <pcapkit.const.ipv4.tos_pre.TOSPrecedence>`
+   * - :class:`IPv4_ToSPrecedence <pcapkit.const.ipv4.tos_pre.ToSPrecedence>`
      - ToS (DS Field) Precedence
-   * - :class:`IPv4_ToSReliability <pcapkit.const.ipv4.tos_rel.TOSReliability>`
+   * - :class:`IPv4_ToSReliability <pcapkit.const.ipv4.tos_rel.ToSReliability>`
      - ToS (DS Field) Reliability
-   * - :class:`IPv4_ToSThroughput <pcapkit.const.ipv4.tos_thr.TOSThroughput>`
+   * - :class:`IPv4_ToSThroughput <pcapkit.const.ipv4.tos_thr.ToSThroughput>`
      - ToS (DS Field) Throughput
    * - :class:`IPv4_TSFlag <pcapkit.const.ipv4.ts_flag.TSFlag>`
      - TS Flag

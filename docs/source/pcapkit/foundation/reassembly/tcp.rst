@@ -39,9 +39,11 @@ Algorithm
 +-------------+---------------------------+
 | ``BUFID``   | Buffer Identifier         |
 +-------------+---------------------------+
-| ``HDL``     | Hole Discriptor List      |
+| ``HDL``     | Hole Descriptor List      |
 +-------------+---------------------------+
 | ``ISN``     | Initial Sequence Number   |
++-------------+---------------------------+
+| ``PSN``     | Payload Sequence Number   |
 +-------------+---------------------------+
 | ``src``     | source IP                 |
 +-------------+---------------------------+
@@ -55,7 +57,12 @@ Algorithm
 .. code-block:: text
 
    DO {
-      BUFID <- src|dst|srcport|dstport|ACK;
+      BUFID <- src|srcport|dst|dstport;
+
+      /* a SYN occupies a sequence number of its own, so payload sent by
+         or after it starts one octet later than the segment's DSN */
+      PSN <- DSN + 1 IF (SYN is true) ELSE DSN;
+
       IF (SYN is true) {
          IF (buffer with BUFID is allocated) {
             flush all reassembly for this BUFID;
@@ -65,10 +72,19 @@ Algorithm
 
       IF (no buffer with BUFID is allocated) {
          allocate reassembly resources with BUFID;
-         ISN <- DSN;
+         ISN <- PSN;
          put data from fragment into data buffer with BUFID
             [from octet fragment.first to octet fragment.last];
-         update HDL;
+         HDL <- [one hole from PSN + fragment.len to infinity];
+      } ELSE {
+         put data from fragment into data buffer with BUFID
+            [from octet fragment.first to octet fragment.last];
+
+         /* a segment with no payload fills no hole, and its "last" lies
+            one below its "first", so it is not run through the algorithm */
+         IF (fragment.len > 0) {
+            update HDL;
+         }
       }
 
       IF (FIN is true or RST is true) {
@@ -82,24 +98,24 @@ Algorithm
       DO {
          select the next hole descriptor from HDL;
 
-         IF (fragment.first >= hole.first) CONTINUE.
-         IF (fragment.last <= hole.first) CONTINUE.
+         IF (fragment.first > hole.last) CONTINUE.
+         IF (fragment.last < hole.first) CONTINUE.
 
          delete the current entry from HDL;
 
-         IF (fragment.first >= hole.first) {
+         IF (fragment.first > hole.first) {
             create new entry "new_hole" in HDL;
             new_hole.first <- hole.first;
             new_hole.last <- fragment.first - 1;
-            BREAK.
          }
 
-         IF (fragment.last <= hole.last) {
+         IF (fragment.last < hole.last AND FIN is false AND RST is false) {
             create new entry "new_hole" in HDL;
             new_hole.first <- fragment.last + 1;
             new_hole.last <- hole.last;
-            BREAK.
          }
+
+         BREAK.
       } give up until (no entry from HDL)
    }
 
@@ -117,8 +133,9 @@ appeared in :rfc:`791`. And here is the process:
    new hole descriptor ``new_hole`` with ``new_hole.first`` equal to
    ``hole.first``, and ``new_hole.last`` equal to ``fragment.first``
    minus one (``-1``).
-6. If ``fragment.last`` is less than ``hole.last`` and
-   ``fragment.more_fragments`` is ``true``, then create a new hole
+6. If ``fragment.last`` is less than ``hole.last`` and neither ``FIN``
+   nor ``RST`` is set -- TCP has no *more fragments* flag, so the
+   termination flags take its place -- then create a new hole
    descriptor ``new_hole``, with ``new_hole.first`` equal to
    ``fragment.last`` plus one (``+1``) and ``new_hole.last`` equal to
    ``hole.last``.
@@ -153,11 +170,16 @@ Terminology
             fin = tcp.flags.fin,            # finish flag
             rst = tcp.flags.rst,            # reset connection flag
             len = tcp.raw_len,              # payload length, header excludes
-            first = tcp.seq,                # this sequence number
-            last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
+            first = tcp.seq,                # first sequence number of payload
+            last = tcp.seq + tcp.raw_len - 1,
+                                            # last sequence number of payload
             header = tcp.packet.header,     # raw bytes type header
             payload = tcp.raw,              # raw bytearray type payload
           )
+
+       Both ``first`` and ``last`` are absolute TCP sequence numbers and
+       both are **inclusive**, so a segment carrying no payload at all has
+       ``last`` one below ``first``.
 
    reasm.tcp.datagram
        Data structure for **reassembled TCP datagram** (element from
@@ -213,25 +235,37 @@ Terminology
           (dict) buffer --> memory buffer for reassembly
            |--> (tuple) BUFID : (dict)
            |       |--> ip.src      |
-           |       |--> ip.dst      |
            |       |--> tcp.srcport |
+           |       |--> ip.dst      |
            |       |--> tcp.dstport |
            |                        |--> 'hdl' : (list) hole descriptor list
            |                        |             |--> (Info) hole --> hole descriptor
-           |                        |                   |--> "first" --> (int) start of hole
-           |                        |                   |--> "last" --> (int) stop of hole
+           |                        |                   |--> "first" --> (int) sequence number of the
+           |                        |                   |                     first missing octet
+           |                        |                   |--> "last" --> (int) sequence number of the
+           |                        |                                        last missing octet, inclusive
            |                        |--> 'hdr' : (bytes) initial TCP header
            |                        |--> 'ack' : (dict) ACK list
            |                                      |--> (int) ACK : (dict)
            |                                      |                 |--> 'ind' : (list) list of reassembled packets
            |                                      |                 |             |--> (int) packet range number
-           |                                      |                 |--> 'isn' : (int) ISN of payload buffer
+           |                                      |                 |--> 'isn' : (int) sequence number of the octet
+           |                                      |                 |                  held in raw[0]
            |                                      |                 |--> 'len' : (int) length of payload buffer
            |                                      |                 |--> 'raw' : (bytearray) reassembled payload,
            |                                      |                                          holes set to b'\x00'
            |                                      |--> (int) ACK ...
            |                                      |--> ...
            |--> (tuple) BUFID ...
+
+       The hole descriptor list is kept in **absolute TCP sequence numbers**,
+       once per ``BUFID``, whereas each ACK's payload buffer is indexed from
+       its own ``isn`` -- ``raw[n]`` holds the octet with sequence number
+       ``isn + n``, and ``isn`` is revised downwards whenever a segment turns
+       up below the data already buffered, so it is not necessarily the
+       connection's own initial sequence number.
+       :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` is the
+       one place that converts between the two.
 
 Data Models
 ===========
@@ -271,7 +305,7 @@ Type Variables
 ==============
 
 .. data:: pcapkit.foundation.reassembly.data.tcp._AT
-   :type: ipaddress.IPv4Address | ipaddress.IPv4Address
+   :type: ipaddress.IPv4Address | ipaddress.IPv6Address
 
 .. data:: pcapkit.foundation.reassembly.data.tcp.BufferID
    :type: typing.Tuple[_AT, int, _AT, int]

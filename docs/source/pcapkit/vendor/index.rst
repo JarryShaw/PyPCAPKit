@@ -5,7 +5,7 @@ Vendor Crawlers
 .. module:: pcapkit.vendor
 
 This module contains all web crawlers of :mod:`pcapkit`, which are
-automatically generating from the :mod:`pcapkit.const` module's constant
+automatically generating the :mod:`pcapkit.const` module's constant
 enumerations.
 
 Crawler Implementations

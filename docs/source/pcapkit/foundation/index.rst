@@ -5,8 +5,8 @@ Library Foundation
 
 :mod:`pcapkit.foundation` is a collection of foundations for
 :mod:`pcapkit`, including PCAP file extraction tool
-:class:`~pcapkit.foundation.extraction.Extrator`, TCP flow tracer
-:class:`~pcapkit.foundation.tractflow.TraceFlow`, registry management
+:class:`~pcapkit.foundation.extraction.Extractor`, TCP flow tracer
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`, registry management
 APIs for :mod:`pcapkit`, and TCP/IP reassembly implementations.
 
 .. toctree::

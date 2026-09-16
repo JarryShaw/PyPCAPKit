@@ -1,0 +1,21 @@
+# The `pcap_ct` environment: pcap-ct, plus everything shared.
+#
+# Separated from `pypcap` for the reason given in requirements-pypcap.txt: both
+# provide the top-level `pcap` module and `pcap-ct` wins the import.
+-r requirements-common.txt
+
+# Both of these are pre-release-only projects -- every release ever published is a
+# beta -- so `pip install pcap-ct` with no version resolves to nothing at all. An
+# *exact* pre-release pin is honoured without `--pre`, which is why the versions
+# are spelled out here rather than left to a range plus a flag.
+#
+# Both publish `py3-none-any` wheels, so neither needs a compiler on any
+# architecture. They do need a system libpcap at *run* time: `libpcap`'s published
+# libpcap.cfg reads `LIBPCAP = None`, which sends its loader to
+# ctypes.util.find_library("pcap") and so to the host's libpcap.so.1. The wheel
+# does vendor its own copies (including an aarch64 one) under
+# `libpcap/_platform/`, but only `LIBPCAP = tcpdump` selects them, and this harness
+# deliberately does not -- measuring against the distribution's libpcap is closer
+# to what a user gets.
+pcap-ct==1.3.0b3
+libpcap==1.11.0b29
