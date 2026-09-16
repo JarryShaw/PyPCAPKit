@@ -22,8 +22,9 @@ HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 
 #: TCP conversations the default (pcapkit-native) engine finds in the committed
 #: ``in.pcap`` capture. Measured against ``examples/captures/in.pcap``, and the
-#: yardstick every other engine is judged by -- see the class docstring for why
-#: the per-engine expected values are *not* uniformly this number.
+#: yardstick every other engine is judged by: every engine reaching this module
+#: is expected to agree on it, either by dissecting the capture itself or by being
+#: redirected to the default engine.
 IN_PCAP_TCP_STREAMS = 3
 
 
@@ -38,10 +39,19 @@ class FollowTCPStreamTests(unittest.TestCase):
     crashed on DPKT frames (``AttributeError: 'dict' object has no attribute
     'packet'``) and returned an empty, misleading result on Scapy frames.
 
-    The expected stream count is asserted per engine rather than as one shared
-    number, because engines with genuine dissection gaps legitimately differ:
-    DPKT dissects this capture fully and must match the default engine, whereas
-    Scapy cannot read its link layer at all and correctly finds nothing.
+    Both third-party engines that dissect this capture -- DPKT and Scapy -- must
+    therefore agree with the default engine on all three streams. Engines that do
+    no dissection at all (PyPCAP) or have no reassembly adapter (PyShark) are
+    redirected to the default engine instead, and are asserted separately below.
+
+    #406: this class previously expected Scapy to find *zero* streams, on the
+    stated rationale that it could not read the capture's link layer -- "a
+    documented capability gap". That rationale was wrong. ``in.pcap`` is plain
+    Ethernet (link type 1), which Scapy dissects perfectly well; the zero came
+    from :class:`~pcapkit.foundation.engines.scapy.Scapy` importing only
+    :mod:`scapy.sendrecv`, which populates none of Scapy's layer registries, so
+    every frame came back as an undissected ``Raw``. Zero was the polluted
+    answer and three is the truthful one.
     """
 
     def setUp(self) -> None:
@@ -92,26 +102,63 @@ class FollowTCPStreamTests(unittest.TestCase):
                          [stream.conversations for stream in native])
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
-    def test_scapy_engine_finds_no_streams_for_this_capture(self) -> None:
-        # Scapy does not recognise this capture's link-layer type and hands every
-        # frame back as one opaque ``Raw`` layer with no TCP inside, so it correctly
-        # finds no TCP stream to follow. Zero is therefore a capability gap, not the
-        # #399 bug -- and the second assertion pins the *cause*, so a future scapy
-        # that learns this link type fails here loudly instead of silently drifting.
+    def test_scapy_engine_matches_the_default_engine(self) -> None:
+        # Scapy dissects in.pcap in full -- its two ICMPv6-over-IPv6 frames, its
+        # three IPv4/TCP frames and its one UDP frame -- so, exactly like DPKT above,
+        # it must agree with the native engine rather than differ from it.
+        # This is the regression guard for #406: the engine imported only
+        # ``scapy.sendrecv``, so Scapy's ``conf.l2types`` registry was empty,
+        # ``PcapReader`` could not map link type 1, and all six frames arrived as
+        # ``Raw`` -- turning three streams into zero with nothing raised.
         import pcapkit
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            streams = self._follow(engine='scapy')
+            native = self._follow()
+            foreign = self._follow(engine='scapy')
             extractor = pcapkit.extract(fin=sample_path('in.pcap'), engine='scapy',
                                         store=True, nofile=True)
 
-        self.assertEqual(len(streams), 0)
-        self.assertFalse(
-            any(frame.haslayer('TCP') for frame in extractor.frame),
-            'scapy dissected a TCP layer from in.pcap; the empty-stream assertion '
-            'above is no longer a capability gap and this test needs revisiting',
+        # Asserted first, and on the frame type rather than on the stream count,
+        # because it names the *cause*. A regression of #406 fails here as "frame 0
+        # came back Raw", which points straight at the engine's import, instead of
+        # surfacing downstream as an unexplained 0 != 3 stream-count mismatch.
+        self.assertNotIsInstance(
+            extractor.frame[0], self._scapy_raw(),
+            'scapy returned frame 0 of in.pcap as an undissected Raw layer, so its '
+            'layer registry was not populated -- see #406: the engine must import '
+            'scapy.all, which loads the registries, not merely scapy.sendrecv',
         )
+        self.assertTrue(
+            any(frame.haslayer('TCP') for frame in extractor.frame),
+            'scapy dissected no TCP layer from in.pcap, which holds three TCP frames',
+        )
+
+        # Full parity with the native engine, on the same three axes the DPKT test
+        # above checks: count, per-stream frame counts, and reassembled conversations.
+        self.assertEqual(len(foreign), IN_PCAP_TCP_STREAMS)
+        self.assertEqual([len(stream.packets) for stream in foreign],
+                         [len(stream.packets) for stream in native])
+        self.assertEqual([stream.conversations for stream in foreign],
+                         [stream.conversations for stream in native])
+
+    @staticmethod
+    def _scapy_raw() -> type:
+        """Scapy's undissected-payload class, :class:`scapy.packet.Raw`.
+
+        Imported inside a helper rather than at module scope because Scapy is an
+        optional extra: this module is collected, and its other cases run, on
+        installs where ``import scapy`` would fail outright.
+
+        :mod:`scapy.packet` is also the right submodule to reach ``Raw`` through
+        for a test about #406, because it is registry-inert -- measured: importing
+        it leaves ``conf.l2types`` empty -- so naming the class cannot itself
+        populate the registries and mask the defect being asserted against.
+
+        """
+        from scapy.packet import Raw
+
+        return Raw
 
     def test_pyshark_and_pypcap_fall_back_to_the_default_engine(self) -> None:
         # Neither engine can trace TCP flows (PyShark has no reassembly adapter,
