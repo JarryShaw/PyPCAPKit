@@ -198,5 +198,34 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         schema = func(cls, data, length, packet)
         ret = schema.post_process(packet)
 
+        # NOTE: ``Schema.unpack`` clears ``__updated__`` before returning, but
+        # ``post_process`` runs after it and assigns fields -- and every field
+        # assignment sets the flag again (``Schema.__setattr__``). The schema is
+        # then left marked as needing a re-pack even though its ``__buffer__``
+        # already holds the octets just read off the wire, so the next
+        # ``bytes(schema)`` or ``len(schema)`` silently re-packs it.
+        #
+        # That re-pack is not merely wasted work: ``Schema.pack`` calls
+        # ``post_process`` a *second* time, with a packet context rebuilt from
+        # the schema's own fields and therefore holding none of the enclosing
+        # layer's, so it overwrites exactly the values ``post_process`` derived
+        # from that context. It is what discarded the IPv6 source address that
+        # ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``
+        # had just resolved: ``OptionField.unpack`` measures each parsed option
+        # with ``len(data)``, which triggered the re-pack one option later.
+        #
+        # ``Schema.pack`` already orders the two the other way round -- clear the
+        # flag *after* ``post_process``, not before -- so match it here and the
+        # revision made while unpacking survives.
+        #
+        # Guarded rather than assigned outright because ``post_process`` may hand
+        # back something other than a schema: an implementation is free to return
+        # a nested one instead of ``self``, as
+        # ``pcapkit.protocols.schema.internet.hopopt._SMFDPDOption`` does, and the
+        # decorator is also applied to stand-ins in the test suite that return
+        # the packet mapping. Only a real schema carries the flag.
+        if hasattr(ret, '__updated__'):
+            ret.__updated__ = False
+
         return cast('R_prepare', ret)
     return unpack

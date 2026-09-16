@@ -4,6 +4,7 @@ import collections
 import enum
 import importlib.util
 import io
+import ipaddress
 import unittest
 from unittest import mock
 
@@ -353,6 +354,186 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         })
         self.assertIsInstance(payload, DummyProtocol)
         self.assertEqual(payload.info.to_dict()['value'], 12)
+
+    def test_parse_limits_accept_the_spelling_every_producer_uses(self) -> None:
+        """``layer=``/``protocol=`` are honoured while parsing, ignored while making.
+
+        The limits are documented on ``ProtocolBase.__init__`` as ``_layer`` and
+        ``_protocol``, but nothing in the tree spells them that way: the engines
+        and every ``_import_next_layer`` pass them without the underscore, so
+        both were silently dropped (GH-356). Both spellings therefore have to
+        work, and the prefixed one has to win when the two disagree.
+
+        The un-prefixed pair may only be consumed while *parsing*, though.
+        ``protocol`` is a real ``make()`` argument -- ``IPv4.make`` takes one, and
+        ``Data_IPv6.to_dict`` carries one straight into ``from_data`` -- so
+        swallowing it on the construction path would silently drop the value
+        being constructed.
+
+        """
+        DummyProtocol, _, _ = self._make_protocol_class()
+
+        for keywords, layer, proto in (
+            ({'_layer': 'Internet'}, 'Internet', None),
+            ({'layer': 'Internet'}, 'Internet', None),
+            ({'_protocol': 'dummyprotocol'}, None, 'dummyprotocol'),
+            ({'protocol': 'dummyprotocol'}, None, 'dummyprotocol'),
+            # the prefixed spelling wins over the un-prefixed one
+            ({'_layer': 'Internet', 'layer': 'Transport'}, 'Internet', None),
+        ):
+            with self.subTest(**keywords):
+                parsed = DummyProtocol(io.BytesIO(b'abpayload'), 9, **keywords)
+
+                self.assertEqual(parsed._exlayer, layer)
+                self.assertEqual(parsed._exproto, proto)
+                self.assertTrue(parsed._sigterm)
+
+        # ... and the un-prefixed pair reaches ``make()`` untouched when there is
+        # no source stream, i.e. nothing is being parsed.
+        made = DummyProtocol(packet=b'abpayload', protocol='dummyprotocol', layer='Internet')
+        self.assertIsNone(made._exlayer)
+        self.assertIsNone(made._exproto)
+        self.assertFalse(made._sigterm)
+
+    def test_no_limit_sentinels_are_not_treated_as_a_limit(self) -> None:
+        """``layer='none'`` and ``protocol='null'`` mean "no limit", not a name.
+
+        They are what ``Extractor.__init__`` substitutes for an omitted argument,
+        so they reach every protocol of every packet and must not be compared
+        against real protocol names.
+
+        """
+        DummyProtocol, _, _ = self._make_protocol_class()
+
+        for keywords in ({'layer': 'none'}, {'layer': 'NONE'}, {'protocol': 'null'},
+                         {'_layer': 'none'}, {'_protocol': 'null'},
+                         {'layer': 'none', 'protocol': 'null'}):
+            with self.subTest(**keywords):
+                parsed = DummyProtocol(io.BytesIO(b'abpayload'), 9, **keywords)
+
+                self.assertIsNone(parsed._exlayer)
+                self.assertIsNone(parsed._exproto)
+                self.assertFalse(parsed._sigterm)
+
+    def test_packet_context_is_republished_as_dunder_packet(self) -> None:
+        """The enclosing layer's ``packet=`` reaches ``unpack`` as ``__packet__``.
+
+        ``_import_next_layer`` hands the next protocol its packet context as
+        ``packet=``, but the schema layer reads it from ``__packet__``
+        (``Protocol.unpack``, and the ``pack``/``unpack`` overrides of ``Frame``
+        and ``PCAPNG``). Nothing bridged the two, so a schema always saw an empty
+        dict (GH-382).
+
+        The republished dict is a *copy*: ``Schema.unpack`` writes every field it
+        reads into the context it is handed, and the IPv6 extension header walk
+        gives one dict to each header in turn, so sharing it would leak one
+        header's fields into the next one's context.
+
+        """
+        DummyProtocol, _, _ = self._make_protocol_class()
+
+        seen = {}  # type: dict[str, object]
+        original = DummyProtocol.unpack
+
+        def capture(self, length=None, **kwargs):
+            # Snapshot before delegating: ``Schema.unpack`` writes its own
+            # ``__length__`` and every field it reads into the context, so what
+            # arrived is only observable ahead of the call.
+            seen['snapshot'] = dict(kwargs.get('__packet__') or {})
+            seen['identity'] = kwargs.get('__packet__')
+            seen['packet'] = kwargs.get('packet')
+            return original(self, length, **kwargs)
+
+        DummyProtocol.unpack = capture  # type: ignore[method-assign]
+        try:
+            outer = {'src': 'the-source', 'dst': 'the-destination'}
+            DummyProtocol(io.BytesIO(b'abpayload'), 9, packet=outer)
+        finally:
+            DummyProtocol.unpack = original  # type: ignore[method-assign]
+
+        self.assertEqual(seen['snapshot'], {'src': 'the-source', 'dst': 'the-destination'})
+        # A copy, and the enclosing layer's own dict is left exactly as it was.
+        self.assertIsNot(seen['identity'], outer)
+        self.assertEqual(outer, {'src': 'the-source', 'dst': 'the-destination'})
+        # ``packet=`` is left in place as well, since it is the documented
+        # ``_import_next_layer`` spelling and some callers still read it.
+        self.assertIs(seen['packet'], outer)
+
+    def test_explicit_dunder_packet_is_not_overridden(self) -> None:
+        """A caller that already supplies ``__packet__`` keeps its own dict.
+
+        The PCAP-NG engine does exactly that -- it passes the section's snapshot
+        length as ``__packet__`` -- so the bridge must only fill the keyword in
+        when it is absent.
+
+        """
+        DummyProtocol, _, _ = self._make_protocol_class()
+
+        seen = {}  # type: dict[str, object]
+        original = DummyProtocol.unpack
+
+        def capture(self, length=None, **kwargs):
+            seen['identity'] = kwargs.get('__packet__')
+            return original(self, length, **kwargs)
+
+        DummyProtocol.unpack = capture  # type: ignore[method-assign]
+        try:
+            chosen = {'snaplen': 262144}
+            DummyProtocol(io.BytesIO(b'abpayload'), 9,
+                          packet={'src': 'ignored'}, __packet__=chosen)
+        finally:
+            DummyProtocol.unpack = original  # type: ignore[method-assign]
+
+        self.assertIs(seen['identity'], chosen)
+
+    def test_outer_address_reaches_a_schema_that_needs_it(self) -> None:
+        """A real consumer of the packet context gets its value (GH-382).
+
+        RFC 7731 lets an MPL option elide its Seed-ID from the wire when the
+        Seed-ID type is ``IPV6_SOURCE_ADDRESS``, in which case the seed *is* the
+        enclosing IPv6 source address.
+        ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``
+        implements that by reading ``packet['src']`` -- a value only the outer
+        layer knows -- and ``IPv6.read`` does put it in the dict it hands down.
+        The dict never arrived as ``__packet__``, so the seed silently came back
+        as :data:`None` for every such option.
+
+        The capture is built here rather than read from
+        :file:`examples/captures/`: this is a unit-tier module, and none of the
+        committed captures carries an MPL option.
+
+        """
+        from pcapkit.const.ipv6.seed_id import SeedID
+        from pcapkit.protocols.internet.ipv6 import IPv6
+
+        source = ipaddress.IPv6Address('2001:db8::1')
+        destination = ipaddress.IPv6Address('ff02::1')
+
+        #: One HOPOPT extension header, eight octets: an MPL option whose
+        #: Seed-ID is elided, then two ``Pad1`` octets to fill the header out.
+        hopopt = bytes([
+            59,     # next header: IPv6-NoNxt
+            0,      # hdr ext len: 0, i.e. 8 octets in total
+            0x6D,   # option type: MPL_Option
+            0x02,   # opt data len: 2 -- flags and sequence only, seed elided
+            0x00,   # flags: S=0b00 (IPV6_SOURCE_ADDRESS), M=0, V=0
+            0x2A,   # sequence
+            0x00,   # option type: Pad1
+            0x00,   # option type: Pad1
+        ])
+        packet = (bytes([0x60, 0x00, 0x00, 0x00])            # version, traffic class, flow label
+                  + len(hopopt).to_bytes(2, 'big')           # payload length
+                  + bytes([0, 64])                           # next header: HOPOPT; hop limit
+                  + source.packed + destination.packed
+                  + hopopt)
+
+        parsed = IPv6(io.BytesIO(packet), len(packet))
+        option = list(parsed.info.hopopt.options.values())[0]
+
+        self.assertEqual(str(parsed.protochain), 'IPv6:HOPOPT')
+        self.assertEqual(parsed.info.src, source)
+        self.assertEqual(option.seed_type, SeedID.IPV6_SOURCE_ADDRESS)
+        self.assertEqual(option.seed_id, source)
 
 
 if __name__ == '__main__':

@@ -103,6 +103,70 @@ class DecoratorTests(unittest.TestCase):
         with self.assertRaises(EOFError):
             DemoSchema.unpack(b'', None, None)
 
+    def test_prepare_leaves_the_schema_clean_after_post_process(self) -> None:
+        """``post_process``'s revisions must not mark the schema as needing a re-pack.
+
+        ``Schema.unpack`` clears ``__updated__`` before returning, but
+        ``post_process`` runs after it and every field it assigns sets the flag
+        again. The schema was therefore left dirty, and the next
+        ``bytes(schema)`` re-packed it -- which calls ``post_process`` a second
+        time with a packet context rebuilt from the schema's own fields, so any
+        value ``post_process`` had derived from the *enclosing* layer's context
+        was overwritten with the fallback. ``Schema.pack`` clears the flag after
+        ``post_process``, and this asserts the unpacking path now matches it.
+
+        """
+        class DemoSchema:
+            def __init__(self) -> None:
+                self.__updated__ = False
+
+            @classmethod
+            def pre_unpack(cls, packet) -> None:
+                return None
+
+            def post_process(self, packet):
+                # stand-in for a field assignment, which is what sets the flag
+                self.value = packet.get('src', 'fallback')
+                self.__updated__ = True
+                return self
+
+            @classmethod
+            @self.decorators.prepare
+            def unpack(cls, data, length=None, packet=None):
+                return cls()
+
+        schema = DemoSchema.unpack(b'payload', None, {'src': 'outer-source'})
+
+        self.assertEqual(schema.value, 'outer-source')
+        self.assertFalse(schema.__updated__)
+
+    def test_prepare_tolerates_a_post_process_that_returns_no_schema(self) -> None:
+        """``post_process`` need not return a schema, so the flag reset is guarded.
+
+        An implementation may hand back a nested schema instead of ``self`` --
+        ``pcapkit.protocols.schema.internet.hopopt._SMFDPDOption`` returns
+        ``self.data`` -- and the stand-ins above return the packet mapping.
+        Neither may raise from the reset.
+
+        """
+        class DemoSchema:
+            @classmethod
+            def pre_unpack(cls, packet) -> None:
+                packet['prepped'] = True
+
+            def post_process(self, packet):
+                return packet
+
+            @classmethod
+            @self.decorators.prepare
+            def unpack(cls, data, length=None, packet=None):
+                return cls()
+
+        returned = DemoSchema.unpack(b'payload', None, None)
+
+        self.assertIsInstance(returned, dict)
+        self.assertTrue(returned['prepped'])
+
     def test_beholder_wraps_struct_eof_with_no_payload(self) -> None:
         exceptions = self.exceptions
 
