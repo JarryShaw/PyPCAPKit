@@ -256,15 +256,35 @@ class OptionField(ListField, Generic[_TS]):
         new_packet = packet.copy()
         new_packet[self.name] = OrderedMultiDict()
 
+        # NOTE: Only the base schema's type field is read here, rather than the
+        # whole base schema. The option schema below re-reads the same octets
+        # from the rewound stream, and the base schema's result is used for
+        # nothing but the type code, so unpacking it in full parsed every option
+        # twice -- 2274 schema unpacks for 1137 options of
+        # ``examples/captures/profile.pcapng``. The type field is the first field
+        # of every base schema in this package, so reading and rewinding it alone
+        # lands the stream on the same octet the full unpack and its rewind did.
+        #
+        # The three lines below deliberately mirror what
+        # :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+        # does for one field -- ``field(packet)``, read ``field.length`` octets,
+        # then ``field.unpack(byte, packet.copy())`` -- rather than reaching for
+        # :func:`struct.unpack`. That keeps ``code``'s enumeration type, which
+        # both the ``self._eool`` comparison and the ``OrderedMultiDict`` key
+        # depend on, and it is what makes the two spellings equivalent rather
+        # than merely similar.
+        type_field = self._base_schema.__fields__[self._type_name]
+
         temp = []  # type: list[_TS]
         while length > 0:
-            # unpack option type using base schema
-            meta = self._base_schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
-            code = cast('int', meta[self._type_name])
+            # unpack option type using the base schema's type field
+            field = type_field(packet)
+            byte = file.read(field.length)
+            code = cast('int', field.unpack(byte, packet.copy()))
             schema = self._registry[code]
 
             # rewind to the beginning of the option
-            file.seek(-len(meta), io.SEEK_CUR)
+            file.seek(-len(byte), io.SEEK_CUR)
 
             # unpack option using option schema
             data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
