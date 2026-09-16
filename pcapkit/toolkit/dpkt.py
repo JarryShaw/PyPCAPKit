@@ -215,7 +215,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
             ihl=hdr_len,                                         # header length, only headers before IPv6-Frag
             mf=bool(ipv6_frag.m_flag),                           # more fragment flag
             tl=hdr_len + len(payload),                           # total length, header includes
-            header=ipv6.pack()[:hdr_len],                        # raw bytearray type header before IPv6-Frag
+            header=ipv6.pack()[:hdr_len],                        # raw bytes type header before IPv6-Frag
             payload=bytearray(payload),                          # raw bytearray type payload after IPv6-Frag
         )
         return data

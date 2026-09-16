@@ -67,7 +67,14 @@ class PCAPToolkitTests(unittest.TestCase):
         # toolkit passes it through to ``fo`` unscaled. ``id`` is deliberately
         # different from the IPv6 header's flow label below, so that a ``bufid``
         # keyed on the wrong one of the two is visible.
+        #
+        # ``length`` mirrors :attr:`IPv6_Frag.length
+        # <pcapkit.protocols.protocol.ProtocolBase.length>`, which is the 8 octets
+        # the toolkit subtracts back off ``hdr_len`` to reach the boundary before
+        # the Fragment header. A fake without it cannot show that subtraction
+        # happening at all.
         fragment = types.SimpleNamespace(
+            length=8,
             info=types.SimpleNamespace(next=TransType.TCP, offset=8, mf=True, id=4321),
         )
         extension_headers = {ExtensionHeader.IPv6_Frag: fragment} if with_fragment else {}
@@ -77,8 +84,10 @@ class PCAPToolkitTests(unittest.TestCase):
                 src=ip_address('2001:db8::1'),
                 dst=ip_address('2001:db8::2'),
                 label=7,
+                # 40 octets of IPv6 header plus the 8 of the Fragment header, and
+                # a payload length that agrees with ``fragment.payload`` below
                 hdr_len=48,
-                raw_len=10,
+                raw_len=6,
                 fragment=types.SimpleNamespace(header=b'V' * 48, payload=b'v6data'),
             ),
         )
@@ -161,7 +170,14 @@ class PCAPToolkitTests(unittest.TestCase):
         self.assertNotEqual(v6.bufid[2], 7)
         self.assertEqual(v6.fo, 8)
         self.assertTrue(v6.mf)
-        self.assertEqual(v6.header, b'V' * 48)
+        # ``hdr_len`` counts the 8-octet Fragment header, but the reassembled
+        # packet holds no Fragment header at all (:rfc:`8200#section-4.5`), so
+        # ``ihl`` and ``header`` stop 8 octets short of it -- and ``tl`` with them,
+        # since the reassembly machinery writes the payload over ``tl - ihl``
+        self.assertEqual(v6.ihl, 40)
+        self.assertEqual(v6.header, b'V' * 40)
+        self.assertEqual(v6.tl, 46)
+        self.assertEqual(v6.tl - v6.ihl, len(v6.payload))
         self.assertEqual(bytes(v6.payload), b'v6data')
         self.assertIsNone(toolkit.ipv6_reassembly(FakeFrame({}, types.SimpleNamespace(number=1))))
         self.assertIsNone(toolkit.ipv6_reassembly(
@@ -217,7 +233,12 @@ class PCAPToolkitTests(unittest.TestCase):
         self.assertEqual(v6.bufid[2], 4321)
         self.assertNotEqual(v6.bufid[2], 7)
         self.assertEqual(v6.fo, 8)
-        self.assertEqual(v6.header, b'V' * 48)
+        # and it stops short of the Fragment header the same way, so a datagram
+        # does not reassemble differently per capture format
+        self.assertEqual(v6.ihl, 40)
+        self.assertEqual(v6.header, b'V' * 40)
+        self.assertEqual(v6.tl, 46)
+        self.assertEqual(v6.tl - v6.ihl, len(v6.payload))
         self.assertIsNone(toolkit.ipv6_reassembly(FakeFrame({}, frame.info)))
         self.assertIsNone(toolkit.ipv6_reassembly(
             FakeFrame({'IPv6': self._make_ipv6(with_fragment=False)}, frame.info),

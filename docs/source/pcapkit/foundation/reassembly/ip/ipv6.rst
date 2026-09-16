@@ -29,6 +29,9 @@ Terminology
 
        .. code-block:: python
 
+          hdr_len = ipv6_info.hdr_len - ipv6_frag.length
+          payload = bytearray(ipv6_info.fragment.payload)
+
           packet_dict = dict(
             bufid = (
                 ipv6_info.src,              # source IP address
@@ -38,27 +41,24 @@ Terminology
             ),
             num = frame.info.number,        # original packet range number
             fo = ipv6_frag_info.offset,     # fragment offset, in octets
-            ihl = ipv6_info.hdr_len,        # header length, IPv6-Frag included
+            ihl = hdr_len,                  # header length, only headers before IPv6-Frag
             mf = ipv6_frag_info.mf,         # more fragment flag
-            tl = ipv6_info.hdr_len
-                 + ipv6_info.raw_len,       # total length, header includes
+            tl = hdr_len + len(payload),    # total length, header includes
             header = ipv6_info.fragment
-                     .header,               # raw bytes type header, IPv6-Frag included
-            payload = bytearray(
-                ipv6_info.fragment
-                .payload),                  # raw bytearray type payload after IPv6-Frag
+                     .header[:hdr_len],     # raw bytes type header before IPv6-Frag
+            payload = payload,              # raw bytearray type payload after IPv6-Frag
           )
 
-       .. warning::
+       .. note::
 
-          ``ihl`` and ``header`` here **include** the 8-octet Fragment header,
-          because :attr:`IPv6.hdr_len <pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len>`
-          counts every extension header it has walked, the Fragment one included.
-          The ``dpkt`` and ``scapy`` adapters stop short of it and report 40 where
-          this one reports 48 for the same packet, so the value is not comparable
-          across engines -- and :rfc:`8200#section-4.5` says the Fragment header
-          is not present in a reassembled packet at all. Tracked as #415; expect
-          this line to change when that is fixed.
+          ``ihl``, ``header`` and ``tl`` all stop short of the 8-octet Fragment
+          header, because :rfc:`8200#section-4.5` says it is not present in the
+          reassembled packet. :attr:`IPv6.hdr_len <pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len>`
+          does count it -- it is a header length, and the Fragment header is one
+          of the extension headers it has walked -- so the adapters subtract it
+          back off. All four adapters (``pcap``, ``pcapng``, ``dpkt`` and
+          ``scapy``) agree on the three fields; they used to report three
+          different values for ``tl`` alone, which is what #415 was about.
 
        .. note::
 
@@ -103,6 +103,17 @@ Terminology
            |     |                 |--> ...
            |     |--> 'packet' : (None)
            |--> (Info) data ...
+
+       .. note::
+
+          ``header`` is the fragment's unfragmentable part with one field
+          rewritten: the Next Header field of its last header carries the
+          Fragment header's Next Header value, as :rfc:`8200#section-4.5`
+          requires of a reassembled packet. Without that rewrite the datagram
+          would still advertise a Fragment header (``44``) on a datagram that is
+          no longer a fragment. The Payload Length field is *not* adjusted, so it
+          still describes the first fragment rather than the reassembled
+          datagram; use ``len(payload)`` instead.
 
    reasm.ipv6.buffer
        Data structure for internal buffering when performing reassembly algorithms

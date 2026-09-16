@@ -202,6 +202,13 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
             return None                        # dismiss not fragmented packet
         ipv6_frag = cast('IPv6ExtHdrFragment', ipv6['IPv6ExtHdrFragment'])
 
+        # NOTE: ``len()`` of a Scapy layer spans that layer and everything after
+        # it, so the difference is the unfragmentable part -- every octet before
+        # the Fragment header, which is the only part of the header the
+        # reassembled packet keeps (:rfc:`8200#section-4.5`).
+        hdr_len = len(ipv6) - len(ipv6_frag)
+        payload = bytearray(bytes(ipv6_frag.payload))
+
         data = IP_Packet(
             bufid=(
                 cast('IPv6Address',
@@ -216,11 +223,15 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
             # units (:rfc:`8200#section-4.5`), but the reassembly machinery indexes
             # the datagram buffer with ``fo``, so it must be scaled into octets.
             fo=ipv6_frag.offset * 8,                      # fragment offset
-            ihl=len(ipv6) - len(ipv6_frag),               # header length, only headers before IPv6-Frag
+            ihl=hdr_len,                                  # header length, only headers before IPv6-Frag
             mf=bool(ipv6_frag.m),                         # more fragment flag
-            tl=len(ipv6),                                 # total length, header includes
-            header=bytes(ipv6)[:-len(ipv6_frag)],         # raw bytes type header before IPv6-Frag
-            payload=bytearray(bytes(ipv6_frag.payload)),  # raw bytearray type payload after IPv6-Frag
+            # NOTE: ``len(ipv6)`` counts the Fragment header, so it overstates
+            # this by 8 -- and the reassembly machinery writes the payload over
+            # the span ``tl - ihl``, so those 8 octets became 8 octets of stray
+            # zeroes in every reassembled datagram.
+            tl=hdr_len + len(payload),                    # total length, header includes
+            header=bytes(ipv6)[:hdr_len],                 # raw bytes type header before IPv6-Frag
+            payload=payload,                              # raw bytearray type payload after IPv6-Frag
         )
         return data
     return None
