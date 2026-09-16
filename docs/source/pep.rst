@@ -292,7 +292,7 @@ each engine has a matching module.
 Test Cases
 ----------
 
-**Largely done.** There is now a systematic test suite under ``tests/`` -- 86
+**Largely done.** There is now a systematic test suite under ``tests/`` -- 91
 modules matching ``test_*.py`` -- and it runs in CI against Python 3.10
 through 3.14, plus an allowed-to-fail 3.15 leg, per
 ``.github/workflows/unit-tests.yml``.
@@ -307,12 +307,15 @@ Those samples are not tracked in git, so
 source, and the tier guard raises rather than letting a unit-tier module
 quietly depend on a file that may not exist.
 
-Two things are still wanted:
+What remains wanted is **coverage rather than infrastructure**: the protocols and
+the registered-but-unhandled type codes listed above have no tests because they
+have no implementation yet.
 
-* **Coverage, rather than infrastructure.** The protocols and the
-  registered-but-unhandled type codes listed above have no tests because they
-  have no implementation yet.
-* **Shipping the suite**, which was part of the original ask and is not done.
-  ``tests`` is excluded from the wheel by ``[tool.setuptools.packages.find]``
-  in ``pyproject.toml``, so while the sdist carries the files, an installed
-  PyPCAPKit has no ``tests`` package and the suite cannot be run against it.
+The original ask also included **shipping the suite**, and that is now a
+deliberate decision rather than an omission. ``tests`` is excluded from the wheel
+by ``[tool.setuptools.packages.find]`` in ``pyproject.toml``; the sdist does carry
+all 91 modules, so a distribution packager building from source has them. The
+wheel stays lean because the suite could not run from an installed package
+anyway: the generated sample captures are not shipped, and ``tests/_tiers.py``
+resolves paths from a repository root that an installed package does not have.
+Anyone wanting to run the tests wants the repository, which is where they are.
