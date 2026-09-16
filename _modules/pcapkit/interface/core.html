@@ -437,6 +437,7 @@
     <span class="s1">'TREE'</span><span class="p">,</span> <span class="s1">'JSON'</span><span class="p">,</span> <span class="s1">'PLIST'</span><span class="p">,</span> <span class="s1">'PCAP'</span><span class="p">,</span>                        <span class="c1"># format macros</span>
     <span class="s1">'LINK'</span><span class="p">,</span> <span class="s1">'INET'</span><span class="p">,</span> <span class="s1">'TRANS'</span><span class="p">,</span> <span class="s1">'APP'</span><span class="p">,</span> <span class="s1">'RAW'</span><span class="p">,</span>                  <span class="c1"># layer macros</span>
     <span class="s1">'DPKT'</span><span class="p">,</span> <span class="s1">'Scapy'</span><span class="p">,</span> <span class="s1">'PyShark'</span><span class="p">,</span> <span class="s1">'PCAPKit'</span><span class="p">,</span>                  <span class="c1"># engine macros</span>
+    <span class="s1">'PyPCAP'</span><span class="p">,</span> <span class="s1">'PCAP_CT'</span><span class="p">,</span> <span class="s1">'PyPCAPFile'</span><span class="p">,</span>                      <span class="c1"># engine macros</span>
 <span class="p">]</span>
 
 <span class="c1"># output file formats</span>
@@ -453,10 +454,21 @@
 <span class="n">APP</span> <span class="o">=</span> <span class="s1">'application'</span>
 
 <span class="c1"># extraction engines</span>
+<span class="c1">#</span>
+<span class="c1"># NOTE: each value is the key the engine is registered under in</span>
+<span class="c1"># :attr:`Extractor.__engine__ &lt;pcapkit.foundation.extraction.Extractor.__engine__&gt;`,</span>
+<span class="c1"># not its display name -- ``Extractor`` looks the requested engine up in that</span>
+<span class="c1"># mapping, and an unknown key only warns and falls back to the default engine, so a</span>
+<span class="c1"># constant whose value does not match the key would silently do nothing. The</span>
+<span class="c1"># identifiers, by contrast, follow each engine's ``__engine_name__``, which is why</span>
+<span class="c1"># the casing of the two sides differs.</span>
 <span class="n">DPKT</span> <span class="o">=</span> <span class="s1">'dpkt'</span>
 <span class="n">Scapy</span> <span class="o">=</span> <span class="s1">'scapy'</span>
 <span class="n">PCAPKit</span> <span class="o">=</span> <span class="s1">'default'</span>
 <span class="n">PyShark</span> <span class="o">=</span> <span class="s1">'pyshark'</span>
+<span class="n">PyPCAP</span> <span class="o">=</span> <span class="s1">'pypcap'</span>
+<span class="n">PCAP_CT</span> <span class="o">=</span> <span class="s1">'pcap_ct'</span>
+<span class="n">PyPCAPFile</span> <span class="o">=</span> <span class="s1">'pypcapfile'</span>
 
 
 <div class="viewcode-block" id="extract">

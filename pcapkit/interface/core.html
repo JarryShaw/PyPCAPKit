@@ -607,14 +607,31 @@ Security Association to find the trailer and decrypt the payload:</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PyShark</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyshark'</span></span><a class="headerlink" href="#pcapkit.interface.core.PyShark" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.interface.core.PyPCAP">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PyPCAP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pypcap'</span></span><a class="headerlink" href="#pcapkit.interface.core.PyPCAP" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.interface.core.PCAP_CT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PCAP_CT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pcap_ct'</span></span><a class="headerlink" href="#pcapkit.interface.core.PCAP_CT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.interface.core.PyPCAPFile">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">PyPCAPFile</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pypcapfile'</span></span><a class="headerlink" href="#pcapkit.interface.core.PyPCAPFile" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>These constants predate the <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> engines and no
-equivalents were added for them, so those two are selected by their literal
-<code class="docutils literal notranslate"><span class="pre">engine=</span></code> values – <code class="docutils literal notranslate"><span class="pre">'pypcap'</span></code> and <code class="docutils literal notranslate"><span class="pre">'pypcapfile'</span></code> – rather than through
-a named constant. Any engine registered at runtime with
-<a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_engine" title="pcapkit.foundation.registry.foundation.register_extractor_engine"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_extractor_engine()</span></code></a> is
-likewise addressed by its string name.</p>
+<p>Every engine <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> ships now has a constant here. The <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>,
+<a class="reference external" href="https://pypi.org/project/pcap-ct">pcap-ct</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> ones were added after the first four, so code
+written against an earlier release may still select them by their literal
+<code class="docutils literal notranslate"><span class="pre">engine=</span></code> values – <code class="docutils literal notranslate"><span class="pre">'pypcap'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pcap_ct'</span></code> and <code class="docutils literal notranslate"><span class="pre">'pypcapfile'</span></code>. That
+keeps working: each constant <em>is</em> that string, so the two spellings are
+interchangeable. An engine registered at runtime with
+<a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_engine" title="pcapkit.foundation.registry.foundation.register_extractor_engine"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_extractor_engine()</span></code></a> has
+no constant and is addressed by the name it was registered under.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../foundation/engines/index.html"><span class="doc">Engine Support</span></a> for the full engine list, what each one

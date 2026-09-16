@@ -1302,16 +1302,27 @@
 
             <span class="c1"># NOTE: these engines' flow tracing adapters report the frame as a</span>
             <span class="c1"># plain :obj:`dict`, which the PCAP trace dumper cannot re-serialise</span>
-            <span class="c1"># -- it reaches for ``frame.packet``. ``None`` has to be caught along</span>
-            <span class="c1"># with ``'pcap'`` here, and replaced by a format that *can* take a</span>
-            <span class="c1"># mapping, because :meth:`TraceFlow.__init__</span>
+            <span class="c1"># -- :meth:`PCAPIO._append_value</span>
+            <span class="c1"># &lt;pcapkit.dumpkit.pcap.PCAPIO._append_value&gt;` reaches for</span>
+            <span class="c1"># ``frame.packet`` and dies with ``AttributeError: 'dict' object has no</span>
+            <span class="c1"># attribute 'packet'``. ``None`` has to be caught along with ``'pcap'``</span>
+            <span class="c1"># here, and replaced by a format that *can* take a mapping, because</span>
+            <span class="c1"># :meth:`TraceFlow.__init__</span>
             <span class="c1"># &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__init__&gt;`</span>
             <span class="c1"># itself substitutes ``'pcap'`` for ``None``.</span>
             <span class="c1">#</span>
-            <span class="c1"># The DPKT and Scapy engines report the frame as a mapping too and are</span>
-            <span class="c1"># deliberately *not* listed here: they are affected by the same defect</span>
-            <span class="c1"># on this revision, but they are outside the scope of this change.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">trace_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># DPKT and Scapy belong on this list and were once left off it. Their</span>
+            <span class="c1"># adapters build the frame with ``packet2dict`` exactly as the other two</span>
+            <span class="c1"># do, so both crash the same way -- but only DPKT did so visibly. The</span>
+            <span class="c1"># Scapy engine imports just :mod:`scapy.sendrecv`, which leaves the L2</span>
+            <span class="c1"># link types unregistered, so every frame dissects as ``Raw``, no TCP</span>
+            <span class="c1"># layer is ever found, and the tracer is never fed at all (#406). That</span>
+            <span class="c1"># hides this defect rather than avoiding it: register the link types --</span>
+            <span class="c1"># as importing :mod:`scapy.all` does -- and the same ``AttributeError``</span>
+            <span class="c1"># appears. So the guard is written from what the adapters produce, not</span>
+            <span class="c1"># from which engines happen to crash today.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">trace_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'trace_format=</span><span class="si">{</span><span class="n">trace_format</span><span class="si">}</span><span class="s2">'; "</span>
                      <span class="s2">"using 'trace_format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
                 <span class="n">trace_format</span> <span class="o">=</span> <span class="s1">'json'</span>
