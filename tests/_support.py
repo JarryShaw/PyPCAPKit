@@ -196,17 +196,24 @@ def purge_modules(prefixes: Iterable[str]) -> None:
 
 
 def _close_quietly(target: object) -> None:
-    """Call ``target.close()``, swallowing anything it raises.
+    """Call ``target.close()``, swallowing any :exc:`Exception` it raises.
+
+    :exc:`BaseException` is deliberately not caught: a
+    :exc:`KeyboardInterrupt` or a :exc:`SystemExit` arriving during teardown
+    should still end the run.
 
     Args:
         target: Object to close, or :data:`None`. Anything without a callable
             ``close`` attribute is ignored.
 
     """
-    close = getattr(target, 'close', None)
-    if not callable(close):
-        return
     try:
+        # Inside the ``try`` because the lookup itself can raise: a test double
+        # with ``close`` as a property, or a custom ``__getattr__``, fails here
+        # rather than at the call, and that would defeat the whole point.
+        close = getattr(target, 'close', None)
+        if not callable(close):
+            return
         close()
     except Exception:  # pylint: disable=broad-except
         # This runs from teardown, where raising would replace the real test

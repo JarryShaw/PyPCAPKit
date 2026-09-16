@@ -132,6 +132,42 @@ class ToleranceTests(unittest.TestCase):
         self.assertEqual(stream.calls, 1)
         self.assertEqual(engine.calls, 1)
 
+    def test_a_close_lookup_that_raises_is_ignored(self) -> None:
+        """Reaching ``close`` at all can fail, and that is tolerated too.
+
+        ``close`` need not be a plain method: as a property, or resolved through
+        ``__getattr__``, the *lookup* raises rather than the call. Guarding only
+        the call would let that escape and mask the real failure.
+
+        """
+        class HostileLookup:
+            @property
+            def close(self) -> 'object':
+                raise RuntimeError('lookup')
+
+        engine = Closeable()
+
+        close_extractor(Extractor(HostileLookup(), engine))
+
+        # And the engine is still closed: one unreachable resource must not
+        # strand the other, exactly as when the call itself raises.
+        self.assertEqual(engine.calls, 1)
+
+
+class PropagationTests(unittest.TestCase):
+    """What the helper deliberately does *not* swallow."""
+
+    def test_base_exception_is_not_swallowed(self) -> None:
+        """A :exc:`KeyboardInterrupt` during teardown still ends the run.
+
+        The helper catches :exc:`Exception`, not :exc:`BaseException`, so
+        interrupting a suite mid-teardown is not quietly absorbed by a cleanup
+        helper.
+
+        """
+        with self.assertRaises(KeyboardInterrupt):
+            close_extractor(Extractor(Closeable(KeyboardInterrupt()), Closeable()))
+
 
 if __name__ == '__main__':
     unittest.main()
