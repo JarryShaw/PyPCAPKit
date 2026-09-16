@@ -21,6 +21,25 @@ cryptography = "*"
 # ``pipenv lock``, which has to build its metadata -- on any machine without the
 # libpcap development files. Install it by hand to work on that engine:
 # ``pipenv run pip install pypcap``.
+#
+# ``pcap-ct`` and ``libpcap``, which drive the PCAP_CT engine, are listed --
+# the reason ``pypcap`` cannot be does not apply to them. Both are
+# ``py3-none-any`` wheels, so there is nothing to compile and ``pipenv lock``
+# works on a machine with no libpcap *development* files at all. (A system
+# ``libpcap.so.1`` is still needed to actually run the engine; that is a runtime
+# prerequisite, not something the lock file can express.)
+#
+# The versions are spelled out rather than left as ``"*"`` because neither
+# project has ever published a non-pre-release, and naming a pre-release in the
+# specifier is the PEP 440 way to opt into one. That keeps the opt-in scoped to
+# these two: ``allow_prereleases`` below stays commented out, since switching it
+# on would let every other package in this file resolve to a beta as well.
+#
+# The marker matches the PCAP_CT extra in pyproject.toml. ``libpcap`` 1.11.0b29
+# declares ``Requires-Python: <4.0.0,>=3.10.0``, which is the binding floor
+# (``pcap-ct`` itself allows 3.9).
+pcap-ct = {version = ">=1.3.0b3",markers = "python_version >= '3.10'"}
+libpcap = {version = ">=1.11.0b29",markers = "python_version >= '3.10'"}
 pypcapfile = "*"
 beautifulsoup4 = {extras = ["html5lib"],version = "*"}
 requests = {extras = ["socks"],version = "*"}

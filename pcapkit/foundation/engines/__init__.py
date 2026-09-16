@@ -7,8 +7,10 @@
 :mod:`pcapkit.foundation.engines` is a collection of engines
 support for :mod:`pcapkit`, including but not limited to the
 built-in PCAP and `PCAP-NG`_ file support, :mod:`Scapy <scapy>`,
-:mod:`PyShark <pyshark>`, :mod:`DPKT <dpkt>`, :mod:`PyPCAP <pcap>`
-and :mod:`PyPCAPFile <pcapfile>` 3rd party engine support.
+:mod:`PyShark <pyshark>`, :mod:`DPKT <dpkt>`, :mod:`PyPCAP <pcap>`,
+`pcap-ct`_ and :mod:`PyPCAPFile <pcapfile>` 3rd party engine support.
+
+.. _pcap-ct: https://pypi.org/project/pcap-ct/
 
 .. _PCAPNG: https://wiki.wireshark.org/Development/PcapNg
 
@@ -25,10 +27,11 @@ from pcapkit.foundation.engines.scapy import Scapy
 from pcapkit.foundation.engines.dpkt import DPKT
 from pcapkit.foundation.engines.pyshark import PyShark
 from pcapkit.foundation.engines.pypcap import PyPCAP
+from pcapkit.foundation.engines.pcap_ct import PCAP_CT
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 
 __all__ = [
     'PCAP', 'PCAPNG',
 
-    'Scapy', 'DPKT', 'PyShark', 'PyPCAP', 'PyPCAPFile',
+    'Scapy', 'DPKT', 'PyShark', 'PyPCAP', 'PCAP_CT', 'PyPCAPFile',
 ]

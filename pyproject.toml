@@ -19,6 +19,33 @@ maintainers = [
     { name="Jarry Shaw" },
 ]
 license = { text="BSD 3-Clause License" }
+# Kept at 3.6, which the ``bpc-*`` requirements above are what make possible: the
+# sources use 3.8 syntax (walrus, positional-only parameters) and ``refactor()`` in
+# setup.py converts it at install time. Measured, so that the state of that is on
+# the record rather than assumed:
+#
+#   3.9.25, 3.8.20   import and extract straight from source, no conversion needed
+#   3.7.16           SyntaxError from source, as expected -- this is what the
+#                    ``bpc-*`` conversion exists for
+#
+# **The conversion path has an upstream bug today.** ``bpc-poseur`` 0.4.3.post1
+# crashes on any positional-only parameter that is on a *method* rather than a
+# plain function -- ``AttributeError: 'Name' object has no attribute 'name'`` at
+# ``poseur.py:744`` in ``_process_classdef``, which does ``cls_ctx=name.name``
+# where ``name`` is already a parso ``Name`` leaf and wants ``.value``. It then
+# **exits 0**, so ``refactor()``'s ``check_call`` cannot see the failure, and the
+# 12 positional-only parameters in ``pcapkit/corekit/io.py`` survive into the
+# installed package -- making ``import pcapkit`` fail with ``SyntaxError`` on an
+# interpreter below 3.8.
+#
+# Verified that this is the *only* blocker: with that one line changed to
+# ``name.value``, ``walrus`` followed by ``poseur`` converts ``io.py`` into
+# something Python 3.7 parses cleanly. So this is an upstream fix to follow, not a
+# reason to withdraw the declaration. Until it lands, sub-3.8 support is intent
+# rather than something that works.
+#
+# Independently: CI covers **3.10 through 3.14** (3.15 runs allowed-to-fail), so 3.8 and 3.9 are best-effort
+# (both are end-of-life), and the ``PCAP_CT`` extra needs 3.10 regardless.
 requires-python = ">=3.6, <4"
 description = "PyPCAPKit: comprehensive network packet analysis library"
 keywords = [ "network", "pcap", "packet" ]
@@ -102,6 +129,48 @@ PyShark = [ "pyshark" ]
 # error instead of a resolver message; upstream sets no ``requires_python`` of
 # its own, and is unmaintained.
 PyPCAP = [ "pypcap; python_version < '3.12'" ]
+# ``pcap-ct`` is what covers 3.12+, and it is a *separate extra* rather than a
+# complementary marker on ``PyPCAP`` above. Two reasons, and the first is
+# decisive:
+#
+#   * They are two engines, not one engine with two backends -- ``engine='pypcap'``
+#     selects ``PyPCAP`` and ``engine='pcap_ct'`` selects ``PCAP_CT``, and
+#     ``PyPCAP`` refuses to run on pcap-ct rather than mislabel itself. An extra
+#     whose contents changed with the interpreter would therefore change which
+#     ``engine=`` string works, under one unchanged extra name.
+#   * These are pre-releases. Folding them into ``PyPCAP`` would install a beta
+#     on a newer interpreter for someone who asked for the stable thing, without
+#     ever saying so.
+#
+# No compiler and no ``pcap.h`` are needed: both publish ``py3-none-any`` wheels.
+# A system libpcap *is* still needed at run time, though -- the ``libpcap``
+# distribution ships a vendored ``libpcap.so`` but its published ``libpcap.cfg``
+# says ``LIBPCAP = None``, which sends its loader to ``find_library("pcap")``.
+# That is a runtime prerequisite rather than a resolution problem, so it is not
+# expressible here; the engine detects it and degrades to the default engine
+# instead of dying, c.f. ``PCAP_CT.unsupported_reason``.
+#
+# The pins name a pre-release on purpose. Neither project has ever published a
+# stable release, so pip's PEP 440 fallback ("if all versions are
+# pre-releases, allow them") means a bare ``pcap-ct`` already resolves without
+# ``--pre``; naming the version keeps that from being an accident, floors the
+# requirement at the versions actually tested here, and still accepts a future
+# stable release, since PEP 440 orders 1.3.0 above 1.3.0b3. ``pcap-ct`` itself
+# depends on ``libpcap>=1.11.0b16``; ``libpcap`` is listed anyway because it is
+# what supplies the ctypes bindings this engine runs on, and that should not be
+# implicit in a transitive dependency.
+#
+# The ``>= '3.10'`` marker is the same courtesy as the ceilings above, pointing
+# the other way. Taken from the wheel metadata rather than guessed: ``pcap-ct``
+# 1.3.0b3 declares ``Requires-Python: <4.0.0,>=3.9.0`` and ``libpcap``
+# 1.11.0b29 declares ``<4.0.0,>=3.10.0``, so 3.10 is the binding floor. This
+# project's own floor is now ``>=3.10`` too, so the marker is belt-and-braces
+# rather than load-bearing -- it keeps the requirement honest on its own terms, and
+# would matter again if the project floor ever moved back down.
+PCAP_CT = [
+    "pcap-ct>=1.3.0b3; python_version >= '3.10'",
+    "libpcap>=1.11.0b29; python_version >= '3.10'",
+]
 # pypcapfile 0.12.0's ``linklayer`` module imports :mod:`imp`, removed in Python
 # 3.12, and ``savefile`` imports ``linklayer`` -- so the package installs cleanly
 # and then raises ``ModuleNotFoundError`` the moment the engine is used. Upstream
@@ -114,6 +183,11 @@ vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]
 # development files on every platform, and fails where only the header is
 # present -- as on the macOS runners. Install it explicitly with
 # ``pip install pypcapkit[PyPCAP]`` once libpcap is available.
+#
+# ``pcap-ct`` is left out too, for a different reason: it needs no toolchain at
+# all, but it and ``libpcap`` are published only as pre-releases, and ``all``
+# should not be the way somebody ends up with a beta they did not ask for. It is
+# ``pip install pypcapkit[PCAP_CT]``, which says what it is installing.
 all = [
     "emoji",
     "cryptography>=3.4",

@@ -42,6 +42,10 @@ from pcapkit.toolkit.pcapng import block2frame as pcapng_block2frame
 # from pcapkit.toolkit.pypcap import packet2chain as pypcap_packet2chain
 # from pcapkit.toolkit.pypcap import packet2dict as pypcap_packet2dict
 
+# # tools for pcap-ct engine
+# from pcapkit.toolkit.pcap_ct import packet2chain as pcap_ct_packet2chain
+# from pcapkit.toolkit.pcap_ct import packet2dict as pcap_ct_packet2dict
+
 # # tools for PyPCAPFile engine
 # from pcapkit.toolkit.pypcapfile import packet2timestamp as pypcapfile_packet2timestamp
 # from pcapkit.toolkit.pypcapfile import ipv4_header as pypcapfile_ipv4_header
@@ -70,6 +74,9 @@ __all__ = [
 
     # # PyPCAP engine
     # 'pypcap_packet2chain', 'pypcap_packet2dict',
+
+    # # pcap-ct engine
+    # 'pcap_ct_packet2chain', 'pcap_ct_packet2dict',
 
     # # PyPCAPFile engine
     # 'pypcapfile_packet2timestamp', 'pypcapfile_ipv4_header',

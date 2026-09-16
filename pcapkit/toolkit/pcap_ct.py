@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
-"""PyPCAP Tools
-=================
+"""pcap-ct Tools
+================
 
-.. module:: pcapkit.toolkit.pypcap
+.. module:: pcapkit.toolkit.pcap_ct
 
-:mod:`pcapkit.toolkit.pypcap` contains all you need for
-:mod:`pcapkit` handy usage with `PyPCAP`_ engine. All reforming
+:mod:`pcapkit.toolkit.pcap_ct` contains all you need for
+:mod:`pcapkit` handy usage with `pcap-ct`_ engine. All reforming
 functions returns with a flag to indicate if usable for
 its caller.
 
-.. _PyPCAP: https://github.com/pynetwork/pypcap
+.. _pcap-ct: https://pypi.org/project/pcap-ct/
 
 .. important::
 
-   `PyPCAP`_ is a thin :manpage:`libpcap(3)` binding: it hands back the
-   ``(timestamp, bytes)`` pair that :c:func:`pcap_next_ex` produced and performs
-   **no protocol dissection whatsoever**. There is therefore no IP or TCP layer
-   for this module to read, and the reassembly and flow tracing adapters that
-   :mod:`pcapkit.toolkit.dpkt` and :mod:`pcapkit.toolkit.scapy` provide cannot
-   be implemented here.
+   `pcap-ct`_ is a :mod:`ctypes` reimplementation of the `PyPCAP`_ interface over
+   :manpage:`libpcap(3)`: it hands back the ``(timestamp, bytes)`` pair that
+   :c:func:`pcap_next_ex` produced and performs **no protocol dissection
+   whatsoever**. There is therefore no IP or TCP layer for this module to read,
+   and the reassembly and flow tracing adapters that :mod:`pcapkit.toolkit.dpkt`
+   and :mod:`pcapkit.toolkit.scapy` provide cannot be implemented here.
 
    They are still defined below, but only so that reaching for one fails loudly
    with :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than with an
@@ -28,12 +28,13 @@ its caller.
 
 .. seealso::
 
-   :mod:`pcapkit.toolkit.pcap_ct` is the same adapter for `pcap-ct`_, the
-   independent reimplementation of this interface that
-   :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` drives. Each engine names
-   its own adapter, so a change made for one cannot quietly alter the other.
+   :mod:`pcapkit.toolkit.pypcap` is the same adapter for upstream `PyPCAP`_. The
+   two are kept apart because the engines are: the distributions are independent
+   projects that happen to share the :mod:`pcap` module name, and each engine
+   names its own adapter so that a change made for one cannot quietly alter the
+   other.
 
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
+.. _PyPCAP: https://github.com/pynetwork/pypcap
 
 """
 from typing import TYPE_CHECKING
@@ -55,12 +56,12 @@ __all__ = [
 ]
 
 #: Explanatory suffix shared by every unsupported adapter below.
-_NO_DISSECTION = ("'pypcap' is a libpcap binding and performs no protocol "
+_NO_DISSECTION = ("'pcap-ct' is a libpcap binding and performs no protocol "
                   "dissection, so there is no protocol layer to read")
 
 
 def packet2chain(packet: 'bytes', *, data_link: 'Enum_LinkType') -> 'str':
-    """Fetch PyPCAP packet protocol chain.
+    """Fetch pcap-ct packet protocol chain.
 
     Args:
         packet: Raw packet bytes, as returned by :class:`pcap.pcap` iteration.
@@ -70,10 +71,10 @@ def packet2chain(packet: 'bytes', *, data_link: 'Enum_LinkType') -> 'str':
         Colon (``:``) separated list of protocol chain.
 
     Note:
-        As `PyPCAP`_ does not dissect the packet, the chain is only ever the
+        As `pcap-ct`_ does not dissect the packet, the chain is only ever the
         link layer type followed by ``Raw``, e.g. ``ETHERNET:Raw``.
 
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
+    .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
     """
     return f'{data_link.name}:Raw'
@@ -81,7 +82,7 @@ def packet2chain(packet: 'bytes', *, data_link: 'Enum_LinkType') -> 'str':
 
 def packet2dict(packet: 'bytes', timestamp: 'float', *,
                 data_link: 'Enum_LinkType') -> 'dict[str, Any]':
-    """Convert PyPCAP packet into :obj:`dict`.
+    """Convert pcap-ct packet into :obj:`dict`.
 
     Args:
         packet: Raw packet bytes, as returned by :class:`pcap.pcap` iteration.
@@ -93,9 +94,9 @@ def packet2dict(packet: 'bytes', timestamp: 'float', *,
 
     Note:
         The mapping carries the captured bytes verbatim rather than a decoded
-        protocol tree, since `PyPCAP`_ does not decode anything.
+        protocol tree, since `pcap-ct`_ does not decode anything.
 
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
+    .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
     """
     return {
@@ -116,12 +117,12 @@ def ipv4_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'IP_Packet[IPv4Add
         count: Packet index. If not provided, default to ``-1``.
 
     Raises:
-        UnsupportedCall: Always, as `PyPCAP`_ provides no IPv4 layer to read.
+        UnsupportedCall: Always, as `pcap-ct`_ provides no IPv4 layer to read.
 
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
+    .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
     """
-    raise UnsupportedCall(f'IPv4 reassembly is not supported by the PyPCAP engine: {_NO_DISSECTION}')
+    raise UnsupportedCall(f'IPv4 reassembly is not supported by the pcap-ct engine: {_NO_DISSECTION}')
 
 
 def ipv6_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'IP_Packet[IPv6Address] | None':
@@ -132,12 +133,12 @@ def ipv6_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'IP_Packet[IPv6Add
         count: Packet index. If not provided, default to ``-1``.
 
     Raises:
-        UnsupportedCall: Always, as `PyPCAP`_ provides no IPv6 layer to read.
+        UnsupportedCall: Always, as `pcap-ct`_ provides no IPv6 layer to read.
 
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
+    .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
     """
-    raise UnsupportedCall(f'IPv6 reassembly is not supported by the PyPCAP engine: {_NO_DISSECTION}')
+    raise UnsupportedCall(f'IPv6 reassembly is not supported by the pcap-ct engine: {_NO_DISSECTION}')
 
 
 def tcp_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'TCP_Packet | None':
@@ -148,12 +149,12 @@ def tcp_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'TCP_Packet | None'
         count: Packet index. If not provided, default to ``-1``.
 
     Raises:
-        UnsupportedCall: Always, as `PyPCAP`_ provides no TCP layer to read.
+        UnsupportedCall: Always, as `pcap-ct`_ provides no TCP layer to read.
 
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
+    .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
     """
-    raise UnsupportedCall(f'TCP reassembly is not supported by the PyPCAP engine: {_NO_DISSECTION}')
+    raise UnsupportedCall(f'TCP reassembly is not supported by the pcap-ct engine: {_NO_DISSECTION}')
 
 
 def tcp_traceflow(packet: 'bytes', timestamp: 'float', *, data_link: 'Enum_LinkType',
@@ -167,9 +168,9 @@ def tcp_traceflow(packet: 'bytes', timestamp: 'float', *, data_link: 'Enum_LinkT
         count: Packet index. If not provided, default to ``-1``.
 
     Raises:
-        UnsupportedCall: Always, as `PyPCAP`_ provides no TCP layer to read.
+        UnsupportedCall: Always, as `pcap-ct`_ provides no TCP layer to read.
 
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
+    .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
     """
-    raise UnsupportedCall(f'TCP flow tracing is not supported by the PyPCAP engine: {_NO_DISSECTION}')
+    raise UnsupportedCall(f'TCP flow tracing is not supported by the pcap-ct engine: {_NO_DISSECTION}')
