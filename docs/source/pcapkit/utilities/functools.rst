@@ -34,7 +34,7 @@ Type Variables
    :type: pcapkit.protocols.protocol.ProtocolBase
 
 .. data:: pcapkit.utilities.decorators.R_prepare
-   :type: pcapkit.protocols.schema.schmea.Schema
+   :type: pcapkit.protocols.schema.schema.Schema
 
 Error Handling Utilities
 ========================

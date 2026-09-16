@@ -24,6 +24,9 @@ from pcapkit.protocols.schema.application.httpv2 import UnassignedFrame as HTTPv
 from pcapkit.protocols.schema.application.httpv2 import \
     WindowUpdateFrame as HTTPv2_WindowUpdateFrame
 
+# NG Application Protocol
+from pcapkit.protocols.schema.application.ngap import NGAP
+
 __all__ = [
     # File Transfer Protocol
     'FTP',
@@ -37,4 +40,7 @@ __all__ = [
     'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
     'HTTPv2_RSTStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
     'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
+
+    # NG Application Protocol
+    'NGAP',
 ]

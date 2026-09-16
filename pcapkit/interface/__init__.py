@@ -11,12 +11,14 @@ designed to help and simplify the usage of :mod:`pcapkit`.
 
 """
 
-from pcapkit.interface.core import (APP, DPKT, INET, JSON, LINK, PCAP, PLIST, RAW, TRANS, TREE,
-                                    PCAPKit, PyShark, Scapy, extract, reassemble, trace)
+from pcapkit.interface.core import (APP, DPKT, INET, JSON, LINK, PCAP, PCAP_CT, PLIST, RAW, TRANS,
+                                    TREE, PCAPKit, PyPCAP, PyPCAPFile, PyShark, Scapy, extract,
+                                    reassemble, trace)
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # interface functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # format macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # layer macros
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # engine macros
+    'PyPCAP', 'PCAP_CT', 'PyPCAPFile',                      # engine macros
 ]

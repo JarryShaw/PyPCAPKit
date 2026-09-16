@@ -7,12 +7,17 @@ import sys
 import tempfile
 import types
 import unittest
+import warnings
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+#: Whether the optional DPKT engine can be selected. It is an extra
+#: (``pypcapkit[DPKT]``), absent from a plain ``[test]`` install, so the end-to-end
+#: case below skips rather than fails on a fresh clone.
+HAS_DPKT = importlib.util.find_spec('dpkt') is not None
 
 
 class ClosableBytesIO(io.BytesIO):
@@ -553,6 +558,158 @@ class ExtractorTests(unittest.TestCase):
             warn.assert_called_once()
             self.assertTrue(hasattr(unknown_output, '_ofile'))
             unknown_output._ifile.close()
+
+    def _traced(self, temp: pathlib.Path, tag: str, **kwargs: object):
+        """An ``Extractor`` built for tracing, with ``run`` patched out.
+
+        Nothing is extracted, so no engine needs to be installed -- the format
+        substitution under test happens in the constructor. Returns the extractor
+        and the patched module-level ``warn``.
+
+        """
+        from pcapkit.foundation.extraction import Extractor
+
+        with mock.patch.object(Extractor, 'run'):
+            with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+                extractor = Extractor(str(temp / 'sample.pcap'), str(temp / f'out-{tag}'),
+                                      format='json', auto=False, nofile=True, trace=True,
+                                      tcp=True, trace_fout=str(temp / f'flows-{tag}'),
+                                      **kwargs)  # type: ignore[arg-type]
+        self.addCleanup(extractor._ifile.close)
+        return extractor, warn
+
+    def test_pcap_trace_format_is_replaced_for_every_dict_frame_engine(self) -> None:
+        # The flow-tracing adapters of these four engines report each frame as a
+        # plain dict, which the PCAP trace dumper cannot re-serialise: it reaches for
+        # ``frame.packet`` and raises AttributeError from
+        # pcapkit.dumpkit.pcap.PCAPIO._append_value. DPKT and Scapy were once left
+        # off this list even though ``packet2dict`` builds their frames exactly as it
+        # builds the other two's.
+        #
+        # ``None`` is asserted alongside 'pcap' and 'cap' because TraceFlow.__init__
+        # substitutes 'pcap' for it, so an unset format routes to the same dumper.
+        # The chosen dumper is read off the tracer's own file extension rather than
+        # inferred from the warning: '.pcap' there means the crash is still reachable
+        # however loudly the constructor complained.
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp = pathlib.Path(tempdir)
+            (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
+
+            for engine in ('dpkt', 'scapy', 'pyshark', 'pypcapfile'):
+                for trace_format in ('pcap', 'cap', None):
+                    with self.subTest(engine=engine, trace_format=trace_format):
+                        tag = f'{engine}-{trace_format}'
+                        traced, warn = self._traced(temp, tag, engine=engine,
+                                                    trace_format=trace_format)
+
+                        self.assertEqual(traced._trace.tcp._fdpext, '.json')
+                        warn.assert_called_once()
+                        message = warn.call_args.args[0]
+                        self.assertIn(f'engine={engine}', message)
+                        self.assertIn(f'trace_format={trace_format}', message)
+
+    def test_a_dict_capable_trace_format_is_left_alone(self) -> None:
+        # Only the formats that route to the PCAP dumper are substituted. A format
+        # that can already take a mapping is the caller's choice and is honoured
+        # silently -- otherwise every traced extraction on these engines would warn.
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp = pathlib.Path(tempdir)
+            (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
+
+            for trace_format, extension in (('json', '.json'), ('tree', '.txt'),
+                                            ('plist', '.plist')):
+                with self.subTest(trace_format=trace_format):
+                    traced, warn = self._traced(temp, f'dpkt-{trace_format}', engine='dpkt',
+                                                trace_format=trace_format)
+
+                    self.assertEqual(traced._trace.tcp._fdpext, extension)
+                    warn.assert_not_called()
+
+    def test_an_engine_with_real_frames_keeps_the_pcap_trace_format(self) -> None:
+        # The guard is about the frame shape an engine's adapter produces, not about
+        # tracing in general: the default engine hands the tracer a dissected Frame,
+        # which the PCAP dumper serialises perfectly well, so 'pcap' must survive.
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp = pathlib.Path(tempdir)
+            (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
+
+            for trace_format in ('pcap', None):
+                with self.subTest(trace_format=trace_format):
+                    traced, warn = self._traced(temp, f'default-{trace_format}',
+                                                trace_format=trace_format)
+
+                    self.assertEqual(traced._trace.tcp._fdpext, '.pcap')
+                    warn.assert_not_called()
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class DictFrameTraceEndToEndTests(unittest.TestCase):
+    """A traced extraction on a dict-frame engine must complete, not crash.
+
+    The constructor-level cases above prove the format was substituted; this proves
+    the substitution is *sufficient* -- the tracer runs, the dumper is handed the
+    mapping and writes it. Before the guard covered DPKT, this raised
+    ``AttributeError: 'dict' object has no attribute 'packet'`` from
+    :meth:`pcapkit.dumpkit.pcap.PCAPIO._append_value`.
+
+    What makes this reachable is that the tracer is actually fed: the dumper runs
+    only once a flow has been recorded, so the capture has to hold real TCP frames
+    and both ``trace=True`` and ``tcp=True`` have to be set. ``nofile=True`` is
+    orthogonal -- it suppresses the *frame* output, not the trace output, so it
+    neither causes nor prevents the crash.
+
+    Only DPKT is exercised end to end. Scapy's adapter produces the same mapping and
+    is covered by the constructor cases, but reaching its dumper needs the L2 link
+    types registered -- measured: with only :mod:`scapy.sendrecv` imported, as the
+    engine does today, every frame of ``in.pcap`` dissects as ``Raw``, no TCP layer
+    is found and the tracer is never fed (#406). Importing :mod:`scapy.all` to force
+    it is a *global and irreversible* change to ``scapy.conf``: measured on
+    ``in.pcap``, frames 3-5 gain a TCP layer afterwards. That would silently
+    invalidate the Scapy case in :mod:`tests.interface.test_misc`, which asserts the
+    opposite, depending on which of the two ran first. So it is deliberately not done
+    here.
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
+    def test_dpkt_traced_extraction_writes_flows_instead_of_crashing(self) -> None:
+        import pcapkit
+
+        for trace_format in ('pcap', 'cap', None):
+            with self.subTest(trace_format=trace_format):
+                with tempfile.TemporaryDirectory() as tempdir:
+                    flows = pathlib.Path(tempdir) / 'flows'
+
+                    with warnings.catch_warnings(record=True) as caught:
+                        warnings.simplefilter('always')
+                        extraction = pcapkit.extract(
+                            fin=sample_path('in.pcap'), engine='dpkt', store=True,
+                            nofile=True, tcp=True, trace=True, trace_fout=str(flows),
+                            trace_format=trace_format,
+                        )
+
+                    # The engine that ran is the one asked for -- a fallback to the
+                    # default engine would not exercise the dict-frame path at all.
+                    self.assertEqual(type(extraction.engine).__engine_name__, 'DPKT')
+                    self.assertTrue(extraction.trace.tcp,
+                                    'no TCP flow was traced, so the dumper never ran '
+                                    'and this test proves nothing')
+
+                    # Each traced flow named a file, and every one of them exists and
+                    # holds the JSON the substituted format produces.
+                    written = sorted(path for path in flows.rglob('*') if path.is_file())
+                    self.assertTrue(written)
+                    for path in written:
+                        self.assertEqual(path.suffix, '.json')
+                        self.assertGreater(path.stat().st_size, 0)
+
+                    self.assertTrue(
+                        any('json' in str(w.message) for w in caught
+                            if w.category.__name__ == 'FormatWarning'),
+                        'the format substitution was not announced',
+                    )
 
 
 if __name__ == '__main__':

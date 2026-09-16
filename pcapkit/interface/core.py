@@ -36,6 +36,7 @@ __all__ = [
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # format macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # layer macros
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # engine macros
+    'PyPCAP', 'PCAP_CT', 'PyPCAPFile',                      # engine macros
 ]
 
 # output file formats
@@ -52,10 +53,21 @@ TRANS = 'transport'
 APP = 'application'
 
 # extraction engines
+#
+# NOTE: each value is the key the engine is registered under in
+# :attr:`Extractor.__engine__ <pcapkit.foundation.extraction.Extractor.__engine__>`,
+# not its display name -- ``Extractor`` looks the requested engine up in that
+# mapping, and an unknown key only warns and falls back to the default engine, so a
+# constant whose value does not match the key would silently do nothing. The
+# identifiers, by contrast, follow each engine's ``__engine_name__``, which is why
+# the casing of the two sides differs.
 DPKT = 'dpkt'
 Scapy = 'scapy'
 PCAPKit = 'default'
 PyShark = 'pyshark'
+PyPCAP = 'pypcap'
+PCAP_CT = 'pcap_ct'
+PyPCAPFile = 'pypcapfile'
 
 
 def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,     # basic settings # pylint: disable=redefined-builtin

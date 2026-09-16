@@ -7,8 +7,8 @@
 
 :mod:`pcapkit.foundation` is a collection of foundations for
 :mod:`pcapkit`, including PCAP file extraction tool
-:class:`~pcapkit.foundation.extraction.Extrator`, flow tracing
-:mod:`~pcapkit.foundation.tractflow`, registry management
+:class:`~pcapkit.foundation.extraction.Extractor`, flow tracing
+:mod:`~pcapkit.foundation.traceflow`, registry management
 APIs for :mod:`pcapkit`, and TCP/IP reassembly implementations.
 
 """

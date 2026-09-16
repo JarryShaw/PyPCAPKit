@@ -47,7 +47,7 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
                IP --> IPv4 & IPv6 & IPsec
 
                subgraph ipsec [IPsec Family]
-                   IPsec --> AH
+                   IPsec --> AH & ESP
                end
            end
 
@@ -109,6 +109,7 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
 
        click Internet "/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.Internet"
        click AH "/pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH"
+       click ESP "/pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP"
        click HIP "/pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP"
        click HOPOPT "/pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT"
        click IP "/pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP"

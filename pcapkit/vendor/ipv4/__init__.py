@@ -27,11 +27,11 @@ crawlers include:
      - ToS (DS Field) Delay
    * - :class:`IPv4_ToSECN <pcapkit.vendor.ipv4.tos_ecn.ToSECN>`
      - ToS ECN Field
-   * - :class:`IPv4_ToSPrecedence <pcapkit.vendor.ipv4.tos_pre.TOSPrecedence>`
+   * - :class:`IPv4_ToSPrecedence <pcapkit.vendor.ipv4.tos_pre.ToSPrecedence>`
      - ToS (DS Field) Precedence
-   * - :class:`IPv4_ToSReliability <pcapkit.vendor.ipv4.tos_rel.TOSReliability>`
+   * - :class:`IPv4_ToSReliability <pcapkit.vendor.ipv4.tos_rel.ToSReliability>`
      - ToS (DS Field) Reliability
-   * - :class:`IPv4_ToSThroughput <pcapkit.vendor.ipv4.tos_thr.TOSThroughput>`
+   * - :class:`IPv4_ToSThroughput <pcapkit.vendor.ipv4.tos_thr.ToSThroughput>`
      - ToS (DS Field) Throughput
 
 .. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1

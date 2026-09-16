@@ -111,6 +111,26 @@ pcapkit-vendor = "pcapkit.vendor.__main__:main"
 cli = [ "emoji" ]
 # for ESP payload decryption, c.f. pcapkit.protocols.internet.esp
 crypto = [ "cryptography>=3.4" ]
+# for NGAP decoding, c.f. pcapkit.protocols.application.ngap. Deliberately kept
+# out of ``all``, for two reasons that are each sufficient on their own:
+#
+#   * Size. ``pycrate`` ships every specification it has ever compiled in one
+#     distribution: installing it lands ~238 MB of ``pycrate_asn1dir`` (87 spec
+#     modules) to obtain the one 4.9 MB ``NGAP.py`` this needs. Paying that in
+#     ``all`` -- a 50x multiplier over the useful part -- to support one
+#     application protocol is not a trade to make on a user's behalf.
+#   * Licence. ``pycrate`` is LGPL-2.1+ where this package is BSD-3-Clause. That
+#     is fine as an optional import a user chooses, and it is not fine as
+#     something ``pip install pypcapkit[all]`` pulls in silently: LGPL carries
+#     obligations on redistribution that a BSD-licensed dependent may not want,
+#     and ``all`` reads as "the rest of the same thing" rather than as a licence
+#     decision.
+#
+# No version floor: NGAP has shipped precompiled in ``pycrate_asn1dir`` for many
+# releases and the two entry points used here (``NGAP_PDU.from_aper`` and
+# ``to_aper``) are long-standing. Verified against 0.8.1, which is pure Python
+# with no compiled extension, so there is no toolchain prerequisite either.
+NGAP = [ "pycrate" ]
 # for normal users
 DPKT = [ "dpkt" ]
 Scapy = [ "scapy" ]
@@ -188,6 +208,9 @@ vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]
 # all, but it and ``libpcap`` are published only as pre-releases, and ``all``
 # should not be the way somebody ends up with a beta they did not ask for. It is
 # ``pip install pypcapkit[PCAP_CT]``, which says what it is installing.
+#
+# ``pycrate`` is left out for the size and licence reasons set out on the
+# ``NGAP`` extra above; ``pip install pypcapkit[NGAP]`` is the way to it.
 all = [
     "emoji",
     "cryptography>=3.4",

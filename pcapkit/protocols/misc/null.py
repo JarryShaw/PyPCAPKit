@@ -4,11 +4,11 @@
 
 .. module:: pcapkit.protocols.misc.null
 
-:mod:`pcapkit.protocols.null` contains
-:class:`~pcapkit.protocols.null.NoPayload` only, which
+:mod:`pcapkit.protocols.misc.null` contains
+:class:`~pcapkit.protocols.misc.null.NoPayload` only, which
 implements a :class:`~pcapkit.protocols.protocol.Protocol` like
 object whose payload is recursively
-:class:`~pcapkit.protocols.null.NoPayload` itself.
+:class:`~pcapkit.protocols.misc.null.NoPayload` itself.
 
 """
 import io

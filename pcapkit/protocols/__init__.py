@@ -66,6 +66,7 @@ __all__ = [
     # Application Layer
     'FTP', 'FTP_DATA',
     'HTTP', 'HTTPv1', 'HTTPv2',
+    'NGAP',
 ]
 
 #: dict[str, ~typing.Type[Protocol]]: Protocol registry.

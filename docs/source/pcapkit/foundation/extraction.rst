@@ -11,12 +11,13 @@ extracts parametres from a PCAP file.
 
 .. seealso::
 
-   Engine support for |pypcap|_ and |pypcapfile|_ has since landed, as
-   :class:`pcapkit.foundation.engines.pypcap.PyPCAP` (``engine='pypcap'``) and
-   :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
-   (``engine='pypcapfile'``). Both support less than the ``default`` engine
-   does; :doc:`engines/index` tabulates the gaps, and :doc:`../../index`
-   documents the installation prerequisites each of the two carries.
+   Engine support for |pypcap|_, |pcap-ct|_ and |pypcapfile|_ has since landed,
+   as :class:`pcapkit.foundation.engines.pypcap.PyPCAP` (``engine='pypcap'``),
+   :class:`pcapkit.foundation.engines.pcap_ct.PCAP_CT` (``engine='pcap_ct'``)
+   and :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
+   (``engine='pypcapfile'``). All three support less than the ``default``
+   engine does; :doc:`engines/index` tabulates the gaps, and :doc:`../../index`
+   documents the installation prerequisites each of the three carries.
 
 .. autoclass:: pcapkit.foundation.extraction.Extractor
    :no-members:
@@ -91,5 +92,7 @@ Type Variables
 
 .. |pypcap| replace:: ``pypcap``
 .. _pypcap: https://github.com/pynetwork/pypcap
+.. |pcap-ct| replace:: ``pcap-ct``
+.. _pcap-ct: https://pypi.org/project/pcap-ct/
 .. |pypcapfile| replace:: ``pypcapfile``
 .. _pypcapfile: https://github.com/kisom/pypcapfile

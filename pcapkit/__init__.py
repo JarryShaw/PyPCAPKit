@@ -102,6 +102,7 @@ __all__ = [
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # Engine Macros
+    'PyPCAP', 'PCAP_CT', 'PyPCAPFile',                      # Engine Macros
 
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE', 'APPTYPE',        # Protocol Numbers
 
@@ -117,7 +118,7 @@ __all__ = [
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer
 
     'FTP', 'FTP_DATA',                                      # Application Layer
-    'HTTP',
+    'HTTP', 'NGAP',
 ]
 
 #: version number
