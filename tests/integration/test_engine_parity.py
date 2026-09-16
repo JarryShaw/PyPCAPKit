@@ -111,10 +111,20 @@ class EngineParityTests(EndToEndTestCase):
         self.assertEqual(len(native.frame), len(foreign.frame))
         for number, (mine, theirs) in enumerate(zip(native.frame, foreign.frame), start=1):
             with self.subTest(frame=number):
-                # scapy does not know this capture's link type and hands back one
-                # opaque ``Raw`` layer holding the whole 60 octet frame, padded to
-                # the Ethernet minimum. Its first fourteen octets are the Ethernet
-                # header that the default engine parsed into a layer of its own.
+                # Re-serialising scapy's frame reproduces the whole 60 octet frame,
+                # padded to the Ethernet minimum, and its first fourteen octets are
+                # the Ethernet header the default engine parsed into a layer of its
+                # own. That is what makes this a bytes-level parity check: both
+                # engines account for every captured octet, whatever they call the
+                # layers they split it into.
+                #
+                # #406: this comment used to say scapy "does not know this capture's
+                # link type and hands back one opaque ``Raw`` layer". That was the
+                # missing-layer-registry bug, not a property of the capture --
+                # arp.pcap is link type 1 and scapy now dissects it as
+                # ``Ethernet / ARP / Padding``. The assertions below are unchanged
+                # and still pass, because ``bytes()`` of a dissected frame is the
+                # same octet string as ``bytes()`` of an undissected one.
                 captured = bytes(theirs)
                 self.assertEqual(len(captured), 60)
                 self.assertEqual(captured[:14], bytes(mine['Ethernet'].packet.header))

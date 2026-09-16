@@ -43,14 +43,26 @@ class EngineRuntimeTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
     def test_scapy_engine_returns_scapy_packets(self) -> None:
+        # #406: this asserted ``Raw`` -- the engine imported only ``scapy.sendrecv``,
+        # so scapy's layer registries were empty and every frame came back
+        # undissected. ``Ether`` is what the capture actually holds: frame 1 of
+        # in.pcap is an Ethernet frame carrying an ICMPv6 neighbour solicitation over
+        # IPv6, which is exactly what the two tests above independently report for the
+        # same frame -- 'Ethernet:IPv6:IPv6_ICMP' from the default engine and
+        # 'Ethernet:IP6:ICMP6' from DPKT. The three chains are three libraries'
+        # spellings of one frame, so scapy agreeing here is parity, not a new claim.
         from pcapkit.interface import extract
+        from pcapkit.toolkit.scapy import packet2chain
 
         extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True, engine='scapy')
         self.addCleanup(close_extractor, extractor)
 
         frame = extractor.frame[0]
         self.assertEqual(extractor.length, 6)
-        self.assertEqual(type(frame).__name__, 'Raw')
+        self.assertEqual(type(frame).__name__, 'Ether')
+        self.assertEqual(packet2chain(frame),
+                         'Ethernet:IPv6:ICMPv6 Neighbor Discovery - Neighbor Solicitation:'
+                         'ICMPv6 Neighbor Discovery Option - Source Link-Layer Address')
         self.assertGreater(len(bytes(frame)), 0)
 
     @unittest.skipUnless(HAS_PYSHARK, 'pyshark not installed')

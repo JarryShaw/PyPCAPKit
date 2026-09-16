@@ -15,6 +15,24 @@ its caller.
 
    This module requires installed `Scapy`_ engine.
 
+.. note::
+
+   Several functions here import a `Scapy`_ layer module lazily, inside the
+   function body -- :func:`ipv6_reassembly` needs
+   :class:`scapy.layers.inet6.IPv6ExtHdrFragment`, for instance. Those imports are
+   for the *classes* they name and nothing more. They must not be mistaken for how
+   `Scapy`_'s layer registries get populated, even though they do populate them as
+   a side effect, because by the time any of these functions runs the engine has
+   already called ``sniff`` and every frame has already been dissected -- or not.
+
+   That distinction is what made #406 hard to see. Reaching
+   :func:`ipv6_reassembly` repaired ``conf.l2types`` mid-run, one call too late to
+   affect the frames being reassembled, so whether a process dissected correctly
+   depended on what had imported `Scapy`_ earlier. Populating the registries before
+   ``sniff`` is
+   :class:`~pcapkit.foundation.engines.scapy.Scapy`'s job, and it does it by
+   importing :mod:`scapy.all` in its constructor.
+
 """
 import ipaddress
 import time
