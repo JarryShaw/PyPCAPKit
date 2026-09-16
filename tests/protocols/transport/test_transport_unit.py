@@ -317,6 +317,55 @@ class TransportUnitTests(unittest.TestCase):
         self.assertEqual(result, 'decoded')
         decode.assert_called_once_with(data, 2000, 12, packet=None)
 
+    def test_decode_next_layer_forwards_the_lower_port_when_neither_is_registered(self) -> None:
+        """An unregistered port pair still names the port it could not place.
+
+        The port reaches
+        :meth:`ProtocolBase._import_next_layer
+        <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` as
+        ``alias``, which is what :class:`~pcapkit.protocols.misc.raw.Raw` records
+        as ``Data_Raw.protocol``. This used to pass :obj:`None`, so TCP and UDP
+        anonymised every payload they could not dispatch -- unlike SCTP and IPv4,
+        which both keep the identifier the packet arrived with. The lower port is
+        the one carried, matching the lookup's own primary key.
+
+        """
+        from pcapkit.protocols.protocol import ProtocolBase
+        from pcapkit.protocols.transport.transport import Transport
+
+        class DummyTransport(Transport):
+            __proto__ = collections.defaultdict(lambda: None, {80: object})
+
+            @property
+            def name(self) -> str:
+                return 'Dummy Transport'
+
+            @property
+            def length(self) -> int:
+                return 0
+
+            def read(self, length: int | None = None, **kwargs: object) -> object:
+                raise NotImplementedError
+
+            def make(self, **kwargs: object) -> object:
+                raise NotImplementedError
+
+            @classmethod
+            def __index__(cls) -> int:
+                return 0
+
+        transport = object.__new__(DummyTransport)
+        data = object()
+
+        with mock.patch.object(ProtocolBase, '_decode_next_layer', return_value='decoded') as decode:
+            result = DummyTransport._decode_next_layer(transport, data, (53406, 22), 12)
+
+        self.assertEqual(result, 'decoded')
+        decode.assert_called_once_with(data, 22, 12, packet=None)
+
+        # And the lookup left nothing behind, so the ports stay registrable.
+        self.assertEqual(set(DummyTransport.__proto__), {80})
+
 
 if __name__ == '__main__':
     unittest.main()

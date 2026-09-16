@@ -148,12 +148,27 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
         Returns:
             Current protocol with next layer extracted.
 
+        Important:
+            The port is forwarded **whether or not it is registered**, since
+            :meth:`ProtocolBase._import_next_layer
+            <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` passes
+            it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`
+            records it as :attr:`Data_Raw.protocol
+            <pcapkit.protocols.data.misc.raw.Raw.protocol>`. Dropping it -- as
+            this used to, by falling back to :obj:`None` -- anonymised the very
+            case the field is most useful for: a payload on a port we do not
+            decode is then indistinguishable from one on port 22. The lower port
+            is the one carried, for the same reason it is the primary lookup
+            key. :meth:`SCTP._decode_next_layer
+            <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>` and
+            :meth:`Internet._import_next_layer
+            <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
+            already behave this way for an unregistered PPID and transport type.
+
         """
         sort_port = sorted(ports)
-        if sort_port[0] in self.__proto__:
-            proto = sort_port[0]
-        elif sort_port[1] in self.__proto__:
+        if sort_port[0] not in self.__proto__ and sort_port[1] in self.__proto__:
             proto = sort_port[1]
         else:
-            proto = None
-        return super()._decode_next_layer(dict_, proto, length, packet=packet)  # type: ignore[arg-type]
+            proto = sort_port[0]
+        return super()._decode_next_layer(dict_, proto, length, packet=packet)
