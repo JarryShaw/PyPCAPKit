@@ -112,6 +112,10 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
         # extract self object & args
         self = cast('R_beholder', args[0])
         try:
+            proto = args[1]
+        except IndexError:
+            proto = None
+        try:
             length = cast('int', args[2])
         except IndexError:
             length = None
@@ -134,8 +138,38 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
                 logger.error('The following error occurred while parsing the packet:')
                 traceback.print_exc()
 
-            file_ = self.__header__.get_payload()
-            next_ = protocol(file_, length, error=str(exc))
+            # NOTE: ``self._get_payload()`` rather than
+            # ``self.__header__.get_payload()``, which it wraps. The two agree
+            # for every protocol whose payload is a schema field, and differ for
+            # the two that override it: SCTP carries user data inside a DATA
+            # chunk and PCAP-NG inside a block, so neither header schema has a
+            # ``payload`` field at all. Going through the schema there raises
+            # ProtocolUnbound('unknown field: payload') *from the recovery path*,
+            # turning a next-layer parse failure that should have degraded to
+            # Raw into a crash. Unreachable until something was registered on an
+            # SCTP payload protocol identifier, which NGAP now is.
+            file_ = self._get_payload()
+
+            # NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so
+            # a payload that failed to parse still reports the code it arrived
+            # with, which is what ``Data_Raw.protocol`` means. A plain integer has
+            # no ``name`` and still renders as ``Raw`` in the protochain, c.f.
+            # ``Raw.__post_init__``, so this only adds a name where the registry
+            # key is an enumeration.
+            #
+            # Measured, because the layers differ and it is easy to state this too
+            # broadly: SCTP's unregistered path keeps its enumeration -- an unknown
+            # PPID gives ``SCTP:Unassigned_4243`` and ``protocol=4243`` -- so
+            # without this line, *registering* NGAP on PPID 60 would have made a
+            # failed parse report a bare ``SCTP:Raw`` and ``protocol=None``, less
+            # than the same bytes gave while unregistered. TCP's unregistered path
+            # does not: an unknown port yields ``protocol=None`` already, because
+            # ``Transport._decode_next_layer`` resolves ports through
+            # ``__proto__`` and never reaches here. So this makes the *failure*
+            # path uniform while the *unknown* paths stay inconsistent with each
+            # other, which is #418 rather than something to fix from inside a
+            # decorator.
+            next_ = protocol(file_, length, error=str(exc), alias=proto)
             return cast('R_beholder', next_)
     return behold
 

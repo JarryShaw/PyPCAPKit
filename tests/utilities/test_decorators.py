@@ -167,30 +167,63 @@ class DecoratorTests(unittest.TestCase):
         self.assertIsInstance(returned, dict)
         self.assertTrue(returned['prepped'])
 
-    def test_beholder_wraps_struct_eof_with_no_payload(self) -> None:
-        exceptions = self.exceptions
+    ##########################################################################
+    # beholder.
+    #
+    # The stand-in protocols below carry a ``_get_payload`` that delegates to
+    # ``self.__header__.get_payload()``, because that is what
+    # ``ProtocolBase._get_payload`` is -- a wrapper over the schema's accessor.
+    # ``beholder`` goes through the wrapper rather than the schema directly, so
+    # that the two protocols which override it (SCTP, PCAP-NG) recover from a
+    # next-layer failure at all; see
+    # ``test_beholder_uses_the_protocol_payload_accessor_not_the_schema``.
+    ##########################################################################
 
+    @staticmethod
+    def _payload_stand_ins():
+        """``Raw`` and ``NoPayload`` stand-ins recording what they were handed."""
         class NoPayload:
-            def __init__(self, file_, length, error=None) -> None:
+            def __init__(self, file_, length, error=None, alias=None) -> None:
                 self.file = file_
                 self.length = length
                 self.error = error
+                self.alias = alias
 
         class Raw(NoPayload):
             pass
 
         install_fake_payload_protocols(Raw, NoPayload)
+        return Raw, NoPayload
 
+    @staticmethod
+    def _demo_protocol_class(decorator, payload: bytes, raises, drop_length=False):
+        """A protocol whose next-layer decode always raises ``raises``."""
         class Header:
             def get_payload(self) -> bytes:
-                return b'payload-bytes'
+                return payload
 
         class DemoProtocol:
             __header__ = Header()
 
-            @self.decorators.beholder
-            def decode(self, proto, length=None):
-                raise exceptions.StructError('unexpected eof', eof=True)
+            def _get_payload(self) -> bytes:
+                return self.__header__.get_payload()
+
+            if drop_length:
+                @decorator
+                def decode(self, proto):
+                    raise raises
+            else:
+                @decorator
+                def decode(self, proto, length=None):
+                    raise raises
+
+        return DemoProtocol
+
+    def test_beholder_wraps_struct_eof_with_no_payload(self) -> None:
+        Raw, NoPayload = self._payload_stand_ins()
+        DemoProtocol = self._demo_protocol_class(
+            self.decorators.beholder, b'payload-bytes',
+            self.exceptions.StructError('unexpected eof', eof=True))
 
         result = DemoProtocol().decode(1, 10)
 
@@ -200,27 +233,9 @@ class DecoratorTests(unittest.TestCase):
         self.assertEqual(result.error, 'unexpected eof')
 
     def test_beholder_wraps_other_errors_with_raw(self) -> None:
-        class NoPayload:
-            def __init__(self, file_, length, error=None) -> None:
-                self.file = file_
-                self.length = length
-                self.error = error
-
-        class Raw(NoPayload):
-            pass
-
-        install_fake_payload_protocols(Raw, NoPayload)
-
-        class Header:
-            def get_payload(self) -> bytes:
-                return b'raw-bytes'
-
-        class DemoProtocol:
-            __header__ = Header()
-
-            @self.decorators.beholder
-            def decode(self, proto, length=None):
-                raise ValueError('broken parser')
+        Raw, _ = self._payload_stand_ins()
+        DemoProtocol = self._demo_protocol_class(
+            self.decorators.beholder, b'raw-bytes', ValueError('broken parser'))
 
         result = DemoProtocol().decode(1, 3)
 
@@ -229,28 +244,64 @@ class DecoratorTests(unittest.TestCase):
         self.assertEqual(result.length, 3)
         self.assertEqual(result.error, 'broken parser')
 
-    def test_beholder_verbose_mode_prints_traceback(self) -> None:
-        class NoPayload:
-            def __init__(self, file_, length, error=None) -> None:
-                self.file = file_
-                self.length = length
-                self.error = error
+    def test_beholder_forwards_the_protocol_number_as_an_alias(self) -> None:
+        """A failed payload keeps the number it arrived with.
 
-        class Raw(NoPayload):
-            pass
+        The success path in ``_import_next_layer`` passes ``alias=proto``, so a
+        payload that reached :class:`Raw` because nothing was registered on its
+        number is still labelled with that number. Omitting it from the failure
+        path made *registering* a protocol produce less informative output than
+        leaving the number unregistered.
 
-        install_fake_payload_protocols(Raw, NoPayload)
+        """
+        Raw, _ = self._payload_stand_ins()
+        DemoProtocol = self._demo_protocol_class(
+            self.decorators.beholder, b'raw-bytes', ValueError('broken parser'))
+
+        self.assertEqual(DemoProtocol().decode(60, 3).alias, 60)
+        # No ``proto`` argument at all -- the decorator must not raise.
+        DemoProtocol = self._demo_protocol_class(
+            self.decorators.beholder, b'raw-bytes', ValueError('broken parser'),
+            drop_length=True)
+        self.assertEqual(DemoProtocol().decode(66).alias, 66)
+
+    def test_beholder_uses_the_protocol_payload_accessor_not_the_schema(self) -> None:
+        """An overridden ``_get_payload`` is what the recovery path reads.
+
+        SCTP carries user data inside a DATA chunk and PCAP-NG inside a block,
+        so neither header schema has a ``payload`` field: reaching for the schema
+        raises ``ProtocolUnbound('unknown field: payload')`` *from the recovery
+        path*, turning a next-layer failure that should have degraded to
+        :class:`Raw` into a crash. It was unreachable until something was
+        registered on an SCTP payload protocol identifier, which NGAP now is.
+
+        """
+        exceptions = self.exceptions
+        Raw, _ = self._payload_stand_ins()
 
         class Header:
             def get_payload(self) -> bytes:
-                return b'raw-bytes'
+                raise exceptions.ProtocolUnbound("unknown field: 'payload'")
 
         class DemoProtocol:
             __header__ = Header()
 
+            def _get_payload(self) -> bytes:
+                return b'chunk-user-data'
+
             @self.decorators.beholder
             def decode(self, proto, length=None):
                 raise ValueError('broken parser')
+
+        result = DemoProtocol().decode(60, 15)
+
+        self.assertIsInstance(result, Raw)
+        self.assertEqual(result.file, b'chunk-user-data')
+
+    def test_beholder_verbose_mode_prints_traceback(self) -> None:
+        Raw, _ = self._payload_stand_ins()
+        DemoProtocol = self._demo_protocol_class(
+            self.decorators.beholder, b'raw-bytes', ValueError('broken parser'))
 
         from unittest import mock
 
@@ -262,27 +313,10 @@ class DecoratorTests(unittest.TestCase):
         print_exc.assert_called_once()
 
     def test_beholder_defaults_length_when_argument_is_missing(self) -> None:
-        class NoPayload:
-            def __init__(self, file_, length, error=None) -> None:
-                self.file = file_
-                self.length = length
-                self.error = error
-
-        class Raw(NoPayload):
-            pass
-
-        install_fake_payload_protocols(Raw, NoPayload)
-
-        class Header:
-            def get_payload(self) -> bytes:
-                return b'raw-bytes'
-
-        class DemoProtocol:
-            __header__ = Header()
-
-            @self.decorators.beholder
-            def decode(self, proto):
-                raise ValueError('broken parser')
+        Raw, _ = self._payload_stand_ins()
+        DemoProtocol = self._demo_protocol_class(
+            self.decorators.beholder, b'raw-bytes', ValueError('broken parser'),
+            drop_length=True)
 
         result = DemoProtocol().decode(1)
 

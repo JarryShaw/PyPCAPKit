@@ -220,7 +220,18 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
        >>> SCTP.register(Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol, NGAP)
        >>> SCTP.register(60, NGAP)  # equivalent, PPID given as a plain integer
 
-    No PPID is registered by default.
+    Two PPIDs are registered by default, both to
+    :class:`~pcapkit.protocols.application.ngap.NGAP`: 60
+    (``NG_Application_Protocol``) and 66 (``NGAP_over_DTLS_over_SCTP``). Every
+    other PPID resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.
+
+    Only PPID 60 actually decodes, though. A PPID 66 payload is an NGAP PDU
+    wrapped in a DTLS record, and :mod:`pcapkit` has no DTLS implementation, so
+    those bytes are not aligned PER and the parse degrades to
+    :class:`~pcapkit.protocols.misc.raw.Raw` -- every time, not only when
+    ``pycrate`` is absent. It is registered so that the PPID is *named* in the
+    protochain rather than reported as an unassigned number, which is strictly
+    more than leaving it out would give.
 
     This class currently supports parsing of the following SCTP chunks, which
     are directly mapped to the :class:`pcapkit.const.sctp.chunk.Chunk`
@@ -343,7 +354,15 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     #:    :class:`~pcapkit.protocols.transport.udp.UDP`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
-        {},
+        {
+            # PPID 66 is NGAP wrapped in a DTLS record rather than a bare
+            # NGAP-PDU, and pcapkit implements no DTLS. It is registered anyway
+            # so that the PPID is *named*: the payload then fails in NGAP's own
+            # decoder and `beholder` degrades it to Raw, which is where an
+            # unregistered PPID would have left it regardless.
+            Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol: ModuleDescriptor('pcapkit.protocols.application.ngap', 'NGAP'),  # NGAP
+            Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP: ModuleDescriptor('pcapkit.protocols.application.ngap', 'NGAP'),  # NGAP over DTLS
+        },
     )  # type: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]
 
     #: DefaultDict[Enum_Chunk, str | tuple[ChunkParser, ChunkConstructor]]: Chunk

@@ -118,7 +118,7 @@ __all__ = [
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer
 
     'FTP', 'FTP_DATA',                                      # Application Layer
-    'HTTP',
+    'HTTP', 'NGAP',
 ]
 
 #: version number
