@@ -1,4 +1,4 @@
-.PHONY: bootstrap setup dist release docs samples test test-all coverage
+.PHONY: bootstrap setup dist release docs samples test test-all coverage bench bench-quick bench-test
 
 export PIPENV_VENV_IN_PROJECT=1
 export PIPENV_CACHE_DIR ?= $(CURDIR)/.pipenv-cache
@@ -86,6 +86,31 @@ test-all: samples
 coverage: samples
 	pipenv run coverage run -m pytest -q
 	pipenv run coverage report
+
+# The engine speed table in README.rst -- every supported Python version, one
+# image each, measured in containers so the host does not affect the result. Needs
+# docker, and nothing else: deliberately not run through pipenv, since the whole
+# point is that the measuring environments are the pinned ones inside the images
+# rather than whatever is installed here.
+#
+# Expect around two hours at the defaults: five interpreters, seven environments,
+# and almost all of the measuring time is pyshark, which spawns a tshark process
+# per extraction. Cut it with --engines, --pythons, or --quick.
+bench:
+	examples/benchmark/run.sh
+
+# A smoke check that the harness works end to end, not a measurement -- two
+# interpreters and the two cheapest engines, which is enough to exercise both
+# virtualenvs, the matrix loop and both emitted tables. The full matrix at --quick
+# would still build five images, and building is most of a quick run's cost.
+bench-quick:
+	examples/benchmark/run.sh --quick --pythons 3.11,3.12 --engines default,dpkt
+
+# The harness's own tests: ratio arithmetic, environment stitching, the per-version
+# grid, and that the emitted reStructuredText parses under plain docutils. No
+# docker needed.
+bench-test:
+	pipenv run python -m pytest -q examples/benchmark/test_harness.py
 
 docs:
 	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C docs html

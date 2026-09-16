@@ -32,6 +32,16 @@ __all__ = ['TraceFlow']
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
 
+# NB: declared above the ``TYPE_CHECKING`` block, not below it, so that
+# ``CallbackFn`` can name ``_IT`` outright. As a quoted forward reference it was
+# resolvable only from this module's namespace, and every module that spells
+# ``CallbackFn`` in an annotation -- ``pcapkit.foundation.registry.foundation``
+# does -- has to evaluate the alias in its own.
+_DT = TypeVar('_DT')
+_BT = TypeVar('_BT', bound='Info')
+_IT = TypeVar('_IT', bound='Info')
+_PT = TypeVar('_PT', bound='Info')
+
 if TYPE_CHECKING:
     from typing import Any, Callable, DefaultDict, Optional, Type
 
@@ -40,12 +50,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.infoclass import Info
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
-    CallbackFn = Callable[['_IT'], None]
-
-_DT = TypeVar('_DT')
-_BT = TypeVar('_BT', bound='Info')
-_IT = TypeVar('_IT', bound='Info')
-_PT = TypeVar('_PT', bound='Info')
+    CallbackFn = Callable[[_IT], None]
 
 
 class TraceFlowMeta(abc.ABCMeta):
