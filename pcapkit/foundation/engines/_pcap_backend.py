@@ -179,8 +179,10 @@ def _purge() -> 'None':
 
     """
     roots = ('pcap', 'libpcap')
+    # computed once rather than per entry in sys.modules, which can be large
+    prefixes = tuple(f'{root}.' for root in roots)
     for name in [name for name in sys.modules
-                 if name in roots or name.startswith(tuple(f'{root}.' for root in roots))]:
+                 if name in roots or name.startswith(prefixes)]:
         del sys.modules[name]
 
 

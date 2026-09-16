@@ -127,7 +127,8 @@ class PyShark(Engine['PySharkPacket']):
         if sys.version_info[:2] >= cls.PYTHON_CEILING:
             return (f'pyshark does not support Python '
                     f'{sys.version_info[0]}.{sys.version_info[1]}; it builds its event '
-                    'loop with `asyncio.get_event_loop()`, which raises RuntimeError '
+                    'loop with `asyncio.get_event_loop_policy().get_event_loop()`, which '
+                    'raises RuntimeError '
                     'from Python 3.14 when no current event loop exists')
 
         try:

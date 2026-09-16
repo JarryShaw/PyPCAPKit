@@ -13,7 +13,7 @@ construction and analysis library.
 
 .. important::
 
-   The whole project supports **Python 3.6** or later; CI verifies 3.10 to 3.15.
+   The whole project supports **Python 3.6** or later; CI covers 3.10 to 3.14, and 3.15 as an allowed-to-fail leg.
 
 .. .. contents::
 ..    :depth: 2
@@ -149,21 +149,22 @@ Which engines can run at all, by interpreter. Verified by installing each engine
 and extracting a capture on 3.10, 3.11, 3.12 and 3.14; 3.13 and 3.15 were not
 available and are marked accordingly.
 
-============== ======== ======== ======== ======== ======== ========
-Engine          3.10     3.11     3.12     3.13     3.14     3.15
-============== ======== ======== ======== ======== ======== ========
-``pcapkit``     yes      yes      yes      yes*     yes      yes*
-``dpkt``        yes      yes      yes      yes*     yes      yes*
-``scapy``       yes      yes      yes      yes*     yes      yes*
-``pcap_ct``     yes      yes      yes      yes*     yes      yes*
-``pypcap``      yes      yes      no       no       no       no
-``pypcapfile``  yes      yes      no       no       no       no
-``pyshark``     yes†     yes†     yes†     yes*†    no       no
-============== ======== ======== ======== ======== ======== ========
+================== ======== ======== ======== =========== ======== ===========
+Engine              3.10     3.11     3.12     3.13 [*]_   3.14     3.15 [*]_
+================== ======== ======== ======== =========== ======== ===========
+``pcapkit``         yes      yes      yes      yes         yes      yes
+``dpkt``            yes      yes      yes      yes         yes      yes
+``scapy``           yes      yes      yes      yes         yes      yes
+``pcap_ct``         yes      yes      yes      yes         yes      yes
+``pypcap``          yes      yes      no       no          no       no
+``pypcapfile``      yes      yes      no       no          no       no
+``pyshark`` [*]_    yes      yes      yes      yes         no       no
+================== ======== ======== ======== =========== ======== ===========
 
-``*`` inferred, not measured -- no 3.13 or 3.15 interpreter was available.
-``†`` also needs Wireshark's :program:`tshark`, which was absent, so only the
-interpreter half was verified for ``pyshark``.
+.. [*] Inferred rather than measured: no 3.13 interpreter was available.
+.. [*] Inferred rather than measured: no 3.15 interpreter was available.
+.. [*] ``pyshark`` also needs Wireshark's :program:`tshark`, which was absent here,
+   so only the interpreter half of each verdict in this row was verified.
 
 ``pypcap`` and ``pypcapfile`` stop at 3.11, and ``pyshark`` at 3.13, for the
 reasons under `Engine prerequisites`_. **Python 3.11 is the last version on which
@@ -196,10 +197,10 @@ Engine         Performance (ms per packet)
 ``dpkt``        0.010390_056723
 ``scapy``       0.091690_233567
 ``pcapkit``     0.200390_390390
-``pyshark``    24.682185_018351 [#pyshark-historical]_
-``pypcap``      *not measured* [#pypcap-not-measured]_
-``pcap_ct``     *not measured* [#pcap-ct-not-measured]_
-``pypcapfile``  *not measured* [#pypcapfile-not-measured]_
+``pyshark``    24.682185_018351 [3]_
+``pypcap``      *not measured* [1]_
+``pcap_ct``     *not measured* [4]_
+``pypcapfile``  *not measured* [2]_
 ============== ===========================
 
 .. warning::
@@ -224,7 +225,7 @@ Installation
 .. note::
 
    :mod:`pcapkit` declares support for **Python 3.6 and later**, and CI verifies
-   **3.10 through 3.15**.
+   **3.10 through 3.14**, plus 3.15 as an allowed-to-fail leg.
 
    The sources themselves use 3.8 syntax; the ``bpc-walrus``/``bpc-poseur``
    backport tools in :file:`setup.py` convert it at install time, which is what
@@ -436,7 +437,7 @@ Indices and tables
 .. _libpcap: https://www.tcpdump.org
 .. _DictDumper: https://github.com/JarryShaw/DictDumper
 
-.. [#pyshark-historical] This figure is **historical**. `PyShark`_ 0.6 builds its event loop with
+.. [3] This figure is **historical**. `PyShark`_ 0.6 builds its event loop with
    ``asyncio.get_event_loop_policy().get_event_loop()``, and Python 3.14 made
    :func:`asyncio.get_event_loop` raise :exc:`RuntimeError` when no current event
    loop exists rather than quietly creating one -- measured working on 3.10 and
@@ -444,7 +445,7 @@ Indices and tables
    number cannot be reproduced on a current interpreter; it stands as what was
    measured when it could be.
 
-.. [#pypcap-not-measured] `PyPCAP`_ could not be installed on the machine available for
+.. [1] `PyPCAP`_ could not be installed on the machine available for
    benchmarking, so no figure was taken. Its 1.3.0 sdist compiles a C extension
    and needs `libpcap`_'s headers *and* shared library present, and the
    pre-generated ``pcap.c`` it ships does not compile on Python 3.12 or newer
@@ -452,12 +453,12 @@ Indices and tables
    hardware and a different Python from the rows above -- which would not be
    comparable with them -- the cell is left empty.
 
-.. [#pcap-ct-not-measured] `pcap-ct`_ was verified working on Python 3.10 and 3.14, so unlike the two
+.. [4] `pcap-ct`_ was verified working on Python 3.10 and 3.14, so unlike the two
    rows above it *could* be timed -- but only on the machine this engine was added
    on, which is neither the hardware nor the operating system the rows above were
    measured with. A number from it would not be comparable, so the cell is left
    empty rather than filled with something misleading.
 
-.. [#pypcapfile-not-measured] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
+.. [2] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
    could only be timed on an older interpreter than the rows above were measured
    with. That number would not be comparable, so the cell is left empty.

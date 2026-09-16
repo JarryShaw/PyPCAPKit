@@ -11,7 +11,7 @@ The PyPCAPKit project is an open source Python program focus on network packet
 parsing and analysis, which works as a comprehensive `PCAP`_ file extraction,
 construction and analysis library.
 
-   The whole project supports **Python 3.6** or later; CI verifies 3.10 to 3.15.
+   The whole project supports **Python 3.6** or later; CI covers 3.10 to 3.14, and 3.15 as an allowed-to-fail leg.
 
 -----
 About
@@ -165,10 +165,10 @@ Engine         Performance (ms per packet)
 ``dpkt``        0.010390_056723
 ``scapy``       0.091690_233567
 ``pcapkit``     0.200390_390390
-``pyshark``    24.682185_018351 [#pyshark-historical]_
-``pypcap``      *not measured* [#pypcap-not-measured]_
-``pcap_ct``     *not measured* [#pcap-ct-not-measured]_
-``pypcapfile``  *not measured* [#pypcapfile-not-measured]_
+``pyshark``    24.682185_018351 [3]_
+``pypcap``      *not measured* [1]_
+``pcap_ct``     *not measured* [4]_
+``pypcapfile``  *not measured* [2]_
 ============== ===========================
 
 **These figures are historical, and three of the rows can no longer be
@@ -190,7 +190,7 @@ Installation
 ------------
 
    **Note** -- ``pcapkit`` declares support for **Python 3.6 and later**, and CI
-   verifies **3.10 through 3.15**.
+   covers **3.10 through 3.14**, plus 3.15 as an allowed-to-fail leg.
 
    The sources themselves use 3.8 syntax; the ``bpc-walrus``/``bpc-poseur``
    backport tools in ``setup.py`` convert it at install time, which is what makes
@@ -430,7 +430,7 @@ engine, and is not needed by the test suite.
 .. _DictDumper: https://github.com/JarryShaw/DictDumper
 .. _engine support documentation: https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/engines/index.html
 
-.. [#pyshark-historical] This figure is **historical**. `PyShark`_ 0.6 builds its event loop with
+.. [3] This figure is **historical**. `PyShark`_ 0.6 builds its event loop with
    ``asyncio.get_event_loop_policy().get_event_loop()``, and Python 3.14 made
    ``asyncio.get_event_loop()`` raise ``RuntimeError`` when no current event
    loop exists rather than quietly creating one -- measured working on 3.10 and
@@ -438,7 +438,7 @@ engine, and is not needed by the test suite.
    number therefore cannot be reproduced on a current interpreter; it stands as
    what was measured when it could be.
 
-.. [#pypcap-not-measured] `PyPCAP`_ could not be installed on the machine available for
+.. [1] `PyPCAP`_ could not be installed on the machine available for
    benchmarking, so no figure was taken. Its 1.3.0 sdist compiles a C extension
    and needs `libpcap`_'s headers *and* shared library present, and the
    pre-generated ``pcap.c`` it ships does not compile on Python 3.12 or newer
@@ -446,12 +446,12 @@ engine, and is not needed by the test suite.
    hardware and a different Python from the rows above -- which would not be
    comparable with them -- the cell is left empty.
 
-.. [#pcap-ct-not-measured] `pcap-ct`_ was verified working on Python 3.10 and 3.14, so unlike the two
+.. [4] `pcap-ct`_ was verified working on Python 3.10 and 3.14, so unlike the two
    rows above it *could* be timed -- but only on the machine this engine was added
    on, which is neither the hardware nor the operating system the rows above were
    measured with. A number from it would not be comparable, so the cell is left
    empty rather than filled with something misleading.
 
-.. [#pypcapfile-not-measured] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
+.. [2] `PyPCAPFile`_ 0.12.0 cannot be imported on Python 3.12 or newer, so it
    could only be timed on an older interpreter than the rows above were measured
    with. That number would not be comparable, so the cell is left empty.

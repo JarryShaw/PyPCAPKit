@@ -44,7 +44,7 @@ license = { text="BSD 3-Clause License" }
 # reason to withdraw the declaration. Until it lands, sub-3.8 support is intent
 # rather than something that works.
 #
-# Independently: CI verifies **3.10 through 3.15**, so 3.8 and 3.9 are best-effort
+# Independently: CI covers **3.10 through 3.14** (3.15 runs allowed-to-fail), so 3.8 and 3.9 are best-effort
 # (both are end-of-life), and the ``PCAP_CT`` extra needs 3.10 regardless.
 requires-python = ">=3.6, <4"
 description = "PyPCAPKit: comprehensive network packet analysis library"
