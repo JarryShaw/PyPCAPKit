@@ -150,16 +150,25 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
             # SCTP payload protocol identifier, which NGAP now is.
             file_ = self._get_payload()
 
-            # NOTE: ``alias=proto`` matches what the success path passes, so a
-            # payload that failed to parse is still named after the protocol
-            # number it arrived with -- ``SCTP:PayloadProtocolIdentifier_3GPP_NG
-            # _Application_Protocol`` rather than a bare ``SCTP:Raw``. Without
-            # it, registering a protocol on a number made the output *less*
-            # informative than leaving the number unregistered, since an
-            # unregistered number reaches Raw through the success path and keeps
-            # its name. A plain integer has no ``name`` and still renders as
-            # ``Raw``, c.f. ``Raw.__post_init__``, so this only adds a name where
-            # the registry key is an enumeration.
+            # NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so
+            # a payload that failed to parse still reports the code it arrived
+            # with, which is what ``Data_Raw.protocol`` means. A plain integer has
+            # no ``name`` and still renders as ``Raw`` in the protochain, c.f.
+            # ``Raw.__post_init__``, so this only adds a name where the registry
+            # key is an enumeration.
+            #
+            # Measured, because the layers differ and it is easy to state this too
+            # broadly: SCTP's unregistered path keeps its enumeration -- an unknown
+            # PPID gives ``SCTP:Unassigned_4243`` and ``protocol=4243`` -- so
+            # without this line, *registering* NGAP on PPID 60 would have made a
+            # failed parse report a bare ``SCTP:Raw`` and ``protocol=None``, less
+            # than the same bytes gave while unregistered. TCP's unregistered path
+            # does not: an unknown port yields ``protocol=None`` already, because
+            # ``Transport._decode_next_layer`` resolves ports through
+            # ``__proto__`` and never reaches here. So this makes the *failure*
+            # path uniform while the *unknown* paths stay inconsistent with each
+            # other, which is #418 rather than something to fix from inside a
+            # decorator.
             next_ = protocol(file_, length, error=str(exc), alias=proto)
             return cast('R_beholder', next_)
     return behold
