@@ -212,12 +212,29 @@ class Criticality(IntEnum):
     notify = 2
 
     @staticmethod
-    def get(key: 'int | str | Criticality', default: 'int' = -1) -> 'Criticality':
+    def get(key: 'int | str | Criticality') -> 'Criticality':
         """Backport support for original codes.
+
+        Unlike :meth:`ProcedureCode.get` and :meth:`ProtocolIE.get`, this takes
+        no ``default``: those two extend themselves through
+        :func:`~aenum.extend_enum` when a newer specification names a code this
+        release does not, which is the right answer for a registry that grows.
+        ``Criticality`` cannot grow. It is an ASN.1 ``ENUMERATED`` with no
+        extension marker, so a fourth value is unencodable and a lookup for one
+        is a bug rather than a version skew -- see :meth:`_missing_`. A
+        ``default`` parameter here would have to be ignored, and one that is
+        declared, documented and ignored is worse than one that is absent.
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+
+        Returns:
+            The matching member.
+
+        Raises:
+            ValueError: If ``key`` names no member. Raised for an unknown name as
+                well as an unknown value, so that the two ways of getting this
+                wrong do not report differently.
 
         :meta private:
         """
@@ -225,7 +242,10 @@ class Criticality(IntEnum):
             return key
         if isinstance(key, int):
             return Criticality(key)
-        return Criticality[key]  # type: ignore[misc]
+        try:
+            return Criticality[key]  # type: ignore[misc]
+        except KeyError:
+            raise ValueError('%r is not a valid %s' % (key, Criticality.__name__)) from None
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'NoReturn':
