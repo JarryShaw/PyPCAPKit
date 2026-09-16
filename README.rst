@@ -130,9 +130,10 @@ Engine          3.10     3.11     3.12     3.13     3.14     3.15
 ``pyshark``     yes†     yes†     yes†     yes†     no       no
 ============== ======== ======== ======== ======== ======== ========
 
-``*`` inferred, not measured -- no 3.15 interpreter was available.
-``†`` also needs Wireshark's ``tshark``, which was absent, so only the
-interpreter half was verified for ``pyshark``.
+  ``*`` inferred, not measured -- no 3.15 interpreter was available.
+
+  ``†`` also needs Wireshark's ``tshark``, which was absent, so only the
+  interpreter half was verified for ``pyshark``.
 
 ``pypcap`` and ``pypcapfile`` stop at 3.11, and ``pyshark`` at 3.13, for the
 reasons under `Engine prerequisites`_. **Python 3.11 is the last version on which
