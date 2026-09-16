@@ -1137,6 +1137,43 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(processed.length, 3)
         self.assertEqual(processed.subtype, MPTCPOption.Reserved_for_Private_Use)
 
+    def test_construction_accepts_bare_integer_ports(self) -> None:
+        """``TCP(srcport=80, dstport=443)`` is the documented construction path.
+
+        :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` advertises
+        ``Enum_AppType | int``, but the schema field converted an :obj:`int` only
+        on its way out to :obj:`bytes`, so the schema attribute kept the
+        :obj:`int` -- and :meth:`TCP.read
+        <pcapkit.protocols.transport.tcp.TCP.read>`, which reads ``srcport.port``
+        to pick the next layer, raised ``AttributeError: 'int' object has no
+        attribute 'port'``. UDP failed identically; SCTP did not, only because it
+        keys its next layer on the DATA chunk's PPID and never reads ``.port``.
+
+        """
+        from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.udp import UDP
+
+        tcp = TCP(srcport=80, dstport=443)
+        self.assertEqual(bytes(tcp)[:4], b'\x00\x50\x01\xbb')
+        self.assertIsInstance(tcp.info.srcport, AppType)
+        self.assertEqual(tcp.info.srcport.port, 80)
+        self.assertEqual(tcp.info.dstport.port, 443)
+        self.assertEqual(tcp.src.port, 80)
+
+        udp = UDP(srcport=53, dstport=5353, payload=b'data')
+        self.assertEqual(bytes(udp)[:4], b'\x00\x35\x14\xe9')
+        self.assertIsInstance(udp.info.dstport, AppType)
+        self.assertEqual(udp.info.srcport.port, 53)
+        self.assertEqual(udp.info.dstport.port, 5353)
+
+        # A port with no IANA service name resolves just the same, and an
+        # AppType passed in is kept as it is rather than round-tripped.
+        member = AppType.get(80, proto=TransportProtocol.tcp)
+        unnamed = TCP(srcport=53406, dstport=member)
+        self.assertEqual(unnamed.info.srcport.port, 53406)
+        self.assertIs(unnamed.info.dstport, member)
+
 
 if __name__ == '__main__':
     unittest.main()

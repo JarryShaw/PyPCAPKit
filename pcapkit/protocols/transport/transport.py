@@ -15,6 +15,7 @@ which is a base class for transport layer protocols, eg.
 import io
 from typing import TYPE_CHECKING, Generic
 
+from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
@@ -26,6 +27,8 @@ if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, Type
 
     from typing_extensions import Literal
+
+    from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 
 __all__ = ['Transport']
 
@@ -130,6 +133,36 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @staticmethod
+    def _make_port(port: 'Enum_AppType | int',
+                   proto: 'Enum_TransportProtocol') -> 'Enum_AppType':
+        """Resolve a port number to its application type.
+
+        Arguments:
+            port: port number, or the application type itself
+            proto: transport protocol the port belongs to, which is what
+                distinguishes e.g. TCP/80 from UDP/80
+
+        Returns:
+            The :class:`~pcapkit.const.reg.apptype.AppType` for ``port``.
+
+        Important:
+            :meth:`self.make <ProtocolBase.make>` accepts a bare :obj:`int` for a
+            port, and the schema field only converts one on the way *out* (in
+            :meth:`PortEnumField.pre_process
+            <pcapkit.protocols.schema.transport.tcp.PortEnumField.pre_process>`),
+            leaving the schema attribute holding whatever it was handed. A
+            constructed packet therefore reached :meth:`self.read
+            <ProtocolBase.read>` with an :obj:`int` where a parsed one carries an
+            :class:`~pcapkit.const.reg.apptype.AppType`, and reading ``.port``
+            off it raised :exc:`AttributeError`. Normalising here keeps the two
+            paths agreeing on the type the schema declares.
+
+        """
+        if isinstance(port, Enum_AppType):
+            return port
+        return Enum_AppType.get(port, proto=proto)
 
     def _decode_next_layer(self, dict_: '_PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None, *,  # type: ignore[override]
                            packet: 'Optional[dict[str, Any]]' = None) -> '_PT':  # pylint: disable=arguments-renamed

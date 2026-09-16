@@ -19,6 +19,7 @@ which is a base class for transport layer protocols, eg.
    .. automethod:: register
    .. automethod:: analyze
 
+   .. automethod:: _make_port
    .. automethod:: _decode_next_layer
 
    .. autoattribute:: __layer__

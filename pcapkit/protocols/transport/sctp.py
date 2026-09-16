@@ -28,6 +28,7 @@ import collections
 import struct
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.const.sctp.cause_code import CauseCode as Enum_CauseCode
 from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
@@ -577,8 +578,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             chunks_value = []
 
         schema = Schema_SCTP(
-            srcport=srcport,
-            dstport=dstport,
+            srcport=self._make_port(srcport, Enum_TransportProtocol.sctp),
+            dstport=self._make_port(dstport, Enum_TransportProtocol.sctp),
             vtag=vtag,
             chksum=b'\x00\x00\x00\x00' if chksum is None else chksum,
             chunks=chunks_value,

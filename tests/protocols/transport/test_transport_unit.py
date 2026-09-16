@@ -366,6 +366,28 @@ class TransportUnitTests(unittest.TestCase):
         # And the lookup left nothing behind, so the ports stay registrable.
         self.assertEqual(set(DummyTransport.__proto__), {80})
 
+    def test_make_port_resolves_an_integer_and_passes_an_apptype_through(self) -> None:
+        from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        from pcapkit.protocols.transport.transport import Transport
+
+        resolved = Transport._make_port(80, TransportProtocol.tcp)
+        self.assertIsInstance(resolved, AppType)
+        self.assertEqual(resolved.port, 80)
+
+        # The transport protocol has to reach the lookup rather than being
+        # defaulted away: port 1 is tcpmux over TCP and unassigned over SCTP, so
+        # the two resolve to different members of the same number.
+        over_tcp = Transport._make_port(1, TransportProtocol.tcp)
+        over_sctp = Transport._make_port(1, TransportProtocol.sctp)
+        self.assertEqual(over_tcp.svc, 'tcpmux')
+        self.assertEqual(over_sctp.svc, 'unknown')
+        self.assertIsNot(over_tcp, over_sctp)
+        self.assertEqual(over_tcp.port, over_sctp.port)
+
+        # An AppType is returned unchanged -- no round trip through its number,
+        # which would lose the protocol it was resolved for.
+        self.assertIs(Transport._make_port(over_sctp, TransportProtocol.tcp), over_sctp)
+
 
 if __name__ == '__main__':
     unittest.main()

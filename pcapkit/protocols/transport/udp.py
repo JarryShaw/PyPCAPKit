@@ -25,6 +25,7 @@ Octets      Bits        Name                    Description
 import collections
 from typing import TYPE_CHECKING
 
+from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.transport.udp import UDP as Data_UDP
@@ -164,8 +165,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
 
         """
         return Schema_UDP(
-            srcport=srcport,
-            dstport=dstport,
+            srcport=self._make_port(srcport, Enum_TransportProtocol.udp),
+            dstport=self._make_port(dstport, Enum_TransportProtocol.udp),
             len=8 + len(payload),
             checksum=checksum,
             payload=payload,
