@@ -542,8 +542,7 @@ third-party package.</p>
 <section id="engine-support-by-python-version">
 <h4>Engine support by Python version<a class="headerlink" href="#engine-support-by-python-version" title="Link to this heading">¶</a></h4>
 <p>Which engines can run at all, by interpreter. Verified by installing each engine
-and extracting a capture on 3.10, 3.11, 3.12 and 3.14; 3.13 and 3.15 were not
-available and are marked accordingly.</p>
+and extracting a capture on 3.10 through 3.14; 3.15 remains inferred.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -551,9 +550,9 @@ available and are marked accordingly.</p>
 <th class="head"><p>3.10</p></th>
 <th class="head"><p>3.11</p></th>
 <th class="head"><p>3.12</p></th>
-<th class="head"><p>3.13 <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></th>
+<th class="head"><p>3.13</p></th>
 <th class="head"><p>3.14</p></th>
-<th class="head"><p>3.15 <a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></th>
+<th class="head"><p>3.15 <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></th>
 </tr>
 </thead>
 <tbody>
@@ -605,7 +604,7 @@ available and are marked accordingly.</p>
 <td><p>no</p></td>
 <td><p>no</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> <a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 <td><p>yes</p></td>
 <td><p>yes</p></td>
 <td><p>yes</p></td>
@@ -617,16 +616,12 @@ available and are marked accordingly.</p>
 </table>
 </div>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id4" role="doc-footnote">
+<aside class="footnote brackets" id="id3" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
-<p>Inferred rather than measured: no 3.13 interpreter was available.</p>
-</aside>
-<aside class="footnote brackets" id="id5" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p>Inferred rather than measured: no 3.15 interpreter was available.</p>
 </aside>
-<aside class="footnote brackets" id="id6" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">‡</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> also needs Wireshark’s <strong class="program">tshark</strong>, which was absent here,
 so only the interpreter half of each verdict in this row was verified.</p>
 </aside>
@@ -643,7 +638,7 @@ has all seven at once.</p>
 <table class="docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p>Operating System</p></td>
-<td><p>macOS Ventura 13.4.1</p></td>
+<td><p>macOS 26.6.2</p></td>
 </tr>
 <tr class="row-even"><td><p>Chip</p></td>
 <td><p>Apple M2 Pro</p></td>
@@ -657,56 +652,75 @@ has all seven at once.</p>
 </section>
 <section id="test-results">
 <h4>Test Results<a class="headerlink" href="#test-results" title="Link to this heading">¶</a></h4>
-<p>Measured with <code class="docutils literal notranslate"><span class="pre">examples/legacy_smoke/test_time.py</span></code> over 1,000 timed
-extractions of <code class="docutils literal notranslate"><span class="pre">examples/captures/in.pcap</span></code> per engine, on the environment
-above.</p>
+<p>Measured with <code class="docutils literal notranslate"><span class="pre">examples/legacy_smoke/test_time.py</span></code>: 1,000 timed
+extractions of <code class="docutils literal notranslate"><span class="pre">examples/captures/in.pcap</span></code> per engine and Python version. The
+first extraction is discarded as a warm-up. Values are milliseconds per packet.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Engine</p></th>
-<th class="head"><p>Performance (ms per packet)</p></th>
+<th class="head"><p>3.10</p></th>
+<th class="head"><p>3.11</p></th>
+<th class="head"><p>3.12</p></th>
+<th class="head"><p>3.13</p></th>
+<th class="head"><p>3.14</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></p></td>
-<td><p>0.010390_056723</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scapy</span></code></p></td>
-<td><p>0.091690_233567</p></td>
-</tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pcapkit</span></code></p></td>
-<td><p>0.200390_390390</p></td>
+<td><p>0.2516</p></td>
+<td><p>0.2227</p></td>
+<td><p>0.2292</p></td>
+<td><p>0.2168</p></td>
+<td><p>0.2307</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></p></td>
+<td><p>0.0170</p></td>
+<td><p>0.0125</p></td>
+<td><p>0.0154</p></td>
+<td><p>0.0125</p></td>
+<td><p>0.0128</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scapy</span></code></p></td>
+<td><p>0.0316</p></td>
+<td><p>0.0268</p></td>
+<td><p>0.0268</p></td>
+<td><p>0.0318</p></td>
+<td><p>0.0297</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></p></td>
-<td><p>24.682185_018351 <a class="footnote-reference brackets" href="#id11" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code></p></td>
-<td><p><em>not measured</em> <a class="footnote-reference brackets" href="#id12" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code></p></td>
-<td><p><em>not measured</em> <a class="footnote-reference brackets" href="#id13" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>14.7434</p></td>
+<td><p>14.8755</p></td>
+<td><p>14.6006</p></td>
+<td><p>14.8334</p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id19" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code></p></td>
-<td><p><em>not measured</em> <a class="footnote-reference brackets" href="#id14" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>0.0163</p></td>
+<td><p>0.0107</p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id20" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id20" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id20" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id21" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id21" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id21" id="id11" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id21" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id21" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id22" id="id14" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id22" id="id15" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id22" id="id16" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id22" id="id17" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>– <a class="footnote-reference brackets" href="#id22" id="id18" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><strong>These figures are historical, and three of the rows can no longer be
-reproduced on a current Python.</strong> The table was taken on the environment above,
-whose interpreter still ran every engine. Since then <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>, <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>
-and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> have each acquired a hard Python ceiling – 3.13, 3.11 and
-3.11 respectively, for the reasons under <a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a> – so on the
-latest Python only <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, <code class="docutils literal notranslate"><span class="pre">dpkt</span></code>, <code class="docutils literal notranslate"><span class="pre">scapy</span></code> and <code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code> can be timed
-at all. A re-run on a modern interpreter would not extend this table; it would
-replace it with a shorter one, measured on different hardware and not
-comparable row-for-row with what is here.</p>
-</div>
-<p>The empty cells stay empty for the same reason: a figure taken on a different
-host, capture or iteration count is not comparable with these, and inventing one
-would be worse than admitting the gap.</p>
+<p>The unavailable cells were attempted. They are not zeroes and must not be
+compared with a measured row.</p>
 </section>
 </section>
 </section>
@@ -905,39 +919,27 @@ pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id11" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">3</a><span class="fn-bracket">]</span></span>
-<p>This figure is <strong>historical</strong>. <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> 0.6 builds its event loop with
-<code class="docutils literal notranslate"><span class="pre">asyncio.get_event_loop_policy().get_event_loop()</span></code>, and Python 3.14 made
-<a class="reference external" href="https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.get_event_loop" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.get_event_loop()</span></code></a> raise <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a> when no current event
-loop exists rather than quietly creating one – measured working on 3.10 and
-3.11, working with a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#DeprecationWarning" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a> on 3.12, and raising on 3.14. The
-number cannot be reproduced on a current interpreter; it stands as what was
-measured when it could be.</p>
+<aside class="footnote brackets" id="id19" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">1</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> 0.6 cannot create the implicit event loop it expects on Python
+3.14; it ran on 3.10–3.13.</p>
 </aside>
-<aside class="footnote brackets" id="id12" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">1</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> could not be installed on the machine available for
-benchmarking, so no figure was taken. Its 1.3.0 sdist compiles a C extension
-and needs <a class="reference external" href="https://www.tcpdump.org">libpcap</a>’s headers <em>and</em> shared library present, and the
-pre-generated <code class="docutils literal notranslate"><span class="pre">pcap.c</span></code> it ships does not compile on Python 3.12 or newer
-(see <a class="reference internal" href="#installation">Installation</a>). Rather than publish a number measured on different
-hardware and a different Python from the rows above – which would not be
-comparable with them – the cell is left empty.</p>
+<aside class="footnote brackets" id="id20" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id6">1</a>,<a role="doc-backlink" href="#id7">2</a>,<a role="doc-backlink" href="#id8">3</a>)</span>
+<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 imports <a class="reference external" href="https://docs.python.org/3/library/imp.html#module-imp" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">imp</span></code></a>, which Python removed in 3.12.</p>
 </aside>
-<aside class="footnote brackets" id="id13" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">4</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> was verified working on Python 3.10 and 3.14, so unlike the two
-rows above it <em>could</em> be timed – but only on the machine this engine was added
-on, which is neither the hardware nor the operating system the rows above were
-measured with. A number from it would not be comparable, so the cell is left
-empty rather than filled with something misleading.</p>
+<aside class="footnote brackets" id="id21" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id9">1</a>,<a role="doc-backlink" href="#id10">2</a>,<a role="doc-backlink" href="#id11">3</a>,<a role="doc-backlink" href="#id12">4</a>,<a role="doc-backlink" href="#id13">5</a>)</span>
+<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> 1.3.0 could not be built here: its build does not search
+Homebrew’s libpcap library prefix. It is also unsupported on Python 3.12+.</p>
 </aside>
-<aside class="footnote brackets" id="id14" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">2</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 cannot be imported on Python 3.12 or newer, so it
-could only be timed on an older interpreter than the rows above were measured
-with. That number would not be comparable, so the cell is left empty.</p>
+<aside class="footnote brackets" id="id22" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id14">1</a>,<a role="doc-backlink" href="#id15">2</a>,<a role="doc-backlink" href="#id16">3</a>,<a role="doc-backlink" href="#id17">4</a>,<a role="doc-backlink" href="#id18">5</a>)</span>
+<p>The prerelease <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> / <a class="reference external" href="https://www.tcpdump.org">libpcap</a> wheels currently load Linux
+<code class="docutils literal notranslate"><span class="pre">libc.so.6</span></code> on this macOS host, so their engine could not be preflighted.</p>
 </aside>
 </aside>
 </section>
