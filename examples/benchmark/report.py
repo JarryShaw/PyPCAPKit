@@ -211,6 +211,27 @@ def _range(low: 'float', high: 'float') -> 'str':
     return _significant(low)
 
 
+def _usable_baseline(value: 'Optional[float]') -> 'bool':
+    """Whether a baseline reading can normalise the pass it was taken alongside.
+
+    Args:
+        value: The baseline's milliseconds per packet, or :data:`None` when the
+            baseline did not run on that repeat at all.
+
+    Returns:
+        Whether dividing by it is meaningful.
+
+    The two rejected cases are different problems that happen to share a fix.
+    :data:`None` means no baseline was recorded for the repeat, so there is
+    nothing to normalise against; ``0.0`` is a reading that *was* taken and
+    cannot be divided by. Testing the value's truthiness alone would conflate
+    them, and a zero baseline is a broken run worth telling apart from an absent
+    one even though both drop the sample.
+
+    """
+    return value is not None and value > 0
+
+
 def collect(documents: 'Sequence[dict[str, Any]]') -> 'list[Row]':
     """Build the table's rows from the per-environment documents.
 
@@ -284,17 +305,23 @@ def collect(documents: 'Sequence[dict[str, Any]]') -> 'list[Row]':
                 reasons[engine][env] = entry['reason'] or 'no reason recorded'
                 continue
 
+            contributed = False
             for sample in entry['repeats']:
                 divisor = base_by_repeat.get(sample['repeat'])
-                if not divisor:
-                    # No baseline for this repeat: the pair is unusable rather
-                    # than approximable, so it is dropped instead of being
+                if not _usable_baseline(divisor):
+                    # No usable baseline for this repeat: the pair is unusable
+                    # rather than approximable, so it is dropped instead of being
                     # divided by a baseline from a different repeat.
                     continue
                 ratios[engine].append(sample['ms_per_packet'] / divisor)
                 absolutes[engine].append(sample['ms_per_packet'])
                 discarded[engine] += len(sample.get('discarded') or [])
-            if entry['repeats']:
+                contributed = True
+            if contributed:
+                # Keyed on a ratio having survived, not on ``entry['repeats']``
+                # being non-empty: passes whose baseline was missing contribute
+                # nothing, and counting their environment would claim a
+                # measurement the cross-environment check cannot then show.
                 environments[engine].append(env)
 
     rows = [
@@ -705,7 +732,8 @@ def _ratios_for(documents: 'Sequence[dict[str, Any]]', engine: 'str',
             return []
         by_repeat = {sample['repeat']: sample['ms_per_packet'] for sample in base['repeats']}
         return [sample['ms_per_packet'] / by_repeat[sample['repeat']]
-                for sample in entry['repeats'] if by_repeat.get(sample['repeat'])]
+                for sample in entry['repeats']
+                if _usable_baseline(by_repeat.get(sample['repeat']))]
     return []
 
 

@@ -144,6 +144,50 @@ class TestRatios:
         rows = {row.engine: row for row in report.collect(docs)}
         assert rows['dpkt'].ratios == pytest.approx([0.1])
 
+    def test_a_zero_baseline_is_dropped_rather_than_divided_by(self):
+        """A baseline of ``0.0`` drops the pair instead of raising.
+
+        A zero baseline is a broken run, not an absent one, but it is just as
+        undividable -- so the sample goes the same way a missing baseline's does,
+        and the engine is not credited with a ratio it never had.
+
+        """
+        docs = [document('pypcap', {'default': [0.0, 0.2], 'dpkt': [0.02, 0.02]})]
+        rows = {row.engine: row for row in report.collect(docs)}
+        assert rows['dpkt'].ratios == pytest.approx([0.1])
+
+    def test_an_environment_contributing_no_ratio_is_not_counted(self):
+        """An environment only counts once a ratio has actually survived it.
+
+        The engine ran, so its repeats are non-empty, but every one of them lost
+        its baseline -- so the environment contributed nothing and must not reach
+        the cross-environment check, which would then advertise an agreement it
+        has only one side of.
+
+        """
+        docs = [
+            document('pypcap', {'default': [0.2, 0.2], 'dpkt': [0.02, 0.02]}),
+            # ``dpkt`` runs a second pass here that the baseline never reaches.
+            document('pcap-ct', {'default': [0.2], 'dpkt': [0.02, 0.02]},
+                     packages={'dpkt': '1.9.8', 'pypcap': None, 'pcap-ct': '1.3.0b3'}),
+        ]
+        rows = {row.engine: row for row in report.collect(docs)}
+        assert rows['dpkt'].environments == ['pypcap', 'pcap-ct']
+
+        # And with the baseline missing outright, the environment drops away.
+        docs[1]['results'] = [entry for entry in docs[1]['results']
+                              if entry['engine'] != 'dpkt']
+        docs[1]['results'].append({
+            'engine': 'dpkt', 'status': 'measured', 'reason': None,
+            'driver': 'DPKT', 'packets': 6,
+            'repeats': [{'repeat': 7, 'ms_per_packet': 0.02,
+                         'mean_ns_per_extraction': 0.12e6, 'timed_samples': 999,
+                         'discarded': []}],
+            'failures': [],
+        })
+        rows = {row.engine: row for row in report.collect(docs)}
+        assert rows['dpkt'].environments == ['pypcap']
+
     def test_environment_without_a_baseline_is_fatal(self):
         """Nothing in an environment is reportable without its baseline."""
         docs = [document('pypcap', {'dpkt': [0.02, 0.02]})]
