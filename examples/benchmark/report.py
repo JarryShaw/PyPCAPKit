@@ -82,6 +82,55 @@ UNMEASURED_MARK = '†'
 #: the pass count.
 PARTIAL_MARK = '¶'
 
+#: Characters that begin reStructuredText inline markup, and therefore have to be
+#: neutralised in any text this module did not write itself. See :func:`_escape`.
+#: The backslash is first because the loop that applies these would otherwise escape
+#: the backslashes it had just inserted.
+RST_SPECIAL = ('\\', '`', '*', '_', '|', '[', ']')
+
+
+def _escape(text: 'str') -> 'str':
+    """Neutralise reStructuredText markup in text that came from elsewhere.
+
+    Every reason in this report is written by something else -- an engine's
+    ``unsupported_reason()``, an exception's ``str()``, the tail of a pip or gcc log
+    that the image recorded -- and all of it lands in emitted markup as prose. None of
+    those sources knows it is writing reStructuredText.
+
+    Measured, with the same ``halt_level=2`` docutils settings the suite's own tests
+    use, on strings a compiler produces without trying:
+
+    * ``gcc: error: **kwargs handling broke the build`` -- *inline strong start-string
+      without end-string*;
+    * ``cannot find `pcap.h`` -- GNU diagnostics quote like that, and an unbalanced
+      backtick is *inline interpreted text start-string without end-string*;
+    * ``imports imp_ which was removed`` -- a trailing underscore is a reference, so
+      *unknown target name: "imp"*;
+    * anything ending ``::`` -- *literal block expected; none found*.
+
+    Each of those turns the snippet this module promises can be pasted into
+    :file:`README.rst` verbatim into a visible error block on GitHub, and the failure
+    is invisible here because the harness's own fixtures are all well-behaved English.
+
+    Args:
+        text: Prose from outside this module.
+
+    Returns:
+        The same prose, with markup characters escaped. A backslash escape in
+        reStructuredText is removed on rendering, so the reader sees the original.
+
+    """
+    for char in RST_SPECIAL:
+        text = text.replace(char, '\\' + char)
+    # Not in the loop above, because a colon is only dangerous at the end of a
+    # paragraph -- and every reason here is its own single-line paragraph -- where
+    # ``::`` promises a literal block that the next line is not. Escaping every colon
+    # instead would put a backslash into the middle of most of these sentences for
+    # nothing.
+    if text.endswith(':'):
+        text = text[:-1] + '\\:'
+    return text
+
 
 class Row:
     """One engine's line in the table.
@@ -674,8 +723,7 @@ def _image_pairs(documents: 'Sequence[dict[str, Any]]',
 
 
 def _provenance(documents: 'Sequence[dict[str, Any]]', image: 'Optional[str]',
-                emulated: 'Optional[str]',
-                missing: 'Sequence[tuple[str, str]]' = ()) -> 'list[tuple[str, str]]':
+                emulated: 'Optional[str]') -> 'list[tuple[str, str]]':
     """The facts that make a run reproducible, as label/value pairs.
 
     Deliberately excludes anything identifying the host it ran on -- no hostname,
@@ -690,11 +738,10 @@ def _provenance(documents: 'Sequence[dict[str, Any]]', image: 'Optional[str]',
             not carry their own.
         emulated: Description of the emulation in play, or :data:`None` when the
             run was native.
-        missing: ``(version, reason)`` pairs for Python versions that produced no
-            measurements at all.
 
     Returns:
-        Ordered label/value pairs.
+        Ordered label/value pairs. Versions the run could not measure are *not* here;
+        see :func:`_missing_pairs` for why they are assembled by the caller.
 
     """
     ordered = _ordered(documents)
@@ -714,14 +761,38 @@ def _provenance(documents: 'Sequence[dict[str, Any]]', image: 'Optional[str]',
         pairs.append(('Emulation', emulated))
     pairs.append(('Capture', f"``{capture['name']}`` -- {capture['bytes']} bytes, "
                              f"SHA-256 ``{capture['sha256'][:16]}...``"))
+    # Every engine on every interpreter should see the same number of frames in the same
+    # capture, so this row is normally one number. A disagreement is reported rather than
+    # dropped: with one interpreter it was barely possible and omitting it cost nothing,
+    # but two CPython versions extracting different counts from one file would be the
+    # most interesting thing in the report, and the previous behaviour was to hide
+    # exactly that by printing no row at all.
     packets = {entry['packets'] for document in ordered for entry in document['results']
                if entry['packets']}
     if len(packets) == 1:
         pairs.append(('Packets per extraction', str(packets.pop())))
+    elif packets:
+        by_series = {}  # type: dict[str, set[int]]
+        for document in ordered:
+            for entry in document['results']:
+                if entry['packets']:
+                    by_series.setdefault(python_series(document), set()).add(entry['packets'])
+        detail = ', '.join(
+            f"{series} {'/'.join(str(count) for count in sorted(by_series[series]))}"
+            for series in sorted(by_series, key=_series_key))
+        pairs.append(('Packets per extraction',
+                      f'**disagreed across the run** -- {detail}. One capture should yield '
+                      f'one frame count everywhere; treat every figure below as suspect '
+                      f'until this is explained.'))
     pairs.append(('Iterations', f"{first['rounds']} timed extractions per engine per pass, "
                                 f"the first discarded as a warm-up"))
-    # "pass" throughout rather than "repeat", so the prose and the table's "Passes"
-    # column are talking about the same thing.
+    # "pass" throughout rather than "repeat", so this row and the table's "Samples"
+    # column are counting the same unit. They are not the same *number*, and cannot be:
+    # a pass happens once per environment, so the table's count is this figure times the
+    # number of environments -- 3 passes over 7 environments is 21 samples per engine.
+    # The column was called "Passes" while there were two environments and one
+    # interpreter, where the difference was easy to overlook; across a matrix it reads as
+    # a contradiction, hence the rename.
     environments = ', '.join(f"``{document['environment']}``" for document in ordered)
     noun = 'environment' if len(ordered) == 1 else 'environments'
     pairs.append(('Passes', f"{first['repeats']} over the whole engine set, "
@@ -732,13 +803,37 @@ def _provenance(documents: 'Sequence[dict[str, Any]]', image: 'Optional[str]',
     libpcaps = sorted({document['libpcap'] for document in ordered if document.get('libpcap')})
     if libpcaps:
         pairs.append(('libpcap', ', '.join(f'``{value}``' for value in libpcaps)))
-    # A version that was asked for and could not be measured belongs in the record of
-    # what the run covered. Without it the block above reads as the complete matrix,
-    # and a reader comparing two runs would see one silently narrower than the other.
-    # A version that produced some documents before failing is labelled differently,
-    # since "not measured" would contradict the figures it did contribute.
-    measured_series = {python_series(document) for document in ordered}
+    return pairs
+
+
+def _missing_pairs(documents: 'Sequence[dict[str, Any]]',
+                   missing: 'Sequence[tuple[str, str]]') -> 'list[tuple[str, str]]':
+    """The versions the run could not measure, as label/value pairs.
+
+    A version that was asked for and could not be measured belongs in the record of
+    what the run covered. Without it the provenance block reads as the complete matrix,
+    and a reader comparing two runs would see one silently narrower than the other.
+
+    Kept out of :func:`_provenance` for one specific reason: the reason string is the
+    only value in that block this module did not write itself, so it has to be escaped
+    before it enters markup and must *not* be escaped in the plain-text report. A value
+    whose correct form depends on where it is going cannot come out of the function both
+    destinations share.
+
+    Args:
+        documents: One :mod:`benchmark` document per environment.
+        missing: ``(version, reason)`` pairs for versions whose build or run failed.
+
+    Returns:
+        Ordered label/value pairs, the reason unescaped.
+
+    """
+    measured_series = {python_series(document) for document in documents}
+    pairs = []  # type: list[tuple[str, str]]
     for version, reason in sorted(missing, key=lambda pair: _series_key(pair[0])):
+        # A version that produced some documents before failing is labelled
+        # differently, since "not measured" would contradict the figures it did
+        # contribute -- and those figures are printed a few lines further down.
         state = 'partly measured' if version in measured_series else 'not measured'
         pairs.append((f'Python {version} ({state})', reason))
     return pairs
@@ -873,11 +968,11 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
 
     notes = []  # type: list[str]
     for version, reason in sorted(absent.items(), key=lambda pair: _series_key(pair[0])):
-        notes.append(f'* Python {version} -- not measured at all: {reason}')
+        notes.append(f'* Python {version} -- not measured at all: {_escape(reason)}')
     for version, reason in sorted(partial.items(), key=lambda pair: _series_key(pair[0])):
         notes.append(f'* Python {version} -- measured, but the run did not complete, so this '
                      f'column may be missing engines that would otherwise have a figure: '
-                     f'{reason}')
+                     f'{_escape(reason)}')
     for row in rows:
         by_reason = {}  # type: dict[str, list[str]]
         for series, reason in sorted(reasons.get(row.engine, {}).items(), key=lambda pair:
@@ -889,7 +984,7 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
         # sentence true of three consecutive versions, and repeating it three times
         # makes the notes longer than the table they annotate.
         for reason, series_list in by_reason.items():
-            notes.append(f'* ``{row.label}`` on {", ".join(series_list)} -- {reason}')
+            notes.append(f'* ``{row.label}`` on {", ".join(series_list)} -- {_escape(reason)}')
 
     if notes:
         lines.append(f'``{UNMEASURED_MARK}`` not measured, or not measured in full, for the')
@@ -934,9 +1029,12 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
     lines.append('')
     lines.append('.. list-table::')
     lines.append('')
-    for label, value in _provenance(documents, image, emulated, missing):
+    for label, value in _provenance(documents, image, emulated):
         lines.append(f'   * - {label}')
         lines.append(f'     - {value}')
+    for label, value in _missing_pairs(documents, missing):
+        lines.append(f'   * - {label}')
+        lines.append(f'     - {_escape(value)}')
     lines.append('')
     lines.append('Resolved package versions:')
     lines.append('')
@@ -987,7 +1085,7 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
         else:
             body.append([f'{name} {UNMEASURED_MARK}', '*not measured*', '--', '0'])
 
-    lines.extend(_simple_table(['Engine', 'Relative time', 'Observed range', 'Passes'], body))
+    lines.extend(_simple_table(['Engine', 'Relative time', 'Observed range', 'Samples'], body))
     lines.append('')
 
     absolutes = baseline_absolutes(documents)
@@ -1037,7 +1135,7 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
             detail = []  # type: list[str]
             if row.discarded:
                 detail.append(f'{row.discarded} individual extraction(s) failed and were discarded')
-            detail.extend(row.failures)
+            detail.extend(_escape(failure) for failure in row.failures)
             lines.append(f'* ``{row.label}`` -- ' + '; '.join(detail))
         lines.append('')
 
@@ -1046,7 +1144,7 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
         lines.append(f'``{UNMEASURED_MARK}`` not measured, for the reason the engine itself gives:')
         lines.append('')
         for row in unmeasured:
-            lines.append(f'* ``{row.label}`` -- {row.reason}')
+            lines.append(f'* ``{row.label}`` -- {_escape(row.reason)}')
         lines.append('')
 
     if emulated:
@@ -1087,8 +1185,10 @@ def render_text(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
     lines.append('=' * 78)
     lines.append('pcapkit engine benchmark')
     lines.append('=' * 78)
-    for label, value in _provenance(documents, image, emulated, missing):
+    for label, value in _provenance(documents, image, emulated):
         lines.append(f'{label + ":":26} {value.replace("``", "")}')
+    for label, value in _missing_pairs(documents, missing):
+        lines.append(f'{label + ":":26} {value}')
     lines.append('')
 
     # Absolute milliseconds per interpreter, which the ratio table below cannot show
@@ -1111,12 +1211,13 @@ def render_text(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
                              else f'{"--":>9}')
             lines.append(f'{row.label:14} ' + ' '.join(cells))
         lines.append('')
-        for version, reason in sorted(missing, key=lambda pair: _series_key(pair[0])):
-            lines.append(f'{version}: not measured -- {reason}')
-        if missing:
-            lines.append('')
+        # No per-version failure lines here. The provenance block above already names
+        # every version the run could not measure and why, in the same output a few
+        # lines up, and a second rendering of the same fact managed to disagree with the
+        # first: it called a partly measured version "not measured" while its figures
+        # were printed in the grid directly above.
 
-    lines.append(f'{"engine":14} {"relative":>10} {"range":>19} {"ms/packet":>12}  passes')
+    lines.append(f'{"engine":14} {"relative":>10} {"range":>19} {"ms/packet":>12}  samples')
     lines.append('-' * 78)
     for row in rows:
         if not row.measured:
@@ -1224,6 +1325,12 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         # to prevent.
         if not separator or not version.strip() or not reason.strip():
             parser.error(f'--missing wants VERSION=REASON, not {entry!r}')
+        # Two reasons for one version have no coherent rendering -- the provenance block
+        # would list both and the table's notes only the last -- and there is no honest
+        # way to pick. `run.sh` writes one note file per version so it cannot happen from
+        # there; anyone driving report.py by hand is told rather than shown half of it.
+        if version.strip() in {existing for existing, _ in missing}:
+            parser.error(f'--missing was given twice for Python {version.strip()}')
         missing.append((version.strip(), reason.strip()))
 
     documents = []  # type: list[dict[str, Any]]

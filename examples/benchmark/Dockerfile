@@ -7,8 +7,10 @@
 # digests live in `python-images.txt`, which is the matrix `run.sh` reads; the
 # reasoning behind pinning by digest rather than by tag is there too, next to the
 # digests it applies to, rather than duplicated here. The default below is 3.11
-# because that is the one interpreter on which every engine can run, which makes it
-# the right thing to get from a bare `docker build` with no `--build-arg`.
+# because it is the *last* interpreter on which every engine can run -- 3.10 is the
+# only other one -- which makes it the right thing to get from a bare `docker build`
+# with no `--build-arg`. It has to stay equal to the 3.11 row of the pins file, and a
+# self-test asserts that it does: one digest written in two places is one that drifts.
 #
 # Two virtualenvs where two are needed, one where they are not. `pypcap` and
 # `pcap-ct` both install a top-level `pcap` module, and with both present

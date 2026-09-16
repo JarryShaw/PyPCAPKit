@@ -83,6 +83,13 @@ A full matrix takes a long while: five versions, up to two virtualenvs each, and
 almost all of the measuring time is pyshark, which spawns a tshark process per
 extraction. Cut it down with --pythons for fewer columns, --engines to drop
 pyshark, or --quick to check the harness rather than measure anything.
+
+exit status:
+  0   every requested version was measured, and both tables were written
+  3   the tables were written, but at least one version could not be measured
+      in full; its reason is in the tables and in <out>/missing/
+  1   no table was produced
+  2   the arguments were wrong; nothing was built or measured
 USAGE
 }
 
@@ -161,13 +168,35 @@ fi
 # An unknown version is a typo, and a typo is fatal here rather than reported as a
 # missing column. A column that says "3.1 could not be measured" would be an
 # honest-looking answer to a question nobody asked.
+#
+# Repeats are dropped in the same pass. `--pythons 3.11,3.11` would otherwise give both
+# iterations the same container name, so the second `docker run` fails on the collision
+# and the version gets written off as a gap -- a spurious failure reported for a version
+# that in fact measured perfectly well the first time round.
+WANTED=''
 for version in ${VERSIONS}; do
     if [ -z "$(pin_field "${version}" 1)" ]; then
         echo "run.sh: '${version}' is not in ${PINS_FILE}." >&2
         echo "  Known versions: $(known_versions)" >&2
         exit 2
     fi
+    case " ${WANTED} " in
+        *" ${version} "*) ;;
+        *) WANTED="${WANTED} ${version}" ;;
+    esac
 done
+VERSIONS="${WANTED}"
+
+# `default` is what every ratio in the report is taken against and the only engine
+# present in every environment, so `collect` refuses to build a table without it.
+# Caught here rather than there: without this the whole matrix builds and measures
+# first, and the failure arrives as a traceback from inside the reporting container
+# minutes -- or hours -- after the mistake was made.
+case ",${ENGINES}," in
+    *,default,*) ;;
+    *)  echo "run.sh: --engines must include 'default'; it is the baseline every ratio uses." >&2
+        exit 2 ;;
+esac
 
 # What this machine is, and hence what it can run without emulation. `uname -m`
 # says arm64 on Apple Silicon and aarch64 on Linux ARM; both mean linux/arm64 to
@@ -250,10 +279,12 @@ trap cleanup EXIT INT TERM
 # *after* copying results out may well have collected an environment or two first, and
 # the reporting pass tells those cases apart -- a column with figures in it and a note
 # attached is partly measured, not unmeasured.
+GAPS=0
 record_missing() {
     local version="$1"
     local reason="$2"
     printf '%s\n' "${reason}" > "${OUT_DIR}/missing/${version}.txt"
+    GAPS=$((GAPS + 1))
     echo "run.sh: ${version} will be reported as a gap in the table -- ${reason}" >&2
 }
 
@@ -303,7 +334,15 @@ for version in ${VERSIONS}; do
     # published -- and the resulting "pull access denied" says nothing at all about
     # the real problem. Only the os/arch pair is compared, so `linux/arm64/v8` and
     # `linux/arm64` are not treated as a mismatch.
-    image_platform="$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "${image_tag}")"
+    # Guarded, unlike every other command substitution in this script: an unguarded
+    # one here would take `set -e` and the whole matrix down with it, which is exactly
+    # the behaviour the per-version failure handling exists to prevent. Everywhere else
+    # a failing substitution really should be fatal; inside this loop nothing should be.
+    if ! image_platform="$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "${image_tag}")"; then
+        record_missing "${version}" \
+            "${image_tag} could not be inspected, so nothing was measured for this version"
+        continue
+    fi
     wanted_platform="$(echo "${PLATFORM}" | cut -d/ -f1,2)"
     if [ "${image_platform}" != "${wanted_platform}" ]; then
         record_missing "${version}" \
@@ -314,7 +353,11 @@ for version in ${VERSIONS}; do
     # The image ID is the reference the report quotes. A locally built image has no
     # registry digest to name, and the ID is a digest of its config, so it identifies
     # the exact image these numbers came from -- which is what the reader needs.
-    image_id="$(docker image inspect --format '{{.Id}}' "${image_tag}")"
+    if ! image_id="$(docker image inspect --format '{{.Id}}' "${image_tag}")"; then
+        record_missing "${version}" \
+            "${image_tag} could not be inspected, so nothing was measured for this version"
+        continue
+    fi
 
     if [ -z "${REPORT_IMAGE}" ]; then
         # Whichever version's image is usable first does the reporting. report.py is
@@ -397,12 +440,12 @@ docker create \
     "${REPORT_IMAGE}" >/dev/null
 
 status=0
-# `|| status=$?` rather than a bare invocation: the report's output is still worth
-# collecting when it fails partway, and `set -e` would abandon it.
 if ! docker cp "${OUT_DIR}/." "${REPORTER}:/in/" >/dev/null 2>&1; then
     echo "run.sh: could not hand the measurements to the reporting container." >&2
     exit 1
 fi
+# `|| status=$?` rather than a bare invocation: the report's output is still worth
+# collecting when it fails partway, and `set -e` would abandon it.
 docker start --attach "${REPORTER}" || status=$?
 docker cp "${REPORTER}:/out/." "${OUT_DIR}/" >/dev/null 2>&1 || status=1
 
@@ -416,6 +459,20 @@ if [ -f "${OUT_DIR}/table-versions.rst" ] && [ -f "${OUT_DIR}/table.rst" ]; then
     echo "    and Python version, ready to paste into README.rst's Test Results," >&2
     echo "    and ${OUT_DIR}/table.rst -- the machine-independent ratio view," >&2
     echo '    alongside the raw JSON and the per-environment locks' >&2
+
+    # A run that lost a column produced everything it could and is still not a run that
+    # went as asked, so it says so in the exit status as well as in the tables. Nothing
+    # was aborted -- the requirement is that a failing version must not end the run, not
+    # that it must be indistinguishable from success -- and an exit code is the only part
+    # of this a scheduled invocation reads. A distinct code rather than 1, so "some
+    # columns are missing, the tables are written" can be told from "there is no table".
+    if [ "${GAPS}" -gt 0 ] && [ "${status}" -eq 0 ]; then
+        echo >&2
+        echo "run.sh: ${GAPS} of the requested Python version(s) could not be measured in" >&2
+        echo '    full; the tables were still written, with the reasons in them and in' >&2
+        echo "    ${OUT_DIR}/missing/. Exiting 3 to say so." >&2
+        status=3
+    fi
 else
     echo "run.sh: no table was produced; ${OUT_DIR} holds whatever the run got to." >&2
     ls -1 "${OUT_DIR}" >&2 2>/dev/null || true

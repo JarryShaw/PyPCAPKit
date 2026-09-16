@@ -106,9 +106,14 @@ if [ -n "$EMULATED" ]; then
     report_args+=(--emulated "$EMULATED")
 fi
 
+# `${report_args[@]+"${report_args[@]}"}` rather than a bare `"${report_args[@]}"`:
+# expanding an empty array under `set -u` is an error before bash 4.4, and a native run
+# with no missing versions leaves it empty, which is the common case. The image ships
+# bash 5, so this is belt and braces -- but the alternative is a line that is only
+# correct because of a fact about the base image that nothing here states.
 echo >&2
 exec python /src/examples/benchmark/report.py \
     "${documents[@]}" \
     --rst-out "$OUT/table.rst" \
     --versions-rst-out "$OUT/table-versions.rst" \
-    "${report_args[@]}"
+    ${report_args[@]+"${report_args[@]}"}

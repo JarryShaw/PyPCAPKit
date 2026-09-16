@@ -1026,11 +1026,14 @@ class TestVersionsMarkup:
         never given the chance to fail.
 
         """
-        snippet, _, _ = self._snippet(versions=('3.11',),
-                                      missing=[('3.15', 'the image failed to build')])
+        snippet, _, rows = self._snippet(versions=('3.11',),
+                                        missing=[('3.15', 'the image failed to build')])
         assert f'3.15 {report.UNMEASURED_MARK}' in snippet
-        assert f'``dpkt`` {report.UNMEASURED_MARK}' not in snippet
-        assert f'``scapy`` {report.UNMEASURED_MARK}' not in snippet
+        # Every engine, not a sample of two: on 3.11 all seven are measurable, so the
+        # only mark in the whole table should be the one on the 3.15 column heading.
+        for row in rows:
+            assert f'``{row.label}`` {report.UNMEASURED_MARK}' not in snippet
+        assert snippet.count(report.UNMEASURED_MARK) == 2  # the heading, and its legend
 
     def test_a_partly_measured_version_is_not_called_unmeasured(self):
         """A version can have both figures and a failure note, and both are true.
@@ -1136,6 +1139,47 @@ class TestMatrixProvenance:
         assert 'pooled across every environment' not in \
             report.render_rst(report.collect(single), single)
 
+    def test_a_packet_count_disagreement_is_reported_not_dropped(self):
+        """One capture must yield one frame count on every interpreter.
+
+        If it does not, that is the most important thing in the report -- and the
+        previous behaviour was to print no row at all, which hid precisely the case the
+        row exists to establish. With one interpreter the disagreement was barely
+        possible; across a matrix it is a real failure mode.
+
+        """
+        docs = matrix(versions=('3.11', '3.12'))
+        for entry in docs[-1]['results']:
+            entry['packets'] = 5 if entry['packets'] else entry['packets']
+        snippet = report.render_rst(report.collect(docs), docs)
+        assert 'Packets per extraction' in snippet
+        assert 'disagreed across the run' in snippet
+        assert '3.11 6' in snippet
+        assert '3.12 5' in snippet
+
+    def test_an_agreeing_packet_count_is_just_the_number(self):
+        """No alarm on the normal case."""
+        docs = matrix(versions=('3.11', '3.12'))
+        snippet = report.render_rst(report.collect(docs), docs)
+        assert 'disagreed' not in snippet
+        assert 'Packets per extraction' in snippet
+
+    def test_the_sample_column_is_not_called_passes(self):
+        """A pass happens once per environment, so samples outnumber passes.
+
+        The provenance block says "3 passes ... in 7 environments" and the table's own
+        count is the product of the two. Calling both "Passes" read as a contradiction
+        as soon as there was more than one interpreter.
+
+        """
+        docs = matrix(versions=('3.11', '3.12'))
+        snippet = report.render_rst(report.collect(docs), docs)
+        table = snippet.split('Test Results (Relative)')[1]
+        assert 'Samples' in table
+        assert 'Passes' not in table
+        # ...while the provenance block above still counts passes, in passes.
+        assert 'Passes' in snippet.split('Test Results (Relative)')[0]
+
     def test_the_two_tables_do_not_share_a_heading(self):
         """Two sections named "Test Results" in one README is one too many.
 
@@ -1147,6 +1191,177 @@ class TestMatrixProvenance:
         rows = report.collect(docs)
         assert 'Test Results (Relative)' in report.render_rst(rows, docs)
         assert 'Test Results (Relative)' not in report.render_versions_rst(rows, docs)
+
+
+class TestPinsFile:
+    """`python-images.txt` is the whole matrix, and nothing else validates it.
+
+    `run.sh` reads it with awk and would happily act on a malformed row -- a missing
+    field silently becomes a row awk skips, so the version quietly stops being measured
+    with no error anywhere. These are the assertions that would otherwise only be made
+    by a benchmark run that takes two hours to reach them.
+
+    """
+
+    #: Field meanings, matching the header comment in the file itself.
+    FIELDS = ('version', 'image', 'pypcap', 'tier')
+
+    def _rows(self):
+        """The real rows, filtered exactly as `run.sh`'s awk does."""
+        path = Path(__file__).resolve().parent / 'python-images.txt'
+        rows = []
+        for line in path.read_text(encoding='utf-8').splitlines():
+            fields = line.split()
+            if not fields or fields[0].startswith('#') or len(fields) < len(self.FIELDS):
+                continue
+            rows.append(dict(zip(self.FIELDS, fields)))
+        return rows
+
+    def test_every_row_has_every_field(self):
+        """A short row is one awk skips, which is a version silently not measured."""
+        rows = self._rows()
+        assert rows, 'no rows parsed at all; run.sh would have nothing to measure'
+        for row in rows:
+            assert all(row[field] for field in self.FIELDS), row
+
+    def test_every_base_image_is_pinned_by_digest(self):
+        """A tag pin is not a pin -- the file's own header says so.
+
+        `3.11-slim-bookworm` is rebuilt whenever Debian or CPython ships a patch, so a
+        row that lost its digest would keep working and quietly measure a different
+        interpreter than the one the last run measured.
+
+        """
+        for row in self._rows():
+            assert '@sha256:' in row['image'], row
+            assert len(row['image'].split('@sha256:')[1]) == 64, row
+
+    def test_the_pypcap_and_tier_columns_use_the_documented_words(self):
+        """`run.sh` compares these literally, so a synonym is a silent behaviour change."""
+        for row in self._rows():
+            assert row['pypcap'] in ('pypcap', 'no-pypcap'), row
+            assert row['tier'] in ('default', 'opt-in'), row
+
+    def test_a_default_run_measures_something(self):
+        """`run.sh` with no arguments has to have a matrix to run."""
+        assert [row['version'] for row in self._rows() if row['tier'] == 'default']
+
+    def test_pypcap_is_offered_only_where_it_can_be_installed(self):
+        """The ceiling is 3.11: building that virtualenv on 3.12+ compiles for nothing."""
+        for row in self._rows():
+            expected = 'pypcap' if tuple(int(part) for part in row['version'].split('.')) \
+                <= (3, 11) else 'no-pypcap'
+            assert row['pypcap'] == expected, row
+
+    def test_the_dockerfile_default_matches_the_pins_file(self):
+        """The 3.11 digest is written in two places, so it can drift in one.
+
+        The Dockerfile needs a usable default so that a bare ``docker build`` works, and
+        `run.sh`'s header claims nothing about the matrix is hard-coded elsewhere. Both
+        are reasonable; together they are a duplicated pin, and this is the only thing
+        that would notice them disagreeing.
+
+        """
+        pinned = {row['version']: row['image'] for row in self._rows()}['3.11']
+        dockerfile = (Path(__file__).resolve().parent / 'Dockerfile').read_text(encoding='utf-8')
+        default = [line.split('=', 1)[1].strip() for line in dockerfile.splitlines()
+                   if line.startswith('ARG PYTHON_IMAGE=')]
+        assert default == [pinned]
+
+
+class TestHostileReasons:
+    """Reasons are written by compilers and exceptions, not by this harness.
+
+    Every reason in the report comes from somewhere that has never heard of
+    reStructuredText: an engine's ``unsupported_reason()``, an exception's ``str()``,
+    or the tail of a pip or gcc log that the Dockerfile recorded because a `pypcap`
+    build was allowed to fail. All of it is interpolated into emitted markup as prose,
+    and the suite's other fixtures are all well-behaved English -- which is exactly why
+    this went unnoticed until a hostile string was tried.
+
+    """
+
+    #: Strings a compiler or a Python traceback produces without trying, each of which
+    #: broke the emitted snippet under plain docutils before the escaping went in.
+    HOSTILE = (
+        # `**kwargs` in a gcc diagnostic: inline strong start-string without end-string.
+        'gcc: error: **kwargs handling broke the build',
+        # GNU tools quote like `this', so the backtick never balances.
+        "pip said: cannot find `pcap.h",
+        # A trailing underscore is a reference: unknown target name.
+        'linklayer imports imp_ which was removed in 3.12',
+        # A paragraph ending in `::` promises a literal block that never arrives.
+        'the build died here::',
+        # And the rest of the inline markup characters, together.
+        'a *very* |odd| [1] c:\\path\\to\\thing reason',
+    )
+
+    def _documents(self, reason):
+        """A two-interpreter run in which every reason is *reason*."""
+        return [
+            document('3.11-pcap_ct', {'default': [0.2, 0.2], 'dpkt': [0.02, 0.02]},
+                     {'pypcap': reason}, failures={'dpkt': [reason]}),
+            document('3.12-pcap_ct', {'default': [0.2, 0.2], 'dpkt': [0.02, 0.02]},
+                     {'pypcap': reason}, python='3.12.12'),
+        ]
+
+    @pytest.mark.parametrize('reason', HOSTILE)
+    def test_both_snippets_still_parse(self, reason):
+        """A gcc diagnostic in a reason must not break the pasted table.
+
+        The promise is that these snippets go into README.rst verbatim, and GitHub
+        renders that with docutils -- where each of these strings produces a visible
+        error block instead of the table.
+
+        """
+        docutils_core = pytest.importorskip('docutils.core')
+        from docutils.utils import SystemMessage  # pylint: disable=import-outside-toplevel
+
+        docs = self._documents(reason)
+        rows = report.collect(docs)
+        for snippet in (report.render_versions_rst(rows, docs, [('3.15', reason)]),
+                        report.render_rst(rows, docs, missing=[('3.15', reason)])):
+            messages = []
+            try:
+                docutils_core.publish_doctree(
+                    snippet,
+                    settings_overrides={
+                        'halt_level': 2, 'report_level': 2, 'warning_stream': messages,
+                        'input_encoding': 'unicode', 'output_encoding': 'unicode',
+                    },
+                )
+            except SystemMessage as exc:  # pragma: no cover - only on a real failure
+                pytest.fail(f'docutils rejected a reason it should have survived: '
+                            f'{exc}\n\n{snippet}')
+            assert not messages, f'docutils warned: {messages}\n\n{snippet}'
+
+    def test_the_reader_still_sees_the_original_text(self):
+        """Escaping must not be censoring: the rendered document says what gcc said.
+
+        A backslash escape is removed when reStructuredText is rendered, so this holds
+        without the reason being rewritten -- which matters because the reason is
+        diagnostic output and a paraphrase of it is worth nothing.
+
+        """
+        docutils_core = pytest.importorskip('docutils.core')
+
+        reason = self.HOSTILE[0]
+        docs = self._documents(reason)
+        snippet = report.render_versions_rst(report.collect(docs), docs)
+        rendered = docutils_core.publish_doctree(
+            snippet,
+            settings_overrides={'input_encoding': 'unicode', 'output_encoding': 'unicode',
+                                'report_level': 5},
+        ).astext()
+        assert reason in rendered
+
+    def test_the_plain_text_report_is_not_escaped(self):
+        """Backslashes belong in markup, not in the operator's terminal."""
+        reason = 'gcc: error: **kwargs handling broke the build'
+        docs = self._documents(reason)
+        text = report.render_text(report.collect(docs), docs, missing=[('3.15', reason)])
+        assert reason in text
+        assert '\\*' not in text
 
 
 class TestFixedFormatting:
@@ -1195,6 +1410,18 @@ class TestMissingArgument:
             report.main([str(path), '--missing', '3.15'])
         with pytest.raises(SystemExit):
             report.main([str(path), '--missing', '3.15='])
+
+    def test_two_reasons_for_one_version_are_rejected(self, tmp_path):
+        """There is no honest rendering of two reasons for one column.
+
+        The provenance block would list both and the table's notes only the last, so the
+        same run would report the gap differently in two places. `run.sh` writes one note
+        file per version and cannot produce this; a hand-driven invocation is told.
+
+        """
+        path = self._one_document(tmp_path)
+        with pytest.raises(SystemExit):
+            report.main([str(path), '--missing', '3.15=first', '--missing', '3.15=second'])
 
 
 class TestNotAttempted:
