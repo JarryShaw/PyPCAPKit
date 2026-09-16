@@ -39,7 +39,7 @@ from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.chardet import detect_charset
+from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, RegistryError,
                                           StructError, UnsupportedCall)
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -331,7 +331,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         .. _chardet: https://chardet.readthedocs.io
 
         """
-        charset = encoding or detect_charset(byte)
+        charset = encoding or detect(byte)
         try:
             return byte.decode(charset, errors=errors)
         except UnicodeError:

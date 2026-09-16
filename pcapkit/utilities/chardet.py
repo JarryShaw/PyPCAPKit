@@ -15,13 +15,13 @@ import functools
 
 import chardet
 
-__all__ = ['detect_charset']
+__all__ = ['detect']
 
-#: How many distinct bytestrings :func:`detect_charset` will remember. Bounded
+#: How many distinct bytestrings :func:`detect` will remember. Bounded
 #: so that a capture full of never-repeating text cannot retain all of it.
 DETECT_CACHE_SIZE = 1024
 
-#: Longest bytestring :func:`detect_charset` will put in the cache. Chosen from
+#: Longest bytestring :func:`detect` will put in the cache. Chosen from
 #: measurement: across ``http.pcap``, ``http6.cap`` and
 #: ``many_interfaces.pcapng`` every value reaching detection was at most 116
 #: octets, with a 95th percentile of 52, so this keeps every repeating string a
@@ -30,7 +30,7 @@ DETECT_CACHE_MAX_BYTES = 256
 
 
 @functools.lru_cache(maxsize=DETECT_CACHE_SIZE)
-def _detect_charset_cached(value: 'bytes') -> 'str':
+def _detect_cached(value: 'bytes') -> 'str':
     """Detect the character set of a short ``value``, memoised.
 
     Args:
@@ -44,7 +44,7 @@ def _detect_charset_cached(value: 'bytes') -> 'str':
     return chardet.detect(value)['encoding'] or 'utf-8'
 
 
-def detect_charset(value: 'bytes') -> 'str':
+def detect(value: 'bytes') -> 'str':
     """Detect the character set of ``value``.
 
     :func:`chardet.detect` is a pure function of the bytes handed to it, and the
@@ -84,4 +84,4 @@ def detect_charset(value: 'bytes') -> 'str':
     """
     if len(value) > DETECT_CACHE_MAX_BYTES:
         return chardet.detect(value)['encoding'] or 'utf-8'
-    return _detect_charset_cached(value)
+    return _detect_cached(value)

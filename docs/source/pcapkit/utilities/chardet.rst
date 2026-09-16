@@ -12,7 +12,7 @@ which is why it lives here rather than beside either of them.
 
 .. _chardet: https://chardet.readthedocs.io
 
-.. autofunction:: pcapkit.utilities.chardet.detect_charset
+.. autofunction:: pcapkit.utilities.chardet.detect
 
 .. autodata:: pcapkit.utilities.chardet.DETECT_CACHE_SIZE
 
