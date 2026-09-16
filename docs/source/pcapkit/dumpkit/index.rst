@@ -33,8 +33,8 @@ of :mod:`pcapkit.dumpkit`:
        A --> Tree & XML & JSON
 
        subgraph pcapkit [PyPCAPKit Dumpers]
-           DumperBase --> Dumper --> PCAPIO & NotImplementedIO
-           Dumper --> E([user customisation ...])
+           DumperBase --> PCAPIO & NotImplementedIO
+           DumperBase --> Dumper --> E([user customisation ...])
        end
        A --> DumperBase
 
@@ -49,4 +49,4 @@ of :mod:`pcapkit.dumpkit`:
        click DumperBase "/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase"
        click Dumper "/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper"
        click PCAPIO "/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO"
-       click NotImplementedIO "/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.NotImplementedIO"
+       click NotImplementedIO "/pcapkit/dumpkit/null.html#pcapkit.dumpkit.null.NotImplementedIO"

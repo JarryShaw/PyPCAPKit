@@ -38,6 +38,8 @@ all engine support functionality.
 
    .. autoproperty:: extractor
 
+   .. automethod:: unsupported_reason
+
    .. automethod:: run
    .. automethod:: read_frame
    .. automethod:: close

@@ -36,6 +36,13 @@ from pcapkit.protocols.data.application.httpv2 import \
 from pcapkit.protocols.data.application.httpv2 import UnassignedFrame as HTTPv2_UnassignedFrame
 from pcapkit.protocols.data.application.httpv2 import WindowUpdateFrame as HTTPv2_WindowUpdateFrame
 
+# NG Application Protocol
+from pcapkit.protocols.data.application.ngap import IE as NGAP_IE
+from pcapkit.protocols.data.application.ngap import NGAP
+from pcapkit.protocols.data.application.ngap import BitString as NGAP_BitString
+from pcapkit.protocols.data.application.ngap import Choice as NGAP_Choice
+from pcapkit.protocols.data.application.ngap import Sequence as NGAP_Sequence
+
 __all__ = [
     # File Transfer Protocol
     'FTP',
@@ -54,4 +61,8 @@ __all__ = [
     'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
     'HTTPv2_RSTStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
     'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
+
+    # NG Application Protocol
+    'NGAP',
+    'NGAP_IE', 'NGAP_Choice', 'NGAP_BitString', 'NGAP_Sequence',
 ]

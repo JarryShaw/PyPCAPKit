@@ -81,6 +81,10 @@ As things stand that is 17 of the 30 registered chunk types, 24 of the 32
 chunk parameters and 10 of the 23 error causes; :doc:`pcapkit/const/sctp`
 lists them all.
 
+The other thing wanted for SCTP is reassembly, which no protocol beyond IP and
+TCP has -- see `Reassembly Beyond IP and TCP`_ below, since it needs work in
+:mod:`pcapkit.foundation` rather than in the protocol.
+
 ESP
 ~~~
 
@@ -91,12 +95,35 @@ Association is supplied through the protocol keyed
 :mod:`pcapkit.corekit.context` channel.
 
 What is still wanted there is wider algorithm coverage. The two enumerations
-under :doc:`pcapkit/const/esp` carry every transform IANA has registered, but
-only five encryption and five integrity algorithms are actually applied, as
-listed by :data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES` and
-:data:`~pcapkit.protocols.internet.esp.INTEGRITY_SUITES`. Specifically not
-implemented: ChaCha20-Poly1305 [:rfc:`7634`], AES-CCM [:rfc:`4309`], AES-XCBC
-integrity [:rfc:`3566`], and Extended Sequence Numbers.
+under :doc:`pcapkit/const/esp` carry every transform IANA has registered -- 36
+:class:`~pcapkit.const.esp.cipher.Cipher` members and 15
+:class:`~pcapkit.const.esp.integrity.Integrity` members -- but
+:data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES` and
+:data:`~pcapkit.protocols.internet.esp.INTEGRITY_SUITES` apply only five of
+each, and two of those ten are the no-ops ``ENCR_NULL`` and ``NONE``. So the
+real coverage is AES-CBC and AES-GCM at all three tag lengths for encryption,
+and HMAC-SHA1-96 plus the three :rfc:`4868` HMAC-SHA2 truncations for
+integrity.
+
+Not implemented, roughly in the order a capture is likely to want them:
+AES-CTR [:rfc:`3686`], AES-CCM at all three tag lengths [:rfc:`4309`],
+ChaCha20-Poly1305 [:rfc:`7634`], AES-XCBC-MAC-96 [:rfc:`3566`], AES-CMAC-96
+[:rfc:`4494`], the AES-GMAC family and its ``ENCR_NULL_AUTH_AES_GMAC``
+counterpart [:rfc:`4543`], and then the Camellia, implicit-IV [:rfc:`8750`] and
+MGM [:rfc:`9227`] families. Extended Sequence Numbers are not implemented
+either, and are the one item on this list that is not simply a table entry: the
+high-order 32 bits are never transmitted, so recovering them is stateful, and
+they widen both the ICV coverage and the AEAD associated data.
+
+Two structural notes for anyone starting. Adding an integrity algorithm that is
+not an HMAC needs more than a row --
+:class:`~pcapkit.protocols.internet.esp.IntegritySuite` records the digest as
+the name of a :mod:`hashlib` constructor, which AES-XCBC and AES-CMAC are not.
+And :func:`~pcapkit.protocols.internet.esp.load_cryptography` imports only the
+``ciphers`` submodules of :mod:`cryptography`, so the AEAD and CMAC primitives
+have to be added there before a cipher suite can reach them. Unsupported
+algorithms are refused loudly, when the Security Association is constructed
+rather than when a packet is read, so nothing decodes wrongly in the meantime.
 
 Mobility Header
 ~~~~~~~~~~~~~~~
@@ -111,15 +138,116 @@ registry:
   Heartbeat, Binding Revocation, Localized Routing Initiation and
   Acknowledgment, Update Notification and its Acknowledgement, Flow Binding,
   Subscription Query and Subscription Response.
-* **51 of the 71 registered options** -- broadly the PMIPv6, NEMO and
-  flow-binding block, including Home Network Prefix, Handoff Indicator, Access
-  Technology Type, Timestamp, GRE Key, Binding Identifier and the QoS options.
+* **51 of the 71 registered options** -- most of the PMIPv6 and flow-binding
+  block, including Home Network Prefix, Handoff Indicator, Access Technology
+  Type, Timestamp, GRE Key, Binding Identifier and the QoS options, together
+  with DNS-UPDATE-TYPE, Vendor Specific and Service Selection, which belong to
+  none of those groups.
 * **3 of the 4 CGA extensions**; only Multi-Prefix is implemented.
 
 Each of those falls through to a generic handler, so nothing breaks -- the
-fields simply are not decoded. The ``# TODO`` markers in
-``pcapkit/protocols/internet/mh.py`` sit at the exact dispatch tables that need
-entries, and the file documents the shape each handler takes.
+fields simply are not decoded. Read and construction are symmetric throughout,
+so every gap above is a gap in both directions: a message type needs a
+``_read_msg_`` and a ``_make_msg_`` handler, an option a ``_read_opt_`` and a
+``_make_opt_``, and each has to be named in the matching dispatch table --
+:attr:`~pcapkit.protocols.internet.mh.MH.__message__`,
+:attr:`~pcapkit.protocols.internet.mh.MH.__option__` or
+:attr:`~pcapkit.protocols.internet.mh.MH.__extension__`. The six ``# TODO``
+markers in ``pcapkit/protocols/internet/mh.py`` sit at the end of each handler
+block rather than at the tables, so both places need editing; the file documents
+the shape each handler takes.
+
+Less of this is groundwork than the numbers suggest. The sub-registries the
+missing options and messages need -- binding revocation types and triggers,
+handoff indicators, access network identifier sub-options, flow identification
+and flow binding sub-options, LMA-controlled MAG parameters, DNS update status,
+traffic selector formats, QoS attributes -- are already generated in full under
+:doc:`pcapkit/const/mh`, and ``mh.py`` already imports 32 of them without using
+them. What is missing is the handlers, not the enumerations.
+
+DTLS
+~~~~
+
+**Not started**, and unlike everything in the list above it has no stub in the
+tree at all -- only TLS/SSL does. It earns its own entry because the registries
+have moved ahead of it, and a growing part of SCTP's surface now names a protocol
+that does not exist:
+
+* the DTLS chunk, type 65 of :class:`~pcapkit.const.sctp.chunk.Chunk`, and the
+  DTLS Key Management chunk parameter, ``0x8006`` of
+  :class:`~pcapkit.const.sctp.parameter.Parameter` -- both fall through to the
+  generic handlers, so they parse as opaque;
+* four of its error causes, 100 to 103 of
+  :class:`~pcapkit.const.sctp.cause_code.CauseCode`;
+* seven payload protocol identifiers -- 47 (Diameter over DTLS/SCTP), 66 to 69
+  (NGAP, XnAP, F1AP and E1AP, each over DTLS over SCTP) and 4242 (DTLS chunk
+  key management).
+
+That last group is the one that bites. NGAP over DTLS over SCTP is PPID 66, and
+even with an NGAP dissector registered against it the bytes arriving are a DTLS
+record rather than an NGAP PDU, so they can only degrade to
+:class:`~pcapkit.protocols.misc.raw.Raw`. DTLS therefore blocks NGAP over DTLS,
+asked for in `discussion #251
+<https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__, independently of
+whether NGAP itself is implemented.
+
+A record-layer dissector is enough to unblock that -- content type, version,
+epoch, sequence number, length, and the fragment offset and length DTLS adds to
+handshake messages. Decryption is a separate question and is not needed to make
+the record structure legible, in the same way :class:`ESP
+<pcapkit.protocols.internet.esp.ESP>` parses without keys. DTLS over UDP is the
+other half of the same work and wants the same dissector.
+
+Registered, But Not Dissected
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A different shape of gap from the empty stubs, and easy to miss because nothing
+announces it. The :doc:`pcapkit/const/reg` enumerations are complete, but only a
+small part of each is bound to a dissector; everything else resolves to
+:class:`~pcapkit.protocols.misc.raw.Raw`, so the capture parses without
+complaint and yields nothing useful.
+
+* **3 of the 219** :class:`~pcapkit.const.reg.linktype.LinkType` values --
+  ``ETHERNET``, ``IPV4`` and ``IPV6``, declared identically in
+  :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
+  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`.
+* **15 of the 151** :class:`~pcapkit.const.reg.transtype.TransType` values, in
+  :attr:`Internet.__proto__
+  <pcapkit.protocols.internet.internet.Internet.__proto__>`.
+* **6 of the 160** :class:`~pcapkit.const.reg.ethertype.EtherType` values, in
+  :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`: ARP,
+  RARP, IPv4, IPv6, IPX and the customer VLAN tag.
+* **2 port numbers, out of 8182** :class:`~pcapkit.const.reg.apptype.AppType`
+  members -- TCP 21 to FTP, and port 80 to HTTP on both TCP and UDP.
+* **none of the 75**
+  :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
+  values. :attr:`SCTP.__proto__
+  <pcapkit.protocols.transport.sctp.SCTP.__proto__>` ships empty, so every DATA
+  chunk payload is ``Raw`` until something calls
+  :func:`~pcapkit.foundation.registry.protocols.register_sctp`.
+
+Most of those want a dissector written and are covered by the stub list above.
+A handful want only a table entry, because the dissector is already there:
+
+* :class:`~pcapkit.protocols.link.ospf.OSPF` and
+  :class:`~pcapkit.protocols.link.l2tp.L2TP` are implemented but reachable from
+  no registry at all -- ``TransType`` 89 and 115 are both unbound. Note that
+  each class deliberately makes ``__index__`` raise, so registering them means
+  deciding that question first.
+* :class:`~pcapkit.protocols.application.ftp.FTP_DATA` is implemented and
+  exported, but TCP port 20 is unbound.
+* HTTP is bound on port 80 only, not on 8080 or 8443.
+* The service VLAN tag identifier (S-Tag), ``0x88A8``, is unbound, though
+  :class:`~pcapkit.protocols.link.vlan.VLAN` already parses that shape and the
+  customer tag ``0x8100`` is bound to it.
+* ``LinkType`` ``NULL``, ``LOOP`` and ``RAW`` carry bare IPv4 or IPv6, both of
+  which pcapkit dissects. ``NULL`` and ``LOOP`` need their four-octet address
+  family word skipped first, and ``RAW`` needs a version sniff.
+
+Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
+ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;
+and ``LINUX_SLL`` and ``LINUX_SLL2`` at the link layer, which every
+``tcpdump -i any`` capture uses and which have no stub.
 
 PCAPNG Support
 --------------
@@ -133,20 +261,50 @@ the thread raised when only PCAP was supported.
 Maybe Even Faster?
 ------------------
 
-**Still open.** Benchmarking put the builtin default engine at roughly 4x
-Scapy and 10x DPKT, which is an acceptable price for what it decodes, but the
-original proposal in the thread stands: fold consecutive ``_read_xxxxxx`` calls
-into a single ``file.read`` so that the number of IO calls and the duplicated
-:func:`struct.unpack` work both come down.
+**Partly done.** The measured benchmark this section used to ask for now exists,
+and acting on it cut extraction time on a 1117-frame HTTP capture by about 46%
+with byte-identical output. Four things were wrong on the hot path, none of them
+the ones the thread predicted:
 
-Note that the parsing path has been rewritten since that was written. Protocols
-no longer read fields inline; they declare a
-:class:`~pcapkit.protocols.schema.schema.Schema` of field descriptors and let
-:meth:`~pcapkit.protocols.schema.schema.Schema.unpack` drive it. The batching
-idea still applies, but it belongs in the schema and field machinery now rather
-than in each protocol's ``_read_`` methods, and the sketch in the thread no
-longer maps onto the code. A measured benchmark showing where the time actually
-goes would be the useful first contribution here.
+* character-set detection was uncached, and accounted for 30% of an HTTP
+  extraction -- 3011 :func:`chardet.detect` calls over 163 distinct
+  bytestrings;
+* every field of every protocol was copied through the generic
+  :func:`copy.copy` machinery, 63207 times per extraction;
+* :attr:`Field.length <pcapkit.corekit.fields.field.FieldBase.length>` recomputes
+  :func:`struct.calcsize` on each read and was read two to four times per field;
+* :meth:`Schema.__setattr__ <pcapkit.protocols.schema.schema.Schema.__setattr__>`
+  re-entered itself once per field assigned.
+
+Two predictions the profiling **contradicted**, recorded so nobody spends time on
+them again: :class:`~pcapkit.corekit.infoclass.Info` construction -- the usual
+suspect -- is 0.0% of its own cost and 4.4% of a parse, and the logging
+integration is 0.03% even in the heaviest shape, since every call site is a lazy
+``%s``. The IO-batching idea the thread proposed was never the bottleneck.
+
+Three larger wins remain, all outside the parse path and each wanting its own
+review:
+
+* **The flow dumper reopens its output file once per frame** and rebuilds a whole
+  :class:`~pcapkit.protocols.misc.pcap.frame.Frame` to obtain bytes it already
+  holds (``pcapkit/dumpkit/pcap.py:94,128``). That is 80% of the flow-tracing
+  cost, and a counterfactual left 330 of 331 output files byte-identical. This is
+  the best-evidenced and lowest-risk piece of work on this page.
+* :meth:`analyze() <pcapkit.foundation.reassembly.ip.IP_Reassembly.analyze>`
+  **runs eagerly on every frame, fragmented or not**, because
+  ``pcapkit/toolkit/pcap.py:53`` filters only on the *DF* flag. A capture with no
+  fragments at all still produces one "datagram" per frame -- 86% of the
+  IP-reassembly cost plus a 133 ms garbage-collection bill. Making the ``packet``
+  field lazy is mechanical; whether unfragmented frames should be emitted at all
+  is a design question worth settling first.
+* **Every option is parsed twice** (``pcapkit/corekit/fields/collections.py:262-270``):
+  2274 schema unpacks for 1137 options, the pre-parse always discarded. About
+  15% of a PCAP-NG extraction, and the riskiest of the three.
+
+Two traps for anyone benchmarking this library. ``reassembly=True`` and
+``trace=True`` are **no-ops** without ``ip=``/``tcp=``, so a benchmark that passes
+only the switch measures nothing; and timing several capture shapes in one
+process inflates them by up to 73%, so each shape wants its own interpreter.
 
 Logging Integration
 -------------------
@@ -174,7 +332,7 @@ with a hard-wired handler. It now provides:
   and the four :func:`print` calls that were marked
   ``# pylint: disable=logging-fstring-interpolation`` are now real logger
   calls;
-- **``debug`` coverage of the extraction path** -- extractor construction,
+- **debug coverage of the extraction path** -- extractor construction,
   engine selection and fallback, frame counts, cleanup, reassembly and
   flow-tracing setup -- so that ``DEBUG`` explains what PyPCAPKit did with a
   file without descending into per-field parsing.
@@ -319,3 +477,67 @@ wheel stays lean because the suite could not run from an installed package
 anyway: the generated sample captures are not shipped, and ``tests/_tiers.py``
 resolves paths from a repository root that an installed package does not have.
 Anyone wanting to run the tests wants the repository, which is where they are.
+
+Reassembly Beyond IP and TCP
+----------------------------
+
+**Still open**, and newer than the rest of this page --
+:doc:`pcapkit/foundation/reassembly/index` covers three protocols and no more.
+IPv4 and IPv6 share the :rfc:`791` procedure, and TCP uses the :rfc:`815`
+hole-descriptor algorithm, which does handle out-of-order and overlapping
+segments. SCTP has nothing: a user message split across DATA chunks is never put
+back together, and ``sctp`` appears nowhere in :mod:`pcapkit.foundation` at all.
+
+What that costs is concrete. The dissector already exposes everything a
+reassembler needs, on
+:class:`~pcapkit.protocols.data.transport.sctp.DATAChunk` -- ``tsn``,
+``stream_id``, ``stream_seq``, ``ppid``, ``data``, and ``flags.B`` and
+``flags.E`` for the beginning and ending fragment bits -- and nothing reads
+those two bits outside the construction path. So each fragment is dispatched on
+its own PPID as though it were a whole PDU, and a registered upper layer is
+handed half a message. Two related holes compound it: only the *first* DATA
+chunk of a bundle is dispatched at all, and I-DATA [:rfc:`8260`], chunk type 64,
+is not dissected -- so the MID and FSN fields that exist precisely to make
+interleaved reassembly tractable are never parsed, and an I-DATA-only packet
+yields no payload whatsoever. FORWARD TSN (192) and I-FORWARD-TSN (194) are
+likewise unhandled, so partial-reliability stream advancement is invisible.
+
+Writing the reassembler is the smaller half of the job. It would go at
+``pcapkit/foundation/reassembly/sctp.py``, subclass
+:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` and implement two
+methods,
+:meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly` and
+:meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.submit`. Registering
+it, though, is currently inert:
+:meth:`~pcapkit.foundation.extraction.Extractor.register_reassembly` accepts any
+protocol name, while
+:class:`~pcapkit.foundation.extraction.Extractor` only ever instantiates the
+three it names literally, and
+:class:`~pcapkit.foundation.reassembly.ReassemblyManager` is a fixed-field
+container with no room for a fourth. Making SCTP reachable therefore also means
+touching that manager and its read-side twin, the construction branch in
+:class:`~pcapkit.foundation.extraction.Extractor`, one adapter per engine in
+:mod:`pcapkit.toolkit`, the call site in each of those engines, and
+:func:`~pcapkit.interface.core.reassemble`. Generalising that wiring so a
+registered reassembler is actually used is worth doing on its own account, and
+would make the fourth protocol cheaper than the third rather than dearer.
+
+Two smaller items in the same subsystem:
+
+* **Flow tracing is TCP only**, and blocked on the same generalisation --
+  :class:`~pcapkit.foundation.traceflow.TraceFlowManager` holds a single field,
+  so UDP, SCTP and IP conversation tracing have nowhere to go. The TCP tracer
+  itself closes a flow on FIN but never on RST, which is not in its packet model
+  at all, and treats each direction of a connection as a separate flow.
+* **Nothing ever times a partial datagram out.** :rfc:`791` gives IP reassembly
+  a 15-second timer and :rfc:`8200` gives IPv6 60 seconds; neither is
+  implemented, and neither can be until the buffer models carry a timestamp. A
+  buffer is released only when its datagram completes or its flow is torn down,
+  and every in-flight IP datagram identifier holds a fixed 72 KiB of
+  preallocated space -- so a lossy capture, or one with spoofed identifiers,
+  grows the buffer monotonically.
+
+Reassembly is also unavailable on some engines rather than merely slower, which
+is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
+``pcap_ct`` disable it entirely, and ``pypcapfile`` disables the IPv6 half of it.
+:doc:`pcapkit/foundation/engines/index` tabulates that.
