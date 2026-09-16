@@ -870,16 +870,27 @@ class Extractor(Generic[_P]):
 
             # NOTE: these engines' flow tracing adapters report the frame as a
             # plain :obj:`dict`, which the PCAP trace dumper cannot re-serialise
-            # -- it reaches for ``frame.packet``. ``None`` has to be caught along
-            # with ``'pcap'`` here, and replaced by a format that *can* take a
-            # mapping, because :meth:`TraceFlow.__init__
+            # -- :meth:`PCAPIO._append_value
+            # <pcapkit.dumpkit.pcap.PCAPIO._append_value>` reaches for
+            # ``frame.packet`` and dies with ``AttributeError: 'dict' object has no
+            # attribute 'packet'``. ``None`` has to be caught along with ``'pcap'``
+            # here, and replaced by a format that *can* take a mapping, because
+            # :meth:`TraceFlow.__init__
             # <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__init__>`
             # itself substitutes ``'pcap'`` for ``None``.
             #
-            # The DPKT and Scapy engines report the frame as a mapping too and are
-            # deliberately *not* listed here: they are affected by the same defect
-            # on this revision, but they are outside the scope of this change.
-            if self._exnam in ('pyshark', 'pypcapfile') and trace_format in ('pcap', 'cap', None):
+            # DPKT and Scapy belong on this list and were once left off it. Their
+            # adapters build the frame with ``packet2dict`` exactly as the other two
+            # do, so both crash the same way -- but only DPKT did so visibly. The
+            # Scapy engine imports just :mod:`scapy.sendrecv`, which leaves the L2
+            # link types unregistered, so every frame dissects as ``Raw``, no TCP
+            # layer is ever found, and the tracer is never fed at all (#406). That
+            # hides this defect rather than avoiding it: register the link types --
+            # as importing :mod:`scapy.all` does -- and the same ``AttributeError``
+            # appears. So the guard is written from what the adapters produce, not
+            # from which engines happen to crash today.
+            if (self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcapfile')
+                    and trace_format in ('pcap', 'cap', None)):
                 warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
                      "using 'trace_format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = 'json'
