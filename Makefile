@@ -1,4 +1,4 @@
-.PHONY: bootstrap setup dist release docs samples test test-all coverage
+.PHONY: bootstrap setup dist release docs samples test test-all coverage bench bench-quick bench-test
 
 export PIPENV_VENV_IN_PROJECT=1
 export PIPENV_CACHE_DIR ?= $(CURDIR)/.pipenv-cache
@@ -86,6 +86,25 @@ test-all: samples
 coverage: samples
 	pipenv run coverage run -m pytest -q
 	pipenv run coverage report
+
+# The engine speed table in README.rst, measured in a container so the host does
+# not affect the result. Needs docker, and nothing else -- deliberately not run
+# through pipenv, since the whole point is that the measuring environment is the
+# pinned one inside the image rather than whatever is installed here.
+#
+# Expect around twenty minutes at the defaults, almost all of it pyshark: it
+# spawns a tshark process per extraction. `make bench-quick` is a smoke check
+# that every engine runs and the table renders, not a measurement.
+bench:
+	examples/benchmark/run.sh
+
+bench-quick:
+	examples/benchmark/run.sh --quick
+
+# The harness's own tests: ratio arithmetic, environment stitching, and that the
+# emitted reStructuredText parses under plain docutils. No docker needed.
+bench-test:
+	pipenv run python -m pytest -q examples/benchmark/test_harness.py
 
 docs:
 	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C docs html
