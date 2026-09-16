@@ -23,26 +23,42 @@ Terminology
    reasm.ipv6.packet
        Data structure for **IPv6 datagram reassembly**
        (:meth:`IPv6.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
-       is as following:
+       is as following, with ``ipv6_info`` the IPv6
+       :attr:`~pcapkit.protocols.protocol.ProtocolBase.info` and
+       ``ipv6_frag_info`` the Fragment header's:
 
        .. code-block:: python
 
           packet_dict = dict(
-            bufid = tuple(
-                ipv6.src,                   # source IP address
-                ipv6.dst,                   # destination IP address
-                ipv6_frag.id,               # identification
-                ipv6_frag.next,             # next header field in IPv6 Fragment Header
+            bufid = (
+                ipv6_info.src,              # source IP address
+                ipv6_info.dst,              # destination IP address
+                ipv6_frag_info.id,          # identification
+                ipv6_frag_info.next,        # next header field in IPv6 Fragment Header
             ),
-            num = frame.number,             # original packet range number
-            fo = ipv6_frag.offset,          # fragment offset, in octets
-            ihl = ipv6.hdr_len,             # header length, only headers before IPv6-Frag
-            mf = ipv6_frag.mf,              # more fragment flag
-            tl = ipv6.hdr_len
-                 + ipv6.raw_len,            # total length, header includes
-            header = ipv6.header,           # raw bytes type header before IPv6-Frag
-            payload = ipv6.payload,         # raw bytearray type payload after IPv6-Frag
+            num = frame.info.number,        # original packet range number
+            fo = ipv6_frag_info.offset,     # fragment offset, in octets
+            ihl = ipv6_info.hdr_len,        # header length, IPv6-Frag included
+            mf = ipv6_frag_info.mf,         # more fragment flag
+            tl = ipv6_info.hdr_len
+                 + ipv6_info.raw_len,       # total length, header includes
+            header = ipv6_info.fragment
+                     .header,               # raw bytes type header, IPv6-Frag included
+            payload = bytearray(
+                ipv6_info.fragment
+                .payload),                  # raw bytearray type payload after IPv6-Frag
           )
+
+       .. warning::
+
+          ``ihl`` and ``header`` here **include** the 8-octet Fragment header,
+          because :attr:`IPv6.hdr_len <pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len>`
+          counts every extension header it has walked, the Fragment one included.
+          The ``dpkt`` and ``scapy`` adapters stop short of it and report 40 where
+          this one reports 48 for the same packet, so the value is not comparable
+          across engines -- and :rfc:`8200#section-4.5` says the Fragment header
+          is not present in a reassembled packet at all. Tracked as #415; expect
+          this line to change when that is fixed.
 
        .. note::
 

@@ -23,24 +23,27 @@ Terminology
    reasm.ipv4.packet
        Data structure for **IPv4 datagram reassembly**
        (:meth:`IPv4.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
-       is as following:
+       is as following, with ``ipv4`` the protocol instance
+       (``frame['IPv4']``) and ``ipv4_info`` its :attr:`~pcapkit.protocols.protocol.ProtocolBase.info`
+       -- the header fields come off the latter, the raw octets off the former:
 
        .. code-block:: python
 
           packet_dict = dict(
-            bufid = tuple(
-                ipv4.src,                   # source IP address
-                ipv4.dst,                   # destination IP address
-                ipv4.id,                    # identification
-                ipv4.protocol,              # payload protocol type
+            bufid = (
+                ipv4_info.src,              # source IP address
+                ipv4_info.dst,              # destination IP address
+                ipv4_info.id,               # identification
+                ipv4_info.protocol,         # payload protocol type
             ),
-            num = frame.number,             # original packet range number
-            fo = ipv4.offset,               # fragment offset, in octets
-            ihl = ipv4.hdr_len,             # internet header length
-            mf = ipv4.flags.mf,             # more fragment flag
-            tl = ipv4.len,                  # total length, header includes
-            header = ipv4.header,           # raw bytes type header
-            payload = ipv4.payload,         # raw bytearray type payload
+            num = frame.info.number,        # original packet range number
+            fo = ipv4_info.offset,          # fragment offset, in octets
+            ihl = ipv4_info.hdr_len,        # internet header length
+            mf = ipv4_info.flags.mf,        # more fragment flag
+            tl = ipv4_info.len,             # total length, header includes
+            header = ipv4.packet.header,    # raw bytes type header
+            payload = bytearray(
+                ipv4.packet.payload),       # raw bytearray type payload
           )
 
    reasm.ipv4.datagram
