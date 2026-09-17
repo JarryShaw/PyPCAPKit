@@ -922,6 +922,45 @@ constructed by <a class="reference internal" href="#pcapkit.protocols.protocol.P
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._lookup_registry">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_lookup_registry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._lookup_registry" title="Link to this definition">¶</a></dt>
+<dd><p>Look up a dispatch registry entry without recording a miss.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>registry</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_VT</span></code>)]</span>) – dispatch registry to read, i.e. <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code> or one of the per-protocol
+<code class="docutils literal notranslate"><span class="pre">__option__</span></code> / <code class="docutils literal notranslate"><span class="pre">__chunk__</span></code> / <code class="docutils literal notranslate"><span class="pre">__block__</span></code> family. Passed in
+rather than read from the class, so that a caller reaching the
+registry through an instance keeps doing so.</p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – registry key to look up, i.e. the wire code being dispatched on</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_VT</span></code>)</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The entry registered for <code class="docutils literal notranslate"><span class="pre">code</span></code>, or the fallback <code class="docutils literal notranslate"><span class="pre">registry</span></code>
+declares when <code class="docutils literal notranslate"><span class="pre">code</span></code> is not registered.</p>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Every one of these registries is a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>
+held on a <em>class</em> attribute, shared by every instance of the class in
+the process. So <code class="docutils literal notranslate"><span class="pre">registry[code]</span></code> inserts each code it misses, and
+parsing one packet carrying an unrecognised code is enough to grow
+the registry permanently.</p>
+<p>The inserted value is whatever the default factory would have
+produced anyway, so the entry buys nothing. It costs a spurious
+“already registered” warning from the next genuine <code class="docutils literal notranslate"><span class="pre">register</span></code> call
+for that code, and it makes “is this code registered?”
+unanswerable by inspection, since the answer depends on what has
+been parsed. The fallback is therefore read from the default factory
+directly rather than through a lookup that records it.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._lookup_next_layer">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_lookup_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._lookup_next_layer" title="Link to this definition">¶</a></dt>
 <dd><p>Look up the protocol class registered for a next layer code.</p>
@@ -945,16 +984,15 @@ declares – normally <a class="reference internal" href="misc/raw.html#pcapkit.
 </dl>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p><code class="docutils literal notranslate"><span class="pre">registry</span></code> is a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>, so indexing it
-with an unregistered code would <em>insert</em> that code. It is
-class-level – shared by every instance in the process – so parsing
-a single packet with an unregistered code would grow it, and make
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">self.register</span></code> afterwards report that
-code as already registered. The fallback is therefore read from the
-default factory rather than through a lookup that records it.</p>
-<p>Resolving a <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> is
-still written back, since that is memoisation of an import for a
-code that <em>is</em> registered rather than a new entry.</p>
+<p>The lookup itself is <code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code>, so a miss does not grow the shared
+registry. What this adds is the next-layer-specific resolution step:
+a registered code may hold a
+<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> rather than a
+class, and importing it is written back so the import happens once.</p>
+<p>That write-back is deliberately confined to a <em>hit</em>. Memoising the
+fallback’s resolution under <code class="docutils literal notranslate"><span class="pre">proto</span></code> would be exactly the insertion
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code> exists
+to avoid.</p>
 </div>
 </dd></dl>
 

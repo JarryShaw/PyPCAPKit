@@ -1280,7 +1280,7 @@
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chunk__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chunk__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_chunk_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -1346,7 +1346,7 @@
 <span class="sd">            Constructed chunk schema.</span>
 
 <span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chunk__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chunk__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_chunk_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ChunkConstructor'</span><span class="p">,</span>
@@ -1372,7 +1372,7 @@
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">:</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -1427,7 +1427,7 @@
 <span class="sd">            Constructed parameter schema.</span>
 
 <span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterConstructor'</span><span class="p">,</span>
@@ -1453,7 +1453,7 @@
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">:</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">code</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cause__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cause__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_cause_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -1508,7 +1508,7 @@
 <span class="sd">            Constructed error cause schema.</span>
 
 <span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cause__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cause__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_cause_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'CauseConstructor'</span><span class="p">,</span>

@@ -1091,7 +1091,7 @@
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">kind</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">kind</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_mode_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -1894,7 +1894,7 @@
 
 <span class="sd">        """</span>
         <span class="n">subtype</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">subtype</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mp_option__</span><span class="p">[</span><span class="n">subtype</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mp_option__</span><span class="p">,</span> <span class="n">subtype</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_mptcp_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -2478,7 +2478,7 @@
                     <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">):</span>  <span class="c1"># ignore padding options by default</span>
                         <span class="k">continue</span>
 
-                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                         <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_mode_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
                         <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
@@ -2509,7 +2509,7 @@
             <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">):</span>
                 <span class="k">continue</span>
 
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_mode_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
@@ -3171,7 +3171,7 @@
                                            <span class="nb">reversed</span><span class="o">=</span><span class="n">subtype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">subtype_val</span> <span class="o">=</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">)</span>
 
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mp_option__</span><span class="p">[</span><span class="n">subtype_val</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mp_option__</span><span class="p">,</span> <span class="n">subtype_val</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_mptcp_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'MPOptionConstructor'</span><span class="p">,</span>

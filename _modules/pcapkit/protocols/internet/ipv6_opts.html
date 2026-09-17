@@ -903,7 +903,7 @@
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
             <span class="n">dscp</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">dscp</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">dscp</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -1760,7 +1760,7 @@
                     <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">):</span>  <span class="c1"># ignore padding options by default</span>
                         <span class="k">continue</span>
 
-                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>  <span class="c1"># type: str | tuple[OptionParser, OptionConstructor]</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                         <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
                         <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
@@ -1791,7 +1791,7 @@
             <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">):</span>
                 <span class="k">continue</span>
 
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>

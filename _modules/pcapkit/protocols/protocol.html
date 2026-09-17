@@ -461,6 +461,7 @@
 <span class="n">_PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Data'</span><span class="p">)</span>
 <span class="n">_ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_ST'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Schema'</span><span class="p">)</span>
 <span class="n">_CTX</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_CTX'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'ProtocolContext'</span><span class="p">)</span>
+<span class="n">_VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_VT'</span><span class="p">)</span>
 
 <span class="c1"># readable characters' order list</span>
 <span class="n">readable</span> <span class="o">=</span> <span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">char</span><span class="p">:</span> <span class="ow">not</span> <span class="n">char</span><span class="o">.</span><span class="n">isspace</span><span class="p">(),</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span><span class="p">)]</span>
@@ -1646,6 +1647,42 @@
         <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
 
     <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_lookup_registry</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'DefaultDict[Any, _VT]'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_VT'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Look up a dispatch registry entry without recording a miss.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            registry: dispatch registry to read, i.e. :attr:`self.__proto__</span>
+<span class="sd">                &lt;ProtocolBase.__proto__&gt;` or one of the per-protocol</span>
+<span class="sd">                ``__option__`` / ``__chunk__`` / ``__block__`` family. Passed in</span>
+<span class="sd">                rather than read from the class, so that a caller reaching the</span>
+<span class="sd">                registry through an instance keeps doing so.</span>
+<span class="sd">            code: registry key to look up, i.e. the wire code being dispatched on</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The entry registered for ``code``, or the fallback ``registry``</span>
+<span class="sd">            declares when ``code`` is not registered.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            Every one of these registries is a :class:`collections.defaultdict`</span>
+<span class="sd">            held on a *class* attribute, shared by every instance of the class in</span>
+<span class="sd">            the process. So ``registry[code]`` inserts each code it misses, and</span>
+<span class="sd">            parsing one packet carrying an unrecognised code is enough to grow</span>
+<span class="sd">            the registry permanently.</span>
+
+<span class="sd">            The inserted value is whatever the default factory would have</span>
+<span class="sd">            produced anyway, so the entry buys nothing. It costs a spurious</span>
+<span class="sd">            "already registered" warning from the next genuine ``register`` call</span>
+<span class="sd">            for that code, and it makes "is this code registered?"</span>
+<span class="sd">            unanswerable by inspection, since the answer depends on what has</span>
+<span class="sd">            been parsed. The fallback is therefore read from the default factory</span>
+<span class="sd">            directly rather than through a lookup that records it.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Callable[[], _VT]'</span><span class="p">,</span> <span class="n">registry</span><span class="o">.</span><span class="n">default_factory</span><span class="p">)()</span>
+
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_lookup_next_layer</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span><span class="p">,</span>
                            <span class="n">proto</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Look up the protocol class registered for a next layer code.</span>
@@ -1663,31 +1700,29 @@
 <span class="sd">            ``proto`` is not registered.</span>
 
 <span class="sd">        Important:</span>
-<span class="sd">            ``registry`` is a :class:`collections.defaultdict`, so indexing it</span>
-<span class="sd">            with an unregistered code would *insert* that code. It is</span>
-<span class="sd">            class-level -- shared by every instance in the process -- so parsing</span>
-<span class="sd">            a single packet with an unregistered code would grow it, and make</span>
-<span class="sd">            :meth:`self.register &lt;ProtocolBase.register&gt;` afterwards report that</span>
-<span class="sd">            code as already registered. The fallback is therefore read from the</span>
-<span class="sd">            default factory rather than through a lookup that records it.</span>
+<span class="sd">            The lookup itself is :meth:`self._lookup_registry</span>
+<span class="sd">            &lt;ProtocolBase._lookup_registry&gt;`, so a miss does not grow the shared</span>
+<span class="sd">            registry. What this adds is the next-layer-specific resolution step:</span>
+<span class="sd">            a registered code may hold a</span>
+<span class="sd">            :class:`~pcapkit.corekit.module.ModuleDescriptor` rather than a</span>
+<span class="sd">            class, and importing it is written back so the import happens once.</span>
 
-<span class="sd">            Resolving a :class:`~pcapkit.corekit.module.ModuleDescriptor` is</span>
-<span class="sd">            still written back, since that is memoisation of an import for a</span>
-<span class="sd">            code that *is* registered rather than a new entry.</span>
+<span class="sd">            That write-back is deliberately confined to a *hit*. Memoising the</span>
+<span class="sd">            fallback's resolution under ``proto`` would be exactly the insertion</span>
+<span class="sd">            :meth:`self._lookup_registry &lt;ProtocolBase._lookup_registry&gt;` exists</span>
+<span class="sd">            to avoid.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">:</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="n">registry</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-                <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
-                <span class="n">registry</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># update mapping upon import</span>
-            <span class="k">return</span> <span class="n">protocol</span>
-
-        <span class="n">fallback</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Callable[[], ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span><span class="p">,</span>
-                        <span class="n">registry</span><span class="o">.</span><span class="n">default_factory</span><span class="p">)()</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fallback</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">fallback</span><span class="o">.</span><span class="n">klass</span>
-        <span class="k">return</span> <span class="n">fallback</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">klass</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+            <span class="c1"># a descriptor can also come back from the default factory, and that</span>
+            <span class="c1"># one has no key to memoise under -- writing it back would recreate</span>
+            <span class="c1"># the insertion-on-miss this exists to avoid</span>
+            <span class="k">if</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">:</span>
+                <span class="n">registry</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span> <span class="o">=</span> <span class="n">klass</span>  <span class="c1"># update mapping upon import</span>
+            <span class="k">return</span> <span class="n">klass</span>
+        <span class="k">return</span> <span class="n">protocol</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'_PT'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>

@@ -1103,7 +1103,7 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__message__</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__message__</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_msg_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'PacketParser'</span><span class="p">,</span>
@@ -1160,7 +1160,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span>  <span class="c1"># type: bytes | Schema_Packet</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Data_MH</span><span class="p">)):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__message__</span><span class="p">[</span><span class="n">type_val</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__message__</span><span class="p">,</span> <span class="n">type_val</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_msg_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'PacketConstructor'</span><span class="p">,</span>
@@ -2030,7 +2030,7 @@
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">options_schema</span><span class="p">:</span>
             <span class="nb">type</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -2897,7 +2897,7 @@
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">extensions_schema</span><span class="p">:</span>
             <span class="nb">type</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extension__</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__extension__</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_ext_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -3725,7 +3725,7 @@
                     <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_Option, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                         <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
                         <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
@@ -3739,7 +3739,7 @@
 
         <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
@@ -4457,7 +4457,7 @@
                     <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_CGAExtension, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extension__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__extension__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                         <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_ext_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
                         <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ExtensionConstructor'</span><span class="p">,</span>
@@ -4474,7 +4474,7 @@
 
         <span class="n">extensions_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">extensions</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extension__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__extension__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_ext_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ExtensionConstructor'</span><span class="p">,</span>
