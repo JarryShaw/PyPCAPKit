@@ -34,6 +34,7 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/IPv4
 
 """
+import collections
 import datetime
 import ipaddress
 import math
@@ -105,7 +106,7 @@ if TYPE_CHECKING:
     from datetime import timedelta
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address
-    from typing import Any, Callable, Optional, Type
+    from typing import Any, Callable, DefaultDict, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
@@ -128,8 +129,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
     """This class implements Internet Protocol version 4.
 
     This class currently supports parsing of the following IPv4 options,
-    which are directly mapped to the :class:`pcapkit.const.ipv4.option_number.OptionNumber`
-    enumeration:
+    which are registered in the :attr:`self.__option__ <pcapkit.protocols.internet.ipv4.IPv4.__option__>`
+    attribute:
 
     .. list-table::
        :header-rows: 1
@@ -181,6 +182,36 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs`
 
     """
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: DefaultDict[Enum_OptionNumber, str | tuple[OptionParser, OptionConstructor]]:
+    #: Option code to method mapping, c.f. :meth:`_read_ipv4_options` and/or
+    #: :meth:`_make_ipv4_options`. Method names are expected to be referred
+    #: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``, and
+    #: if such name not found, the value should then be a method that can parse
+    #: the option by itself.
+    __option__ = collections.defaultdict(
+        lambda: 'unassigned',
+        {
+            Enum_OptionNumber.EOOL:   'eool',    # [RFC 791] 0
+            Enum_OptionNumber.NOP:    'nop',     # [RFC 791] 1
+            Enum_OptionNumber.SEC:    'sec',     # [RFC 1108] 130
+            Enum_OptionNumber.LSR:    'lsr',     # [RFC 791] 131
+            Enum_OptionNumber.TS:     'ts',      # [RFC 791] 68
+            Enum_OptionNumber.E_SEC:  'e_sec',   # [RFC 1108] 133
+            Enum_OptionNumber.RR:     'rr',      # [RFC 791] 7
+            Enum_OptionNumber.SID:    'sid',     # [RFC 791][RFC 6814] 136
+            Enum_OptionNumber.SSR:    'ssr',     # [RFC 791] 137
+            Enum_OptionNumber.MTUP:   'mtup',    # [RFC 1063][RFC 1191] 11
+            Enum_OptionNumber.MTUR:   'mtur',    # [RFC 1063][RFC 1191] 12
+            Enum_OptionNumber.TR:     'tr',      # [RFC 1393][RFC 6814] 82
+            Enum_OptionNumber.RTRALT: 'rtralt',  # [RFC 2113] 148
+            Enum_OptionNumber.QS:     'qs',      # [RFC 4782] 25
+        },
+    )  # type: DefaultDict[Enum_OptionNumber | int, str | tuple[OptionParser, OptionConstructor]]
 
     ##########################################################################
     # Properties.
@@ -447,16 +478,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             meth: Method name or callable to parse and/or construct the option.
 
         """
-        name = code.name.lower()
-        if hasattr(cls, f'_read_opt_{name}'):
+        if code in cls.__option__:
             warn(f'option {code} already registered, overwriting', RegistryWarning)
-
-        if isinstance(meth, str):
-            meth = (getattr(cls, f'_read_opt_{meth}', cls._read_opt_unassigned),  # type: ignore[arg-type]
-                    getattr(cls, f'_make_opt_{meth}', cls._make_opt_unassigned))  # type: ignore[arg-type]
-
-        setattr(cls, f'_read_opt_{name}', meth[0])
-        setattr(cls, f'_make_opt_{name}', meth[1])
+        cls.__option__[code] = meth
 
     ##########################################################################
     # Data models.
@@ -563,11 +587,14 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         for schema in self.__header__.options:
             kind = schema.type
-            name = kind.name.lower()
+            name = self._lookup_registry(self.__option__, kind)
 
-            meth_name = f'_read_opt_{name}'
-            meth = cast('OptionParser',
-                        getattr(self, meth_name, self._read_opt_unassigned))
+            if isinstance(name, str):
+                meth_name = f'_read_opt_{name}'
+                meth = cast('OptionParser',
+                            getattr(self, meth_name, self._read_opt_unassigned))
+            else:
+                meth = name[0]
             data = meth(schema, options=options)
 
             # record option data
@@ -1204,9 +1231,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
                         continue
 
-                    name = f'_make_opt_{code.name.lower()}'
-                    meth = cast('OptionConstructor',
-                                getattr(self, name, self._make_opt_unassigned))
+                    name = self._lookup_registry(self.__option__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_opt_{name}'
+                        meth = cast('OptionConstructor',
+                                    getattr(self, meth_name, self._make_opt_unassigned))
+                    else:
+                        meth = name[1]
 
                     data = meth(code, **args)
                     data_len = len(data.pack())
@@ -1231,9 +1262,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):
                 continue
 
-            name = f'_make_opt_{code.name.lower()}'
-            meth = cast('OptionConstructor',
-                        getattr(self, name, self._make_opt_unassigned))
+            name = self._lookup_registry(self.__option__, code)
+            if isinstance(name, str):
+                meth_name = f'_make_opt_{name}'
+                meth = cast('OptionConstructor',
+                            getattr(self, meth_name, self._make_opt_unassigned))
+            else:
+                meth = name[1]
 
             data = meth(code, option)
             data_len = len(data.pack())
