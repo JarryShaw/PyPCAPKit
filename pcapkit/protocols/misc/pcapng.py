@@ -950,7 +950,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             self._sect += 1
             self._ctx = None
 
-        name = self.__block__[schema.type]
+        name = self._lookup_registry(self.__block__, schema.type)
         if isinstance(name, str):
             meth_name = f'_read_block_{name}'
             meth = cast('BlockParser',
@@ -1010,7 +1010,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if isinstance(block, bytes):
             block_val = block  # type: bytes | Schema_BlockType
         elif isinstance(block, (dict, Data_PCAPNG)):
-            name = self.__block__[type_val]
+            name = self._lookup_registry(self.__block__, type_val)
             if isinstance(name, str):
                 meth_name = f'_make_block_{name}'
                 meth = cast('BlockConstructor',
@@ -1876,7 +1876,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Parsed packet data.
 
         """
-        name = self.__secrets__[schema.secrets_type]
+        name = self._lookup_registry(self.__secrets__, schema.secrets_type)
         if isinstance(name, str):
             meth_name = f'_read_secrets_{name}'
             meth = cast('SecretsParser',
@@ -2040,7 +2040,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         for schema in options_schema:
             type = schema.type
-            name = self.__option__[_option_key(type)]
+            name = self._lookup_registry(self.__option__, _option_key(type))
 
             if isinstance(name, str):
                 meth_name = f'_read_option_{name}'
@@ -3126,7 +3126,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         for schema in records_schema:
             type = schema.type
-            name = self.__record__[type]
+            name = self._lookup_registry(self.__record__, type)
 
             if isinstance(name, str):
                 meth_name = f'_read_record_{name}'
@@ -3736,7 +3736,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if isinstance(secrets_data, bytes):
             secrets_data_val = secrets_data  # type: bytes | Schema_DSBSecrets
         elif isinstance(secrets_data, (dict, Data_DSBSecrets)):
-            name = self.__secrets__[secrets_type_val]
+            name = self._lookup_registry(self.__secrets__, secrets_type_val)
             if isinstance(name, str):
                 meth_name = f'_make_secrets_{name}'
                 meth = cast('SecretsConstructor',
@@ -3925,7 +3925,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                         has_endofopt = True
                         continue
 
-                    name = self.__option__[_option_key(code)]
+                    name = self._lookup_registry(self.__option__, _option_key(code))
                     if isinstance(name, str):
                         meth_name = f'_make_option_{name}'
                         meth = cast('OptionConstructor',
@@ -3952,7 +3952,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 has_endofopt = True
                 continue
 
-            name = self.__option__[_option_key(code)]
+            name = self._lookup_registry(self.__option__, _option_key(code))
             if isinstance(name, str):
                 meth_name = f'_make_option_{name}'
                 meth = cast('OptionConstructor',
@@ -5353,7 +5353,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                         has_record_end = True
                         continue
 
-                    name = self.__record__[code]
+                    name = self._lookup_registry(self.__record__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_record_{name}'
                         meth = cast('RecordConstructor',
@@ -5379,7 +5379,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 has_record_end = True
                 continue
 
-            name = self.__record__[code]
+            name = self._lookup_registry(self.__record__, code)
             if isinstance(name, str):
                 meth_name = f'_make_record_{name}'
                 meth = cast('RecordConstructor',
