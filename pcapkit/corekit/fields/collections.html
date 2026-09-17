@@ -538,6 +538,30 @@ option schema.</p></li>
 </dl>
 <p>This field is used to represent a list of fields, as in the case of lists of
 options and/or parameters in a protocol.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.unpack" title="pcapkit.corekit.fields.collections.OptionField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a> selects an option’s schema by reading the
+<code class="docutils literal notranslate"><span class="pre">type_name</span></code> field of <code class="docutils literal notranslate"><span class="pre">base_schema</span></code> <strong>alone</strong> off the front of the
+option, instead of unpacking the whole base schema and keeping only that
+one value. That is only the same read when three things hold of the type
+field:</p>
+<ol class="arabic simple">
+<li><p>it is the base schema’s <strong>first</strong> field, so that it is what sits at the
+front of the option;</p></li>
+<li><p>it is a <a class="reference internal" href="numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a>, so that
+<a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>
+reads it through its ordinary per-field branch;</p></li>
+<li><p>its length is a fixed integer rather than a callable, so that its width
+does not depend on packet data the shortcut has not read.</p></li>
+</ol>
+<p>All of that is true of every <code class="docutils literal notranslate"><span class="pre">OptionField</span></code> declared in this package. A
+base schema registered from outside it – c.f.
+<a class="reference internal" href="../../foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> – need not satisfy it, and is <strong>not</strong>
+rejected: such a base schema is unpacked in full, exactly as it was before
+the shortcut existed. It parses correctly and pays the cost of the second
+parse. Only the shortcut is withheld, so a base schema whose type field
+comes second cannot be silently misread.</p>
+</div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.OptionField.base_schema">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">base_schema</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TS" title="pcapkit.corekit.fields.collections.pcapkit.corekit.fields.collections._TS"><span class="pre">_TS</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.fields.collections.OptionField.base_schema" title="Link to this definition">¶</a></dt>

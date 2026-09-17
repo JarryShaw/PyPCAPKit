@@ -409,6 +409,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumberField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span>
@@ -595,6 +596,29 @@
 <span class="sd">    This field is used to represent a list of fields, as in the case of lists of</span>
 <span class="sd">    options and/or parameters in a protocol.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        :meth:`self.unpack &lt;unpack&gt;` selects an option's schema by reading the</span>
+<span class="sd">        ``type_name`` field of ``base_schema`` **alone** off the front of the</span>
+<span class="sd">        option, instead of unpacking the whole base schema and keeping only that</span>
+<span class="sd">        one value. That is only the same read when three things hold of the type</span>
+<span class="sd">        field:</span>
+
+<span class="sd">        1. it is the base schema's **first** field, so that it is what sits at the</span>
+<span class="sd">           front of the option;</span>
+<span class="sd">        2. it is a :class:`~pcapkit.corekit.fields.numbers.NumberField`, so that</span>
+<span class="sd">           :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+<span class="sd">           reads it through its ordinary per-field branch;</span>
+<span class="sd">        3. its length is a fixed integer rather than a callable, so that its width</span>
+<span class="sd">           does not depend on packet data the shortcut has not read.</span>
+
+<span class="sd">        All of that is true of every ``OptionField`` declared in this package. A</span>
+<span class="sd">        base schema registered from outside it -- c.f.</span>
+<span class="sd">        :mod:`pcapkit.foundation.registry` -- need not satisfy it, and is **not**</span>
+<span class="sd">        rejected: such a base schema is unpacked in full, exactly as it was before</span>
+<span class="sd">        the shortcut existed. It parses correctly and pays the cost of the second</span>
+<span class="sd">        parse. Only the shortcut is withheld, so a base schema whose type field</span>
+<span class="sd">        comes second cannot be silently misread.</span>
+
 <span class="sd">    """</span>
 
     <span class="nd">@property</span>
@@ -645,6 +669,34 @@
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="s1">'Field &lt;option&gt; has no registry.'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span> <span class="o">=</span> <span class="n">registry</span>
 
+        <span class="c1"># NOTE: Decided once, here, rather than per option in ``unpack``. See the</span>
+        <span class="c1"># docstring above for what the fast path requires and why a base schema</span>
+        <span class="c1"># that does not meet it is accommodated rather than rejected.</span>
+        <span class="c1">#</span>
+        <span class="c1"># The three conditions are exactly what makes reading the type field alone</span>
+        <span class="c1"># the same read that ``Schema.unpack`` performs for it: it must sit at the</span>
+        <span class="c1"># front of the option, ``Schema.unpack`` must handle it through its generic</span>
+        <span class="c1"># branch rather than one of the special ones (a ``NumberField`` is never</span>
+        <span class="c1"># ``PayloadField``, ``PaddingField``, ``ConditionalField``,</span>
+        <span class="c1"># ``ForwardMatchField``, ``SwitchField`` or ``OptionField``), and its width</span>
+        <span class="c1"># must not depend on packet state that the full unpack would have</span>
+        <span class="c1"># established first.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Every test is written so that an unexpected base schema selects the full</span>
+        <span class="c1"># unpack instead of raising, so this cannot turn a registration that works</span>
+        <span class="c1"># today into an import-time failure.</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_schema</span><span class="p">,</span> <span class="s1">'__fields__'</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">type_field</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span>
+
+        <span class="c1">#: Optional[FieldBase]: Base schema's type field, when reading it on its own</span>
+        <span class="c1">#: is equivalent to unpacking the whole base schema to obtain it; otherwise</span>
+        <span class="c1">#: :data:`None`, and :meth:`self.unpack &lt;unpack&gt;` unpacks the base schema.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type_field</span> <span class="o">=</span> <span class="n">type_field</span> <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_field</span><span class="p">,</span> <span class="n">NumberField</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">list</span><span class="p">(</span><span class="n">fields</span><span class="p">)[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="n">type_name</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="n">type_field</span><span class="o">.</span><span class="n">_length_callback</span> <span class="ow">is</span> <span class="kc">None</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
 <div class="viewcode-block" id="OptionField.unpack">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField.unpack">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bytes | IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_TS]'</span><span class="p">:</span>
@@ -675,15 +727,47 @@
         <span class="n">new_packet</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">new_packet</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
+        <span class="c1"># NOTE: Where it can, this reads the base schema's type field alone rather</span>
+        <span class="c1"># than the whole base schema. The option schema below re-reads the same</span>
+        <span class="c1"># octets from the rewound stream, and the base schema's result is used for</span>
+        <span class="c1"># nothing but the type code, so unpacking it in full parsed every option</span>
+        <span class="c1"># twice -- 2274 schema unpacks for 1137 options of</span>
+        <span class="c1"># ``examples/captures/profile.pcapng``.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Reading the type field alone deliberately mirrors what</span>
+        <span class="c1"># :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+        <span class="c1"># does for one field -- ``field(packet)``, read ``field.length`` octets,</span>
+        <span class="c1"># then ``field.unpack(byte, packet.copy())`` -- rather than reaching for</span>
+        <span class="c1"># :func:`struct.unpack`. That keeps ``code``'s enumeration type, which both</span>
+        <span class="c1"># the ``self._eool`` comparison and the ``OrderedMultiDict`` key depend on,</span>
+        <span class="c1"># and it is what makes the two spellings equivalent rather than merely</span>
+        <span class="c1"># similar.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``self._type_field`` is :data:`None` for a base schema that the shortcut</span>
+        <span class="c1"># does not fit -- see the class docstring -- and the full unpack is used</span>
+        <span class="c1"># for it instead. Whichever way the code was read, ``consumed`` is the</span>
+        <span class="c1"># number of octets to rewind to get back to the front of the option.</span>
+        <span class="n">type_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_field</span>
+
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_TS]</span>
         <span class="k">while</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># unpack option type using base schema</span>
-            <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc,var-annotated]</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_name</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">type_field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># unpack option type using base schema</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc,var-annotated]</span>
+                <span class="n">code</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_name</span><span class="p">])</span>
+                <span class="n">consumed</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># unpack option type using the base schema's type field. No cast</span>
+                <span class="c1"># is needed here, unlike the branch above: the type field is known</span>
+                <span class="c1"># to be a ``NumberField``, so ``unpack`` is already typed ``int``.</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">type_field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+                <span class="n">byte</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+                <span class="n">code</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+                <span class="n">consumed</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
             <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
 
             <span class="c1"># rewind to the beginning of the option</span>
-            <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">meta</span><span class="p">),</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">consumed</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
 
             <span class="c1"># unpack option using option schema</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc,var-annotated]</span>

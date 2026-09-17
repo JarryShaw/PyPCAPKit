@@ -412,12 +412,12 @@
 <span class="sd">:mod:`dictdumper`.</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">DumperBase</span> <span class="k">as</span> <span class="n">Dumper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">Data_Header</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -433,6 +433,23 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'PCAPIO'</span><span class="p">,</span>
 <span class="p">]</span>
+
+<span class="c1">#: Per-byte-order record header packers for the four ``uint32`` fields of a PCAP</span>
+<span class="c1">#: record header -- ``ts_sec``, ``ts_usec``, ``incl_len``, ``orig_len``. Keyed by</span>
+<span class="c1">#: the byte order of the global header this dumper wrote, so that the records</span>
+<span class="c1">#: agree with the magic number a reader will find in front of them.</span>
+<span class="n">_RECORD_HEADER</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'little'</span><span class="p">:</span> <span class="n">struct</span><span class="o">.</span><span class="n">Struct</span><span class="p">(</span><span class="s1">'&lt;IIII'</span><span class="p">),</span>
+    <span class="s1">'big'</span><span class="p">:</span> <span class="n">struct</span><span class="o">.</span><span class="n">Struct</span><span class="p">(</span><span class="s1">'&gt;IIII'</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="c1">#: Truncation mask for those four fields. :class:`~pcapkit.corekit.fields.numbers.UInt32Field`,</span>
+<span class="c1">#: which used to pack them, masks to the field width in</span>
+<span class="c1">#: :meth:`~pcapkit.corekit.fields.numbers.NumberField.pre_process` rather than</span>
+<span class="c1">#: rejecting an out-of-range value -- a ``ts_sec`` of ``2**32 + 5`` was written as</span>
+<span class="c1">#: ``5``. :func:`struct.pack` raises instead, so the mask is applied here to keep</span>
+<span class="c1">#: the two spellings writing the same octets for every input.</span>
+<span class="n">_UINT32_MASK</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF</span>
 
 
 <div class="viewcode-block" id="PCAPIO">
@@ -451,6 +468,8 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: PCAP file global header.</span>
         <span class="n">_ghdr</span><span class="p">:</span> <span class="s1">'Data_Header'</span>
+        <span class="c1">#: Record header packer, in the global header's byte order.</span>
+        <span class="n">_rechdr</span><span class="p">:</span> <span class="s1">'struct.Struct'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -480,6 +499,11 @@
 <span class="sd">        """</span>
         <span class="c1">#: int: Frame counter.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># NOTE: Both of these now only record how the dumper was configured -- the</span>
+        <span class="c1"># values that shape the output reach it through :meth:`self._dump_header</span>
+        <span class="c1"># &lt;_dump_header&gt;`'s own arguments, and are readable afterwards from</span>
+        <span class="c1"># :attr:`self._ghdr &lt;_ghdr&gt;`. They are kept because they are part of the</span>
+        <span class="c1"># instance surface a subclass may already read.</span>
         <span class="c1">#: bool: Nanosecond-resolution file flag.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span> <span class="o">=</span> <span class="n">nanosecond</span>
         <span class="c1">#: Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int: Data link type.</span>
@@ -528,6 +552,13 @@
             <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">info</span>
 
+        <span class="c1">#: struct.Struct: Packer for the record header preceding each frame, in the</span>
+        <span class="c1">#: byte order of the global header just written. Taken from</span>
+        <span class="c1">#: :attr:`self._ghdr &lt;_ghdr&gt;` rather than from the ``byteorder`` argument</span>
+        <span class="c1">#: because :class:`~pcapkit.protocols.misc.pcap.header.Header` is what</span>
+        <span class="c1">#: validates and normalises it.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rechdr</span> <span class="o">=</span> <span class="n">_RECORD_HEADER</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">byteorder</span><span class="p">]</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Data_Frame'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Call this function to write contents.</span>
 
@@ -536,16 +567,37 @@
 <span class="sd">            file: output file</span>
 <span class="sd">            name: name of current content block</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            A PCAP record is a 16-octet header followed by the packet octets, and</span>
+<span class="sd">            both are already in hand: the header fields are exactly</span>
+<span class="sd">            ``value.frame_info`` and the octets are exactly ``value.packet``. So</span>
+<span class="sd">            this writes them directly, rather than handing them to</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, whose constructor</span>
+<span class="sd">            packs the record and then **dissects it again** through the whole</span>
+<span class="sd">            protocol stack to arrive at bytes it was given. That round trip was</span>
+<span class="sd">            about 82% of the cost of a flow-traced extraction -- ``http.pcap``,</span>
+<span class="sd">            1117 frames, best of 7: 2319 ms with the rebuild against 1263 ms</span>
+<span class="sd">            without, over a 1030 ms untraced baseline.</span>
+
+<span class="sd">            Dropping it is not only cheaper. The re-dissection re-emitted every</span>
+<span class="sd">            parse warning the frame had already produced once, and warned about</span>
+<span class="sd">            payloads it had no business parsing at all -- writing a 3-octet</span>
+<span class="sd">            payload raised ``SchemaWarning: packet length &lt; 0: -3`` from a dumper</span>
+<span class="sd">            that only had to copy it.</span>
+
 <span class="sd">        """</span>
-        <span class="n">packet</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span>
-            <span class="n">nanosecond</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span><span class="p">,</span>
-            <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="p">,</span>
-            <span class="n">proto</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">,</span>
-            <span class="n">packet</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">packet</span><span class="p">,</span>
-            <span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">value</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="c1"># NOTE: The payload is read before the metadata so that a caller passing a</span>
+        <span class="c1"># mapping rather than a dissected frame -- which the flow-tracing adapters</span>
+        <span class="c1"># of several engines do -- still fails naming ``packet``, as the ``Frame``</span>
+        <span class="c1"># construction did. :mod:`pcapkit.foundation.extraction` substitutes a</span>
+        <span class="c1"># dict-capable trace format on the strength of that error.</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">packet</span>
+        <span class="n">frame_info</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">frame_info</span>
+
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rechdr</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">frame_info</span><span class="o">.</span><span class="n">ts_sec</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
+                                     <span class="n">frame_info</span><span class="o">.</span><span class="n">ts_usec</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
+                                     <span class="n">frame_info</span><span class="o">.</span><span class="n">incl_len</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
+                                     <span class="n">frame_info</span><span class="o">.</span><span class="n">orig_len</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">)</span> <span class="o">+</span> <span class="n">packet</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 </pre></div>
