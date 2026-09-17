@@ -41,6 +41,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.link.ospf import OSPF as Data_OSPF
 from pcapkit.protocols.data.link.ospf import \
     CrytographicAuthentication as Data_CrytographicAuthentication
@@ -48,12 +49,12 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.ospf import OSPF as Schema_OSPF
 from pcapkit.protocols.schema.link.ospf import \
     CrytographicAuthentication as Schema_CrytographicAuthentication
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address
-    from typing import Any, NoReturn, Optional, Type
+    from typing import Any, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -69,7 +70,34 @@ PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
 class OSPF(Link[Data_OSPF, Schema_OSPF],
            schema=Schema_OSPF, data=Data_OSPF):
-    """This class implements Open Shortest Path First."""
+    """This class implements Open Shortest Path First.
+
+    The protocol is dispatched from :attr:`Internet.__proto__
+    <pcapkit.protocols.internet.internet.Internet.__proto__>` at
+    :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP` (IANA protocol number
+    89), since OSPF rides directly on IP rather than on a link-layer frame.
+
+    Note:
+        It nonetheless subclasses :class:`~pcapkit.protocols.link.link.Link` and
+        so reports ``layer == 'Link'``, which is not where a protocol carried
+        inside IP belongs. That is a pre-existing classification, kept because
+        moving the module would change its public import path. It is inert for
+        layer-limited extraction -- IPv4 and IPv6 terminate an ``internet``
+        extraction before OSPF is reached, and a ``link`` extraction stops at
+        Ethernet -- but :attr:`self.layer <pcapkit.protocols.link.link.Link.layer>`
+        does read ``'Link'`` on a parsed OSPF packet.
+
+    """
+    #: Version number of corresponding protocol, as read off the header. Held on
+    #: the instance rather than read back out of :attr:`self._info
+    #: <pcapkit.protocols.protocol.ProtocolBase._info>` because :attr:`name` and
+    #: :attr:`alias` are both needed *during* :meth:`read` -- it is
+    #: :meth:`self._decode_next_layer
+    #: <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>` that builds
+    #: the protocol chain out of :attr:`alias` -- and ``_info`` is not assigned
+    #: until :meth:`read` has returned. c.f. :attr:`ARP._acnm
+    #: <pcapkit.protocols.link.arp.ARP._acnm>`, which carries the same constraint.
+    _version: 'int'
 
     ##########################################################################
     # Properties.
@@ -78,12 +106,12 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
     @property
     def name(self) -> 'str':
         """Name of current protocol."""
-        return f'Open Shortest Path First version {self._info.version}'
+        return f'Open Shortest Path First version {self._version}'
 
     @property
     def alias(self) -> 'str':
         """Acronym of current protocol."""
-        return f'OSPFv{self._info.version}'
+        return f'OSPFv{self._version}'
 
     @property
     def length(self) -> 'Literal[24]':
@@ -130,7 +158,10 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
             Parsed packet data.
 
         """
-        schema = self.__schema__
+        schema = self.__header__
+
+        # Set before _decode_next_layer below, which reads self.alias.
+        self._version = schema.version
 
         ospf = Data_OSPF(
             version=schema.version,
@@ -153,7 +184,13 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
             ospf.__update__([
                 ('auth', cast('bytes', schema.auth_data)),
             ])
-        return self._decode_next_layer(ospf, length - self.length)
+        # OSPF carries no next-protocol field -- the body is LSAs and packet-type
+        # specific fields, which pcapkit does not dissect -- so dispatch on the
+        # -1 sentinel, as ARP does, rather than on a code read off the wire.
+        # Passing the remaining length here (as this did) dispatched on it as if
+        # it were an EtherType, which resolved to Raw only because a length
+        # rarely collides with a registered one.
+        return self._decode_next_layer(ospf, -1, length - self.length)
 
     def make(self,
              version: 'int' = 2,
@@ -227,14 +264,16 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
         return 24
 
     @classmethod
-    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
-        Raises:
-            UnsupportedCall: This protocol has no registry entry.
+        Returns:
+            Numeral registry index of the protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+        return Enum_TransType.OSPFIGP  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
