@@ -20,6 +20,7 @@ Module              Fixtures
 :file:`pcap.py`     the ``.pcap`` captures the unit and runtime tests read
 :file:`pcapng.py`   the ``.pcapng`` captures the regression tests read
 :file:`legacy.py`   the extra captures ``examples/legacy_smoke/`` reads
+:file:`options.py`  the ``options-*.pcap`` option-coverage captures
 =================== ==========================================================
 
 They are loaded by path rather than imported by name, since this directory is
@@ -44,8 +45,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 HERE = pathlib.Path(__file__).resolve().parent
 #: Destination directory for every generated capture.
 DEST = ROOT / 'examples' / 'captures'
-#: Generator modules, in the order they are run.
-GENERATORS = ('pcap', 'pcapng', 'legacy')
+#: Generator modules, in the order they are run. :file:`options.py` runs last
+#: because it is the only one that builds its captures out of :mod:`pcapkit`'s
+#: own construction output, so a failure in it is a statement about the library
+#: rather than about the fixture -- and reading it after the others have already
+#: printed keeps that distinction visible in the log.
+GENERATORS = ('pcap', 'pcapng', 'legacy', 'options')
 
 
 def load(name: 'str') -> 'ModuleType':
