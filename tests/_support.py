@@ -42,12 +42,14 @@ def time_limit(seconds: int = 5) -> Iterator[None]:
     enclosing deadline keeps counting down across the ``with`` rather than being
     silently dropped.
 
-    An enclosing deadline that *expired* while the body ran cannot be delivered at
-    the moment it was due, since the body held the process until then. It is
-    re-armed for one second instead of cancelled: honouring it a moment late is the
-    lesser wrong, and cancelling it is how the enclosing timeout goes missing
-    altogether. The same clamp applies when the enclosing deadline was shorter than
-    ``seconds`` and this one therefore fired first.
+    An enclosing deadline whose moment falls inside the body is not delivered on
+    time, and the reason is this helper rather than the body: arming an alarm
+    *replaces* the pending one, so the enclosing deadline was already cancelled
+    before the body began and there was nothing left to fire when it came due. It
+    is re-armed for one second on the way out rather than dropped -- honouring it
+    late is the lesser wrong, and dropping it is how an enclosing timeout goes
+    missing altogether. That one-second floor covers every case where the body ran
+    for longer than the enclosing deadline had left.
 
     Args:
         seconds: Whole seconds to allow the body. :func:`signal.alarm` counts in
