@@ -1099,6 +1099,57 @@ class SCTPUnitTests(unittest.TestCase):
                 finally:
                     registry[code] = original
 
+    def test_unregistered_sub_registry_codes_do_not_mutate_the_class(self) -> None:
+        """Parsing must not write to ``__chunk__``, ``__parameter__`` or ``__cause__``.
+
+        #425's defect, on SCTP's three sub-registries. Each is a
+        :class:`collections.defaultdict` on a class attribute shared by every
+        :class:`~pcapkit.protocols.transport.sctp.SCTP` instance in the process,
+        so ``registry[code]`` inserted every unregistered chunk type, parameter
+        type and error cause code a capture happened to carry -- and the value it
+        inserted was ``'donone'``, which the default factory returns anyway. The
+        entries bought nothing and made
+        :meth:`~pcapkit.protocols.transport.sctp.SCTP.register_chunk` and its
+        siblings report an overwrite of something nobody registered.
+
+        The chunk type is unassigned by IANA, and both the parameter type and the
+        error cause code are drawn from the ``0xFFF0``-and-up range :rfc:`9260`
+        reserves for IETF-Defined extensions, so nothing is expected to register
+        them.
+
+        """
+        from pcapkit.const.sctp.cause_code import CauseCode
+        from pcapkit.const.sctp.chunk import Chunk
+        from pcapkit.const.sctp.parameter import Parameter
+        from pcapkit.protocols.transport import sctp as sctp_module
+        from pcapkit.protocols.transport.sctp import SCTP
+
+        header = bytes.fromhex('26ab960c1122334400000000')
+        for register, code, registry, chunk in (
+            # an unassigned chunk type, on its own
+            (SCTP.register_chunk, Chunk(200), SCTP.__dict__['__chunk__'],
+             'c8' '00' '0004'),
+            # INIT, length 24 = 4 header + 16 fixed + one 4-octet parameter
+            (SCTP.register_parameter, Parameter(0xFFF0), SCTP.__dict__['__parameter__'],
+             '01' '00' '0018' '11223344' '0001a000' '000a' '000a' '55667788' 'fff00004'),
+            # ERROR, length 8 = 4 header + one 4-octet error cause
+            (SCTP.register_cause, CauseCode(0xFFF0), SCTP.__dict__['__cause__'],
+             '09' '00' '0008' 'fff00004'),
+        ):
+            with self.subTest(register=register.__name__):
+                before = set(registry)
+                self.assertNotIn(code, before)
+
+                try:
+                    self._packet(header + bytes.fromhex(chunk))
+                    self.assertEqual(set(registry), before)
+
+                    with mock.patch.object(sctp_module, 'warn') as warned:
+                        register(code, 'donone')
+                    self.assertEqual(warned.call_count, 0)
+                finally:
+                    registry.pop(code, None)
+
     def test_callable_sub_registry_entries_are_used(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.protocols.transport.sctp import SCTP

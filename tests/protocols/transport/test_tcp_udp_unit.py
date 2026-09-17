@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import io
 import ipaddress
 import importlib.util
 import types
@@ -1173,6 +1174,86 @@ class TCPUDPUnitTests(unittest.TestCase):
         unnamed = TCP(srcport=53406, dstport=member)
         self.assertEqual(unnamed.info.srcport.port, 53406)
         self.assertIs(unnamed.info.dstport, member)
+
+    def test_unregistered_option_kind_does_not_mutate_the_class_registry(self) -> None:
+        """Parsing must not write to the shared ``TCP.__option__``.
+
+        The reproduction from #425, verbatim: one segment carrying option kind
+        156, which nothing registers. ``__option__`` is a
+        :class:`collections.defaultdict` on a class attribute shared by every
+        :class:`~pcapkit.protocols.transport.tcp.TCP` instance in the process, so
+        ``__option__[kind]`` inserted the kind it missed -- and the value it
+        inserted was ``'donone'``, exactly what the default factory returns
+        anyway. The entry bought nothing and cost a
+        :func:`~pcapkit.foundation.registry.protocols.register_tcp_option` call
+        afterwards a warning about an overwrite that never happened.
+
+        """
+        from pcapkit.const.tcp.option import Option
+        from pcapkit.foundation.registry.protocols import register_tcp_option
+        from pcapkit.protocols.transport.tcp import TCP
+
+        # ports, seq, ack, data offset 7 / flags, window, checksum, urgent
+        # pointer, then one 4-octet option of kind 156.
+        packet = (bytes.fromhex('005001bb00000000000000007002ffff00000000')
+                  + bytes([156, 2, 0, 0]))
+
+        registry = TCP.__dict__['__option__']
+        before = set(registry)
+        self.assertNotIn(Option(156), before)
+
+        try:
+            proto = TCP(io.BytesIO(packet), len(packet))
+
+            # The option is still parsed, by the fallback the registry declares;
+            # only the registry write is gone.
+            self.assertIn(Option(156), proto.info.options)
+            self.assertEqual(set(registry), before)
+
+            # A second segment must behave identically; a class-level leak from
+            # the first would show up here rather than above.
+            TCP(io.BytesIO(packet), len(packet))
+            self.assertEqual(set(registry), before)
+
+            with mock.patch('pcapkit.protocols.transport.tcp.warn') as warn:
+                register_tcp_option(Option(156), 'donone')
+            self.assertEqual(warn.call_count, 0)
+        finally:
+            registry.pop(Option(156), None)
+
+    def test_unregistered_mptcp_subtype_does_not_mutate_the_class_registry(self) -> None:
+        """``TCP.__mp_option__`` leaks the same way, on the construction path.
+
+        The parse path cannot reach it with an unregistered subtype: the schema
+        layer resolves an unknown subtype to
+        :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPUnknown`, whose
+        ``data`` field sizes itself from ``pkt['length']`` -- a key the nested
+        packet context does not carry -- so it raises before
+        :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mp` ever looks the
+        subtype up. Construction reaches the sibling read site in
+        :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_mp`, which had the
+        identical defect.
+
+        """
+        from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
+        from pcapkit.const.tcp.option import Option
+        from pcapkit.foundation.registry.protocols import register_tcp_mp_option
+        from pcapkit.protocols.transport.tcp import TCP
+
+        registry = TCP.__dict__['__mp_option__']
+        before = set(registry)
+        self.assertNotIn(MPTCPOption(0xF), before)
+
+        try:
+            schema = object.__new__(TCP)._make_mode_mp(Option.Multipath_TCP, subtype=0xF)
+            self.assertEqual(schema.test['subtype'], MPTCPOption(0xF))
+            self.assertEqual(set(registry), before)
+
+            with mock.patch('pcapkit.protocols.transport.tcp.warn') as warn:
+                register_tcp_mp_option(MPTCPOption(0xF), 'unknown')
+            self.assertEqual(warn.call_count, 0)
+        finally:
+            registry.pop(MPTCPOption(0xF), None)
 
 
 if __name__ == '__main__':

@@ -225,7 +225,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if schema.type in (Enum_Frame.SETTINGS, Enum_Frame.PING) and schema.stream['sid'] != 0:
             raise ProtocolError(f'HTTP/2: [Type {schema.type}] invalid format')
 
-        name = self.__frame__[schema.type]
+        name = self._lookup_registry(self.__frame__, schema.type)
         if isinstance(name, str):
             meth_name = f'_read_http_{name}'
             meth = cast('FrameParser',
@@ -268,7 +268,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if isinstance(frame, bytes):
             frame_val = frame  # type: bytes | Schema_FrameType
         elif isinstance(frame, (dict, Data_HTTP)):
-            name = self.__frame__[type_val]
+            name = self._lookup_registry(self.__frame__, type_val)
             if isinstance(name, str):
                 meth_name = f'_make_http_{name}'
                 meth = cast('FrameConstructor',

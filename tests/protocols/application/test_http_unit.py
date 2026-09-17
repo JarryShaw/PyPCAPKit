@@ -282,6 +282,47 @@ class HTTPUnitTests(unittest.TestCase):
         finally:
             HTTPv2.__dict__['__frame__'][Frame.DATA] = original
 
+    def test_unregistered_frame_type_does_not_mutate_the_class_registry(self) -> None:
+        """Parsing must not write to the shared ``HTTPv2.__frame__``.
+
+        #425's defect on HTTP/2 frame dispatch. ``__frame__`` is a
+        :class:`collections.defaultdict` on a class attribute shared by every
+        :class:`~pcapkit.protocols.application.httpv2.HTTP` instance in the
+        process, so ``__frame__[type]`` inserted every frame type it missed --
+        and the value it inserted was ``'none'``, which the default factory
+        returns anyway.
+
+        Frame type ``0xF0`` sits in the range :rfc:`9113` leaves for extensions,
+        so an unrecognised frame type is expected traffic rather than a
+        malformed frame -- HTTP/2 requires an endpoint to ignore one.
+
+        """
+        import io
+
+        from pcapkit.const.http.frame import Frame
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+
+        # length 13, type 0xF0, no flags, stream 1, then four octets of payload
+        packet = bytes.fromhex('00000d' 'f0' '00' '00000001' '61626364')
+
+        registry = HTTPv2.__dict__['__frame__']
+        before = set(registry)
+        self.assertNotIn(Frame(0xF0), before)
+
+        try:
+            with mock.patch('pcapkit.protocols.application.httpv2.warn'):
+                proto = HTTPv2(io.BytesIO(packet), len(packet))
+
+            # The frame is still parsed, by the fallback the registry declares.
+            self.assertEqual(proto.info.data, b'abcd')
+            self.assertEqual(set(registry), before)
+
+            with mock.patch('pcapkit.protocols.application.httpv2.warn') as warn:
+                HTTPv2.register_frame(Frame(0xF0), 'none')
+            self.assertEqual(warn.call_count, 0)
+        finally:
+            registry.pop(Frame(0xF0), None)
+
     def test_httpv2_frame_readers_cover_successful_frames(self) -> None:
         from pcapkit.const.http.error_code import ErrorCode
         from pcapkit.const.http.frame import Frame

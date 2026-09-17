@@ -130,6 +130,87 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(option_map[_option_key(OptionType.pack_flags)], 'pack_flags')
         self.assertEqual(option_map.get(_option_key(OptionType.get(2, namespace='opt')), 'unknown'), 'unknown')
 
+    def test_unregistered_pcapng_codes_do_not_mutate_the_class_registries(self) -> None:
+        """Parsing must not write to any of PCAP-NG's four dispatch registries.
+
+        #425's defect, four times over. ``__block__``, ``__option__``,
+        ``__record__`` and ``__secrets__`` are each a
+        :class:`collections.defaultdict` on a class attribute shared by every
+        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` instance in the process, so
+        ``registry[code]`` inserted every unrecognised block type, option code,
+        record type and secrets type a capture carried -- values the default
+        factory returns anyway.
+
+        PCAP-NG makes this the easiest family to hit by accident: the format is
+        explicitly extensible, a reader is required to skip blocks and options it
+        does not know, and a capture written by any tool with private extensions
+        carries codes this library does not register.
+
+        """
+        import tempfile
+
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.const.pcapng.record_type import RecordType
+        from pcapkit.const.pcapng.secrets_type import SecretsType
+        from pcapkit.interface import extract
+        from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key
+
+        def block(type_: int, body: bytes) -> bytes:
+            length = 12 + len(body)
+            return (struct.pack('<II', type_, length) + body
+                    + struct.pack('<I', length))
+
+        def option(code: int, value: bytes) -> bytes:
+            return (struct.pack('<HH', code, len(value)) + value
+                    + bytes(-len(value) % 4))
+
+        section = struct.pack('<IHHq', 0x1A2B3C4D, 1, 0, -1)
+        prologue = (block(0x0A0D0D0A, section)
+                    + block(0x00000001, struct.pack('<HHI', 1, 0, 0x40000)))
+
+        def parse(trailer: bytes) -> None:
+            handle, path = tempfile.mkstemp(suffix='.pcapng')
+            try:
+                with os.fdopen(handle, 'wb') as file:
+                    file.write(prologue + trailer)
+                extract(fin=path, store=True, nofile=True).engine.close()
+            finally:
+                os.unlink(path)
+
+        for label, register, code, key, registry, trailer in (
+            # An IRIG Timestamp Block: a real, specified block type that this
+            # library does not implement, so the default 'unknown' applies.
+            ('block', PCAPNG.register_block, BlockType(0x00000007), BlockType(0x00000007),
+             PCAPNG.__dict__['__block__'], block(0x00000007, bytes(4))),
+            # A second section header carrying an option code nothing registers.
+            ('option', PCAPNG.register_option, OptionType.get(42),
+             _option_key(OptionType.get(42)), PCAPNG.__dict__['__option__'],
+             block(0x0A0D0D0A, section + option(42, b'x') + option(0, b''))),
+            # A Name Resolution Block whose one record has an unregistered type.
+            ('record', PCAPNG.register_record, RecordType(0x0BAD), RecordType(0x0BAD),
+             PCAPNG.__dict__['__record__'],
+             block(0x00000004, struct.pack('<HH', 0x0BAD, 1) + b'x' + bytes(3)
+                   + struct.pack('<HH', 0, 0))),
+            # A Decryption Secrets Block of an unregistered secrets type.
+            ('secrets', PCAPNG.register_secrets, SecretsType(0x0BADBEEF),
+             SecretsType(0x0BADBEEF), PCAPNG.__dict__['__secrets__'],
+             block(0x0000000A, struct.pack('<II', 0x0BADBEEF, 4) + bytes(4))),
+        ):
+            with self.subTest(registry=label):
+                before = set(registry)
+                self.assertNotIn(key, before)
+
+                try:
+                    parse(trailer)
+                    self.assertEqual(set(registry), before)
+
+                    with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+                        register(code, 'unknown')
+                    self.assertEqual(warn.call_count, 0)
+                finally:
+                    registry.pop(key, None)
+
     def test_pcapng_simple_packet_block_populates_default_interface_and_timestamp(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock
