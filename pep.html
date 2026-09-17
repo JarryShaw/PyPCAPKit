@@ -439,35 +439,38 @@ category</a>.</p>
 <p>Wish you enjoy <strong>PyPCAPKit</strong>!!!</p>
 <section id="more-protocols-more">
 <h2>More Protocols, More!!!<a class="headerlink" href="#more-protocols-more" title="Link to this heading">¶</a></h2>
-<p>As you may have noticed, there are some protocol-named files under the
-<code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code> folders. These protocols are what I planned to implement
-but not yet done. Namely, grouped by each TCP/IP layer and ordered by protocol
-name alphabetically,</p>
+<p>Plenty of protocols are not decoded yet, and every one of them is wanted.
+Adding one is about the most self-contained contribution there is: a schema
+class, a data class and a protocol class, as sketched in
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/251">discussion #251</a>.
+The reply in that thread is the closest thing the project has to a
+step-by-step guide for adding a protocol, and is worth reading before starting
+one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
+the ones outstanding are,</p>
 <ul class="simple">
-<li><p>Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP</p></li>
+<li><p>Link Layer: DSL, EAPOL, FDDI, ISDN, LINUX_SLL, LINUX_SLL2, NDP, PPP</p></li>
 <li><p>Internet Layer: ECN, ICMP, ICMPv6, IGMP, Shim6</p></li>
 <li><p>Transport Layer: DCCP, RSVP</p></li>
-<li><p>Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP,
-ONC/RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL, XMPP</p></li>
+<li><p>Application Layer: BGP, DHCP, DHCPv6, DNS, DTLS, IMAP, LDAP, MQTT, NNTP,
+NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL,
+XMPP</p></li>
 </ul>
-<p>Each of those files is empty, so any one of them is a self-contained piece of
-work: a schema class, a data class and a protocol class, as sketched in
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/251">discussion #251</a>.
-That thread asks for <strong>NGAP</strong> (5G, application layer), which is not on the list
-above and has no stub, and the reply to it is the closest thing the project has
-to a step-by-step guide for adding a protocol – worth reading before starting
-any of these.</p>
+<p>Several of these come in pairs that want a shared abstract base rather than two
+independent implementations, in the way
+<a class="reference internal" href="pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> already covers its family: ICMP with
+ICMPv6, TLS/SSL with DTLS, and <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> with <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Two entries differ from the list in the discussion thread, and both are
-corrections rather than progress. <strong>NDP</strong> is shown under the link layer
-because that is where its stub actually lives, at
-<code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/link/NotImplemented/ndp.py</span></code>; there is no
-<code class="docutils literal notranslate"><span class="pre">ndp.py</span></code> under the internet layer. <strong>QUIC</strong> has been dropped because no
-stub for it exists anywhere in the tree – the thread lists it, but the file
-was never created.</p>
-<p><strong>ESP</strong> and <strong>SCTP</strong> have left the list because they are now implemented,
-and neither left a stub behind.</p>
+<p>Some of these have an empty, protocol-named file under a
+<code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code> folder. <strong>Those files are not a roadmap.</strong> They were
+scratch reminders the author left himself before this page existed, so a
+stub’s presence does not mean a protocol is planned or claimed, and its
+absence does not mean the protocol is unwanted: <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code>, <code class="docutils literal notranslate"><span class="pre">QUIC</span></code> and
+<strong>DTLS</strong> have no stub and are on the list above, while <strong>NGAP</strong> had none
+either and is implemented. Take this page as the record and ignore the
+folder.</p>
+<p><strong>ESP</strong>, <strong>SCTP</strong> and <strong>NGAP</strong> are no longer listed because they are
+implemented.</p>
 </div>
 <section id="sctp">
 <h3>SCTP<a class="headerlink" href="#sctp" title="Link to this heading">¶</a></h3>
