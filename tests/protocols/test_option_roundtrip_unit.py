@@ -94,10 +94,21 @@ class Gap(NamedTuple):
 
     #: Expected :attr:`~examples.generators.options.Outcome.status`.
     status: 'str'
-    #: Substring the failure detail must contain, or ``''`` to assert only the
-    #: status. Empty is used where the detail is a pair of long hex strings, or
-    #: where it embeds a timestamp and so is not stable between runs.
-    fragment: 'str'
+    #: Substring the failure detail must contain, or a tuple of substrings *all*
+    #: of which it must contain, or ``''`` to assert only the status. Empty is
+    #: used where the detail is a pair of long hex strings, or where it embeds a
+    #: timestamp and so is not stable between runs.
+    #:
+    #: Make it as specific as the message allows, because a fragment that matches
+    #: half the tree does not pin anything: ``'invalid format'`` alone occurs 205
+    #: times across 13 modules (31 in :file:`internet/hip.py`, 26 in
+    #: :file:`transport/tcp.py`), so it is satisfied by a regression at any of
+    #: them. Prefer the alias and whatever bracketed code the message carries --
+    #: ``'TCP: [OptNo 28] invalid format'`` narrows those 26 sites to the one
+    #: option that can print ``28``. The tuple form is for messages whose stable
+    #: parts are not contiguous, so that a fragment does not have to bake in a
+    #: rendering that is itself defective.
+    fragment: 'str | tuple[str, ...]'
     #: The defect, named with the ``file:line`` that causes it. This is the
     #: field that makes the entry worth keeping rather than just silencing.
     defect: 'str'
@@ -119,7 +130,7 @@ EXPECTED_FAILURES = {
     # ``_read_mode_timeout`` checks the length exactly. Measured: the schema
     # packs ``1c03003c`` where a correct one is ``1c04003c``.
     'tcp-option/User_Timeout_Option': Gap(
-        'CONSTRUCT', 'invalid format',
+        'CONSTRUCT', 'TCP: [OptNo 28] invalid format',
         'pcapkit/protocols/transport/tcp.py:2506 -- _make_mode_timeout sets '
         'length=3 for a 4-octet option'),
 
@@ -273,7 +284,7 @@ EXPECTED_FAILURES = {
     # The deadline in the sweep stays regardless. It is protection against the
     # *next* non-progress defect, not against this one.
     'ipv6-opts-option/SMF_DPD': Gap(
-        'PARSE', 'invalid format',
+        'PARSE', 'IPv6-Opts: invalid format',
         'pcapkit/protocols/schema/internet/ipv6_opts.py:434 -- a redundant second '
         "'test' ForwardMatchField that hopopt.py's equivalent does not have; it "
         'consumes nothing but is counted in __buffer__, so the nested schema '
@@ -287,12 +298,21 @@ EXPECTED_FAILURES = {
     # Schema paths divide by eight. The read-side guards then reject it, and
     # those guards compare the unit field against octet counts too, so the
     # RFC-correct value would fail as well.
+    # Both fragments are tuples rather than the whole message, because the
+    # message itself is defective: these two guards interpolate a bare ``type``
+    # into an f-string in a method that has no ``type`` parameter, so the name
+    # resolves to the builtin and the detail reads ``[TypeNo <class 'type'>]``
+    # (issue #442). Matching the literal rendering would pin that bug into this
+    # table and turn it red when #442 is fixed, which says nothing about whether
+    # the round trip closes. The stable parts either side of it do pin the site:
+    # ``[TypeNo`` occurs at exactly three lines of ``ipv6_route.py`` (:462, :506,
+    # :546), against 205 occurrences of ``'invalid format'`` tree-wide.
     'ipv6-route-type/Source_Route': Gap(
-        'CONSTRUCT', 'invalid format',
+        'CONSTRUCT', ('IPv6-Route', '[TypeNo', 'invalid format'),
         'pcapkit/protocols/internet/ipv6_route.py:276 -- length in octets, not '
         'in 8-octet units; guard at :461'),
     'ipv6-route-type/Type_2_Routing_Header': Gap(
-        'CONSTRUCT', 'invalid format',
+        'CONSTRUCT', ('IPv6-Route', '[TypeNo', 'invalid format'),
         'pcapkit/protocols/internet/ipv6_route.py:276; guard at :505'),
     # RPL fails earlier still: ``post_process`` assumes ``addresses`` is bytes,
     # which is true after unpacking and false while packing, where it is still
@@ -359,11 +379,11 @@ EXPECTED_FAILURES = {
     # can represent even in pairs -- see HIP_COPIES in the generator for why the
     # pair is used at all.
     'hip-parameter/HIP_TRANSFORM': Gap(
-        'CONSTRUCT', 'invalid parameter',
+        'CONSTRUCT', 'HIPv2: [ParamNo 577] invalid parameter',
         'pcapkit/protocols/internet/hip.py:698 -- the len check; HIP_TRANSFORM '
         'packs to a length the make-side arithmetic cannot express'),
     'hip-parameter/HOST_ID': Gap(
-        'CONSTRUCT', 'invalid format',
+        'CONSTRUCT', 'HIPv2: invalid format',
         'pcapkit/protocols/internet/hip.py:698 -- HOST_ID packs to 14 octets '
         'with len=8, so it is not even 4-aligned'),
 
@@ -391,7 +411,7 @@ EXPECTED_FAILURES = {
     # demands exactly 9. Its siblings all check payload+9 (RST_STREAM 13,
     # WINDOW_UPDATE 13, PING 17), so 9 looks like the outlier.
     'httpv2-frame/PRIORITY': Gap(
-        'CONSTRUCT', 'invalid format',
+        'CONSTRUCT', 'HTTP/2: [Type 2] invalid format',
         'pcapkit/protocols/application/httpv2.py:572 -- reads length != 9 for a '
         'frame make() always builds with length 14'),
 
@@ -824,11 +844,16 @@ class OptionRoundTripTests(unittest.TestCase):
                     f'{outcome.status}: {outcome.detail}. If the defect is fixed, '
                     f'delete its EXPECTED_FAILURES entry.'
                 )
-                if gap.fragment:
+                fragments = ((gap.fragment,) if isinstance(gap.fragment, str)
+                             else gap.fragment)
+                for fragment in fragments:
+                    if not fragment:
+                        continue
                     self.assertIn(
-                        gap.fragment, outcome.detail,
+                        fragment, outcome.detail,
                         f'{case.label} still fails with {gap.status}, but not in '
-                        f'the recorded way ({gap.defect})'
+                        f'the recorded way ({gap.defect}); detail was '
+                        f'{outcome.detail!r}'
                     )
 
     def test_a_single_hip_parameter_cannot_be_constructed(self) -> None:
