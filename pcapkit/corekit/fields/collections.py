@@ -125,6 +125,10 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         Returns:
             Unpacked field value.
 
+        Raises:
+            FieldValueError: If the items overrun the field, or if a schema item
+                consumes nothing from ``buffer`` -- see the note below.
+
         """
         length = self._length
         if isinstance(buffer, bytes):
@@ -138,12 +142,33 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         from pcapkit.corekit.fields.misc import SchemaField
         is_schema = isinstance(self._item_type, SchemaField)
 
+        # NOTE: The item-typed branch below sizes each item by ``field.length``,
+        # which is what it read, but the schema branch sizes it by ``len(data)``,
+        # which is only what the schema *recorded*. A schema reading a stream that
+        # has already run out records nothing, so ``length -= len(data)`` makes no
+        # progress and the loop spins forever. Reachable from a TCP segment: a
+        # ``SACK`` option declaring more octets than the option area holds leaves
+        # ``sack``'s ``ListField`` reading ``SACKBlock`` off an exhausted stream.
+        # Remembering where the previous item ended is what bounds the iteration
+        # count, since it does not depend on what the schema reports. C.f. #431,
+        # which is the same defect in the ``OptionField`` subclass.
+        offset = file.tell()
+
         temp = []  # type: list[_TL]
         while length > 0:
             field = self._item_type(packet)
 
             if is_schema:
                 data = cast('SchemaField', self._item_type).unpack(file, packet)
+
+                end = file.tell()
+                if end <= offset:
+                    raise FieldValueError(
+                        f'Field {self.name} has an item that consumed no data: '
+                        f'item {len(temp)} at offset {offset} of {self._length}, '
+                        f'with {length} octet(s) of the field left to parse'
+                    )
+                offset = end
 
                 length -= len(data)
                 if length < 0:
