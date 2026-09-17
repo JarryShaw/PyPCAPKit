@@ -7,7 +7,7 @@ import importlib.util
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import purge_modules, time_limit
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -329,6 +329,56 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertEqual(unpacked.options[0].value, 0xAA)
         self.assertEqual(unpacked.pad, b'')
         self.assertEqual(observed_padding, [1])
+
+    def test_schema_option_field_unpack_rejects_an_option_consuming_nothing(self) -> None:
+        """An option area that cannot be advanced past is an error, not a hang.
+
+        :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` sizes each
+        option by ``len(data)``, the size of the schema the option reported,
+        which is not the number of octets it took from the stream. ``Wrapper``
+        below is the smallest thing that separates the two, and is the shape
+        every wrapper option schema in the package has: it reads two octets and
+        returns a nested schema that recorded one. So the first option leaves the
+        stream one octet ahead of where ``length`` thinks it is, the second
+        option consumes the last of it, and the third finds the stream exhausted,
+        reads ``b''`` for every field, and reports ``len(data) == 0`` -- against
+        which ``length -= len(data)`` makes no progress at all. C.f. #431, where
+        this spun forever on an eight-octet HOPOPT header.
+
+        The deadline is part of the test: without it a regression here does not
+        fail, it hangs the run.
+
+        """
+        from pcapkit.corekit.fields.collections import OptionField
+        from pcapkit.corekit.fields.misc import SchemaField
+        from pcapkit.corekit.fields.numbers import UInt8Field
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        @schema_final
+        class Marker(Schema):
+            type: int = UInt8Field(default=0)
+
+        @schema_final
+        class Wrapper(Schema):
+            #: Two octets of stream, of which ``Marker`` records only the first.
+            body: Marker = SchemaField(length=2, schema=Marker)
+
+            def post_process(self, packet: dict) -> Schema:
+                return self.body
+
+        @schema_final
+        class WrappedOptionsSchema(Schema):
+            options: list[Marker] = OptionField(
+                length=3,
+                base_schema=Marker,
+                registry=collections.defaultdict(lambda: Marker, {1: Wrapper}),
+            )
+
+        with self.assertRaisesRegex(FieldValueError, 'consumed no data'):
+            with time_limit(5):
+                WrappedOptionsSchema.unpack(b'\x01\xff\x00', 3, {})
 
 
 if __name__ == '__main__':

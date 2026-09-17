@@ -244,12 +244,35 @@ class OptionField(ListField, Generic[_TS]):
             as the remaining length to the ``packet`` argument such that
             the next fields can be aware of such informations.
 
+        Raises:
+            FieldValueError: If an option consumes nothing from ``buffer``, since
+                the loop below has then no way to get past it.
+
         """
         length = self._length
         if isinstance(buffer, bytes):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             file = buffer
+
+        # NOTE: The loop below sizes each option by ``len(data)`` -- the size of
+        # the schema the option reported -- and that is not always the number of
+        # octets the option took from ``file``. The two part company for a schema
+        # whose ``post_process`` returns a *nested* schema, since ``len(data)``
+        # then measures the nested schema rather than what the outer one read. So
+        # ``len(data)`` cannot be the loop's progress measure: an option that
+        # over-reads leaves ``length`` above zero with ``file`` already exhausted,
+        # every field of the next option reads ``b''``, and an option that read
+        # nothing reports ``len(data) == 0`` and leaves ``length`` untouched --
+        # which spins forever, with no exception and no diagnostic. C.f. #431.
+        #
+        # Remembering where the previous option ended gives the loop a measure of
+        # progress that does not depend on what a schema reports, and one octet of
+        # it per iteration is what bounds the iteration count. ``length`` is still
+        # decremented by ``len(data)``, so that no option area which parses today
+        # parses differently: every option this package can parse consumes at
+        # least its own type field, so the guard cannot fire on one.
+        offset = file.tell()
 
         # make a copy of the ``packet`` dict so that we can include
         # parsed option schema in the ``packet`` dict
@@ -270,6 +293,16 @@ class OptionField(ListField, Generic[_TS]):
             data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
             new_packet[self.name].add(code, data)
             temp.append(data)
+
+            # insist on progress through ``file`` before trusting ``len(data)``
+            end = file.tell()
+            if end <= offset:
+                raise FieldValueError(
+                    f'Field {self.name} has an option that consumed no data: '
+                    f'{code!r} at offset {offset} of {self._length}, with '
+                    f'{length} octet(s) of the option area left to parse'
+                )
+            offset = end
 
             # update length
             length -= len(data)
