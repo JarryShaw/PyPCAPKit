@@ -44,6 +44,7 @@ import ipaddress
 import math
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.const.reg.transtype import TransType
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.flags import Flags as Enum_Flags
@@ -549,8 +550,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         self._flags = _flag
 
         return Schema_TCP(
-            srcport=srcport,
-            dstport=dstport,
+            srcport=self._make_port(srcport, Enum_TransportProtocol.tcp),
+            dstport=self._make_port(dstport, Enum_TransportProtocol.tcp),
             seq=seq_no,
             ack=ack_no,
             offset={

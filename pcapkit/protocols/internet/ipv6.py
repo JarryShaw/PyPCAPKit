@@ -31,7 +31,6 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
@@ -406,10 +405,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             from pcapkit.protocols.misc.raw import \
                 Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
-            protocol = self.__proto__[proto]  # type: ignore[assignment]
-            if isinstance(protocol, ModuleDescriptor):
-                protocol = protocol.klass  # type: ignore[unreachable]
-                self.__proto__[proto] = protocol  # update mapping upon import
+            protocol = self._lookup_next_layer(self.__proto__, proto)
 
         next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
                          alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto,
