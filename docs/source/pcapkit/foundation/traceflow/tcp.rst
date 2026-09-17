@@ -70,8 +70,8 @@ Terminology
            |                        |                   that opened the flow
            |                        |--> 'origin': (tuple) (address, port) of the endpoint
            |                        |                      that opened the flow
-           |                        |--> 'forward': (list) frame index sent by ``origin``
-           |                        |--> 'reverse': (list) frame index sent to ``origin``
+           |                        |--> 'forward': (list) frame index sent by 'origin'
+           |                        |--> 'reverse': (list) frame index sent to 'origin'
            |                        |--> 'fin': (set) endpoints seen to have sent a FIN
            |                        |--> 'reset': (bool) whether a RST has been seen
            |--> (tuple) BUFID ...
