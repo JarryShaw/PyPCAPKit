@@ -51,9 +51,9 @@ class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol`
          - :class:`pcapkit.protocols.link.rarp.RARP`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type`
-         - :class:`pcapkit.protocols.link.vlan.C_Tag`
+         - :class:`pcapkit.protocols.link.c_tag.C_Tag`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier`
-         - :class:`pcapkit.protocols.link.vlan.S_Tag`
+         - :class:`pcapkit.protocols.link.s_tag.S_Tag`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4`
          - :class:`pcapkit.protocols.internet.ipv4.IPv4`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6`
@@ -86,9 +86,9 @@ class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
             # identical, and both share the code in
             # :class:`~pcapkit.protocols.link.vlan.VLAN`.
             Enum_EtherType.Customer_VLAN_Tag_Type:
-                ModuleDescriptor('pcapkit.protocols.link.vlan', 'C_Tag'),
+                ModuleDescriptor('pcapkit.protocols.link.c_tag', 'C_Tag'),
             Enum_EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier:
-                ModuleDescriptor('pcapkit.protocols.link.vlan', 'S_Tag'),
+                ModuleDescriptor('pcapkit.protocols.link.s_tag', 'S_Tag'),
 
             Enum_EtherType.Internet_Protocol_version_4:         ModuleDescriptor('pcapkit.protocols.internet.ipv4', 'IPv4'),
             Enum_EtherType.Internet_Protocol_version_6:         ModuleDescriptor('pcapkit.protocols.internet.ipv6', 'IPv6'),

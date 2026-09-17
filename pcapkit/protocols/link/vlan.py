@@ -5,11 +5,12 @@
 .. module:: pcapkit.protocols.link.vlan
 
 :mod:`pcapkit.protocols.link.vlan` contains
-:class:`~pcapkit.protocols.link.vlan.VLAN`, an abstract base class holding the
-tag layout shared by every VLAN tag, and its two concrete subclasses --
-:class:`~pcapkit.protocols.link.vlan.C_Tag` for the 802.1Q customer tag [*]_ and
-:class:`~pcapkit.protocols.link.vlan.S_Tag` for the 802.1ad service tag -- whose
-structure is described as below:
+:class:`~pcapkit.protocols.link.vlan.VLAN` only, an abstract base class holding
+the tag layout shared by every VLAN tag [*]_. The two concrete tags live in
+modules of their own, since they are reached through different registry indices
+-- :class:`~pcapkit.protocols.link.c_tag.C_Tag` for the 802.1Q customer tag
+(``0x8100``) and :class:`~pcapkit.protocols.link.s_tag.S_Tag` for the 802.1ad
+service tag (``0x88A8``). The tag structure is described as below:
 
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
@@ -37,6 +38,15 @@ therefore appear in one frame, and :attr:`~pcapkit.protocols.protocol.ProtocolBa
 would nest one ``c_tag`` inside another, leaving nothing in the output to say
 which of the two was the service tag.
 
+Two distinct EtherTypes also means two distinct
+:meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__` values, which is the
+project's rule for when protocols get separate modules: siblings that *share* an
+index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares
+:mod:`~pcapkit.protocols.link.arp` and
+:class:`~pcapkit.protocols.link.rarp.DRARP` shares
+:mod:`~pcapkit.protocols.link.rarp`. This base declares no index of its own --
+it is abstract and nothing dispatches to it -- so its ``__index__`` raises.
+
 .. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q
 
 """
@@ -62,7 +72,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.link.vlan import TCIType
     from pcapkit.protocols.schema.schema import Schema
 
-__all__ = ['VLAN', 'C_Tag', 'S_Tag']
+__all__ = ['VLAN']
 
 
 class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
@@ -100,6 +110,20 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
     ##########################################################################
     # Methods.
     ##########################################################################
+
+    @classmethod
+    def id(cls) -> 'tuple[Literal["VLAN"], Literal["C_Tag"], Literal["S_Tag"]]':
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol -- the family name, then every tag in it, as
+            :meth:`HTTP.id <pcapkit.protocols.application.http.HTTP.id>` does for
+            its own family. Note that unlike HTTP's versions, the two tags are
+            *distinct protocols* rather than flavours of one, so each is its own
+            canonical name; they carry ``VLAN`` only as a secondary alias.
+
+        """
+        return ('VLAN', 'C_Tag', 'S_Tag')
 
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_VLAN':  # pylint: disable=unused-argument
         """Read 802.1Q/802.1ad VLAN tag type.
@@ -239,103 +263,3 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
             'type': data.type,
             'payload': cls._make_payload(data),
         }
-
-
-# NOTE: Both concrete tags restate ``schema`` and ``data`` even though
-# :class:`VLAN` already declares them. They are not inherited:
-# :meth:`ProtocolBase.__init_subclass__ <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>`
-# resolves an omitted schema by looking the *subclass name* up in
-# :mod:`pcapkit.protocols.schema`, and assigns unconditionally -- so leaving them
-# off would silently bind ``Schema_Raw``/``Data_Raw`` here rather than falling
-# back to the base class's pair.
-
-
-class C_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
-    """This class implements 802.1Q Customer VLAN Tag Type."""
-
-    ##########################################################################
-    # Properties.
-    ##########################################################################
-
-    @property
-    def name(self) -> 'Literal["802.1Q Customer VLAN Tag Type"]':
-        """Name of current protocol."""
-        return '802.1Q Customer VLAN Tag Type'
-
-    @property
-    def alias(self) -> 'Literal["802.1Q"]':
-        """Acronym of corresponding protocol."""
-        return '802.1Q'
-
-    #: NOTE: This is what keeps a stacked service tag and customer tag apart in
-    #: the parsed info dict, so it is spelled out rather than left to the
-    #: class-name default -- a rename must not silently move the output key.
-    @property
-    def info_name(self) -> 'Literal["c_tag"]':
-        """Key name of the :attr:`info` dict."""
-        return 'c_tag'
-
-    ##########################################################################
-    # Methods.
-    ##########################################################################
-
-    @classmethod
-    def id(cls) -> 'tuple[Literal["C_Tag"], Literal["VLAN"]]':
-        """Index ID of the protocol.
-
-        Returns:
-            Index ID of the protocol. ``VLAN`` is retained alongside the class's
-            own name so that selecting the protocol by that name -- as
-            ``pcapkit.extract(..., protocol='VLAN')`` did when this class *was*
-            ``VLAN`` -- keeps matching.
-
-        """
-        return ('C_Tag', 'VLAN')
-
-
-class S_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
-    """This class implements 802.1ad Service VLAN Tag Type.
-
-    Note:
-        802.1ad was incorporated into IEEE 802.1Q-2011, so the service tag is
-        specified by 802.1Q today. The ``802.1ad`` name is kept because it is
-        what the provider-bridging tag is universally called, and because it is
-        the only thing distinguishing this class from :class:`C_Tag` by name.
-
-    """
-
-    ##########################################################################
-    # Properties.
-    ##########################################################################
-
-    @property
-    def name(self) -> 'Literal["802.1ad Service VLAN Tag Type"]':
-        """Name of current protocol."""
-        return '802.1ad Service VLAN Tag Type'
-
-    @property
-    def alias(self) -> 'Literal["802.1ad"]':
-        """Acronym of corresponding protocol."""
-        return '802.1ad'
-
-    #: NOTE: c.f. :attr:`C_Tag.info_name` -- spelled out deliberately.
-    @property
-    def info_name(self) -> 'Literal["s_tag"]':
-        """Key name of the :attr:`info` dict."""
-        return 's_tag'
-
-    ##########################################################################
-    # Methods.
-    ##########################################################################
-
-    @classmethod
-    def id(cls) -> 'tuple[Literal["S_Tag"], Literal["VLAN"]]':
-        """Index ID of the protocol.
-
-        Returns:
-            Index ID of the protocol. ``VLAN`` is retained alongside the class's
-            own name so that selecting VLAN tags by that name matches the
-            service tag as well as the customer tag.
-
-        """
-        return ('S_Tag', 'VLAN')

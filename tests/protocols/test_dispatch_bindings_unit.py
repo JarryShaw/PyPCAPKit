@@ -212,7 +212,9 @@ class DispatchBindingTests(unittest.TestCase):
             0x0800, ipv4(17, udp(1701, 1701, l2tp_data())),
         ))[0]
 
-        self.assertEqual(str(frame.protochain), 'Ethernet:IPv4:UDP:L2TP:Raw')
+        # The alias reports the version; the info key deliberately does not, so
+        # a consumer finds the datagram under ``l2tp`` whichever version it was.
+        self.assertEqual(str(frame.protochain), 'Ethernet:IPv4:UDP:L2TPv2:Raw')
         l2tp = frame.info.to_dict()['ethernet']['ipv4']['udp']['l2tp']
         self.assertEqual(l2tp['version'], 2)
         self.assertEqual(l2tp['tunnelid'], 0x1234)
@@ -223,18 +225,22 @@ class DispatchBindingTests(unittest.TestCase):
         # PPP is not dissected, so the payload is Raw under the -1 sentinel.
         self.assertEqual(l2tp['raw']['protocol'], -1)
 
-    def test_l2tp_over_ip_is_deliberately_not_bound(self) -> None:
-        """``TransType.L2TP`` (115) stays unbound: it is L2TPv3, not v2.
+    def test_l2tp_over_ip_waits_on_an_l2tpv3_class(self) -> None:
+        """``TransType.L2TP`` (115) stays unbound: it is L2TPv3, and v3 has no class.
 
-        :rfc:`3931` gives protocol number 115 a different session header from
-        the :rfc:`2661` framing this dissector implements, so binding it would
-        hand the parser the wrong shape.
+        :rfc:`3931` gives protocol number 115 a different session header from the
+        :rfc:`2661` framing :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`
+        implements, so the binding waits on an ``L2TPv3`` class rather than on a
+        framing decision. 115 is also the first index anything in this family
+        would carry, which is why v3 gets a module of its own when written.
 
         """
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
 
         self.assertNotIn(TransType.L2TP, Internet.__proto__)
+        self.assertFalse(hasattr(
+            __import__('pcapkit.protocols.link', fromlist=['link']), 'L2TPv3'))
 
     ##########################################################################
     # Port bindings.

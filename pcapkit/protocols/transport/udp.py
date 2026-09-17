@@ -60,7 +60,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
        * - 80
          - :class:`pcapkit.protocols.application.http.HTTP`
        * - 1701
-         - :class:`pcapkit.protocols.link.l2tp.L2TP`
+         - :class:`pcapkit.protocols.link.l2tpv2.L2TPv2`
        * - 8080
          - :class:`pcapkit.protocols.application.http.HTTP`
 
@@ -102,11 +102,13 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
             8080: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
 
-            # L2TPv2 (RFC 2661) is UDP-borne, and v2 is what the dissector
-            # implements. IANA protocol number 115 is deliberately *not* bound
-            # to it: that assignment references RFC 3931, i.e. L2TPv3 over IP,
-            # whose session header is a different shape.
-            1701: ModuleDescriptor('pcapkit.protocols.link.l2tp', 'L2TP'),
+            # L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version the
+            # package implements, so the concrete class is bound rather than the
+            # abstract L2TP base. IANA protocol number 115 stays unbound because
+            # it is L2TPv3 (RFC 3931), which has no class yet -- when it does, it
+            # takes 115 and this entry becomes a version switch on the Ver
+            # nibble. c.f. pcapkit.protocols.link.l2tp.
+            1701: ModuleDescriptor('pcapkit.protocols.link.l2tpv2', 'L2TPv2'),
         },
     )
 

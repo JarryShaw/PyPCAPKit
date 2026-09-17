@@ -2,8 +2,8 @@
 """data models for 802.1Q/802.1ad VLAN tag types
 
 The customer tag (802.1Q) and the service tag (802.1ad) carry an identical
-layout, so :class:`~pcapkit.protocols.link.vlan.C_Tag` and
-:class:`~pcapkit.protocols.link.vlan.S_Tag` share the data model below.
+layout, so :class:`~pcapkit.protocols.link.c_tag.C_Tag` and
+:class:`~pcapkit.protocols.link.s_tag.S_Tag` share the data model below.
 
 """
 

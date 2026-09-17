@@ -41,6 +41,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.link.ospf import OSPF as Data_OSPF
 from pcapkit.protocols.data.link.ospf import \
     CrytographicAuthentication as Data_CrytographicAuthentication
@@ -48,12 +49,12 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.ospf import OSPF as Schema_OSPF
 from pcapkit.protocols.schema.link.ospf import \
     CrytographicAuthentication as Schema_CrytographicAuthentication
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address
-    from typing import Any, NoReturn, Optional, Type
+    from typing import Any, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -263,14 +264,23 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
         return 24
 
     @classmethod
-    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
-        Raises:
-            UnsupportedCall: This protocol has no registry entry.
+        Returns:
+            Numeral registry index of the protocol in `IANA`_.
+
+        Note:
+            This raised :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`
+            while the protocol was reachable from no registry at all. It is now
+            dispatched from :attr:`Internet.__proto__
+            <pcapkit.protocols.internet.internet.Internet.__proto__>` at
+            protocol number 89, so it has an index to report.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+        return Enum_TransType.OSPFIGP  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

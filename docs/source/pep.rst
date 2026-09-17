@@ -49,8 +49,8 @@ independent implementations, in the way
 ICMPv6, TLS/SSL with DTLS, and ``LINUX_SLL`` with ``LINUX_SLL2``.
 :class:`~pcapkit.protocols.link.vlan.VLAN` is the closer precedent for a pair
 whose *layout* is identical -- it holds the whole of the tag, and
-:class:`~pcapkit.protocols.link.vlan.C_Tag` and
-:class:`~pcapkit.protocols.link.vlan.S_Tag` add only how each names itself.
+:class:`~pcapkit.protocols.link.c_tag.C_Tag` and
+:class:`~pcapkit.protocols.link.s_tag.S_Tag` add only how each names itself.
 
 .. note::
 
@@ -242,7 +242,7 @@ and those have now been made:
 
 * **Done.** :class:`~pcapkit.protocols.link.ospf.OSPF` is bound at
   ``TransType`` 89 (``OSPFIGP``) and
-  :class:`~pcapkit.protocols.link.l2tp.L2TP` at UDP port 1701. Binding them
+  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701. Binding them
   turned up three defects that had kept OSPF from parsing anything at all --
   ``read`` consulted the schema *class* rather than the parsed header,
   :attr:`~pcapkit.protocols.link.ospf.OSPF.alias` read an ``_info`` that does
@@ -261,8 +261,8 @@ and those have now been made:
   and de-facto 8443 traffic is TLS-wrapped, which pcapkit cannot parse -- see
   the ``tls`` stub above. Binding it would feed a TLS record to an HTTP parser.
 * **Done.** The service VLAN tag identifier (S-Tag), ``0x88A8``, is bound to
-  :class:`~pcapkit.protocols.link.vlan.S_Tag`, and the customer tag ``0x8100``
-  to :class:`~pcapkit.protocols.link.vlan.C_Tag`. Both subclass the now-abstract
+  :class:`~pcapkit.protocols.link.s_tag.S_Tag`, and the customer tag ``0x8100``
+  to :class:`~pcapkit.protocols.link.c_tag.C_Tag`. Both subclass the now-abstract
   :class:`~pcapkit.protocols.link.vlan.VLAN`, which carries the shared tag
   layout; the split exists so that a Q-in-Q frame's two tags stay distinct in
   the parsed output. Fixing the shared ``read`` also fixed the DEI flag, which
@@ -273,12 +273,18 @@ and those have now been made:
 
 Three follow-ups the above deliberately left alone:
 
-* ``TransType`` 115 (``L2TP``) stays unbound. It references :rfc:`3931`, i.e.
-  L2TPv3 over IP, whose session header differs from the :rfc:`2661` L2TPv2
-  framing :class:`~pcapkit.protocols.link.l2tp.L2TP` implements. Binding it
-  wants a v3 dissector, not a table entry.
-* :class:`~pcapkit.protocols.link.ospf.OSPF` and
-  :class:`~pcapkit.protocols.link.l2tp.L2TP` both live under
+* ``TransType`` 115 (``L2TP``) stays unbound, and the reason is now structural
+  rather than incidental: it references :rfc:`3931`, i.e. L2TPv3 over IP, and
+  **there is no** ``L2TPv3`` **class for it to point at**. What exists is
+  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`, the :rfc:`2661` v2 framing,
+  reached over UDP 1701. So the binding waits on a v3 dissector, which is also
+  the first member of the family to carry an
+  :meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__` of its own -- 115
+  being that index. :mod:`pcapkit.protocols.link.l2tp` records what v3 needs, and
+  what ``L2F`` needs alongside it: the version nibble reading ``1`` selects L2F
+  [:rfc:`2341`], a separate protocol, not an earlier L2TP.
+* :class:`~pcapkit.protocols.link.ospf.OSPF` and the
+  :class:`~pcapkit.protocols.link.l2tp.L2TP` family both live under
   :mod:`pcapkit.protocols.link` and so report ``layer == 'Link'``, although one
   is carried inside IP and the other inside UDP. Moving them would change their
   public import paths, so the misclassification is documented rather than

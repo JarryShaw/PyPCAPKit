@@ -109,8 +109,8 @@ __all__ = [
     'Header', 'Frame',                                      # PCAP Headers
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
-    'ARP', 'C_Tag', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'OSPF', 'RARP',
-    'S_Tag', 'VLAN',                                        # Link Layer
+    'ARP', 'C_Tag', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2', 'OSPF',
+    'RARP', 'S_Tag', 'VLAN',                                # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header

@@ -4,11 +4,21 @@ VLAN - 802.1Q/802.1ad VLAN Tag Types
 .. module:: pcapkit.protocols.link.vlan
 
 :mod:`pcapkit.protocols.link.vlan` contains
-:class:`~pcapkit.protocols.link.vlan.VLAN`, an abstract base class holding the
-tag layout shared by every VLAN tag, and its two concrete subclasses --
-:class:`~pcapkit.protocols.link.vlan.C_Tag` for the 802.1Q customer tag [*]_ and
-:class:`~pcapkit.protocols.link.vlan.S_Tag` for the 802.1ad service tag -- whose
-structure is described as below:
+:class:`~pcapkit.protocols.link.vlan.VLAN` only, an abstract base class holding
+the tag layout shared by every VLAN tag [*]_. The two concrete tags live in
+modules of their own:
+
+.. list-table::
+   :header-rows: 1
+
+   * - EtherType
+     - Class
+   * - ``0x8100`` (customer tag, 802.1Q)
+     - :class:`~pcapkit.protocols.link.c_tag.C_Tag`
+   * - ``0x88A8`` (service tag, 802.1ad)
+     - :class:`~pcapkit.protocols.link.s_tag.S_Tag`
+
+The tag structure is described as below:
 
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
@@ -25,7 +35,7 @@ solely by the tag protocol identifier (TPID) that selected them -- ``0x8100`` fo
 the customer tag against ``0x88A8`` for the service tag. That TPID is not part of
 either tag: it is the EtherType field of whatever encapsulates the tag, so both
 classes read the same four octets and share every byte of parsing and
-construction code.
+construction code, which is what this base holds.
 
 They are nonetheless distinct classes rather than one class bound at two
 EtherTypes, because 802.1ad *stacks* them. In a Q-in-Q frame the service tag's
@@ -46,6 +56,15 @@ tags appear in one frame:
 would nest one ``c_tag`` inside another, leaving nothing in the output to say
 which of the two was the service tag.
 
+Two distinct EtherTypes also means two distinct
+:meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__` values, which is the
+project's rule for when protocols get separate modules: siblings that *share* an
+index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares
+:mod:`~pcapkit.protocols.link.arp` and
+:class:`~pcapkit.protocols.link.rarp.DRARP` shares
+:mod:`~pcapkit.protocols.link.rarp`. This base declares no index of its own --
+it is abstract and nothing dispatches to it -- so its ``__index__`` raises.
+
 .. autoclass:: pcapkit.protocols.link.vlan.VLAN
    :no-members:
    :show-inheritance:
@@ -53,32 +72,13 @@ which of the two was the service tag.
    .. autoproperty:: length
    .. autoproperty:: protocol
 
+   .. automethod:: id
    .. automethod:: read
    .. automethod:: make
 
    .. automethod:: _make_data
 
    .. automethod:: __index__
-
-.. autoclass:: pcapkit.protocols.link.vlan.C_Tag
-   :no-members:
-   :show-inheritance:
-
-   .. autoproperty:: name
-   .. autoproperty:: alias
-   .. autoproperty:: info_name
-
-   .. automethod:: id
-
-.. autoclass:: pcapkit.protocols.link.vlan.S_Tag
-   :no-members:
-   :show-inheritance:
-
-   .. autoproperty:: name
-   .. autoproperty:: alias
-   .. autoproperty:: info_name
-
-   .. automethod:: id
 
 Header Schemas
 --------------
