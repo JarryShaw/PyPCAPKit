@@ -114,6 +114,9 @@ class MHUnitTests(unittest.TestCase):
         def parse(hexstr: str) -> None:
             raw = bytes.fromhex(hexstr)
             self.assertEqual(len(raw) % 8, 0, 'mobility header must be 8-octet aligned')
+            # the header length field counts 8-octet units after the first, so it
+            # has to describe the octets actually supplied
+            self.assertEqual((raw[1] + 1) * 8, len(raw))
             MH(io.BytesIO(raw), len(raw), extension=True)
 
         for label, register, code, registry, exercise in (

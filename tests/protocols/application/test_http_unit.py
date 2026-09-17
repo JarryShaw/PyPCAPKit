@@ -302,8 +302,18 @@ class HTTPUnitTests(unittest.TestCase):
         from pcapkit.const.http.frame import Frame
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 
-        # length 13, type 0xF0, no flags, stream 1, then four octets of payload
+        # Length 13, type 0xF0, no flags, stream 1, then four octets of payload.
+        #
+        # 13 is the *whole* frame, header included, which is this library's
+        # convention rather than :rfc:`9113#section-4.1`'s -- that one counts the
+        # payload alone, so a real frame with four octets of payload declares 4.
+        # ``make`` writes ``payload + 9`` (httpv2.py:292) and the readers recover
+        # the payload as ``length - 9`` (httpv2.py:658,668), and ``read`` rejects
+        # anything under 9 outright, so a wire-accurate 4 raises here. Declaring
+        # 13 is what reaches the registry lookup; the mismatch with the RFC is a
+        # separate defect and not this test's to assert.
         packet = bytes.fromhex('00000d' 'f0' '00' '00000001' '61626364')
+        self.assertEqual(int.from_bytes(packet[:3], 'big'), len(packet))
 
         registry = HTTPv2.__dict__['__frame__']
         before = set(registry)

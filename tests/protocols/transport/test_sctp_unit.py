@@ -1140,8 +1140,14 @@ class SCTPUnitTests(unittest.TestCase):
                 before = set(registry)
                 self.assertNotIn(code, before)
 
+                body = bytes.fromhex(chunk)
+                # the chunk length field has to be the octets actually supplied,
+                # or the parser is reading past the end of the packet and the
+                # test is exercising a code path no real capture reaches
+                self.assertEqual(int.from_bytes(body[2:4], 'big'), len(body))
+
                 try:
-                    self._packet(header + bytes.fromhex(chunk))
+                    self._packet(header + body)
                     self.assertEqual(set(registry), before)
 
                     with mock.patch.object(sctp_module, 'warn') as warned:

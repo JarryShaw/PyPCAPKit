@@ -1178,8 +1178,8 @@ class TCPUDPUnitTests(unittest.TestCase):
     def test_unregistered_option_kind_does_not_mutate_the_class_registry(self) -> None:
         """Parsing must not write to the shared ``TCP.__option__``.
 
-        The reproduction from #425, verbatim: one segment carrying option kind
-        156, which nothing registers. ``__option__`` is a
+        The reproduction from #425: one segment carrying option kind 156, which
+        nothing registers. ``__option__`` is a
         :class:`collections.defaultdict` on a class attribute shared by every
         :class:`~pcapkit.protocols.transport.tcp.TCP` instance in the process, so
         ``__option__[kind]`` inserted the kind it missed -- and the value it
@@ -1188,14 +1188,21 @@ class TCPUDPUnitTests(unittest.TestCase):
         :func:`~pcapkit.foundation.registry.protocols.register_tcp_option` call
         afterwards a warning about an overwrite that never happened.
 
+        The segment is the issue's, with its data offset corrected from 7 words
+        to 6: the issue supplies 24 octets but declared a 28-octet header. The
+        leak reproduces either way -- checked, since a malformed offset driving
+        the parser somewhere it would not otherwise go would have made this test
+        pass for the wrong reason -- but a test is worth nothing if the packet it
+        asserts against could not exist on a wire.
+
         """
         from pcapkit.const.tcp.option import Option
         from pcapkit.foundation.registry.protocols import register_tcp_option
         from pcapkit.protocols.transport.tcp import TCP
 
-        # ports, seq, ack, data offset 7 / flags, window, checksum, urgent
+        # ports, seq, ack, data offset 6 words / flags, window, checksum, urgent
         # pointer, then one 4-octet option of kind 156.
-        packet = (bytes.fromhex('005001bb00000000000000007002ffff00000000')
+        packet = (bytes.fromhex('005001bb00000000000000006002ffff00000000')
                   + bytes([156, 2, 0, 0]))
 
         registry = TCP.__dict__['__option__']
@@ -1204,6 +1211,10 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         try:
             proto = TCP(io.BytesIO(packet), len(packet))
+
+            # The header the segment declares is the header it supplies, so the
+            # option area is read from real octets rather than off the end.
+            self.assertEqual(proto.info.hdr_len, len(packet))
 
             # The option is still parsed, by the fallback the registry declares;
             # only the registry write is gone.
