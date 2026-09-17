@@ -2315,6 +2315,74 @@ class MHUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             proto._read_opt_redirect(bogus, options=None)  # type: ignore[arg-type]
 
+    def test_mh_nested_suboptions_build_from_raw_kwargs(self) -> None:
+        """A nested sub-option built from keyword arguments must keep every field.
+
+        The round-trip tests cannot catch this: rebuilding from an already-parsed
+        data model goes down the ``option is not None`` branch, which reads the
+        model. Only *fresh* construction from keyword arguments reaches the
+        ``kwargs`` branch, and a field whose name collides with one of the maker's
+        own parameters never arrives there.
+
+        That is what happened. The makers took the data model as a parameter named
+        ``data``, and the vendor-specific quality-of-service attribute of
+        :rfc:`7222#section-4.2.11` has a *field* called ``data``, so a caller's
+        ``data=`` bound to the model parameter and ``kwargs.get('data')`` always saw
+        nothing. The payload was dropped with no exception and the length written as
+        though it were empty -- ``vendor`` and ``subtype`` arrived intact, which
+        made it look like a partial success. The parameter is now ``option``, which
+        no sub-option field is called.
+        """
+        from pcapkit.const.mh.ani_suboption import ANISuboption
+        from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
+        from pcapkit.const.mh.lma_mag_suboption import LMAControlledMAGSuboption
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.qos_attribute import QoSAttribute
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+        payload = b'\xde\xad\xbe\xef'
+
+        # the registered vendor-specific attribute: the case that was broken
+        attr = proto._make_qos_attribute(  # type: ignore[arg-type]
+            QoSAttribute.QoS_Vendor_Specific_Attribute,
+            vendor=32473, subtype=3, data=payload)
+        self.assertEqual(attr.vendor, 32473)
+        self.assertEqual(attr.subtype, 3)
+        self.assertEqual(attr.data, payload, 'the vendor payload was dropped')
+        self.assertEqual(attr.length, 7 + len(payload))
+        self.assertEqual(len(attr.pack()), attr.length + 2)
+
+        # every family's unassigned fallback takes a ``data`` keyword too
+        unassigned = [
+            ('qos attribute', proto._make_qos_attribute, QoSAttribute(200)),  # type: ignore[arg-type]
+            ('flow id sub-option', proto._make_fid_suboption, FlowIDSuboption(200)),  # type: ignore[arg-type]
+            ('ani sub-option', proto._make_ani_suboption, ANISuboption(200)),  # type: ignore[arg-type]
+            ('lcmp sub-option', proto._make_lcmp_suboption,  # type: ignore[arg-type]
+             LMAControlledMAGSuboption(200)),
+        ]
+        for label, maker, code in unassigned:
+            with self.subTest(label):
+                built = maker(code, data=payload)
+                self.assertEqual(built.data, payload, 'the sub-option data was dropped')
+                self.assertEqual(built.length, len(payload))
+
+        # and the traffic selector sub-option, whose payload field is ``selector``
+        # rather than ``data`` -- included so the two spellings stay distinguished
+        selector = proto._make_fid_suboption(  # type: ignore[arg-type]
+            FlowIDSuboption.Traffic_Selector, ts_format=1, selector=payload)
+        self.assertEqual(selector.selector, payload)
+        self.assertEqual(selector.length, 2 + len(payload))
+
+        # finally the same thing through the public interface, since that is how a
+        # caller meets it: the attribute has to survive being nested in an option
+        # and packed
+        option = proto._make_opt_qos(  # type: ignore[arg-type]
+            Option.Quality_of_Service, sr_id=1, dscp=46, oc=1,
+            attributes=[(QoSAttribute.QoS_Vendor_Specific_Attribute,
+                         {'vendor': 32473, 'subtype': 3, 'data': payload})])
+        self.assertIn(payload, option.pack())
+
     def test_mh_cga_parameters_option_is_unparsable_upstream(self) -> None:
         """The CGA Parameters option cannot be parsed, and this is not new.
 

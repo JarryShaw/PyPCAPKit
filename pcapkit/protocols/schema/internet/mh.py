@@ -1813,7 +1813,8 @@ class ANIOperatorIdentifierSuboption(ANISuboption, code=Enum_ANISuboption.Operat
 
 @schema_final
 class ANICivicLocationSuboption(ANISuboption, code=Enum_ANISuboption.Civic_Location):
-    """Header schema for MH Civic-Location ANI sub-options."""
+    """Header schema for MH Civic-Location ANI sub-options
+    [:rfc:`7563#section-3.1`]."""
 
     #: Encoding format; only ``0``, the binary encoding of :rfc:`4776#section-3.1`,
     #: is defined.
@@ -1852,7 +1853,8 @@ class ANIMAGGroupIdentifierSuboption(ANISuboption, code=Enum_ANISuboption.MAG_Gr
 
 @schema_final
 class ANIUpdateTimerSuboption(ANISuboption, code=Enum_ANISuboption.ANI_Update_Timer):
-    """Header schema for MH ANI Update-Timer sub-options."""
+    """Header schema for MH ANI Update-Timer sub-options
+    [:rfc:`7563#section-3.3`]."""
 
     #: Update timer. One time unit is 4 seconds; ``0`` asks for an immediate
     #: update.

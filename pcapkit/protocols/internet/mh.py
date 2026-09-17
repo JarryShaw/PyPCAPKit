@@ -4560,8 +4560,42 @@ class MH(Internet[Data_MH, Schema_MH],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         These are sub-options of one mobility option rather than mobility options
-        in their own right, so they are dispatched here by schema type rather than
-        through :attr:`self.__option__ <MH.__option__>`.
+        in their own right, so they are dispatched here rather than through
+        :attr:`self.__option__ <MH.__option__>`.
+
+        Note:
+            Dispatch is on the sub-option **type code**, never on ``isinstance`` of
+            the schema class, and that is load-bearing rather than a matter of
+            taste. Every schema class descends from
+            :class:`collections.abc.Mapping`, and on Python 3.10 and older they do
+            **not** each get their own ``_abc_impl`` -- they share
+            :class:`~pcapkit.protocols.schema.schema.Schema`'s. One
+            :class:`abc.ABCMeta` cache therefore serves the whole family, and it is
+            keyed only on the class being *tested*, not on the class being tested
+            *against*. So one ``issubclass`` answer poisons every later question
+            about the same class:
+
+            .. code-block:: python
+
+               >>> issubclass(ANIGeoLocationSuboption, Schema)                 # True, cached
+               True
+               >>> issubclass(ANIGeoLocationSuboption, ANINetworkIdentifierSuboption)
+               True   # wrong -- the cached True for Schema is handed back
+
+            The wrong answer goes both ways: a correct ``False`` against a sibling
+            then makes ``isinstance(sub, Schema)`` ``False``, which is what
+            :meth:`ListField.pack
+            <pcapkit.corekit.fields.collections.ListField.pack>` consults, so
+            packing a perfectly good option fails with
+            :exc:`~pcapkit.utilities.exceptions.FieldValueError`. Python 3.11 and
+            newer give each class its own cache and the checks behave, which is why
+            this was invisible on a modern interpreter.
+
+            The code is on the wire and the registry keys on it, so it is both the
+            cheaper discriminator and the only one that cannot be poisoned. The
+            same reasoning applies to :meth:`_read_ani_suboptions`,
+            :meth:`_read_qos_attributes`, :meth:`_read_lcmp_suboptions` and their
+            four constructor counterparts.
 
         Args:
             suboptions_schema: Parsed sub-option schemas.
@@ -4573,45 +4607,53 @@ class MH(Internet[Data_MH, Schema_MH],
         suboptions = OrderedMultiDict()  # type: FlowIDSuboption
 
         for schema in suboptions_schema:
-            if isinstance(schema, Schema_PadFlowIdentificationSuboption):
-                size = 1 if schema.type == Enum_FlowIDSuboption.Pad else schema.length + 2
+            code = schema.type
+
+            if code in (Enum_FlowIDSuboption.Pad, Enum_FlowIDSuboption.PadN):
+                pad = cast('Schema_PadFlowIdentificationSuboption', schema)
+                size = 1 if code == Enum_FlowIDSuboption.Pad else pad.length + 2
                 data = Data_PadFlowIdentificationSuboption(
-                    type=schema.type,
+                    type=code,
                     length=size,
                 )  # type: Data_FlowIdentificationSuboption
-            elif isinstance(schema, Schema_BIDReferenceSuboption):
+            elif code == Enum_FlowIDSuboption.BID_Reference:
+                bid_ref = cast('Schema_BIDReferenceSuboption', schema)
                 data = Data_BIDReferenceSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    bid=tuple(schema.bid),
+                    type=code,
+                    length=bid_ref.length + 2,
+                    bid=tuple(bid_ref.bid),
                 )
-            elif isinstance(schema, Schema_TrafficSelectorSuboption):
+            elif code == Enum_FlowIDSuboption.Traffic_Selector:
+                selector = cast('Schema_TrafficSelectorSuboption', schema)
                 data = Data_TrafficSelectorSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    ts_format=schema.ts_format,
-                    selector=schema.selector,
+                    type=code,
+                    length=selector.length + 2,
+                    ts_format=selector.ts_format,
+                    selector=selector.selector,
                 )
-            elif isinstance(schema, Schema_FlowBindingActionSuboption):
+            elif code == Enum_FlowIDSuboption.Flow_Binding_Action:
+                action = cast('Schema_FlowBindingActionSuboption', schema)
                 data = Data_FlowBindingActionSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    action=schema.action,
+                    type=code,
+                    length=action.length + 2,
+                    action=action.action,
                 )
-            elif isinstance(schema, Schema_TargetCareofAddressSuboption):
+            elif code == Enum_FlowIDSuboption.Target_Care_of_Address:
+                target = cast('Schema_TargetCareofAddressSuboption', schema)
                 data = Data_TargetCareofAddressSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    address=schema.address,
+                    type=code,
+                    length=target.length + 2,
+                    address=target.address,
                 )
             else:
+                unknown = cast('Schema_UnassignedFlowIdentificationSuboption', schema)
                 data = Data_UnassignedFlowIdentificationSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    data=cast('Schema_UnassignedFlowIdentificationSuboption', schema).data,
+                    type=code,
+                    length=unknown.length + 2,
+                    data=unknown.data,
                 )
 
-            suboptions.add(schema.type, data)
+            suboptions.add(code, data)
 
         return suboptions
 
@@ -4933,6 +4975,11 @@ class MH(Internet[Data_MH, Schema_MH],
         integers are recorded -- the latter so that the exact wire value survives
         a round trip through the data model.
 
+        Note:
+            Dispatch is on the sub-option type code rather than on ``isinstance``
+            of the schema class, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
         Args:
             suboptions_schema: Parsed sub-option schemas.
 
@@ -4943,59 +4990,68 @@ class MH(Internet[Data_MH, Schema_MH],
         suboptions = OrderedMultiDict()  # type: ANISuboption
 
         for schema in suboptions_schema:
-            if isinstance(schema, Schema_ANINetworkIdentifierSuboption):
+            code = schema.type
+
+            if code == Enum_ANISuboption.Network_Identifier:
+                net = cast('Schema_ANINetworkIdentifierSuboption', schema)
                 data = Data_ANINetworkIdentifierSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    utf8=bool(schema.flags['E']),
-                    net_name=schema.net_name,
-                    ap_name=schema.ap_name,
+                    type=code,
+                    length=net.length + 2,
+                    utf8=bool(net.flags['E']),
+                    net_name=net.net_name,
+                    ap_name=net.ap_name,
                 )  # type: Data_ANISuboption
-            elif isinstance(schema, Schema_ANIGeoLocationSuboption):
-                raw_lat = self._decode_signed(schema.location['latitude'], 24)
-                raw_lon = self._decode_signed(schema.location['longitude'], 24)
+            elif code == Enum_ANISuboption.Geo_Location:
+                geo = cast('Schema_ANIGeoLocationSuboption', schema)
+                raw_lat = self._decode_signed(geo.location['latitude'], 24)
+                raw_lon = self._decode_signed(geo.location['longitude'], 24)
                 data = Data_ANIGeoLocationSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
+                    type=code,
+                    length=geo.length + 2,
                     latitude=raw_lat / 2 ** 15,
                     longitude=raw_lon / 2 ** 15,
                     raw_latitude=raw_lat,
                     raw_longitude=raw_lon,
                 )
-            elif isinstance(schema, Schema_ANIOperatorIdentifierSuboption):
+            elif code == Enum_ANISuboption.Operator_Identifier:
+                operator = cast('Schema_ANIOperatorIdentifierSuboption', schema)
                 data = Data_ANIOperatorIdentifierSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    op_id_type=schema.op_id_type,
-                    identifier=schema.identifier,
+                    type=code,
+                    length=operator.length + 2,
+                    op_id_type=operator.op_id_type,
+                    identifier=operator.identifier,
                 )
-            elif isinstance(schema, Schema_ANICivicLocationSuboption):
+            elif code == Enum_ANISuboption.Civic_Location:
+                civic = cast('Schema_ANICivicLocationSuboption', schema)
                 data = Data_ANICivicLocationSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    format=schema.format,
-                    location=schema.location,
+                    type=code,
+                    length=civic.length + 2,
+                    format=civic.format,
+                    location=civic.location,
                 )
-            elif isinstance(schema, Schema_ANIMAGGroupIdentifierSuboption):
+            elif code == Enum_ANISuboption.MAG_Group_Identifier:
+                group = cast('Schema_ANIMAGGroupIdentifierSuboption', schema)
                 data = Data_ANIMAGGroupIdentifierSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    group_id=schema.group_id,
+                    type=code,
+                    length=group.length + 2,
+                    group_id=group.group_id,
                 )
-            elif isinstance(schema, Schema_ANIUpdateTimerSuboption):
+            elif code == Enum_ANISuboption.ANI_Update_Timer:
+                timer = cast('Schema_ANIUpdateTimerSuboption', schema)
                 data = Data_ANIUpdateTimerSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    timer=datetime.timedelta(seconds=schema.timer * 4),
+                    type=code,
+                    length=timer.length + 2,
+                    timer=datetime.timedelta(seconds=timer.timer * 4),
                 )
             else:
+                unknown = cast('Schema_UnassignedANISuboption', schema)
                 data = Data_UnassignedANISuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    data=cast('Schema_UnassignedANISuboption', schema).data,
+                    type=code,
+                    length=unknown.length + 2,
+                    data=unknown.data,
                 )
 
-            suboptions.add(schema.type, data)
+            suboptions.add(code, data)
 
         return suboptions
 
@@ -5326,6 +5382,10 @@ class MH(Internet[Data_MH, Schema_MH],
             not the kilobytes per second of the load information option's capacity
             fields.
 
+            Dispatch is on the attribute type code rather than on ``isinstance`` of
+            the schema class, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
         Args:
             attributes_schema: Parsed attribute schemas.
 
@@ -5336,51 +5396,65 @@ class MH(Internet[Data_MH, Schema_MH],
         attributes = OrderedMultiDict()  # type: QoSAttribute
 
         for schema in attributes_schema:
-            if isinstance(schema, Schema_PerSessionBitRateAttribute):
+            code = schema.type
+
+            if code in (Enum_QoSAttribute.Per_Session_Agg_Max_DL_Bit_Rate,
+                        Enum_QoSAttribute.Per_Session_Agg_Max_UL_Bit_Rate):
+                session = cast('Schema_PerSessionBitRateAttribute', schema)
                 data = Data_PerSessionBitRateAttribute(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    service=bool(schema.flags['S']),
-                    exclude=bool(schema.flags['E']),
-                    rate=schema.rate,
+                    type=code,
+                    length=session.length + 2,
+                    service=bool(session.flags['S']),
+                    exclude=bool(session.flags['E']),
+                    rate=session.rate,
                 )  # type: Data_QoSAttribute
-            elif isinstance(schema, Schema_BitRateAttribute):
+            elif code in (Enum_QoSAttribute.Per_MN_Agg_Max_DL_Bit_Rate,
+                          Enum_QoSAttribute.Per_MN_Agg_Max_UL_Bit_Rate,
+                          Enum_QoSAttribute.Aggregate_Max_DL_Bit_Rate,
+                          Enum_QoSAttribute.Aggregate_Max_UL_Bit_Rate,
+                          Enum_QoSAttribute.Guaranteed_DL_Bit_Rate,
+                          Enum_QoSAttribute.Guaranteed_UL_Bit_Rate):
+                rate = cast('Schema_BitRateAttribute', schema)
                 data = Data_BitRateAttribute(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    rate=schema.rate,
+                    type=code,
+                    length=rate.length + 2,
+                    rate=rate.rate,
                 )
-            elif isinstance(schema, Schema_AllocationRetentionPriorityAttribute):
+            elif code == Enum_QoSAttribute.Allocation_Retention_Priority:
+                arp = cast('Schema_AllocationRetentionPriorityAttribute', schema)
                 data = Data_AllocationRetentionPriorityAttribute(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    priority_level=schema.priority['PL'],
-                    preemption_capability=schema.priority['PC'],
-                    preemption_vulnerability=schema.priority['PV'],
+                    type=code,
+                    length=arp.length + 2,
+                    priority_level=arp.priority['PL'],
+                    preemption_capability=arp.priority['PC'],
+                    preemption_vulnerability=arp.priority['PV'],
                 )
-            elif isinstance(schema, Schema_QoSTrafficSelectorAttribute):
+            elif code == Enum_QoSAttribute.QoS_Traffic_Selector:
+                selector = cast('Schema_QoSTrafficSelectorAttribute', schema)
                 data = Data_QoSTrafficSelectorAttribute(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    ts_format=schema.ts_format,
-                    selector=schema.selector,
+                    type=code,
+                    length=selector.length + 2,
+                    ts_format=selector.ts_format,
+                    selector=selector.selector,
                 )
-            elif isinstance(schema, Schema_QoSVendorSpecificAttribute):
+            elif code == Enum_QoSAttribute.QoS_Vendor_Specific_Attribute:
+                vendor = cast('Schema_QoSVendorSpecificAttribute', schema)
                 data = Data_QoSVendorSpecificAttribute(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    vendor=schema.vendor,
-                    subtype=schema.subtype,
-                    data=schema.data,
+                    type=code,
+                    length=vendor.length + 2,
+                    vendor=vendor.vendor,
+                    subtype=vendor.subtype,
+                    data=vendor.data,
                 )
             else:
+                unknown = cast('Schema_UnassignedQoSAttribute', schema)
                 data = Data_UnassignedQoSAttribute(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    data=cast('Schema_UnassignedQoSAttribute', schema).data,
+                    type=code,
+                    length=unknown.length + 2,
+                    data=unknown.data,
                 )
 
-            attributes.add(schema.type, data)
+            attributes.add(code, data)
 
         return attributes
 
@@ -5585,6 +5659,10 @@ class MH(Internet[Data_MH, Schema_MH],
             other interval in these two sub-options is in whole seconds
             [:rfc:`8127#section-3.1.1`, :rfc:`8127#section-3.1.2`].
 
+            Dispatch is on the sub-option type code rather than on ``isinstance``
+            of the schema class, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
         Args:
             suboptions_schema: Parsed sub-option schemas.
 
@@ -5595,32 +5673,37 @@ class MH(Internet[Data_MH, Schema_MH],
         suboptions = OrderedMultiDict()  # type: LMAControlledMAGSuboption
 
         for schema in suboptions_schema:
-            if isinstance(schema, Schema_BindingReregistrationControlSuboption):
+            code = schema.type
+
+            if code == Enum_LMAControlledMAGSuboption.Binding_Re_registration_Control:
+                rereg = cast('Schema_BindingReregistrationControlSuboption', schema)
                 data = Data_BindingReregistrationControlSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    start_time=datetime.timedelta(seconds=schema.start_time * 4),
+                    type=code,
+                    length=rereg.length + 2,
+                    start_time=datetime.timedelta(seconds=rereg.start_time * 4),
                     initial_retransmission=datetime.timedelta(
-                        seconds=schema.initial_retransmission),
-                    max_retransmission=datetime.timedelta(seconds=schema.max_retransmission),
+                        seconds=rereg.initial_retransmission),
+                    max_retransmission=datetime.timedelta(seconds=rereg.max_retransmission),
                 )  # type: Data_LMAControlledMAGSuboption
-            elif isinstance(schema, Schema_HeartbeatControlSuboption):
+            elif code == Enum_LMAControlledMAGSuboption.Heartbeat_Control:
+                heartbeat = cast('Schema_HeartbeatControlSuboption', schema)
                 data = Data_HeartbeatControlSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    interval=datetime.timedelta(seconds=schema.interval),
+                    type=code,
+                    length=heartbeat.length + 2,
+                    interval=datetime.timedelta(seconds=heartbeat.interval),
                     retransmission_delay=datetime.timedelta(
-                        seconds=schema.retransmission_delay),
-                    max_retransmissions=schema.max_retransmissions,
+                        seconds=heartbeat.retransmission_delay),
+                    max_retransmissions=heartbeat.max_retransmissions,
                 )
             else:
+                unknown = cast('Schema_UnassignedLMAControlledMAGSuboption', schema)
                 data = Data_UnassignedLMAControlledMAGSuboption(
-                    type=schema.type,
-                    length=schema.length + 2,
-                    data=cast('Schema_UnassignedLMAControlledMAGSuboption', schema).data,
+                    type=code,
+                    length=unknown.length + 2,
+                    data=unknown.data,
                 )
 
-            suboptions.add(schema.type, data)
+            suboptions.add(code, data)
 
         return suboptions
 
@@ -8829,45 +8912,57 @@ class MH(Internet[Data_MH, Schema_MH],
                     entries.append(self._make_fid_suboption(code, **args))
             return entries
 
-        return [self._make_fid_suboption(code, data=data)
-                for code, data in suboptions.items(multi=True)]
+        return [self._make_fid_suboption(code, option)
+                for code, option in suboptions.items(multi=True)]
 
     def _make_fid_suboption(self, code: 'Enum_FlowIDSuboption',
-                            data: 'Optional[Data_FlowIdentificationSuboption]' = None,
+                            option: 'Optional[Data_FlowIdentificationSuboption]' = None,
                             **kwargs: 'Any') -> 'Schema_FlowIdentificationSuboption':
         """Make one MH flow identification sub-option.
 
         Args:
             code: Sub-option type.
-            data: Sub-option data model.
+            option: Sub-option data model.
             **kwargs: Sub-option fields, when no data model is given.
 
         Returns:
             Constructed sub-option schema.
 
+        Note:
+            The data model parameter is named ``option`` rather than ``data`` to
+            match :meth:`_make_opt_fid` and the rest of this module -- and because
+            naming it ``data`` made it **shadow a field**. The traffic selector and
+            unassigned sub-options both carry a field of their own called ``data``,
+            so a caller's ``data=`` bound to the model parameter instead of landing
+            in ``**kwargs``, and the ``kwargs.get('data')`` fallback below could
+            never see it: the payload was silently dropped and the length written as
+            though it were empty. No exception, just a lost field.
+
+            Dispatch is on ``code`` rather than on ``isinstance`` of the schema or
+            data class, for the reason given in :meth:`_read_fid_suboptions`.
+
         """
-        if isinstance(data, Data_PadFlowIdentificationSuboption) or (
-                data is None and code in (Enum_FlowIDSuboption.Pad,
-                                          Enum_FlowIDSuboption.PadN)):
+        if code in (Enum_FlowIDSuboption.Pad, Enum_FlowIDSuboption.PadN):
             if code == Enum_FlowIDSuboption.Pad:
                 pad_len = 0
-            elif data is not None:
-                pad_len = data.length - 2
+            elif option is not None:
+                pad_len = option.length - 2
             else:
                 pad_len = cast('int', kwargs.get('length', 0))
             return Schema_PadFlowIdentificationSuboption(type=code, length=pad_len)
 
-        if isinstance(data, Data_BIDReferenceSuboption):
-            bid = list(data.bid)
-        else:
-            bid = cast('list[int]', kwargs.get('bid') or [])
         if code == Enum_FlowIDSuboption.BID_Reference:
+            if option is not None:
+                bid = list(cast('Data_BIDReferenceSuboption', option).bid)
+            else:
+                bid = cast('list[int]', kwargs.get('bid') or [])
             return Schema_BIDReferenceSuboption(type=code, length=len(bid) * 2, bid=bid)
 
         if code == Enum_FlowIDSuboption.Traffic_Selector:
-            if isinstance(data, Data_TrafficSelectorSuboption):
-                ts_format = data.ts_format  # type: Enum_TrafficSelector | int
-                selector = data.selector
+            if option is not None:
+                selector_opt = cast('Data_TrafficSelectorSuboption', option)
+                ts_format = selector_opt.ts_format  # type: Enum_TrafficSelector | int
+                selector = selector_opt.selector
             else:
                 ts_format = cast('Enum_TrafficSelector | int',
                                  kwargs.get('ts_format',
@@ -8878,8 +8973,9 @@ class MH(Internet[Data_MH, Schema_MH],
                 ts_format=cast('Enum_TrafficSelector', ts_format), selector=selector)
 
         if code == Enum_FlowIDSuboption.Flow_Binding_Action:
-            if isinstance(data, Data_FlowBindingActionSuboption):
-                action = data.action  # type: Enum_FlowBindingAction | int
+            if option is not None:
+                action = cast('Data_FlowBindingActionSuboption',
+                              option).action  # type: Enum_FlowBindingAction | int
             else:
                 action = cast('Enum_FlowBindingAction | int',
                               kwargs.get('action', Enum_FlowBindingAction.Add))
@@ -8887,8 +8983,8 @@ class MH(Internet[Data_MH, Schema_MH],
                 type=code, length=2, action=cast('Enum_FlowBindingAction', action))
 
         if code == Enum_FlowIDSuboption.Target_Care_of_Address:
-            if isinstance(data, Data_TargetCareofAddressSuboption):
-                address = data.address  # type: Any
+            if option is not None:
+                address = cast('Data_TargetCareofAddressSuboption', option).address  # type: Any
             else:
                 address = kwargs.get('address', '::')
             addr = address if isinstance(
@@ -8897,8 +8993,8 @@ class MH(Internet[Data_MH, Schema_MH],
             return Schema_TargetCareofAddressSuboption(
                 type=code, length=6 if addr.version == 4 else 18, address=addr)
 
-        if isinstance(data, Data_UnassignedFlowIdentificationSuboption):
-            payload = data.data
+        if option is not None:
+            payload = cast('Data_UnassignedFlowIdentificationSuboption', option).data
         else:
             payload = cast('bytes', kwargs.get('data', b''))
         return Schema_UnassignedFlowIdentificationSuboption(
@@ -9167,17 +9263,17 @@ class MH(Internet[Data_MH, Schema_MH],
                     entries.append(self._make_ani_suboption(code, **args))
             return entries
 
-        return [self._make_ani_suboption(code, data=data)
-                for code, data in suboptions.items(multi=True)]
+        return [self._make_ani_suboption(code, option)
+                for code, option in suboptions.items(multi=True)]
 
     def _make_ani_suboption(self, code: 'Enum_ANISuboption',
-                            data: 'Optional[Data_ANISuboption]' = None,
+                            option: 'Optional[Data_ANISuboption]' = None,
                             **kwargs: 'Any') -> 'Schema_ANISuboption':
         """Make one MH access network identifier sub-option.
 
         Args:
             code: Sub-option type.
-            data: Sub-option data model.
+            option: Sub-option data model.
             **kwargs: Sub-option fields, when no data model is given.
 
         Returns:
@@ -9188,10 +9284,17 @@ class MH(Internet[Data_MH, Schema_MH],
             integers rather than from the decoded floats, since a float cannot
             always be converted back to the same 24-bit fixed-point value.
 
+            The data model parameter is named ``option`` rather than ``data`` so
+            that it cannot shadow a sub-option field of that name -- see
+            :meth:`_make_fid_suboption`, where it did. Dispatch is on ``code``
+            rather than on ``isinstance``, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
         """
         if code == Enum_ANISuboption.Network_Identifier:
-            if isinstance(data, Data_ANINetworkIdentifierSuboption):
-                utf8, net_name, ap_name = data.utf8, data.net_name, data.ap_name
+            if option is not None:
+                net = cast('Data_ANINetworkIdentifierSuboption', option)
+                utf8, net_name, ap_name = net.utf8, net.net_name, net.ap_name
             else:
                 utf8 = cast('bool', kwargs.get('utf8', False))
                 net_name = cast('bytes', kwargs.get('net_name', b''))
@@ -9202,8 +9305,9 @@ class MH(Internet[Data_MH, Schema_MH],
                 ap_name_len=len(ap_name), ap_name=ap_name)
 
         if code == Enum_ANISuboption.Geo_Location:
-            if isinstance(data, Data_ANIGeoLocationSuboption):
-                raw_lat, raw_lon = data.raw_latitude, data.raw_longitude
+            if option is not None:
+                geo = cast('Data_ANIGeoLocationSuboption', option)
+                raw_lat, raw_lon = geo.raw_latitude, geo.raw_longitude
             else:
                 raw_lat = cast('int', kwargs.get('raw_latitude', 0))
                 raw_lon = cast('int', kwargs.get('raw_longitude', 0))
@@ -9214,9 +9318,10 @@ class MH(Internet[Data_MH, Schema_MH],
                 })
 
         if code == Enum_ANISuboption.Operator_Identifier:
-            if isinstance(data, Data_ANIOperatorIdentifierSuboption):
-                op_id_type = data.op_id_type  # type: Enum_OperatorID | int
-                identifier = data.identifier
+            if option is not None:
+                operator = cast('Data_ANIOperatorIdentifierSuboption', option)
+                op_id_type = operator.op_id_type  # type: Enum_OperatorID | int
+                identifier = operator.identifier
             else:
                 op_id_type = cast('Enum_OperatorID | int',
                                   kwargs.get('op_id_type', Enum_OperatorID.Realm_of_the_Operator))
@@ -9226,8 +9331,9 @@ class MH(Internet[Data_MH, Schema_MH],
                 op_id_type=cast('Enum_OperatorID', op_id_type), identifier=identifier)
 
         if code == Enum_ANISuboption.Civic_Location:
-            if isinstance(data, Data_ANICivicLocationSuboption):
-                fmt, location = data.format, data.location
+            if option is not None:
+                civic = cast('Data_ANICivicLocationSuboption', option)
+                fmt, location = civic.format, civic.location
             else:
                 fmt = cast('int', kwargs.get('format', 0))
                 location = cast('bytes', kwargs.get('location', b''))
@@ -9235,23 +9341,24 @@ class MH(Internet[Data_MH, Schema_MH],
                 type=code, length=2 + len(location), format=fmt, location=location)
 
         if code == Enum_ANISuboption.MAG_Group_Identifier:
-            if isinstance(data, Data_ANIMAGGroupIdentifierSuboption):
-                group_id = data.group_id
+            if option is not None:
+                group_id = cast('Data_ANIMAGGroupIdentifierSuboption', option).group_id
             else:
                 group_id = cast('int', kwargs.get('group_id', 0))
             return Schema_ANIMAGGroupIdentifierSuboption(type=code, length=2, group_id=group_id)
 
         if code == Enum_ANISuboption.ANI_Update_Timer:
-            if isinstance(data, Data_ANIUpdateTimerSuboption):
-                timer = math.ceil(data.timer.total_seconds() / 4)
+            if option is not None:
+                timer = math.ceil(cast('Data_ANIUpdateTimerSuboption',
+                                       option).timer.total_seconds() / 4)
             else:
                 raw_timer = kwargs.get('timer', 0)
                 timer = raw_timer if isinstance(raw_timer, int) else math.ceil(
                     raw_timer.total_seconds() / 4)
             return Schema_ANIUpdateTimerSuboption(type=code, length=2, timer=timer)
 
-        if isinstance(data, Data_UnassignedANISuboption):
-            payload = data.data
+        if option is not None:
+            payload = cast('Data_UnassignedANISuboption', option).data
         else:
             payload = cast('bytes', kwargs.get('data', b''))
         return Schema_UnassignedANISuboption(type=code, length=len(payload), data=payload)
@@ -9485,27 +9592,44 @@ class MH(Internet[Data_MH, Schema_MH],
                     entries.append(self._make_qos_attribute(code, **args))
             return entries
 
-        return [self._make_qos_attribute(code, data=data)
-                for code, data in attributes.items(multi=True)]
+        return [self._make_qos_attribute(code, option)
+                for code, option in attributes.items(multi=True)]
 
     def _make_qos_attribute(self, code: 'Enum_QoSAttribute',
-                            data: 'Optional[Data_QoSAttribute]' = None,
+                            option: 'Optional[Data_QoSAttribute]' = None,
                             **kwargs: 'Any') -> 'Schema_QoSAttribute':
         """Make one MH quality-of-service attribute.
 
         Args:
             code: Attribute type.
-            data: Attribute data model.
+            option: Attribute data model.
             **kwargs: Attribute fields, when no data model is given.
 
         Returns:
             Constructed attribute schema.
 
+        Note:
+            The data model parameter is named ``option`` rather than ``data``, and
+            that is not cosmetic. The vendor-specific attribute of
+            :rfc:`7222#section-4.2.11` has a field of its own called ``data``, so
+            with the parameter named ``data`` a caller's ``data=`` bound to the
+            model parameter instead of reaching ``**kwargs`` -- and the
+            ``kwargs.get('data')`` fallback then always saw nothing. Building the
+            attribute the natural way, mirroring the data model's own field names,
+            silently dropped the vendor payload and wrote the length as though it
+            were empty. ``vendor`` and ``subtype`` survived because those names do
+            not collide, which made the loss look like a partial success rather
+            than a bug.
+
+            Dispatch is on ``code`` rather than on ``isinstance``, for the reason
+            given in :meth:`_read_fid_suboptions`.
+
         """
         if code in (Enum_QoSAttribute.Per_Session_Agg_Max_DL_Bit_Rate,
                     Enum_QoSAttribute.Per_Session_Agg_Max_UL_Bit_Rate):
-            if isinstance(data, Data_PerSessionBitRateAttribute):
-                service, exclude, rate = data.service, data.exclude, data.rate
+            if option is not None:
+                session = cast('Data_PerSessionBitRateAttribute', option)
+                service, exclude, rate = session.service, session.exclude, session.rate
             else:
                 service = cast('bool', kwargs.get('service', False))
                 exclude = cast('bool', kwargs.get('exclude', False))
@@ -9520,17 +9644,18 @@ class MH(Internet[Data_MH, Schema_MH],
                     Enum_QoSAttribute.Aggregate_Max_UL_Bit_Rate,
                     Enum_QoSAttribute.Guaranteed_DL_Bit_Rate,
                     Enum_QoSAttribute.Guaranteed_UL_Bit_Rate):
-            if isinstance(data, Data_BitRateAttribute):
-                rate = data.rate
+            if option is not None:
+                rate = cast('Data_BitRateAttribute', option).rate
             else:
                 rate = cast('int', kwargs.get('rate', 0))
             return Schema_BitRateAttribute(type=code, length=6, rate=rate)
 
         if code == Enum_QoSAttribute.Allocation_Retention_Priority:
-            if isinstance(data, Data_AllocationRetentionPriorityAttribute):
-                level = data.priority_level
-                capability = data.preemption_capability
-                vulnerability = data.preemption_vulnerability
+            if option is not None:
+                arp = cast('Data_AllocationRetentionPriorityAttribute', option)
+                level = arp.priority_level
+                capability = arp.preemption_capability
+                vulnerability = arp.preemption_vulnerability
             else:
                 level = cast('int', kwargs.get('priority_level', 1))
                 capability = cast('int', kwargs.get('preemption_capability', 0))
@@ -9540,9 +9665,10 @@ class MH(Internet[Data_MH, Schema_MH],
                 priority={'PL': level, 'PC': capability, 'PV': vulnerability})
 
         if code == Enum_QoSAttribute.QoS_Traffic_Selector:
-            if isinstance(data, Data_QoSTrafficSelectorAttribute):
-                ts_format = data.ts_format  # type: Enum_TrafficSelector | int
-                selector = data.selector
+            if option is not None:
+                ts_attr = cast('Data_QoSTrafficSelectorAttribute', option)
+                ts_format = ts_attr.ts_format  # type: Enum_TrafficSelector | int
+                selector = ts_attr.selector
             else:
                 ts_format = cast('Enum_TrafficSelector | int',
                                  kwargs.get('ts_format',
@@ -9553,8 +9679,10 @@ class MH(Internet[Data_MH, Schema_MH],
                 ts_format=cast('Enum_TrafficSelector', ts_format), selector=selector)
 
         if code == Enum_QoSAttribute.QoS_Vendor_Specific_Attribute:
-            if isinstance(data, Data_QoSVendorSpecificAttribute):
-                vendor, subtype, payload = data.vendor, data.subtype, data.data
+            if option is not None:
+                vendor_attr = cast('Data_QoSVendorSpecificAttribute', option)
+                vendor, subtype, payload = (vendor_attr.vendor, vendor_attr.subtype,
+                                            vendor_attr.data)
             else:
                 vendor = cast('int', kwargs.get('vendor', 0))
                 subtype = cast('int', kwargs.get('subtype', 0))
@@ -9563,8 +9691,8 @@ class MH(Internet[Data_MH, Schema_MH],
                 type=code, length=7 + len(payload), vendor=vendor, subtype=subtype,
                 data=payload)
 
-        if isinstance(data, Data_UnassignedQoSAttribute):
-            payload = data.data
+        if option is not None:
+            payload = cast('Data_UnassignedQoSAttribute', option).data
         else:
             payload = cast('bytes', kwargs.get('data', b''))
         return Schema_UnassignedQoSAttribute(type=code, length=len(payload), data=payload)
@@ -9750,8 +9878,8 @@ class MH(Internet[Data_MH, Schema_MH],
                     entries.append(self._make_lcmp_suboption(code, **args))
             return entries
 
-        return [self._make_lcmp_suboption(code, data=data)
-                for code, data in suboptions.items(multi=True)]
+        return [self._make_lcmp_suboption(code, option)
+                for code, option in suboptions.items(multi=True)]
 
     @staticmethod
     def _seconds(value: 'int | timedelta', unit: 'int' = 1) -> 'int':
@@ -9771,24 +9899,32 @@ class MH(Internet[Data_MH, Schema_MH],
         return math.ceil(value.total_seconds() / unit)
 
     def _make_lcmp_suboption(self, code: 'Enum_LMAControlledMAGSuboption',
-                             data: 'Optional[Data_LMAControlledMAGSuboption]' = None,
+                             option: 'Optional[Data_LMAControlledMAGSuboption]' = None,
                              **kwargs: 'Any') -> 'Schema_LMAControlledMAGSuboption':
         """Make one MH LMA-controlled MAG parameters sub-option.
 
         Args:
             code: Sub-option type.
-            data: Sub-option data model.
+            option: Sub-option data model.
             **kwargs: Sub-option fields, when no data model is given.
 
         Returns:
             Constructed sub-option schema.
 
+        Note:
+            The data model parameter is named ``option`` rather than ``data`` so
+            that it cannot shadow a sub-option field of that name -- see
+            :meth:`_make_fid_suboption`, where it did. Dispatch is on ``code``
+            rather than on ``isinstance``, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
         """
         if code == Enum_LMAControlledMAGSuboption.Binding_Re_registration_Control:
-            if isinstance(data, Data_BindingReregistrationControlSuboption):
-                start = math.ceil(data.start_time.total_seconds() / 4)
-                initial = math.ceil(data.initial_retransmission.total_seconds())
-                maximum = math.ceil(data.max_retransmission.total_seconds())
+            if option is not None:
+                rereg = cast('Data_BindingReregistrationControlSuboption', option)
+                start = math.ceil(rereg.start_time.total_seconds() / 4)
+                initial = math.ceil(rereg.initial_retransmission.total_seconds())
+                maximum = math.ceil(rereg.max_retransmission.total_seconds())
             else:
                 start = self._seconds(kwargs.get('start_time', 0), 4)
                 initial = self._seconds(kwargs.get('initial_retransmission', 0))
@@ -9798,10 +9934,11 @@ class MH(Internet[Data_MH, Schema_MH],
                 initial_retransmission=initial, max_retransmission=maximum)
 
         if code == Enum_LMAControlledMAGSuboption.Heartbeat_Control:
-            if isinstance(data, Data_HeartbeatControlSuboption):
-                interval = math.ceil(data.interval.total_seconds())
-                delay = math.ceil(data.retransmission_delay.total_seconds())
-                count = data.max_retransmissions
+            if option is not None:
+                heartbeat = cast('Data_HeartbeatControlSuboption', option)
+                interval = math.ceil(heartbeat.interval.total_seconds())
+                delay = math.ceil(heartbeat.retransmission_delay.total_seconds())
+                count = heartbeat.max_retransmissions
             else:
                 interval = self._seconds(kwargs.get('interval', 0))
                 delay = self._seconds(kwargs.get('retransmission_delay', 0))
@@ -9810,8 +9947,8 @@ class MH(Internet[Data_MH, Schema_MH],
                 type=code, length=6, interval=interval,
                 retransmission_delay=delay, max_retransmissions=count)
 
-        if isinstance(data, Data_UnassignedLMAControlledMAGSuboption):
-            payload = data.data
+        if option is not None:
+            payload = cast('Data_UnassignedLMAControlledMAGSuboption', option).data
         else:
             payload = cast('bytes', kwargs.get('data', b''))
         return Schema_UnassignedLMAControlledMAGSuboption(
