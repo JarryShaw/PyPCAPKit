@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-"""VLAN - 802.1Q Customer VLAN Tag Type
+"""VLAN - 802.1Q/802.1ad VLAN Tag Types
 ==========================================
 
 .. module:: pcapkit.protocols.link.vlan
 
 :mod:`pcapkit.protocols.link.vlan` contains
-:class:`~pcapkit.protocols.link.vlan.VLAN`
-only, which implements extractor for 802.1Q
-Customer VLAN Tag Type [*]_, whose structure is
-described as below:
+:class:`~pcapkit.protocols.link.vlan.VLAN` only, an abstract base class holding
+the tag layout shared by every VLAN tag [*]_. The two concrete tags live in
+modules of their own, since they are reached through different registry indices
+-- :class:`~pcapkit.protocols.link.c_tag.C_Tag` for the 802.1Q customer tag
+(``0x8100``) and :class:`~pcapkit.protocols.link.s_tag.S_Tag` for the 802.1ad
+service tag (``0x88A8``). The tag structure is described as below:
 
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
@@ -19,6 +21,31 @@ Octets      Bits        Name                    Description
   1           4   ``vlan.tci.vid``          VLAN Identifier
   3          24   ``vlan.type``             Protocol (Internet Layer)
 ======= ========= ====================== =============================
+
+The two tags carry an **identical** tag control information layout -- the same
+3-bit PCP, 1-bit DEI and 12-bit VID -- and are told apart solely by the tag
+protocol identifier (TPID) that selected them, ``0x8100`` for the customer tag
+against ``0x88A8`` for the service tag. That TPID is not part of either tag: it
+is the EtherType field of whatever encapsulates the tag, so both classes read the
+same four octets and share every byte of parsing and construction code.
+
+They are nonetheless distinct classes rather than one class bound at two
+EtherTypes, because 802.1ad *stacks* them: a Q-in-Q frame carries a service tag
+whose next EtherType is ``0x8100``, selecting a customer tag in turn. Both tags
+therefore appear in one frame, and :attr:`~pcapkit.protocols.protocol.ProtocolBase.info_name`
+-- ``s_tag`` against ``c_tag`` -- is what keeps them apart in the parsed
+:class:`~pcapkit.corekit.infoclass.Info`. A single class bound at both EtherTypes
+would nest one ``c_tag`` inside another, leaving nothing in the output to say
+which of the two was the service tag.
+
+Two distinct EtherTypes also means two distinct
+:meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__` values, which is the
+project's rule for when protocols get separate modules: siblings that *share* an
+index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares
+:mod:`~pcapkit.protocols.link.arp` and
+:class:`~pcapkit.protocols.link.rarp.DRARP` shares
+:mod:`~pcapkit.protocols.link.rarp`. This base declares no index of its own --
+it is abstract and nothing dispatches to it -- so its ``__index__`` raises.
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q
 
@@ -48,28 +75,27 @@ if TYPE_CHECKING:
 __all__ = ['VLAN']
 
 
-class VLAN(Link[Data_VLAN, Schema_VLAN],
+class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
            schema=Schema_VLAN, data=Data_VLAN):
-    """This class implements 802.1Q Customer VLAN Tag Type."""
+    """Abstract base class for 802.1Q/802.1ad VLAN tag types.
+
+    The class implements the whole of the tag -- both parsing and construction --
+    since the customer and service tags are byte-for-byte identical. What it
+    deliberately leaves to its subclasses is only how the tag *names* itself:
+    :attr:`name`, :attr:`alias` and
+    :attr:`~pcapkit.protocols.protocol.ProtocolBase.info_name`.
+
+    It is abstract for the same reason :class:`~pcapkit.protocols.internet.ip.IP`
+    is: :attr:`~pcapkit.protocols.protocol.ProtocolBase.name` is declared
+    abstract by :class:`~pcapkit.protocols.protocol.ProtocolBase` and is not
+    defined here, so the class cannot be instantiated. Bind
+    :class:`C_Tag` or :class:`S_Tag`, never this class.
+
+    """
 
     ##########################################################################
     # Properties.
     ##########################################################################
-
-    @property
-    def name(self) -> 'Literal["802.1Q Customer VLAN Tag Type"]':
-        """Name of current protocol."""
-        return '802.1Q Customer VLAN Tag Type'
-
-    @property
-    def alias(self) -> 'Literal["802.1Q"]':
-        """Acronym of corresponding protocol."""
-        return '802.1Q'
-
-    @property
-    def info_name(self) -> 'Literal["c_tag"]':
-        """Key name of the :attr:`info` dict."""
-        return 'c_tag'
 
     @property
     def length(self) -> 'Literal[4]':
@@ -85,10 +111,24 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_VLAN':  # pylint: disable=unused-argument
-        """Read 802.1Q Customer VLAN Tag Type.
+    @classmethod
+    def id(cls) -> 'tuple[Literal["VLAN"], Literal["C_Tag"], Literal["S_Tag"]]':
+        """Index ID of the protocol.
 
-        Structure of 802.1Q Customer VLAN Tag Type [`IEEE 802.1Q <https://standards.ieee.org/ieee/802.1Q/6844/>`__]:
+        Returns:
+            Index ID of the protocol -- the family name, then every tag in it, as
+            :meth:`HTTP.id <pcapkit.protocols.application.http.HTTP.id>` does for
+            its own family. Note that unlike HTTP's versions, the two tags are
+            *distinct protocols* rather than flavours of one, so each is its own
+            canonical name; they carry ``VLAN`` only as a secondary alias.
+
+        """
+        return ('VLAN', 'C_Tag', 'S_Tag')
+
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_VLAN':  # pylint: disable=unused-argument
+        """Read 802.1Q/802.1ad VLAN tag type.
+
+        Structure of 802.1Q/802.1ad VLAN tag type [`IEEE 802.1Q <https://standards.ieee.org/ieee/802.1Q/6844/>`__]:
 
         .. code-block:: text
 
@@ -118,7 +158,7 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],
         vlan = Data_VLAN(
             tci=Data_TCI(
                 pcp=Enum_PriorityLevel.get(tci['pcp']),
-                dei=bool(tci['pcp']),
+                dei=bool(tci['dei']),
                 vid=int(tci['vid']),
             ),
             type=schema.type,

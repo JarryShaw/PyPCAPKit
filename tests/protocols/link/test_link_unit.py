@@ -21,12 +21,105 @@ class LinkProtocolUnitTests(unittest.TestCase):
     def setUp(self) -> None:
         purge_modules(['pcapkit'])
 
-    def test_vlan_index_is_unsupported(self) -> None:
+    def test_vlan_indices_follow_the_one_module_per_index_rule(self) -> None:
+        """Each tag declares the EtherType it is reached by; the base declares none.
+
+        The two indices differing is *why* the tags live in separate modules --
+        the project's rule is that a shared index may share a module (as
+        ``InARP`` shares ``ARP``'s), and a distinct one may not.
+
+        """
+        from pcapkit.const.reg.ethertype import EtherType
+        from pcapkit.protocols.link.c_tag import C_Tag
+        from pcapkit.protocols.link.s_tag import S_Tag
         from pcapkit.protocols.link.vlan import VLAN
         from pcapkit.utilities.exceptions import UnsupportedCall
 
+        self.assertEqual(C_Tag.__index__(), EtherType.Customer_VLAN_Tag_Type)
+        self.assertEqual(C_Tag.__index__(), 0x8100)
+        self.assertEqual(S_Tag.__index__(),
+                         EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier)
+        self.assertEqual(S_Tag.__index__(), 0x88A8)
+        self.assertNotEqual(C_Tag.__index__(), S_Tag.__index__())
+
+        # The abstract base is reached by nothing, so it has no index.
         with self.assertRaises(UnsupportedCall):
             VLAN.__index__()
+
+        # ... and each tag is in a module of its own, keyed on that difference.
+        self.assertEqual(C_Tag.__module__, 'pcapkit.protocols.link.c_tag')
+        self.assertEqual(S_Tag.__module__, 'pcapkit.protocols.link.s_tag')
+        self.assertEqual(VLAN.__module__, 'pcapkit.protocols.link.vlan')
+
+    def test_vlan_base_is_abstract_and_tags_are_concrete(self) -> None:
+        from pcapkit.protocols.data.link.vlan import VLAN as DataVLAN
+        from pcapkit.protocols.link.c_tag import C_Tag
+        from pcapkit.protocols.link.s_tag import S_Tag
+        from pcapkit.protocols.link.vlan import VLAN
+        from pcapkit.protocols.schema.link.vlan import VLAN as SchemaVLAN
+
+        # The base leaves ``name`` to its subclasses, which is what makes it
+        # abstract -- the same reason ``internet.ip.IP`` is.
+        self.assertEqual(VLAN.__abstractmethods__, frozenset({'name'}))
+        with self.assertRaises(TypeError):
+            object.__new__(VLAN)
+
+        for klass in (C_Tag, S_Tag):
+            with self.subTest(protocol=klass.__name__):
+                self.assertEqual(klass.__abstractmethods__, frozenset())
+                self.assertTrue(issubclass(klass, VLAN))
+                # Restated on each subclass rather than inherited: an omitted
+                # ``schema=``/``data=`` is resolved by *class name* lookup and
+                # would silently fall back to the Raw pair.
+                self.assertIs(klass.__schema__, SchemaVLAN)
+                self.assertIs(klass.__data__, DataVLAN)
+
+    def test_vlan_tags_keep_distinct_names_and_share_vlan_id(self) -> None:
+        from pcapkit.protocols.link.c_tag import C_Tag
+        from pcapkit.protocols.link.s_tag import S_Tag
+
+        c_tag = object.__new__(C_Tag)
+        s_tag = object.__new__(S_Tag)
+
+        self.assertEqual(c_tag.name, '802.1Q Customer VLAN Tag Type')
+        self.assertEqual(c_tag.alias, '802.1Q')
+        self.assertEqual(c_tag.info_name, 'c_tag')
+
+        self.assertEqual(s_tag.name, '802.1ad Service VLAN Tag Type')
+        self.assertEqual(s_tag.alias, '802.1ad')
+        self.assertEqual(s_tag.info_name, 's_tag')
+
+        # Distinct info_name is the whole point: it is what keeps a stacked
+        # service tag and customer tag apart in the parsed info dict.
+        self.assertNotEqual(c_tag.info_name, s_tag.info_name)
+
+        # Both still answer to 'VLAN' for protocol selection, with their own
+        # name canonical -- element zero is what callers treat as canonical.
+        self.assertEqual(C_Tag.id(), ('C_Tag', 'VLAN'))
+        self.assertEqual(S_Tag.id(), ('S_Tag', 'VLAN'))
+        self.assertEqual(C_Tag.id()[0], 'C_Tag')
+        self.assertEqual(S_Tag.id()[0], 'S_Tag')
+
+    def test_vlan_base_claims_its_family_in_id(self) -> None:
+        from pcapkit.protocols.link.vlan import VLAN
+
+        self.assertEqual(VLAN.id(), ('VLAN', 'C_Tag', 'S_Tag'))
+
+    def test_vlan_tags_are_registered_at_their_own_ethertypes(self) -> None:
+        from pcapkit.const.reg.ethertype import EtherType
+        from pcapkit.protocols.link.link import Link
+        from pcapkit.protocols.protocol import ProtocolBase
+
+        size = len(Link.__proto__)
+        for code, name in (
+            (EtherType.Customer_VLAN_Tag_Type, 'C_Tag'),
+            (EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier, 'S_Tag'),
+        ):
+            with self.subTest(ethertype=code):
+                self.assertIn(code, Link.__proto__)
+                entry = ProtocolBase._lookup_registry(Link.__proto__, code)
+                self.assertEqual(getattr(entry, 'name', None) or entry.__name__, name)
+        self.assertEqual(len(Link.__proto__), size)
 
     def test_ethernet_index_and_length_hint_are_stable(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
@@ -57,11 +150,12 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(RARP.__index__(), EtherType.Reverse_Address_Resolution_Protocol)
 
     def test_vlan_length_hint_is_stable(self) -> None:
-        from pcapkit.protocols.link.vlan import VLAN
+        from pcapkit.protocols.link.c_tag import C_Tag
+        from pcapkit.protocols.link.s_tag import S_Tag
 
-        proto = object.__new__(VLAN)
-
-        self.assertEqual(proto.__length_hint__(), 4)
+        for klass in (C_Tag, S_Tag):
+            with self.subTest(protocol=klass.__name__):
+                self.assertEqual(object.__new__(klass).__length_hint__(), 4)
 
     def test_arp_cached_properties_expose_grouped_addresses_and_types(self) -> None:
         from pcapkit.const.arp.hardware import Hardware
@@ -167,6 +261,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.const.vlan.priority_level import PriorityLevel
         from pcapkit.protocols.link.vlan import VLAN
 
+        # ``_make_data`` is shared plumbing on the abstract base, so it is
+        # reachable from the base itself as well as from either concrete tag.
         class DummyTCI(dict):
             __getattr__ = dict.__getitem__
 
@@ -186,8 +282,41 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(values['type'], EtherType.Internet_Protocol_version_6)
         self.assertIn('payload', values)
 
+    def test_l2tp_base_is_abstract_and_carries_no_header(self) -> None:
+        """The base holds the family, not a header shape.
+
+        The versions do not share one: all that is common is the version nibble
+        in the first 16-bit word. So the base defines no ``read``/``make`` and
+        binds no schema, exactly as ``internet.ip.IP`` does for its family.
+
+        """
+        from pcapkit.protocols.link.l2tp import L2TP
+        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.schema.link.l2tp import L2TP as SchemaL2TP
+
+        self.assertEqual(L2TP.__abstractmethods__,
+                         frozenset({'name', 'read', 'make', 'length'}))
+        with self.assertRaises(TypeError):
+            object.__new__(L2TP)
+
+        self.assertTrue(issubclass(L2TPv2, L2TP))
+        self.assertEqual(L2TPv2.__abstractmethods__, frozenset())
+        # v2 binds the RFC 2661 schema; the version-agnostic base binds none of
+        # its own, so this must be stated on the subclass, not inherited.
+        self.assertIs(L2TPv2.__schema__, SchemaL2TP)
+
+        # Canonical family name first, then this version's label -- the shape
+        # ``httpv1.HTTP.id`` uses, so ``protocol='L2TP'`` still selects v2.
+        self.assertEqual(L2TP.id(), ('L2TP', 'L2TPv2'))
+        self.assertEqual(L2TPv2.id(), ('L2TP', 'L2TPv2'))
+        self.assertEqual(L2TPv2.id()[0], 'L2TP')
+
+        self.assertEqual(L2TP.__module__, 'pcapkit.protocols.link.l2tp')
+        self.assertEqual(L2TPv2.__module__, 'pcapkit.protocols.link.l2tpv2')
+
     def test_l2tp_index_is_unsupported_and_make_data_preserves_flags(self) -> None:
         from pcapkit.protocols.link.l2tp import L2TP
+        from pcapkit.protocols.link.l2tpv2 import L2TPv2
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         data = DummyData(
@@ -201,12 +330,17 @@ class LinkProtocolUnitTests(unittest.TestCase):
             offset=0,
             __next_type__=None,
         )
-        proto = object.__new__(L2TP)
+        proto = object.__new__(L2TPv2)
 
-        with self.assertRaises(UnsupportedCall):
-            L2TP.__index__()
+        # Neither the abstract base nor v2 has a numeral registry index: v2 is
+        # reached by UDP port 1701, and a port is not an ``__index__`` value
+        # anywhere in this package. L2TPv3 will be the first with one (115).
+        for klass in (L2TP, L2TPv2):
+            with self.subTest(protocol=klass.__name__):
+                with self.assertRaises(UnsupportedCall):
+                    klass.__index__()
         self.assertEqual(proto.__length_hint__(), 16)
-        values = L2TP._make_data(data)
+        values = L2TPv2._make_data(data)
         self.assertEqual(values['type'], True)
         self.assertEqual(values['prio'], False)
         self.assertEqual(values['version'], 2)
@@ -214,10 +348,10 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(values['session_id'], 4)
         self.assertIn('payload', values)
 
-    def test_ospf_index_is_unsupported_and_make_data_preserves_header(self) -> None:
+    def test_ospf_index_is_its_transtype_and_make_data_preserves_header(self) -> None:
         from pcapkit.const.ospf.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.link.ospf import OSPF
-        from pcapkit.utilities.exceptions import UnsupportedCall
 
         data = DummyData(
             version=2,
@@ -231,8 +365,10 @@ class LinkProtocolUnitTests(unittest.TestCase):
         )
         proto = object.__new__(OSPF)
 
-        with self.assertRaises(UnsupportedCall):
-            OSPF.__index__()
+        # This raised UnsupportedCall while OSPF was reachable from no registry
+        # at all; it is now dispatched from Internet.__proto__ at 89.
+        self.assertEqual(OSPF.__index__(), TransType.OSPFIGP)
+        self.assertEqual(OSPF.__index__(), 89)
         self.assertEqual(proto.__length_hint__(), 24)
         values = OSPF._make_data(data)
         self.assertEqual(values['version'], 2)
@@ -458,20 +594,25 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
     def test_l2tp_properties_read_and_make_variants(self) -> None:
         from pcapkit.const.l2tp.type import Type
-        from pcapkit.protocols.link.l2tp import L2TP
+        from pcapkit.protocols.link.l2tpv2 import L2TPv2
         from pcapkit.protocols.schema.link.l2tp import L2TP as SchemaL2TP
 
-        l2tp = object.__new__(L2TP)
+        l2tp = object.__new__(L2TPv2)
         l2tp._info = types.SimpleNamespace(
             hdr_len=12,
             flags=types.SimpleNamespace(type=Type.Data),
         )
 
-        self.assertEqual(l2tp.name, 'Layer 2 Tunnelling Protocol')
+        self.assertEqual(l2tp.name, 'Layer 2 Tunnelling Protocol version 2')
+        self.assertEqual(l2tp.alias, 'L2TPv2')
+        self.assertEqual(l2tp.version, 2)
+        # info_name comes from the abstract base and is version-independent, so
+        # a consumer finds the datagram under ``l2tp`` whichever version it was.
+        self.assertEqual(l2tp.info_name, 'l2tp')
         self.assertEqual(l2tp.length, 12)
         self.assertEqual(l2tp.type, Type.Data)
 
-        reader = object.__new__(L2TP)
+        reader = object.__new__(L2TPv2)
         reader.__header__ = SchemaL2TP(
             flags={'type': Type.Control, 'len': True, 'seq': True, 'offset': True,
                    'prio': True, 'version': 2},
@@ -484,7 +625,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
             payload=b'xxpayload',
         )
         reader._read_fileng = mock.Mock(return_value=b'\x00\x00')
-        reader._decode_next_layer = mock.Mock(side_effect=lambda data, length: data)
+        reader._decode_next_layer = mock.Mock(side_effect=lambda data, proto, length: data)
         data = reader.read()
         self.assertTrue(data.flags.len)
         self.assertTrue(data.flags.seq)
@@ -492,7 +633,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(data.hdr_len, 16)
         reader._read_fileng.assert_called_once_with(2)
 
-        reader_no_flags = object.__new__(L2TP)
+        reader_no_flags = object.__new__(L2TPv2)
         reader_no_flags.__cached__ = {}
         reader_no_flags._data = b'\x00' * 14
         reader_no_flags.__header__ = SchemaL2TP(
@@ -506,14 +647,14 @@ class LinkProtocolUnitTests(unittest.TestCase):
             offset=None,
             payload=b'payload',
         )
-        reader_no_flags._decode_next_layer = mock.Mock(side_effect=lambda data, length: data)
+        reader_no_flags._decode_next_layer = mock.Mock(side_effect=lambda data, proto, length: data)
         data_no_flags = reader_no_flags.read()
         self.assertIsNone(data_no_flags.length)
         self.assertIsNone(data_no_flags.ns)
         self.assertIsNone(data_no_flags.offset)
         self.assertEqual(data_no_flags.hdr_len, 6)
 
-        maker = object.__new__(L2TP)
+        maker = object.__new__(L2TPv2)
         schema = maker.make(
             type=Type.Control,
             priority=True,
@@ -534,11 +675,11 @@ class LinkProtocolUnitTests(unittest.TestCase):
     def test_vlan_properties_read_and_make_variants(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.vlan.priority_level import PriorityLevel
-        from pcapkit.protocols.link.vlan import VLAN
+        from pcapkit.protocols.link.c_tag import C_Tag
         from pcapkit.protocols.schema.link.vlan import TCI as SchemaTCI
         from pcapkit.protocols.schema.link.vlan import VLAN as SchemaVLAN
 
-        vlan = object.__new__(VLAN)
+        vlan = object.__new__(C_Tag)
         vlan._info = types.SimpleNamespace(type=EtherType.Internet_Protocol_version_4)
 
         self.assertEqual(vlan.name, '802.1Q Customer VLAN Tag Type')
@@ -547,7 +688,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(vlan.length, 4)
         self.assertEqual(vlan.protocol, EtherType.Internet_Protocol_version_4)
 
-        reader = object.__new__(VLAN)
+        reader = object.__new__(C_Tag)
         reader.__cached__ = {}
         reader._data = b'\x00' * 18
         reader.__header__ = SchemaVLAN(
@@ -562,13 +703,13 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(data.tci.vid, 4094)
         self.assertEqual(data.type, EtherType.Internet_Protocol_version_6)
 
-        explicit_length = object.__new__(VLAN)
+        explicit_length = object.__new__(C_Tag)
         explicit_length.__header__ = reader.__header__
         explicit_length._decode_next_layer = mock.Mock(side_effect=lambda data, proto, length: data)
         self.assertEqual(explicit_length.read(64).type, EtherType.Internet_Protocol_version_6)
         explicit_length._decode_next_layer.assert_called_once()
 
-        maker = object.__new__(VLAN)
+        maker = object.__new__(C_Tag)
         schema = maker.make(
             pcp=PriorityLevel.CA,
             dei=True,
@@ -588,6 +729,45 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertFalse(explicit_schema.tci['dei'])
         self.assertEqual(explicit_schema.type, EtherType.Address_Resolution_Protocol)
 
+    def test_vlan_dei_is_read_from_the_dei_bit_not_the_pcp(self) -> None:
+        """``read`` used to report ``bool(tci['pcp'])`` as the DEI flag.
+
+        That is wrong in both directions, and invisible whenever the two happen
+        to agree -- which is why the case below pins them in *dis*agreement.
+
+        """
+        from pcapkit.const.reg.ethertype import EtherType
+        from pcapkit.const.vlan.priority_level import PriorityLevel
+        from pcapkit.protocols.link.c_tag import C_Tag
+        from pcapkit.protocols.link.s_tag import S_Tag
+        from pcapkit.protocols.schema.link.vlan import VLAN as SchemaVLAN
+
+        cases = (
+            # priority set, drop-eligible clear -- the old code said True here
+            (PriorityLevel.CA, False, False),
+            # priority clear, drop-eligible set -- the old code said False here
+            (PriorityLevel.BE, True, True),
+            (PriorityLevel.BE, False, False),
+            (PriorityLevel.CA, True, True),
+        )
+        for klass in (C_Tag, S_Tag):
+            for pcp, dei, expected in cases:
+                with self.subTest(protocol=klass.__name__, pcp=pcp, dei=dei):
+                    reader = object.__new__(klass)
+                    reader.__cached__ = {}
+                    reader._data = b'\x00' * 18
+                    reader.__header__ = SchemaVLAN(
+                        tci={'pcp': pcp, 'dei': dei, 'vid': 42},
+                        type=EtherType.Internet_Protocol_version_4,
+                        payload=b'payload',
+                    )
+                    reader._decode_next_layer = mock.Mock(
+                        side_effect=lambda data, proto, length: data)
+                    data = reader.read()
+                    self.assertIs(data.tci.dei, expected)
+                    self.assertEqual(data.tci.pcp, pcp)
+                    self.assertEqual(data.tci.vid, 42)
+
     def test_ospf_properties_read_make_and_auth_helpers(self) -> None:
         from pcapkit.const.ospf.authentication import Authentication
         from pcapkit.const.ospf.packet import Packet
@@ -600,6 +780,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         ospf = object.__new__(OSPF)
+        # ``name``/``alias`` read ``_version``, not ``_info``: both are needed
+        # while ``read`` is still running, before ``_info`` exists.
+        ospf._version = 2
         ospf._info = types.SimpleNamespace(version=2, type=Packet.Hello)
 
         self.assertEqual(ospf.name, 'Open Shortest Path First version 2')
@@ -608,7 +791,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(ospf.type, Packet.Hello)
 
         reader = object.__new__(OSPF)
-        reader.__schema__ = SchemaOSPF(
+        reader.__header__ = SchemaOSPF(
             version=2,
             type=Packet.Database_Description,
             length=24,
@@ -619,14 +802,16 @@ class LinkProtocolUnitTests(unittest.TestCase):
             auth_data=b'\x00' * 8,
             payload=b'',
         )
-        reader._decode_next_layer = mock.Mock(side_effect=lambda data, length: data)
+        reader._decode_next_layer = mock.Mock(side_effect=lambda data, proto, length: data)
         data = reader.read()
         self.assertEqual(data.auth, b'\x00' * 8)
         self.assertEqual(str(data.router_id), '192.0.2.1')
+        # No next-protocol field on the wire, so the -1 sentinel is dispatched.
+        self.assertEqual(reader._decode_next_layer.call_args.args[1], -1)
 
         crypto_schema = SchemaCryptoAuth(key_id=1, len=16, seq=99)
         crypto_reader = object.__new__(OSPF)
-        crypto_reader.__schema__ = SchemaOSPF(
+        crypto_reader.__header__ = SchemaOSPF(
             version=2,
             type=Packet.Link_State_Request,
             length=0,
@@ -639,7 +824,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         )
         crypto_reader.__cached__ = {}
         crypto_reader._data = b'\x00' * 32
-        crypto_reader._decode_next_layer = mock.Mock(side_effect=lambda data, length: data)
+        crypto_reader._decode_next_layer = mock.Mock(side_effect=lambda data, proto, length: data)
         crypto_data = crypto_reader.read()
         self.assertEqual(crypto_data.auth.key_id, 1)
         self.assertEqual(crypto_data.auth.seq, 99)
