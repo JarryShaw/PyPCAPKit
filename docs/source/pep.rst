@@ -22,6 +22,17 @@ welcome. For questions, leave a note in the `discussion thread
 <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ or under the `Q&A
 category <https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a>`__.
 
+.. note::
+
+   This page tracks **feature requests** -- what is not implemented yet, and
+   what a contributor could pick up. It is not an issue tracker. Where work on
+   something listed here turns up a **defect** in code that already exists, the
+   defect belongs in `the issue tracker
+   <https://github.com/JarryShaw/PyPCAPKit/issues>`__ and is linked from here,
+   not written up as prose on this page. A design question that needs a decision
+   before anyone can implement it -- as against something simply being broken --
+   is a request and does belong here.
+
 Wish you enjoy **PyPCAPKit**!!!
 
 More Protocols, More!!!
@@ -296,9 +307,10 @@ Three follow-ups the above deliberately left alone:
   :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` points
   the same ports at :class:`pcapkit.protocols.application.httpv1.HTTP`. The
   asymmetry predates the 8080 entries. Reconciling it changes what existing
-  captures parse to, so it wants its own change. Note also that
-  ``http.HTTP``'s explicit ``version=`` path is broken independently: it passes
-  an already-drained file object, so only the auto-guess path works.
+  captures parse to, so it wants its own change and its own decision, which is
+  why it is asked for here. The separate defect that ``http.HTTP``'s explicit
+  ``version=`` path is unusable is tracked as
+  `#447 <https://github.com/JarryShaw/PyPCAPKit/issues/447>`__.
 
 Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
 ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;
