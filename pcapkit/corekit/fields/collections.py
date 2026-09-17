@@ -126,6 +126,10 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         Returns:
             Unpacked field value.
 
+        Raises:
+            FieldValueError: If the items overrun the field, or if a schema item
+                consumes nothing from ``buffer`` -- see the note below.
+
         """
         length = self._length
         if isinstance(buffer, bytes):
@@ -139,12 +143,46 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         from pcapkit.corekit.fields.misc import SchemaField
         is_schema = isinstance(self._item_type, SchemaField)
 
+        # NOTE: The item-typed branch below sizes each item by ``field.length``,
+        # which is what it read, but the schema branch sizes it by ``len(data)``,
+        # which is only what the schema *recorded*. A schema reading a stream that
+        # has already run out records nothing, so ``length -= len(data)`` makes no
+        # progress and the loop spins forever. Reachable from a TCP segment: a
+        # ``SACK`` option declaring more octets than the option area holds leaves
+        # ``sack``'s ``ListField`` reading ``SACKBlock`` off an exhausted stream.
+        # Remembering where the previous item ended is what bounds the iteration
+        # count, since it does not depend on what the schema reports. C.f. #431,
+        # which is the same defect in the ``OptionField`` subclass.
+        #
+        # ``start`` is where the field itself begins. The comparison needs stream
+        # positions, but the diagnostic wants an offset into the field, and the two
+        # only coincide when the field happens to be reading from the front of its
+        # stream -- which it does when handed a :obj:`bytes` buffer and does not
+        # when handed a live file.
+        start = offset = file.tell()
+
         temp = []  # type: list[_TL]
         while length > 0:
             field = self._item_type(packet)
 
             if is_schema:
                 data = cast('SchemaField', self._item_type).unpack(file, packet)
+
+                end = file.tell()
+                if end <= offset:
+                    # NOTE: ``len(temp)`` counts the items already parsed, so it
+                    # names the failing one as a count rather than as an ordinal --
+                    # "after 2 item(s)" rather than "item 2", which would read as
+                    # the second item when it is the third. The ``OptionField``
+                    # message below names the option code in this slot and so has
+                    # no index to be read either way.
+                    raise FieldValueError(
+                        f'Field {self.name} has an item that consumed no data: '
+                        f'after {len(temp)} item(s), at offset {offset - start} of '
+                        f'{self._length}, with {length} octet(s) of the field '
+                        f'left to parse'
+                    )
+                offset = end
 
                 length -= len(data)
                 if length < 0:
@@ -296,12 +334,40 @@ class OptionField(ListField, Generic[_TS]):
             as the remaining length to the ``packet`` argument such that
             the next fields can be aware of such informations.
 
+        Raises:
+            FieldValueError: If an option consumes nothing from ``buffer``, since
+                the loop below has then no way to get past it.
+
         """
         length = self._length
         if isinstance(buffer, bytes):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             file = buffer
+
+        # NOTE: The loop below sizes each option by ``len(data)`` -- the size of
+        # the schema the option reported -- and that is not always the number of
+        # octets the option took from ``file``. The two part company for a schema
+        # whose ``post_process`` returns a *nested* schema, since ``len(data)``
+        # then measures the nested schema rather than what the outer one read. So
+        # ``len(data)`` cannot be the loop's progress measure: an option that
+        # over-reads leaves ``length`` above zero with ``file`` already exhausted,
+        # every field of the next option reads ``b''``, and an option that read
+        # nothing reports ``len(data) == 0`` and leaves ``length`` untouched --
+        # which spins forever, with no exception and no diagnostic. C.f. #431.
+        #
+        # Remembering where the previous option ended gives the loop a measure of
+        # progress that does not depend on what a schema reports, and one octet of
+        # it per iteration is what bounds the iteration count. ``length`` is still
+        # decremented by ``len(data)``, so that an option area which parses today
+        # parses identically.
+        #
+        # ``start`` is where the option area itself begins. The comparison needs
+        # stream positions, but the diagnostic wants an offset into the area, and
+        # the two only coincide when the field happens to be reading from the front
+        # of its stream -- which it does when handed a :obj:`bytes` buffer and does
+        # not when handed a live file.
+        start = offset = file.tell()
 
         # make a copy of the ``packet`` dict so that we can include
         # parsed option schema in the ``packet`` dict
@@ -361,6 +427,33 @@ class OptionField(ListField, Generic[_TS]):
             # check for EOOL
             if code == self._eool:
                 break
+
+            # NOTE: The progress check comes *after* the end-of-option-list break,
+            # and that order is not incidental. An area declared longer than the
+            # octets behind it -- an over-long ``ihl``, or a capture cut short by
+            # the snapshot length -- exhausts ``file`` early, and the exhausted
+            # read then decodes the type field as 0. For the IPv4, TCP and PCAP-NG
+            # registries 0 *is* the end-of-option-list code, so the break above has
+            # always absorbed that case and reported the rest of the area as
+            # padding. Checking progress first turned all of those into errors:
+            # measured on ``IPv4(bytes.fromhex('4a00001800010000400600000a0000010a000002'))``,
+            # 20 octets of options declared with none present, and on a TCP segment
+            # with a data offset of 10 and four option octets, both of which parse
+            # on ``main``.
+            #
+            # The registries that spin are the ones where 0 is *not* the
+            # end-of-option-list code, so they never reach the break: HOPOPT,
+            # IPv6-Opts and MH read 0 as ``Pad1``, HIP as an unassigned parameter,
+            # SCTP as a DATA chunk. Those are what this guards, and one octet of
+            # measured progress per surviving iteration is what bounds the loop.
+            end = file.tell()
+            if end <= offset:
+                raise FieldValueError(
+                    f'Field {self.name} has an option that consumed no data: '
+                    f'{code!r} at offset {offset - start} of {self._length}, with '
+                    f'{length} octet(s) of the option area left to parse'
+                )
+            offset = end
 
         self._option_padding = length
         return temp

@@ -155,12 +155,22 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]') -> 'Field':
           wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.SMFHashBasedDPDOption`
           instance.
 
+    Note:
+        The field is sized ``Opt Data Len + 2`` rather than ``Opt Data Len``.
+        ``Opt Data Len`` counts only what follows the option header
+        [:rfc:`8200#section-4.2`], while both schemas this may return inherit
+        :attr:`Option.type` and :attr:`Option.len` and so parse those two octets
+        themselves. Sizing the field at ``Opt Data Len`` handed them an area two
+        octets short of the option they read, which
+        :class:`~pcapkit.corekit.fields.collections.OptionField` then mis-counted
+        against the option area -- c.f. #431.
+
     """
     mode = Enum_SMFDPDMode.get(pkt['test']['mode'])
     schema = SMFDPDOption.registry[mode]
     if schema is None:
         raise FieldValueError(f'IPv6-Opts: invalid SMF DPD mode: {mode}')
-    return SchemaField(length=pkt['test']['len'], schema=schema)
+    return SchemaField(length=pkt['test']['len'] + 2, schema=schema)
 
 
 def smf_i_dpd_tid_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -367,11 +377,21 @@ class CALIPSOOption(Option, code=Enum_Option.CALIPSO):
 
 @schema_final
 class _SMFDPDOption(Schema):
-    """Header schema for IPv6-Opts SMF DPD options with generic representation."""
+    """Header schema for IPv6-Opts SMF DPD options with generic representation.
+
+    The ``test`` field forward-matches the first three octets of the option --
+    ``Option Type``, ``Opt Data Len`` and the octet carrying the DPD mode bit --
+    without consuming them, so that :func:`smf_dpd_data_selector` can size and
+    choose the schema which then reads the option properly. Its ``namespace``
+    offsets are therefore bit offsets into the *option*, not into any one field
+    of it: ``Opt Data Len`` is octet 1, i.e. bits 8 to 15, and the mode bit is
+    the first bit of octet 2 [:rfc:`6621#section-8.1`].
+
+    """
 
     #: SMF DPD mode.
     test: 'SMFDPDTestFlag' = ForwardMatchField(BitField(length=3, namespace={
-        'len': (1, 8),
+        'len': (8, 8),
         'mode': (16, 1),
     }))
     #: SMF DPD data.

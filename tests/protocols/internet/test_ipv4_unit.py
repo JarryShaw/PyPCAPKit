@@ -979,6 +979,34 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertEqual(tuple(unknown.timestamp), (1,))
         warn.assert_called_once()
 
+    def test_an_option_area_longer_than_the_datagram_still_parses(self) -> None:
+        """An ``ihl`` promising more options than are there is tolerated.
+
+        The header below sets ``ihl`` to 10 -- a 20-octet option area -- and stops
+        after the fixed 20 octets, so there are no option octets at all. Reading
+        past them yields ``b''``, which decodes the option number as 0, and 0 is
+        IPv4's end-of-option-list, so the option loop breaks there and reports the
+        whole area as padding. That is how a datagram cut short by the snapshot
+        length parses at all, and it is why :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` checks each
+        option's progress *after* its end-of-option-list break rather than before:
+        checking first turns every such header into an error. C.f. #431.
+
+        """
+        from pcapkit.const.ipv4.option_number import OptionNumber
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from tests._support import time_limit
+
+        raw = bytes.fromhex('4a00001800010000400600000a0000010a000002')
+        with time_limit(5):
+            proto = IPv4(raw, len(raw))
+
+        self.assertEqual(proto.info.hdr_len, 40)
+        self.assertEqual(
+            [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
+            [(OptionNumber.EOOL, 1)],
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

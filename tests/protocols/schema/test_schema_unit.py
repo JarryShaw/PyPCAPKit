@@ -3,10 +3,11 @@ from __future__ import annotations
 import collections
 import enum
 import importlib.util
+import io
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import purge_modules, time_limit
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -404,6 +405,146 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertEqual(unpacked.options[0].value, 0xAA)
         self.assertEqual(unpacked.pad, b'')
         self.assertEqual(observed_padding, [1])
+
+    def test_schema_option_field_unpack_rejects_an_option_consuming_nothing(self) -> None:
+        """An option area that cannot be advanced past is an error, not a hang.
+
+        :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` sizes each
+        option by ``len(data)``, the size of the schema the option reported,
+        which is not the number of octets it took from the stream. ``Wrapper``
+        below is the smallest thing that separates the two, and is the shape
+        every wrapper option schema in the package has: it reads two octets and
+        returns a nested schema that recorded one. So the first option leaves the
+        stream one octet ahead of where ``length`` thinks it is, the second
+        option consumes the last of it, and the third finds the stream exhausted,
+        reads ``b''`` for every field, and reports ``len(data) == 0`` -- against
+        which ``length -= len(data)`` makes no progress at all. C.f. #431, where
+        this spun forever on an eight-octet HOPOPT header.
+
+        The deadline is part of the test: without it a regression here does not
+        fail, it hangs the run.
+
+        """
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        schema = self._make_wrapped_options_schema()
+
+        with self.assertRaisesRegex(FieldValueError, 'consumed no data'):
+            with time_limit(5):
+                schema.unpack(b'\x01\xff\x00', 3, {})
+
+    def test_schema_option_field_unpack_reports_a_field_relative_offset(self) -> None:
+        """The offset in the diagnostic counts from the option area, not the stream.
+
+        :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` is handed a
+        :obj:`bytes` buffer by
+        :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`, so
+        its stream starts at zero and the two readings coincide -- but the method
+        is public and takes an ``IO[bytes]`` as well, and a
+        :class:`~pcapkit.corekit.fields.misc.SchemaField` hands the live file
+        straight down. Reporting the raw stream position then names an offset
+        outside the field: the same three-octet area that fails at offset 3 below
+        reported offset 5 when the stream was two octets in.
+
+        """
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        schema = self._make_wrapped_options_schema()
+        field = schema.__fields__['options']
+
+        stream = io.BytesIO(b'\xde\xad' + b'\x01\xff\x00')
+        stream.seek(2)
+
+        with self.assertRaisesRegex(FieldValueError, r'at offset 3 of 3\b'):
+            with time_limit(5):
+                field.unpack(stream, {})
+
+    def test_schema_list_field_unpack_rejects_a_schema_item_consuming_nothing(self) -> None:
+        """A list of schema items must be advanced past too, or reported.
+
+        :meth:`ListField.unpack
+        <pcapkit.corekit.fields.collections.ListField.unpack>` sizes a schema item
+        by ``len(data)`` in the same way, so a budget larger than the octets behind
+        it leaves the item schema reading an exhausted stream, recording nothing,
+        and subtracting nothing. Reachable from a TCP segment whose ``SACK`` option
+        declares more octets than the option area holds, which
+        :file:`tests/protocols/transport/test_tcp_udp_unit.py` pins; this covers
+        the field on its own, and pins the offset as a count into the field rather
+        than into the stream -- the same reading as its ``OptionField`` subclass.
+
+        Two items parse off the two octets below and the third finds the stream
+        exhausted, so the diagnostic's ``after 2 item(s)`` is a count of what was
+        parsed rather than an ordinal naming the second item.
+
+        """
+        from pcapkit.corekit.fields.collections import ListField
+        from pcapkit.corekit.fields.misc import SchemaField
+        from pcapkit.corekit.fields.numbers import UInt8Field
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        @schema_final
+        class Marker(Schema):
+            type: int = UInt8Field(default=0)
+
+        @schema_final
+        class MarkerListSchema(Schema):
+            #: Eight octets of budget, however few are really there.
+            markers: list[Marker] = ListField(
+                length=8,
+                item_type=SchemaField(length=2, schema=Marker),
+            )
+
+        field = MarkerListSchema.__fields__['markers']
+
+        stream = io.BytesIO(b'\xde\xad' + b'\x01\x02')
+        stream.seek(2)
+
+        with self.assertRaisesRegex(FieldValueError, r'after 2 item\(s\), at offset 2 of 8\b'):
+            with time_limit(5):
+                field.unpack(stream, {})
+
+    def _make_wrapped_options_schema(self):
+        """A three-octet option area whose first option over-reads by one octet.
+
+        Returns:
+            A :class:`~pcapkit.protocols.schema.schema.Schema` subclass carrying a
+            single :class:`~pcapkit.corekit.fields.collections.OptionField`.
+
+        ``Wrapper`` is the smallest thing that separates the octets an option takes
+        from the stream from the ``len(data)`` it reports, and is the shape every
+        wrapper option schema in the package has: it reads two octets and returns a
+        nested schema that recorded one.
+
+        """
+        from pcapkit.corekit.fields.collections import OptionField
+        from pcapkit.corekit.fields.misc import SchemaField
+        from pcapkit.corekit.fields.numbers import UInt8Field
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+
+        @schema_final
+        class Marker(Schema):
+            type: int = UInt8Field(default=0)
+
+        @schema_final
+        class Wrapper(Schema):
+            #: Two octets of stream, of which ``Marker`` records only the first.
+            body: Marker = SchemaField(length=2, schema=Marker)
+
+            def post_process(self, packet: dict) -> Schema:
+                return self.body
+
+        @schema_final
+        class WrappedOptionsSchema(Schema):
+            options: list[Marker] = OptionField(
+                length=3,
+                base_schema=Marker,
+                registry=collections.defaultdict(lambda: Marker, {1: Wrapper}),
+            )
+
+        return WrappedOptionsSchema
 
 
 if __name__ == '__main__':
