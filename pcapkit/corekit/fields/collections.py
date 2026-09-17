@@ -294,9 +294,8 @@ class OptionField(ListField, Generic[_TS]):
         # Remembering where the previous option ended gives the loop a measure of
         # progress that does not depend on what a schema reports, and one octet of
         # it per iteration is what bounds the iteration count. ``length`` is still
-        # decremented by ``len(data)``, so that no option area which parses today
-        # parses differently: every option this package can parse consumes at
-        # least its own type field, so the guard cannot fire on one.
+        # decremented by ``len(data)``, so that an option area which parses today
+        # parses identically.
         offset = file.tell()
 
         # make a copy of the ``packet`` dict so that we can include
@@ -319,7 +318,31 @@ class OptionField(ListField, Generic[_TS]):
             new_packet[self.name].add(code, data)
             temp.append(data)
 
-            # insist on progress through ``file`` before trusting ``len(data)``
+            # update length
+            length -= len(data)
+
+            # check for EOOL
+            if code == self._eool:
+                break
+
+            # NOTE: The progress check comes *after* the end-of-option-list break,
+            # and that order is not incidental. An area declared longer than the
+            # octets behind it -- an over-long ``ihl``, or a capture cut short by
+            # the snapshot length -- exhausts ``file`` early, and the exhausted
+            # read then decodes the type field as 0. For the IPv4, TCP and PCAP-NG
+            # registries 0 *is* the end-of-option-list code, so the break above has
+            # always absorbed that case and reported the rest of the area as
+            # padding. Checking progress first turned all of those into errors:
+            # measured on ``IPv4(bytes.fromhex('4a00001800010000400600000a0000010a000002'))``,
+            # 20 octets of options declared with none present, and on a TCP segment
+            # with a data offset of 10 and four option octets, both of which parse
+            # on ``main``.
+            #
+            # The registries that spin are the ones where 0 is *not* the
+            # end-of-option-list code, so they never reach the break: HOPOPT,
+            # IPv6-Opts and MH read 0 as ``Pad1``, HIP as an unassigned parameter,
+            # SCTP as a DATA chunk. Those are what this guards, and one octet of
+            # measured progress per surviving iteration is what bounds the loop.
             end = file.tell()
             if end <= offset:
                 raise FieldValueError(
@@ -328,13 +351,6 @@ class OptionField(ListField, Generic[_TS]):
                     f'{length} octet(s) of the option area left to parse'
                 )
             offset = end
-
-            # update length
-            length -= len(data)
-
-            # check for EOOL
-            if code == self._eool:
-                break
 
         self._option_padding = length
         return temp

@@ -1225,6 +1225,37 @@ class TCPUDPUnitTests(unittest.TestCase):
             with time_limit(5):
                 TCP(bad, len(bad))
 
+    def test_an_option_area_longer_than_the_segment_still_parses(self) -> None:
+        """A data offset promising more options than are there is tolerated.
+
+        The segment below declares a data offset of 10 -- a 20-octet option area --
+        and carries four option octets. Reading past them yields ``b''``, which
+        decodes the option kind as 0, and 0 is TCP's end-of-option-list, so the
+        option loop breaks there and reports the remaining 16 octets as padding.
+        That is how a capture cut short by the snapshot length parses at all, and
+        it is why :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` checks each
+        option's progress *after* its end-of-option-list break rather than before:
+        checking first turns every such segment into an error.
+
+        """
+        from pcapkit.const.tcp.option import Option
+        from pcapkit.protocols.transport.tcp import TCP
+        from tests._support import time_limit
+
+        raw = bytes.fromhex('00501f900000000100000002a002ffff00000000020405b4')
+        with time_limit(5):
+            proto = TCP(raw, len(raw))
+
+        self.assertEqual(proto.info.hdr_len, 40)
+        self.assertEqual(
+            [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
+            [(Option.Maximum_Segment_Size, 4), (Option.End_of_Option_List, 1)],
+        )
+        mss = next(opt for code, opt in proto.info.options.items(multi=True)
+                   if code == Option.Maximum_Segment_Size)
+        self.assertEqual(mss.mss, 1460)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1523,6 +1523,44 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         self._assert_identification_based_dpd_options_parse_from_the_wire(IPv6_Opts)
 
+    def _assert_a_truncated_option_area_is_diagnosed(self, protocol_cls: type) -> None:
+        """An option area with nothing behind it is an error, not a hang.
+
+        The simplest form of #431, and the one that needs no option schema at all:
+        a header extension length of 1 declares a 14-octet option area, and the
+        two octets given here are the whole header. The option loop reads ``b''``
+        for every field, which decodes the type octet as 0 -- ``Pad1`` in this
+        registry, not an end-of-option-list -- so it appends a phantom one-octet
+        ``Pad1``, subtracts the zero octets it actually read, and goes round
+        again forever.
+
+        Note that this is registry-dependent, and IPv4, TCP and PCAP-NG behave
+        differently on purpose: 0 is the end-of-option-list code there, so the
+        loop's ``eool`` break has always absorbed a truncated area and reported
+        the rest as padding. Their tolerance is pinned in their own tests.
+
+        """
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        for name, raw in (
+            ('no option octets at all', b'\x3b\x01'),
+            ('four of fourteen octets', b'\x3b\x01' + b'\x01\x02\x00\x00'),
+        ):
+            with self.subTest(case=name):
+                with self.assertRaisesRegex(FieldValueError, 'consumed no data'):
+                    with time_limit(5):
+                        protocol_cls(raw, len(raw), extension=True)
+
+    def test_hopopt_truncated_option_area_is_diagnosed(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_a_truncated_option_area_is_diagnosed(HOPOPT)
+
+    def test_ipv6_opts_truncated_option_area_is_diagnosed(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_a_truncated_option_area_is_diagnosed(IPv6_Opts)
+
     def _assert_padding_option_schema_sizes_itself(self, protocol_cls: type) -> None:
         """The padding option schema, on its own.
 
