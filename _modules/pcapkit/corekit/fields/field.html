@@ -472,9 +472,17 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="n">_name</span><span class="p">:</span> <span class="s1">'str'</span>
-        <span class="n">_default</span><span class="p">:</span> <span class="s1">'_T | NoValueType'</span>
         <span class="n">_template</span><span class="p">:</span> <span class="s1">'str'</span>
         <span class="n">_callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span>
+
+    <span class="c1"># NOTE: Declared on the class, not only assigned in :meth:`__init__`, so that</span>
+    <span class="c1"># :attr:`default` is answerable for every field. A field class is free to</span>
+    <span class="c1"># replace :meth:`__init__` without chaining to this one -- as</span>
+    <span class="c1"># :class:`~pcapkit.corekit.fields.collections.ListField` does, since a list of</span>
+    <span class="c1"># fields takes no default value of its own -- and reading :attr:`default` off</span>
+    <span class="c1"># one of those raised :exc:`AttributeError` for a private attribute rather</span>
+    <span class="c1"># than reporting that the field declares no default. See #422.</span>
+    <span class="n">_default</span><span class="p">:</span> <span class="s1">'_T | NoValueType'</span> <span class="o">=</span> <span class="n">NoValue</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>

@@ -477,18 +477,41 @@
     <span class="n">args_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=NoValue'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
     <span class="n">dict_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
 
-    <span class="c1"># NOTE: We shall only attempt to generate ``__init__`` method</span>
-    <span class="c1"># if the class does not define such method.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'__init__'</span><span class="p">):</span>
+    <span class="c1"># NOTE: We shall only attempt to generate ``__init__`` method if the class</span>
+    <span class="c1"># does not define such method -- which is a test on ``cls.__dict__``, not on</span>
+    <span class="c1"># ``hasattr``: every class inherits ``__init__`` from :obj:`object`, so</span>
+    <span class="c1"># ``hasattr(cls, '__init__')`` is unconditionally true and the generated</span>
+    <span class="c1"># method was never installed. ``Schema(...)`` therefore ran</span>
+    <span class="c1"># :meth:`Schema.__update__` alone and never reached</span>
+    <span class="c1"># :meth:`Schema.__post_init__`, leaving a schema built from a subset of its</span>
+    <span class="c1"># fields holding :class:`~pcapkit.corekit.fields.field.FieldBase` objects in</span>
+    <span class="c1"># place of the omitted values, so that it could not be packed at all and</span>
+    <span class="c1"># failed with an error naming a field class rather than a field. See #422.</span>
+    <span class="c1">#</span>
+    <span class="c1"># :class:`~pcapkit.protocols.schema.misc.null.NoPayload` is what the test</span>
+    <span class="c1"># protects: it declares an argument-less ``__init__`` of its own so that no</span>
+    <span class="c1"># generated one displaces it.</span>
+    <span class="k">if</span> <span class="s1">'__init__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
         <span class="c1"># NOTE: We only generate typed ``__init__`` method if only the class</span>
         <span class="c1"># has field definition from any of itself and its base classes.</span>
         <span class="k">if</span> <span class="n">args_</span><span class="p">:</span>
             <span class="c1"># NOTE: The following code is to make the ``__init__`` method work.</span>
             <span class="c1"># It is inspired from the :func:`dataclasses._create_fn` function.</span>
+            <span class="c1">#</span>
+            <span class="c1"># ``**kwargs`` is forwarded rather than rejected, so that a keyword</span>
+            <span class="c1"># naming something other than a field keeps reaching</span>
+            <span class="c1"># :meth:`Schema.__update__` and drawing its</span>
+            <span class="c1"># :class:`~pcapkit.utilities.warnings.UnknownFieldWarning`, as it did</span>
+            <span class="c1"># while ``__init__`` *was* ``__update__``. Several schemas are</span>
+            <span class="c1"># constructed that way on purpose -- the Multipath TCP options take a</span>
+            <span class="c1"># ``kind`` and a ``length`` that the enclosing option owns and that</span>
+            <span class="c1"># ``MPTCP`` declares only for the type checker -- so a strict</span>
+            <span class="c1"># signature here would turn a warning into a :exc:`TypeError` on a</span>
+            <span class="c1"># path that has nothing to do with the missing ``__post_init__``.</span>
             <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'def __create_fn__():</span><span class="se">\n</span><span class="s1">'</span>
-                <span class="sa">f</span><span class="s1">'    def __init__(self, </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">, *, __packet__=None):</span><span class="se">\n</span><span class="s1">'</span>
-                <span class="sa">f</span><span class="s1">'        self.__update__(</span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="sa">f</span><span class="s1">'    def __init__(self, </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">, *, __packet__=None, **kwargs):</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="sa">f</span><span class="s1">'        self.__update__(</span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">, **kwargs)</span><span class="se">\n</span><span class="s1">'</span>
                 <span class="sa">f</span><span class="s1">'        self.__post_init__(__packet__)</span><span class="se">\n</span><span class="s1">'</span>
                 <span class="sa">f</span><span class="s1">'    return __init__</span><span class="se">\n</span><span class="s1">'</span>
             <span class="p">)</span>
@@ -692,10 +715,64 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Fill in the fields the caller left unset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Packet data, as forwarded from the ``__packet__`` keyword</span>
+<span class="sd">                argument of the generated ``__init__``. The schema is packed</span>
+<span class="sd">                here only when one is given; see the note below.</span>
+
+<span class="sd">        """</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">NoValue</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+            <span class="c1"># NOTE: Read with a fallback rather than by subscript, since the</span>
+            <span class="c1"># generated ``__init__`` is not the only caller: :meth:`from_dict`</span>
+            <span class="c1"># seeds only the keys its argument carries, so a field the caller left</span>
+            <span class="c1"># out is missing from ``__dict__`` entirely rather than holding</span>
+            <span class="c1"># ``NoValue``, and subscripting it raised :exc:`KeyError` naming the</span>
+            <span class="c1"># field.</span>
+            <span class="c1">#</span>
+            <span class="c1"># What is tested is ``NoValue`` alone, not ``NoValue`` or ``None``.</span>
+            <span class="c1"># This method fills in what the caller did not say, and a ``None`` the</span>
+            <span class="c1"># caller passed *is* something said: on an optional field it is the</span>
+            <span class="c1"># chosen value, meaning this packet does not carry the field. It is</span>
+            <span class="c1"># also what :meth:`unpack` stores for a</span>
+            <span class="c1"># :class:`~pcapkit.corekit.fields.misc.ConditionalField` whose test</span>
+            <span class="c1"># fails -- including one that declares a default of its own -- so</span>
+            <span class="c1"># substituting the default here would leave a constructed schema</span>
+            <span class="c1"># disagreeing with a parsed one about the same packet, and</span>
+            <span class="c1"># ``from_dict(parsed.to_dict())`` no longer reproducing what it was</span>
+            <span class="c1"># given. Telling the two apart is what ``NoValue`` is for.</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">NoValue</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoValue</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">default</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
+            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoValue</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># NOTE: Nothing to fill an unset field with, so the ``NoValue``</span>
+                <span class="c1"># the generated ``__init__`` seeded it with is dropped rather than</span>
+                <span class="c1"># kept: it is a *field* sentinel, not a value a schema may hold.</span>
+                <span class="c1"># Dropping it rather than storing ``None`` also keeps the name out</span>
+                <span class="c1"># of the context :meth:`pack` builds from ``__dict__``, which a</span>
+                <span class="c1"># schema may be relying on to seed for itself -- the PCAP-NG</span>
+                <span class="c1"># section header block reads its Byte-Order Magic from a ``match``</span>
+                <span class="c1"># its own :meth:`pre_pack` supplies, and only when the context</span>
+                <span class="c1"># does not name one already. :meth:`pack` reads an absent field as</span>
+                <span class="c1"># ``None`` regardless.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: Packed here only when a packet context was actually handed over.</span>
+        <span class="c1"># A schema is not in general packable from its own fields alone: a field</span>
+        <span class="c1"># callback may read a key that the *enclosing* layer owns, as the</span>
+        <span class="c1"># Multipath TCP options do with the ``length`` of the TCP option that</span>
+        <span class="c1"># carries them, and packing without it raises rather than producing</span>
+        <span class="c1"># octets. ``__updated__`` is still set, so a schema left unpacked here is</span>
+        <span class="c1"># packed by :meth:`__bytes__` on first use -- by which time the enclosing</span>
+        <span class="c1"># layer has supplied the context, which is where the octets were produced</span>
+        <span class="c1"># before this method ran on construction at all.</span>
+        <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -936,11 +1013,22 @@
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
+            <span class="c1"># NOTE: Read from the instance rather than with :func:`getattr`, which</span>
+            <span class="c1"># finds the *class* attribute when the instance has none -- and a</span>
+            <span class="c1"># schema's class attribute for a field is the</span>
+            <span class="c1"># :class:`~pcapkit.corekit.fields.field.FieldBase` object itself. A</span>
+            <span class="c1"># field the caller never set therefore arrived below as the field</span>
+            <span class="c1"># rather than as a value: ``getattr(self, name, None)`` could not</span>
+            <span class="c1"># return its ``None`` for one, so the absent-value branches never</span>
+            <span class="c1"># fired, and what surfaced instead was a failure from inside the</span>
+            <span class="c1"># packing of a field object -- naming a field *class*, and so saying</span>
+            <span class="c1"># nothing about which field had been left out. See #422.</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">):</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> \
                     <span class="n">Protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
-                <span class="n">data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
@@ -954,7 +1042,6 @@
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ListField</span><span class="p">):</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
@@ -979,9 +1066,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                 <span class="k">continue</span>
 
-            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">temp</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">NoDefaultValue</span><span class="p">:</span>
                 <span class="n">temp</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
