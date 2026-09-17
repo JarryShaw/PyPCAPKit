@@ -539,6 +539,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Unpacked field value.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If the items overrun the field, or if a schema item</span>
+<span class="sd">                consumes nothing from ``buffer`` -- see the note below.</span>
+
 <span class="sd">        """</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
@@ -552,12 +556,46 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaField</span>
         <span class="n">is_schema</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: The item-typed branch below sizes each item by ``field.length``,</span>
+        <span class="c1"># which is what it read, but the schema branch sizes it by ``len(data)``,</span>
+        <span class="c1"># which is only what the schema *recorded*. A schema reading a stream that</span>
+        <span class="c1"># has already run out records nothing, so ``length -= len(data)`` makes no</span>
+        <span class="c1"># progress and the loop spins forever. Reachable from a TCP segment: a</span>
+        <span class="c1"># ``SACK`` option declaring more octets than the option area holds leaves</span>
+        <span class="c1"># ``sack``'s ``ListField`` reading ``SACKBlock`` off an exhausted stream.</span>
+        <span class="c1"># Remembering where the previous item ended is what bounds the iteration</span>
+        <span class="c1"># count, since it does not depend on what the schema reports. C.f. #431,</span>
+        <span class="c1"># which is the same defect in the ``OptionField`` subclass.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``start`` is where the field itself begins. The comparison needs stream</span>
+        <span class="c1"># positions, but the diagnostic wants an offset into the field, and the two</span>
+        <span class="c1"># only coincide when the field happens to be reading from the front of its</span>
+        <span class="c1"># stream -- which it does when handed a :obj:`bytes` buffer and does not</span>
+        <span class="c1"># when handed a live file.</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_TL]</span>
         <span class="k">while</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">is_schema</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'SchemaField'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+
+                <span class="n">end</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">offset</span><span class="p">:</span>
+                    <span class="c1"># NOTE: ``len(temp)`` counts the items already parsed, so it</span>
+                    <span class="c1"># names the failing one as a count rather than as an ordinal --</span>
+                    <span class="c1"># "after 2 item(s)" rather than "item 2", which would read as</span>
+                    <span class="c1"># the second item when it is the third. The ``OptionField``</span>
+                    <span class="c1"># message below names the option code in this slot and so has</span>
+                    <span class="c1"># no index to be read either way.</span>
+                    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has an item that consumed no data: '</span>
+                        <span class="sa">f</span><span class="s1">'after </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span><span class="si">}</span><span class="s1"> item(s), at offset </span><span class="si">{</span><span class="n">offset</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s1"> of '</span>
+                        <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">, with </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) of the field '</span>
+                        <span class="sa">f</span><span class="s1">'left to parse'</span>
+                    <span class="p">)</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">end</span>
 
                 <span class="n">length</span> <span class="o">-=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -715,12 +753,40 @@
 <span class="sd">            as the remaining length to the ``packet`` argument such that</span>
 <span class="sd">            the next fields can be aware of such informations.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If an option consumes nothing from ``buffer``, since</span>
+<span class="sd">                the loop below has then no way to get past it.</span>
+
 <span class="sd">        """</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>  <span class="c1"># type: IO[bytes]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">buffer</span>
+
+        <span class="c1"># NOTE: The loop below sizes each option by ``len(data)`` -- the size of</span>
+        <span class="c1"># the schema the option reported -- and that is not always the number of</span>
+        <span class="c1"># octets the option took from ``file``. The two part company for a schema</span>
+        <span class="c1"># whose ``post_process`` returns a *nested* schema, since ``len(data)``</span>
+        <span class="c1"># then measures the nested schema rather than what the outer one read. So</span>
+        <span class="c1"># ``len(data)`` cannot be the loop's progress measure: an option that</span>
+        <span class="c1"># over-reads leaves ``length`` above zero with ``file`` already exhausted,</span>
+        <span class="c1"># every field of the next option reads ``b''``, and an option that read</span>
+        <span class="c1"># nothing reports ``len(data) == 0`` and leaves ``length`` untouched --</span>
+        <span class="c1"># which spins forever, with no exception and no diagnostic. C.f. #431.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Remembering where the previous option ended gives the loop a measure of</span>
+        <span class="c1"># progress that does not depend on what a schema reports, and one octet of</span>
+        <span class="c1"># it per iteration is what bounds the iteration count. ``length`` is still</span>
+        <span class="c1"># decremented by ``len(data)``, so that an option area which parses today</span>
+        <span class="c1"># parses identically.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``start`` is where the option area itself begins. The comparison needs</span>
+        <span class="c1"># stream positions, but the diagnostic wants an offset into the area, and</span>
+        <span class="c1"># the two only coincide when the field happens to be reading from the front</span>
+        <span class="c1"># of its stream -- which it does when handed a :obj:`bytes` buffer and does</span>
+        <span class="c1"># not when handed a live file.</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
 
         <span class="c1"># make a copy of the ``packet`` dict so that we can include</span>
         <span class="c1"># parsed option schema in the ``packet`` dict</span>
@@ -780,6 +846,33 @@
             <span class="c1"># check for EOOL</span>
             <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eool</span><span class="p">:</span>
                 <span class="k">break</span>
+
+            <span class="c1"># NOTE: The progress check comes *after* the end-of-option-list break,</span>
+            <span class="c1"># and that order is not incidental. An area declared longer than the</span>
+            <span class="c1"># octets behind it -- an over-long ``ihl``, or a capture cut short by</span>
+            <span class="c1"># the snapshot length -- exhausts ``file`` early, and the exhausted</span>
+            <span class="c1"># read then decodes the type field as 0. For the IPv4, TCP and PCAP-NG</span>
+            <span class="c1"># registries 0 *is* the end-of-option-list code, so the break above has</span>
+            <span class="c1"># always absorbed that case and reported the rest of the area as</span>
+            <span class="c1"># padding. Checking progress first turned all of those into errors:</span>
+            <span class="c1"># measured on ``IPv4(bytes.fromhex('4a00001800010000400600000a0000010a000002'))``,</span>
+            <span class="c1"># 20 octets of options declared with none present, and on a TCP segment</span>
+            <span class="c1"># with a data offset of 10 and four option octets, both of which parse</span>
+            <span class="c1"># on ``main``.</span>
+            <span class="c1">#</span>
+            <span class="c1"># The registries that spin are the ones where 0 is *not* the</span>
+            <span class="c1"># end-of-option-list code, so they never reach the break: HOPOPT,</span>
+            <span class="c1"># IPv6-Opts and MH read 0 as ``Pad1``, HIP as an unassigned parameter,</span>
+            <span class="c1"># SCTP as a DATA chunk. Those are what this guards, and one octet of</span>
+            <span class="c1"># measured progress per surviving iteration is what bounds the loop.</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">offset</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has an option that consumed no data: '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1"> at offset </span><span class="si">{</span><span class="n">offset</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s1"> of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">, with '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) of the option area left to parse'</span>
+                <span class="p">)</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">end</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_option_padding</span> <span class="o">=</span> <span class="n">length</span>
         <span class="k">return</span> <span class="n">temp</span></div>

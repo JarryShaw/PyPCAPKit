@@ -507,6 +507,10 @@ instead of updating the current instance.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Unpacked field value.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If the items overrun the field, or if a schema item
+    consumes nothing from <code class="docutils literal notranslate"><span class="pre">buffer</span></code> – see the note below.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -617,6 +621,12 @@ set <a class="reference internal" href="#pcapkit.corekit.fields.collections.Opti
 as the remaining length to the <code class="docutils literal notranslate"><span class="pre">packet</span></code> argument such that
 the next fields can be aware of such informations.</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If an option consumes nothing from <code class="docutils literal notranslate"><span class="pre">buffer</span></code>, since
+    the loop below has then no way to get past it.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

@@ -2542,6 +2542,17 @@ instance.</p></li>
 </p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The field is sized <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span> <span class="pre">+</span> <span class="pre">2</span></code> rather than <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>.
+<code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> counts only what follows the option header
+[<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>], while both schemas this may return inherit
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.type" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.type</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.len" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.len</span></code></a> and so parse those two octets
+themselves. Sizing the field at <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> handed them an area two
+octets short of the option they read, which
+<a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a> then mis-counted
+against the option area – c.f. #431.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
