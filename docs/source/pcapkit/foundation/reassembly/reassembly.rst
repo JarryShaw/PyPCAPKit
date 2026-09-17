@@ -41,9 +41,11 @@ implements datagram reassembly of IP and TCP packets.
 
    .. autoproperty:: count
    .. autoproperty:: datagram
+   .. autoproperty:: timeout
 
    .. automethod:: reassembly
    .. automethod:: submit
+   .. automethod:: expire
    .. automethod:: fetch
    .. automethod:: index
    .. automethod:: run
@@ -58,6 +60,8 @@ implements datagram reassembly of IP and TCP packets.
       :no-value:
    .. autoattribute:: _flag_n
       :no-value:
+   .. autoattribute:: _timeout
+      :no-value:
 
    .. autoattribute:: _buffer
       :no-value:
@@ -69,6 +73,7 @@ implements datagram reassembly of IP and TCP packets.
 
    .. autoattribute:: __protocol_name__
    .. autoattribute:: __protocol_type__
+   .. autoattribute:: __timeout__
 
 Internal Definitions
 --------------------

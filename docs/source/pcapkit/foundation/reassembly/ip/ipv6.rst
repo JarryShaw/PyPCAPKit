@@ -47,6 +47,8 @@ Terminology
             header = ipv6_info.fragment
                      .header[:hdr_len],     # raw bytes type header before IPv6-Frag
             payload = payload,              # raw bytearray type payload after IPv6-Frag
+            timestamp = float(
+                frame.info.time_epoch),     # capture timestamp
           )
 
        .. note::
@@ -77,7 +79,7 @@ Terminology
 
           (tuple) datagram
            |--> (Info) data
-           |     |--> 'completed' : (bool) True --> implemented
+           |     |--> 'completed' : (Completion) COMPLETE --> reassembled in whole
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv6Address) ipv6.src
            |     |            |--> 'dst' --> (IPv6Address) ipv6.dst
@@ -89,7 +91,7 @@ Terminology
            |     |--> 'payload' : (bytes) reassembled IPv6 payload
            |     |--> 'packet' : (Protocol) parsed reassembled payload
            |--> (Info) data
-           |     |--> 'completed' : (bool) False --> not implemented
+           |     |--> 'completed' : (Completion) PARTIAL or TIMEOUT --> incomplete
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv6Address) ipv6.src
            |     |            |--> 'dst' --> (IPv6Address) ipv6.dst
