@@ -72,18 +72,41 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     args_ = [f'{key}=NoValue' for key in cls.__fields__]
     dict_ = [f'{key}={key}' for key in cls.__fields__]
 
-    # NOTE: We shall only attempt to generate ``__init__`` method
-    # if the class does not define such method.
-    if not hasattr(cls, '__init__'):
+    # NOTE: We shall only attempt to generate ``__init__`` method if the class
+    # does not define such method -- which is a test on ``cls.__dict__``, not on
+    # ``hasattr``: every class inherits ``__init__`` from :obj:`object`, so
+    # ``hasattr(cls, '__init__')`` is unconditionally true and the generated
+    # method was never installed. ``Schema(...)`` therefore ran
+    # :meth:`Schema.__update__` alone and never reached
+    # :meth:`Schema.__post_init__`, leaving a schema built from a subset of its
+    # fields holding :class:`~pcapkit.corekit.fields.field.FieldBase` objects in
+    # place of the omitted values, so that it could not be packed at all and
+    # failed with an error naming a field class rather than a field. See #422.
+    #
+    # :class:`~pcapkit.protocols.schema.misc.null.NoPayload` is what the test
+    # protects: it declares an argument-less ``__init__`` of its own so that no
+    # generated one displaces it.
+    if '__init__' not in cls.__dict__:
         # NOTE: We only generate typed ``__init__`` method if only the class
         # has field definition from any of itself and its base classes.
         if args_:
             # NOTE: The following code is to make the ``__init__`` method work.
             # It is inspired from the :func:`dataclasses._create_fn` function.
+            #
+            # ``**kwargs`` is forwarded rather than rejected, so that a keyword
+            # naming something other than a field keeps reaching
+            # :meth:`Schema.__update__` and drawing its
+            # :class:`~pcapkit.utilities.warnings.UnknownFieldWarning`, as it did
+            # while ``__init__`` *was* ``__update__``. Several schemas are
+            # constructed that way on purpose -- the Multipath TCP options take a
+            # ``kind`` and a ``length`` that the enclosing option owns and that
+            # ``MPTCP`` declares only for the type checker -- so a strict
+            # signature here would turn a warning into a :exc:`TypeError` on a
+            # path that has nothing to do with the missing ``__post_init__``.
             init_ = (
                 f'def __create_fn__():\n'
-                f'    def __init__(self, {", ".join(args_)}, *, __packet__=None):\n'
-                f'        self.__update__({", ".join(dict_)})\n'
+                f'    def __init__(self, {", ".join(args_)}, *, __packet__=None, **kwargs):\n'
+                f'        self.__update__({", ".join(dict_)}, **kwargs)\n'
                 f'        self.__post_init__(__packet__)\n'
                 f'    return __init__\n'
             )
@@ -278,10 +301,55 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         return self
 
     def __post_init__(self, packet: 'Optional[dict[str, Any]]' = None) -> 'None':
+        """Fill in the fields the caller left unset.
+
+        Args:
+            packet: Packet data, as forwarded from the ``__packet__`` keyword
+                argument of the generated ``__init__``. The schema is packed
+                here only when one is given; see the note below.
+
+        """
         for name, field in self.__fields__.items():
-            if self.__dict__[name] in (NoValue, None):
-                self.__dict__[name] = field.default
-        self.pack(packet)
+            # NOTE: Read with a fallback rather than by subscript, since the
+            # generated ``__init__`` is not the only caller: :meth:`from_dict`
+            # seeds only the keys its argument carries, so a field the caller left
+            # out is missing from ``__dict__`` entirely rather than holding
+            # ``NoValue``, and subscripting it raised :exc:`KeyError` naming the
+            # field. Both paths now fill it from the field's default.
+            value = self.__dict__.get(name, NoValue)
+            if value is not NoValue and value is not None:
+                continue
+
+            default = field.default
+            if default is not NoValue:
+                self.__dict__[name] = default
+            elif value is NoValue:
+                # NOTE: Nothing to fill an unset field with, so the ``NoValue``
+                # the generated ``__init__`` seeded it with is dropped rather than
+                # kept: it is a *field* sentinel, not a value a schema may hold.
+                # Dropping it rather than storing ``None`` also keeps the name out
+                # of the context :meth:`pack` builds from ``__dict__``, which a
+                # schema may be relying on to seed for itself -- the PCAP-NG
+                # section header block reads its Byte-Order Magic from a ``match``
+                # its own :meth:`pre_pack` supplies, and only when the context
+                # does not name one already.
+                #
+                # A ``None`` the caller passed is kept, on the other hand: on an
+                # optional field it is a chosen value rather than an absent one,
+                # saying that this packet does not carry the field.
+                self.__dict__.pop(name, None)
+
+        # NOTE: Packed here only when a packet context was actually handed over.
+        # A schema is not in general packable from its own fields alone: a field
+        # callback may read a key that the *enclosing* layer owns, as the
+        # Multipath TCP options do with the ``length`` of the TCP option that
+        # carries them, and packing without it raises rather than producing
+        # octets. ``__updated__`` is still set, so a schema left unpacked here is
+        # packed by :meth:`__bytes__` on first use -- by which time the enclosing
+        # layer has supplied the context, which is where the octets were produced
+        # before this method ran on construction at all.
+        if packet is not None:
+            self.pack(packet)
 
     def __update__(self, dict_: 'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]' = None,
                    **kwargs: '_VT') -> 'None':
@@ -508,11 +576,22 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         for field in self.__fields__.values():
             field = field(packet)
 
+            # NOTE: Read from the instance rather than with :func:`getattr`, which
+            # finds the *class* attribute when the instance has none -- and a
+            # schema's class attribute for a field is the
+            # :class:`~pcapkit.corekit.fields.field.FieldBase` object itself. A
+            # field the caller never set therefore arrived below as the field
+            # rather than as a value: ``getattr(self, name, None)`` could not
+            # return its ``None`` for one, so the absent-value branches never
+            # fired, and what surfaced instead was a failure from inside the
+            # packing of a field object -- naming a field *class*, and so saying
+            # nothing about which field had been left out. See #422.
+            data = self.__dict__.get(self.__map__.get(field.name, field.name))
+
             if isinstance(field, PayloadField):
                 from pcapkit.protocols.protocol import \
                     Protocol  # pylint: disable=import-outside-toplevel
 
-                data = getattr(self, field.name, None)
                 if data is None:
                     self.__buffer__[field.name] = b''
                 elif isinstance(data, Protocol):
@@ -526,7 +605,6 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 continue
 
             if isinstance(field, ListField):
-                data = getattr(self, field.name, None)
                 if data is None:
                     self.__buffer__[field.name] = b''
                 elif isinstance(data, bytes):
@@ -551,9 +629,8 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 self.__buffer__[field.name] = b''
                 continue
 
-            value = getattr(self, field.name)
             try:
-                temp = field.pack(value, packet)
+                temp = field.pack(data, packet)
             except NoDefaultValue:
                 temp = bytes(field.length)
             self.__buffer__[field.name] = temp

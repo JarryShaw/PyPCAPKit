@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import builtins
 import collections
 import enum
 import importlib.util
@@ -73,6 +72,9 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertEqual(schema['kind'], 9)
         self.assertIn('kind=9', str(schema))
         self.assertIn('NestedSchema(...)', repr(schema))
+        # ``pad`` is absent: the generated ``__init__`` seeds every field, but
+        # ``__post_init__`` keeps only the ones it can fill, and a padding field
+        # declaring no default has nothing to be filled with
         self.assertEqual(list(schema), ['kind', 'maybe', 'peek', 'repeated', 'nested', 'payload'])
 
         as_dict = schema.to_dict()
@@ -92,6 +94,9 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertEqual(unpacked.repeated, [8, 9])
         self.assertEqual(unpacked.nested.marker, 0x33)
         self.assertEqual(unpacked.payload, b'zz')
+        # unpacking reads every field off the wire, so unlike the construction
+        # above it leaves none of them absent
+        self.assertEqual(list(unpacked), list(FeatureSchema.__fields__))
 
     def test_schema_update_unknown_fields_and_builtin_field_mapping(self) -> None:
         _, _, _, _, BuiltinNameSchema = self._make_schema_classes()
@@ -225,22 +230,13 @@ class SchemaUnitTests(unittest.TestCase):
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.protocols.schema.schema import Schema, schema_final
 
+        @schema_final
         class GeneratedInitSchema(Schema):
             value: int = UInt8Field(default=1)
 
+        @schema_final
         class EmptyGeneratedSchema(Schema):
             pass
-
-        original_hasattr = builtins.hasattr
-
-        def fake_hasattr(obj: object, name: str) -> bool:
-            if obj in (GeneratedInitSchema, EmptyGeneratedSchema) and name == '__init__':
-                return False
-            return original_hasattr(obj, name)
-
-        with mock.patch('builtins.hasattr', side_effect=fake_hasattr):
-            GeneratedInitSchema = schema_final(GeneratedInitSchema)
-            EmptyGeneratedSchema = schema_final(EmptyGeneratedSchema)
 
         self.assertEqual(bytes(GeneratedInitSchema(value=2)), b'\x02')
         self.assertEqual(bytes(GeneratedInitSchema()), b'\x01')
@@ -251,6 +247,49 @@ class SchemaUnitTests(unittest.TestCase):
                 value: int = UInt8Field(default=3)
 
         self.assertIn('value', LegacyVersionSchema.__fields__)
+
+    def test_generated_init_is_installed_and_runs_post_init(self) -> None:
+        from pcapkit.corekit.fields.collections import ListField
+        from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field
+        from pcapkit.protocols.schema.misc.null import NoPayload
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+
+        @schema_final
+        class HeaderSchema(Schema):
+            kind: int = UInt8Field(default=3)
+            size: int = UInt16Field(default=0x0102)
+            spare: int = UInt8Field()
+            trailer: list[int] = ListField(length=2, item_type=UInt8Field())
+
+        # the guard read ``hasattr(cls, '__init__')``, which every class satisfies
+        # through :obj:`object`, so the generated method was never installed and
+        # ``__init__`` stayed bound to ``Schema.__update__``
+        self.assertIsNot(HeaderSchema.__init__, Schema.__update__)
+        self.assertEqual(HeaderSchema.__init__.__qualname__, 'HeaderSchema.__init__')
+
+        schema = HeaderSchema(kind=9)
+
+        # ``__post_init__`` ran: ``size`` carries its declared default, and the
+        # two that declare none are left absent rather than holding the
+        # ``NoValue`` the generated ``__init__`` seeded them with
+        self.assertEqual(schema.to_dict(), {'kind': 9, 'size': 0x0102})
+
+        # so the schema packs, where before the fix the fields left out reached
+        # the packing as the field objects themselves
+        self.assertEqual(bytes(schema), b'\x09\x01\x02\x00')
+
+        # and the two construction paths now agree
+        self.assertEqual(bytes(HeaderSchema.from_dict({'kind': 9})), bytes(schema))
+
+        # a packet context is what makes packing at construction possible, so it
+        # is what asks for it
+        eager = HeaderSchema(kind=9, __packet__={})
+        self.assertFalse(eager.__updated__)
+        self.assertEqual(eager.__buffer__['size'], b'\x01\x02')
+
+        # a schema declaring an ``__init__`` of its own keeps it
+        self.assertEqual(NoPayload.__init__.__qualname__, 'NoPayload.__init__')
+        self.assertEqual(bytes(NoPayload()), b'')
 
     def test_schema_mapping_payload_list_and_default_edge_branches(self) -> None:
         NestedSchema, FeatureSchema, PayloadOnlySchema, _, _ = self._make_schema_classes()
