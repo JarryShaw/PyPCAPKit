@@ -75,7 +75,25 @@ __all__ = ['L2TP']
 
 class L2TP(Link[Data_L2TP, Schema_L2TP],
            schema=Schema_L2TP, data=Data_L2TP):
-    """This class implements Layer Two Tunnelling Protocol."""
+    """This class implements Layer Two Tunnelling Protocol.
+
+    The protocol is dispatched from :attr:`UDP.__proto__
+    <pcapkit.protocols.transport.udp.UDP.__proto__>` at port 1701.
+
+    Note:
+        This is **L2TPv2** as specified by :rfc:`2661` -- a 16-bit tunnel ID and
+        a 16-bit session ID, with the version nibble reading 2. IANA protocol
+        number 115 (``L2TP``) is therefore deliberately left unbound: it
+        references :rfc:`3931`, i.e. L2TPv3 over IP, whose session header is a
+        different shape and which this dissector would misparse.
+
+        As with :class:`~pcapkit.protocols.link.ospf.OSPF`, the class subclasses
+        :class:`~pcapkit.protocols.link.link.Link` and so reports
+        ``layer == 'Link'`` even though it is carried inside UDP. That is a
+        pre-existing classification, kept because moving the module would change
+        its public import path.
+
+    """
 
     ##########################################################################
     # Properties.
@@ -160,7 +178,13 @@ class L2TP(Link[Data_L2TP, Schema_L2TP],
             # l2tp['padding'] = self._read_fileng(_size)
 
         length = schema.length if flags.len else (length or len(self))
-        return self._decode_next_layer(l2tp, length - hdr_len)
+        # L2TP carries no next-protocol field -- the payload is a PPP frame,
+        # which pcapkit does not dissect -- so dispatch on the -1 sentinel, as
+        # ARP does, rather than on a code read off the wire. Passing the
+        # remaining length here (as this did) dispatched on it as if it were an
+        # EtherType, which resolved to Raw only because a length rarely collides
+        # with a registered one.
+        return self._decode_next_layer(l2tp, -1, length - hdr_len)
 
     def make(self,
              version: 'Literal[2]' = 2,

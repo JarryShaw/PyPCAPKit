@@ -50,8 +50,8 @@ __all__ = [
     'Raw',
 
     # Link Layer
-    'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP',
-    'OSPF', 'RARP', 'VLAN',
+    'ARP', 'C_Tag', 'DRARP', 'Ethernet', 'InARP', 'L2TP',
+    'OSPF', 'RARP', 'S_Tag', 'VLAN',
 
     # Internet Layer
     'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',

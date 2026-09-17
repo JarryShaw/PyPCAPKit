@@ -211,14 +211,15 @@ complaint and yields nothing useful.
   ``ETHERNET``, ``IPV4`` and ``IPV6``, declared identically in
   :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
   :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`.
-* **15 of the 151** :class:`~pcapkit.const.reg.transtype.TransType` values, in
+* **16 of the 151** :class:`~pcapkit.const.reg.transtype.TransType` values, in
   :attr:`Internet.__proto__
   <pcapkit.protocols.internet.internet.Internet.__proto__>`.
-* **6 of the 160** :class:`~pcapkit.const.reg.ethertype.EtherType` values, in
+* **7 of the 160** :class:`~pcapkit.const.reg.ethertype.EtherType` values, in
   :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`: ARP,
-  RARP, IPv4, IPv6, IPX and the customer VLAN tag.
-* **2 port numbers, out of 8182** :class:`~pcapkit.const.reg.apptype.AppType`
-  members -- TCP 21 to FTP, and port 80 to HTTP on both TCP and UDP.
+  RARP, IPv4, IPv6, IPX and both VLAN tags.
+* **6 port numbers, out of 8182** :class:`~pcapkit.const.reg.apptype.AppType`
+  members -- TCP 20 to FTP-DATA and 21 to FTP, port 80 and 8080 to HTTP on both
+  TCP and UDP, and UDP 1701 to L2TP.
 * **none of the 75**
   :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
   values. :attr:`SCTP.__proto__
@@ -227,22 +228,62 @@ complaint and yields nothing useful.
   :func:`~pcapkit.foundation.registry.protocols.register_sctp`.
 
 Most of those want a dissector written and are covered by the stub list above.
-A handful want only a table entry, because the dissector is already there:
+A handful wanted only a table entry, because the dissector was already there,
+and those have now been made:
 
-* :class:`~pcapkit.protocols.link.ospf.OSPF` and
-  :class:`~pcapkit.protocols.link.l2tp.L2TP` are implemented but reachable from
-  no registry at all -- ``TransType`` 89 and 115 are both unbound. Note that
-  each class deliberately makes ``__index__`` raise, so registering them means
-  deciding that question first.
-* :class:`~pcapkit.protocols.application.ftp.FTP_DATA` is implemented and
-  exported, but TCP port 20 is unbound.
-* HTTP is bound on port 80 only, not on 8080 or 8443.
-* The service VLAN tag identifier (S-Tag), ``0x88A8``, is unbound, though
-  :class:`~pcapkit.protocols.link.vlan.VLAN` already parses that shape and the
-  customer tag ``0x8100`` is bound to it.
+* **Done.** :class:`~pcapkit.protocols.link.ospf.OSPF` is bound at
+  ``TransType`` 89 (``OSPFIGP``) and
+  :class:`~pcapkit.protocols.link.l2tp.L2TP` at UDP port 1701. Binding them
+  turned up three defects that had kept OSPF from parsing anything at all --
+  ``read`` consulted the schema *class* rather than the parsed header,
+  :attr:`~pcapkit.protocols.link.ospf.OSPF.alias` read an ``_info`` that does
+  not exist until ``read`` has returned, and both classes dispatched the
+  remaining payload *length* as if it were a protocol code. ``__index__`` still
+  raises on both, which is correct: neither is reached through a link-layer
+  EtherType.
+* **Done.** :class:`~pcapkit.protocols.application.ftp.FTP_DATA` is bound at TCP
+  port 20 (IANA ``ftp-data``). It is a thin
+  :class:`~pcapkit.protocols.misc.raw.Raw` subclass, so this buys the payload a
+  *name* rather than a parse -- which is the right answer for a data channel
+  carrying an arbitrary file.
+* **Done.** HTTP is additionally bound on 8080 (IANA ``http-alt``, "HTTP
+  Alternate (see port 80)") on both TCP and UDP. **8443 is deliberately left
+  unbound**: IANA registers it as ``pcsync-https``, not as an HTTP alternate,
+  and de-facto 8443 traffic is TLS-wrapped, which pcapkit cannot parse -- see
+  the ``tls`` stub above. Binding it would feed a TLS record to an HTTP parser.
+* **Done.** The service VLAN tag identifier (S-Tag), ``0x88A8``, is bound to
+  :class:`~pcapkit.protocols.link.vlan.S_Tag`, and the customer tag ``0x8100``
+  to :class:`~pcapkit.protocols.link.vlan.C_Tag`. Both subclass the now-abstract
+  :class:`~pcapkit.protocols.link.vlan.VLAN`, which carries the shared tag
+  layout; the split exists so that a Q-in-Q frame's two tags stay distinct in
+  the parsed output. Fixing the shared ``read`` also fixed the DEI flag, which
+  had been reported as ``bool(pcp)`` rather than read from its own bit.
 * ``LinkType`` ``NULL``, ``LOOP`` and ``RAW`` carry bare IPv4 or IPv6, both of
   which pcapkit dissects. ``NULL`` and ``LOOP`` need their four-octet address
   family word skipped first, and ``RAW`` needs a version sniff.
+
+Three follow-ups the above deliberately left alone:
+
+* ``TransType`` 115 (``L2TP``) stays unbound. It references :rfc:`3931`, i.e.
+  L2TPv3 over IP, whose session header differs from the :rfc:`2661` L2TPv2
+  framing :class:`~pcapkit.protocols.link.l2tp.L2TP` implements. Binding it
+  wants a v3 dissector, not a table entry.
+* :class:`~pcapkit.protocols.link.ospf.OSPF` and
+  :class:`~pcapkit.protocols.link.l2tp.L2TP` both live under
+  :mod:`pcapkit.protocols.link` and so report ``layer == 'Link'``, although one
+  is carried inside IP and the other inside UDP. Moving them would change their
+  public import paths, so the misclassification is documented rather than
+  fixed. It is inert for layer-limited extraction, since IPv4 and IPv6 terminate
+  an ``internet`` extraction before either is reached.
+* :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>` points
+  its HTTP ports at the version-guessing
+  :class:`pcapkit.protocols.application.http.HTTP`, while
+  :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` points
+  the same ports at :class:`pcapkit.protocols.application.httpv1.HTTP`. The
+  asymmetry predates the 8080 entries. Reconciling it changes what existing
+  captures parse to, so it wants its own change. Note also that
+  ``http.HTTP``'s explicit ``version=`` path is broken independently: it passes
+  an already-drained file object, so only the auto-guess path works.
 
 Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
 ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;

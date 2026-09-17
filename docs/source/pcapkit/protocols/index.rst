@@ -38,6 +38,10 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
                    RARP --> DRARP
                end
            end
+
+           subgraph vlan [VLAN Family]
+               VLAN --> C_Tag & S_Tag
+           end
        end
 
        subgraph internet [Internet Layer]
@@ -102,6 +106,8 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
        click L2TP "/pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP"
        click OSPF "/pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF"
        click VLAN "/pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN"
+       click C_Tag "/pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.C_Tag"
+       click S_Tag "/pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.S_Tag"
        click ARP "/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP"
        click InARP "/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.InARP"
        click RARP "/pcapkit/protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP"

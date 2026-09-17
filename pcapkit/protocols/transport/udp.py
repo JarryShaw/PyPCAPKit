@@ -59,6 +59,21 @@ class UDP(Transport[Data_UDP, Schema_UDP],
          - Protocol
        * - 80
          - :class:`pcapkit.protocols.application.http.HTTP`
+       * - 1701
+         - :class:`pcapkit.protocols.link.l2tp.L2TP`
+       * - 8080
+         - :class:`pcapkit.protocols.application.http.HTTP`
+
+    Note:
+        Both HTTP ports here resolve to
+        :class:`pcapkit.protocols.application.http.HTTP`, which sniffs HTTP/1
+        against HTTP/2 and delegates, whereas
+        :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
+        binds :class:`pcapkit.protocols.application.httpv1.HTTP` directly for
+        the same ports. The asymmetry predates the 8080 entries -- port 80 was
+        already split this way -- and each table is left internally consistent
+        rather than repointing port 80 and changing what existing captures
+        parse to. Reconciling the two is left as its own change.
 
     """
 
@@ -73,7 +88,25 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
-            80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),  # HTTP
+            # Ports are IANA service-name registry assignments, quoting that
+            # registry's own service name and description:
+            #
+            #   80    http       World Wide Web HTTP
+            #   1701  l2tp       l2tp
+            #   8080  http-alt   HTTP Alternate (see port 80)
+            #
+            # Both HTTP entries keep pointing at the version-guessing
+            # :class:`pcapkit.protocols.application.http.HTTP`, which is what
+            # port 80 already used here -- unlike TCP, which binds HTTP/1
+            # directly. c.f. the note in the class docstring.
+            80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
+            8080: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
+
+            # L2TPv2 (RFC 2661) is UDP-borne, and v2 is what the dissector
+            # implements. IANA protocol number 115 is deliberately *not* bound
+            # to it: that assignment references RFC 3931, i.e. L2TPv3 over IP,
+            # whose session header is a different shape.
+            1701: ModuleDescriptor('pcapkit.protocols.link.l2tp', 'L2TP'),
         },
     )
 

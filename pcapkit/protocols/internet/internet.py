@@ -73,6 +73,8 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
          - :class:`pcapkit.protocols.internet.hip.HIP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.SCTP`
          - :class:`pcapkit.protocols.transport.sctp.SCTP`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`
+         - :class:`pcapkit.protocols.link.ospf.OSPF`
 
     """
 
@@ -104,6 +106,15 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             Enum_TransType.Mobility_Header: ModuleDescriptor('pcapkit.protocols.internet.mh',         'MH'),
             Enum_TransType.HIP:             ModuleDescriptor('pcapkit.protocols.internet.hip',        'HIP'),
             Enum_TransType.SCTP:            ModuleDescriptor('pcapkit.protocols.transport.sctp',      'SCTP'),
+
+            # OSPF rides directly on IP, so IANA protocol number 89 is its only
+            # dispatch point. The dissector lives under ``protocols.link``
+            # despite that, and so reports ``__layer__ = 'Link'``; c.f. the note
+            # in :mod:`pcapkit.protocols.link.ospf`. The module is left where it
+            # is here -- moving it would break its import path -- and the
+            # mislabel is inert for layer-limited extraction, since IPv4/IPv6
+            # terminate an ``internet`` extraction before OSPF is reached.
+            Enum_TransType.OSPFIGP:         ModuleDescriptor('pcapkit.protocols.link.ospf',           'OSPF'),
         },
     )
 

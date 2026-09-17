@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for 802.1Q Customer VLAN Tag Type protocol"""
+"""header schema for 802.1Q/802.1ad VLAN tag type protocols
+
+The customer tag (802.1Q, TPID ``0x8100``) and the service tag (802.1ad, TPID
+``0x88A8``) carry an identical layout, so
+:class:`~pcapkit.protocols.link.vlan.C_Tag` and
+:class:`~pcapkit.protocols.link.vlan.S_Tag` share the schema below. The TPID that
+told them apart belongs to the encapsulating header, not to the tag.
+
+"""
 
 from typing import TYPE_CHECKING
 
@@ -21,7 +29,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class TCIType(TypedDict):
-        """Type of 802.1Q Customer VLAN Tag Type tag control information."""
+        """Type of 802.1Q/802.1ad VLAN tag control information."""
 
         #: Priority code point.
         pcp: int
@@ -33,7 +41,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
 @schema_final
 class TCI(Schema):
-    """Header schema for 802.1Q Customer VLAN Tag Type tag control information."""
+    """Header schema for 802.1Q/802.1ad VLAN tag control information."""
 
     #: Priority code point.
     pcp: 'Enum_PriorityLevel' = EnumField(length=1, bit_length=3, namespace=Enum_PriorityLevel)
@@ -48,7 +56,7 @@ class TCI(Schema):
 
 @schema_final
 class VLAN(Schema):
-    """Header schema for 802.1Q Customer VLAN Tag Type packet."""
+    """Header schema for an 802.1Q/802.1ad VLAN tag."""
 
     #: Tag control information.
     tci: 'TCIType' = BitField(

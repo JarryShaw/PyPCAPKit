@@ -180,10 +180,14 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
        * - Port Number
          - Protocol
+       * - 20
+         - :class:`pcapkit.protocols.application.ftp.FTP_DATA`
        * - 21
          - :class:`pcapkit.protocols.application.ftp.FTP`
        * - 80
-         - :class:`pcapkit.protocols.application.http.HTTP`
+         - :class:`pcapkit.protocols.application.httpv1.HTTP`
+       * - 8080
+         - :class:`pcapkit.protocols.application.httpv1.HTTP`
 
     This class currently supports parsing of the following TCP options,
     which are directly mapped to the :class:`pcapkit.const.tcp.option.Option`
@@ -310,8 +314,21 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
-            21: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP'),      # FTP
-            80: ModuleDescriptor('pcapkit.protocols.application.httpv1', 'HTTP'),  # HTTP/1.*
+            # Ports are IANA service-name registry assignments, quoting that
+            # registry's own service name and description:
+            #
+            #   20    ftp-data   File Transfer [Default Data]
+            #   21    ftp        File Transfer Protocol [Control]
+            #   80    http       World Wide Web HTTP
+            #   8080  http-alt   HTTP Alternate (see port 80)
+            #
+            # 8443 is deliberately absent: IANA registers it as ``pcsync-https``
+            # rather than as an HTTP alternate, and traffic there is TLS-wrapped,
+            # which pcapkit does not parse.
+            20: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP_DATA'),
+            21: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP'),
+            80: ModuleDescriptor('pcapkit.protocols.application.httpv1', 'HTTP'),
+            8080: ModuleDescriptor('pcapkit.protocols.application.httpv1', 'HTTP'),
         },
     )
 
