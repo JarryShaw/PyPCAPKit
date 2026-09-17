@@ -224,9 +224,11 @@ complaint and yields nothing useful.
 * **7 of the 160** :class:`~pcapkit.const.reg.ethertype.EtherType` values, in
   :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`: ARP,
   RARP, IPv4, IPv6, IPX and both VLAN tags.
-* **6 port numbers, out of 8182** :class:`~pcapkit.const.reg.apptype.AppType`
-  members -- TCP 20 to FTP-DATA and 21 to FTP, port 80 and 8080 to HTTP on both
-  TCP and UDP, and UDP 1701 to L2TP.
+* **7 bindings over 5 port numbers, out of 8182**
+  :class:`~pcapkit.const.reg.apptype.AppType` members -- TCP 20 to FTP-DATA and
+  21 to FTP, port 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TP.
+  The two counts differ because 80 and 8080 are each bound twice, once per
+  transport.
 * **none of the 75**
   :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
   values. :attr:`SCTP.__proto__
