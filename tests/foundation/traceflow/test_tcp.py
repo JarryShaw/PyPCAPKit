@@ -19,14 +19,15 @@ class TCPTraceFlowTests(unittest.TestCase):
 
     def _packet(self, *, index: int, src: str = '192.0.2.1', dst: str = '198.51.100.2',
                 srcport: int = 12345, dstport: int = 443, syn: bool = False,
-                fin: bool = False, timestamp: float = 1.25, frame: object | None = None):
+                fin: bool = False, rst: bool = False, timestamp: float = 1.25,
+                frame: object | None = None):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.traceflow.data.tcp import Packet
 
         if frame is None:
             frame = {'frame': index}
-        return Packet(LinkType.ETHERNET, index, frame, syn, fin, ip_address(src), ip_address(dst),
-                      srcport, dstport, timestamp)
+        return Packet(LinkType.ETHERNET, index, frame, syn, fin, rst, ip_address(src),
+                      ip_address(dst), srcport, dstport, timestamp)
 
     def test_tcp_trace_ipv4_fin_submit_cache_callback_and_dump(self) -> None:
         """One direction, traced with ``bidirectional=False``.
@@ -101,13 +102,16 @@ class TCPTraceFlowTests(unittest.TestCase):
             self.assertEqual(flow.forward, (1,))
             self.assertEqual(flow.reverse, (2,))
 
-    def test_a_conversation_closes_only_once_both_halves_have_finished(self) -> None:
-        """One FIN is half a teardown, so it must not close the flow.
+    def test_a_four_way_close_keeps_its_final_acknowledgement(self) -> None:
+        """The whole close belongs to the flow, the last ACK included.
 
-        Closing on the first FIN would cut the peer's FIN and the final
-        acknowledgement out of the flow -- and they would then open a *second*
-        flow under the same buffer ID, which is the split bidirectional tracing
-        exists to remove.
+        A four-way close is FIN, ACK, FIN, ACK, so the final acknowledgement
+        arrives *after* the second FIN. Submitting the flow on the second FIN --
+        or, worse, on the first -- drops that ACK from it and lets the ACK open a
+        fresh buffer under the same canonical buffer ID, which
+        :meth:`test_a_reused_port_pair_does_not_join_the_closed_connection` shows
+        a later connection then merges into. So a teardown records itself and
+        finalises nothing.
 
         """
         from pcapkit.dumpkit.null import NotImplementedIO
@@ -129,13 +133,158 @@ class TCPTraceFlowTests(unittest.TestCase):
             trace.trace(self._packet(index=4, fin=True, timestamp=1.8))
             self.assertEqual(trace._stream, [])
 
-            # now the server finishes too
+            # the server's FIN completes the exchange, but not the conversation:
+            # its acknowledgement is still to come, so nothing is finalised yet
             trace.trace(self._reply(index=5, fin=True, timestamp=2.0))
-            self.assertEqual(len(trace._buffer), 0)
-            flow, = trace._stream
-            self.assertEqual(flow.index, (1, 2, 3, 4, 5))
-            self.assertEqual(flow.forward, (1, 3, 4))
+            self.assertEqual(len(trace._buffer), 1)
+            self.assertEqual(trace._stream, [])
+
+            # ... and here it is, in the flow where it belongs
+            trace.trace(self._packet(index=6, timestamp=2.25))
+            # ... as is a duplicate of it, which no rule naming "the last packet
+            # of the exchange" could have accommodated
+            trace.trace(self._packet(index=7, timestamp=2.5))
+
+            flow, = trace.index
+            self.assertEqual(flow.index, (1, 2, 3, 4, 5, 6, 7))
+            self.assertEqual(flow.forward, (1, 3, 4, 6, 7))
             self.assertEqual(flow.reverse, (2, 5))
+
+    def test_a_reused_port_pair_does_not_join_the_closed_connection(self) -> None:
+        """A new connection on the same endpoints is a second flow.
+
+        This is the defect the review found. With the flow submitted on the second
+        FIN, the final ACK arrived after the buffer had been popped and opened a
+        stray one-packet buffer under the same canonical buffer ID; the next
+        connection to reuse the endpoints then merged into that stray buffer, and
+        two unrelated connections came back as one flow.
+
+        A SYN is what proves the previous connection can receive nothing further,
+        so it is what finalises the old flow and starts a new one.
+
+        """
+        from pcapkit.dumpkit.null import NotImplementedIO
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        TCP.register_dumper('unit-null', NotImplementedIO, '.unit')
+        callbacks = []
+        TCP.register_callback(callbacks.append)
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unit-null')
+
+            # connection one: handshake, data, and a full four-way close
+            trace.trace(self._packet(index=1, syn=True, timestamp=1.0))
+            trace.trace(self._reply(index=2, syn=True, timestamp=1.1))
+            trace.trace(self._packet(index=3, fin=True, timestamp=1.2))
+            trace.trace(self._reply(index=4, timestamp=1.3))
+            trace.trace(self._reply(index=5, fin=True, timestamp=1.4))
+            trace.trace(self._packet(index=6, timestamp=1.5))
+
+            # connection two: the very same address and port pair, reused. Its SYN
+            # is what finalises the first flow, so that is where the first flow's
+            # callback fires -- carrying the whole conversation, final ACK
+            # included, rather than a truncated one.
+            fired = len(callbacks)
+            trace.trace(self._packet(index=7, syn=True, timestamp=9.0))
+            self.assertEqual(len(callbacks), fired + 1)
+            self.assertEqual(callbacks[-1].index, (1, 2, 3, 4, 5, 6))
+
+            trace.trace(self._reply(index=8, syn=True, timestamp=9.1))
+
+            # ``finish`` is what Extractor._cleanup calls at the end of a capture;
+            # after it every flow has been finalised, so ``index`` reports them in
+            # the order they closed rather than open-buffers-first
+            trace.finish()
+            first, second = trace.index
+            self.assertEqual(first.index, (1, 2, 3, 4, 5, 6),
+                             'the second connection joined the first')
+            self.assertEqual(second.index, (7, 8))
+            self.assertNotEqual(first.label, second.label)
+
+    def test_the_peers_syn_ack_joins_the_flow_rather_than_splitting_it(self) -> None:
+        """A SYN-ACK carries SYN too, and must not be read as a new connection.
+
+        Which is why the rule is gated on the teardown having been seen: a SYN-ACK
+        cannot arrive after both endpoints have finished, or after a reset. Without
+        that gate every connection whose handshake was captured would split in two
+        at its second frame.
+
+        """
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unknown-unit-format')
+            trace.trace(self._packet(index=1, syn=True, timestamp=1.0))
+            trace.trace(self._reply(index=2, syn=True, timestamp=1.1))
+
+            flow, = trace.index
+            self.assertEqual(flow.index, (1, 2))
+
+    def test_a_reset_ends_the_connection_as_a_close_does(self) -> None:
+        """RST is the other way a connection ends, and was not modelled at all.
+
+        Without the flag reaching the tracer a reset connection looked merely
+        idle, so a later connection reusing the endpoints merged into it -- the
+        same contamination as the FIN case, by a different route.
+
+        """
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unknown-unit-format')
+            trace.trace(self._packet(index=1, syn=True, timestamp=1.0))
+            trace.trace(self._reply(index=2, rst=True, timestamp=1.1))
+
+            # the reset is recorded but does not itself finalise the flow
+            self.assertEqual(len(trace._buffer), 1)
+            bufid, = trace._buffer
+            self.assertTrue(trace._buffer[bufid].reset)
+
+            # a new connection on the same endpoints is a second flow
+            trace.trace(self._packet(index=3, syn=True, timestamp=9.0))
+            trace.finish()
+            first, second = trace.index
+            self.assertEqual(first.index, (1, 2))
+            self.assertEqual(second.index, (3,))
+
+    def test_a_half_open_connection_is_still_reported_at_end_of_capture(self) -> None:
+        """A conversation with no teardown must not simply vanish.
+
+        Nothing supersedes it, so ``finish`` -- which
+        :meth:`Extractor._cleanup <pcapkit.foundation.extraction.Extractor._cleanup>`
+        calls at the end of the capture -- is what finalises it and fires its
+        callback. ``submit`` reports it either way, so that reading ``index``
+        part-way through a capture is not destructive.
+
+        """
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        callbacks = []
+        TCP.register_callback(callbacks.append)
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unknown-unit-format')
+            trace.trace(self._packet(index=1, syn=True, timestamp=1.0))
+            trace.trace(self._reply(index=2, timestamp=1.1))
+
+            # reported, but not finalised -- and reading it changed nothing
+            flow, = trace.index
+            self.assertEqual(flow.index, (1, 2))
+            self.assertEqual(len(trace._buffer), 1)
+            self.assertEqual(trace._stream, [])
+
+            before = len(callbacks)
+            trace.finish()
+            self.assertEqual(len(trace._buffer), 0)
+            flow, = trace.index
+            self.assertEqual(flow.index, (1, 2))
+            self.assertEqual(len(callbacks), before + 1)
+
+            # idempotent: Extractor._cleanup can run twice for one extraction
+            trace.finish()
+            self.assertEqual(len(callbacks), before + 1)
+            self.assertEqual(len(trace.index), 1)
 
     def test_the_buffer_id_is_canonical_and_stays_a_tuple(self) -> None:
         """Both directions reduce to the same key, whichever is seen first.

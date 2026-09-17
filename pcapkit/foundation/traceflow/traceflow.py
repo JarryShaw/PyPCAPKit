@@ -288,6 +288,28 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
         """
 
+    def finish(self) -> 'None':
+        """Finalise every flow still being traced.
+
+        Called by :meth:`Extractor._cleanup
+        <pcapkit.foundation.extraction.Extractor._cleanup>` once the capture has
+        been read to its end, which is the point at which a flow that was never
+        superseded can be said to be over.
+
+        The base implementation does nothing, so a tracer that has no such notion
+        -- or an existing third-party subclass that predates this method -- keeps
+        working unchanged. :meth:`submit` must remain able to report a flow that
+        was never finalised, since nothing guarantees this is called: a tracer
+        driven directly rather than through an
+        :class:`~pcapkit.foundation.extraction.Extractor` never sees an end of
+        capture.
+
+        Implementations must be **idempotent**: :meth:`Extractor._cleanup
+        <pcapkit.foundation.extraction.Extractor._cleanup>` can run more than once
+        for one extraction.
+
+        """
+
     ##########################################################################
     # Data models.
     ##########################################################################

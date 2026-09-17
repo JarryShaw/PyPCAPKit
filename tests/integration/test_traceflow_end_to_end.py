@@ -110,15 +110,30 @@ class TraceFlowScaleTests(EndToEndTestCase):
         flows = extractor.trace.tcp
 
         self.assertEqual(extractor.length, 1117)
-        # 220 connections, not the 331 directions they are made of: 111 of them
-        # were captured both ways and 109 only one way, and 2 * 111 + 109 == 331,
-        # so the drop is the two halves of a connection meeting in one flow and
-        # not frames going missing -- which is what the index check below pins
-        self.assertEqual(len(flows), 220)
+        # 111 connections, not the 331 directions they are made of. Every one of
+        # them was captured both ways, so keying a flow on the pair of endpoints
+        # rather than on (source, destination) halves the count; the odd frame is
+        # the two connections that carry more than the usual ten.
+        #
+        # 220 would be the answer if a flow were submitted on the second FIN of
+        # its four-way close: the final acknowledgement then arrives after the
+        # buffer has been popped and forms a flow of its own, so each conversation
+        # comes back as a nine-frame flow plus a one-frame tail -- 109 of them
+        # here, which is what the review caught. The assertions below are what
+        # would notice it again: a stray tail is a single-frame flow, and it is a
+        # flow a later connection reusing those endpoints can be absorbed into.
+        self.assertEqual(len(flows), 111)
+        self.assertEqual(sum(1 for flow in flows if len(flow.index) == 1), 0,
+                         'a flow of one frame is a stray tail, not a conversation')
+        self.assertEqual(sum(1 for flow in flows if not flow.reverse), 0)
 
         indexed = [number for flow in flows for number in flow.index]
         self.assertEqual(len(indexed), 1117)
         self.assertEqual(sorted(indexed), list(range(1, 1118)))
+        # and each flow's own index is its two halves merged, so the split into
+        # directions cannot lose or duplicate a frame either
+        for flow in flows:
+            self.assertEqual(flow.index, tuple(sorted(flow.forward + flow.reverse)))
 
     def test_one_report_is_written_per_flow(self) -> None:
         extractor = self.extract(fin=sample_path('http.pcap'), nofile=True, store=False,
@@ -128,9 +143,9 @@ class TraceFlowScaleTests(EndToEndTestCase):
 
         written = {entry.name for entry in self.tmp_path.joinpath('trace').iterdir()}
         self.assertEqual(written, {f'{flow.label}.json' for flow in flows})
-        self.assertEqual(len(written), 220)
+        self.assertEqual(len(written), 111)
 
-        # Spot-check the longest flow rather than re-reading all 220 reports.
+        # Spot-check the longest flow rather than re-reading all 111 reports.
         longest = max(flows, key=lambda flow: len(flow.index))
         report = read_json(longest.fpout)
         self.assertEqual(list(report), [f'Frame {number}' for number in longest.index])

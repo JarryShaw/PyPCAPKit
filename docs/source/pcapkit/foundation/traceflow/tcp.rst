@@ -16,6 +16,7 @@ TCP flows from a series of packets and connections.
    .. automethod:: dump
    .. automethod:: make_bufid
    .. automethod:: trace
+   .. automethod:: finish
    .. automethod:: submit
 
    .. autoattribute:: __protocol_name__
@@ -39,6 +40,7 @@ Terminology
               frame=frame.info,                       # extracted frame info
               syn=tcp.flags.syn,                      # TCP synchronise (SYN) flag
               fin=tcp.flags.fin,                      # TCP finish (FIN) flag
+              rst=tcp.flags.rst,                      # TCP reset (RST) flag
               src=ip.src,                             # source IP
               dst=ip.dst,                             # destination IP
               srcport=tcp.srcport,                    # TCP source port
@@ -71,6 +73,7 @@ Terminology
            |                        |--> 'forward': (list) frame index sent by ``origin``
            |                        |--> 'reverse': (list) frame index sent to ``origin``
            |                        |--> 'fin': (set) endpoints seen to have sent a FIN
+           |                        |--> 'reset': (bool) whether a RST has been seen
            |--> (tuple) BUFID ...
 
        When tracing bidirectionally -- the default -- ``BUFID`` orders the two
@@ -79,6 +82,18 @@ Terminology
        either way, because it is a :obj:`dict` key and an
        :class:`~pcapkit.corekit.infoclass.Info` cannot be one --
        :class:`collections.abc.Mapping` sets its ``__hash__`` to :data:`None`.
+
+       A teardown -- a FIN from each endpoint, or a RST from either -- is recorded
+       in ``fin`` and ``reset`` but does **not** finalise the flow. The four-way
+       close of :rfc:`9293#section-3.6` is FIN, ACK, FIN, ACK, so the
+       acknowledgement that completes it arrives after the second FIN; finalising
+       on that FIN would drop the ACK from the flow and let it open a fresh buffer
+       under the same ``BUFID``, which a later connection reusing those endpoints
+       would then merge into. The flow is finalised instead by proof that nothing
+       more can arrive -- a new connection's SYN on the same endpoints, or
+       :meth:`TCP.finish <pcapkit.foundation.traceflow.tcp.TCP.finish>` at the end
+       of the capture. Telling that SYN from the peer's SYN-ACK is what the
+       recorded teardown is for.
 
        .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Buffer`
 

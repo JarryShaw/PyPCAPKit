@@ -223,6 +223,108 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class IPLooseModeTests(unittest.TestCase):
+    """``strict=False``, where IP reports one contiguous payload, not the runs.
+
+    This branch had no test, and it is the one where the payload -- not merely the
+    ``completed`` flag -- changed: an unterminated datagram used to come back as
+    65534 octets of preallocated buffer, reported *complete*.
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes):
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.foundation.reassembly.data.ip import Packet
+
+        src = ip_address('192.0.2.1')
+        dst = ip_address('198.51.100.2')
+        return Packet((src, dst, 42, TransType.UDP), num, fo, 20, mf,
+                      20 + len(payload), b'ip-header', bytearray(payload), T0)
+
+    def test_an_unterminated_datagram_reports_the_prefix_that_arrived(self) -> None:
+        """No final fragment means no known length -- but the prefix is known.
+
+        ``TDL`` is still ``-1`` here, and ``datagram[:-1]`` was 65534 octets of the
+        preallocated buffer with ``completed=True`` on top. Neither that nor an
+        empty payload is right: the octets from offset zero to the first hole did
+        genuinely arrive, so they are what a caller asking for one contiguous
+        payload gets, and the datagram is reported incomplete.
+
+        """
+        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.ipv4 import IPv4
+
+        reasm = IPv4(strict=False)
+        # 16 octets at offset 0, then nothing -- MF set throughout, so the total
+        # length is never learnt
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 16))
+
+        datagram, = reasm.datagram
+        self.assertIs(datagram.completed, Completion.PARTIAL)
+        self.assertFalse(datagram.completed)
+        self.assertEqual(datagram.payload, b'A' * 16)
+        self.assertNotEqual(len(datagram.payload), 65534, 'the whole buffer came back')
+
+    def test_the_prefix_stops_at_the_first_hole(self) -> None:
+        """A run after a gap cannot be placed in a blob, so it is not in one.
+
+        Its offset is exactly what a contiguous payload cannot express; ``strict``
+        mode lists the runs for that reason. Reporting the later run here would
+        misrepresent it as starting at the datagram's beginning.
+
+        """
+        from pcapkit.foundation.reassembly.ipv4 import IPv4
+
+        reasm = IPv4(strict=False)
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 16))
+        reasm(self._packet(num=2, fo=64, mf=True, payload=b'C' * 16))
+
+        datagram, = reasm.datagram
+        self.assertEqual(datagram.payload, b'A' * 16)
+
+        # ... and strict mode, the default, reports both runs instead
+        strict = IPv4()
+        strict(self._packet(num=1, fo=0, mf=True, payload=b'A' * 16))
+        strict(self._packet(num=2, fo=64, mf=True, payload=b'C' * 16))
+        datagram, = strict.datagram
+        self.assertEqual(datagram.payload, (b'A' * 16, b'C' * 16))
+
+    def test_a_known_length_still_zero_fills_its_holes(self) -> None:
+        """With the last fragment in hand the length is known, so nothing changes.
+
+        This is the case ``strict=False`` exists for, and its payload is exactly
+        what it always was -- only ``completed`` stopped claiming the datagram was
+        whole.
+
+        """
+        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.ipv4 import IPv4
+
+        reasm = IPv4(strict=False)
+        # a 24-octet datagram missing its middle 8 octets
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 8))
+        reasm(self._packet(num=2, fo=16, mf=False, payload=b'C' * 8))
+
+        datagram, = reasm.datagram
+        self.assertIs(datagram.completed, Completion.PARTIAL)
+        self.assertEqual(datagram.payload, b'A' * 8 + bytes(8) + b'C' * 8)
+
+    def test_a_complete_datagram_is_unaffected_by_loose_mode(self) -> None:
+        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.ipv4 import IPv4
+
+        reasm = IPv4(strict=False)
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 8))
+        reasm(self._packet(num=2, fo=8, mf=False, payload=b'B' * 8))
+
+        datagram, = reasm.datagram
+        self.assertIs(datagram.completed, Completion.COMPLETE)
+        self.assertEqual(datagram.payload, b'A' * 8 + b'B' * 8)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TCPReassemblyTimeoutTests(unittest.TestCase):
     def setUp(self) -> None:
         purge_modules(['pcapkit'])

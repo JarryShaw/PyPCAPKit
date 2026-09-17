@@ -44,6 +44,7 @@ which is an abstract base class for all flow tracing classes.
 
    .. automethod:: dump
    .. automethod:: trace
+   .. automethod:: finish
    .. automethod:: submit
 
    .. autoattribute:: __output__

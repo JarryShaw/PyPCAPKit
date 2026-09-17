@@ -24,20 +24,22 @@ class TraceFlowDataModelTests(unittest.TestCase):
         src = ip_address('2001:db8::1')
         dst = ip_address('2001:db8::2')
         frame = {'frame': 1}
-        packet = Packet(LinkType.ETHERNET, 1, frame, True, False, src, dst, 12345, 443, 1.5)
+        packet = Packet(LinkType.ETHERNET, 1, frame, True, False, False, src, dst, 12345, 443, 1.5)
         self.assertIsInstance(packet, TCP_Packet)
         self.assertEqual(packet.src, src)
         self.assertEqual(packet.frame, frame)
+        self.assertFalse(packet.rst)
 
         dumper = object()
         origin = (src, 12345)
         buffer = Buffer(dumper, [1, 2], '2001_db8_1-12345_2001_db8_2-443',
-                        origin, [1], [2], {origin})
+                        origin, [1], [2], {origin}, False)
         self.assertIsInstance(buffer, TCP_Buffer)
         self.assertEqual(buffer.fpout, dumper)
         self.assertEqual(buffer.origin, origin)
         self.assertEqual((buffer.forward, buffer.reverse), ([1], [2]))
         self.assertEqual(buffer.fin, {origin})
+        self.assertFalse(buffer.reset)
 
         index = Index('/tmp/flow.json', (1, 2), buffer.label, (1,), (2,))
         self.assertIsInstance(index, TCP_Index)

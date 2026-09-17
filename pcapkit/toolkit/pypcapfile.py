@@ -448,6 +448,7 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
         frame=packet2dict(packet, data_link=data_link),     # extracted packet
         syn=bool(tcp.syn),                                  # TCP synchronise (SYN) flag
         fin=bool(tcp.fin),                                  # TCP finish (FIN) flag
+        rst=bool(tcp.rst),                                  # TCP reset (RST) flag
         src=ipaddress.IPv4Address(ipv4.src),                # source IP
         dst=ipaddress.IPv4Address(ipv4.dst),                # destination IP
         srcport=tcp.src_port,                               # TCP source port

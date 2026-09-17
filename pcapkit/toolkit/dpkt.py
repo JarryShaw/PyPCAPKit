@@ -332,6 +332,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
             frame=packet2dict(packet, timestamp, data_link=data_link),  # extracted packet
             syn=bool(int(flags[6])),                                    # TCP synchronise (SYN) flag
             fin=bool(int(flags[7])),                                    # TCP finish (FIN) flag
+            rst=bool(int(flags[5])),                                    # TCP reset (RST) flag
             src=ipaddress.ip_address(ip.src),                           # source IP
             dst=ipaddress.ip_address(ip.dst),                           # destination IP
             srcport=tcp.sport,                                          # TCP source port

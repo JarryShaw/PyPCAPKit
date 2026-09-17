@@ -1045,10 +1045,22 @@ class Extractor(Generic[_P]):
         sets :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
         as :data:`True` and closes the input file (if necessary).
 
+        It also tells the flow tracer the capture has ended, via
+        :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish>`.
+        That is the point at which a traced flow nothing has superseded can be
+        said to be over, so it is where such a flow is finalised and its callbacks
+        run. This method can be reached twice for one extraction -- the EOF path in
+        :meth:`_read_frame` and again from :meth:`run` -- so ``finish`` is required
+        to be idempotent rather than guarded here.
+
         """
         # pylint: disable=attribute-defined-outside-init
         logger.debug('cleaning up after %d frame(s) from %s', self._frnum, self._ifnm)
         self._flag_e = True
+
+        if self._flag_t and self._tcp:
+            self._trace.tcp.finish()
+
         if isinstance(self._ifile, SeekableReader):
             self._ifile.close()
         elif not self._flag_s:

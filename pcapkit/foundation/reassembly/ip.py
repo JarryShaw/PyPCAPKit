@@ -221,16 +221,43 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         # if datagram is reassembled in whole -- or if it is not, and ``strict``
         # asked for one contiguous payload rather than the received runs
         else:
-            # NOTE: ``max(TDL, 0)``, not ``TDL``. ``TDL`` is still its initial
-            # ``-1`` until the fragment with **MF** clear arrives, so a datagram
-            # whose final fragment never came reached this branch under
-            # ``strict=False`` and sliced ``datagram[:-1]`` -- handing back 65534
-            # octets of the preallocated buffer, almost all of them zeros the
-            # sender never sent, and calling it complete. The length of such a
-            # datagram is simply not known, so there is nothing honest to report
-            # but an empty payload; ``strict=True``, the default, reports the runs
-            # that did arrive instead.
-            payload = bytes(datagram[:max(TDL, 0)])
+            # ``TDL`` is the datagram's total length, and it is only known once the
+            # fragment with **MF** clear has arrived -- until then it is still its
+            # initial ``-1``. Which case this is decides how much of the buffer
+            # there is to report.
+            if TDL > 0:
+                # The length is known. Report it, holes and all: the gaps read as
+                # zeros, exactly as they do in the TCP reassembler's loose mode.
+                # This is unchanged behaviour, and the reason ``strict=False``
+                # exists -- a caller who wants the gaps *marked* rather than
+                # zero-filled uses ``strict=True`` and gets the runs.
+                stop = TDL
+            else:
+                # The length is not known, and this is the case that used to slice
+                # ``datagram[:-1]`` -- handing back 65534 octets of the
+                # preallocated buffer, almost all of them zeros the sender never
+                # sent, and calling the result complete.
+                #
+                # Reporting nothing at all would be the other extreme, and it
+                # discards data that really did arrive. So report the **contiguous
+                # prefix**: every octet from offset zero up to the first hole. That
+                # is the longest run whose extent is known without knowing the
+                # total length, it is all genuinely received, and it is the part a
+                # caller asking for one contiguous payload can actually use --
+                # a parser reading a payload from its start cannot use a run that
+                # begins after an unmeasured gap anyway. Anything past the first
+                # hole is still reported by ``strict=True``, which lists the runs
+                # precisely because their offsets cannot be conveyed in a blob.
+                #
+                # ``RCVBT`` records receipt in 8-octet units, so the prefix ends at
+                # the first clear bit.
+                received = 0
+                for bit in RCVBT:
+                    if not bit:
+                        break
+                    received += 1
+                stop = received * 8
+            payload = bytes(datagram[:stop])
             packet = Datagram(
                 completed=completion,
                 id=DatagramID(

@@ -228,6 +228,7 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
                                                           # extracted frame info
             syn=tcp_info.flags.syn,                       # TCP synchronise (SYN) flag
             fin=tcp_info.flags.fin,                       # TCP finish (FIN) flag
+            rst=tcp_info.flags.rst,                       # TCP reset (RST) flag
             src=ip_info.src,                              # source IP
             dst=ip_info.dst,                              # destination IP
             srcport=tcp_info.srcport.port,                # TCP source port

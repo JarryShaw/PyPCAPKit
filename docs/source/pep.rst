@@ -594,25 +594,53 @@ Two smaller items in the same subsystem:
 
 * **Flow tracing is TCP only**, and blocked on the same generalisation --
   :class:`~pcapkit.foundation.traceflow.TraceFlowManager` holds a single field,
-  so UDP, SCTP and IP conversation tracing have nowhere to go. The TCP tracer
-  also closes a flow on FIN but never on RST, which is not in
-  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet` at all -- every toolkit
-  adapter would have to report the flag before the tracer could act on it.
+  so UDP, SCTP and IP conversation tracing have nowhere to go.
 
   It no longer *treats each direction of a connection as a separate flow*,
-  though. :meth:`TCP.make_bufid
+  though, and RST is no longer missing from
+  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet`. :meth:`TCP.make_bufid
   <pcapkit.foundation.traceflow.tcp.TCP.make_bufid>` orders the two endpoints
   canonically, so both halves of a conversation reduce to one buffer ID, one
   label and one output file, and
   :class:`~pcapkit.foundation.traceflow.data.tcp.Index` reports ``forward`` and
   ``reverse`` alongside ``index`` so per-direction ordering stays recoverable.
-  A flow now closes only once **both** halves have sent a FIN, since a
-  connection is not over while one direction is still sending. This is the
-  default; ``bidirectional=False`` (``trace_bidirectional=False`` on
+  This is the default; ``bidirectional=False``
+  (``trace_bidirectional=False`` on
   :class:`~pcapkit.foundation.extraction.Extractor`,
   :func:`~pcapkit.interface.core.extract` and
   :func:`~pcapkit.interface.misc.follow_tcp_stream`) restores the older
   per-direction behaviour.
+
+  What ends a bidirectional flow is worth stating, because the obvious answer is
+  wrong. A teardown -- a FIN from each endpoint, or a RST from either -- is
+  *recorded* but does not finalise the flow: the four-way close of
+  :rfc:`9293#section-3.6` is FIN, ACK, FIN, ACK, so the final acknowledgement
+  arrives after the second FIN, and finalising on that FIN drops the ACK from the
+  flow and lets it open a fresh buffer under the same canonical buffer ID -- which
+  a later connection reusing those endpoints then merges into. Duplicates of that
+  ACK defeat any rule that tries to name the last packet of the exchange. So the
+  flow is finalised only by proof that nothing more can arrive: a new connection's
+  SYN on the same endpoints, or the end of the capture, via
+  :meth:`TraceFlow.finish
+  <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish>`. Distinguishing
+  that SYN from the peer's SYN-ACK is what the recorded teardown is for.
+
+  What is still wanted here is **wiring the application layer into flow
+  tracing**. Reassembly analyses a datagram's payload lazily through
+  :class:`~pcapkit.foundation.reassembly.data.data.Deferred`; flow tracing
+  analyses nothing, because it buffers no payload at all -- its
+  :class:`~pcapkit.foundation.traceflow.data.tcp.Buffer` holds a dumper, frame
+  indices and a label. So this is not a parse to postpone but a capability to
+  add, and it needs a decision first: whether the tracer grows a payload buffer
+  per direction, or delegates to
+  :class:`~pcapkit.foundation.reassembly.tcp.TCP` the way
+  :func:`~pcapkit.interface.misc.follow_tcp_stream` already does.
+
+  One case remains undecided rather than solved: a capture that *starts* in the
+  middle of a connection, sees no teardown, and then has its endpoints reused. The
+  reuse is indistinguishable from a continuation without the ACK flag on
+  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet`, which would make
+  ``syn and not ack`` a definitive new-connection test on its own.
 
   What is still wanted here is **wiring the application layer into flow
   tracing**. Reassembly analyses a datagram's payload lazily through

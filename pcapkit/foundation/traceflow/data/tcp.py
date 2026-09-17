@@ -55,6 +55,12 @@ class Packet(Info, Generic[_AT]):
     syn: 'bool'
     #: TCP finish (FIN) flag.
     fin: 'bool'
+    #: TCP reset (RST) flag. A connection can end abruptly as well as politely
+    #: (:rfc:`9293#section-3.5.2`), and the tracer cannot notice that unless the
+    #: flag reaches it -- which it did not, so a reset connection used to look
+    #: merely idle and a later connection reusing the same endpoints merged into
+    #: it.
+    rst: 'bool'
     #: Source IP.
     src: '_AT'
     #: Destination IP.
@@ -67,8 +73,7 @@ class Packet(Info, Generic[_AT]):
     timestamp: 'float'
 
     if TYPE_CHECKING:
-        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', src: '_AT', dst: '_AT',
-                     srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', rst: 'bool', src: '_AT', dst: '_AT', srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final
@@ -105,6 +110,10 @@ class Buffer(Info, Generic[_AT]):
     #: than a single flag: submitting on the first FIN would cut the peer's FIN
     #: and the final acknowledgement out of the flow.
     fin: 'set[tuple[_AT, int]]'
+    #: Whether a TCP **RST** has been seen on this flow. A reset ends the
+    #: connection at once (:rfc:`9293#section-3.5.2`), where a polite close needs
+    #: a FIN from each side, so it is tracked as a flag rather than per endpoint.
+    reset: 'bool'
 
     if TYPE_CHECKING:
         # NOTE: one line, however long. ``# pylint: disable`` is *line*-scoped and
@@ -113,7 +122,7 @@ class Buffer(Info, Generic[_AT]):
         # disable's reach -- which is why the shorter form this replaces leaked
         # three ``unused-argument`` messages of its own. Every other data model in
         # :mod:`pcapkit` writes these stubs on one line for the same reason.
-        def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str', origin: 'tuple[_AT, int]', forward: 'list[int]', reverse: 'list[int]', fin: 'set[tuple[_AT, int]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str', origin: 'tuple[_AT, int]', forward: 'list[int]', reverse: 'list[int]', fin: 'set[tuple[_AT, int]]', reset: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final
