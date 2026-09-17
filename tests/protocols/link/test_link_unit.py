@@ -271,6 +271,23 @@ class LinkProtocolUnitTests(unittest.TestCase):
             registry[custom_type] = ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')
             callback_payload(descriptor_field, {'type': custom_type})
             self.assertIs(descriptor_field.protocol, Raw)
+
+            # Resolving a registered descriptor memoises the imported class,
+            # which the callback used to resolve afresh on every frame.
+            self.assertIs(registry[custom_type], Raw)
+
+            # An *unregistered* EtherType still resolves to Raw, and must not be
+            # recorded on the way: the registry is Link.__proto__, shared by
+            # every Link subclass in the process, so an inserting lookup here
+            # turns parsing into registration and makes Link.register afterwards
+            # report an overwrite of something nobody registered.
+            registry.pop(custom_type, None)
+            keys = set(registry)
+            missing_field = PayloadField()
+            callback_payload(missing_field, {'type': custom_type})
+            self.assertIs(missing_field.protocol, Raw)
+            self.assertNotIn(custom_type, registry)
+            self.assertEqual(set(registry), keys)
         finally:
             if had_original:
                 registry[custom_type] = original

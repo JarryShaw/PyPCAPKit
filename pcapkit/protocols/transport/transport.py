@@ -15,10 +15,11 @@ which is a base class for transport layer protocols, eg.
 import io
 from typing import TYPE_CHECKING, Generic
 
+from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
-from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import RegistryError, StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, get_logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -26,6 +27,8 @@ if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, Type
 
     from typing_extensions import Literal
+
+    from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 
 __all__ = ['Transport']
 
@@ -89,7 +92,7 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not issubclass(protocol, Protocol):
-            raise TypeError(f'protocol must be a Protocol subclass, not {protocol!r}')
+            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
             warn(f'port {code} already registered, overwriting', RegistryWarning)
         cls.__proto__[code] = protocol
@@ -108,13 +111,8 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
             instance.
 
         """
-        if ports[0] in cls.__proto__:
-            protocol = cls.__proto__[ports[0]]
-        else:
-            protocol = cls.__proto__[ports[1]]
-
-        if isinstance(protocol, ModuleDescriptor):
-            protocol = protocol.klass
+        protocol = cls._lookup_next_layer(
+            cls.__proto__, ports[0] if ports[0] in cls.__proto__ else ports[1])
 
         payload_io = io.BytesIO(payload)
         try:
@@ -136,6 +134,36 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
     # Utilities.
     ##########################################################################
 
+    @staticmethod
+    def _make_port(port: 'Enum_AppType | int',
+                   proto: 'Enum_TransportProtocol') -> 'Enum_AppType':
+        """Resolve a port number to its application type.
+
+        Arguments:
+            port: port number, or the application type itself
+            proto: transport protocol the port belongs to, which is what
+                distinguishes e.g. TCP/80 from UDP/80
+
+        Returns:
+            The :class:`~pcapkit.const.reg.apptype.AppType` for ``port``.
+
+        Important:
+            :meth:`self.make <ProtocolBase.make>` accepts a bare :obj:`int` for a
+            port, and the schema field only converts one on the way *out* (in
+            :meth:`PortEnumField.pre_process
+            <pcapkit.protocols.schema.transport.tcp.PortEnumField.pre_process>`),
+            leaving the schema attribute holding whatever it was handed. A
+            constructed packet therefore reached :meth:`self.read
+            <ProtocolBase.read>` with an :obj:`int` where a parsed one carries an
+            :class:`~pcapkit.const.reg.apptype.AppType`, and reading ``.port``
+            off it raised :exc:`AttributeError`. Normalising here keeps the two
+            paths agreeing on the type the schema declares.
+
+        """
+        if isinstance(port, Enum_AppType):
+            return port
+        return Enum_AppType.get(port, proto=proto)
+
     def _decode_next_layer(self, dict_: '_PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None, *,  # type: ignore[override]
                            packet: 'Optional[dict[str, Any]]' = None) -> '_PT':  # pylint: disable=arguments-renamed
         """Decode next layer protocol.
@@ -153,12 +181,27 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
         Returns:
             Current protocol with next layer extracted.
 
+        Important:
+            The port is forwarded **whether or not it is registered**, since
+            :meth:`ProtocolBase._import_next_layer
+            <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` passes
+            it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`
+            records it as :attr:`Data_Raw.protocol
+            <pcapkit.protocols.data.misc.raw.Raw.protocol>`. Dropping it -- as
+            this used to, by falling back to :obj:`None` -- anonymised the very
+            case the field is most useful for: a payload on a port we do not
+            decode is then indistinguishable from one on port 22. The lower port
+            is the one carried, for the same reason it is the primary lookup
+            key. :meth:`SCTP._decode_next_layer
+            <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>` and
+            :meth:`Internet._import_next_layer
+            <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
+            already behave this way for an unregistered PPID and transport type.
+
         """
         sort_port = sorted(ports)
-        if sort_port[0] in self.__proto__:
-            proto = sort_port[0]
-        elif sort_port[1] in self.__proto__:
+        if sort_port[0] not in self.__proto__ and sort_port[1] in self.__proto__:
             proto = sort_port[1]
         else:
-            proto = None
-        return super()._decode_next_layer(dict_, proto, length, packet=packet)  # type: ignore[arg-type]
+            proto = sort_port[0]
+        return super()._decode_next_layer(dict_, proto, length, packet=packet)

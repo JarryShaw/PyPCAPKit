@@ -34,6 +34,10 @@ class UDPRuntimeTests(unittest.TestCase):
         self.assertEqual(udp.info.checksum.hex(), 'ff0b')
         self.assertEqual(type(udp.payload).__name__, 'Raw')
 
+        # Neither port is registered, so the lower of the two is what labels the
+        # payload -- the same treatment SCTP gives an unregistered PPID.
+        self.assertEqual(udp.payload.info.protocol, 12345)
+
     def test_ipv6_udp_mdns_frame_exposes_multicast_ports_and_checksum(self) -> None:
         extractor = self._extract('stream.pcap')
         frame = extractor.frame[1]
@@ -46,6 +50,7 @@ class UDPRuntimeTests(unittest.TestCase):
         self.assertEqual(udp.info.len, 145)
         self.assertEqual(udp.info.checksum.hex(), '9cb1')
         self.assertEqual(type(udp.payload).__name__, 'Raw')
+        self.assertEqual(udp.payload.info.protocol, 5353)
 
 
 if __name__ == '__main__':
