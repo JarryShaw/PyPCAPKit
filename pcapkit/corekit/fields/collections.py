@@ -153,7 +153,13 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         # Remembering where the previous item ended is what bounds the iteration
         # count, since it does not depend on what the schema reports. C.f. #431,
         # which is the same defect in the ``OptionField`` subclass.
-        offset = file.tell()
+        #
+        # ``start`` is where the field itself begins. The comparison needs stream
+        # positions, but the diagnostic wants an offset into the field, and the two
+        # only coincide when the field happens to be reading from the front of its
+        # stream -- which it does when handed a :obj:`bytes` buffer and does not
+        # when handed a live file.
+        start = offset = file.tell()
 
         temp = []  # type: list[_TL]
         while length > 0:
@@ -166,8 +172,9 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
                 if end <= offset:
                     raise FieldValueError(
                         f'Field {self.name} has an item that consumed no data: '
-                        f'item {len(temp)} at offset {offset} of {self._length}, '
-                        f'with {length} octet(s) of the field left to parse'
+                        f'item {len(temp)} at offset {offset - start} of '
+                        f'{self._length}, with {length} octet(s) of the field '
+                        f'left to parse'
                     )
                 offset = end
 
@@ -348,7 +355,13 @@ class OptionField(ListField, Generic[_TS]):
         # it per iteration is what bounds the iteration count. ``length`` is still
         # decremented by ``len(data)``, so that an option area which parses today
         # parses identically.
-        offset = file.tell()
+        #
+        # ``start`` is where the option area itself begins. The comparison needs
+        # stream positions, but the diagnostic wants an offset into the area, and
+        # the two only coincide when the field happens to be reading from the front
+        # of its stream -- which it does when handed a :obj:`bytes` buffer and does
+        # not when handed a live file.
+        start = offset = file.tell()
 
         # make a copy of the ``packet`` dict so that we can include
         # parsed option schema in the ``packet`` dict
@@ -431,7 +444,7 @@ class OptionField(ListField, Generic[_TS]):
             if end <= offset:
                 raise FieldValueError(
                     f'Field {self.name} has an option that consumed no data: '
-                    f'{code!r} at offset {offset} of {self._length}, with '
+                    f'{code!r} at offset {offset - start} of {self._length}, with '
                     f'{length} octet(s) of the option area left to parse'
                 )
             offset = end
