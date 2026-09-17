@@ -173,31 +173,45 @@ mobility anchor address option codes of :rfc:`5949#section-6.2.2`
 What is left, and why:
 
 * **The CGA Parameters option** (type 12) is the one option still on the generic
-  handler, and it is unreachable rather than unimplemented:
-  :attr:`~pcapkit.protocols.schema.internet.mh.CGAParameter.extensions` sizes
-  itself from ``pkt['length']``, but :class:`CGAParameter
-  <pcapkit.protocols.schema.internet.mh.CGAParameter>` has no ``length`` field
-  and :class:`~pcapkit.corekit.fields.misc.SchemaField` gives a nested schema a
-  fresh packet context rather than the enclosing option's, so a well-formed
-  option raises ``KeyError: 'length'`` on parse and on construction alike. Making
-  the lookup optional gets past that and straight into a second fault, in how a
-  :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` counts towards the
-  nested schema's length. Both halves live in shared field machinery rather than
-  in the mobility header, which is why this is recorded here rather than patched
-  around; ``test_mh_cga_parameters_option_is_unparsable_upstream`` pins the
-  current behaviour so the fix is noticed.
-* **Payloads that belong to another protocol** are carried opaquely, deliberately.
-  The multicast options (54, 56, 57, 60 and 61) embed :rfc:`3810` MLD or
-  :rfc:`3376` IGMP address records, and the traffic selectors of :rfc:`6089` and
-  :rfc:`7222` embed the flag-driven range lists of :rfc:`6088`. Both are separate
-  registries with their own dissectors' worth of structure; the mobility options
-  around them are fully decoded, and each records which format its payload is in.
-* **The MN-ID option's constructor mis-sizes a non-address identifier.**
-  ``_make_opt_mn_id`` measures ``len(identifier)`` even for the ``IPv6_Address``
-  subtype, so passing a string or an integer declares that many octets while the
-  schema emits 16. Passing an :class:`~ipaddress.IPv6Address` is correct. This is
-  pre-existing and outside the registry-completion work, so it is noted rather
-  than fixed.
+  handler, and it is unreachable rather than unimplemented. Two faults in shared
+  field machinery stand in the way, both outside the mobility header and both now
+  tracked as defects rather than described here:
+  `#445 <https://github.com/JarryShaw/PyPCAPKit/issues/445>`__, a nested schema
+  cannot reach the enclosing packet's fields by name, and
+  `#446 <https://github.com/JarryShaw/PyPCAPKit/issues/446>`__, a
+  :class:`~pcapkit.corekit.fields.misc.ForwardMatchField`'s non-consuming bytes
+  count towards the schema's length. Both have to be fixed for this option to
+  parse, which is why the half-fix was reverted rather than shipped;
+  ``test_mh_cga_parameters_option_is_unparsable_upstream`` pins the current
+  behaviour so the day it starts working is visible.
+* **Payloads that belong to another protocol** are carried opaquely for now. The
+  multicast options (54, 56, 57, 60 and 61) embed :rfc:`3810` MLD or :rfc:`3376`
+  IGMP address records, and the traffic selectors of :rfc:`6089` and :rfc:`7222`
+  embed the flag-driven range lists of :rfc:`6088`. Each is a separate registry
+  with its own dissector's worth of structure; the mobility options around them
+  are fully decoded, and each records which format its payload is in.
+
+  What is wanted is to carry these as :class:`~pcapkit.protocols.misc.raw.Raw`
+  rather than as bare :obj:`bytes`, dispatched through a **per-payload registry**
+  in the style of :attr:`MH.__option__ <pcapkit.protocols.internet.mh.MH.__option__>`,
+  keyed on the field that already names the format --
+  :attr:`~pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption.ts_format`
+  for the traffic selectors, and the mode flag for MLD against IGMP on the
+  multicast options. ``Raw`` is already what an unregistered dispatch falls back
+  to everywhere else in the package, so this makes the mobility header consistent
+  with the rest rather than inventing a convention; and once a dissector for one
+  of these formats exists, registering it needs no change at the option site.
+
+  It wants a registry of its own rather than
+  :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`, which is
+  only ever called at a layer boundary and appends to the frame's protocol chain.
+  An MLD address record inside a mobility option did not follow MH on the wire,
+  so putting it in that chain would make ``layer=`` and ``protocol=`` limits
+  behave wrongly. Changing the parsed shape from :obj:`bytes` to ``Raw`` also
+  changes what existing captures dump to, so it is its own change.
+* **The MN-ID option's constructor mis-sizes a non-address identifier**, tracked
+  as `#448 <https://github.com/JarryShaw/PyPCAPKit/issues/448>`__. Pre-existing
+  and outside the registry-completion work, so it is filed rather than fixed here.
 
 Two wire-format traps are worth knowing before touching this code, since both
 look like ordinary fields and are not:
