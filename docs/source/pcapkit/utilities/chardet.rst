@@ -15,5 +15,3 @@ which is why it lives here rather than beside either of them.
 .. autofunction:: pcapkit.utilities.chardet.detect
 
 .. autodata:: pcapkit.utilities.chardet.DETECT_CACHE_SIZE
-
-.. autodata:: pcapkit.utilities.chardet.DETECT_DIGEST_SIZE
