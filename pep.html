@@ -439,6 +439,16 @@ is where they are kept up to date.</p>
 <p>Pull requests for anything still open, and new ideas of your own, are very
 welcome. For questions, leave a note in the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a> or under the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a">Q&amp;A
 category</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This page tracks <strong>feature requests</strong> – what is not implemented yet, and
+what a contributor could pick up. It is not an issue tracker. Where work on
+something listed here turns up a <strong>defect</strong> in code that already exists, the
+defect belongs in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a> and is linked from here,
+not written up as prose on this page. A design question that needs a decision
+before anyone can implement it – as against something simply being broken –
+is a request and does belong here.</p>
+</div>
 <p>Wish you enjoy <strong>PyPCAPKit</strong>!!!</p>
 <section id="more-protocols-more">
 <h2>More Protocols, More!!!<a class="headerlink" href="#more-protocols-more" title="Link to this heading">¶</a></h2>
@@ -692,9 +702,10 @@ its HTTP ports at the version-guessing
 <a class="reference internal" href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__proto__" title="pcapkit.protocols.transport.tcp.TCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__proto__</span></code></a> points
 the same ports at <a class="reference internal" href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1.HTTP</span></code></a>. The
 asymmetry predates the 8080 entries. Reconciling it changes what existing
-captures parse to, so it wants its own change. Note also that
-<code class="docutils literal notranslate"><span class="pre">http.HTTP</span></code>’s explicit <code class="docutils literal notranslate"><span class="pre">version=</span></code> path is broken independently: it passes
-an already-drained file object, so only the auto-guess path works.</p></li>
+captures parse to, so it wants its own change and its own decision, which is
+why it is asked for here. The separate defect that <code class="docutils literal notranslate"><span class="pre">http.HTTP</span></code>’s explicit
+<code class="docutils literal notranslate"><span class="pre">version=</span></code> path is unusable is tracked as
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/447">#447</a>.</p></li>
 </ul>
 <p>Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
 ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;
