@@ -4,9 +4,8 @@
 import urllib.parse as urllib_parse
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
-import chardet
-
 from pcapkit.corekit.fields.field import Field, NoValue
+from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import Dict
 from pcapkit.utilities.exceptions import FieldValueError
 
@@ -168,7 +167,7 @@ class StringField(_TextField[str]):
             except UnicodeError:
                 ret = urllib_parse.unquote(value.replace(b'%', rb'\x'), encoding='utf-8', errors='replace')
         else:
-            charset = self._encoding or chardet.detect(value)['encoding'] or 'utf-8'
+            charset = self._encoding or detect(value)
             try:
                 ret = value.decode(charset, self._errors)
             except UnicodeError:

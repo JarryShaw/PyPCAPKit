@@ -131,6 +131,24 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         self._template = '0s'
         self._callback = lambda *_: None
 
+    def __copy__(self) -> 'Self':
+        """Return a shallow copy of the field.
+
+        Every field of every protocol is copied once per packet by
+        :meth:`__call__`, which made the generic :func:`copy.copy` path -- via
+        :meth:`object.__reduce_ex__` and :func:`copy._reconstruct` -- one of the
+        costlier things an extraction did. This does what that path would have
+        done, and only that: a new instance of the same class, its
+        :attr:`~object.__dict__` shallow-updated from this one.
+
+        Returns:
+            A new field instance sharing this one's attribute values.
+
+        """
+        new_self = self.__class__.__new__(self.__class__)
+        new_self.__dict__.update(self.__dict__)
+        return new_self
+
     def __repr__(self) -> 'str':
         if not self.name.isidentifier():
             return f'<{self.__class__.__name__}>'
@@ -208,9 +226,14 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
             Unpacked field value.
 
         """
+        # NOTE: ``length`` recomputes struct.calcsize() on every read, so the
+        # three reads this method used to make were three calcsize() calls for
+        # one value.
+        length = self.length
+
         if not isinstance(buffer, bytes):
-            buffer = buffer.read(self.length)
-        value = struct.unpack(self.template, buffer[:self.length].rjust(self.length, b'\x00'))[0]
+            buffer = buffer.read(length)
+        value = struct.unpack(self.template, buffer[:length].rjust(length, b'\x00'))[0]
         return self.post_process(value, packet)
 
 
