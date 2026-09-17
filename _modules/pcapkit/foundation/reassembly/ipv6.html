@@ -413,10 +413,62 @@
 <span class="sd">origin. Please refer to :doc:`ip` for more information.</span>
 
 <span class="sd">"""</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">IPv6_Protocol</span>
 
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6'</span><span class="p">]</span>
+
+<span class="c1">#: Length of the fixed IPv6 header, i.e. the offset of the first extension</span>
+<span class="c1">#: header (:rfc:`8200#section-3`). A literal because it is a *byte offset* into</span>
+<span class="c1">#: the header rather than a protocol number, so no enumeration carries it.</span>
+<span class="n">_IPV6_HDR_LEN</span> <span class="o">=</span> <span class="mi">40</span>
+
+<span class="c1">#: Offset of the Next Header field within the fixed IPv6 header. A literal for</span>
+<span class="c1">#: the same reason as :data:`_IPV6_HDR_LEN`.</span>
+<span class="n">_IPV6_NEXT_HEADER</span> <span class="o">=</span> <span class="mi">6</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_next_header_offset</span><span class="p">(</span><span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Locate the Next Header field of a datagram's last header.</span>
+
+<span class="sd">    :rfc:`8200#section-4.5` gives the Next Header field of the *last* header of</span>
+<span class="sd">    the unfragmentable part -- not necessarily the fixed IPv6 header's, since</span>
+<span class="sd">    Hop-by-Hop Options, Routing and Destination Options headers may precede the</span>
+<span class="sd">    Fragment header. Each of those starts with its own Next Header field, so the</span>
+<span class="sd">    answer is found by walking the chain to its end.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        header: Unfragmentable part of a datagram, i.e. every octet of the</span>
+<span class="sd">            fragment before its Fragment header.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Offset, within ``header``, of the Next Header field to rewrite.</span>
+
+<span class="sd">    """</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">_IPV6_NEXT_HEADER</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">_IPV6_HDR_LEN</span>
+    <span class="n">proto</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span>
+
+    <span class="c1"># NOTE: ``header[position]`` is the Next Header field of the extension</span>
+    <span class="c1"># header starting at ``position`` and ``header[position + 1]`` its length,</span>
+    <span class="c1"># but which of the two length encodings applies is decided by the *previous*</span>
+    <span class="c1"># header's Next Header value -- hence ``proto`` trailing one step behind.</span>
+    <span class="k">while</span> <span class="n">position</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="c1"># NOTE: AH is the one extension header that does not measure its</span>
+        <span class="c1"># length in 8-octet units (:rfc:`4302#section-2.2`), which is why it</span>
+        <span class="c1"># is singled out rather than falling to the common case below.</span>
+        <span class="k">if</span> <span class="n">proto</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">+=</span> <span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">+=</span> <span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span>
+        <span class="n">proto</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">offset</span>
 
 
 <span class="c1"># BUG: It is supposed to be ``IP[IPv6Address]``. But somehow Python</span>
@@ -452,7 +504,45 @@
     <span class="c1">#: Protocol name of current reassembly object.</span>
     <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'IPv6'</span>
     <span class="c1">#: Protocol of current reassembly object.</span>
-    <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv6_Protocol</span></div>
+    <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv6_Protocol</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rectify_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Remove the Fragment header from a datagram's header chain.</span>
+
+<span class="sd">        :rfc:`8200#section-4.5` states that the Fragment header is not present in</span>
+<span class="sd">        the reassembled packet, and that the Next Header field of the last header</span>
+<span class="sd">        of the unfragmentable part comes from the Fragment header's. Left alone,</span>
+<span class="sd">        the reassembled datagram advertises a Fragment header on a datagram that</span>
+<span class="sd">        is by definition no longer a fragment, which is what every engine used to</span>
+<span class="sd">        report -- the toolkit adapters differ over whether the Fragment header's</span>
+<span class="sd">        *octets* belong to ``header``, but none of them rewrote the field that</span>
+<span class="sd">        points at it.</span>
+
+<span class="sd">        The Fragment header's own octets are already excluded by the adapters, so</span>
+<span class="sd">        only the field pointing at it is left to fix.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            header: Raw header octets of the fragment at fragment offset zero.</span>
+<span class="sd">            proto: Payload protocol type, i.e. the Fragment header's Next Header</span>
+<span class="sd">                field, which is what the rewritten field must carry.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Header octets to keep for the reassembled datagram.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># a header too short to hold the fixed IPv6 header cannot be walked, and</span>
+        <span class="c1"># a chain not ending in the Fragment header has nothing to rewrite --</span>
+        <span class="c1"># which also makes this idempotent</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_IPV6_HDR_LEN</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">header</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">_next_header_offset</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">header</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">header</span>
+        <span class="k">return</span> <span class="n">header</span><span class="p">[:</span><span class="n">offset</span><span class="p">]</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">proto</span><span class="p">),))</span> <span class="o">+</span> <span class="n">header</span><span class="p">[</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span></div>
 
 </pre></div>
         </article>

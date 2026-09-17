@@ -473,7 +473,10 @@ implemented) when submit</p></li>
 is as following, with <code class="docutils literal notranslate"><span class="pre">ipv6_info</span></code> the IPv6
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code> and
 <code class="docutils literal notranslate"><span class="pre">ipv6_frag_info</span></code> the Fragment header’s:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">packet_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hdr_len</span> <span class="o">=</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">length</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+
+<span class="n">packet_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
   <span class="n">bufid</span> <span class="o">=</span> <span class="p">(</span>
       <span class="n">ipv6_info</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>              <span class="c1"># source IP address</span>
       <span class="n">ipv6_info</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>              <span class="c1"># destination IP address</span>
@@ -482,28 +485,25 @@ is as following, with <code class="docutils literal notranslate"><span class="pr
   <span class="p">),</span>
   <span class="n">num</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>        <span class="c1"># original packet range number</span>
   <span class="n">fo</span> <span class="o">=</span> <span class="n">ipv6_frag_info</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>     <span class="c1"># fragment offset, in octets</span>
-  <span class="n">ihl</span> <span class="o">=</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span>        <span class="c1"># header length, IPv6-Frag included</span>
+  <span class="n">ihl</span> <span class="o">=</span> <span class="n">hdr_len</span><span class="p">,</span>                  <span class="c1"># header length, only headers before IPv6-Frag</span>
   <span class="n">mf</span> <span class="o">=</span> <span class="n">ipv6_frag_info</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>         <span class="c1"># more fragment flag</span>
-  <span class="n">tl</span> <span class="o">=</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">hdr_len</span>
-       <span class="o">+</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">raw_len</span><span class="p">,</span>       <span class="c1"># total length, header includes</span>
+  <span class="n">tl</span> <span class="o">=</span> <span class="n">hdr_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>    <span class="c1"># total length, header includes</span>
   <span class="n">header</span> <span class="o">=</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span>
-           <span class="o">.</span><span class="n">header</span><span class="p">,</span>               <span class="c1"># raw bytes type header, IPv6-Frag included</span>
-  <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span>
-      <span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span>
-      <span class="o">.</span><span class="n">payload</span><span class="p">),</span>                  <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
+           <span class="o">.</span><span class="n">header</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span>     <span class="c1"># raw bytes type header before IPv6-Frag</span>
+  <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="p">,</span>              <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><code class="docutils literal notranslate"><span class="pre">ihl</span></code> and <code class="docutils literal notranslate"><span class="pre">header</span></code> here <strong>include</strong> the 8-octet Fragment header,
-because <a class="reference internal" href="../../../protocols/internet/ipv6.html#pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len" title="pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.hdr_len</span></code></a>
-counts every extension header it has walked, the Fragment one included.
-The <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> adapters stop short of it and report 40 where
-this one reports 48 for the same packet, so the value is not comparable
-across engines – and <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> says the Fragment header
-is not present in a reassembled packet at all. Tracked as #415; expect
-this line to change when that is fixed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">ihl</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code> and <code class="docutils literal notranslate"><span class="pre">tl</span></code> all stop short of the 8-octet Fragment
+header, because <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> says it is not present in the
+reassembled packet. <a class="reference internal" href="../../../protocols/internet/ipv6.html#pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len" title="pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.hdr_len</span></code></a>
+does count it – it is a header length, and the Fragment header is one
+of the extension headers it has walked – so the adapters subtract it
+back off. All four adapters (<code class="docutils literal notranslate"><span class="pre">pcap</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapng</span></code>, <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and
+<code class="docutils literal notranslate"><span class="pre">scapy</span></code>) agree on the three fields; they used to report three
+different values for <code class="docutils literal notranslate"><span class="pre">tl</span></code> alone, which is what #415 was about.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -546,6 +546,28 @@ interleaves their fragments.</p>
  |     |--&gt; 'packet' : (None)
  |--&gt; (Info) data ...
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">header</span></code> is the fragment’s unfragmentable part with one field
+rewritten: the Next Header field of its last header carries the
+Fragment header’s Next Header value, as <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a>
+requires of a reassembled packet. Without that rewrite the datagram
+would still advertise a Fragment header (<code class="docutils literal notranslate"><span class="pre">44</span></code>) on a datagram that is
+no longer a fragment. The Payload Length field is <em>not</em> adjusted, so it
+still describes the first fragment rather than the reassembled
+datagram; use <code class="docutils literal notranslate"><span class="pre">len(payload)</span></code> instead.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is analysed on the first read, not when the datagram is
+submitted. A datagram is submitted for <em>every</em> frame – an unfragmented
+one included, since nothing upstream filters it out – and the analysis
+is a second full parse of the payload, so running it eagerly charged
+every caller for a result most never read. Reading the attribute, or any
+mapping view of it (<code class="docutils literal notranslate"><span class="pre">datagram['packet']</span></code>, <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code>, <code class="docutils literal notranslate"><span class="pre">items()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">repr()</span></code>), runs it and keeps the result; see
+<a class="reference internal" href="../index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>.</p>
 </div>
 </dd>
 <dt id="term-reasm.ipv6.buffer">reasm.ipv6.buffer<a class="headerlink" href="#term-reasm.ipv6.buffer" title="Link to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms

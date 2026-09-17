@@ -515,6 +515,21 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">ipv6_frag_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6_Frag'</span><span class="p">,</span> <span class="n">ipv6_frag</span><span class="p">)</span><span class="o">.</span><span class="n">info</span>
 
+        <span class="c1"># NOTE: ``Data_IPv6.hdr_len`` counts the Fragment header, since</span>
+        <span class="c1"># :meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>
+        <span class="c1"># adds each extension header's length before the Fragment-header check</span>
+        <span class="c1"># breaks its loop. That is correct for a header length, but the</span>
+        <span class="c1"># reassembled packet carries no Fragment header at all</span>
+        <span class="c1"># (:rfc:`8200#section-4.5`), so the boundary wanted here is the one</span>
+        <span class="c1"># *before* it -- which is that same length less the Fragment header's,</span>
+        <span class="c1"># undoing the addition that included it.</span>
+        <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6_Frag'</span><span class="p">,</span> <span class="n">ipv6_frag</span><span class="p">)</span><span class="o">.</span><span class="n">length</span>
+        <span class="c1"># NOTE: The reassembly machinery writes the payload into its datagram</span>
+        <span class="c1"># buffer over the span ``tl - ihl``, so ``tl`` is derived from the</span>
+        <span class="c1"># payload actually handed over rather than from ``raw_len``: the two</span>
+        <span class="c1"># agree, but only the former cannot drift out of step with it.</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+
         <span class="n">frame_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>
             <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
@@ -525,11 +540,11 @@
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">frame_info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>                          <span class="c1"># original packet range number</span>
             <span class="n">fo</span><span class="o">=</span><span class="n">ipv6_frag_info</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>                       <span class="c1"># fragment offset</span>
-            <span class="n">ihl</span><span class="o">=</span><span class="n">ipv6_info</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span>                          <span class="c1"># header length, only headers before IPv6-Frag</span>
+            <span class="n">ihl</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span>                                    <span class="c1"># header length, only headers before IPv6-Frag</span>
             <span class="n">mf</span><span class="o">=</span><span class="n">ipv6_frag_info</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>                           <span class="c1"># more fragment flag</span>
-            <span class="n">tl</span><span class="o">=</span><span class="n">ipv6_info</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">+</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">raw_len</span><span class="p">,</span>       <span class="c1"># total length, header includes</span>
-            <span class="n">header</span><span class="o">=</span><span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>               <span class="c1"># raw bytearray type header before IPv6-Frag</span>
-            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>  <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
+            <span class="n">tl</span><span class="o">=</span><span class="n">hdr_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                      <span class="c1"># total length, header includes</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span><span class="o">.</span><span class="n">header</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span>     <span class="c1"># raw bytes type header before IPv6-Frag</span>
+            <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>                                <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>

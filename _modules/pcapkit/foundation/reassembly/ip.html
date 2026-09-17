@@ -420,7 +420,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_AT</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">DatagramID</span><span class="p">,</span>
-                                                   <span class="n">Packet</span><span class="p">)</span>
+                                                   <span class="n">Deferred</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyBase</span> <span class="k">as</span> <span class="n">Reassembly</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -457,6 +457,25 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rectify_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Adapt a fragment's header into the reassembled datagram's header.</span>
+
+<span class="sd">        The base implementation returns ``header`` unchanged, which is what IPv4</span>
+<span class="sd">        wants: an IPv4 fragment's header needs nothing removed to describe the</span>
+<span class="sd">        datagram it belongs to. IPv6 overrides this, because</span>
+<span class="sd">        :rfc:`8200#section-4.5` drops the Fragment header from the reassembled</span>
+<span class="sd">        packet and hands its Next Header field to the header before it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            header: Raw header octets of the fragment at fragment offset zero.</span>
+<span class="sd">            proto: Payload protocol type, i.e. ``bufid[3]``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Header octets to keep for the reassembled datagram.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">header</span>
+
 <div class="viewcode-block" id="IP.reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP.reassembly">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -484,19 +503,22 @@
                 <span class="p">)</span>
                 <span class="k">return</span>
 
+        <span class="c1"># the header of the fragment at offset zero is the reassembled datagram's</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">FO</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rectify_header</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
         <span class="c1"># initialise buffer with BUFID</span>
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
                 <span class="n">TDL</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>                              <span class="c1"># Total Data Length</span>
                 <span class="n">RCVBT</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">8191</span><span class="p">),</span>              <span class="c1"># Fragment Received Bit Table</span>
                 <span class="n">index</span><span class="o">=</span><span class="p">[],</span>                           <span class="c1"># index record</span>
-                <span class="n">header</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">FO</span> <span class="k">else</span> <span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>  <span class="c1"># header buffer</span>
+                <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>                      <span class="c1"># header buffer</span>
                 <span class="n">datagram</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">65535</span><span class="p">),</span>          <span class="c1"># data buffer</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># put header into header buffer</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">FO</span><span class="p">:</span>  <span class="c1"># pylint: disable=else-if-used</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
 
         <span class="c1"># append packet index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
@@ -584,7 +606,7 @@
                 <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="c1"># if datagram is reassembled in whole</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="n">datagram</span><span class="p">[:</span><span class="n">TDL</span><span class="p">]</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">datagram</span><span class="p">[:</span><span class="n">TDL</span><span class="p">])</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
                 <span class="n">completed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
@@ -595,8 +617,13 @@
                 <span class="p">),</span>
                 <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
                 <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
-                <span class="n">payload</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
-                <span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)),</span>
+                <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+                <span class="c1"># NOTE: ``analyze`` is a second full parse of the payload, and a</span>
+                <span class="c1"># datagram is submitted for every frame rather than only for the</span>
+                <span class="c1"># fragmented ones, so running it here charges every caller for a</span>
+                <span class="c1"># result most of them never read. ``Deferred`` postpones it to the</span>
+                <span class="c1"># first read of ``Datagram.packet``.</span>
+                <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">,</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">payload</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 

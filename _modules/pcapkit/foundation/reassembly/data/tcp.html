@@ -407,6 +407,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deferred</span><span class="p">,</span> <span class="n">DeferredPacket</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -488,11 +489,15 @@
 <div class="viewcode-block" id="Datagram">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Datagram</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Datagram</span><span class="p">(</span><span class="n">DeferredPacket</span><span class="p">,</span> <span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.datagram&gt;`."""</span>
 
     <span class="c1">#: Completed flag.</span>
     <span class="n">completed</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Listing ``packet`` here is what makes it lazy -- see</span>
+    <span class="c1">#: :class:`~pcapkit.foundation.reassembly.data.data.DeferredPacket`.</span>
+    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet'</span><span class="p">]</span>
+
     <span class="c1">#: Original packet identifier.</span>
     <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span>
     <span class="c1">#: Packet numbers.</span>
@@ -502,16 +507,18 @@
     <span class="c1">#: Reassembled payload (application layer data).</span>
     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span>
     <span class="c1">#: Parsed reassembled payload.</span>
+    <span class="c1">#: Parsed TCP payload. Analysed on first read rather than at construction;</span>
+    <span class="c1">#: a :class:`Deferred` may be passed in its place.</span>
     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="nd">@overload</span>  <span class="c1"># pylint: disable=used-before-assignment</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Literal[True]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Protocol'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Literal[True]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Protocol | Deferred'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 
         <span class="nd">@overload</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Literal[False]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'None'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol | Deferred]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 

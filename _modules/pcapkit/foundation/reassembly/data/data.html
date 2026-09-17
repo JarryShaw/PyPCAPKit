@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>pcapkit.foundation.reassembly.data.ip - PyPCAPKit</title>
+        <title>pcapkit.foundation.reassembly.data.data - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
@@ -400,145 +400,185 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.foundation.reassembly.data.ip</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.foundation.reassembly.data.data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""data models for IP reassembly"""</span>
+<span class="sd">"""shared data models for reassembly"""</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deferred</span><span class="p">,</span> <span class="n">DeferredPacket</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'DatagramID'</span><span class="p">,</span> <span class="s1">'Datagram'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'BufferID'</span><span class="p">,</span>
-<span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ReassemblyData'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">,</span> <span class="s1">'DeferredPacket'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">overload</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypeAlias</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">IP_Datagram</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
 
-<span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_AT'</span><span class="p">,</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="s1">'IPv6Address'</span><span class="p">)</span>
 
-<span class="c1">#: Buffer ID.</span>
-<span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">'TransType'</span><span class="p">]</span>
+<div class="viewcode-block" id="Deferred">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Deferred</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A postponed analysis of a reassembled payload.</span>
+
+<span class="sd">    A reassembled datagram's ``packet`` is a second, full parse of the payload</span>
+<span class="sd">    the datagram just reassembled. Nothing about postponing it is specific to any</span>
+<span class="sd">    one reassembler, which is why this lives beside</span>
+<span class="sd">    :class:`~pcapkit.foundation.reassembly.data.data.ReassemblyData` rather than in</span>
+<span class="sd">    either protocol's data module.</span>
+
+<span class="sd">    IP reassembly is the case that made it necessary. It submits a datagram for</span>
+<span class="sd">    *every* frame -- not only the fragmented ones, since a frame that is not</span>
+<span class="sd">    fragmented in any sense still reaches</span>
+<span class="sd">    :meth:`IP.reassembly &lt;pcapkit.foundation.reassembly.ip.IP.reassembly&gt;` and is</span>
+<span class="sd">    submitted there as a trivially complete datagram -- so the eager parse</span>
+<span class="sd">    re-parsed captures holding no fragments at all: :file:`http.pcap` has 1117</span>
+<span class="sd">    IPv4 frames, none of them fragmented, and the parse was 86% of the cost of IP</span>
+<span class="sd">    reassembly over it.</span>
+
+<span class="sd">    TCP reassembly builds its ``packet`` eagerly too</span>
+<span class="sd">    (:meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;`). It is a</span>
+<span class="sd">    far smaller cost there, being FIN/RST-driven rather than per-frame -- 222</span>
+<span class="sd">    submits per :file:`http.pcap` pass against 1117 -- so it is left for its own</span>
+<span class="sd">    change, but it can use this unmodified when someone gets to it.</span>
+
+<span class="sd">    Holding the call here defers it to the first read of</span>
+<span class="sd">    :attr:`Datagram.packet`, so a caller that wants the parsed payload still gets</span>
+<span class="sd">    exactly the object the eager call produced, and one that does not never pays</span>
+<span class="sd">    for it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        analyze: The analyser to call, i.e.</span>
+<span class="sd">            :meth:`Protocol.analyze &lt;pcapkit.protocols.protocol.ProtocolBase.analyze&gt;`</span>
+<span class="sd">            bound to the reassembly object's protocol.</span>
+<span class="sd">        proto: Payload protocol type.</span>
+<span class="sd">        payload: Reassembled payload to parse.</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'analyze'</span><span class="p">,</span> <span class="s1">'proto'</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analyze</span><span class="p">:</span> <span class="s1">'Callable[[TransType, bytes], Protocol]'</span><span class="p">,</span>
+                 <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analyze</span> <span class="o">=</span> <span class="n">analyze</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proto</span> <span class="o">=</span> <span class="n">proto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span>
+
+<div class="viewcode-block" id="Deferred.__call__">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Protocol'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run the postponed analysis.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed payload.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Packet">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Packet">[docs]</a>
+
+<div class="viewcode-block" id="DeferredPacket">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DeferredPacket</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Resolves a :class:`Deferred` ``packet`` field on first read.</span>
+
+<span class="sd">    A reassembled datagram's ``packet`` is the parsed form of the payload it just</span>
+<span class="sd">    reassembled, and both reassemblers can hand a :class:`Deferred` in its place.</span>
+<span class="sd">    This carries the reading half of that arrangement, so the two ``Datagram``</span>
+<span class="sd">    models share it rather than each declaring it.</span>
+
+<span class="sd">    A subclass has to list ``packet`` in its ``__additional__``. That is what makes</span>
+<span class="sd">    the field lazy at all: :class:`~pcapkit.corekit.infoclass.Info` stores a field</span>
+<span class="sd">    whose name is a *builtin* name under a mangled key and maps it back on the way</span>
+<span class="sd">    out, so ``packet`` never lands in :attr:`~object.__dict__` itself -- which</span>
+<span class="sd">    routes reading it through :meth:`__getattr__`, where the deferred analysis can</span>
+<span class="sd">    run, while ``dict(datagram)``, :meth:`to_dict` and iteration still report the</span>
+<span class="sd">    field under its own name.</span>
+
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="DeferredPacket.__analyse__">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket.__analyse__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__analyse__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Protocol]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve a deferred analysis, at most once.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed IP payload, or :data:`None` for an incomplete datagram.</span>
+
+<span class="sd">        """</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">,</span> <span class="s1">'packet'</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Deferred</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="c1"># NOTE: reached only for names absent from ``__dict__``, which ``packet``</span>
+        <span class="c1"># always is -- see ``__additional__`` above. Everything else has to raise,</span>
+        <span class="c1"># or a typo would silently answer with a parsed payload.</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">'packet'</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+        <span class="c1"># NOTE: ``Mapping.__contains__`` answers by fetching the value, which</span>
+        <span class="c1"># would run the deferred analysis merely to decide that the field exists.</span>
+        <span class="c1"># ``packet`` is a declared field, so it is always there.</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span> <span class="ow">or</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DeferredPacket.to_dict">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Convert :class:`Datagram` into :obj:`dict`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The datagram's fields, with ``packet`` analysed if it had not been</span>
+<span class="sd">            read yet -- a :obj:`dict` holding a :class:`Deferred` would leak an</span>
+<span class="sd">            implementation detail into what is meant to be plain data.</span>
+
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ReassemblyData">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.ReassemblyData">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`IPv4 &lt;reasm.ipv4.packet&gt;` and/or</span>
-<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.packet&gt;` packet representation.."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReassemblyData</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data storage for reassembly."""</span>
 
-    <span class="c1">#: Buffer ID.</span>
-    <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span>
-    <span class="c1">#: Original packet range number.</span>
-    <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Fragment offset.</span>
-    <span class="n">fo</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Internet header length.</span>
-    <span class="n">ihl</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: More fragments flag.</span>
-    <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span>
-    <span class="c1">#: Total length, header included.</span>
-    <span class="n">tl</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Raw :obj:`bytes` type header.</span>
-    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Raw :obj:`bytearray` type payload.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span>
+    <span class="c1">#: IPv4 reassembled data.</span>
+    <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'tuple[IP_Datagram, ...]'</span>
+    <span class="c1">#: IPv6 reassembled data.</span>
+    <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'tuple[IP_Datagram, ...]'</span>
+    <span class="c1">#: TCP reassembled data.</span>
+    <span class="n">tcp</span><span class="p">:</span> <span class="s1">'tuple[TCP_Datagram, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'tuple[_AT, _AT, int, TransType]'</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fo</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ihl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">tl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
-
-
-
-<div class="viewcode-block" id="DatagramID">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.DatagramID">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`IPv4 &lt;reasm.ipv4.datagram&gt;` and/or</span>
-<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.datagram&gt;` original packet identifier."""</span>
-
-    <span class="c1">#: Source address.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span>
-    <span class="c1">#: Destination address.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span>
-    <span class="c1">#: IP protocol identifier.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Payload protocol type.</span>
-    <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
-
-
-
-<div class="viewcode-block" id="Datagram">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Datagram</span><span class="p">(</span><span class="n">DeferredPacket</span><span class="p">,</span> <span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`IPv4 &lt;reasm.ipv4.datagram&gt;` and/or</span>
-<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.datagram&gt;` reassembled datagram."""</span>
-
-    <span class="c1">#: Listing ``packet`` here is what makes :attr:`packet` lazy. :class:`Info`</span>
-    <span class="c1">#: stores a field whose name is a *builtin* name under a mangled key and maps</span>
-    <span class="c1">#: it back on the way out, so ``packet`` never lands in :attr:`__dict__`</span>
-    <span class="c1">#: itself -- which routes reading it through :meth:`__getattr__`, where a</span>
-    <span class="c1">#: :class:`Deferred` analysis can be run, while ``dict(datagram)``,</span>
-    <span class="c1">#: :meth:`to_dict` and iteration still report the field under its own name.</span>
-    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet'</span><span class="p">]</span>
-
-    <span class="c1">#: Completed flag.</span>
-    <span class="n">completed</span><span class="p">:</span> <span class="s1">'bool'</span>
-    <span class="c1">#: Original packet identifier.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span>
-    <span class="c1">#: Packet numbers.</span>
-    <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
-    <span class="c1">#: Initial IP header.</span>
-    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Reassembled IP payload.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span>
-    <span class="c1">#: Parsed IP payload. Analysed on first read, not at construction time; a</span>
-    <span class="c1">#: :class:`Deferred` may be passed in its place, and reading this attribute</span>
-    <span class="c1">#: then runs it and keeps the result.</span>
-    <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol]'</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="nd">@overload</span>  <span class="c1">#pylint: disable=used-before-assignment</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Literal[True]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Protocol | Deferred'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
-
-        <span class="nd">@overload</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Literal[False]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'None'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol | Deferred]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
-
-
-<div class="viewcode-block" id="Buffer">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Buffer">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`IPv4 &lt;reasm.ipv4.buffer&gt;` and/or</span>
-<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.buffer&gt;` reassembly buffer entry."""</span>
-
-    <span class="c1">#: Total data length.</span>
-    <span class="n">TDL</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Fragment received bit table.</span>
-    <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">'bytearray'</span>
-    <span class="c1">#: List of reassembled packets.</span>
-    <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span>
-    <span class="c1">#: Header buffer.</span>
-    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Data buffer, holes set to ``b'\x00'``.</span>
-    <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TDL</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'Optional[tuple[IP_Datagram, ...]]'</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'Optional[tuple[IP_Datagram, ...]]'</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'Optional[tuple[TCP_Datagram, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 </pre></div>
         </article>
