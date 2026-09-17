@@ -201,7 +201,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             length = len(self)
         schema = self.__header__
 
-        name = self.__routing__[schema.type]
+        name = self._lookup_registry(self.__routing__, schema.type)
         if isinstance(name, str):
             name = f'_read_data_type_{name.lower()}'
             meth = cast('TypeParser',
@@ -260,7 +260,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             length = math.ceil((len(data) + 4) / 8)
             data_val = data.ljust(length * 8 - 4, b'\x00')  # type: bytes | Schema_RoutingType
         elif isinstance(data, (dict, Data_IPv6_Route)):
-            name = self.__routing__[type_val]
+            name = self._lookup_registry(self.__routing__, type_val)
             if isinstance(name, str):
                 name = f'_make_data_type_{name.lower()}'
                 meth = cast('TypeConstructor',

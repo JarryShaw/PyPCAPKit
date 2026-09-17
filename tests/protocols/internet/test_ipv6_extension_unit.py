@@ -95,6 +95,69 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         finally:
             IPv6_Route.__dict__['__routing__'][Routing.Source_Route] = original
 
+    def test_unregistered_extension_codes_do_not_mutate_the_class_registry(self) -> None:
+        """Parsing must not write to the shared IPv6 extension registries.
+
+        #425's defect on the three IPv6 extension header registries. Each is a
+        :class:`collections.defaultdict` on a class attribute shared by every
+        instance of its protocol in the process, so ``registry[code]`` inserted
+        every unrecognised option type and routing type a capture carried -- and
+        the value it inserted was ``'none'``, which the default factory returns
+        anyway. That made
+        :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT.register_option` and its
+        siblings warn about overwriting something nobody registered.
+
+        Option type ``0x1E`` is :rfc:`4727`'s experimentation code and routing
+        type 253 is :rfc:`4727`'s experimental routing type, so neither is
+        expected to be registered -- and both really do arrive on the wire, which
+        is what makes the leak reachable in ordinary use.
+
+        """
+        from pcapkit.const.ipv6.option import Option
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+
+        src = bytes.fromhex('fe80' + '0000' * 6 + '0001')
+        dst = bytes.fromhex('fe80' + '0000' * 6 + '0002')
+
+        def datagram(next_header: int, extension: bytes) -> bytes:
+            return (b'\x60\x00\x00\x00' + len(extension).to_bytes(2, 'big')
+                    + bytes([next_header, 64]) + src + dst + extension)
+
+        for protocol, module, register, code, registry, packet in (
+            # next header 0, i.e. hop-by-hop options: one 4-octet option of an
+            # unregistered type, padded to the mandatory 8 octets.
+            (HOPOPT, 'hopopt', HOPOPT.register_option, Option(0x1E),
+             HOPOPT.__dict__['__option__'], datagram(0, bytes([17, 0, 0x1E, 4]) + bytes(4))),
+            # next header 60, i.e. destination options, carrying the same option
+            (IPv6_Opts, 'ipv6_opts', IPv6_Opts.register_option, Option(0x1E),
+             IPv6_Opts.__dict__['__option__'], datagram(60, bytes([17, 0, 0x1E, 4]) + bytes(4))),
+            # next header 43, i.e. a 16-octet routing header of type 253
+            (IPv6_Route, 'ipv6_route', IPv6_Route.register_routing, Routing(253),
+             IPv6_Route.__dict__['__routing__'], datagram(43, bytes([17, 1, 253, 0]) + bytes(12))),
+        ):
+            with self.subTest(protocol=protocol.__name__):
+                before = set(registry)
+                self.assertNotIn(code, before)
+
+                try:
+                    IPv6(io.BytesIO(packet), len(packet))
+                    self.assertEqual(set(registry), before)
+
+                    # A second datagram must behave identically; a class-level
+                    # leak from the first would show up here rather than above.
+                    IPv6(io.BytesIO(packet), len(packet))
+                    self.assertEqual(set(registry), before)
+
+                    with mock.patch(f'pcapkit.protocols.internet.{module}.warn') as warn:
+                        register(code, 'none')
+                    self.assertEqual(warn.call_count, 0)
+                finally:
+                    registry.pop(code, None)
+
     def test_ipv6_frag_index_length_and_make_data(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag

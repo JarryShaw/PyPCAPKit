@@ -84,6 +84,68 @@ class MHUnitTests(unittest.TestCase):
         finally:
             MH.__dict__['__extension__'][CGAExtension.Multi_Prefix] = original
 
+    def test_unregistered_mh_codes_do_not_mutate_the_class_registries(self) -> None:
+        """Parsing must not write to ``__message__``, ``__option__`` or ``__extension__``.
+
+        #425's defect on MH's three registries. Each is a
+        :class:`collections.defaultdict` on a class attribute shared by every
+        :class:`~pcapkit.protocols.internet.mh.MH` instance in the process, so
+        ``registry[code]`` inserted every unrecognised message type, option type
+        and CGA extension type -- and the value it inserted was the one the
+        default factory returns anyway, so it bought nothing while making
+        :meth:`~pcapkit.protocols.internet.mh.MH.register_message` and its
+        siblings warn about an overwrite that never happened.
+
+        ``__extension__`` is reached through the construction path rather than a
+        parse: CGA extensions arrive inside a CGA Parameters option, whose schema
+        sizes its extension area from ``pkt['length']`` -- a key the nested packet
+        context does not carry -- so
+        :meth:`~pcapkit.protocols.internet.mh.MH._read_cga_extensions` is
+        unreachable from bytes today. The sibling read site in
+        :meth:`~pcapkit.protocols.internet.mh.MH._make_cga_extensions` had the
+        identical defect.
+
+        """
+        from pcapkit.const.mh.cga_extension import CGAExtension
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.protocols.internet.mh import MH
+
+        def parse(hexstr: str) -> None:
+            raw = bytes.fromhex(hexstr)
+            self.assertEqual(len(raw) % 8, 0, 'mobility header must be 8-octet aligned')
+            # the header length field counts 8-octet units after the first, so it
+            # has to describe the octets actually supplied
+            self.assertEqual((raw[1] + 1) * 8, len(raw))
+            MH(io.BytesIO(raw), len(raw), extension=True)
+
+        for label, register, code, registry, exercise in (
+            # next, header length 1 (i.e. 16 octets), type 200, reserved,
+            # checksum, then ten octets of message body nothing can interpret
+            ('message', MH.register_message, Packet(200), MH.__dict__['__message__'],
+             lambda: parse('1101' 'c8' '00' '1234' '00000000000000000000')),
+            # a Binding Refresh Request carrying one 8-octet option of type 0x40
+            ('option', MH.register_option, Option(0x40), MH.__dict__['__option__'],
+             lambda: parse('1101' '00' '00' '1234' '0000' '4006' '000000000000')),
+            ('extension', MH.register_extension, CGAExtension(0xFF),
+             MH.__dict__['__extension__'],
+             lambda: object.__new__(MH)._make_cga_extensions(
+                 [(CGAExtension(0xFF), dict(data=b''))])),
+        ):
+            with self.subTest(registry=label):
+                before = set(registry)
+                self.assertNotIn(code, before)
+
+                try:
+                    exercise()
+                    self.assertEqual(set(registry), before)
+
+                    with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
+                        register(code, 'none' if label != 'message' else 'unknown')
+                    self.assertEqual(warn.call_count, 0)
+                finally:
+                    registry.pop(code, None)
+
     def test_mh_read_make_properties_and_extension_accessors(self) -> None:
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType

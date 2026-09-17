@@ -61,6 +61,7 @@ utility arguments and methods of specified protocols.
    .. automethod:: _make_index
    .. automethod:: _make_payload
 
+   .. automethod:: _lookup_registry
    .. automethod:: _lookup_next_layer
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
