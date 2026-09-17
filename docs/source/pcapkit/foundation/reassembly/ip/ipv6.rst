@@ -124,7 +124,7 @@ Terminology
           every caller for a result most never read. Reading the attribute, or any
           mapping view of it (``datagram['packet']``, ``to_dict()``, ``items()``,
           ``repr()``), runs it and keeps the result; see
-          :class:`~pcapkit.foundation.reassembly.data.Deferred`.
+          :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.
 
    reasm.ipv6.buffer
        Data structure for internal buffering when performing reassembly algorithms

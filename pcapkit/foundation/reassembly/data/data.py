@@ -24,7 +24,7 @@ class Deferred:
     A reassembled datagram's ``packet`` is a second, full parse of the payload
     the datagram just reassembled. Nothing about postponing it is specific to any
     one reassembler, which is why this lives beside
-    :class:`~pcapkit.foundation.reassembly.data.ReassemblyData` rather than in
+    :class:`~pcapkit.foundation.reassembly.data.data.ReassemblyData` rather than in
     either protocol's data module.
 
     IP reassembly is the case that made it necessary. It submits a datagram for
