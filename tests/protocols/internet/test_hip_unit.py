@@ -230,53 +230,200 @@ class HIPUnitTests(unittest.TestCase):
 
     def test_hip_register_parameter_warns_on_overwrite(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.data.internet import hip as hip_data
         from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
 
-        read_name = f'_read_param_{Parameter.ESP_INFO.name.lower()}'
-        make_name = f'_make_param_{Parameter.ESP_INFO.name.lower()}'
-        original_read = getattr(HIP, read_name)
-        original_make = getattr(HIP, make_name)
+        registry = HIP.__dict__['__parameter__']
+
+        original = registry[Parameter.ESP_INFO]
         try:
             with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
                 HIP.register_parameter(Parameter.ESP_INFO, 'esp_info')
             warn.assert_called_once()
-            self.assertIs(getattr(HIP, read_name), original_read)
-            self.assertIs(getattr(HIP, make_name), original_make)
+            self.assertEqual(registry[Parameter.ESP_INFO], 'esp_info')
         finally:
-            setattr(HIP, read_name, original_read)
-            setattr(HIP, make_name, original_make)
+            registry[Parameter.ESP_INFO] = original
 
+        # An unregistered code carries no entry, so registering one is not an
+        # overwrite. The setattr form could not tell the two apart: it keyed the
+        # warning on ``hasattr(cls, f'_read_param_{name}')``, which is true of
+        # every shipped handler as well as of anything a user had installed.
         custom = Parameter.Unassigned_65501
-        custom_read_name = f'_read_param_{custom.name.lower()}'
-        custom_make_name = f'_make_param_{custom.name.lower()}'
-        original_custom_read = getattr(HIP, custom_read_name, None)
-        original_custom_make = getattr(HIP, custom_make_name, None)
+        self.assertNotIn(custom, registry)
+        try:
+            with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+                HIP.register_parameter(custom, 'unassigned')
+            warn.assert_not_called()
+            self.assertEqual(registry[custom], 'unassigned')
 
-        def read_param(packet, *, version, options):
-            return hip_data.UnassignedParameter(type=packet.type, critical=False,
-                                                length=4, contents=packet.value)
+            with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+                HIP.register_parameter(custom, 'unassigned')
+            warn.assert_called_once()
+        finally:
+            registry.pop(custom, None)
+
+    def test_hip_register_parameter_dispatches_a_registered_callable_pair(self) -> None:
+        """A ``(parser, constructor)`` pair must reach both dispatch directions.
+
+        The pair is called with the signatures :data:`ParameterParser` and
+        :data:`ParameterConstructor` declare -- ``(schema, *, version, options)``
+        and ``(code, param=None, *, version, **kwargs)`` -- i.e. as plain
+        callables rather than as methods with an implicit ``self``. That is the
+        calling convention every other dispatch family uses, and the reason the
+        registry form replaced ``setattr``: installing the callable on the class
+        made it a descriptor, so dispatch passed ``self`` as the first positional
+        argument and a handler written to the declared signature could not be
+        called at all.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.data.internet import hip as hip_data
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        registry = HIP.__dict__['__parameter__']
+        custom = Parameter.Unassigned_65501
+        seen = []  # type: list[str]
+
+        def read_param(schema, *, version, options):
+            seen.append(f'read/v{version}')
+            return hip_data.UnassignedParameter(type=schema.type, critical=False,
+                                                length=4 + schema.len,
+                                                contents=schema.value)
 
         def make_param(code, param=None, *, version, contents=b'', **kwargs):
+            seen.append(f'make/v{version}')
+            if param is not None:
+                contents = param.contents
             return hip_schema.UnassignedParameter(type=code, len=len(contents),
                                                   value=contents)
 
+        self.assertNotIn(custom, registry)
         try:
-            with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
-                HIP.register_parameter(custom, (read_param, make_param))
-            warn.assert_not_called()
-            self.assertIs(getattr(HIP, custom_read_name), read_param)
-            self.assertIs(getattr(HIP, custom_make_name), make_param)
+            HIP.register_parameter(custom, (read_param, make_param))
+            self.assertEqual(registry[custom], (read_param, make_param))
+
+            schema = hip_schema.UnassignedParameter(type=custom, len=4,
+                                                    value=b'abcd')
+            proto = object.__new__(HIP)
+            proto.__header__ = types.SimpleNamespace(param=[schema])
+            parsed = proto._read_hip_param(len(schema), version=2)
+            self.assertEqual(seen, ['read/v2'])
+            self.assertEqual(parsed[custom].contents, b'abcd')
+
+            # the list-of-tuples branch of the constructor
+            seen.clear()
+            made_list, list_len = proto._make_hip_param(
+                [(custom, {'contents': b'wxyz'})], version=2)
+            self.assertEqual(seen, ['make/v2'])
+            self.assertEqual(made_list[0].value, b'wxyz')
+            # 4 octets of type and length, 4 of value, 4 of padding to a multiple
+            # of 8
+            self.assertEqual(list_len, 12)
+
+            # ... and the OrderedMultiDict branch, which the two halves of an
+            # issue like this are equally easy to fix one of and forget the other
+            seen.clear()
+            made_dict, dict_len = proto._make_hip_param(
+                OrderedMultiDict([(custom, parsed[custom])]), version=2)
+            self.assertEqual(seen, ['make/v2'])
+            self.assertEqual(made_dict[0].value, b'abcd')
+            self.assertEqual(dict_len, 12)
         finally:
-            if original_custom_read is None:
-                delattr(HIP, custom_read_name)
-            else:
-                setattr(HIP, custom_read_name, original_custom_read)
-            if original_custom_make is None:
-                delattr(HIP, custom_make_name)
-            else:
-                setattr(HIP, custom_make_name, original_custom_make)
+            registry.pop(custom, None)
+
+    def test_hip_parameter_registry_covers_every_shipped_handler(self) -> None:
+        """Every ``_read_param_*`` / ``_make_param_*`` pair must be reachable.
+
+        The setattr form derived the handler name from ``code.name.lower()``, so
+        a handler was reachable by construction and "what is registered?" had no
+        direct answer. Under the registry the mapping is explicit data, which
+        means a handler added without its registry entry becomes dead code --
+        this pins the two sides together.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+
+        registry = HIP.__dict__['__parameter__']
+        fallback = registry.default_factory()
+        self.assertEqual(fallback, 'unassigned')
+
+        registered = set(registry.values()) | {fallback}
+        self.assertEqual(
+            {name[len('_read_param_'):] for name in vars(HIP)
+             if name.startswith('_read_param_')},
+            registered,
+        )
+        self.assertEqual(
+            {name[len('_make_param_'):] for name in vars(HIP)
+             if name.startswith('_make_param_')},
+            registered,
+        )
+
+        # ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129, HIPv2) are distinct
+        # codes whose names differ only in case, so both have to be keyed
+        # explicitly -- ``code.name.lower()`` collapsed them for free.
+        self.assertEqual(registry[Parameter.R1_Counter], 'r1_counter')
+        self.assertEqual(registry[Parameter.R1_COUNTER], 'r1_counter')
+
+        # every key is a real parameter code, and every value names real methods
+        for code, name in registry.items():
+            with self.subTest(code=code):
+                self.assertIsInstance(code, Parameter)
+                self.assertTrue(hasattr(HIP, f'_read_param_{name}'))
+                self.assertTrue(hasattr(HIP, f'_make_param_{name}'))
+
+    def test_hip_unregistered_parameter_code_does_not_mutate_the_registry(self) -> None:
+        """Parsing must not write to the shared HIP parameter registry.
+
+        :attr:`HIP.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`
+        is a :class:`collections.defaultdict` on a class attribute shared by
+        every instance in the process, so ``registry[code]`` would insert each
+        code it missed -- the leak #428 swept out of the sixteen registries that
+        already existed. This one is new, so the guard has to be pinned here too:
+        the reads go through
+        :meth:`~pcapkit.protocols.protocol.ProtocolBase._lookup_registry`.
+
+        Code 65499 is unassigned in IANA's registry and 4650 is
+        ``RELAYED_ADDRESS``, which is assigned but has no parser, so both take
+        the fallback.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        registry = HIP.__dict__['__parameter__']
+        proto = object.__new__(HIP)
+
+        for code in (Parameter.Unassigned_65499, Parameter.RELAYED_ADDRESS):
+            with self.subTest(code=code):
+                before = set(registry)
+                self.assertNotIn(code, before)
+
+                schema = hip_schema.UnassignedParameter(type=code, len=4,
+                                                        value=b'abcd')
+                proto.__header__ = types.SimpleNamespace(param=[schema])
+                proto._read_hip_param(len(schema), version=2)
+                self.assertEqual(set(registry), before)
+
+                # both constructor branches, since either can leak on its own
+                proto._make_hip_param([(code, {'contents': b'abcd'})], version=2)
+                self.assertEqual(set(registry), before)
+                proto._make_hip_param(
+                    OrderedMultiDict([(code, types.SimpleNamespace(contents=b'abcd'))]),
+                    version=2)
+                self.assertEqual(set(registry), before)
+
+                # a leak would make the next genuine registration warn
+                with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+                    try:
+                        HIP.register_parameter(code, 'unassigned')
+                        warn.assert_not_called()
+                    finally:
+                        registry.pop(code, None)
 
     def test_hip_parameter_readers_cover_simple_models_and_guards(self) -> None:
         from pcapkit.const.hip.certificate import Certificate

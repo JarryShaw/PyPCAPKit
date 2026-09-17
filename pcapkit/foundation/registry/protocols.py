@@ -358,13 +358,13 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
     register_protocol(module)
 
 
-# NOTE: pcapkit.protocols.internet.internet.IPv4
+# NOTE: pcapkit.protocols.internet.ipv4.IPv4.__option__
 def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_OptionParser, IPv4_OptionConstructor]', *,
                          schema: 'Optional[Type[Schema_IPv4_Option]]' = None) -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
-    :data:`pcapkit.protocols.internet.internet.IPv4` internal registry.
+    :data:`pcapkit.protocols.internet.ipv4.IPv4.__option__` registry.
 
     Args:
         code: :class:`IPv4 <pcapkit.protocols.internet.ipv4.IPv4>` option code as
@@ -383,13 +383,13 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
     logger.debug('registered IPv4 option parser: %s', code.name)
 
 
-# NOTE: pcapkit.protocols.internet.hip.HIP
+# NOTE: pcapkit.protocols.internet.hip.HIP.__parameter__
 def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_ParameterParser, HIP_ParameterConstructor]', *,
                            schema: 'Optional[Type[Schema_HIP_Parameter]]' = None) -> 'None':
     """Register a parameter parser.
 
     The function will register the given parameter parser to the
-    :data:`pcapkit.protocols.internet.hip.HIP` internal registry.
+    :data:`pcapkit.protocols.internet.hip.HIP.__parameter__` registry.
 
     Args:
         code: :class:`~pcapkit.protocols.internet.hip.HIP` parameter code as

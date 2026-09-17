@@ -146,6 +146,9 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_param_via_rvs
    .. automethod:: _make_param_relay_hmac
 
+   .. autoattribute:: __parameter__
+      :no-value:
+
    .. automethod:: __post_init__
    .. automethod:: __index__
 
