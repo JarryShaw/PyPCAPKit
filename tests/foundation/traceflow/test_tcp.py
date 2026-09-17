@@ -401,6 +401,45 @@ class TCPTraceFlowTests(unittest.TestCase):
             self.assertNotIn((12345, 0), got)
             self.assertNotIn((443, 101), got)
 
+    def test_pipelined_sends_share_a_datagram_because_the_ack_never_moved(self) -> None:
+        """The bucket boundary is the peer's turn, not the message boundary.
+
+        The sibling test above gets one datagram per request because each request
+        waited for its reply, so every one carried a fresh acknowledgement number.
+        A sender that *pipelines* -- several requests in flight before any reply --
+        emits them all on the same acknowledgement number, so they land in one
+        bucket and are concatenated.
+
+        Pinned because the class docstring would otherwise be read as promising one
+        application message per datagram, which holds only where an exchange is one
+        request and one reply. This is the case where it does not.
+
+        """
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+
+            trace.trace(self._packet(index=1, syn=True, seq=100, ack=0))
+            trace.trace(self._reply(index=2, syn=True, seq=500, ack=101, timestamp=1.1))
+            # two requests back to back, both acknowledging the same server byte
+            trace.trace(self._packet(index=3, seq=101, ack=501, payload=b'req1', timestamp=1.2))
+            trace.trace(self._packet(index=4, seq=105, ack=501, payload=b'req2', timestamp=1.3))
+            trace.trace(self._reply(index=5, seq=501, ack=109, payload=b'resp1', timestamp=1.4))
+
+            flow, = trace.index
+            datagrams = flow.packet
+            self.assertIsNotNone(datagrams)
+
+            got = {(dgram.id.src[1], dgram.id.ack): bytes(dgram.payload)
+                   for dgram in datagrams}
+            # the two requests are *one* datagram, not two -- concatenated, and an
+            # application parser handed this sees only the first message
+            self.assertEqual(got, {
+                (12345, 501): b'req1req2',
+                (443, 109): b'resp1',
+            })
+
     def test_an_open_flows_application_layer_is_a_snapshot_of_when_it_was_read(self) -> None:
         """Reading ``packet`` on an open flow freezes it there.
 

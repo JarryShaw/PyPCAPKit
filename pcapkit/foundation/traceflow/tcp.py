@@ -104,13 +104,29 @@ class TCP(TraceFlow[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]):
 
         That is deliberate rather than incidental: the acknowledgement number
         advances exactly when the peer has spoken, so bucketing on it splits a
-        conversation at its message boundaries, and each datagram's payload is one
-        application message that :attr:`Datagram.packet
-        <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>` can parse on its
-        own. Merging a direction into a single stream would instead hand the
-        application parser several concatenated messages and have it read only the
-        first. A direction that carried one acknowledgement number throughout --
-        a single request and its reply, which is what the unit tests exercise --
+        direction wherever the other end got a word in -- one datagram per
+        **exchange**. Merging a whole direction into one stream would instead hand
+        the application parser every message it ever sent, concatenated, and have
+        it read only the first.
+
+        Be precise about what that does and does not buy, though, because the
+        boundary is the peer's turn and **not** the application's message
+        boundary. Where an exchange is one request and one reply, the two coincide
+        and each datagram's payload is a single message that
+        :attr:`Datagram.packet
+        <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>` can parse alone.
+        Where a sender **pipelines** -- several requests in flight before any reply
+        -- they all carry the same acknowledgement number, so they share a bucket
+        and are concatenated after all. Measured: two requests sent back to back
+        on one acknowledgement number come back as a single datagram carrying
+        ``b'req1req2'``, which
+        :meth:`test_pipelined_sends_share_a_datagram_because_the_ack_never_moved`
+        pins. So this narrows the concatenation to within one exchange rather than
+        eliminating it, and an application parser handed a pipelined datagram
+        still sees only the first message.
+
+        A direction that carried one acknowledgement number throughout -- a single
+        request and its reply, which is what most of the unit tests exercise --
         does collapse to one datagram each way, which is where "one per direction"
         holds.
 
