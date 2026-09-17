@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """shared data models for reassembly"""
 
-import enum
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.utilities.compat import StrEnum
 
 __all__ = ['ReassemblyData', 'Completion', 'Deferred', 'DeferredPacket']
 
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 
-class Completion(enum.Enum):
+class Completion(StrEnum):
     """How completely a datagram was reassembled, and why it stopped.
 
     This is the value of
@@ -38,6 +38,23 @@ class Completion(enum.Enum):
     preserved -- ``datagram.completed == True`` is now :data:`False` even for a
     complete datagram -- so a caller comparing against a boolean has to compare
     against a member instead.
+
+    It derives from :class:`~pcapkit.utilities.compat.StrEnum`, as
+    :class:`~pcapkit.protocols.application.httpv1.Type` and
+    :class:`~pcapkit.protocols.misc.pcapng.TLSKeyLabel` do, which buys two things
+    a plain :class:`enum.Enum` does not: the value survives
+    :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and
+    :meth:`Datagram.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` hands this
+    field straight out -- and ``datagram.completed == 'timeout'`` works, so the
+    new state can be tested for without importing this class.
+
+    Warning:
+        Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are
+        **falsy** makes this a non-empty string that tests false, so ``bool(x)``
+        and ``bool(str(x))`` disagree. That is deliberate -- the truthiness above
+        is the property callers of a former :obj:`bool` field rely on -- but code
+        that takes this for an ordinary string and tests it for truth will read it
+        backwards.
 
     """
 
@@ -64,11 +81,15 @@ class Completion(enum.Enum):
         Only :attr:`COMPLETE` is truthy; both :attr:`PARTIAL` and
         :attr:`TIMEOUT` describe an incomplete datagram.
 
+        Note:
+            This override is what a :class:`str` base does *not* give -- every
+            non-empty string is otherwise truthy, which would make an incomplete
+            datagram read as a complete one. :meth:`__str__` needs no such
+            override: :class:`~pcapkit.utilities.compat.StrEnum` already renders a
+            member as its value.
+
         """
         return self is Completion.COMPLETE
-
-    def __str__(self) -> 'str':
-        return self.value
 
 
 class Deferred:
@@ -145,6 +166,13 @@ class DeferredPacket:
 
     """
 
+    # NOTE: the ``super()`` calls below are suppressed for both checkers. They are
+    # undefined *on this mixin*, which is what a mixin is -- the base arrives at
+    # the point of use, where every subclass is declared
+    # ``class X(DeferredPacket, Info)`` and :class:`~pcapkit.corekit.infoclass.Info`
+    # supplies all three. Neither mypy nor pylint can see that from here, and
+    # pylint calls it an *error* rather than a warning.
+
     def __analyse__(self) -> 'Optional[Protocol]':
         """Resolve a deferred analysis, at most once.
 
@@ -170,13 +198,13 @@ class DeferredPacket:
     def __getitem__(self, name: 'str') -> 'Any':
         if name == 'packet':
             return self.__analyse__()
-        return super().__getitem__(name)
+        return super().__getitem__(name)  # type: ignore[misc] # pylint: disable=no-member
 
     def __contains__(self, name: 'object') -> 'bool':
         # NOTE: ``Mapping.__contains__`` answers by fetching the value, which
         # would run the deferred analysis merely to decide that the field exists.
         # ``packet`` is a declared field, so it is always there.
-        return name == 'packet' or super().__contains__(name)
+        return name == 'packet' or super().__contains__(name)  # type: ignore[misc] # pylint: disable=no-member
 
     def __str__(self) -> 'str':
         self.__analyse__()
@@ -196,7 +224,7 @@ class DeferredPacket:
 
         """
         self.__analyse__()
-        return super().to_dict()
+        return super().to_dict()  # type: ignore[misc] # pylint: disable=no-member
 
 
 @info_final

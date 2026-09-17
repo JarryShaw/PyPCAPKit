@@ -38,8 +38,8 @@ from pcapkit.foundation.traceflow.traceflow import TraceFlow
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           RegistryError, UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import get_logger
-from pcapkit.utilities.warnings import (EngineWarning, ExtractionWarning, FormatWarning,
-                                        RegistryWarning, warn)
+from pcapkit.utilities.warnings import (AttributeWarning, EngineWarning, ExtractionWarning,
+                                        FormatWarning, RegistryWarning, warn)
 
 if TYPE_CHECKING:
     from io import BufferedReader
@@ -713,7 +713,7 @@ class Extractor(Generic[_P]):
                  reasm_timeout: 'Optional[float]' = None,                                                                       # reassembly settings # pylint: disable=line-too-long
                  trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
                  trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
-                 trace_bidirectional: 'bool' = True,                                                                            # trace settings # pylint: disable=line-too-long
+                 trace_bidirectional: 'bool' = True, trace_analyse: 'bool' = False,                                            # trace settings # pylint: disable=line-too-long
                  ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
                  buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
                  no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
@@ -759,6 +759,11 @@ class Extractor(Generic[_P]):
             trace_bidirectional: whether both halves of a conversation are
                 traced as one flow, which is the default; :data:`False` restores
                 the older behaviour of a flow per direction
+            trace_analyse: whether each traced flow reassembles its application
+                layer, so that its ``packet`` can be read. Off by default,
+                because it buffers every traced payload -- a cost tracing does
+                not otherwise pay. Unavailable on the ``pyshark`` engine, which
+                reports dissected fields rather than the octets behind them
 
             ip: if record data for IPv4 & IPv6 reassembly (must be used with ``reassembly=True``)
             ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)
@@ -910,6 +915,17 @@ class Extractor(Generic[_P]):
                      "using 'trace_format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = 'json'
 
+            # NOTE: PyShark hands the tracer dissected *fields*, not the octets
+            # behind them, so there is no payload for a flow to reassemble -- which
+            # is the same reason :mod:`pcapkit.toolkit.pyshark` carries no
+            # ``tcp_reassembly`` at all. Refuse rather than analyse empty payloads
+            # into an empty answer that looks like a real one.
+            if trace_analyse and self._exnam == 'pyshark':
+                warn(f"'Extractor(engine={self._exnam})' does not expose packet payloads; "
+                     "using 'trace_analyse=False' instead", AttributeWarning,
+                     stacklevel=stacklevel())
+                trace_analyse = False
+
             if self._tcp:
                 logger.debug('TCP flow tracing enabled')
 
@@ -919,7 +935,8 @@ class Extractor(Generic[_P]):
                     self.__traceflow__['tcp'] = trace_cls_tcp  # update mapping upon import
                 trace_obj_tcp = cast('TCP_TraceFlow', trace_cls_tcp(fout=trace_fout, format=trace_format,
                                                                     byteorder=trace_byteorder, nanosecond=trace_nanosecond,
-                                                                    bidirectional=trace_bidirectional))
+                                                                    bidirectional=trace_bidirectional,
+                                                                    analyse=trace_analyse))
 
             self._trace = TraceFlowManager(
                 tcp=trace_obj_tcp,

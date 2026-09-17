@@ -91,6 +91,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
         bidirectional: trace both halves of a conversation as one flow
+        analyse: reassemble each flow's application layer
 
     Note:
         This class is for internal use only. For customisation, please use
@@ -325,7 +326,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
     def __init__(self, fout: 'Optional[str]', format: 'Optional[str]',  # pylint: disable=redefined-builtin
                  byteorder: 'Literal["little", "big"]' = sys.byteorder,
-                 nanosecond: bool = False, bidirectional: 'bool' = True) -> 'None':
+                 nanosecond: bool = False, bidirectional: 'bool' = True,
+                 analyse: 'bool' = False) -> 'None':
         """Initialise instance.
 
         Arguments:
@@ -338,6 +340,9 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
                 endpoints rather than on (source, destination), so a connection
                 is traced as the one thing it is; pass :data:`False` for the
                 older per-direction behaviour.
+            analyse: whether to reassemble each flow's application layer, so that
+                its ``packet`` can be read. Off by default: it buffers every
+                traced payload, a cost tracing does not otherwise pay.
 
         """
         if fout is None:
@@ -361,6 +366,11 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         #: of a conversation share one buffer entry, one label and one output
         #: file; otherwise each direction is a flow of its own.
         self._bidir = bidirectional
+        #: bool: Application-layer analysis flag. If set to :data:`True`, each
+        #: flow reassembles the payload it carries so that its ``packet`` can be
+        #: read; otherwise no payload is buffered and ``packet`` is
+        #: :data:`None`.
+        self._analyse = analyse
 
         # dump I/O object
         fio, ext = self.make_fout(fout, format)
@@ -370,8 +380,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         self._fdpext = ext
 
         logger.debug('%s flow tracing initialised (root=%s, format=%s, byteorder=%s, '
-                     'nanosecond=%s, bidirectional=%s)', self.name, fout, format,
-                     byteorder, nanosecond, bidirectional)
+                     'nanosecond=%s, bidirectional=%s, analyse=%s)', self.name, fout,
+                     format, byteorder, nanosecond, bidirectional, analyse)
 
     def __call__(self, packet: '_PT') -> 'None':
         """Dump frame to output files.
@@ -413,6 +423,7 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
         bidirectional: trace both halves of a conversation as one flow
+        analyse: reassemble each flow's application layer
 
     """
 

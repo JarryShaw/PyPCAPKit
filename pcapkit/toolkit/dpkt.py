@@ -19,6 +19,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -32,9 +33,65 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 
 __all__ = [
-    'ipv6_hdr_len', 'packet2chain', 'packet2dict',
+    'ipv6_hdr_len', 'attach_timestamp', 'packet2timestamp', 'packet2chain', 'packet2dict',
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow'
 ]
+
+#: Attribute a frame's capture timestamp is stashed under.
+#:
+#: `DPKT`_ keeps the two halves of a record apart -- its reader yields
+#: ``(timestamp, bytes)`` and only the bytes become a packet -- so a frame on its
+#: own does not know when it was captured. Anything that reads a frame *after* the
+#: extraction loop has moved on therefore has no way back to the timestamp unless
+#: the engine puts it somewhere, and this is where
+#: :class:`~pcapkit.foundation.engines.dpkt.DPKT` puts it.
+#:
+#: A `DPKT`_ packet carries a :attr:`~object.__dict__`, so this is an ordinary
+#: attribute rather than anything exotic; the name is spelled out here so that
+#: nothing has to know it by hand.
+#:
+#: .. _DPKT: https://dpkt.readthedocs.io
+TIMESTAMP_ATTR = '__pcapkit_timestamp__'
+
+
+def attach_timestamp(packet: 'Packet', timestamp: 'float') -> 'None':
+    """Stash a frame's capture timestamp on the frame.
+
+    Args:
+        packet: DPKT packet.
+        timestamp: Capture timestamp of the packet, as `DPKT`_'s reader yielded it
+            beside the record's octets.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    setattr(packet, TIMESTAMP_ATTR, timestamp)
+
+
+def packet2timestamp(packet: 'Packet') -> 'float':
+    """Read back the capture timestamp of a DPKT packet.
+
+    Args:
+        packet: DPKT packet, as stored by
+            :class:`~pcapkit.foundation.engines.dpkt.DPKT`.
+
+    Returns:
+        Capture timestamp of the packet, in seconds since the epoch.
+
+    Raises:
+        UnsupportedCall: If the packet carries no timestamp, i.e. it did not come
+            through :class:`~pcapkit.foundation.engines.dpkt.DPKT`. Raised rather
+            than defaulted, because a plausible-looking zero would silently
+            misdate whatever was going to use it.
+
+    """
+    timestamp = getattr(packet, TIMESTAMP_ATTR, None)
+    if timestamp is None:
+        raise UnsupportedCall(
+            f'{type(packet).__name__} carries no capture timestamp; only a frame read by '
+            "'Extractor(engine=dpkt)' has one attached"
+        )
+    return cast('float', timestamp)
 
 
 def ipv6_hdr_len(ipv6: 'IP6') -> 'int':
@@ -116,8 +173,11 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
     Args:
         packet: DPKT packet.
         timestamp: Capture timestamp of the packet, which drives the reassembly
-            timeout. DPKT hands it back beside the packet rather than on it, so
-            it has to be passed in -- as :func:`tcp_traceflow` already does.
+            timeout. `DPKT`_'s reader yields it beside the record's octets rather
+            than on the packet, so it is passed in -- as :func:`tcp_traceflow`
+            already does. A caller holding only a frame can read it back with
+            :func:`packet2timestamp`, which is where
+            :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it.
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -171,7 +231,7 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
     Args:
         packet: DPKT packet.
         timestamp: Capture timestamp of the packet, which drives the reassembly
-            timeout.
+            timeout; :func:`packet2timestamp` reads it back off a stored frame.
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -238,7 +298,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
     Args:
         packet: DPKT packet.
         timestamp: Capture timestamp of the packet, which drives the reassembly
-            timeout.
+            timeout; :func:`packet2timestamp` reads it back off a stored frame.
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -338,6 +398,10 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
             srcport=tcp.sport,                                          # TCP source port
             dstport=tcp.dport,                                          # TCP destination port
             timestamp=timestamp,                                        # timestamp
+            seq=tcp.seq,                                                # TCP sequence number
+            ack=tcp.ack,                                                # TCP acknowledgement number
+            header=tcp.pack()[:tcp.off * 4],                            # raw bytes type header
+            payload=bytearray(bytes(tcp.data)),                         # raw bytearray type payload
         )
         return data
     return None

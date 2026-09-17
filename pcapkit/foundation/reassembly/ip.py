@@ -85,11 +85,11 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         self._flag_n = False
         self.__cached__.clear()
 
-        BUFID = info.bufid  # Buffer Identifier
-        FO = info.fo        # Fragment Offset
-        IHL = info.ihl      # Internet Header Length
-        MF = info.mf        # More Fragments flag
-        TL = info.tl        # Total Length
+        BUFID = info.bufid   # Buffer Identifier
+        FO = info.fo         # Fragment Offset
+        IHL = info.ihl       # Internet Header Length
+        MF = info.mf         # More Fragments flag
+        TL = info.tl         # Total Length
         TS = info.timestamp  # Capture timestamp, i.e. the only clock we have
 
         # This fragment's arrival is the evidence that capture time has reached

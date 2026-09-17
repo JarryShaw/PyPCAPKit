@@ -49,6 +49,39 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertEqual(storage.ipv6, ())
         self.assertEqual(storage.tcp, ())
 
+    def test_completion_is_a_string_that_still_reads_as_the_old_bool(self) -> None:
+        """The contract ``Datagram.completed`` has to keep, now it is a StrEnum.
+
+        Deriving from :class:`~pcapkit.utilities.compat.StrEnum` -- as
+        :class:`~pcapkit.protocols.application.httpv1.Type` does -- buys
+        serialisability and comparison against a plain string. What it must not
+        cost is the truthiness callers of the former :obj:`bool` field rely on,
+        which needs ``__bool__`` overridden because every non-empty string is
+        otherwise truthy.
+
+        """
+        import json
+
+        from pcapkit.foundation.reassembly.data.data import Completion
+
+        # only COMPLETE is truthy, so ``if datagram.completed:`` reads as it did
+        self.assertTrue(Completion.COMPLETE)
+        self.assertFalse(Completion.PARTIAL)
+        self.assertFalse(Completion.TIMEOUT)
+
+        # ... while equality against a bool stays broken, as documented
+        self.assertNotEqual(Completion.COMPLETE, True)
+        self.assertNotEqual(Completion.PARTIAL, False)
+
+        # what the str base adds
+        self.assertIsInstance(Completion.TIMEOUT, str)
+        self.assertEqual(Completion.TIMEOUT, 'timeout')
+        self.assertEqual(str(Completion.PARTIAL), 'partial')
+        self.assertEqual(json.dumps(Completion.PARTIAL), '"partial"')
+
+        # and identity still works, which is what the assertions elsewhere use
+        self.assertIs(Completion('complete'), Completion.COMPLETE)
+
     def test_tcp_data_models_and_package_aliases(self) -> None:
         from pcapkit.foundation.reassembly.data import (Completion, TCP_Buffer, TCP_Datagram,
                                                         TCP_DatagramID, TCP_Fragment,

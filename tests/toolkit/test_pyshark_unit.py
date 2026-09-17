@@ -27,9 +27,11 @@ class FakePySharkPacket:
             FakeLayer('ethernet', src='aa:aa:aa:aa:aa:aa'),
             FakeLayer('ip', src='192.0.2.1', dst='198.51.100.1'),
             # ``flags_reset`` is PyShark's spelling of Wireshark's
-            # ``tcp.flags.reset``, the field the RST flag comes from
+            # ``tcp.flags.reset``, the field the RST flag comes from. ``seq`` and
+            # ``ack`` are reported as strings too, like every PyShark field.
             FakeLayer('tcp', srcport='1234', dstport='80',
-                      flags_syn='1', flags_fin='0', flags_reset='0'),
+                      flags_syn='1', flags_fin='0', flags_reset='0',
+                      seq='101', ack='202'),
         ]
         self._contains = set()
         if ip:

@@ -95,6 +95,15 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
             srcport=int(tcp.srcport),                                            # TCP source port
             dstport=int(tcp.dstport),                                            # TCP destination port
             timestamp=packet.frame_info.time_epoch,                              # timestamp
+            seq=int(tcp.seq),                                                    # TCP sequence number
+            ack=int(tcp.ack),                                                    # TCP acknowledgement number
+            # NOTE: PyShark reports dissected *fields*, not the octets behind
+            # them, so there is no header or payload to hand over -- which is
+            # the same reason this module carries no ``tcp_reassembly`` at all.
+            # ``Extractor`` refuses ``trace_analyse=True`` on this engine, so
+            # nothing reads these two.
+            header=b'',                                                          # unavailable
+            payload=bytearray(),                                                 # unavailable
         )
         return data
     return None

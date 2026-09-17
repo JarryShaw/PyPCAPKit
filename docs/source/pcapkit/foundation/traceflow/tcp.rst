@@ -41,6 +41,11 @@ Terminology
               syn=tcp.flags.syn,                      # TCP synchronise (SYN) flag
               fin=tcp.flags.fin,                      # TCP finish (FIN) flag
               rst=tcp.flags.rst,                      # TCP reset (RST) flag
+              seq=tcp.seq,                            # TCP sequence number
+              ack=tcp.ack,                            # TCP acknowledgement number
+              header=tcp.packet.header,               # raw bytes type header
+              payload=bytearray(
+                  tcp.packet.payload),                # raw bytearray type payload
               src=ip.src,                             # source IP
               dst=ip.dst,                             # destination IP
               srcport=tcp.srcport,                    # TCP source port
@@ -74,6 +79,9 @@ Terminology
            |                        |--> 'reverse': (list) frame index sent to 'origin'
            |                        |--> 'fin': (set) endpoints seen to have sent a FIN
            |                        |--> 'reset': (bool) whether a RST has been seen
+           |                        |--> 'reassembly': (Optional[TCP]) the flow's own
+           |                                            reassembler, or None when
+           |                                            analyse is off
            |--> (tuple) BUFID ...
 
        When tracing bidirectionally -- the default -- ``BUFID`` orders the two
@@ -115,13 +123,25 @@ Terminology
            |     |--> 'forward': (tuple) frame index in the direction that
            |     |                       opened the flow
            |     |--> 'reverse': (tuple) frame index the other way; empty when
-           |                            tracing unidirectionally
+           |     |                      tracing unidirectionally
+           |     |--> 'packet': (Optional[tuple]) one reassembled datagram per
+           |                    direction, or None when analyse is off
            |--> (Info) data ...
 
        ``forward`` and ``reverse`` partition ``index``, so
        ``frame_number in flow.forward`` answers which way a packet went without
        taking the label apart. ``forward`` is the direction of the packet that
        opened the flow, whose endpoints the label names first.
+
+       ``packet`` is the conversation's application layer: one reassembled datagram
+       per direction, present only when the tracer was constructed with
+       ``analyse=True``. It is reassembled on the *first read*, and each datagram's
+       own :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is
+       parsed later still, so a caller that wanted only frame numbers pays for
+       neither. The tracer does not reassemble the stream itself -- it feeds
+       :class:`~pcapkit.foundation.reassembly.tcp.TCP`, whose :rfc:`815` algorithm
+       handles the reordering and retransmission that concatenating payloads in
+       capture order would corrupt.
 
        .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Index`
 
@@ -142,6 +162,14 @@ Data Structures
    :show-inheritance:
 
 .. autoclass:: pcapkit.foundation.traceflow.data.tcp.Index
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.foundation.traceflow.data.data.Deferred
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.foundation.traceflow.data.data.DeferredPacket
    :members:
    :show-inheritance:
 

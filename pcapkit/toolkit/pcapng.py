@@ -234,6 +234,10 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
             srcport=tcp_info.srcport.port,                # TCP source port
             dstport=tcp_info.dstport.port,                # TCP destination port
             timestamp=float(frame_info.timestamp_epoch),  # frame timestamp
+            seq=tcp_info.seq,                             # TCP sequence number
+            ack=tcp_info.ack,                             # TCP acknowledgement number
+            header=tcp.packet.header,                     # raw bytes type header
+            payload=bytearray(tcp.packet.payload),        # raw bytearray type payload
         )
         return data
     return None

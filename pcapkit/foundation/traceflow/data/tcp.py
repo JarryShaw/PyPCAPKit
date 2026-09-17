@@ -4,6 +4,7 @@
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.foundation.traceflow.data.data import Deferred, DeferredPacket
 from pcapkit.utilities.compat import Tuple
 
 __all__ = ['BufferID', 'Packet', 'Buffer', 'Index']
@@ -16,6 +17,8 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+    from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
+    from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
     from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
@@ -71,9 +74,23 @@ class Packet(Info, Generic[_AT]):
     dstport: 'int'
     #: Frame timestamp.
     timestamp: 'float'
+    #: TCP sequence number. Carried so that a tracer asked to analyse the
+    #: application layer can hand the segment to
+    #: :class:`~pcapkit.foundation.reassembly.tcp.TCP` rather than reassemble the
+    #: stream itself -- a tracer that simply concatenated payloads in capture order
+    #: would be silently wrong on the first retransmission or reordering.
+    seq: 'int'
+    #: TCP acknowledgement number, which is what the reassembler keys a payload
+    #: buffer on.
+    ack: 'int'
+    #: Raw :obj:`bytes` type TCP header.
+    header: 'bytes'
+    #: Raw :obj:`bytearray` type TCP payload, i.e. the application-layer octets
+    #: this segment carries.
+    payload: 'bytearray'
 
     if TYPE_CHECKING:
-        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', rst: 'bool', src: '_AT', dst: '_AT', srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', rst: 'bool', src: '_AT', dst: '_AT', srcport: 'int', dstport: 'int', timestamp: 'float', seq: 'int', ack: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final
@@ -114,6 +131,13 @@ class Buffer(Info, Generic[_AT]):
     #: connection at once (:rfc:`9293#section-3.5.2`), where a polite close needs
     #: a FIN from each side, so it is tracked as a flag rather than per endpoint.
     reset: 'bool'
+    #: The flow's own :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler,
+    #: fed each segment as it is traced, or :data:`None` when the tracer was not
+    #: asked to analyse the application layer. One per flow rather than one per
+    #: tracer, so that
+    #: :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` can
+    #: flush *this* conversation without disturbing any other.
+    reassembly: 'Optional[TCP_Reassembly]'
 
     if TYPE_CHECKING:
         # NOTE: one line, however long. ``# pylint: disable`` is *line*-scoped and
@@ -122,11 +146,11 @@ class Buffer(Info, Generic[_AT]):
         # disable's reach -- which is why the shorter form this replaces leaked
         # three ``unused-argument`` messages of its own. Every other data model in
         # :mod:`pcapkit` writes these stubs on one line for the same reason.
-        def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str', origin: 'tuple[_AT, int]', forward: 'list[int]', reverse: 'list[int]', fin: 'set[tuple[_AT, int]]', reset: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str', origin: 'tuple[_AT, int]', forward: 'list[int]', reverse: 'list[int]', fin: 'set[tuple[_AT, int]]', reset: 'bool', reassembly: 'Optional[TCP_Reassembly]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final
-class Index(Info):
+class Index(DeferredPacket, Info):
     """Data structure for **TCP flow tracing**.
 
     See Also:
@@ -135,6 +159,10 @@ class Index(Info):
         * :term:`trace.tcp.index`
 
     """
+
+    #: Listing ``packet`` here is what makes :attr:`packet` lazy -- see
+    #: :class:`~pcapkit.foundation.traceflow.data.data.DeferredPacket`.
+    __additional__ = ['packet']
 
     #: Output filename if exists.
     fpout: 'Optional[str]'
@@ -151,7 +179,17 @@ class Index(Info):
     #: Empty when tracing unidirectionally, in which case
     #: :attr:`forward` ``==`` :attr:`index`.
     reverse: 'tuple[int, ...]'
+    #: The conversation's **application layer**: one reassembled datagram per
+    #: direction, or :data:`None` when the tracer was not asked for it
+    #: (``analyse=False``, the default).
+    #:
+    #: Reassembled on the first read, not when the flow is finalised, and each
+    #: datagram's own
+    #: :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is parsed
+    #: later still -- two layers of the same postponement, so a caller that only
+    #: wanted frame numbers pays for neither.
+    packet: 'Optional[tuple[TCP_Datagram, ...]]'
 
     if TYPE_CHECKING:
         # NOTE: on one line, for the reason given on :class:`Buffer` above.
-        def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]', label: 'str', forward: 'tuple[int, ...]', reverse: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]', label: 'str', forward: 'tuple[int, ...]', reverse: 'tuple[int, ...]', packet: 'Optional[tuple[TCP_Datagram, ...] | Deferred]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

@@ -20,14 +20,16 @@ class TCPTraceFlowTests(unittest.TestCase):
     def _packet(self, *, index: int, src: str = '192.0.2.1', dst: str = '198.51.100.2',
                 srcport: int = 12345, dstport: int = 443, syn: bool = False,
                 fin: bool = False, rst: bool = False, timestamp: float = 1.25,
-                frame: object | None = None):
+                frame: object | None = None, seq: int = 0, ack: int = 0,
+                payload: bytes = b''):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.traceflow.data.tcp import Packet
 
         if frame is None:
             frame = {'frame': index}
         return Packet(LinkType.ETHERNET, index, frame, syn, fin, rst, ip_address(src),
-                      ip_address(dst), srcport, dstport, timestamp)
+                      ip_address(dst), srcport, dstport, timestamp,
+                      seq, ack, b'tcp-header', bytearray(payload))
 
     def test_tcp_trace_ipv4_fin_submit_cache_callback_and_dump(self) -> None:
         """One direction, traced with ``bidirectional=False``.
@@ -285,6 +287,90 @@ class TCPTraceFlowTests(unittest.TestCase):
             trace.finish()
             self.assertEqual(len(callbacks), before + 1)
             self.assertEqual(len(trace.index), 1)
+
+    def test_the_application_layer_is_not_reassembled_unless_asked_for(self) -> None:
+        """``analyse`` is off by default, and off means nothing is buffered.
+
+        Reassembling a flow's payload is a cost tracing does not otherwise pay, so
+        a caller who only wanted frame numbers must not be charged for it.
+
+        """
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unknown-unit-format')
+            trace.trace(self._packet(index=1, syn=True, seq=0))
+            trace.trace(self._reply(index=2, timestamp=1.5, seq=0, payload=b'hello'))
+
+            bufid, = trace._buffer
+            self.assertIsNone(trace._buffer[bufid].reassembly)
+
+            flow, = trace.index
+            self.assertIsNone(flow.packet)
+
+    def test_analyse_gives_a_flow_its_application_layer_per_direction(self) -> None:
+        """One reassembled datagram per direction, parsed on demand.
+
+        The tracer does not reassemble the stream itself -- it feeds
+        :class:`~pcapkit.foundation.reassembly.tcp.TCP`, which is why the segments
+        below are delivered *out of order* and still come back in sequence order.
+        A tracer concatenating payloads as they arrived would return ``b'worldhello'``.
+
+        """
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+
+            # client: SYN, then the second half of its request before the first
+            trace.trace(self._packet(index=1, syn=True, seq=100))
+            trace.trace(self._packet(index=2, seq=106, payload=b'world', timestamp=1.5))
+            trace.trace(self._packet(index=3, seq=101, payload=b'hello', timestamp=1.6))
+            # server: one reply
+            trace.trace(self._reply(index=4, seq=500, payload=b'reply', timestamp=1.7))
+
+            flow, = trace.index
+            datagrams = flow.packet
+            self.assertIsNotNone(datagrams)
+            self.assertEqual(len(datagrams), 2, 'expected one datagram per direction')
+
+            payloads = {dgram.id.src[1]: bytes(dgram.payload) for dgram in datagrams}
+            # sequence order, not arrival order -- this is the reassembler's work
+            self.assertEqual(payloads[12345], b'helloworld')
+            self.assertEqual(payloads[443], b'reply')
+
+    def test_the_application_layer_is_reassembled_only_on_first_read(self) -> None:
+        """``Index.packet`` holds a :class:`Deferred` until somebody reads it.
+
+        The same postponement reassembly uses for
+        :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>`,
+        one layer out: the flow defers its *reassembly*, and each datagram then
+        defers its own *parse*.
+
+        """
+        from pcapkit.foundation.traceflow.data.data import Deferred
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+            trace.trace(self._packet(index=1, syn=True, seq=100))
+            trace.trace(self._packet(index=2, seq=101, payload=b'hello', timestamp=1.5))
+
+            flow, = trace.index
+            key = flow.__map__.get('packet', 'packet')
+            self.assertIsInstance(flow.__dict__[key], Deferred,
+                                  'the flow was reassembled before anyone asked')
+
+            first = flow.packet
+            # resolved in place, so a second read is the same object rather than a
+            # second reassembly
+            self.assertNotIsInstance(flow.__dict__[key], Deferred)
+            self.assertIs(flow.packet, first)
+
+            # and the mapping views report it under its own name, resolved
+            self.assertIn('packet', flow)
+            self.assertIs(flow.to_dict()['packet'], first)
+            self.assertIs(flow['packet'], first)
 
     def test_the_buffer_id_is_canonical_and_stays_a_tuple(self) -> None:
         """Both directions reduce to the same key, whichever is seen first.

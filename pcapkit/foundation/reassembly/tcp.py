@@ -110,12 +110,12 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
         self._flag_n = False
         self.__cached__.clear()
 
-        BUFID = info.bufid  # Buffer Identifier
-        DSN = info.dsn      # Data Sequence Number
-        ACK = info.ack      # Acknowledgement Number
-        FIN = info.fin      # Finish Flag (Termination)
-        RST = info.rst      # Reset Connection Flag (Termination)
-        SYN = info.syn      # Synchronise Flag (Establishment)
+        BUFID = info.bufid   # Buffer Identifier
+        DSN = info.dsn       # Data Sequence Number
+        ACK = info.ack       # Acknowledgement Number
+        FIN = info.fin       # Finish Flag (Termination)
+        RST = info.rst       # Reset Connection Flag (Termination)
+        SYN = info.syn       # Synchronise Flag (Establishment)
         TS = info.timestamp  # Capture timestamp, i.e. the only clock we have
 
         # This segment's arrival is the evidence that capture time has reached

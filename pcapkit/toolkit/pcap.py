@@ -226,6 +226,10 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
             srcport=tcp_info.srcport.port,           # TCP source port
             dstport=tcp_info.dstport.port,           # TCP destination port
             timestamp=float(frame.info.time_epoch),  # frame timestamp
+            seq=tcp_info.seq,                        # TCP sequence number
+            ack=tcp_info.ack,                        # TCP acknowledgement number
+            header=tcp.packet.header,                # raw bytes type header
+            payload=bytearray(tcp.packet.payload),   # raw bytearray type payload
         )
         return data
     return None

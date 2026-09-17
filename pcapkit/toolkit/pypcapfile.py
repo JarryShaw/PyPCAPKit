@@ -442,6 +442,7 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
     from pcapfile.protocols.transport.tcp import TCP  # isort:skip
 
     tcp = TCP(segment)
+    hdr_len = max(tcp.data_offset, TCP_MIN_HEADER_LEN)
     return TF_TCP_Packet(  # type: ignore[type-var]
         protocol=data_link,                                 # data link type from savefile header
         index=count,                                        # frame number
@@ -454,4 +455,8 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
         srcport=tcp.src_port,                               # TCP source port
         dstport=tcp.dst_port,                               # TCP destination port
         timestamp=packet2timestamp(packet),                 # timestamp
+        seq=tcp.seqnum,                                     # TCP sequence number
+        ack=tcp.acknum,                                     # TCP acknowledgement number
+        header=segment[:hdr_len],                           # raw bytes type header
+        payload=bytearray(segment[hdr_len:]),               # raw bytearray type payload
     )

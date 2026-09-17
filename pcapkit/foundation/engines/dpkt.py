@@ -144,8 +144,8 @@ class DPKT(Engine['DPKTPacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.dpkt import (ipv4_reassembly, ipv6_reassembly, packet2dict,
-                                          tcp_reassembly, tcp_traceflow)
+        from pcapkit.toolkit.dpkt import (attach_timestamp, ipv4_reassembly, ipv6_reassembly,
+                                          packet2dict, tcp_reassembly, tcp_traceflow)
         ext = self._extractor
 
         reader = self._extmp
@@ -155,6 +155,12 @@ class DPKT(Engine['DPKTPacket']):
         timestamp, pkt = cast('tuple[float, bytes]', next(reader))
         protocol = self._get_protocol(linktype)
         packet = protocol(pkt)  # type: DPKTPacket
+
+        # DPKT hands the record's timestamp back beside its octets and only the
+        # octets become a packet, so the frame would otherwise not know when it was
+        # captured -- and anything reading a *stored* frame after this loop has
+        # moved on could not find out. Keep the two together from the start.
+        attach_timestamp(packet, timestamp)
 
         # verbose output
         ext._frnum += 1

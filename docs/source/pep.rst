@@ -631,16 +631,34 @@ Two smaller items in the same subsystem:
   :class:`~pcapkit.foundation.traceflow.data.tcp.Packet`, which would make
   ``syn and not ack`` a definitive new-connection test on its own.
 
-  What is still wanted here is **wiring the application layer into flow
-  tracing**. Reassembly analyses a datagram's payload lazily through
-  :class:`~pcapkit.foundation.reassembly.data.data.Deferred`; flow tracing
-  analyses nothing, because it buffers no payload at all -- its
-  :class:`~pcapkit.foundation.traceflow.data.tcp.Buffer` holds a dumper, frame
-  indices and a label. So this is not a parse to postpone but a capability to
-  add, and it needs a decision first: whether the tracer grows a payload buffer
-  per direction, or delegates to
-  :class:`~pcapkit.foundation.reassembly.tcp.TCP` the way
-  :func:`~pcapkit.interface.misc.follow_tcp_stream` already does.
+  **The application layer is wired into flow tracing** as well, though it is a
+  capability rather than a parse to postpone: flow tracing buffered no payload at
+  all, so there was no second parse to defer. Of the two ways of getting one, the
+  tracer **delegates to**
+  :class:`~pcapkit.foundation.reassembly.tcp.TCP` rather than growing a
+  per-direction payload buffer of its own. A buffer that concatenated payloads in
+  capture order would be silently wrong on the first retransmission or reordered
+  segment, where the :rfc:`815` hole-descriptor algorithm already in the
+  reassembler is not -- so
+  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet` carries the four segment
+  fields (``seq``, ``ack``, ``header``, ``payload``) that reassembler needs, and
+  the tracer hands each traced segment straight to it.
+
+  :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` then
+  holds one reassembled datagram per direction, and postpones twice: reading it is
+  what flushes the flow's reassembler, and each datagram's own
+  :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is parsed later
+  still, through the same
+  :class:`~pcapkit.foundation.reassembly.data.data.Deferred` arrangement the
+  reassembly side uses. It is **opt-in** -- ``analyse=True``, or
+  ``trace_analyse=True`` on :class:`~pcapkit.foundation.extraction.Extractor`,
+  :func:`~pcapkit.interface.core.extract` and
+  :func:`~pcapkit.interface.misc.follow_tcp_stream` -- because buffering every
+  traced payload is a cost tracing does not otherwise pay, and tracing's
+  per-packet cost is something this package has deliberately driven down. It is
+  unavailable on the ``pyshark`` engine, which reports dissected fields rather
+  than the octets behind them, and which for the same reason has no reassembly
+  adapter at all; asking for it there warns and falls back.
 * **Timing a partial datagram out** is implemented, for IP.
   :meth:`Reassembly.expire
   <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire>` abandons a

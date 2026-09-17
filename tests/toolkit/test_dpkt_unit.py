@@ -826,5 +826,73 @@ class DPKTEngineParityTests(unittest.TestCase):
                 self.assertEqual(actual[1], expected[1])
 
 
+@unittest.skipUnless(HAS_RUNTIME and HAS_DPKT, 'runtime dependencies not installed')
+class DPKTTimestampTests(unittest.TestCase):
+    """The engine must not drop the timestamp DPKT hands it.
+
+    DPKT's reader yields ``(timestamp, bytes)`` and only the octets become a
+    packet, so a frame does not know when it was captured unless the engine says
+    so. It did not, and
+    :func:`~pcapkit.interface.misc.follow_tcp_stream` -- which reads frames back
+    after the extraction loop has finished -- had nothing to pass its reassembler
+    but a bound zero.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def test_the_engine_attaches_each_frames_capture_timestamp(self) -> None:
+        import pcapkit
+        from pcapkit.toolkit.dpkt import packet2timestamp
+
+        extractor = pcapkit.extract(fin=sample_path('in.pcap'), nofile=True, store=True,
+                                    engine='dpkt')
+        try:
+            stamps = [packet2timestamp(frame) for frame in extractor.frame]
+        finally:
+            close_extractor(extractor)
+
+        self.assertEqual(len(stamps), 6)
+        # the capture's own clock, not a placeholder and not the host's
+        self.assertTrue(all(stamp > 1_500_000_000 for stamp in stamps), stamps)
+        self.assertEqual(sorted(stamps), stamps, 'timestamps went backwards')
+
+    def test_a_frame_from_elsewhere_has_no_timestamp_and_says_so(self) -> None:
+        """Loudly, rather than defaulting -- a zero would silently misdate.
+
+        Only a frame that came through the engine carries one, so a packet built
+        by hand has to be refused rather than dated to the epoch.
+
+        """
+        import dpkt
+
+        from pcapkit.toolkit.dpkt import packet2timestamp
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        bare = dpkt.ethernet.Ethernet(b'\x00' * 12 + b'\x08\x00' + b'E' + b'\x00' * 19)
+        with self.assertRaises(UnsupportedCall):
+            packet2timestamp(bare)
+
+    def test_following_a_stream_agrees_with_the_default_engine(self) -> None:
+        """And the real timestamp changes nothing, which is worth pinning.
+
+        TCP reassembly has no timeout by default, so the value never reaches a
+        decision -- the fix removes a workaround rather than altering a result.
+
+        """
+        import tempfile
+
+        from pcapkit.interface.misc import follow_tcp_stream
+
+        def follow(engine: str):
+            with tempfile.TemporaryDirectory() as tempdir:
+                streams = follow_tcp_stream(fin=sample_path('in.pcap'), engine=engine,
+                                            fout=tempdir, format='json')
+                return [(len(stream.packets), stream.conversations) for stream in streams]
+
+        self.assertEqual(follow('dpkt'), follow('default'))
+
+
 if __name__ == '__main__':
     unittest.main()

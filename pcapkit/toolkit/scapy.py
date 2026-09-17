@@ -333,6 +333,10 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             # own timestamp on ``Packet.time``, which is what every other
             # engine's adapter reports.
             timestamp=float(packet.time),                        # capture timestamp
+            seq=tcp.seq,                                         # TCP sequence number
+            ack=tcp.ack,                                         # TCP acknowledgement number
+            header=bytes(tcp)[:tcp.dataofs * 4],                 # raw bytes type header
+            payload=bytearray(bytes(tcp.payload)),               # raw bytearray type payload
         )
         return data
     return None

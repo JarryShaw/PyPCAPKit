@@ -79,7 +79,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
             reasm_timeout: 'Optional[float]' = None,                                                                       # reassembly settings # pylint: disable=line-too-long
             trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
             trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
-            trace_bidirectional: 'bool' = True,                                                                            # trace settings # pylint: disable=line-too-long
+            trace_bidirectional: 'bool' = True, trace_analyse: 'bool' = False,                                            # trace settings # pylint: disable=line-too-long
             ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
             buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
             no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
@@ -120,6 +120,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
         trace_nanosecond: output nanosecond-resolution file flag
         trace_bidirectional: whether both halves of a conversation are traced as
             one flow, which is the default
+        trace_analyse: whether each traced flow reassembles its application
+            layer, so that its ``packet`` can be read; off by default
 
         ip: if record data for IPv4 & IPv6 reassembly (must be used with ``reassembly=True``)
         ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)
@@ -161,7 +163,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                      reasm_timeout=reasm_timeout,
                      trace=trace, trace_fout=trace_fout, trace_format=trace_format,
                      trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond,
-                     trace_bidirectional=trace_bidirectional,
+                     trace_bidirectional=trace_bidirectional, trace_analyse=trace_analyse,
                      buffer_size=buffer_size, buffer_path=buffer_path, buffer_save=buffer_save,
                      no_eof=no_eof, context=context)
 
