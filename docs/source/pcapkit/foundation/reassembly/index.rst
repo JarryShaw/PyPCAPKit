@@ -53,6 +53,16 @@ Auxiliary Data
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.ReassemblyData
+.. module:: pcapkit.foundation.reassembly.data.data
+
+.. autoclass:: pcapkit.foundation.reassembly.data.data.ReassemblyData
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.foundation.reassembly.data.data.Deferred
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.foundation.reassembly.data.data.DeferredPacket
    :members:
    :show-inheritance:

@@ -12,6 +12,7 @@ which reconstructs fragmented TCP packets back to origin.
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.foundation.reassembly.data.data import Deferred
 from pcapkit.foundation.reassembly.data.tcp import (Buffer, BufferID, Datagram, DatagramID,
                                                     Fragment, HoleDescriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
@@ -295,7 +296,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                         index=tuple(buffer.ind),
                         header=buf.hdr,
                         payload=bytes(payload),
-                        packet=self.protocol.analyze((bufid[1], bufid[3]), bytes(payload)),
+                        packet=Deferred(self.protocol.analyze, (bufid[1], bufid[3]), bytes(payload)),
                     )
                     datagram.append(packet)
 

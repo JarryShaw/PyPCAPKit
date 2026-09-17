@@ -107,6 +107,21 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
             return None
         ipv6_frag_info = cast('IPv6_Frag', ipv6_frag).info
 
+        # NOTE: ``Data_IPv6.hdr_len`` counts the Fragment header, since
+        # :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
+        # adds each extension header's length before the Fragment-header check
+        # breaks its loop. That is correct for a header length, but the
+        # reassembled packet carries no Fragment header at all
+        # (:rfc:`8200#section-4.5`), so the boundary wanted here is the one
+        # *before* it -- which is that same length less the Fragment header's,
+        # undoing the addition that included it.
+        hdr_len = ipv6_info.hdr_len - cast('IPv6_Frag', ipv6_frag).length
+        # NOTE: The reassembly machinery writes the payload into its datagram
+        # buffer over the span ``tl - ihl``, so ``tl`` is derived from the
+        # payload actually handed over rather than from ``raw_len``: the two
+        # agree, but only the former cannot drift out of step with it.
+        payload = bytearray(ipv6_info.fragment.payload)
+
         frame_info = cast('Packet', frame.info)
         data = IP_Packet(
             bufid=(
@@ -117,11 +132,11 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
             ),
             num=frame_info.number,                          # original packet range number
             fo=ipv6_frag_info.offset,                       # fragment offset
-            ihl=ipv6_info.hdr_len,                          # header length, only headers before IPv6-Frag
+            ihl=hdr_len,                                    # header length, only headers before IPv6-Frag
             mf=ipv6_frag_info.mf,                           # more fragment flag
-            tl=ipv6_info.hdr_len + ipv6_info.raw_len,       # total length, header includes
-            header=ipv6_info.fragment.header,               # raw bytearray type header before IPv6-Frag
-            payload=bytearray(ipv6_info.fragment.payload),  # raw bytearray type payload after IPv6-Frag
+            tl=hdr_len + len(payload),                      # total length, header includes
+            header=ipv6_info.fragment.header[:hdr_len],     # raw bytes type header before IPv6-Frag
+            payload=payload,                                # raw bytearray type payload after IPv6-Frag
         )
         return data
     return None

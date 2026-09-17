@@ -4,6 +4,7 @@
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.foundation.reassembly.data.data import Deferred, DeferredPacket
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -77,11 +78,15 @@ class DatagramID(Info, Generic[_AT]):
 
 
 @info_final
-class Datagram(Info, Generic[_AT]):
+class Datagram(DeferredPacket, Info, Generic[_AT]):
     """Data model for :term:`TCP <reasm.tcp.datagram>`."""
 
     #: Completed flag.
     completed: 'bool'
+    #: Listing ``packet`` here is what makes it lazy -- see
+    #: :class:`~pcapkit.foundation.reassembly.data.data.DeferredPacket`.
+    __additional__ = ['packet']
+
     #: Original packet identifier.
     id: 'DatagramID[_AT]'
     #: Packet numbers.
@@ -91,16 +96,18 @@ class Datagram(Info, Generic[_AT]):
     #: Reassembled payload (application layer data).
     payload: 'bytes | tuple[bytes, ...]'
     #: Parsed reassembled payload.
+    #: Parsed TCP payload. Analysed on first read rather than at construction;
+    #: a :class:`Deferred` may be passed in its place.
     packet: 'Optional[Protocol]'
 
     if TYPE_CHECKING:
         @overload  # pylint: disable=used-before-assignment
-        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes', packet: 'Protocol') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes', packet: 'Protocol | Deferred') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
         @overload
         def __init__(self, completed: 'Literal[False]', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]', packet: 'None') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
-        def __init__(self, completed: 'bool', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'bool', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol | Deferred]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

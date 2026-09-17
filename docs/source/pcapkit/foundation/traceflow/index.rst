@@ -54,6 +54,8 @@ Auxiliary Data
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.traceflow.data.TraceFlowData
+.. module:: pcapkit.foundation.traceflow.data.data
+
+.. autoclass:: pcapkit.foundation.traceflow.data.data.TraceFlowData
    :members:
    :show-inheritance:

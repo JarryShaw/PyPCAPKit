@@ -17,7 +17,7 @@ however, this implement still used the elder one.
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
-                                                   Packet)
+                                                   Deferred, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
 
 if TYPE_CHECKING:
@@ -52,6 +52,25 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
     # Methods.
     ##########################################################################
 
+    def _rectify_header(self, header: 'bytes', proto: 'TransType') -> 'bytes':  # pylint: disable=unused-argument
+        """Adapt a fragment's header into the reassembled datagram's header.
+
+        The base implementation returns ``header`` unchanged, which is what IPv4
+        wants: an IPv4 fragment's header needs nothing removed to describe the
+        datagram it belongs to. IPv6 overrides this, because
+        :rfc:`8200#section-4.5` drops the Fragment header from the reassembled
+        packet and hands its Next Header field to the header before it.
+
+        Args:
+            header: Raw header octets of the fragment at fragment offset zero.
+            proto: Payload protocol type, i.e. ``bufid[3]``.
+
+        Returns:
+            Header octets to keep for the reassembled datagram.
+
+        """
+        return header
+
     def reassembly(self, info: 'Packet[_AT]') -> 'None':
         """Reassembly procedure.
 
@@ -77,19 +96,22 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 )
                 return
 
+        # the header of the fragment at offset zero is the reassembled datagram's
+        header = b'' if FO else self._rectify_header(info.header, BUFID[3])
+
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
             self._buffer[BUFID] = Buffer(
                 TDL=-1,                              # Total Data Length
                 RCVBT=bytearray(8191),              # Fragment Received Bit Table
                 index=[],                           # index record
-                header=b'' if FO else info.header,  # header buffer
+                header=header,                      # header buffer
                 datagram=bytearray(65535),          # data buffer
             )
         else:
             # put header into header buffer
             if not FO:  # pylint: disable=else-if-used
-                self._buffer[BUFID].__update__(header=info.header)
+                self._buffer[BUFID].__update__(header=header)
 
         # append packet index
         self._buffer[BUFID].index.append(info.num)
@@ -174,7 +196,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 ret.append(packet)
         # if datagram is reassembled in whole
         else:
-            payload = datagram[:TDL]
+            payload = bytes(datagram[:TDL])
             packet = Datagram(
                 completed=True,
                 id=DatagramID(
@@ -185,8 +207,13 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 ),
                 index=tuple(index),
                 header=header,
-                payload=bytes(payload),
-                packet=self.protocol.analyze(bufid[3], bytes(payload)),
+                payload=payload,
+                # NOTE: ``analyze`` is a second full parse of the payload, and a
+                # datagram is submitted for every frame rather than only for the
+                # fragmented ones, so running it here charges every caller for a
+                # result most of them never read. ``Deferred`` postpones it to the
+                # first read of ``Datagram.packet``.
+                packet=Deferred(self.protocol.analyze, bufid[3], payload),
             )
             ret.append(packet)
 
