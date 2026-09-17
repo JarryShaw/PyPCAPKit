@@ -107,9 +107,13 @@ class Buffer(Info, Generic[_AT]):
     fin: 'set[tuple[_AT, int]]'
 
     if TYPE_CHECKING:
-        def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
-                     origin: 'tuple[_AT, int]', forward: 'list[int]', reverse: 'list[int]',
-                     fin: 'set[tuple[_AT, int]]') -> 'None': ...
+        # NOTE: one line, however long. ``# pylint: disable`` is *line*-scoped and
+        # ``unused-argument`` is reported against the ``def``, so wrapping the
+        # signature leaves every parameter on a continuation line outside the
+        # disable's reach -- which is why the shorter form this replaces leaked
+        # three ``unused-argument`` messages of its own. Every other data model in
+        # :mod:`pcapkit` writes these stubs on one line for the same reason.
+        def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str', origin: 'tuple[_AT, int]', forward: 'list[int]', reverse: 'list[int]', fin: 'set[tuple[_AT, int]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final
@@ -140,6 +144,5 @@ class Index(Info):
     reverse: 'tuple[int, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
-                     label: 'str', forward: 'tuple[int, ...]',
-                     reverse: 'tuple[int, ...]') -> 'None': ...
+        # NOTE: on one line, for the reason given on :class:`Buffer` above.
+        def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]', label: 'str', forward: 'tuple[int, ...]', reverse: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
