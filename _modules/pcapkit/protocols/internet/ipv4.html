@@ -437,6 +437,7 @@
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/IPv4</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
@@ -508,7 +509,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
@@ -533,8 +534,8 @@
 <span class="w">    </span><span class="sd">"""This class implements Internet Protocol version 4.</span>
 
 <span class="sd">    This class currently supports parsing of the following IPv4 options,</span>
-<span class="sd">    which are directly mapped to the :class:`pcapkit.const.ipv4.option_number.OptionNumber`</span>
-<span class="sd">    enumeration:</span>
+<span class="sd">    which are registered in the :attr:`self.__option__ &lt;pcapkit.protocols.internet.ipv4.IPv4.__option__&gt;`</span>
+<span class="sd">    attribute:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -586,6 +587,36 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs`</span>
 
 <span class="sd">    """</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: DefaultDict[Enum_OptionNumber, str | tuple[OptionParser, OptionConstructor]]:</span>
+    <span class="c1">#: Option code to method mapping, c.f. :meth:`_read_ipv4_options` and/or</span>
+    <span class="c1">#: :meth:`_make_ipv4_options`. Method names are expected to be referred</span>
+    <span class="c1">#: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``, and</span>
+    <span class="c1">#: if such name not found, the value should then be a method that can parse</span>
+    <span class="c1">#: the option by itself.</span>
+    <span class="n">__option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unassigned'</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">:</span>   <span class="s1">'eool'</span><span class="p">,</span>    <span class="c1"># [RFC 791] 0</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">:</span>    <span class="s1">'nop'</span><span class="p">,</span>     <span class="c1"># [RFC 791] 1</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SEC</span><span class="p">:</span>    <span class="s1">'sec'</span><span class="p">,</span>     <span class="c1"># [RFC 1108] 130</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">LSR</span><span class="p">:</span>    <span class="s1">'lsr'</span><span class="p">,</span>     <span class="c1"># [RFC 791] 131</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">TS</span><span class="p">:</span>     <span class="s1">'ts'</span><span class="p">,</span>      <span class="c1"># [RFC 791] 68</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">E_SEC</span><span class="p">:</span>  <span class="s1">'e_sec'</span><span class="p">,</span>   <span class="c1"># [RFC 1108] 133</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">RR</span><span class="p">:</span>     <span class="s1">'rr'</span><span class="p">,</span>      <span class="c1"># [RFC 791] 7</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SID</span><span class="p">:</span>    <span class="s1">'sid'</span><span class="p">,</span>     <span class="c1"># [RFC 791][RFC 6814] 136</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SSR</span><span class="p">:</span>    <span class="s1">'ssr'</span><span class="p">,</span>     <span class="c1"># [RFC 791] 137</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">MTUP</span><span class="p">:</span>   <span class="s1">'mtup'</span><span class="p">,</span>    <span class="c1"># [RFC 1063][RFC 1191] 11</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">MTUR</span><span class="p">:</span>   <span class="s1">'mtur'</span><span class="p">,</span>    <span class="c1"># [RFC 1063][RFC 1191] 12</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">TR</span><span class="p">:</span>     <span class="s1">'tr'</span><span class="p">,</span>      <span class="c1"># [RFC 1393][RFC 6814] 82</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">RTRALT</span><span class="p">:</span> <span class="s1">'rtralt'</span><span class="p">,</span>  <span class="c1"># [RFC 2113] 148</span>
+            <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">QS</span><span class="p">:</span>     <span class="s1">'qs'</span><span class="p">,</span>      <span class="c1"># [RFC 4782] 25</span>
+        <span class="p">},</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_OptionNumber | int, str | tuple[OptionParser, OptionConstructor]]</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -863,16 +894,9 @@
 <span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
 
 <span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'option </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_read_opt_unassigned</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type]</span>
-                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_opt_unassigned</span><span class="p">))</span>  <span class="c1"># type: ignore[arg-type]</span>
-
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">meth</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">meth</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
 
     <span class="c1">##########################################################################</span>
@@ -988,11 +1012,14 @@
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">kind</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
 
-            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionParser'</span><span class="p">,</span>
-                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_unassigned</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionParser'</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_unassigned</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
             <span class="c1"># record option data</span>
@@ -1677,9 +1704,13 @@
                     <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">,</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">):</span>  <span class="c1"># ignore padding options by default</span>
                         <span class="k">continue</span>
 
-                    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span>
-                    <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
-                                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_unassigned</span><span class="p">))</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                        <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
+                                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_unassigned</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
                     <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
                     <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
@@ -1704,9 +1735,13 @@
             <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">,</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">):</span>
                 <span class="k">continue</span>
 
-            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
-                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_unassigned</span><span class="p">))</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_unassigned</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
             <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>

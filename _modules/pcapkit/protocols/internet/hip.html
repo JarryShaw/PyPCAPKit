@@ -433,6 +433,7 @@
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Host_Identity_Protocol</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
@@ -607,7 +608,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
@@ -664,8 +665,8 @@
 <span class="w">    </span><span class="sd">"""This class implements Host Identity Protocol.</span>
 
 <span class="sd">    This class currently supports parsing of the following HIP parameters,</span>
-<span class="sd">    which are directly mapped to the :class:`pcapkit.const.hip.parameter.Parameter`</span>
-<span class="sd">    enumeration:</span>
+<span class="sd">    which are registered in the :attr:`self.__parameter__ &lt;pcapkit.protocols.internet.hip.HIP.__parameter__&gt;`</span>
+<span class="sd">    attribute:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -770,6 +771,71 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_relay_hmac`</span>
 
 <span class="sd">    """</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]:</span>
+    <span class="c1">#: Parameter code to method mapping, c.f. :meth:`_read_hip_param` and/or</span>
+    <span class="c1">#: :meth:`_make_hip_param`. Method names are expected to be referred to the</span>
+    <span class="c1">#: class by ``_read_param_${name}`` and/or ``_make_param_${name}``, and if</span>
+    <span class="c1">#: such name not found, the value should then be a method that can parse the</span>
+    <span class="c1">#: parameter by itself.</span>
+    <span class="n">__parameter__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unassigned'</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ESP_INFO</span><span class="p">:</span>               <span class="s1">'esp_info'</span><span class="p">,</span>                <span class="c1"># [RFC 7402] 65</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">R1_Counter</span><span class="p">:</span>             <span class="s1">'r1_counter'</span><span class="p">,</span>              <span class="c1"># [RFC 5201] 128, v1 only</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">R1_COUNTER</span><span class="p">:</span>             <span class="s1">'r1_counter'</span><span class="p">,</span>              <span class="c1"># [RFC 7401] 129</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">LOCATOR_SET</span><span class="p">:</span>            <span class="s1">'locator_set'</span><span class="p">,</span>             <span class="c1"># [RFC 8046] 193</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">PUZZLE</span><span class="p">:</span>                 <span class="s1">'puzzle'</span><span class="p">,</span>                  <span class="c1"># [RFC 7401] 257</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">SOLUTION</span><span class="p">:</span>               <span class="s1">'solution'</span><span class="p">,</span>                <span class="c1"># [RFC 7401] 321</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">SEQ</span><span class="p">:</span>                    <span class="s1">'seq'</span><span class="p">,</span>                     <span class="c1"># [RFC 7401] 385</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ACK</span><span class="p">:</span>                    <span class="s1">'ack'</span><span class="p">,</span>                     <span class="c1"># [RFC 7401] 449</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">DH_GROUP_LIST</span><span class="p">:</span>          <span class="s1">'dh_group_list'</span><span class="p">,</span>           <span class="c1"># [RFC 7401] 511</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">DIFFIE_HELLMAN</span><span class="p">:</span>         <span class="s1">'diffie_hellman'</span><span class="p">,</span>          <span class="c1"># [RFC 7401] 513</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_TRANSFORM</span><span class="p">:</span>          <span class="s1">'hip_transform'</span><span class="p">,</span>           <span class="c1"># [RFC 5201] 577, v1 only</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_CIPHER</span><span class="p">:</span>             <span class="s1">'hip_cipher'</span><span class="p">,</span>              <span class="c1"># [RFC 7401] 579</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">NAT_TRAVERSAL_MODE</span><span class="p">:</span>     <span class="s1">'nat_traversal_mode'</span><span class="p">,</span>      <span class="c1"># [RFC 5770] 608</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">TRANSACTION_PACING</span><span class="p">:</span>     <span class="s1">'transaction_pacing'</span><span class="p">,</span>      <span class="c1"># [RFC 5770] 610</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ENCRYPTED</span><span class="p">:</span>              <span class="s1">'encrypted'</span><span class="p">,</span>               <span class="c1"># [RFC 7401] 641</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HOST_ID</span><span class="p">:</span>                <span class="s1">'host_id'</span><span class="p">,</span>                 <span class="c1"># [RFC 7401] 705</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIT_SUITE_LIST</span><span class="p">:</span>         <span class="s1">'hit_suite_list'</span><span class="p">,</span>          <span class="c1"># [RFC 7401] 715</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">CERT</span><span class="p">:</span>                   <span class="s1">'cert'</span><span class="p">,</span>                    <span class="c1"># [RFC 7401][RFC 8002] 768</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">NOTIFICATION</span><span class="p">:</span>           <span class="s1">'notification'</span><span class="p">,</span>            <span class="c1"># [RFC 7401] 832</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_REQUEST_SIGNED</span><span class="p">:</span>    <span class="s1">'echo_request_signed'</span><span class="p">,</span>     <span class="c1"># [RFC 7401] 897</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_INFO</span><span class="p">:</span>               <span class="s1">'reg_info'</span><span class="p">,</span>                <span class="c1"># [RFC 8003] 930</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_REQUEST</span><span class="p">:</span>            <span class="s1">'reg_request'</span><span class="p">,</span>             <span class="c1"># [RFC 8003] 932</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_RESPONSE</span><span class="p">:</span>           <span class="s1">'reg_response'</span><span class="p">,</span>            <span class="c1"># [RFC 8003] 934</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_FAILED</span><span class="p">:</span>             <span class="s1">'reg_failed'</span><span class="p">,</span>              <span class="c1"># [RFC 8003] 936</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_FROM</span><span class="p">:</span>               <span class="s1">'reg_from'</span><span class="p">,</span>                <span class="c1"># [RFC 5770] 950</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_RESPONSE_SIGNED</span><span class="p">:</span>   <span class="s1">'echo_response_signed'</span><span class="p">,</span>    <span class="c1"># [RFC 7401] 961</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">TRANSPORT_FORMAT_LIST</span><span class="p">:</span>  <span class="s1">'transport_format_list'</span><span class="p">,</span>   <span class="c1"># [RFC 7401] 2049</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ESP_TRANSFORM</span><span class="p">:</span>          <span class="s1">'esp_transform'</span><span class="p">,</span>           <span class="c1"># [RFC 7402] 4095</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">SEQ_DATA</span><span class="p">:</span>               <span class="s1">'seq_data'</span><span class="p">,</span>                <span class="c1"># [RFC 6078] 4481</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ACK_DATA</span><span class="p">:</span>               <span class="s1">'ack_data'</span><span class="p">,</span>                <span class="c1"># [RFC 6078] 4545</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">PAYLOAD_MIC</span><span class="p">:</span>            <span class="s1">'payload_mic'</span><span class="p">,</span>             <span class="c1"># [RFC 6078] 4577</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">TRANSACTION_ID</span><span class="p">:</span>         <span class="s1">'transaction_id'</span><span class="p">,</span>          <span class="c1"># [RFC 6078] 4580</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">OVERLAY_ID</span><span class="p">:</span>             <span class="s1">'overlay_id'</span><span class="p">,</span>              <span class="c1"># [RFC 6079] 4592</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ROUTE_DST</span><span class="p">:</span>              <span class="s1">'route_dst'</span><span class="p">,</span>               <span class="c1"># [RFC 6028] 4601</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_TRANSPORT_MODE</span><span class="p">:</span>     <span class="s1">'hip_transport_mode'</span><span class="p">,</span>      <span class="c1"># [RFC 6261] 7680</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_MAC</span><span class="p">:</span>                <span class="s1">'hip_mac'</span><span class="p">,</span>                 <span class="c1"># [RFC 7401] 61505</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_MAC_2</span><span class="p">:</span>              <span class="s1">'hip_mac_2'</span><span class="p">,</span>               <span class="c1"># [RFC 7401] 61569</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_SIGNATURE_2</span><span class="p">:</span>        <span class="s1">'hip_signature_2'</span><span class="p">,</span>         <span class="c1"># [RFC 7401] 61633</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_SIGNATURE</span><span class="p">:</span>          <span class="s1">'hip_signature'</span><span class="p">,</span>           <span class="c1"># [RFC 7401] 61697</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_REQUEST_UNSIGNED</span><span class="p">:</span>  <span class="s1">'echo_request_unsigned'</span><span class="p">,</span>   <span class="c1"># [RFC 7401] 63661</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_RESPONSE_UNSIGNED</span><span class="p">:</span> <span class="s1">'echo_response_unsigned'</span><span class="p">,</span>  <span class="c1"># [RFC 7401] 63425</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RELAY_FROM</span><span class="p">:</span>             <span class="s1">'relay_from'</span><span class="p">,</span>              <span class="c1"># [RFC 5770] 63998</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RELAY_TO</span><span class="p">:</span>               <span class="s1">'relay_to'</span><span class="p">,</span>                <span class="c1"># [RFC 5770] 64002</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">OVERLAY_TTL</span><span class="p">:</span>            <span class="s1">'overlay_ttl'</span><span class="p">,</span>             <span class="c1"># [RFC 6079] 64011</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ROUTE_VIA</span><span class="p">:</span>              <span class="s1">'route_via'</span><span class="p">,</span>               <span class="c1"># [RFC 6028] 64017</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">FROM</span><span class="p">:</span>                   <span class="s1">'from'</span><span class="p">,</span>                    <span class="c1"># [RFC 8004] 65498</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RVS_HMAC</span><span class="p">:</span>               <span class="s1">'rvs_hmac'</span><span class="p">,</span>                <span class="c1"># [RFC 8004] 65500</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">VIA_RVS</span><span class="p">:</span>                <span class="s1">'via_rvs'</span><span class="p">,</span>                 <span class="c1"># [RFC 8004] 65502</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RELAY_HMAC</span><span class="p">:</span>             <span class="s1">'relay_hmac'</span><span class="p">,</span>              <span class="c1"># [RFC 5770] 65520</span>
+        <span class="p">},</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Parameter | int, str | tuple[ParameterParser, ParameterConstructor]]</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -991,20 +1057,13 @@
 <span class="w">        </span><span class="sd">"""Register a parameter parser.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            code: IPv4 option code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
+<span class="sd">            code: HIP parameter code.</span>
+<span class="sd">            meth: Method name or callable to parse and/or construct the parameter.</span>
 
 <span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'parameter </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_read_param_unassigned</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type]</span>
-                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_make_param_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_param_unassigned</span><span class="p">))</span>  <span class="c1"># type: ignore[arg-type]</span>
-
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">meth</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_make_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">meth</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
 
     <span class="c1">##########################################################################</span>
@@ -1111,10 +1170,14 @@
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">param</span><span class="p">:</span>
             <span class="n">dscp</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">,</span> <span class="n">dscp</span><span class="p">)</span>
 
-            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">dscp</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterParser'</span><span class="p">,</span>
-                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_param_unassigned</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterParser'</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_param_unassigned</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
             <span class="c1"># record parameter data</span>
@@ -3402,9 +3465,13 @@
                     <span class="n">total_length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema_packed</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_Parameter, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-                    <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_param_</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span>
-                    <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterConstructor'</span><span class="p">,</span>
-                                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_param_unassigned</span><span class="p">))</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                        <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterConstructor'</span><span class="p">,</span>
+                                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_param_unassigned</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
                     <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>  <span class="c1"># type: Schema_Parameter</span>
                     <span class="n">data_packed</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
@@ -3415,9 +3482,13 @@
 
         <span class="n">parameters_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_param_</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterConstructor'</span><span class="p">,</span>
-                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_param_unassigned</span><span class="p">))</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterConstructor'</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_param_unassigned</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
             <span class="n">data_packed</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
