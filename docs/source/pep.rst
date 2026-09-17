@@ -625,17 +625,6 @@ Two smaller items in the same subsystem:
   <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish>`. Distinguishing
   that SYN from the peer's SYN-ACK is what the recorded teardown is for.
 
-  What is still wanted here is **wiring the application layer into flow
-  tracing**. Reassembly analyses a datagram's payload lazily through
-  :class:`~pcapkit.foundation.reassembly.data.data.Deferred`; flow tracing
-  analyses nothing, because it buffers no payload at all -- its
-  :class:`~pcapkit.foundation.traceflow.data.tcp.Buffer` holds a dumper, frame
-  indices and a label. So this is not a parse to postpone but a capability to
-  add, and it needs a decision first: whether the tracer grows a payload buffer
-  per direction, or delegates to
-  :class:`~pcapkit.foundation.reassembly.tcp.TCP` the way
-  :func:`~pcapkit.interface.misc.follow_tcp_stream` already does.
-
   One case remains undecided rather than solved: a capture that *starts* in the
   middle of a connection, sees no teardown, and then has its endpoints reused. The
   reuse is indistinguishable from a continuation without the ACK flag on
