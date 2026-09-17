@@ -326,6 +326,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -528,6 +529,26 @@ and the actual value provided for packing.</p>
 </dl>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a> instead of
 updating the current instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.__copy__">
+<span class="sig-name descname"><span class="pre">__copy__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#FieldBase.__copy__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.__copy__" title="Link to this definition">¶</a></dt>
+<dd><p>Return a shallow copy of the field.</p>
+<p>Every field of every protocol is copied once per packet by
+<a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.__call__" title="pcapkit.corekit.fields.field.FieldBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a>, which made the generic <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> path – via
+<a class="reference external" href="https://docs.python.org/3/library/pickle.html#object.__reduce_ex__" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__reduce_ex__()</span></code></a> and <code class="xref py py-func docutils literal notranslate"><span class="pre">copy._reconstruct()</span></code> – one of the
+costlier things an extraction did. This does what that path would have
+done, and only that: a new instance of the same class, its
+<a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__dict__" title="(in Python v3.14)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a> shallow-updated from this one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new field instance sharing this one’s attribute values.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

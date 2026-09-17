@@ -319,6 +319,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -795,7 +796,13 @@
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># NOTE: ``self.__updated__ = True`` would re-enter this method once</span>
+            <span class="c1"># per field assigned -- 180297 recursive calls per extraction of</span>
+            <span class="c1"># examples/captures/http.pcap -- only to miss the __fields__ test and</span>
+            <span class="c1"># fall through to object.__setattr__. ``__updated__`` is an instance</span>
+            <span class="c1"># attribute established in __new__, so the direct store is the same</span>
+            <span class="c1"># write with none of the round trip.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__updated__'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
@@ -1048,24 +1055,29 @@
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
+            <span class="c1"># NOTE: ``Field.length`` recomputes struct.calcsize() on every read,</span>
+            <span class="c1"># so it is read once per field here rather than at each use.</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">):</span>
-                <span class="n">payload_length</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">])</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">payload_length</span> <span class="o">=</span> <span class="n">length</span> <span class="ow">or</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">])</span>
 
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">payload_length</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
 
-                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">length</span>
                 <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
 
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PaddingField</span><span class="p">):</span>
-                <span class="n">byte</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+
+                <span class="n">byte</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
 
                 <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
-                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">length</span>
 
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">byte</span><span class="p">)</span>
                 <span class="k">continue</span>
@@ -1078,7 +1090,9 @@
                     <span class="k">continue</span>
                 <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-            <span class="n">byte</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+
+            <span class="n">byte</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
 
             <span class="n">value</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
@@ -1090,18 +1104,18 @@
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">OptionField</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># the option list ended before the declared field length was</span>
                 <span class="c1"># exhausted; give the unconsumed remainder back to ``data``</span>
                 <span class="c1"># so that the following fields can read it</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">field</span><span class="o">.</span><span class="n">option_padding</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
-                <span class="n">consumed</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
+                <span class="n">consumed</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span><span class="p">[:</span><span class="n">consumed</span><span class="p">]</span>
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">consumed</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">length</span>
 
             <span class="k">if</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'packet length &lt; 0: </span><span class="si">{</span><span class="n">packet</span><span class="p">[</span><span class="s2">"__length__"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
