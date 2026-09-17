@@ -2,15 +2,66 @@ from __future__ import annotations
 
 import abc
 import collections.abc
+import contextlib
 import importlib.util
 import inspect
 import pathlib
+import signal
 import sys
 import types
-from typing import Iterable
+import unittest
+from typing import Iterable, Iterator
 
 from tests._tiers import (ROOT, SAMPLE_ROOT, REGENERATE_SAMPLES_CMD,
                           GeneratedFixtureInUnitTierError, check_unit_tier_read)
+
+
+@contextlib.contextmanager
+def time_limit(seconds: int = 5) -> Iterator[None]:
+    """Fail the calling test if its body has not finished in ``seconds`` seconds.
+
+    A parser defect that degenerates into a loop making no progress -- GitHub
+    issue #431 is one -- offers a test nothing to assert on: the call under test
+    simply never returns. A test written for it without a deadline does not fail,
+    it *wedges*, taking the rest of the run with it, so the deadline is as much a
+    part of the regression test as the assertion is.
+
+    :func:`signal.alarm` is what interrupts the body, rather than a watchdog
+    thread: the loops this guards are pure Python and hold the GIL for the whole
+    of an iteration, so nothing in another thread gets to run and stop them,
+    whereas a signal is delivered between bytecodes. That also rules out
+    :data:`signal.SIGTERM` from an outer :program:`timeout`, which such a loop
+    likewise never gets around to handling.
+
+    Args:
+        seconds: Whole seconds to allow the body. :func:`signal.alarm` counts in
+            whole seconds, so this cannot usefully be fractional.
+
+    Yields:
+        Nothing. The deadline applies to the body of the ``with`` statement.
+
+    Raises:
+        TimeoutError: If the body has not finished within ``seconds`` seconds.
+
+    """
+    # An interval timer is a POSIX facility, and the deadline is the whole point
+    # of this helper: silently running the body without one would restore exactly
+    # the wedged run it exists to prevent, so the test is skipped instead.
+    if not hasattr(signal, 'SIGALRM'):
+        raise unittest.SkipTest('signal.alarm is unavailable on this platform')
+
+    def expire(signum: int, frame: object) -> None:
+        raise TimeoutError(f'did not finish within {seconds}s')
+
+    previous = signal.signal(signal.SIGALRM, expire)
+    signal.alarm(seconds)
+    try:
+        yield
+    finally:
+        # Cancel before restoring, so that an alarm which fires between the two
+        # cannot be delivered to whatever handler was installed before.
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, previous)
 
 
 def sample_path(name: str) -> str:
