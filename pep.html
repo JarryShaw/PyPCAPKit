@@ -245,8 +245,11 @@
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="pcapkit/protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -458,7 +461,11 @@ XMPP</p></li>
 <p>Several of these come in pairs that want a shared abstract base rather than two
 independent implementations, in the way
 <a class="reference internal" href="pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> already covers its family: ICMP with
-ICMPv6, TLS/SSL with DTLS, and <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> with <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code>.</p>
+ICMPv6, TLS/SSL with DTLS, and <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> with <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code>.
+<a class="reference internal" href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> is the closer precedent for a pair
+whose <em>layout</em> is identical – it holds the whole of the tag, and
+<a class="reference internal" href="pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag" title="pcapkit.protocols.link.c_tag.C_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code></a> and
+<a class="reference internal" href="pcapkit/protocols/link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag" title="pcapkit.protocols.link.s_tag.S_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">S_Tag</span></code></a> add only how each names itself.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Some of these have an empty, protocol-named file under a
@@ -609,13 +616,16 @@ complaint and yields nothing useful.</p>
 <code class="docutils literal notranslate"><span class="pre">ETHERNET</span></code>, <code class="docutils literal notranslate"><span class="pre">IPV4</span></code> and <code class="docutils literal notranslate"><span class="pre">IPV6</span></code>, declared identically in
 <a class="reference internal" href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> and
 <a class="reference internal" href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>.</p></li>
-<li><p><strong>15 of the 151</strong> <a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> values, in
+<li><p><strong>16 of the 151</strong> <a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> values, in
 <a class="reference internal" href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet.__proto__" title="pcapkit.protocols.internet.internet.Internet.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Internet.__proto__</span></code></a>.</p></li>
-<li><p><strong>6 of the 160</strong> <a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> values, in
+<li><p><strong>7 of the 160</strong> <a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> values, in
 <a class="reference internal" href="pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>: ARP,
-RARP, IPv4, IPv6, IPX and the customer VLAN tag.</p></li>
-<li><p><strong>2 port numbers, out of 8182</strong> <a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>
-members – TCP 21 to FTP, and port 80 to HTTP on both TCP and UDP.</p></li>
+RARP, IPv4, IPv6, IPX and both VLAN tags.</p></li>
+<li><p><strong>7 bindings over 5 port numbers, out of 8182</strong>
+<a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> members – TCP 20 to FTP-DATA and
+21 to FTP, port 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TP.
+The two counts differ because 80 and 8080 are each bound twice, once per
+transport.</p></li>
 <li><p><strong>none of the 75</strong>
 <a class="reference internal" href="pcapkit/const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a>
 values. <a class="reference internal" href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a> ships empty, so every DATA
@@ -623,22 +633,68 @@ chunk payload is <code class="docutils literal notranslate"><span class="pre">Ra
 <a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_sctp" title="pcapkit.foundation.registry.protocols.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a>.</p></li>
 </ul>
 <p>Most of those want a dissector written and are covered by the stub list above.
-A handful want only a table entry, because the dissector is already there:</p>
+A handful wanted only a table entry, because the dissector was already there,
+and those have now been made:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF" title="pcapkit.protocols.link.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> and
-<a class="reference internal" href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> are implemented but reachable from
-no registry at all – <code class="docutils literal notranslate"><span class="pre">TransType</span></code> 89 and 115 are both unbound. Note that
-each class deliberately makes <code class="docutils literal notranslate"><span class="pre">__index__</span></code> raise, so registering them means
-deciding that question first.</p></li>
-<li><p><a class="reference internal" href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA" title="pcapkit.protocols.application.ftp.FTP_DATA"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP_DATA</span></code></a> is implemented and
-exported, but TCP port 20 is unbound.</p></li>
-<li><p>HTTP is bound on port 80 only, not on 8080 or 8443.</p></li>
-<li><p>The service VLAN tag identifier (S-Tag), <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code>, is unbound, though
-<a class="reference internal" href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> already parses that shape and the
-customer tag <code class="docutils literal notranslate"><span class="pre">0x8100</span></code> is bound to it.</p></li>
+<li><p><strong>Done.</strong> <a class="reference internal" href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF" title="pcapkit.protocols.link.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> is bound at
+<code class="docutils literal notranslate"><span class="pre">TransType</span></code> 89 (<code class="docutils literal notranslate"><span class="pre">OSPFIGP</span></code>) and
+<a class="reference internal" href="pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> at UDP port 1701. Binding them
+turned up three defects that had kept OSPF from parsing anything at all –
+<code class="docutils literal notranslate"><span class="pre">read</span></code> consulted the schema <em>class</em> rather than the parsed header,
+<a class="reference internal" href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.alias" title="pcapkit.protocols.link.ospf.OSPF.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a> read an <code class="docutils literal notranslate"><span class="pre">_info</span></code> that does
+not exist until <code class="docutils literal notranslate"><span class="pre">read</span></code> has returned, and both classes dispatched the
+remaining payload <em>length</em> as if it were a protocol code. <code class="docutils literal notranslate"><span class="pre">__index__</span></code> still
+raises on both, which is correct: neither is reached through a link-layer
+EtherType.</p></li>
+<li><p><strong>Done.</strong> <a class="reference internal" href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA" title="pcapkit.protocols.application.ftp.FTP_DATA"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP_DATA</span></code></a> is bound at TCP
+port 20 (IANA <code class="docutils literal notranslate"><span class="pre">ftp-data</span></code>). It is a thin
+<a class="reference internal" href="pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> subclass, so this buys the payload a
+<em>name</em> rather than a parse – which is the right answer for a data channel
+carrying an arbitrary file.</p></li>
+<li><p><strong>Done.</strong> HTTP is additionally bound on 8080 (IANA <code class="docutils literal notranslate"><span class="pre">http-alt</span></code>, “HTTP
+Alternate (see port 80)”) on both TCP and UDP. <strong>8443 is deliberately left
+unbound</strong>: IANA registers it as <code class="docutils literal notranslate"><span class="pre">pcsync-https</span></code>, not as an HTTP alternate,
+and de-facto 8443 traffic is TLS-wrapped, which pcapkit cannot parse – see
+the <code class="docutils literal notranslate"><span class="pre">tls</span></code> stub above. Binding it would feed a TLS record to an HTTP parser.</p></li>
+<li><p><strong>Done.</strong> The service VLAN tag identifier (S-Tag), <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code>, is bound to
+<a class="reference internal" href="pcapkit/protocols/link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag" title="pcapkit.protocols.link.s_tag.S_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">S_Tag</span></code></a>, and the customer tag <code class="docutils literal notranslate"><span class="pre">0x8100</span></code>
+to <a class="reference internal" href="pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag" title="pcapkit.protocols.link.c_tag.C_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code></a>. Both subclass the now-abstract
+<a class="reference internal" href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a>, which carries the shared tag
+layout; the split exists so that a Q-in-Q frame’s two tags stay distinct in
+the parsed output. Fixing the shared <code class="docutils literal notranslate"><span class="pre">read</span></code> also fixed the DEI flag, which
+had been reported as <code class="docutils literal notranslate"><span class="pre">bool(pcp)</span></code> rather than read from its own bit.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">LinkType</span></code> <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, <code class="docutils literal notranslate"><span class="pre">LOOP</span></code> and <code class="docutils literal notranslate"><span class="pre">RAW</span></code> carry bare IPv4 or IPv6, both of
 which pcapkit dissects. <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and <code class="docutils literal notranslate"><span class="pre">LOOP</span></code> need their four-octet address
 family word skipped first, and <code class="docutils literal notranslate"><span class="pre">RAW</span></code> needs a version sniff.</p></li>
+</ul>
+<p>Three follow-ups the above deliberately left alone:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TransType</span></code> 115 (<code class="docutils literal notranslate"><span class="pre">L2TP</span></code>) stays unbound, and the reason is now structural
+rather than incidental: it references <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. L2TPv3 over IP, and
+<strong>there is no</strong> <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> <strong>class for it to point at</strong>. What exists is
+<a class="reference internal" href="pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, the <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> v2 framing,
+reached over UDP 1701. So the binding waits on a v3 dissector, which is also
+the first member of the family to carry an
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code> of its own – 115
+being that index. <a class="reference internal" href="pcapkit/protocols/link/l2tp.html#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a> records what v3 needs, and
+what <code class="docutils literal notranslate"><span class="pre">L2F</span></code> needs alongside it: the version nibble reading <code class="docutils literal notranslate"><span class="pre">1</span></code> selects L2F
+[<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2341.html"><strong>RFC 2341</strong></a>], a separate protocol, not an earlier L2TP.</p></li>
+<li><p><a class="reference internal" href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF" title="pcapkit.protocols.link.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> and the
+<a class="reference internal" href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> family both live under
+<a class="reference internal" href="pcapkit/protocols/link/index.html#module-pcapkit.protocols.link" title="pcapkit.protocols.link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link</span></code></a> and so report <code class="docutils literal notranslate"><span class="pre">layer</span> <span class="pre">==</span> <span class="pre">'Link'</span></code>, although one
+is carried inside IP and the other inside UDP. Moving them would change their
+public import paths, so the misclassification is documented rather than
+fixed. It is inert for layer-limited extraction, since IPv4 and IPv6 terminate
+an <code class="docutils literal notranslate"><span class="pre">internet</span></code> extraction before either is reached.</p></li>
+<li><p><a class="reference internal" href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__proto__" title="pcapkit.protocols.transport.udp.UDP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UDP.__proto__</span></code></a> points
+its HTTP ports at the version-guessing
+<a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.HTTP</span></code></a>, while
+<a class="reference internal" href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__proto__" title="pcapkit.protocols.transport.tcp.TCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__proto__</span></code></a> points
+the same ports at <a class="reference internal" href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1.HTTP</span></code></a>. The
+asymmetry predates the 8080 entries. Reconciling it changes what existing
+captures parse to, so it wants its own change. Note also that
+<code class="docutils literal notranslate"><span class="pre">http.HTTP</span></code>’s explicit <code class="docutils literal notranslate"><span class="pre">version=</span></code> path is broken independently: it passes
+an already-drained file object, so only the auto-guess path works.</p></li>
 </ul>
 <p>Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
 ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;
@@ -712,7 +768,7 @@ through its own child obtained from
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code>;</p></li>
 <li><p><strong>library-safe defaults</strong> – importing <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> attaches only a
 <a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.NullHandler" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.NullHandler</span></code></a> and sets no level, leaving the destination and
-verbosity to the application. <span class="target" id="index-12"></span><a class="reference internal" href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> still bootstraps the
+verbosity to the application. <span class="target" id="index-15"></span><a class="reference internal" href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> still bootstraps the
 historical <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> handler at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>;</p></li>
 <li><p>a <strong>runtime configuration API</strong> –
 <a class="reference internal" href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.configure" title="pcapkit.utilities.logging.configure"><code class="xref py py-func docutils literal notranslate"><span class="pre">configure()</span></code></a>,
@@ -858,7 +914,7 @@ Anyone wanting to run the tests wants the repository, which is where they are.</
 <h2>Reassembly Beyond IP and TCP<a class="headerlink" href="#reassembly-beyond-ip-and-tcp" title="Link to this heading">¶</a></h2>
 <p><strong>Still open</strong>, and newer than the rest of this page –
 <a class="reference internal" href="pcapkit/foundation/reassembly/index.html"><span class="doc">Packets Reassembly</span></a> covers three protocols and no more.
-IPv4 and IPv6 share the <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, and TCP uses the <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
+IPv4 and IPv6 share the <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, and TCP uses the <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA chunks is never put
 back together, and <code class="docutils literal notranslate"><span class="pre">sctp</span></code> appears nowhere in <a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> at all.</p>
@@ -870,7 +926,7 @@ reassembler needs, on
 those two bits outside the construction path. So each fragment is dispatched on
 its own PPID as though it were a whole PDU, and a registered upper layer is
 handed half a message. Two related holes compound it: only the <em>first</em> DATA
-chunk of a bundle is dispatched at all, and I-DATA [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8260.html"><strong>RFC 8260</strong></a>], chunk type 64,
+chunk of a bundle is dispatched at all, and I-DATA [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8260.html"><strong>RFC 8260</strong></a>], chunk type 64,
 is not dissected – so the MID and FSN fields that exist precisely to make
 interleaved reassembly tractable are never parsed, and an I-DATA-only packet
 yields no payload whatsoever. FORWARD TSN (192) and I-FORWARD-TSN (194) are
@@ -901,8 +957,8 @@ would make the fourth protocol cheaper than the third rather than dearer.</p>
 so UDP, SCTP and IP conversation tracing have nowhere to go. The TCP tracer
 itself closes a flow on FIN but never on RST, which is not in its packet model
 at all, and treats each direction of a connection as a separate flow.</p></li>
-<li><p><strong>Nothing ever times a partial datagram out.</strong> <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> gives IP reassembly
-a 15-second timer and <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> gives IPv6 60 seconds; neither is
+<li><p><strong>Nothing ever times a partial datagram out.</strong> <span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> gives IP reassembly
+a 15-second timer and <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> gives IPv6 60 seconds; neither is
 implemented, and neither can be until the buffer models carry a timestamp. A
 buffer is released only when its datagram completes or its flow is torn down,
 and every in-flight IP datagram identifier holds a fixed 72 KiB of

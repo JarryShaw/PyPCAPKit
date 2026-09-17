@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.protocols.link.ospf contains OSPF only, which implements extractor for Open Shortest Path First (OSPF)*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,, 0, 0, ..." />
 <meta name="description" content="pcapkit.protocols.link.ospf contains OSPF only, which implements extractor for Open Shortest Path First (OSPF)*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,, 0, 0, ..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="VLAN - 802.1Q Customer VLAN Tag Type" href="vlan.html"><link rel="prev" title="L2TP - Layer Two Tunnelling Protocol" href="l2tp.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="VLAN - 802.1Q/802.1ad VLAN Tag Types" href="vlan.html"><link rel="prev" title="L2TPv2 - Layer Two Tunnelling Protocol version 2" href="l2tpv2.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>OSPF - Open Shortest Path First - PyPCAPKit</title>
@@ -245,8 +245,11 @@
 <li class="toctree-l4"><a class="reference internal" href="arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">OSPF - Open Shortest Path First</a></li>
-<li class="toctree-l4"><a class="reference internal" href="vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -482,6 +485,20 @@ as below:</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ospf.</span></span><span class="sig-name descname"><span class="pre">OSPF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ospf.html#OSPF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.link.ospf.OSPF" title="pcapkit.protocols.data.link.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.link.ospf.OSPF" title="pcapkit.protocols.schema.link.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a>]</p>
 <p>This class implements Open Shortest Path First.</p>
+<p>The protocol is dispatched from <a class="reference internal" href="../internet/internet.html#pcapkit.protocols.internet.internet.Internet.__proto__" title="pcapkit.protocols.internet.internet.Internet.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Internet.__proto__</span></code></a> at
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType.OSPFIGP" title="pcapkit.const.reg.transtype.TransType.OSPFIGP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">OSPFIGP</span></code></a> (IANA protocol number
+89), since OSPF rides directly on IP rather than on a link-layer frame.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It nonetheless subclasses <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a> and
+so reports <code class="docutils literal notranslate"><span class="pre">layer</span> <span class="pre">==</span> <span class="pre">'Link'</span></code>, which is not where a protocol carried
+inside IP belongs. That is a pre-existing classification, kept because
+moving the module would change its public import path. It is inert for
+layer-limited extraction – IPv4 and IPv6 terminate an <code class="docutils literal notranslate"><span class="pre">internet</span></code>
+extraction before OSPF is reached, and a <code class="docutils literal notranslate"><span class="pre">link</span></code> extraction stops at
+Ethernet – but <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.layer" title="pcapkit.protocols.link.link.Link.layer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.layer</span></code></a>
+does read <code class="docutils literal notranslate"><span class="pre">'Link'</span></code> on a parsed OSPF packet.</p>
+</div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF.name" title="Link to this definition">¶</a></dt>
@@ -647,11 +664,11 @@ i.e. <code class="xref py py-attr docutils literal notranslate"><span class="pre
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ospf.html#OSPF.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF.__index__" title="Link to this definition">¶</a></dt>
 <dd><p>Numeral registry index of the protocol.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol has no registry entry.</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a></span></p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml">IANA</a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -880,18 +897,18 @@ wrapped <a class="reference internal" href="#pcapkit.protocols.schema.link.ospf.
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">VLAN - 802.1Q Customer VLAN Tag Type</div>
+                <div class="title">VLAN - 802.1Q/802.1ad VLAN Tag Types</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="l2tp.html">
+          <a class="prev-page" href="l2tpv2.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">L2TP - Layer Two Tunnelling Protocol</div>
+                <div class="title">L2TPv2 - Layer Two Tunnelling Protocol version 2</div>
                 
               </div>
             </a>

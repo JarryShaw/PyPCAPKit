@@ -238,8 +238,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -478,6 +481,8 @@
 <span class="sd">         - :class:`pcapkit.protocols.internet.hip.HIP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.SCTP`</span>
 <span class="sd">         - :class:`pcapkit.protocols.transport.sctp.SCTP`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.link.ospf.OSPF`</span>
 
 <span class="sd">    """</span>
 
@@ -509,6 +514,15 @@
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.mh'</span><span class="p">,</span>         <span class="s1">'MH'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HIP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.hip'</span><span class="p">,</span>        <span class="s1">'HIP'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">SCTP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.sctp'</span><span class="p">,</span>      <span class="s1">'SCTP'</span><span class="p">),</span>
+
+            <span class="c1"># OSPF rides directly on IP, so IANA protocol number 89 is its only</span>
+            <span class="c1"># dispatch point. The dissector lives under ``protocols.link``</span>
+            <span class="c1"># despite that, and so reports ``__layer__ = 'Link'``; c.f. the note</span>
+            <span class="c1"># in :mod:`pcapkit.protocols.link.ospf`. The module is left where it</span>
+            <span class="c1"># is here -- moving it would break its import path -- and the</span>
+            <span class="c1"># mislabel is inert for layer-limited extraction, since IPv4/IPv6</span>
+            <span class="c1"># terminate an ``internet`` extraction before OSPF is reached.</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">OSPFIGP</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.ospf'</span><span class="p">,</span>           <span class="s1">'OSPF'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
 

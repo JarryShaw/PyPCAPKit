@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="VLAN - 802.1Q Customer VLAN Tag Type" />
+<meta property="og:title" content="VLAN - 802.1Q/802.1ad VLAN Tag Types" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/link/vlan.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.link.vlan contains VLAN only, which implements extractor for 802.1Q Customer VLAN Tag Type*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,, 1, 0, vl..." />
-<meta name="description" content="pcapkit.protocols.link.vlan contains VLAN only, which implements extractor for 802.1Q Customer VLAN Tag Type*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,, 1, 0, vl..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Internet Layer" href="../internet/index.html"><link rel="prev" title="OSPF - Open Shortest Path First" href="ospf.html">
+<meta property="og:description" content="pcapkit.protocols.link.vlan contains VLAN only, an abstract base class holding the tag layout shared by every VLAN tag*. The two concrete tags live in modules of their own:,, EtherType, Class,,, 0x..." />
+<meta name="description" content="pcapkit.protocols.link.vlan contains VLAN only, an abstract base class holding the tag layout shared by every VLAN tag*. The two concrete tags live in modules of their own:,, EtherType, Class,,, 0x..." />
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="C_Tag - 802.1Q Customer VLAN Tag Type" href="c_tag.html"><link rel="prev" title="OSPF - Open Shortest Path First" href="ospf.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>VLAN - 802.1Q Customer VLAN Tag Type - PyPCAPKit</title>
+        <title>VLAN - 802.1Q/802.1ad VLAN Tag Types - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -245,8 +245,11 @@
 <li class="toctree-l4"><a class="reference internal" href="arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ospf.html">OSPF - Open Shortest Path First</a></li>
-<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -418,12 +421,29 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols.link.vlan">
-<span id="vlan-802-1q-customer-vlan-tag-type"></span><h1>VLAN - 802.1Q Customer VLAN Tag Type<a class="headerlink" href="#module-pcapkit.protocols.link.vlan" title="Link to this heading">¶</a></h1>
+<span id="vlan-802-1q-802-1ad-vlan-tag-types"></span><h1>VLAN - 802.1Q/802.1ad VLAN Tag Types<a class="headerlink" href="#module-pcapkit.protocols.link.vlan" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.link.vlan" title="pcapkit.protocols.link.vlan"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.vlan</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a>
-only, which implements extractor for 802.1Q
-Customer VLAN Tag Type <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is
-described as below:</p>
+<a class="reference internal" href="#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> only, an abstract base class holding
+the tag layout shared by every VLAN tag <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>. The two concrete tags live in
+modules of their own:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>EtherType</p></th>
+<th class="head"><p>Class</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x8100</span></code> (customer tag, 802.1Q)</p></td>
+<td><p><a class="reference internal" href="c_tag.html#pcapkit.protocols.link.c_tag.C_Tag" title="pcapkit.protocols.link.c_tag.C_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0x88A8</span></code> (service tag, 802.1ad)</p></td>
+<td><p><a class="reference internal" href="s_tag.html#pcapkit.protocols.link.s_tag.S_Tag" title="pcapkit.protocols.link.s_tag.S_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">S_Tag</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The tag structure is described as below:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -462,29 +482,51 @@ described as below:</p>
 </tbody>
 </table>
 </div>
+<p>The two tags carry an identical tag control information layout and are told apart
+solely by the tag protocol identifier (TPID) that selected them – <code class="docutils literal notranslate"><span class="pre">0x8100</span></code> for
+the customer tag against <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code> for the service tag. That TPID is not part of
+either tag: it is the EtherType field of whatever encapsulates the tag, so both
+classes read the same four octets and share every byte of parsing and
+construction code, which is what this base holds.</p>
+<p>They are nonetheless distinct classes rather than one class bound at two
+EtherTypes, because 802.1ad <em>stacks</em> them. In a Q-in-Q frame the service tag’s
+own next-EtherType is <code class="docutils literal notranslate"><span class="pre">0x8100</span></code>, which selects a customer tag in turn, so both
+tags appear in one frame:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ethernet.type                = 0x88A8
+ethernet.s_tag.tci.vid       = 100     &lt;- service tag,  802.1ad
+ethernet.s_tag.type          = 0x8100
+ethernet.s_tag.c_tag.tci.vid = 200     &lt;- customer tag, 802.1Q
+ethernet.s_tag.c_tag.type    = 0x0800
+</pre></div>
+</div>
+<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code> – <code class="docutils literal notranslate"><span class="pre">s_tag</span></code> against
+<code class="docutils literal notranslate"><span class="pre">c_tag</span></code> – is what keeps the two apart in the parsed
+<a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>. A single class bound at both EtherTypes
+would nest one <code class="docutils literal notranslate"><span class="pre">c_tag</span></code> inside another, leaving nothing in the output to say
+which of the two was the service tag.</p>
+<p>Two distinct EtherTypes also means two distinct
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code> values, which is the
+project’s rule for when protocols get separate modules: siblings that <em>share</em> an
+index may share a module, as <a class="reference internal" href="arp.html#pcapkit.protocols.link.arp.InARP" title="pcapkit.protocols.link.arp.InARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">InARP</span></code></a> shares
+<a class="reference internal" href="arp.html#module-pcapkit.protocols.link.arp" title="pcapkit.protocols.link.arp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">arp</span></code></a> and
+<a class="reference internal" href="rarp.html#pcapkit.protocols.link.rarp.DRARP" title="pcapkit.protocols.link.rarp.DRARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DRARP</span></code></a> shares
+<a class="reference internal" href="rarp.html#module-pcapkit.protocols.link.rarp" title="pcapkit.protocols.link.rarp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rarp</span></code></a>. This base declares no index of its own –
+it is abstract and nothing dispatches to it – so its <code class="docutils literal notranslate"><span class="pre">__index__</span></code> raises.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.vlan.</span></span><span class="sig-name descname"><span class="pre">VLAN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/vlan.html#VLAN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.link.vlan.VLAN" title="pcapkit.protocols.data.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.link.vlan.VLAN" title="pcapkit.protocols.schema.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a>]</p>
-<p>This class implements 802.1Q Customer VLAN Tag Type.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'802.1Q</span> <span class="pre">Customer</span> <span class="pre">VLAN</span> <span class="pre">Tag</span> <span class="pre">Type'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.name" title="Link to this definition">¶</a></dt>
-<dd><p>Name of current protocol.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.alias">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alias</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'802.1Q'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.alias" title="Link to this definition">¶</a></dt>
-<dd><p>Acronym of corresponding protocol.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.info_name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">info_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'c_tag'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.info_name" title="Link to this definition">¶</a></dt>
-<dd><p>Key name of the <code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code> dict.</p>
-</dd></dl>
-
+<p>Abstract base class for 802.1Q/802.1ad VLAN tag types.</p>
+<p>The class implements the whole of the tag – both parsing and construction –
+since the customer and service tags are byte-for-byte identical. What it
+deliberately leaves to its subclasses is only how the tag <em>names</em> itself:
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code> and
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code>.</p>
+<p>It is abstract for the same reason <a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>
+is: <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> is declared
+abstract by <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> and is not
+defined here, so the class cannot be instantiated. Bind
+<code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">S_Tag</span></code>, never this class.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.length">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.length" title="Link to this definition">¶</a></dt>
@@ -498,10 +540,28 @@ described as below:</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.id">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/vlan.html#VLAN.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.id" title="Link to this definition">¶</a></dt>
+<dd><p>Index ID of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'VLAN'</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'C_Tag'</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'S_Tag'</span></code>]]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Index ID of the protocol – the family name, then every tag in it, as
+<a class="reference internal" href="../application/http.html#pcapkit.protocols.application.http.HTTP.id" title="pcapkit.protocols.application.http.HTTP.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.id</span></code></a> does for
+its own family. Note that unlike HTTP’s versions, the two tags are
+<em>distinct protocols</em> rather than flavours of one, so each is its own
+canonical name; they carry <code class="docutils literal notranslate"><span class="pre">VLAN</span></code> only as a secondary alias.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.read">
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/vlan.html#VLAN.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.read" title="Link to this definition">¶</a></dt>
-<dd><p>Read 802.1Q Customer VLAN Tag Type.</p>
-<p>Structure of 802.1Q Customer VLAN Tag Type [<a class="reference external" href="https://standards.ieee.org/ieee/802.1Q/6844/">IEEE 802.1Q</a>]:</p>
+<dd><p>Read 802.1Q/802.1ad VLAN tag type.</p>
+<p>Structure of 802.1Q/802.1ad VLAN tag type [<a class="reference external" href="https://standards.ieee.org/ieee/802.1Q/6844/">IEEE 802.1Q</a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -595,11 +655,12 @@ described as below:</p>
 
 <section id="module-pcapkit.protocols.schema.link.vlan">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.link.vlan" title="Link to this heading">¶</a></h2>
+<p>Both tags share these, since their layouts are identical.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.vlan.VLAN">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.link.vlan.</span></span><span class="sig-name descname"><span class="pre">VLAN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/link/vlan.html#VLAN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.link.vlan.VLAN" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
-<p>Header schema for 802.1Q Customer VLAN Tag Type packet.</p>
+<p>Header schema for an 802.1Q/802.1ad VLAN tag.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.vlan.VLAN.tci">
 <span class="sig-name descname"><span class="pre">tci</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.link.vlan.TCIType" title="pcapkit.protocols.schema.link.vlan.TCIType"><span class="pre">TCIType</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">tci&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.vlan.VLAN.tci" title="Link to this definition">¶</a></dt>
@@ -624,7 +685,7 @@ described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.vlan.TCI">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.link.vlan.</span></span><span class="sig-name descname"><span class="pre">TCI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/link/vlan.html#TCI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.link.vlan.TCI" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
-<p>Header schema for 802.1Q Customer VLAN Tag Type tag control information.</p>
+<p>Header schema for 802.1Q/802.1ad VLAN tag control information.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.vlan.TCI.pcp">
 <span class="sig-name descname"><span class="pre">pcp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/vlan.html#pcapkit.const.vlan.priority_level.PriorityLevel" title="pcapkit.const.vlan.priority_level.PriorityLevel"><span class="pre">PriorityLevel</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">pcp&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.vlan.TCI.pcp" title="Link to this definition">¶</a></dt>
@@ -651,7 +712,7 @@ described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.vlan.TCIType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.link.vlan.</span></span><span class="sig-name descname"><span class="pre">TCIType</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/link/vlan.html#TCIType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.link.vlan.TCIType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
-<p>Type of 802.1Q Customer VLAN Tag Type tag control information.</p>
+<p>Type of 802.1Q/802.1ad VLAN tag control information.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.vlan.TCIType.pcp">
 <span class="sig-name descname"><span class="pre">pcp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.link.vlan.TCIType.pcp" title="Link to this definition">¶</a></dt>
@@ -680,7 +741,7 @@ described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.vlan.VLAN">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.vlan.</span></span><span class="sig-name descname"><span class="pre">VLAN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/vlan.html#VLAN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.vlan.VLAN" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
-<p>Data model for 802.1Q customer VLAN tag type.</p>
+<p>Data model for an 802.1Q/802.1ad VLAN tag.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.vlan.VLAN.tci">
 <span class="sig-name descname"><span class="pre">tci</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.vlan.TCI" title="pcapkit.protocols.data.link.vlan.TCI"><span class="pre">TCI</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.vlan.VLAN.tci" title="Link to this definition">¶</a></dt>
@@ -735,12 +796,12 @@ described as below:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../internet/index.html">
+          <a class="next-page" href="c_tag.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Internet Layer</div>
+                <div class="title">C_Tag - 802.1Q Customer VLAN Tag Type</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -785,7 +846,7 @@ described as below:</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">VLAN - 802.1Q Customer VLAN Tag Type</a><ul>
+<li><a class="reference internal" href="#">VLAN - 802.1Q/802.1ad VLAN Tag Types</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema.link.vlan">Header Schemas</a><ul>
 <li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
 </ul>

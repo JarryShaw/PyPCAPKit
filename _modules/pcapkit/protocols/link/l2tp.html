@@ -238,8 +238,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -408,236 +411,139 @@
 <span class="sd">.. module:: pcapkit.protocols.link.l2tp</span>
 
 <span class="sd">:mod:`pcapkit.protocols.link.l2tp` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.link.l2tp.L2TP` only,</span>
-<span class="sd">which implements extractor for Layer Two Tunnelling</span>
-<span class="sd">Protocol (L2TP) [*]_, whose structure is described</span>
-<span class="sd">as below:</span>
+<span class="sd">:class:`~pcapkit.protocols.link.l2tp.L2TP` only, an abstract base class for the</span>
+<span class="sd">Layer Two Tunnelling Protocol family [*]_. The concrete versions live in modules</span>
+<span class="sd">of their own:</span>
 
-<span class="sd">.. table::</span>
+<span class="sd">.. list-table::</span>
+<span class="sd">   :header-rows: 1</span>
 
-<span class="sd">   ======= ===== ===================== ==========================================</span>
-<span class="sd">    Octets Bits  Name                  Description</span>
-<span class="sd">   ======= ===== ===================== ==========================================</span>
-<span class="sd">    0          0 ``l2tp.flags``        Flags and Version Info</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    0          0 ``l2tp.flags.type``   Type (control / data)</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    0          1 ``l2tp.flags.len``    Length</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    0          2                       Reserved (must be zero ``x00``)</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    0          4 ``l2tp.flags.seq``    Sequence</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    0          5                       Reserved (must be zero ``x00``)</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    0          6 ``l2tp.flags.offset`` Offset</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    0          7 ``l2tp.flags.prio``   Priority</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    1          8                       Reserved (must be zero ``x00``)</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    1         12 ``l2tp.ver``          Version (``2``)</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    2         16 ``l2tp.length``       Length (optional by ``len``)</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    4         32 ``l2tp.tunnelid``     Tunnel ID</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    6         48 ``l2tp.sessionid``    Session ID</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    8         64 ``l2tp.ns``           Sequence Number (optional by ``seq``)</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    10        80 ``l2tp.nr``           Next Sequence Number (optional by ``seq``)</span>
-<span class="sd">   ------- ----- --------------------- ------------------------------------------</span>
-<span class="sd">    12        96 ``l2tp.offset``       Offset Size (optional by ``offset``)</span>
-<span class="sd">   ======= ===== ===================== ==========================================</span>
+<span class="sd">   * - Version</span>
+<span class="sd">     - Class</span>
+<span class="sd">     - Specification</span>
+<span class="sd">   * - L2TPv2</span>
+<span class="sd">     - :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`</span>
+<span class="sd">     - :rfc:`2661`</span>
+
+<span class="sd">Only L2TPv2 is implemented. What the family is expected to grow is set out below,</span>
+<span class="sd">so that the base's shape is not guessed at later.</span>
+
+<span class="sd">The base deliberately carries **no header parsing at all**, in the way</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.ip.IP` carries none for its family. That is</span>
+<span class="sd">not tidiness: the versions genuinely do not share a header. All that is common</span>
+<span class="sd">across them is the *first 16-bit word carrying a version nibble at bits 12-15*;</span>
+<span class="sd">everything after it differs, so a base that parsed further would be assuming one</span>
+<span class="sd">version's layout for all of them.</span>
+
+<span class="sd">What the family still wants</span>
+<span class="sd">---------------------------</span>
+
+<span class="sd">**L2TPv3** [:rfc:`3931`] has a different session header and a different control</span>
+<span class="sd">message header from v2, and is reachable two ways -- over UDP port 1701 like v2,</span>
+<span class="sd">and directly over IP as **protocol number 115**. That second route is why</span>
+<span class="sd">:attr:`Internet.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`</span>
+<span class="sd">leaves 115 unbound today: the binding waits on an ``L2TPv3`` class, not on a</span>
+<span class="sd">different framing decision. It also means v3 is the first member of this family</span>
+<span class="sd">to have a real :meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__`.</span>
+
+<span class="sd">**L2F** [:rfc:`2341`] is reached when the version nibble reads ``1``. It is *not*</span>
+<span class="sd">an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reserves</span>
+<span class="sd">the value 1 "to permit detection of L2F packets should they arrive intermixed</span>
+<span class="sd">with L2TP packets". L2F is a separate protocol with its own header. It is</span>
+<span class="sd">therefore to be implemented as ``L2F``, the canonical name, carrying ``L2TPv1``</span>
+<span class="sd">only as an alias in its :meth:`~pcapkit.protocols.protocol.ProtocolBase.id` --</span>
+<span class="sd">the same relationship HTTP/3 has to QUIC. c.f.</span>
+<span class="sd">:meth:`HTTPv1.id &lt;pcapkit.protocols.application.httpv1.HTTP.id&gt;` for how a</span>
+<span class="sd">version-flavoured alias is spelled: canonical name first, alias second, since</span>
+<span class="sd">callers take element zero as canonical.</span>
+
+<span class="sd">Selecting a version</span>
+<span class="sd">-------------------</span>
+
+<span class="sd">Nothing dispatches on the version nibble yet, because only one version exists.</span>
+<span class="sd">When a second lands, the mechanism it wants already has a precedent in</span>
+<span class="sd">:class:`~pcapkit.protocols.application.http.HTTP`, which reads a version and</span>
+<span class="sd">delegates to a per-version class. L2TP is the easier case: HTTP has to</span>
+<span class="sd">*trial-parse* each candidate in</span>
+<span class="sd">:meth:`~pcapkit.protocols.application.http.HTTP._guess_version` because the wire</span>
+<span class="sd">format carries no version field, whereas L2TP states its version explicitly in</span>
+<span class="sd">those four bits. So a deterministic switch on ``Ver`` is enough, and no new</span>
+<span class="sd">registry is needed -- the class bound at UDP 1701 reads two octets, masks out the</span>
+<span class="sd">nibble, and hands the datagram to the matching class.</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.l2tp.type</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">Enum_Type</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.l2tp</span><span class="w"> </span><span class="kn">import</span> <span class="n">L2TP</span> <span class="k">as</span> <span class="n">Data_L2TP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.l2tp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Data_Flags</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.link</span><span class="w"> </span><span class="kn">import</span> <span class="n">Link</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.link.l2tp</span><span class="w"> </span><span class="kn">import</span> <span class="n">L2TP</span> <span class="k">as</span> <span class="n">Schema_L2TP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoReturn</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
-
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'L2TP'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="L2TP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">L2TP</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_L2TP</span><span class="p">,</span> <span class="n">Schema_L2TP</span><span class="p">],</span>
-           <span class="n">schema</span><span class="o">=</span><span class="n">Schema_L2TP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_L2TP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""This class implements Layer Two Tunnelling Protocol."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">L2TP</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
+<span class="w">    </span><span class="sd">"""This class implements all protocols in L2TP family.</span>
+
+<span class="sd">    - Layer Two Tunnelling Protocol version 2</span>
+<span class="sd">      (:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`) [:rfc:`2661`]</span>
+
+<span class="sd">    It is abstract for the same mechanical reason</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ip.IP` is:</span>
+<span class="sd">    :attr:`~pcapkit.protocols.protocol.ProtocolBase.name` and</span>
+<span class="sd">    :meth:`~pcapkit.protocols.protocol.ProtocolBase.read` are both declared</span>
+<span class="sd">    abstract by :class:`~pcapkit.protocols.protocol.ProtocolBase` and neither is</span>
+<span class="sd">    defined here, so the class cannot be instantiated. Bind a version, never this</span>
+<span class="sd">    class.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
 
+    <span class="c1">#: NOTE: Declared on the base, and so shared by every version, deliberately.</span>
+    <span class="c1">#: This is the key the parsed datagram appears under, and a consumer wants</span>
+    <span class="c1">#: ``udp.l2tp`` whichever version was on the wire -- the version is reported</span>
+    <span class="c1">#: by :attr:`~pcapkit.protocols.protocol.ProtocolBase.alias` instead. Left to</span>
+    <span class="c1">#: the class-name default it would read ``l2tpv2``, ``l2tpv3`` and so on, and</span>
+    <span class="c1">#: every consumer would have to know the version to find the data.</span>
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["Layer 2 Tunnelling Protocol"]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Name of current protocol."""</span>
-        <span class="k">return</span> <span class="s1">'Layer 2 Tunnelling Protocol'</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Header length of current protocol."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">hdr_len</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["control", "data"]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""L2TP type."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">type</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">info_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["l2tp"]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Key name of the :attr:`info` dict."""</span>
+        <span class="k">return</span> <span class="s1">'l2tp'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="L2TP.read">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_L2TP'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read Layer Two Tunnelling Protocol.</span>
-
-<span class="sd">        Structure of L2TP header [:rfc:`2661`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |T|L|x|x|S|x|O|P|x|x|x|x|  Ver  |          Length (opt)         |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |           Tunnel ID           |           Session ID          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |             Ns (opt)          |             Nr (opt)          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |      Offset Size (opt)        |    Offset pad... (opt)</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            length: Length of packet data.</span>
-<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+<div class="viewcode-block" id="L2TP.id">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.id">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Literal["L2TP"], Literal["L2TPv2"]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Parsed packet data.</span>
+<span class="sd">            Index ID of the protocol -- the family name, then every version in</span>
+<span class="sd">            it, as :meth:`HTTP.id &lt;pcapkit.protocols.application.http.HTTP.id&gt;`</span>
+<span class="sd">            does for its own family. ``L2F`` and ``L2TPv3`` join this tuple when</span>
+<span class="sd">            they are implemented.</span>
 
 <span class="sd">        """</span>
-        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
-        <span class="n">_flag</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span>
-
-        <span class="n">flags</span> <span class="o">=</span> <span class="n">Data_Flags</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">Enum_Type</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]),</span>
-            <span class="nb">len</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]),</span>
-            <span class="n">seq</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="s1">'seq'</span><span class="p">]),</span>
-            <span class="n">offset</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">]),</span>
-            <span class="n">prio</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="s1">'prio'</span><span class="p">]),</span>
-        <span class="p">)</span>
-
-        <span class="n">_size</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">offset</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">offset</span> <span class="k">else</span> <span class="mi">0</span>
-        <span class="n">hdr_len</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">flags</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">flags</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">flags</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span> <span class="o">+</span> <span class="n">_size</span>
-
-        <span class="n">l2tp</span> <span class="o">=</span> <span class="n">Data_L2TP</span><span class="p">(</span>
-            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
-            <span class="n">version</span><span class="o">=</span><span class="n">_flag</span><span class="p">[</span><span class="s1">'version'</span><span class="p">],</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">len</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">tunnelid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">tunnel_id</span><span class="p">,</span>
-            <span class="n">sessionid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">session_id</span><span class="p">,</span>
-            <span class="n">ns</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ns</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">seq</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">nr</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">nr</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">seq</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="n">_size</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">offset</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="n">l2tp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
-            <span class="p">(</span><span class="s1">'hdr_len'</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">),</span>
-        <span class="p">])</span>
-        <span class="k">if</span> <span class="n">_size</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
-            <span class="c1"># l2tp['padding'] = self._read_fileng(_size)</span>
-
-        <span class="n">length</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">len</span> <span class="k">else</span> <span class="p">(</span><span class="n">length</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">l2tp</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">hdr_len</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="L2TP.make">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.make">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[2]'</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-             <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Type | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">Data</span><span class="p">,</span>
-             <span class="n">type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-             <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">priority</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">tunnel_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-             <span class="n">session_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-             <span class="n">ns</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">nr</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">offset</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | Protocol | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_L2TP'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            version: L2TP version.</span>
-<span class="sd">            type: L2TP type.</span>
-<span class="sd">            type_default: Default value of type.</span>
-<span class="sd">            type_namespace: Namespace of type.</span>
-<span class="sd">            type_reversed: Reversed namespace of type.</span>
-<span class="sd">            priority: Priority flag.</span>
-<span class="sd">            length: Length of packet data.</span>
-<span class="sd">            tunnel_id: Tunnel ID.</span>
-<span class="sd">            session_id: Session ID.</span>
-<span class="sd">            ns: Sequence number.</span>
-<span class="sd">            nr: Acknowledgement number.</span>
-<span class="sd">            offset: Offset size.</span>
-<span class="sd">            payload: Payload data.</span>
-<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Constructed packet data.</span>
-
-<span class="sd">        """</span>
-        <span class="n">type_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">type_namespace</span><span class="p">,</span>
-                                 <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Schema_L2TP</span><span class="p">(</span>
-            <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">'type'</span><span class="p">:</span> <span class="n">type_</span><span class="p">,</span>
-                <span class="s1">'len'</span><span class="p">:</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s1">'seq'</span><span class="p">:</span> <span class="n">ns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s1">'offset'</span><span class="p">:</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s1">'prio'</span><span class="p">:</span> <span class="n">priority</span><span class="p">,</span>
-                <span class="s1">'version'</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
-            <span class="p">},</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">tunnel_id</span><span class="o">=</span><span class="n">tunnel_id</span><span class="p">,</span>
-            <span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span>
-            <span class="n">ns</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span>
-            <span class="n">nr</span><span class="o">=</span><span class="n">nr</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
-            <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">'L2TP'</span><span class="p">,</span> <span class="s1">'L2TPv2'</span><span class="p">)</span></div>
 
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[16]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
-        <span class="k">return</span> <span class="mi">16</span>
 
 <div class="viewcode-block" id="L2TP.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.__index__">[docs]</a>
@@ -648,39 +554,14 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            An abstract base is reached by nothing, so it has no index of its</span>
+<span class="sd">            own. That is also the project's rule for module layout -- a distinct</span>
+<span class="sd">            ``__index__`` means a distinct module, and a base carrying none</span>
+<span class="sd">            claims no module of its own beyond holding the family together.</span>
+
 <span class="sd">        """</span>
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer'</span><span class="p">)</span></div>
-
-
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Utilities.</span>
-    <span class="c1">##########################################################################</span>
-
-<div class="viewcode-block" id="L2TP._make_data">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP._make_data">[docs]</a>
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_L2TP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data: protocol data</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Key-value pairs for protocol construction.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="s1">'prio'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">prio</span><span class="p">,</span>
-            <span class="s1">'version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
-            <span class="s1">'length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="s1">'tunnel_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tunnelid</span><span class="p">,</span>
-            <span class="s1">'session_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sessionid</span><span class="p">,</span>
-            <span class="s1">'ns'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">ns</span><span class="p">,</span>
-            <span class="s1">'nr'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">nr</span><span class="p">,</span>
-            <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>
-            <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-        <span class="p">}</span></div>
 </div>
 
 </pre></div>
