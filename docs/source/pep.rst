@@ -146,42 +146,73 @@ rather than when a packet is read, so nothing decodes wrongly in the meantime.
 Mobility Header
 ~~~~~~~~~~~~~~~
 
-**Partly done**, and still the section of this page with the most work left in
-it. :class:`~pcapkit.protocols.internet.mh.MH` has the FMIPv6 fast-handover
-messages [:rfc:`5568`] -- Handover Initiate, Handover Acknowledge, FBU, FBack
-and FNA -- along with the options they need. What remains is the rest of the
-registry:
-
-* **10 of the 24 registered message data types**, namely Home Agent Switch,
-  Heartbeat, Binding Revocation, Localized Routing Initiation and
-  Acknowledgment, Update Notification and its Acknowledgement, Flow Binding,
-  Subscription Query and Subscription Response.
-* **51 of the 71 registered options** -- most of the PMIPv6 and flow-binding
-  block, including Home Network Prefix, Handoff Indicator, Access Technology
-  Type, Timestamp, GRE Key, Binding Identifier and the QoS options, together
-  with DNS-UPDATE-TYPE, Vendor Specific and Service Selection, which belong to
-  none of those groups.
-* **3 of the 4 CGA extensions**; only Multi-Prefix is implemented.
-
-Each of those falls through to a generic handler, so nothing breaks -- the
-fields simply are not decoded. Read and construction are symmetric throughout,
-so every gap above is a gap in both directions: a message type needs a
-``_read_msg_`` and a ``_make_msg_`` handler, an option a ``_read_opt_`` and a
-``_make_opt_``, and each has to be named in the matching dispatch table --
+**Done, bar one option that was already broken.**
+:class:`~pcapkit.protocols.internet.mh.MH` now decodes and constructs the whole
+registry: **all 24 registered message data types**, **all 4 CGA extensions**, and
+**70 of the 71 registered options**. Every one of them is registered in
 :attr:`~pcapkit.protocols.internet.mh.MH.__message__`,
 :attr:`~pcapkit.protocols.internet.mh.MH.__option__` or
-:attr:`~pcapkit.protocols.internet.mh.MH.__extension__`. The six ``# TODO``
-markers in ``pcapkit/protocols/internet/mh.py`` sit at the end of each handler
-block rather than at the tables, so both places need editing; the file documents
-the shape each handler takes.
+:attr:`~pcapkit.protocols.internet.mh.MH.__extension__` with both a ``_read_``
+and a ``_make_`` handler, and every one round-trips byte-for-byte --
+``make`` then ``read`` then ``make`` again reproduces the same octets.
 
-Less of this is groundwork than the numbers suggest. The sub-registries the
-missing options and messages need -- binding revocation types and triggers,
-handoff indicators, access network identifier sub-options, flow identification
-and flow binding sub-options, LMA-controlled MAG parameters, DNS update status,
-traffic selector formats, QoS attributes -- are already generated in full under
-:doc:`pcapkit/const/mh`, and ``mh.py`` already imports 32 of them without using
-them. What is missing is the handlers, not the enumerations.
+The sub-registries turned out to be the easy half, as predicted: binding
+revocation types and triggers, handoff indicators, access network identifier
+sub-options, flow identification and flow binding sub-options, LMA-controlled MAG
+parameters, DNS update status, traffic selector formats and QoS attributes were
+already generated in full under :doc:`pcapkit/const/mh`, and **no new
+enumeration or vendor crawler was needed**. Two value sets did have to be added
+to ``mh.py`` itself rather than to :mod:`pcapkit.const.mh`, because IANA
+registers neither: the localized routing acknowledgment status codes of
+:rfc:`6705#section-10.2`
+(:class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus`) and the local
+mobility anchor address option codes of :rfc:`5949#section-6.2.2`
+(:class:`~pcapkit.protocols.internet.mh.LMAAddressCode`), alongside the two
+:rfc:`5568` sets that were already there.
+
+What is left, and why:
+
+* **The CGA Parameters option** (type 12) is the one option still on the generic
+  handler, and it is unreachable rather than unimplemented:
+  :attr:`~pcapkit.protocols.schema.internet.mh.CGAParameter.extensions` sizes
+  itself from ``pkt['length']``, but :class:`CGAParameter
+  <pcapkit.protocols.schema.internet.mh.CGAParameter>` has no ``length`` field
+  and :class:`~pcapkit.corekit.fields.misc.SchemaField` gives a nested schema a
+  fresh packet context rather than the enclosing option's, so a well-formed
+  option raises ``KeyError: 'length'`` on parse and on construction alike. Making
+  the lookup optional gets past that and straight into a second fault, in how a
+  :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` counts towards the
+  nested schema's length. Both halves live in shared field machinery rather than
+  in the mobility header, which is why this is recorded here rather than patched
+  around; ``test_mh_cga_parameters_option_is_unparsable_upstream`` pins the
+  current behaviour so the fix is noticed.
+* **Payloads that belong to another protocol** are carried opaquely, deliberately.
+  The multicast options (54, 56, 57, 60 and 61) embed :rfc:`3810` MLD or
+  :rfc:`3376` IGMP address records, and the traffic selectors of :rfc:`6089` and
+  :rfc:`7222` embed the flag-driven range lists of :rfc:`6088`. Both are separate
+  registries with their own dissectors' worth of structure; the mobility options
+  around them are fully decoded, and each records which format its payload is in.
+* **The MN-ID option's constructor mis-sizes a non-address identifier.**
+  ``_make_opt_mn_id`` measures ``len(identifier)`` even for the ``IPv6_Address``
+  subtype, so passing a string or an integer declares that many octets while the
+  schema emits 16. Passing an :class:`~ipaddress.IPv6Address` is correct. This is
+  pre-existing and outside the registry-completion work, so it is noted rather
+  than fixed.
+
+Two wire-format traps are worth knowing before touching this code, since both
+look like ordinary fields and are not:
+
+* :rfc:`7411`'s two multicast options measure their length field in **32-bit
+  words**, and exclude the option-code and status octets as well as the type and
+  length ones -- so the option occupies ``4 + length * 4`` octets, not
+  ``length + 2``.
+* :rfc:`5213#section-8.8`'s timestamp is **not** an :rfc:`1305` NTP timestamp,
+  though the mobility header carries both. It counts from the UNIX epoch in a
+  48/16 fixed-point split, where NTP counts from 1900 in a 32/32 one, so reading
+  one as the other is wrong in the epoch and in both field widths. They have
+  separate types for that reason:
+  :class:`~pcapkit.protocols.internet.mh.PMIPv6Timestamp` and
+  :class:`~pcapkit.protocols.internet.mh.NTPTimestamp`.
 
 DTLS
 ~~~~

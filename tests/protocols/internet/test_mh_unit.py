@@ -124,9 +124,13 @@ class MHUnitTests(unittest.TestCase):
             # checksum, then ten octets of message body nothing can interpret
             ('message', MH.register_message, Packet(200), MH.__dict__['__message__'],
              lambda: parse('1101' 'c8' '00' '1234' '00000000000000000000')),
-            # a Binding Refresh Request carrying one 8-octet option of type 0x40
-            ('option', MH.register_option, Option(0x40), MH.__dict__['__option__'],
-             lambda: parse('1101' '00' '00' '1234' '0000' '4006' '000000000000')),
+            # a Binding Refresh Request carrying one 8-octet option of type 0xC8.
+            # The code has to be outside the registry itself, not merely one this
+            # module happens not to handle: every one of the 71 registered option
+            # types now has a dispatch entry, so a registered code would already be
+            # in the table and prove nothing about insertion on a miss.
+            ('option', MH.register_option, Option(0xC8), MH.__dict__['__option__'],
+             lambda: parse('1101' '00' '00' '1234' '0000' 'c806' '000000000000')),
             ('extension', MH.register_extension, CGAExtension(0xFF),
              MH.__dict__['__extension__'],
              lambda: object.__new__(MH)._make_cga_extensions(
@@ -1702,6 +1706,646 @@ class MHUnitTests(unittest.TestCase):
         raw = bytes(MH(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
                        chksum=b'\x00\x00', data={'options': []}))
         self.assertEqual(len(raw) % 8, 0)
+
+    def test_mh_every_registered_code_has_both_handlers(self) -> None:
+        """Every registry entry must name a parser *and* a constructor.
+
+        The dispatch tables map a code to a bare method-name stem, and a stem
+        naming a method that does not exist falls back to the generic handler
+        silently -- no import fails, no test fails, the option simply stops being
+        decoded. So the mapping is checked against the class rather than trusted.
+        """
+        from pcapkit.const.mh.cga_extension import CGAExtension
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.protocols.internet.mh import MH
+
+        for enum, registry, read_pre, make_pre in (
+            (Packet, '__message__', '_read_msg_', '_make_msg_'),
+            (Option, '__option__', '_read_opt_', '_make_opt_'),
+            (CGAExtension, '__extension__', '_read_ext_', '_make_ext_'),
+        ):
+            table = MH.__dict__[registry]
+            # every registered code, not just the ones the table happens to hold
+            self.assertEqual(sorted(table), sorted(enum),
+                             f'{registry} does not cover its whole registry')
+            for member in enum:
+                stem = table[member]
+                with self.subTest(registry=registry, code=member.name):
+                    self.assertIsInstance(stem, str)
+                    self.assertTrue(hasattr(MH, f'{read_pre}{stem}'),
+                                    f'{read_pre}{stem} is missing')
+                    self.assertTrue(hasattr(MH, f'{make_pre}{stem}'),
+                                    f'{make_pre}{stem} is missing')
+
+    def test_mh_pmipv6_timestamp_is_not_an_ntp_timestamp(self) -> None:
+        """:rfc:`5213#section-8.8` is not :rfc:`1305`, and must not be read as it.
+
+        The two are both 64-bit timestamps carried in a mobility option, which is
+        exactly why they are easy to conflate. They agree on nothing else: the
+        replay-protection option counts from 1900 in a 32/32 split, and the
+        timestamp option counts from 1970 in a 48/16 one.
+        """
+        import datetime as dt
+
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+
+        # 1 January 2000 00:00:00 UTC, exactly, with no fractional part
+        epoch_2000 = 946_684_800
+        schema = proto._make_opt_timestamp(  # type: ignore[arg-type]
+            Option.Timestamp_Option, seconds=epoch_2000, fraction=0)
+        self.assertEqual(schema.length, 8)
+        self.assertEqual(schema.timestamp, {'seconds': epoch_2000, 'fraction': 0})
+
+        data = proto._read_opt_timestamp(schema, options=None)  # type: ignore[arg-type]
+        self.assertEqual(data.timestamp,
+                         dt.datetime(2000, 1, 1, tzinfo=dt.timezone.utc))
+        self.assertEqual(tuple(data.pmip_timestamp), (epoch_2000, 0))
+
+        # a half-second is 0x8000 of the 16-bit fraction, and survives the trip
+        half = proto._make_opt_timestamp(  # type: ignore[arg-type]
+            Option.Timestamp_Option, seconds=epoch_2000, fraction=0x8000)
+        parsed = proto._read_opt_timestamp(half, options=None)  # type: ignore[arg-type]
+        self.assertEqual(tuple(parsed.pmip_timestamp), (epoch_2000, 0x8000))
+        self.assertEqual(
+            proto._make_opt_timestamp(Option.Timestamp_Option, parsed).pack(),  # type: ignore[arg-type]
+            half.pack())
+
+    def test_mh_geo_location_degrees_are_signed(self) -> None:
+        """The geo-location degrees are 24-bit two's complement.
+
+        A :class:`~pcapkit.corekit.fields.strings.BitField` reads a sub-field
+        unsigned, which is right for every other bit-packed field in the mobility
+        header and wrong for these two, so a southern latitude read as an unsigned
+        integer comes out as a number just under 2**24 rather than a negative one.
+        """
+        from pcapkit.const.mh.ani_suboption import ANISuboption
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+
+        # 33 degrees 52 minutes south, 151 degrees 12 minutes east
+        raw_lat, raw_lon = -1_109_852, 4_953_047
+        schema = proto._make_opt_ani(  # type: ignore[arg-type]
+            Option.Access_Network_Identifier,
+            suboptions=[(ANISuboption.Geo_Location,
+                         {'raw_latitude': raw_lat, 'raw_longitude': raw_lon})])
+
+        # the wire carries them unsigned, as two 24-bit fields
+        sub = schema.suboptions[0]
+        self.assertEqual(sub.location['latitude'], raw_lat & 0xFFFFFF)
+        self.assertEqual(sub.location['longitude'], raw_lon)
+
+        data = proto._read_opt_ani(schema, options=None)  # type: ignore[arg-type]
+        geo = data.suboptions[ANISuboption.Geo_Location]
+        self.assertEqual(geo.raw_latitude, raw_lat)
+        self.assertEqual(geo.raw_longitude, raw_lon)
+        self.assertLess(geo.latitude, 0)
+        self.assertGreater(geo.longitude, 0)
+        self.assertAlmostEqual(geo.latitude, raw_lat / 2 ** 15, places=6)
+
+        # and the signed values, not the decoded floats, are what gets re-encoded
+        again = proto._make_opt_ani(Option.Access_Network_Identifier, data)  # type: ignore[arg-type]
+        self.assertEqual(again.pack(), schema.pack())
+
+    def test_mh_multiprefix_extension_length_matches_its_payload(self) -> None:
+        """The Multi-Prefix CGA extension declared a length it did not emit.
+
+        ``_make_ext_multiprefix`` computed ``1 + len(prefixes) * 16`` for an
+        extension whose data is a 4-octet flag word followed by one **8**-octet
+        prefix apiece, so two prefixes declared 33 data octets where 20 were
+        written and a re-parse ran off the end. Re-making a *parsed* extension was
+        broken separately: the data model holds the prefixes as a :obj:`tuple`,
+        which :class:`~pcapkit.corekit.fields.collections.ListField` refuses.
+        """
+        from pcapkit.const.mh.cga_extension import CGAExtension
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+
+        for count in (0, 1, 2, 5):
+            with self.subTest(prefixes=count):
+                schema = proto._make_ext_multiprefix(  # type: ignore[arg-type]
+                    CGAExtension.Multi_Prefix, flag=True, prefixes=list(range(count)))
+                packed = schema.pack()
+
+                # the declared data length is exactly the data emitted
+                self.assertEqual(schema.length, 4 + count * 8)
+                self.assertEqual(len(packed), schema.length + 4)
+
+                data = proto._read_ext_multiprefix(schema, extensions=None)  # type: ignore[arg-type]
+                self.assertEqual(data.prefixes, tuple(range(count)))
+                self.assertTrue(data.flag)
+
+                # and a parsed extension can be re-made, tuple prefixes and all
+                again = proto._make_ext_multiprefix(  # type: ignore[arg-type]
+                    CGAExtension.Multi_Prefix, data)
+                self.assertEqual(again.pack(), packed)
+
+    def test_mh_experimental_cga_extensions_round_trip(self) -> None:
+        """:rfc:`4581#section-3`'s three experimental extension types.
+
+        The RFC assigns the codepoints and gives their extension data no structure
+        at all, so an opaque payload is the whole of the correct parse rather than
+        a placeholder for a better one. All three share a handler.
+        """
+        from pcapkit.const.mh.cga_extension import CGAExtension
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+
+        for code in (CGAExtension.Exp_FFFD, CGAExtension.Exp_FFFE, CGAExtension.Exp_FFFF):
+            for payload in (b'', b'\x01', bytes(range(16))):
+                with self.subTest(code=code.name, size=len(payload)):
+                    schema = proto._make_ext_exp(code, data=payload)  # type: ignore[arg-type]
+                    self.assertEqual(schema.length, len(payload))
+                    self.assertEqual(len(schema.pack()), len(payload) + 4)
+
+                    data = proto._read_ext_exp(schema, extensions=None)  # type: ignore[arg-type]
+                    self.assertEqual(data.type, code)
+                    self.assertEqual(data.length, len(payload) + 2)
+                    self.assertEqual(data.data, payload)
+
+                    again = proto._make_ext_exp(code, data)  # type: ignore[arg-type]
+                    self.assertEqual(again.pack(), schema.pack())
+
+    def test_mh_pmipv6_options_round_trip_byte_for_byte(self) -> None:
+        """Every mobility option this module decodes must survive a round trip.
+
+        ``make`` then ``read`` then ``make`` again has to give identical octets,
+        and the parse must land on a real handler rather than falling through to
+        :class:`~pcapkit.protocols.data.internet.mh.UnassignedOption` -- a
+        fall-through is what a missing dispatch entry looks like, and it does not
+        raise.
+
+        Note:
+            :attr:`~pcapkit.const.mh.option.Option.CGA_Parameters` is absent, and
+            deliberately so: it cannot be parsed at all, on this branch or on
+            ``main``. See
+            :meth:`test_mh_cga_parameters_option_is_unparsable_upstream`.
+        """
+        import ipaddress
+
+        from pcapkit.const.mh.ani_suboption import ANISuboption
+        from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
+        from pcapkit.const.mh.lma_mag_suboption import LMAControlledMAGSuboption
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.mh.qos_attribute import QoSAttribute
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.data.internet.mh import UnassignedOption
+        from pcapkit.protocols.internet.mh import MH
+
+        v6 = '2001:db8::1'
+        v4 = '198.51.100.7'
+
+        cases = {
+            Option.Pad1: {'length': 0},
+            Option.PadN: {'length': 4},
+            Option.Binding_Refresh_Advice: {'interval': 300},
+            Option.Alternate_Care_of_Address: {'address': v6},
+            Option.Nonce_Indices: {'home': 1, 'careof': 2},
+            Option.Authorization_Data: {'data': bytes(range(8))},
+            Option.Mobile_Network_Prefix_Option: {'prefix': '2001:db8:1::/64'},
+            Option.Mobility_Header_Link_Layer_Address_option: {'address': b'\x00\x11\x22\x33\x44\x55'},
+            Option.MN_ID_OPTION_TYPE: {'identifier': ipaddress.ip_address(v6)},
+            Option.AUTH_OPTION_TYPE: {'spi': 0xdeadbeef, 'data': bytes(range(10))},
+            Option.MESG_ID_OPTION_TYPE: {'seconds': 0x83aa7e80, 'fraction': 0x40000000},
+            Option.CGA_Parameters_Request: {},
+            Option.Signature: {'signature': bytes(range(16))},
+            Option.Permanent_Home_Keygen_Token: {'token': bytes(range(8))},
+            Option.Care_of_Test_Init: {},
+            Option.Care_of_Test: {'token': bytes(range(8))},
+            Option.DNS_UPDATE_TYPE: {'remove': True, 'identity': b'mn.example.com'},
+            Option.Experimental_Mobility_Option: {'data': b'\x01\x02\x03\x04'},
+            Option.Vendor_Specific_Mobility_Option: {'vendor': 32473, 'subtype': 3,
+                                                     'data': b'\xaa\xbb'},
+            Option.Service_Selection_Mobility_Option: {'identifier': 'ims'},
+            Option.Binding_Authorization_Data_for_FMIPv6: {'spi': 1, 'data': bytes(range(12))},
+            Option.Home_Network_Prefix_Option: {'prefix_length': 64, 'prefix': '2001:db8:1::'},
+            Option.Handoff_Indicator_Option: {'hi': 2},
+            Option.Access_Technology_Type_Option: {'att': 4},
+            Option.Mobile_Node_Link_layer_Identifier_Option: {'lli': b'\x00\x11\x22\x33\x44\x55'},
+            Option.Link_local_Address_Option: {'address': 'fe80::1'},
+            Option.Timestamp_Option: {'seconds': 1_700_000_000, 'fraction': 0x8000},
+            Option.Restart_Counter: {'counter': 7},
+            Option.IPv4_Home_Address: {'prefix_length': 24, 'address': v4,
+                                       'request_prefix': True},
+            Option.IPv4_Address_Acknowledgement: {'status': 0, 'prefix_length': 24,
+                                                  'address': v4},
+            Option.NAT_Detection: {'force': True, 'refresh': 110},
+            Option.IPv4_Care_of_Address: {'address': v4},
+            Option.GRE_Key_Option: {'key': 0x11223344},
+            Option.Mobility_Header_IPv6_Address_Prefix: {'code': 2, 'prefix_length': 64,
+                                                         'address': '2001:db8:2::'},
+            Option.Binding_Identifier: {'bid': 5, 'status': 0, 'simultaneous': True,
+                                        'bid_pri': 3, 'address': v6},
+            Option.IPv4_Home_Address_Request: {'prefix_length': 32, 'address': v4},
+            Option.IPv4_Home_Address_Reply: {'status': 0, 'prefix_length': 32, 'address': v4},
+            Option.IPv4_Default_Router_Address: {'address': v4},
+            Option.IPv4_DHCP_Support_Mode: {'mode': 1},
+            Option.Context_Request_Option: {'requests': [(22, b''),
+                                                         (19, b'\x00\x00~\xd9\x03')]},
+            Option.Local_Mobility_Anchor_Address_Option: {'code': 1, 'address': v6},
+            Option.Mobile_Node_Link_local_Address_Interface_Identifier_Option: {
+                'iid': bytes(range(8))},
+            Option.Transient_Binding: {'late': True, 'lifetime': 5},
+            Option.Flow_Summary_Mobility_Option: {'fid': [1, 2, 3]},
+            Option.Flow_Identification_Mobility_Option: {
+                'fid': 7, 'fid_pri': 2, 'status': 0,
+                'suboptions': [
+                    (FlowIDSuboption.BID_Reference, {'bid': [1, 2]}),
+                    (FlowIDSuboption.Traffic_Selector, {'ts_format': 2,
+                                                        'selector': b'\x00\x01\x02\x03'}),
+                    (FlowIDSuboption.Flow_Binding_Action, {'action': 11}),
+                    (FlowIDSuboption.Target_Care_of_Address, {'address': v6}),
+                    (FlowIDSuboption.PadN, {'length': 2}),
+                    (FlowIDSuboption.Pad, {}),
+                ],
+            },
+            Option.Redirect_Capability_Mobility_Option: {},
+            Option.Redirect_Mobility_Option: {'ipv6': v6},
+            Option.Load_Information_Mobility_Option: {
+                'priority': 10, 'sessions_in_use': 100, 'max_sessions': 1000,
+                'used_capacity': 55, 'max_capacity': 999},
+            Option.Alternate_IPv4_Care_of_Address: {'address': v4},
+            Option.Mobile_Node_Group_Identifier: {'subtype': 1, 'group_id': 42},
+            Option.MAG_IPv6_Address: {'address_length': 128, 'address': v6},
+            Option.Access_Network_Identifier: {
+                'suboptions': [
+                    (ANISuboption.Network_Identifier, {'utf8': True, 'net_name': b'wifi',
+                                                       'ap_name': b'\x00\x11\x22\x33\x44\x55'}),
+                    (ANISuboption.Geo_Location, {'raw_latitude': -1234567,
+                                                 'raw_longitude': 987654}),
+                    (ANISuboption.Operator_Identifier, {'op_id_type': 2,
+                                                        'identifier': b'example.com'}),
+                    (ANISuboption.Civic_Location, {'format': 0, 'location': b'GB\x01\x02'}),
+                    (ANISuboption.MAG_Group_Identifier, {'group_id': 9}),
+                    (ANISuboption.ANI_Update_Timer, {'timer': 15}),
+                ],
+            },
+            Option.IPv4_Traffic_Offload_Selector: {
+                'mode': True,
+                'selector': [(FlowIDSuboption.Traffic_Selector,
+                              {'ts_format': 1, 'selector': b'\x00\x01\x02\x03'})],
+            },
+            Option.Dynamic_IP_Multicast_Selector: {'protocol': 143, 'mode': True,
+                                                   'records': 1, 'data': bytes(range(8))},
+            Option.Delegated_Mobile_Network_Prefix: {'prefix_length': 56,
+                                                     'prefix': '2001:db8:3::'},
+            Option.Active_Multicast_Subscription_IPv4: {'igmp_type': 0x22,
+                                                        'context': bytes(range(8))},
+            Option.Active_Multicast_Subscription_IPv6: {'mld_type': 143,
+                                                        'context': bytes(range(20))},
+            Option.Quality_of_Service: {
+                'sr_id': 3, 'dscp': 46, 'oc': 1,
+                'attributes': [
+                    (QoSAttribute.Per_MN_Agg_Max_DL_Bit_Rate, {'rate': 1_000_000}),
+                    (QoSAttribute.Per_Session_Agg_Max_UL_Bit_Rate,
+                     {'service': True, 'exclude': True, 'rate': 500_000}),
+                    (QoSAttribute.Allocation_Retention_Priority,
+                     {'priority_level': 5, 'preemption_capability': 1,
+                      'preemption_vulnerability': 0}),
+                    (QoSAttribute.QoS_Traffic_Selector, {'ts_format': 2,
+                                                         'selector': b'\x01\x02'}),
+                    (QoSAttribute.QoS_Vendor_Specific_Attribute,
+                     {'vendor': 32473, 'subtype': 1, 'data': b'\xff'}),
+                ],
+            },
+            Option.LMA_User_Plane_Address: {'address': v6},
+            Option.Multicast_Mobility_Option: {'code': 2, 'data': bytes(range(8))},
+            Option.Multicast_Acknowledgement_Option: {'code': 0, 'status': 1,
+                                                      'data': bytes(range(4))},
+            Option.LMA_Controlled_MAG_Parameters: {
+                'suboptions': [
+                    (LMAControlledMAGSuboption.Binding_Re_registration_Control,
+                     {'start_time': 10, 'initial_retransmission': 2,
+                      'max_retransmission': 30}),
+                    (LMAControlledMAGSuboption.Heartbeat_Control,
+                     {'interval': 60, 'retransmission_delay': 3,
+                      'max_retransmissions': 5}),
+                ],
+            },
+            Option.MAG_Multipath_Binding: {'att': 4, 'label': 2, 'bid': 3, 'bulk': True},
+            Option.MAG_Identifier: {'subtype': 1, 'identifier': b'mag@example.com'},
+            Option.Anchored_Prefix: {'prefix_length': 64, 'prefix': '2001:db8:4::'},
+            Option.Local_Prefix: {'prefix_length': 64, 'prefix': '2001:db8:5::'},
+            Option.Previous_MAAR: {'prefix_length': 64, 'maar': v6,
+                                   'prefix': '2001:db8:6::'},
+            Option.Serving_MAAR: {'address': v6},
+            Option.DLIF_Link_Local_Address: {'address': 'fe80::2'},
+            Option.DLIF_Link_Layer_Address: {'lla': b'\x00\x11\x22\x33\x44\x55'},
+        }
+
+        # the whole registry bar the one option that cannot be parsed at all
+        self.assertEqual(sorted([*cases, Option.CGA_Parameters]), sorted(Option))
+
+        for code, args in cases.items():
+            with self.subTest(option=code.name):
+                raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
+                               type=Packet.Binding_Refresh_Request,
+                               data={'options': [(code, args)]}))
+                self.assertEqual(len(raw) % 8, 0)
+
+                parsed = MH(io.BytesIO(raw), len(raw), extension=True).info
+                option = parsed.options[code]
+                self.assertNotIsInstance(option, UnassignedOption)
+                self.assertEqual(option.type, code)
+
+                rebuilt = bytes(MH(next=parsed.next, type=parsed.type,
+                                   chksum=parsed.chksum, data=parsed))
+                self.assertEqual(rebuilt, raw)
+
+    def test_mh_message_types_round_trip_byte_for_byte(self) -> None:
+        """Every one of the 24 registered message types must survive a round trip."""
+        from pcapkit.const.mh.option import Option
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.data.internet.mh import UnknownMessage
+        from pcapkit.protocols.internet.mh import MH
+
+        v6 = '2001:db8::1'
+
+        # message types that carry mobility options, and the fields they add
+        with_options = {
+            Packet.Binding_Refresh_Request: {},
+            Packet.Home_Test_Init: {'cookie': bytes(range(8))},
+            Packet.Care_of_Test_Init: {'cookie': bytes(range(8))},
+            Packet.Home_Test: {'nonce_index': 1, 'cookie': bytes(range(8)),
+                               'token': bytes(range(8))},
+            Packet.Care_of_Test: {'nonce_index': 1, 'cookie': bytes(range(8)),
+                                  'token': bytes(range(8))},
+            Packet.Binding_Update: {'seq': 9, 'ack': True, 'lifetime': 40},
+            Packet.Binding_Acknowledgement: {'status': 0, 'seq': 9, 'lifetime': 40},
+            Packet.Binding_Error: {'status': 1, 'home': v6},
+            Packet.Fast_Binding_Update: {'seq': 9, 'ack': True, 'lifetime': 40},
+            Packet.Fast_Binding_Acknowledgment: {'status': 0, 'seq': 9, 'lifetime': 40},
+            Packet.Fast_Neighbor_Advertisement: {},
+            Packet.Handover_Initiate_Message: {'seq': 3, 'assign': True, 'code': 0},
+            Packet.Handover_Acknowledge_Message: {'seq': 3, 'buffer': True, 'code': 0},
+            Packet.Home_Agent_Switch_Message: {'addresses': [v6, '2001:db8::2']},
+            Packet.Heartbeat_Message: {'unsolicited': True, 'response': True, 'seq': 12345},
+            Packet.Binding_Revocation_Message: {'br_type': 1, 'code': 2, 'seq': 77,
+                                                'proxy': True, 'global_revocation': True},
+            Packet.Localized_Routing_Initiation: {'seq': 4, 'lifetime': 600},
+            Packet.Localized_Routing_Acknowledgment: {'seq': 4, 'unsolicited': True,
+                                                      'status': 128, 'lifetime': 600},
+            Packet.Update_Notification: {'seq': 5, 'reason': 2, 'ack': True,
+                                         'retransmit': True},
+            Packet.Update_Notification_Acknowledgement: {'seq': 5, 'status': 128},
+            Packet.Flow_Binding_Message: {'fb_type': 2, 'seq': 6, 'code': 128},
+            Packet.Subscription_Query: {'seq': 200},
+            Packet.Subscription_Response: {'seq': 200, 'info': True},
+        }
+        # ... and the one whose body is opaque, so has nowhere to put an option
+        opaque = {Packet.Experimental_Mobility_Header: {'data': bytes(range(10))}}
+
+        self.assertEqual(sorted({**with_options, **opaque}), sorted(Packet))
+
+        for code, args in with_options.items():
+            with self.subTest(message=code.name):
+                payload = dict(args)
+                payload['options'] = [(Option.Alternate_Care_of_Address, {'address': v6})]
+
+                raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34', type=code,
+                               data=payload))
+                self.assertEqual(len(raw) % 8, 0)
+
+                parsed = MH(io.BytesIO(raw), len(raw), extension=True).info
+                self.assertEqual(parsed.type, code)
+                self.assertNotIsInstance(parsed, UnknownMessage)
+                self.assertEqual(parsed.length, len(raw))
+
+                rebuilt = bytes(MH(next=parsed.next, type=parsed.type,
+                                   chksum=parsed.chksum, data=parsed))
+                self.assertEqual(rebuilt, raw)
+
+        for code, args in opaque.items():
+            with self.subTest(message=code.name):
+                raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34', type=code, data=args))
+                parsed = MH(io.BytesIO(raw), len(raw), extension=True).info
+                rebuilt = bytes(MH(next=parsed.next, type=parsed.type,
+                                   chksum=parsed.chksum, data=parsed))
+                self.assertEqual(rebuilt, raw)
+
+    def test_mh_two_form_messages_switch_on_their_inner_type(self) -> None:
+        """Binding revocation and flow binding each carry two forms under one type.
+
+        Neither is distinguished by the Mobility Header type, so the octet after
+        the inner type field means different things in the two forms and draws from
+        a different registry in each. Reading it against the wrong registry yields
+        a plausible-looking wrong name rather than an error, so both forms are
+        pinned.
+        """
+        from pcapkit.const.mh.binding_revocation import BindingRevocation
+        from pcapkit.const.mh.fb_ack_status import FlowBindingACKStatus
+        from pcapkit.const.mh.fb_indication_trigger import FlowBindingIndicationTrigger
+        from pcapkit.const.mh.fb_type import FlowBindingType
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.mh.revocation_status_code import RevocationStatusCode
+        from pcapkit.const.mh.revocation_trigger import RevocationTrigger
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.mh import MH
+
+        def build(packet_type, payload):
+            payload = dict(payload, options=[])
+            raw = bytes(MH(next=TransType.UDP, chksum=b'\x00\x00',
+                           type=packet_type, data=payload))
+            return raw, MH(io.BytesIO(raw), len(raw), extension=True).info
+
+        # a revocation indication reads its octet as a trigger ...
+        raw, bri = build(Packet.Binding_Revocation_Message,
+                         {'br_type': BindingRevocation.Binding_Revocation_Indication,
+                          'code': RevocationTrigger.Per_Peer_Policy, 'seq': 1,
+                          'proxy': True})
+        self.assertEqual(bri.br_type, BindingRevocation.Binding_Revocation_Indication)
+        self.assertEqual(bri.code, RevocationTrigger.Per_Peer_Policy)
+        self.assertIsInstance(bri.code, RevocationTrigger)
+        self.assertTrue(bri.proxy)
+        self.assertEqual(
+            bytes(MH(next=bri.next, type=bri.type, chksum=bri.chksum, data=bri)), raw)
+
+        # ... and an acknowledgement reads the same octet as a status code
+        raw, bra = build(Packet.Binding_Revocation_Message,
+                         {'br_type': BindingRevocation.Binding_Revocation_Acknowledgement,
+                          'code': RevocationStatusCode.Binding_Does_NOT_Exist, 'seq': 1})
+        self.assertEqual(bra.code, RevocationStatusCode.Binding_Does_NOT_Exist)
+        self.assertIsInstance(bra.code, RevocationStatusCode)
+        self.assertEqual(
+            bytes(MH(next=bra.next, type=bra.type, chksum=bra.chksum, data=bra)), raw)
+
+        # the flow binding message does the same, one registry apart
+        raw, fbi = build(Packet.Flow_Binding_Message,
+                         {'fb_type': FlowBindingType.Indication,
+                          'code': FlowBindingIndicationTrigger.Administrative_Reason,
+                          'ack': True, 'seq': 2})
+        self.assertEqual(fbi.code, FlowBindingIndicationTrigger.Administrative_Reason)
+        self.assertIsInstance(fbi.code, FlowBindingIndicationTrigger)
+        self.assertTrue(fbi.ack)
+        self.assertEqual(
+            bytes(MH(next=fbi.next, type=fbi.type, chksum=fbi.chksum, data=fbi)), raw)
+
+        raw, fba = build(Packet.Flow_Binding_Message,
+                         {'fb_type': FlowBindingType.Acknowledgement,
+                          'code': FlowBindingACKStatus.Action_NOT_Authorized, 'seq': 2})
+        self.assertEqual(fba.code, FlowBindingACKStatus.Action_NOT_Authorized)
+        self.assertIsInstance(fba.code, FlowBindingACKStatus)
+        self.assertEqual(
+            bytes(MH(next=fba.next, type=fba.type, chksum=fba.chksum, data=fba)), raw)
+
+    def test_mh_word_counted_option_lengths_are_not_octet_counts(self) -> None:
+        """The two multicast options of :rfc:`7411` count 32-bit words.
+
+        Their length field is in words rather than octets, and excludes the option
+        code and status octets as well as the type and length ones, so the option
+        occupies ``4 + length * 4`` octets. Treating the field as the usual octet
+        count would under-read the payload by a factor of four.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(MH)
+
+        payload = bytes(range(12))
+        schema = proto._make_opt_mcast(  # type: ignore[arg-type]
+            Option.Multicast_Mobility_Option, code=2, data=payload)
+        self.assertEqual(schema.length, 3)                 # 12 octets == 3 words
+        self.assertEqual(len(schema.pack()), 16)           # 4 + 12
+
+        data = proto._read_opt_mcast(schema, options=None)  # type: ignore[arg-type]
+        self.assertEqual(data.length, 16)                  # the true octet count
+        self.assertEqual(data.data, payload)
+
+        # a payload that is not a whole number of words cannot be described at all
+        with self.assertRaises(ProtocolError):
+            proto._make_opt_mcast(Option.Multicast_Mobility_Option,  # type: ignore[arg-type]
+                                  code=2, data=b'\x00\x01\x02')
+
+        ack = proto._make_opt_mcast_ack(  # type: ignore[arg-type]
+            Option.Multicast_Acknowledgement_Option, code=0, status=1, data=payload)
+        self.assertEqual(ack.length, 3)
+        self.assertEqual(
+            proto._read_opt_mcast_ack(ack, options=None).length, 16)  # type: ignore[arg-type]
+
+    def test_mh_length_derived_addresses_pick_their_family(self) -> None:
+        """Three fields carry an address whose family only the length reveals.
+
+        The binding identifier option, the local mobility anchor address option and
+        the target care-of address sub-option each carry an IPv4 or an IPv6 address
+        with no flag saying which, so the option length is the only thing to branch
+        on. The delegated mobile network prefix option is the exception that *does*
+        carry a flag, and is checked here alongside so the two shapes stay distinct.
+        """
+        import ipaddress
+
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+
+        for address, expected in (('198.51.100.7', 8), ('2001:db8::1', 20)):
+            with self.subTest(option='bid', address=address):
+                schema = proto._make_opt_bid(  # type: ignore[arg-type]
+                    Option.Binding_Identifier, bid=1, address=address)
+                self.assertEqual(schema.length, expected)
+                data = proto._read_opt_bid(schema, options=None)  # type: ignore[arg-type]
+                self.assertEqual(data.address, ipaddress.ip_address(address))
+
+        # no address at all is a length of 4, and comes back as ``None``
+        bare = proto._make_opt_bid(Option.Binding_Identifier, bid=1)  # type: ignore[arg-type]
+        self.assertEqual(bare.length, 4)
+        self.assertIsNone(proto._read_opt_bid(bare, options=None).address)  # type: ignore[arg-type]
+
+        for address, expected in (('198.51.100.7', 6), ('2001:db8::1', 18)):
+            with self.subTest(option='lmaa', address=address):
+                schema = proto._make_opt_lmaa(  # type: ignore[arg-type]
+                    Option.Local_Mobility_Anchor_Address_Option, address=address)
+                self.assertEqual(schema.length, expected)
+                data = proto._read_opt_lmaa(schema, options=None)  # type: ignore[arg-type]
+                self.assertEqual(data.address, ipaddress.ip_address(address))
+
+        # the LMA user-plane address may be absent entirely, which is how a mobile
+        # access gateway names a transport without naming an address
+        empty = proto._make_opt_lma_up(Option.LMA_User_Plane_Address)  # type: ignore[arg-type]
+        self.assertEqual(empty.length, 2)
+        self.assertIsNone(
+            proto._read_opt_lma_up(empty, options=None).address)  # type: ignore[arg-type]
+
+        # the delegated prefix option carries a flag, so the flag drives the width
+        for prefix, expected, ipv4 in (('198.51.100.0', 6, True),
+                                       ('2001:db8:3::', 18, False)):
+            with self.subTest(option='dmnp', prefix=prefix):
+                schema = proto._make_opt_dmnp(  # type: ignore[arg-type]
+                    Option.Delegated_Mobile_Network_Prefix, prefix_length=24 if ipv4 else 56,
+                    prefix=prefix)
+                self.assertEqual(schema.length, expected)
+                self.assertEqual(bool(schema.flags['V']), ipv4)
+                data = proto._read_opt_dmnp(schema, options=None)  # type: ignore[arg-type]
+                self.assertEqual(data.ipv4, ipv4)
+                self.assertEqual(data.prefix, ipaddress.ip_address(prefix))
+
+    def test_mh_redirect_option_rejects_contradictory_flags(self) -> None:
+        """:rfc:`6463#section-4.2` allows exactly one of the ``K`` and ``N`` flags.
+
+        Both set, or both clear, leaves the option's own length undetermined, so it
+        cannot be read either way -- and the flags and the length are two encodings
+        of the same fact, which a parser has to see agree.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.schema.internet.mh import RedirectOption
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(MH)
+
+        with self.assertRaises(ProtocolError):
+            proto._make_opt_redirect(Option.Redirect_Mobility_Option)  # type: ignore[arg-type]
+        with self.assertRaises(ProtocolError):
+            proto._make_opt_redirect(  # type: ignore[arg-type]
+                Option.Redirect_Mobility_Option, ipv6='2001:db8::1', ipv4='198.51.100.7')
+
+        # a hand-built option with both flags clear is rejected on the way in
+        bogus = RedirectOption(type=Option.Redirect_Mobility_Option, length=6,
+                               flags={'K': 0, 'N': 0}, ipv6=None, ipv4=None)
+        with self.assertRaises(ProtocolError):
+            proto._read_opt_redirect(bogus, options=None)  # type: ignore[arg-type]
+
+    def test_mh_cga_parameters_option_is_unparsable_upstream(self) -> None:
+        """The CGA Parameters option cannot be parsed, and this is not new.
+
+        :attr:`~pcapkit.protocols.schema.internet.mh.CGAParameter.extensions` sizes
+        itself from ``pkt['length']``, but :class:`CGAParameter
+        <pcapkit.protocols.schema.internet.mh.CGAParameter>` has no ``length``
+        field of its own and
+        :class:`~pcapkit.corekit.fields.misc.SchemaField` hands a nested schema a
+        fresh packet dict rather than the enclosing option's, so the lookup fails.
+        A well-formed option therefore raises :exc:`KeyError` on parse.
+
+        This is recorded rather than fixed: the remaining half of the fault is in
+        how a :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` is counted
+        towards the nested schema's length, which is shared field machinery well
+        outside the mobility header. The test pins the *current* behaviour so that
+        whoever fixes it finds out here.
+        """
+        from pcapkit.protocols.internet.mh import MH
+
+        # type 12, 30 octets: a 16-octet modifier, 8-octet subnet prefix, one
+        # collision count octet and a 5-octet ASN.1 public key -- no extensions
+        raw = bytes.fromhex('11040000123400000c1e'
+                            '0000000000000000000000000000086f'
+                            '0000000020010db8'
+                            '00'
+                            '3003010203')
+        self.assertEqual(len(raw), 40)
+
+        with self.assertRaises(KeyError) as caught:
+            MH(io.BytesIO(raw), len(raw), extension=True)
+        self.assertEqual(caught.exception.args[0], 'length')
 
 
 if __name__ == '__main__':
