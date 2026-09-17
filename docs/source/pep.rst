@@ -27,37 +27,40 @@ Wish you enjoy **PyPCAPKit**!!!
 More Protocols, More!!!
 -----------------------
 
-As you may have noticed, there are some protocol-named files under the
-``NotImplemented`` folders. These protocols are what I planned to implement
-but not yet done. Namely, grouped by each TCP/IP layer and ordered by protocol
-name alphabetically,
+Plenty of protocols are not decoded yet, and every one of them is wanted.
+Adding one is about the most self-contained contribution there is: a schema
+class, a data class and a protocol class, as sketched in
+`discussion #251 <https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__.
+The reply in that thread is the closest thing the project has to a
+step-by-step guide for adding a protocol, and is worth reading before starting
+one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
+the ones outstanding are,
 
-* Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
+* Link Layer: DSL, EAPOL, FDDI, ISDN, LINUX_SLL, LINUX_SLL2, NDP, PPP
 * Internet Layer: ECN, ICMP, ICMPv6, IGMP, Shim6
 * Transport Layer: DCCP, RSVP
-* Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP,
-  ONC/RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL, XMPP
+* Application Layer: BGP, DHCP, DHCPv6, DNS, DTLS, IMAP, LDAP, MQTT, NNTP,
+  NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL,
+  XMPP
 
-Each of those files is empty, so any one of them is a self-contained piece of
-work: a schema class, a data class and a protocol class, as sketched in
-`discussion #251 <https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__.
-That thread asks for **NGAP** (5G, application layer), which is not on the list
-above and has no stub, and the reply to it is the closest thing the project has
-to a step-by-step guide for adding a protocol -- worth reading before starting
-any of these.
+Several of these come in pairs that want a shared abstract base rather than two
+independent implementations, in the way
+:class:`~pcapkit.protocols.internet.ip.IP` already covers its family: ICMP with
+ICMPv6, TLS/SSL with DTLS, and ``LINUX_SLL`` with ``LINUX_SLL2``.
 
 .. note::
 
-   Two entries differ from the list in the discussion thread, and both are
-   corrections rather than progress. **NDP** is shown under the link layer
-   because that is where its stub actually lives, at
-   ``pcapkit/protocols/link/NotImplemented/ndp.py``; there is no
-   ``ndp.py`` under the internet layer. **QUIC** has been dropped because no
-   stub for it exists anywhere in the tree -- the thread lists it, but the file
-   was never created.
+   Some of these have an empty, protocol-named file under a
+   ``NotImplemented`` folder. **Those files are not a roadmap.** They were
+   scratch reminders the author left himself before this page existed, so a
+   stub's presence does not mean a protocol is planned or claimed, and its
+   absence does not mean the protocol is unwanted: ``LINUX_SLL``, ``QUIC`` and
+   **DTLS** have no stub and are on the list above, while **NGAP** had none
+   either and is implemented. Take this page as the record and ignore the
+   folder.
 
-   **ESP** and **SCTP** have left the list because they are now implemented,
-   and neither left a stub behind.
+   **ESP**, **SCTP** and **NGAP** are no longer listed because they are
+   implemented.
 
 SCTP
 ~~~~
