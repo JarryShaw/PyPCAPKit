@@ -47,6 +47,10 @@ Several of these come in pairs that want a shared abstract base rather than two
 independent implementations, in the way
 :class:`~pcapkit.protocols.internet.ip.IP` already covers its family: ICMP with
 ICMPv6, TLS/SSL with DTLS, and ``LINUX_SLL`` with ``LINUX_SLL2``.
+:class:`~pcapkit.protocols.link.vlan.VLAN` is the closer precedent for a pair
+whose *layout* is identical -- it holds the whole of the tag, and
+:class:`~pcapkit.protocols.link.vlan.C_Tag` and
+:class:`~pcapkit.protocols.link.vlan.S_Tag` add only how each names itself.
 
 .. note::
 
