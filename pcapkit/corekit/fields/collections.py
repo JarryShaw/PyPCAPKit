@@ -6,6 +6,7 @@ import io
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.field import FieldBase
+from pcapkit.corekit.fields.numbers import NumberField
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.utilities.compat import List
 from pcapkit.utilities.exceptions import FieldValueError
@@ -178,6 +179,29 @@ class OptionField(ListField, Generic[_TS]):
     This field is used to represent a list of fields, as in the case of lists of
     options and/or parameters in a protocol.
 
+    Note:
+        :meth:`self.unpack <unpack>` selects an option's schema by reading the
+        ``type_name`` field of ``base_schema`` **alone** off the front of the
+        option, instead of unpacking the whole base schema and keeping only that
+        one value. That is only the same read when three things hold of the type
+        field:
+
+        1. it is the base schema's **first** field, so that it is what sits at the
+           front of the option;
+        2. it is a :class:`~pcapkit.corekit.fields.numbers.NumberField`, so that
+           :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+           reads it through its ordinary per-field branch;
+        3. its length is a fixed integer rather than a callable, so that its width
+           does not depend on packet data the shortcut has not read.
+
+        All of that is true of every ``OptionField`` declared in this package. A
+        base schema registered from outside it -- c.f.
+        :mod:`pcapkit.foundation.registry` -- need not satisfy it, and is **not**
+        rejected: such a base schema is unpacked in full, exactly as it was before
+        the shortcut existed. It parses correctly and pays the cost of the second
+        parse. Only the shortcut is withheld, so a base schema whose type field
+        comes second cannot be silently misread.
+
     """
 
     @property
@@ -228,6 +252,34 @@ class OptionField(ListField, Generic[_TS]):
             raise FieldValueError('Field <option> has no registry.')
         self._registry = registry
 
+        # NOTE: Decided once, here, rather than per option in ``unpack``. See the
+        # docstring above for what the fast path requires and why a base schema
+        # that does not meet it is accommodated rather than rejected.
+        #
+        # The three conditions are exactly what makes reading the type field alone
+        # the same read that ``Schema.unpack`` performs for it: it must sit at the
+        # front of the option, ``Schema.unpack`` must handle it through its generic
+        # branch rather than one of the special ones (a ``NumberField`` is never
+        # ``PayloadField``, ``PaddingField``, ``ConditionalField``,
+        # ``ForwardMatchField``, ``SwitchField`` or ``OptionField``), and its width
+        # must not depend on packet state that the full unpack would have
+        # established first.
+        #
+        # Every test is written so that an unexpected base schema selects the full
+        # unpack instead of raising, so this cannot turn a registration that works
+        # today into an import-time failure.
+        fields = getattr(self._base_schema, '__fields__', {})
+        type_field = fields.get(type_name)
+
+        #: Optional[FieldBase]: Base schema's type field, when reading it on its own
+        #: is equivalent to unpacking the whole base schema to obtain it; otherwise
+        #: :data:`None`, and :meth:`self.unpack <unpack>` unpacks the base schema.
+        self._type_field = type_field if (
+            isinstance(type_field, NumberField)
+            and list(fields)[:1] == [type_name]
+            and type_field._length_callback is None  # pylint: disable=protected-access
+        ) else None
+
     def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[_TS]':
         """Unpack field value from :obj:`bytes`.
 
@@ -256,15 +308,47 @@ class OptionField(ListField, Generic[_TS]):
         new_packet = packet.copy()
         new_packet[self.name] = OrderedMultiDict()
 
+        # NOTE: Where it can, this reads the base schema's type field alone rather
+        # than the whole base schema. The option schema below re-reads the same
+        # octets from the rewound stream, and the base schema's result is used for
+        # nothing but the type code, so unpacking it in full parsed every option
+        # twice -- 2274 schema unpacks for 1137 options of
+        # ``examples/captures/profile.pcapng``.
+        #
+        # Reading the type field alone deliberately mirrors what
+        # :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+        # does for one field -- ``field(packet)``, read ``field.length`` octets,
+        # then ``field.unpack(byte, packet.copy())`` -- rather than reaching for
+        # :func:`struct.unpack`. That keeps ``code``'s enumeration type, which both
+        # the ``self._eool`` comparison and the ``OrderedMultiDict`` key depend on,
+        # and it is what makes the two spellings equivalent rather than merely
+        # similar.
+        #
+        # ``self._type_field`` is :data:`None` for a base schema that the shortcut
+        # does not fit -- see the class docstring -- and the full unpack is used
+        # for it instead. Whichever way the code was read, ``consumed`` is the
+        # number of octets to rewind to get back to the front of the option.
+        type_field = self._type_field
+
         temp = []  # type: list[_TS]
         while length > 0:
-            # unpack option type using base schema
-            meta = self._base_schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
-            code = cast('int', meta[self._type_name])
+            if type_field is None:
+                # unpack option type using base schema
+                meta = self._base_schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
+                code = cast('int', meta[self._type_name])
+                consumed = len(meta)
+            else:
+                # unpack option type using the base schema's type field. No cast
+                # is needed here, unlike the branch above: the type field is known
+                # to be a ``NumberField``, so ``unpack`` is already typed ``int``.
+                field = type_field(packet)
+                byte = file.read(field.length)
+                code = field.unpack(byte, packet.copy())
+                consumed = len(byte)
             schema = self._registry[code]
 
             # rewind to the beginning of the option
-            file.seek(-len(meta), io.SEEK_CUR)
+            file.seek(-consumed, io.SEEK_CUR)
 
             # unpack option using option schema
             data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
