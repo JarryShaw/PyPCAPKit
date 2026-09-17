@@ -30,6 +30,7 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/Host_Identity_Protocol
 
 """
+import collections
 import datetime
 import ipaddress
 import math
@@ -204,7 +205,7 @@ if TYPE_CHECKING:
     from datetime import timedelta
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
-    from typing import IO, Any, Callable, NoReturn, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
@@ -256,8 +257,8 @@ class HIP(Internet[Data_HIP, Schema_HIP],
     """This class implements Host Identity Protocol.
 
     This class currently supports parsing of the following HIP parameters,
-    which are directly mapped to the :class:`pcapkit.const.hip.parameter.Parameter`
-    enumeration:
+    which are registered in the :attr:`self.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`
+    attribute:
 
     .. list-table::
        :header-rows: 1
@@ -362,6 +363,71 @@ class HIP(Internet[Data_HIP, Schema_HIP],
          - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_relay_hmac`
 
     """
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]:
+    #: Parameter code to method mapping, c.f. :meth:`_read_hip_param` and/or
+    #: :meth:`_make_hip_param`. Method names are expected to be referred to the
+    #: class by ``_read_param_${name}`` and/or ``_make_param_${name}``, and if
+    #: such name not found, the value should then be a method that can parse the
+    #: parameter by itself.
+    __parameter__ = collections.defaultdict(
+        lambda: 'unassigned',
+        {
+            Enum_Parameter.ESP_INFO:               'esp_info',                # [RFC 7402] 65
+            Enum_Parameter.R1_Counter:             'r1_counter',              # [RFC 5201] 128, v1 only
+            Enum_Parameter.R1_COUNTER:             'r1_counter',              # [RFC 7401] 129
+            Enum_Parameter.LOCATOR_SET:            'locator_set',             # [RFC 8046] 193
+            Enum_Parameter.PUZZLE:                 'puzzle',                  # [RFC 7401] 257
+            Enum_Parameter.SOLUTION:               'solution',                # [RFC 7401] 321
+            Enum_Parameter.SEQ:                    'seq',                     # [RFC 7401] 385
+            Enum_Parameter.ACK:                    'ack',                     # [RFC 7401] 449
+            Enum_Parameter.DH_GROUP_LIST:          'dh_group_list',           # [RFC 7401] 511
+            Enum_Parameter.DIFFIE_HELLMAN:         'diffie_hellman',          # [RFC 7401] 513
+            Enum_Parameter.HIP_TRANSFORM:          'hip_transform',           # [RFC 5201] 577, v1 only
+            Enum_Parameter.HIP_CIPHER:             'hip_cipher',              # [RFC 7401] 579
+            Enum_Parameter.NAT_TRAVERSAL_MODE:     'nat_traversal_mode',      # [RFC 5770] 608
+            Enum_Parameter.TRANSACTION_PACING:     'transaction_pacing',      # [RFC 5770] 610
+            Enum_Parameter.ENCRYPTED:              'encrypted',               # [RFC 7401] 641
+            Enum_Parameter.HOST_ID:                'host_id',                 # [RFC 7401] 705
+            Enum_Parameter.HIT_SUITE_LIST:         'hit_suite_list',          # [RFC 7401] 715
+            Enum_Parameter.CERT:                   'cert',                    # [RFC 7401][RFC 8002] 768
+            Enum_Parameter.NOTIFICATION:           'notification',            # [RFC 7401] 832
+            Enum_Parameter.ECHO_REQUEST_SIGNED:    'echo_request_signed',     # [RFC 7401] 897
+            Enum_Parameter.REG_INFO:               'reg_info',                # [RFC 8003] 930
+            Enum_Parameter.REG_REQUEST:            'reg_request',             # [RFC 8003] 932
+            Enum_Parameter.REG_RESPONSE:           'reg_response',            # [RFC 8003] 934
+            Enum_Parameter.REG_FAILED:             'reg_failed',              # [RFC 8003] 936
+            Enum_Parameter.REG_FROM:               'reg_from',                # [RFC 5770] 950
+            Enum_Parameter.ECHO_RESPONSE_SIGNED:   'echo_response_signed',    # [RFC 7401] 961
+            Enum_Parameter.TRANSPORT_FORMAT_LIST:  'transport_format_list',   # [RFC 7401] 2049
+            Enum_Parameter.ESP_TRANSFORM:          'esp_transform',           # [RFC 7402] 4095
+            Enum_Parameter.SEQ_DATA:               'seq_data',                # [RFC 6078] 4481
+            Enum_Parameter.ACK_DATA:               'ack_data',                # [RFC 6078] 4545
+            Enum_Parameter.PAYLOAD_MIC:            'payload_mic',             # [RFC 6078] 4577
+            Enum_Parameter.TRANSACTION_ID:         'transaction_id',          # [RFC 6078] 4580
+            Enum_Parameter.OVERLAY_ID:             'overlay_id',              # [RFC 6079] 4592
+            Enum_Parameter.ROUTE_DST:              'route_dst',               # [RFC 6028] 4601
+            Enum_Parameter.HIP_TRANSPORT_MODE:     'hip_transport_mode',      # [RFC 6261] 7680
+            Enum_Parameter.HIP_MAC:                'hip_mac',                 # [RFC 7401] 61505
+            Enum_Parameter.HIP_MAC_2:              'hip_mac_2',               # [RFC 7401] 61569
+            Enum_Parameter.HIP_SIGNATURE_2:        'hip_signature_2',         # [RFC 7401] 61633
+            Enum_Parameter.HIP_SIGNATURE:          'hip_signature',           # [RFC 7401] 61697
+            Enum_Parameter.ECHO_REQUEST_UNSIGNED:  'echo_request_unsigned',   # [RFC 7401] 63661
+            Enum_Parameter.ECHO_RESPONSE_UNSIGNED: 'echo_response_unsigned',  # [RFC 7401] 63425
+            Enum_Parameter.RELAY_FROM:             'relay_from',              # [RFC 5770] 63998
+            Enum_Parameter.RELAY_TO:               'relay_to',                # [RFC 5770] 64002
+            Enum_Parameter.OVERLAY_TTL:            'overlay_ttl',             # [RFC 6079] 64011
+            Enum_Parameter.ROUTE_VIA:              'route_via',               # [RFC 6028] 64017
+            Enum_Parameter.FROM:                   'from',                    # [RFC 8004] 65498
+            Enum_Parameter.RVS_HMAC:               'rvs_hmac',                # [RFC 8004] 65500
+            Enum_Parameter.VIA_RVS:                'via_rvs',                 # [RFC 8004] 65502
+            Enum_Parameter.RELAY_HMAC:             'relay_hmac',              # [RFC 5770] 65520
+        },
+    )  # type: DefaultDict[Enum_Parameter | int, str | tuple[ParameterParser, ParameterConstructor]]
 
     ##########################################################################
     # Properties.
@@ -575,20 +641,13 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         """Register a parameter parser.
 
         Args:
-            code: IPv4 option code.
-            meth: Method name or callable to parse and/or construct the option.
+            code: HIP parameter code.
+            meth: Method name or callable to parse and/or construct the parameter.
 
         """
-        name = code.name.lower()
-        if hasattr(cls, f'_read_param_{name}'):
+        if code in cls.__parameter__:
             warn(f'parameter {code} already registered, overwriting', RegistryWarning)
-
-        if isinstance(meth, str):
-            meth = (getattr(cls, f'_read_param_{meth}', cls._read_param_unassigned),  # type: ignore[arg-type]
-                    getattr(cls, f'_make_param_{meth}', cls._make_param_unassigned))  # type: ignore[arg-type]
-
-        setattr(cls, f'_read_param_{name}', meth[0])
-        setattr(cls, f'_make_param_{name}', meth[1])
+        cls.__parameter__[code] = meth
 
     ##########################################################################
     # Data models.
@@ -683,10 +742,14 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
         for schema in self.__header__.param:
             dscp = schema.type
+            name = self._lookup_registry(self.__parameter__, dscp)
 
-            meth_name = f'_read_param_{dscp.name.lower()}'
-            meth = cast('ParameterParser',
-                        getattr(self, meth_name, self._read_param_unassigned))
+            if isinstance(name, str):
+                meth_name = f'_read_param_{name}'
+                meth = cast('ParameterParser',
+                            getattr(self, meth_name, self._read_param_unassigned))
+            else:
+                meth = name[0]
             data = meth(schema, version=version, options=options)
 
             # record parameter data
@@ -2824,9 +2887,13 @@ class HIP(Internet[Data_HIP, Schema_HIP],
                     total_length += len(schema_packed)
                 else:
                     code, args = cast('tuple[Enum_Parameter, dict[str, Any]]', schema)
-                    meth_name = f'_make_param_{code.name.lower()}'
-                    meth = cast('ParameterConstructor',
-                                getattr(self, meth_name, self._make_param_unassigned))
+                    name = self._lookup_registry(self.__parameter__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_param_{name}'
+                        meth = cast('ParameterConstructor',
+                                    getattr(self, meth_name, self._make_param_unassigned))
+                    else:
+                        meth = name[1]
 
                     data = meth(code, version=version, **args)  # type: Schema_Parameter
                     data_packed = data.pack()
@@ -2837,9 +2904,13 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
         parameters_list = []
         for code, param in parameters.items(multi=True):
-            meth_name = f'_make_param_{code.name.lower()}'
-            meth = cast('ParameterConstructor',
-                        getattr(self, meth_name, self._make_param_unassigned))
+            name = self._lookup_registry(self.__parameter__, code)
+            if isinstance(name, str):
+                meth_name = f'_make_param_{name}'
+                meth = cast('ParameterConstructor',
+                            getattr(self, meth_name, self._make_param_unassigned))
+            else:
+                meth = name[1]
 
             data = meth(code, param, version=version)
             data_packed = data.pack()
