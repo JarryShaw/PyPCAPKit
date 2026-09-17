@@ -21,7 +21,7 @@ class TransportUnitTests(unittest.TestCase):
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.transport.transport import Transport
-        from pcapkit.utilities.exceptions import UnsupportedCall
+        from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall
 
         class DummyTransport(Transport):
             __proto__ = collections.defaultdict(lambda: Raw, {80: Raw})
@@ -49,6 +49,10 @@ class TransportUnitTests(unittest.TestCase):
 
         with self.assertRaises(UnsupportedCall):
             Transport.register(1, Raw)
+        # RegistryError is (BaseError, TypeError), so the bare TypeError this
+        # used to raise is still caught by anyone who was catching it.
+        with self.assertRaises(RegistryError):
+            DummyTransport.register(81, object)  # type: ignore[arg-type]
         with self.assertRaises(TypeError):
             DummyTransport.register(81, object)  # type: ignore[arg-type]
 
@@ -316,6 +320,77 @@ class TransportUnitTests(unittest.TestCase):
 
         self.assertEqual(result, 'decoded')
         decode.assert_called_once_with(data, 2000, 12, packet=None)
+
+    def test_decode_next_layer_forwards_the_lower_port_when_neither_is_registered(self) -> None:
+        """An unregistered port pair still names the port it could not place.
+
+        The port reaches
+        :meth:`ProtocolBase._import_next_layer
+        <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` as
+        ``alias``, which is what :class:`~pcapkit.protocols.misc.raw.Raw` records
+        as ``Data_Raw.protocol``. This used to pass :obj:`None`, so TCP and UDP
+        anonymised every payload they could not dispatch -- unlike SCTP and IPv4,
+        which both keep the identifier the packet arrived with. The lower port is
+        the one carried, matching the lookup's own primary key.
+
+        """
+        from pcapkit.protocols.protocol import ProtocolBase
+        from pcapkit.protocols.transport.transport import Transport
+
+        class DummyTransport(Transport):
+            __proto__ = collections.defaultdict(lambda: None, {80: object})
+
+            @property
+            def name(self) -> str:
+                return 'Dummy Transport'
+
+            @property
+            def length(self) -> int:
+                return 0
+
+            def read(self, length: int | None = None, **kwargs: object) -> object:
+                raise NotImplementedError
+
+            def make(self, **kwargs: object) -> object:
+                raise NotImplementedError
+
+            @classmethod
+            def __index__(cls) -> int:
+                return 0
+
+        transport = object.__new__(DummyTransport)
+        data = object()
+
+        with mock.patch.object(ProtocolBase, '_decode_next_layer', return_value='decoded') as decode:
+            result = DummyTransport._decode_next_layer(transport, data, (53406, 22), 12)
+
+        self.assertEqual(result, 'decoded')
+        decode.assert_called_once_with(data, 22, 12, packet=None)
+
+        # And the lookup left nothing behind, so the ports stay registrable.
+        self.assertEqual(set(DummyTransport.__proto__), {80})
+
+    def test_make_port_resolves_an_integer_and_passes_an_apptype_through(self) -> None:
+        from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        from pcapkit.protocols.transport.transport import Transport
+
+        resolved = Transport._make_port(80, TransportProtocol.tcp)
+        self.assertIsInstance(resolved, AppType)
+        self.assertEqual(resolved.port, 80)
+
+        # The transport protocol has to reach the lookup rather than being
+        # defaulted away: port 1 is tcpmux over TCP and unassigned over SCTP, so
+        # the two resolve to different members of the same number.
+        over_tcp = Transport._make_port(1, TransportProtocol.tcp)
+        over_sctp = Transport._make_port(1, TransportProtocol.sctp)
+        self.assertEqual(over_tcp.svc, 'tcpmux')
+        self.assertEqual(over_sctp.svc, 'unknown')
+        self.assertIsNot(over_tcp, over_sctp)
+        self.assertEqual(over_tcp.port, over_sctp.port)
+
+        # An AppType is returned unchanged -- no round trip through its number,
+        # which would lose the protocol it was resolved for.
+        self.assertIs(Transport._make_port(over_sctp, TransportProtocol.tcp), over_sctp)
 
 
 if __name__ == '__main__':

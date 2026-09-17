@@ -73,6 +73,25 @@ class TCPRuntimeTests(unittest.TestCase):
         self.assertEqual(options[2][1].echo, 2559889017)
 
     def test_tcp_unregistered_application_payload_falls_back_to_raw(self) -> None:
+        """An unregistered port is still recorded on the Raw payload.
+
+        ``Data_Raw.protocol`` is "the original enumeration of this protocol", and
+        it is worth most precisely when the protocol is unknown -- it is then the
+        only record of what the payload claimed to be. This frame is SSH, which
+        :mod:`pcapkit` does not decode, so port 22 is what it has to say. It used
+        to say :obj:`None`, which made the frame indistinguishable from "TCP
+        payload on a port we cannot name at all", while the equivalent SCTP and
+        IPv4 cases both named theirs.
+
+        The chain still ends in ``Raw`` rather than in the port's name: the ports
+        reach :meth:`Transport._decode_next_layer
+        <pcapkit.protocols.transport.transport.Transport._decode_next_layer>` as
+        plain :obj:`int` (``srcport.port``), not as
+        :class:`~pcapkit.const.reg.apptype.AppType` members, so
+        :class:`~pcapkit.protocols.misc.raw.Raw` has no name to label itself
+        with.
+
+        """
         extractor = self._extract('tcp.pcap')
         frame = extractor.frame[5]
         tcp = frame.payload.payload.payload
@@ -82,7 +101,8 @@ class TCPRuntimeTests(unittest.TestCase):
         self.assertTrue(tcp.info.flags.ack)
         self.assertEqual(type(tcp.payload).__name__, 'Raw')
         self.assertEqual(tcp.payload.name, 'Unknown')
-        self.assertIsNone(tcp.payload.info.protocol)
+        self.assertEqual(tcp.info.dstport.port, 22)
+        self.assertEqual(tcp.payload.info.protocol, 22)
         self.assertIsNone(tcp.payload.info.error)
 
     def test_stream_sample_exposes_no_payload_ack_frame(self) -> None:

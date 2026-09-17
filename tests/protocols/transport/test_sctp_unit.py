@@ -161,6 +161,29 @@ class SCTPUnitTests(unittest.TestCase):
         # A zeroed checksum is not the CRC32c of this packet.
         self.assertFalse(proto.checksum_valid)
 
+    def test_constructed_ports_carry_the_same_type_as_parsed_ones(self) -> None:
+        """A bare :obj:`int` port is resolved on construction, not left as it is.
+
+        SCTP never tripped over this the way TCP and UDP did -- it keys its next
+        layer on the DATA chunk's PPID rather than on a port, so it never read
+        ``srcport.port`` off the schema -- but it did leave a constructed packet
+        holding an :obj:`int` where a parsed one holds an
+        :class:`~pcapkit.const.reg.apptype.AppType`.
+
+        """
+        from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        from pcapkit.protocols.transport.sctp import SCTP
+
+        proto = SCTP.__new__(SCTP)
+        schema = SCTP.make(proto, srcport=9899, dstport=38412, vtag=0x11223344)
+
+        self.assertIsInstance(schema.srcport, AppType)
+        self.assertEqual(schema.srcport.port, 9899)
+        self.assertEqual(schema.srcport,
+                         AppType.get(9899, proto=TransportProtocol.sctp))
+        self.assertEqual(schema.dstport.port, 38412)
+        self.assertEqual(schema.pack()[:4], b'\x26\xab\x96\x0c')
+
     def test_checksum_is_the_little_endian_crc32c_of_the_zeroed_packet(self) -> None:
         import struct
 
