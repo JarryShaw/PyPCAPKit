@@ -46,9 +46,6 @@ Data Models
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.ip.Deferred
-   :members:
-   :show-inheritance:
 
 Type Variables
 --------------

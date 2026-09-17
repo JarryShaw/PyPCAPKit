@@ -30,12 +30,6 @@ _IPV6_HDR_LEN = 40
 #: the same reason as :data:`_IPV6_HDR_LEN`.
 _IPV6_NEXT_HEADER = 6
 
-#: Next Header value of the Authentication Header. Named here only to record
-#: *why* the walk below singles it out: it is the one extension header that does
-#: not measure its length in 8-octet units (:rfc:`4302#section-2.2`).
-_NH_AH = Enum_TransType.AH
-
-
 def _next_header_offset(header: 'bytes') -> 'int':
     """Locate the Next Header field of a datagram's last header.
 
@@ -63,7 +57,10 @@ def _next_header_offset(header: 'bytes') -> 'int':
     # header's Next Header value -- hence ``proto`` trailing one step behind.
     while position + 1 < len(header):
         offset = position
-        if proto == _NH_AH:
+        # NOTE: AH is the one extension header that does not measure its
+        # length in 8-octet units (:rfc:`4302#section-2.2`), which is why it
+        # is singled out rather than falling to the common case below.
+        if proto == Enum_TransType.AH:
             position += (header[position + 1] + 2) * 4
         else:
             position += (header[position + 1] + 1) * 8
