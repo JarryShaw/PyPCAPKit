@@ -7,10 +7,12 @@ import importlib.util
 import io
 from ipaddress import ip_address
 import pathlib
+import struct
 import tempfile
 import types
 import unittest
 from unittest import mock
+import warnings
 
 from tests._support import purge_modules
 
@@ -153,6 +155,117 @@ class DumpkitIOTests(unittest.TestCase):
             frame.__update__(packet=b'abcd')
             self.assertIs(dumper(frame), dumper)
             self.assertGreater(pcap_path.stat().st_size, header_size)
+
+    def test_pcap_dumper_writes_the_record_header_in_the_global_header_byte_order(self) -> None:
+        # The dumper writes the 16-octet record header itself instead of building a
+        # Frame to pack it, so the byte order of those four uint32 fields is now this
+        # module's responsibility rather than the schema's. It has to match the magic
+        # number in front of them, and 'big' has to keep working on a little-endian
+        # host -- which is exactly what a struct format hardcoded to one endianness
+        # would silently get wrong.
+        #
+        # Values are chosen to be byte-order-visible: every field is asymmetric, so a
+        # wrong endianness cannot coincide with a right one.
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.dumpkit.pcap import PCAPIO
+        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+
+        payload = bytes(range(6))
+        for byteorder, endian in (('little', '<'), ('big', '>')):
+            for nanosecond in (False, True):
+                with self.subTest(byteorder=byteorder, nanosecond=nanosecond):
+                    with tempfile.TemporaryDirectory() as tempdir:
+                        path = pathlib.Path(tempdir) / 'sample.pcap'
+                        dumper = PCAPIO(str(path), protocol=LinkType.ETHERNET,
+                                        byteorder=byteorder, nanosecond=nanosecond)
+                        header_size = path.stat().st_size
+
+                        frame = Frame(
+                            frame_info=FrameInfo(ts_sec=0x01020304, ts_usec=0x05060708,
+                                                 incl_len=len(payload), orig_len=0x0A0B0C0D),
+                            time='time', number=1, time_epoch=1.25,
+                            len=len(payload), cap_len=0x0A0B0C0D,
+                        )
+                        frame.__update__(packet=payload)
+                        dumper(frame)
+
+                        self.assertEqual(
+                            path.read_bytes()[header_size:],
+                            struct.pack(f'{endian}IIII', 0x01020304, 0x05060708,
+                                        len(payload), 0x0A0B0C0D) + payload,
+                        )
+
+    def test_pcap_dumper_truncates_an_out_of_range_record_field(self) -> None:
+        # UInt32Field, which used to pack these four fields, masks to the field width
+        # in NumberField.pre_process instead of rejecting an out-of-range value, so
+        # the dumper silently wrote a wrapped one. struct.pack raises on the same
+        # input, so writing the header directly would have turned a written -- if
+        # wrong -- record into a struct.error. Pinned so the mask is not mistaken for
+        # dead defensiveness and dropped: this is behaviour being preserved, not
+        # behaviour being chosen.
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.dumpkit.pcap import PCAPIO
+        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            path = pathlib.Path(tempdir) / 'sample.pcap'
+            dumper = PCAPIO(str(path), protocol=LinkType.ETHERNET,
+                            byteorder='little', nanosecond=False)
+            header_size = path.stat().st_size
+
+            frame = Frame(
+                frame_info=FrameInfo(ts_sec=2 ** 32 + 5, ts_usec=7,
+                                     incl_len=2, orig_len=2),
+                time='time', number=1, time_epoch=1.0, len=2, cap_len=2,
+            )
+            frame.__update__(packet=b'ab')
+            dumper(frame)
+
+            self.assertEqual(path.read_bytes()[header_size:],
+                             struct.pack('<IIII', 5, 7, 2, 2) + b'ab')
+
+    def test_pcap_dumper_appends_each_frame_without_reparsing_it(self) -> None:
+        # Successive frames have to accumulate, and each record has to be the caller's
+        # own octets verbatim -- the dumper no longer round-trips them through a Frame
+        # construction, which packed the record and then dissected it again through
+        # the whole protocol stack to reach bytes it had just been handed.
+        #
+        # The payload here is deliberately not a valid Ethernet frame: under the old
+        # rebuild it was dissected anyway, so a dumper that reparses is not merely
+        # slower but is doing work that can warn or raise on data it only had to copy.
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.dumpkit.pcap import PCAPIO
+        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+
+        def make(number: int, packet: bytes) -> Frame:
+            frame = Frame(
+                frame_info=FrameInfo(ts_sec=number, ts_usec=0, incl_len=len(packet),
+                                     orig_len=len(packet)),
+                time='time', number=number, time_epoch=float(number),
+                len=len(packet), cap_len=len(packet),
+            )
+            frame.__update__(packet=packet)
+            return frame
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            path = pathlib.Path(tempdir) / 'sample.pcap'
+            dumper = PCAPIO(str(path), protocol=LinkType.ETHERNET,
+                            byteorder='little', nanosecond=False)
+            header_size = path.stat().st_size
+
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                self.assertIs(dumper(make(1, b'\xff' * 3)), dumper)
+                self.assertIs(dumper(make(2, b'\xfe' * 5)), dumper)
+
+            self.assertEqual(
+                path.read_bytes()[header_size:],
+                struct.pack('<IIII', 1, 0, 3, 3) + b'\xff' * 3
+                + struct.pack('<IIII', 2, 0, 5, 5) + b'\xfe' * 5,
+            )
+            # The frame counter still advances once per frame, and nothing was parsed.
+            self.assertEqual(dumper._fnum, 3)
+            self.assertEqual([str(entry.message) for entry in caught], [])
 
     def test_pcap_dumper_cannot_serialise_a_mapping_frame(self) -> None:
         # Why Extractor substitutes a dict-capable trace format for the DPKT, Scapy,
