@@ -291,6 +291,42 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertEqual(NoPayload.__init__.__qualname__, 'NoPayload.__init__')
         self.assertEqual(bytes(NoPayload()), b'')
 
+    def test_post_init_fills_the_unset_and_keeps_an_explicit_none(self) -> None:
+        from pcapkit.corekit.fields.misc import ConditionalField
+        from pcapkit.corekit.fields.numbers import UInt8Field
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+
+        @schema_final
+        class OptionalSchema(Schema):
+            kind: int = UInt8Field(default=1)
+            #: declares a default of its own, and is off the wire unless kind is 9
+            maybe: int = ConditionalField(UInt8Field(default=0xCC),
+                                          lambda packet: packet['kind'] == 9)
+            #: declares no default
+            spare: int = UInt8Field()
+
+        # a field the caller left out is filled from its declared default, and one
+        # declaring none is left absent rather than holding ``NoValue``
+        self.assertEqual(OptionalSchema(kind=9).to_dict(), {'kind': 9, 'maybe': 0xCC})
+
+        # a ``None`` the caller passed is a value they chose, not a field they
+        # omitted, so it survives even where the field declares a default
+        self.assertEqual(OptionalSchema(kind=9, maybe=None, spare=None).to_dict(),
+                         {'kind': 9, 'maybe': None, 'spare': None})
+
+        # keeping it costs nothing on the wire, since ``FieldBase.pack`` resolves a
+        # ``None`` from the field's own default anyway
+        self.assertEqual(bytes(OptionalSchema(kind=9, maybe=None)),
+                         bytes(OptionalSchema(kind=9)))
+
+        # and it is what keeps a constructed schema agreeing with a parsed one:
+        # ``unpack`` stores ``None`` for a conditional field whose test fails, so
+        # substituting the default would stop ``to_dict`` surviving ``from_dict``
+        parsed = OptionalSchema.unpack(b'\x01\x07', 2, None)
+        self.assertIsNone(parsed.maybe)
+        self.assertEqual(OptionalSchema.from_dict(parsed.to_dict()).to_dict(),
+                         parsed.to_dict())
+
     def test_schema_mapping_payload_list_and_default_edge_branches(self) -> None:
         NestedSchema, FeatureSchema, PayloadOnlySchema, _, _ = self._make_schema_classes()
         from pcapkit.corekit.fields.field import NoValue

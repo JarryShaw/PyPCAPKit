@@ -315,15 +315,27 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             # seeds only the keys its argument carries, so a field the caller left
             # out is missing from ``__dict__`` entirely rather than holding
             # ``NoValue``, and subscripting it raised :exc:`KeyError` naming the
-            # field. Both paths now fill it from the field's default.
+            # field.
+            #
+            # What is tested is ``NoValue`` alone, not ``NoValue`` or ``None``.
+            # This method fills in what the caller did not say, and a ``None`` the
+            # caller passed *is* something said: on an optional field it is the
+            # chosen value, meaning this packet does not carry the field. It is
+            # also what :meth:`unpack` stores for a
+            # :class:`~pcapkit.corekit.fields.misc.ConditionalField` whose test
+            # fails -- including one that declares a default of its own -- so
+            # substituting the default here would leave a constructed schema
+            # disagreeing with a parsed one about the same packet, and
+            # ``from_dict(parsed.to_dict())`` no longer reproducing what it was
+            # given. Telling the two apart is what ``NoValue`` is for.
             value = self.__dict__.get(name, NoValue)
-            if value is not NoValue and value is not None:
+            if value is not NoValue:
                 continue
 
             default = field.default
             if default is not NoValue:
                 self.__dict__[name] = default
-            elif value is NoValue:
+            else:
                 # NOTE: Nothing to fill an unset field with, so the ``NoValue``
                 # the generated ``__init__`` seeded it with is dropped rather than
                 # kept: it is a *field* sentinel, not a value a schema may hold.
@@ -332,11 +344,8 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 # schema may be relying on to seed for itself -- the PCAP-NG
                 # section header block reads its Byte-Order Magic from a ``match``
                 # its own :meth:`pre_pack` supplies, and only when the context
-                # does not name one already.
-                #
-                # A ``None`` the caller passed is kept, on the other hand: on an
-                # optional field it is a chosen value rather than an absent one,
-                # saying that this packet does not carry the field.
+                # does not name one already. :meth:`pack` reads an absent field as
+                # ``None`` regardless.
                 self.__dict__.pop(name, None)
 
         # NOTE: Packed here only when a packet context was actually handed over.
