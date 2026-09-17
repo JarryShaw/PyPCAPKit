@@ -5,9 +5,11 @@ import collections.abc
 import contextlib
 import importlib.util
 import inspect
+import math
 import pathlib
 import signal
 import sys
+import time
 import types
 import unittest
 from typing import Iterable, Iterator
@@ -33,6 +35,20 @@ def time_limit(seconds: int = 5) -> Iterator[None]:
     :data:`signal.SIGTERM` from an outer :program:`timeout`, which such a loop
     likewise never gets around to handling.
 
+    There is only ever one pending alarm per process, so arming this one cancels
+    whatever was already scheduled -- an enclosing ``time_limit``, or a deadline the
+    test runner set for itself. Both the handler and that pending alarm are put back
+    on the way out, the alarm with the seconds spent in the body deducted, so an
+    enclosing deadline keeps counting down across the ``with`` rather than being
+    silently dropped.
+
+    An enclosing deadline that *expired* while the body ran cannot be delivered at
+    the moment it was due, since the body held the process until then. It is
+    re-armed for one second instead of cancelled: honouring it a moment late is the
+    lesser wrong, and cancelling it is how the enclosing timeout goes missing
+    altogether. The same clamp applies when the enclosing deadline was shorter than
+    ``seconds`` and this one therefore fired first.
+
     Args:
         seconds: Whole seconds to allow the body. :func:`signal.alarm` counts in
             whole seconds, so this cannot usefully be fractional.
@@ -53,15 +69,26 @@ def time_limit(seconds: int = 5) -> Iterator[None]:
     def expire(signum: int, frame: object) -> None:
         raise TimeoutError(f'did not finish within {seconds}s')
 
-    previous = signal.signal(signal.SIGALRM, expire)
-    signal.alarm(seconds)
+    previous_handler = signal.signal(signal.SIGALRM, expire)
+
+    # NOTE: ``signal.alarm`` returns the seconds left on the alarm it replaces, or
+    # zero when there was none. That return value is the only record of an
+    # enclosing deadline, so it is read here rather than discarded -- there is no
+    # way to ask for it again afterwards.
+    pending = signal.alarm(seconds)
+    started = time.monotonic()
     try:
         yield
     finally:
-        # Cancel before restoring, so that an alarm which fires between the two
-        # cannot be delivered to whatever handler was installed before.
+        # Cancel first, so that an alarm which fires between here and the handler
+        # being restored cannot be delivered to whatever handler was installed
+        # before -- and so that the alarm re-armed below belongs to that handler
+        # rather than to ``expire``.
         signal.alarm(0)
-        signal.signal(signal.SIGALRM, previous)
+        signal.signal(signal.SIGALRM, previous_handler)
+        if pending:
+            left = pending - (time.monotonic() - started)
+            signal.alarm(max(1, math.ceil(left)))
 
 
 def sample_path(name: str) -> str:

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Tests for :func:`tests._support.close_extractor`.
+"""Tests for the helpers in :mod:`tests._support`.
+
+Two of them are pinned here, both for the same reason: they are *machinery* the
+rest of the suite leans on, so a fault in either reports itself as a failure in
+whichever test happened to be running rather than as a fault in the helper.
+:func:`~tests._support.time_limit` is covered by :class:`TimeLimitTests` at the
+end; the rest of the module is :func:`~tests._support.close_extractor`.
 
 That helper is teardown machinery: nearly every runtime and integration test
 hands it an extractor from ``addCleanup`` or a ``finally`` block. Teardown code
@@ -24,9 +30,11 @@ extractors, so it reads no sample capture and needs no engine installed.
 """
 from __future__ import annotations
 
+import signal
+import time
 import unittest
 
-from tests._support import close_extractor
+from tests._support import close_extractor, time_limit
 
 
 class Closeable:
@@ -167,6 +175,81 @@ class PropagationTests(unittest.TestCase):
         """
         with self.assertRaises(KeyboardInterrupt):
             close_extractor(Extractor(Closeable(KeyboardInterrupt()), Closeable()))
+
+
+@unittest.skipUnless(hasattr(signal, 'SIGALRM'), 'signal.alarm is unavailable')
+class TimeLimitTests(unittest.TestCase):
+    """A deadline that arrives, and an enclosing one that survives.
+
+    A process has one pending alarm, so arming a deadline cancels whatever was
+    already scheduled. The helper reads what it displaced and puts it back; these
+    pin that, because an enclosing deadline going missing is invisible until the
+    run it should have bounded hangs instead.
+
+    """
+
+    def setUp(self) -> None:
+        # Whatever a test leaves behind, the next one starts from nothing pending
+        # and from a handler this class owns rather than the helper's.
+        self.handled = []  # type: list[int]
+        previous = signal.signal(signal.SIGALRM, lambda signum, frame: self.handled.append(signum))
+        self.addCleanup(signal.signal, signal.SIGALRM, previous)
+        self.addCleanup(signal.alarm, 0)
+
+    def test_the_deadline_fires_on_a_body_that_overruns(self) -> None:
+        """The point of the helper, pinned so the rest cannot be met by disarming."""
+        with self.assertRaises(TimeoutError):
+            with time_limit(1):
+                while True:
+                    pass
+
+    def test_an_enclosing_alarm_is_restored(self) -> None:
+        """An outer deadline keeps counting down across the ``with``.
+
+        Before this was fixed the helper cancelled the pending alarm on the way out
+        and never re-armed it, so an outer ``signal.alarm(30)`` read back as ``0``
+        afterwards: the enclosing deadline was gone, silently.
+
+        """
+        own_handler = signal.getsignal(signal.SIGALRM)
+
+        signal.alarm(30)
+        with time_limit(5):
+            pass
+
+        # Reading the remaining seconds cancels the alarm, which is the cleanup
+        # this test wanted anyway.
+        remaining = signal.alarm(0)
+
+        self.assertGreater(remaining, 0)
+        self.assertLessEqual(remaining, 30)
+        self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
+        self.assertEqual(self.handled, [])
+
+    def test_an_enclosing_alarm_that_expired_in_the_body_is_re_armed(self) -> None:
+        """An outer deadline overtaken by the body is honoured late, not dropped.
+
+        The body holds the process past the moment the outer alarm was due, so it
+        cannot be delivered on time. The helper re-arms it for a second rather than
+        cancelling it, since cancelling is how an outer timeout goes missing
+        altogether.
+
+        """
+        signal.alarm(1)
+        with time_limit(5):
+            time.sleep(1.2)
+
+        remaining = signal.alarm(0)
+
+        self.assertGreaterEqual(remaining, 1)
+        self.assertEqual(self.handled, [])
+
+    def test_nothing_is_re_armed_when_nothing_was_pending(self) -> None:
+        """The common case: no enclosing deadline, nothing left behind."""
+        with time_limit(5):
+            pass
+
+        self.assertEqual(signal.alarm(0), 0)
 
 
 if __name__ == '__main__':
