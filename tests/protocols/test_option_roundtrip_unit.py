@@ -246,23 +246,39 @@ EXPECTED_FAILURES = {
 
     # Both of these used to *hang* rather than fail, which is why the cycle is
     # run under a deadline at all. #432 landed the progress guard in
-    # ``OptionField``/``ListField``, and #429's ``_SMFDPDOption`` over-read fix
-    # went in with it -- so ``hopopt-option/SMF_DPD`` now round-trips and has no
-    # entry here at all.
+    # ``OptionField``/``ListField`` and fixed the ``_SMFDPDOption`` sizing in
+    # *both* schema modules symmetrically -- 26 lines each, ``'len': (1, 8)`` to
+    # ``(8, 8)`` and the ``+ 2`` on the selector's ``SchemaField`` -- so
+    # ``hopopt-option/SMF_DPD`` now round-trips and has no entry here at all.
     #
-    # ``IPv6-Opts`` did not get the same treatment, and that asymmetry is the
-    # finding: the two modules are line-for-line duplicates of each other (the
-    # over-read is at :163 and the ``'len': (1, 8)`` namespace at :374 in *both*
-    # schema files), so this is one fix that was applied once where it was needed
-    # twice. It now raises instead of hanging, which is the guard doing its job.
+    # ``IPv6-Opts`` still fails, and not because it missed that fix. The two
+    # modules differ in exactly one line of code, and it is older than #432:
+    # ``ipv6_opts.SMFIdentificationBasedDPDOption`` declares a second, redundant
+    # ``test`` ``ForwardMatchField`` that ``hopopt``'s does not. The enclosing
+    # ``_SMFDPDOption`` already has one, in both modules, and it is that outer
+    # field the selector reads -- nothing reads the nested copy. But a
+    # ``ForwardMatchField`` does not consume the stream while still occupying a
+    # slot in ``__buffer__``, so the nested schema over-reports its own size by
+    # one octet, and ``OptionField`` then mis-counts the option area against the
+    # header. Measured on the *same* octets, ``1100080100010100``:
+    #
+    #     hopopt    __fields__ = [type, len, info, tid, id]        len(schema) = 3
+    #     ipv6_opts __fields__ = [type, len, test, info, tid, id]  len(schema) = 4
+    #
+    #     HOPOPT(...)    -> options=[SMF_DPD, PadN]
+    #     IPv6_Opts(...) -> ProtocolError: IPv6-Opts: invalid format
+    #
+    # Identical on 3.10.20 and 3.14.7, so this one is not interpreter-dependent.
     #
     # The deadline in the sweep stays regardless. It is protection against the
     # *next* non-progress defect, not against this one.
     'ipv6-opts-option/SMF_DPD': Gap(
         'PARSE', 'invalid format',
-        'pcapkit/protocols/schema/internet/ipv6_opts.py:163 over-reads and :374 '
-        "declares 'len': (1, 8) where the octet is at bits 8-15; hopopt.py got "
-        'the fix in #429/#432 and ipv6_opts.py did not'),
+        'pcapkit/protocols/schema/internet/ipv6_opts.py:434 -- a redundant second '
+        "'test' ForwardMatchField that hopopt.py's equivalent does not have; it "
+        'consumes nothing but is counted in __buffer__, so the nested schema '
+        'reports 4 octets where it read 3, and the threshold check at '
+        'pcapkit/protocols/internet/ipv6_opts.py:497 rejects the option area'),
 
     # -- IPv6-Route -----------------------------------------------------------
 
