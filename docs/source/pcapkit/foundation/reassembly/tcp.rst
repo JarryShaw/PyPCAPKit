@@ -175,6 +175,8 @@ Terminology
                                             # last sequence number of payload
             header = tcp.packet.header,     # raw bytes type header
             payload = tcp.raw,              # raw bytearray type payload
+            timestamp = float(
+                frame.time_epoch),          # capture timestamp
           )
 
        Both ``first`` and ``last`` are absolute TCP sequence numbers and
@@ -190,7 +192,7 @@ Terminology
 
           (tuple) datagram
            |--> (Info) data
-           |     |--> 'completed' : (bool) True --> implemented
+           |     |--> 'completed' : (Completion) COMPLETE --> reassembled in whole
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (tuple)
            |     |            |               |--> (IPv4Address) ip.src
@@ -206,7 +208,7 @@ Terminology
            |     |--> 'payload' : (bytes) reassembled payload
            |     |--> 'packet' : (Protocol) parsed reassembled payload
            |--> (Info) data
-           |     |--> 'completed' : (bool) False --> not implemented
+           |     |--> 'completed' : (Completion) PARTIAL or TIMEOUT --> incomplete
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (tuple)
            |     |            |               |--> (IPv4Address) ip.src
@@ -256,7 +258,20 @@ Terminology
            |                                      |                                          holes set to b'\x00'
            |                                      |--> (int) ACK ...
            |                                      |--> ...
+           |                        |--> 'timestamp' : (float) capture timestamp of the
+           |                                                   first segment buffered
            |--> (tuple) BUFID ...
+
+       .. note::
+
+          TCP reassembly has **no** timeout by default: no specification gives
+          stream reassembly a deadline the way :rfc:`1122#section-3.3.2` and
+          :rfc:`8200#section-4.5` give IP fragmentation one, and an idle
+          connection is ordinary rather than pathological. ``timestamp`` is
+          recorded regardless, so passing ``timeout`` to
+          :class:`~pcapkit.foundation.reassembly.tcp.TCP` enables the same
+          eviction the IP reassemblers use -- see
+          :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.TCP.__timeout__>`.
 
        The hole descriptor list is kept in **absolute TCP sequence numbers**,
        once per ``BUFID``, whereas each ACK's payload buffer is indexed from

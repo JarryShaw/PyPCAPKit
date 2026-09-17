@@ -61,3 +61,11 @@ Auxiliary Data
 .. autoclass:: pcapkit.foundation.traceflow.data.data.TraceFlowData
    :members:
    :show-inheritance:
+
+.. autoclass:: pcapkit.foundation.traceflow.data.data.Deferred
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.foundation.traceflow.data.data.DeferredPacket
+   :members:
+   :show-inheritance:
