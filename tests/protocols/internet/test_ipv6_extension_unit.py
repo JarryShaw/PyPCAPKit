@@ -8,7 +8,7 @@ import types
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import purge_modules, time_limit
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -1389,6 +1389,139 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 
         self._assert_padding_options_parse_from_the_wire(IPv6_Opts)
+
+    def _assert_smf_dpd_options_parse_from_the_wire(self, protocol_cls: type) -> None:
+        """A hash-based ``SMF_DPD`` option must consume exactly what it declares.
+
+        Per :rfc:`6621#section-8.1` the option is an ``Option Type`` octet, an
+        ``Opt Data Len`` octet, and ``Opt Data Len`` further octets whose first
+        bit is the DPD mode -- set, here, for hash-based DPD, so that the whole of
+        the hash assist value is the ``Opt Data Len`` octets. Two things have to
+        hold for that to read correctly, and each case below breaks if either
+        does not: the declared length has to be read from the ``Opt Data Len``
+        octet, and the area handed to the mode schema has to be two octets wider
+        than it, since that schema parses the option header itself.
+
+        The first case is #431's reproducer verbatim. On the pristine tree it does
+        not fail, it never returns -- 15 seconds of CPU with no exception and no
+        diagnostic -- so every case runs under a deadline: a regression here has
+        to fail the suite rather than wedge it.
+
+        """
+        from pcapkit.const.ipv6.option import Option
+        from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode
+
+        cases = (
+            ('#431: hash-based DPD of length 3, then a pad1',
+             b'\x3b\x00' + b'\x08\x03\x81\x02\x03' + b'\x00',
+             [(Option.SMF_DPD, 5), (Option.Pad1, 1)],
+             [b'\x81\x02\x03']),
+            ('hash-based DPD filling the option area',
+             b'\x3b\x00' + b'\x08\x04\x81\x02\x03\x04',
+             [(Option.SMF_DPD, 6)],
+             [b'\x81\x02\x03\x04']),
+            ('two hash-based DPD options back to back',
+             b'\x3b\x01' + b'\x08\x02\x81\x01' + b'\x08\x02\x81\x02' + b'\x00' * 6,
+             [(Option.SMF_DPD, 4), (Option.SMF_DPD, 4)] + [(Option.Pad1, 1)] * 6,
+             [b'\x81\x01', b'\x81\x02']),
+        )
+
+        for name, raw, expected, expected_hav in cases:
+            with self.subTest(case=name):
+                with time_limit(5):
+                    proto = protocol_cls(raw, extension=True)
+
+                options = list(proto.info.options.items(multi=True))
+
+                self.assertEqual(proto.info.length, len(raw))
+                self.assertEqual([(code, opt.length) for code, opt in options], expected)
+
+                # every octet of the option area has to be accounted for by an
+                # option, which is what the mis-sized read got wrong
+                self.assertEqual(sum(length for _, length in expected), len(raw) - 2)
+
+                self.assertEqual(
+                    [opt.hav for code, opt in options if code == Option.SMF_DPD],
+                    expected_hav,
+                )
+                self.assertEqual(
+                    [opt.dpd_type for code, opt in options if code == Option.SMF_DPD],
+                    [SMFDPDMode.H_DPD] * len(expected_hav),
+                )
+
+                # the reader and the writer must agree: repacking the parsed
+                # schema has to give back the very bytes it was read from
+                self.assertEqual(bytes(proto.__header__), raw)
+
+    def test_hopopt_smf_dpd_options_parse_from_the_wire(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_smf_dpd_options_parse_from_the_wire(HOPOPT)
+
+    def test_ipv6_opts_smf_dpd_options_parse_from_the_wire(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_smf_dpd_options_parse_from_the_wire(IPv6_Opts)
+
+    def _assert_identification_based_dpd_options_parse_from_the_wire(self, protocol_cls: type) -> None:
+        """The other ``SMF_DPD`` mode, which sizes itself from a TaggerID.
+
+        Identification-based DPD reaches the same mis-sized read by a different
+        route: its length comes from ``Opt Data Len`` too, but the octets it
+        covers are a TaggerID whose own width comes from the ``TidLen`` nibble
+        [:rfc:`6621#section-8.1`], so a wrong ``Opt Data Len`` mis-sizes the
+        identifier rather than the whole option. Both cases below hang the
+        pristine tree exactly as the hash-based ones do.
+
+        Only the option itself is asserted, not the padding after it: HOPOPT and
+        IPv6-Opts disagree on how much of the option area an
+        ``SMFIdentificationBasedDPDOption`` leaves over, because the IPv6-Opts
+        schema carries an extra forward-matched octet which
+        :attr:`Schema.__buffer__ <pcapkit.protocols.schema.schema.Schema.__buffer__>`
+        records although the stream never consumes it. That is its own
+        ``len(data)``-is-not-consumed defect, distinct from the one #431 is about,
+        and pinning either count here would bless one of the two.
+
+        """
+        from pcapkit.const.ipv6.option import Option
+        from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode
+        from pcapkit.const.ipv6.tagger_id import TaggerID
+
+        cases = (
+            ('null taggerID, two-octet identifier',
+             b'\x3b\x00' + b'\x08\x03\x00\x01\x02' + b'\x00',
+             5, TaggerID.NULL, 0, None, b'\x01\x02'),
+            ('four-octet taggerID, one-octet identifier',
+             b'\x3b\x01' + b'\x08\x06\x13\x0a\x00\x00\x01\xff' + b'\x00' * 6,
+             8, TaggerID.DEFAULT, 3, b'\x0a\x00\x00\x01', b'\xff'),
+        )
+
+        for name, raw, length, tid_type, tid_len, tid, identifier in cases:
+            with self.subTest(case=name):
+                with time_limit(5):
+                    proto = protocol_cls(raw, extension=True)
+
+                option = next(opt for code, opt in proto.info.options.items(multi=True)
+                              if code == Option.SMF_DPD)
+
+                self.assertEqual(option.length, length)
+                self.assertEqual(option.dpd_type, SMFDPDMode.I_DPD)
+                self.assertEqual(option.tid_type, tid_type)
+                self.assertEqual(option.tid_len, tid_len)
+                self.assertEqual(option.tid, tid)
+                self.assertEqual(option.id, identifier)
+
+                self.assertEqual(bytes(proto.__header__), raw)
+
+    def test_hopopt_identification_based_dpd_options_parse_from_the_wire(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_identification_based_dpd_options_parse_from_the_wire(HOPOPT)
+
+    def test_ipv6_opts_identification_based_dpd_options_parse_from_the_wire(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_identification_based_dpd_options_parse_from_the_wire(IPv6_Opts)
 
     def _assert_padding_option_schema_sizes_itself(self, protocol_cls: type) -> None:
         """The padding option schema, on its own.
