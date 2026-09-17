@@ -410,7 +410,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PayloadField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Ethernet'</span><span class="p">]</span>
@@ -424,14 +423,35 @@
 <div class="viewcode-block" id="callback_payload">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.schema.link.ethernet.callback_payload">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">callback_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">'PayloadField'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Callback function for :attr:`Ethernet.payload`."""</span>
+<span class="w">    </span><span class="sd">"""Callback function for :attr:`Ethernet.payload`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        self: Payload field to resolve.</span>
+<span class="sd">        packet: Packet data, whose ``type`` names the next layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`None`; the resolved class is assigned to ``self.protocol``.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        The lookup goes through :meth:`ProtocolBase._lookup_next_layer</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer&gt;` rather than</span>
+<span class="sd">        subscripting the registry. :attr:`Ethernet.__proto__</span>
+<span class="sd">        &lt;pcapkit.protocols.link.link.Link.__proto__&gt;` *is*</span>
+<span class="sd">        :attr:`Link.__proto__ &lt;pcapkit.protocols.link.link.Link.__proto__&gt;`, a</span>
+<span class="sd">        class-level :class:`collections.defaultdict`, so reading a missing key</span>
+<span class="sd">        inserted it -- every unregistered EtherType a parse saw was recorded as</span>
+<span class="sd">        though somebody had registered it, and</span>
+<span class="sd">        :meth:`Link.register &lt;pcapkit.protocols.link.link.Link.register&gt;`</span>
+<span class="sd">        afterwards reported it as an overwrite. The helper reads the fallback</span>
+<span class="sd">        without recording it, and memoises a</span>
+<span class="sd">        :class:`~pcapkit.corekit.module.ModuleDescriptor` for a code that really</span>
+<span class="sd">        is registered, which this did not.</span>
+
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ethernet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ethernet</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
-    <span class="n">type_</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span>
-    <span class="n">protocol</span> <span class="o">=</span> <span class="n">Ethernet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">type_</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">Ethernet</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="n">Ethernet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'type'</span><span class="p">])</span></div>
 
 
 

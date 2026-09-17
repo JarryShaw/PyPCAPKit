@@ -619,6 +619,31 @@ header types.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.ethernet.callback_payload">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.link.ethernet.</span></span><span class="sig-name descname"><span class="pre">callback_payload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/link/ethernet.html#callback_payload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.link.ethernet.callback_payload" title="Link to this definition">¶</a></dt>
 <dd><p>Callback function for <a class="reference internal" href="#pcapkit.protocols.schema.link.ethernet.Ethernet.payload" title="pcapkit.protocols.schema.link.ethernet.Ethernet.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Ethernet.payload</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.PayloadField" title="pcapkit.corekit.fields.misc.PayloadField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadField</span></code></a></span>) – Payload field to resolve.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data, whose <code class="docutils literal notranslate"><span class="pre">type</span></code> names the next layer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>; the resolved class is assigned to <code class="docutils literal notranslate"><span class="pre">self.protocol</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The lookup goes through <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code> rather than
+subscripting the registry. <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Ethernet.__proto__</span></code></a> <em>is</em>
+<a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>, a
+class-level <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>, so reading a missing key
+inserted it – every unregistered EtherType a parse saw was recorded as
+though somebody had registered it, and
+<a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.register" title="pcapkit.protocols.link.link.Link.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Link.register</span></code></a>
+afterwards reported it as an overwrite. The helper reads the fallback
+without recording it, and memoises a
+<a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> for a code that really
+is registered, which this did not.</p>
+</div>
 </dd></dl>
 
 </section>

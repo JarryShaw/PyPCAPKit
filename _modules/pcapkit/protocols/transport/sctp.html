@@ -430,6 +430,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportProtocol</span> <span class="k">as</span> <span class="n">Enum_TransportProtocol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.cause_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">CauseCode</span> <span class="k">as</span> <span class="n">Enum_CauseCode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.chunk</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chunk</span> <span class="k">as</span> <span class="n">Enum_Chunk</span>
@@ -557,7 +558,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.sctp</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">UserInitiatedAbortCause</span> <span class="k">as</span> <span class="n">Schema_UserInitiatedAbortCause</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -987,8 +987,8 @@
             <span class="n">chunks_value</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_SCTP</span><span class="p">(</span>
-            <span class="n">srcport</span><span class="o">=</span><span class="n">srcport</span><span class="p">,</span>
-            <span class="n">dstport</span><span class="o">=</span><span class="n">dstport</span><span class="p">,</span>
+            <span class="n">srcport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">srcport</span><span class="p">,</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">sctp</span><span class="p">),</span>
+            <span class="n">dstport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">dstport</span><span class="p">,</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">sctp</span><span class="p">),</span>
             <span class="n">vtag</span><span class="o">=</span><span class="n">vtag</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span> <span class="k">if</span> <span class="n">chksum</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">chksum</span><span class="p">,</span>
             <span class="n">chunks</span><span class="o">=</span><span class="n">chunks_value</span><span class="p">,</span>
@@ -1254,66 +1254,17 @@
 <span class="sd">            &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`</span>
 <span class="sd">            does for an unregistered transport type. Resolving it to</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw` is</span>
-<span class="sd">            :meth:`self._import_next_layer &lt;SCTP._import_next_layer&gt;`'s job.</span>
+<span class="sd">            :meth:`ProtocolBase._import_next_layer</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase._import_next_layer&gt;`'s job,</span>
+<span class="sd">            which looks the PPID up through</span>
+<span class="sd">            :meth:`ProtocolBase._lookup_next_layer</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer&gt;` and so</span>
+<span class="sd">            leaves :attr:`self.__proto__ &lt;SCTP.__proto__&gt;` untouched.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type,return-value]</span></div>
 
-
-    <span class="nd">@beholder</span>  <span class="c1"># type: ignore[arg-type]</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Protocol'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Import next layer extractor.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            proto: payload protocol identifier (PPID) of the DATA chunk carrying</span>
-<span class="sd">                the payload, or :obj:`None` if the packet carries no user data</span>
-<span class="sd">            length: valid (*non-padding*) length</span>
-<span class="sd">            packet: packet info (passed from :meth:`self.unpack &lt;pcapkit.protocols.protocol.Protocol.unpack&gt;`)</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Instance of next layer.</span>
-
-<span class="sd">        Important:</span>
-<span class="sd">            This overrides :meth:`ProtocolBase._import_next_layer</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase._import_next_layer&gt;` for one</span>
-<span class="sd">            reason only: to look the PPID up **without** mutating</span>
-<span class="sd">            :attr:`self.__proto__ &lt;SCTP.__proto__&gt;`.</span>
-
-<span class="sd">            The registry is a :class:`collections.defaultdict`, so the base</span>
-<span class="sd">            implementation's ``self.__proto__[proto]`` *inserts* any key it is</span>
-<span class="sd">            handed. Every packet with an unregistered PPID would therefore grow</span>
-<span class="sd">            a registry that is class-level -- shared by every :class:`SCTP`</span>
-<span class="sd">            instance in the process -- and make</span>
-<span class="sd">            :meth:`self.register &lt;SCTP.register&gt;` report that PPID as already</span>
-<span class="sd">            registered. The fallback itself is unchanged: an unregistered PPID</span>
-<span class="sd">            still resolves to :class:`~pcapkit.protocols.misc.raw.Raw`, which is</span>
-<span class="sd">            what :attr:`self.__proto__ &lt;SCTP.__proto__&gt;` declares as its default.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[Protocol]'</span>
-
-        <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="k">elif</span> <span class="n">proto</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span>  <span class="c1"># type: ignore[assignment]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-                <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># type: ignore[unreachable]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># update mapping upon import</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-
-        <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span>  <span class="c1"># type: ignore[abstract]</span>
-                         <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">next_</span>
 
 <div class="viewcode-block" id="SCTP._read_sctp_chunks">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._read_sctp_chunks">[docs]</a>
