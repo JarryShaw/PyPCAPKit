@@ -81,11 +81,38 @@ class TCP(TraceFlow[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]):
     Note:
         With ``analyse=True`` a flow also carries its **application layer**:
         :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
-        holds one reassembled datagram per direction, each with its payload parsed
-        on demand. The tracer does not reassemble the stream itself -- it feeds
+        holds the flow's reassembled datagrams, each with its payload parsed on
+        demand. The tracer does not reassemble the stream itself -- it feeds
         :class:`~pcapkit.foundation.reassembly.tcp.TCP`, which already implements
         :rfc:`815` and copes with the reordering and retransmission that a tracer
         concatenating payloads in capture order would silently corrupt.
+
+        How many datagrams that is follows from the reassembler's own notion of a
+        datagram, which is **per direction and per acknowledgement number**: it
+        buckets as ``self._buffer[BUFID].ack[ACK]`` and emits one datagram per
+        bucket. Since :meth:`_make_segment` passes each segment's ``ack`` through
+        untouched, a direction yields one datagram per distinct acknowledgement
+        number it carried -- not one datagram per direction. Three request/response
+        round trips on one connection therefore give **six** datagrams, three each
+        way, one per exchange:
+
+        .. code-block:: text
+
+           src=12345  ack=501  payload=b'req1'    src=443  ack=105  payload=b'resp1'
+           src=12345  ack=506  payload=b'req2'    src=443  ack=109  payload=b'resp2'
+           src=12345  ack=511  payload=b'req3'    src=443  ack=113  payload=b'resp3'
+
+        That is deliberate rather than incidental: the acknowledgement number
+        advances exactly when the peer has spoken, so bucketing on it splits a
+        conversation at its message boundaries, and each datagram's payload is one
+        application message that :attr:`Datagram.packet
+        <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>` can parse on its
+        own. Merging a direction into a single stream would instead hand the
+        application parser several concatenated messages and have it read only the
+        first. A direction that carried one acknowledgement number throughout --
+        a single request and its reply, which is what the unit tests exercise --
+        does collapse to one datagram each way, which is where "one per direction"
+        holds.
 
         It is **off by default** because buffering every traced payload is a cost
         tracing does not otherwise pay, and tracing's per-packet cost is something
@@ -444,6 +471,25 @@ class TCP(TraceFlow[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]):
             buffer there would strand the rest of its conversation in a second
             flow. Such a flow is therefore reported here but has not fired its
             callback; :meth:`finish` is what does that, at the end of the capture.
+
+            With ``analyse=True`` that makes an open flow's
+            :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
+            a **snapshot**, and a mid-capture one. The
+            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves when
+            it is first read and is then fixed in place, so it holds the flow as it
+            stood at *that read* -- not as it stood when this method returned, and
+            not as it will stand once the conversation ends. Read it while the flow
+            is open and the datagrams cover only the segments seen so far; segments
+            arriving afterwards are reassembled into the buffer but cannot reach an
+            already-resolved snapshot, and nothing on the returned :class:`Index`
+            distinguishes one from the final result that :meth:`finish` produces.
+
+            This call's own cache is not the cause and does not soften it: both
+            :meth:`trace` and :meth:`finish` clear ``__cached__['submit']``, so a
+            later call rebuilds the tuple with fresh
+            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` objects. It is
+            the *previously returned* :class:`Index`, if a caller kept one, that
+            cannot catch up. For a result that is final, read after :meth:`finish`.
 
         """
         if (cached := self.__cached__.get('submit')) is not None:

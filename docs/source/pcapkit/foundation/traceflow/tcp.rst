@@ -165,14 +165,6 @@ Data Structures
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.traceflow.data.data.Deferred
-   :members:
-   :show-inheritance:
-
-.. autoclass:: pcapkit.foundation.traceflow.data.data.DeferredPacket
-   :members:
-   :show-inheritance:
-
 Type Variables
 --------------
 

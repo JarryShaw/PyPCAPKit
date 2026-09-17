@@ -316,6 +316,11 @@ class TCPTraceFlowTests(unittest.TestCase):
         below are delivered *out of order* and still come back in sequence order.
         A tracer concatenating payloads as they arrived would return ``b'worldhello'``.
 
+        Every segment here carries the default ``ack=0``, which is the *only*
+        reason the count is one per direction -- see
+        :meth:`test_each_exchange_of_a_multi_round_trip_flow_is_its_own_datagram`
+        for what a real, advancing acknowledgement number does.
+
         """
         from pcapkit.foundation.traceflow.tcp import TCP
 
@@ -332,12 +337,104 @@ class TCPTraceFlowTests(unittest.TestCase):
             flow, = trace.index
             datagrams = flow.packet
             self.assertIsNotNone(datagrams)
-            self.assertEqual(len(datagrams), 2, 'expected one datagram per direction')
+            self.assertEqual(len(datagrams), 2,
+                             'one acknowledgement number each way, so one datagram each way')
 
             payloads = {dgram.id.src[1]: bytes(dgram.payload) for dgram in datagrams}
             # sequence order, not arrival order -- this is the reassembler's work
             self.assertEqual(payloads[12345], b'helloworld')
             self.assertEqual(payloads[443], b'reply')
+
+    def test_each_exchange_of_a_multi_round_trip_flow_is_its_own_datagram(self) -> None:
+        """A direction yields one datagram per acknowledgement number, not one total.
+
+        The reassembler buckets as ``self._buffer[BUFID].ack[ACK]`` and emits one
+        datagram per bucket, and :meth:`~pcapkit.foundation.traceflow.tcp.TCP._make_segment`
+        passes ``ack`` through untouched. So the count follows the *conversation*:
+        the acknowledgement number advances exactly when the peer has spoken, which
+        splits each direction at its message boundaries and leaves every datagram's
+        payload one application message that can be parsed on its own.
+
+        Pinned because the sibling test above holds ``ack`` at its default of zero
+        throughout, and so cannot see this: it is the one shape in which "one
+        datagram per direction" is the whole truth.
+
+        """
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+
+            # three request/response round trips on one connection, with the
+            # acknowledgement number advancing as it does on any real exchange
+            trace.trace(self._packet(index=1, syn=True, seq=100, ack=0))
+            trace.trace(self._reply(index=2, syn=True, seq=500, ack=101, timestamp=1.3))
+            trace.trace(self._packet(index=3, seq=101, ack=501, timestamp=1.4))
+            trace.trace(self._packet(index=4, seq=101, ack=501, payload=b'req1', timestamp=1.5))
+            trace.trace(self._reply(index=5, seq=501, ack=105, payload=b'resp1', timestamp=1.6))
+            trace.trace(self._packet(index=6, seq=105, ack=506, payload=b'req2', timestamp=1.7))
+            trace.trace(self._reply(index=7, seq=506, ack=109, payload=b'resp2', timestamp=1.8))
+            trace.trace(self._packet(index=8, seq=109, ack=511, payload=b'req3', timestamp=1.9))
+            trace.trace(self._reply(index=9, seq=511, ack=113, payload=b'resp3', timestamp=2.0))
+
+            flow, = trace.index
+            datagrams = flow.packet
+            self.assertIsNotNone(datagrams)
+            self.assertEqual(len(datagrams), 6,
+                             'three exchanges each way, one datagram per exchange')
+
+            # keyed by (source port, acknowledgement number), which is what the
+            # reassembler buckets on
+            got = {(dgram.id.src[1], dgram.id.ack): bytes(dgram.payload)
+                   for dgram in datagrams}
+            self.assertEqual(got, {
+                (12345, 501): b'req1',
+                (12345, 506): b'req2',
+                (12345, 511): b'req3',
+                (443, 105): b'resp1',
+                (443, 109): b'resp2',
+                (443, 113): b'resp3',
+            })
+
+            # the payload-free handshake and bare acknowledgement raise no datagram
+            # of their own -- they fill no hole, so no bucket of theirs is emitted
+            self.assertNotIn((12345, 0), got)
+            self.assertNotIn((443, 101), got)
+
+    def test_an_open_flows_application_layer_is_a_snapshot_of_when_it_was_read(self) -> None:
+        """Reading ``packet`` on an open flow freezes it there.
+
+        :meth:`~pcapkit.foundation.traceflow.tcp.TCP.submit` deliberately reports
+        open flows without finalising them, and the
+        :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves on first
+        read and is then fixed in place. So an :class:`Index` a caller kept from a
+        mid-capture read cannot see segments that arrived afterwards, and nothing on
+        it says so -- which is why the docstring tells callers to read after
+        :meth:`~pcapkit.foundation.traceflow.tcp.TCP.finish` for a final result.
+
+        """
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+            trace.trace(self._packet(index=1, syn=True, seq=100))
+            trace.trace(self._packet(index=2, seq=101, payload=b'first', timestamp=1.5))
+
+            held, = trace.index          # a caller keeping a mid-capture Index
+            resolved = held.packet       # ... and resolving its Deferred here
+            self.assertEqual([bytes(dgram.payload) for dgram in resolved], [b'first'])
+
+            # the rest of the conversation reaches the buffer, but not the snapshot
+            trace.trace(self._packet(index=3, seq=106, payload=b'second', timestamp=1.6))
+            self.assertIs(held.packet, resolved,
+                          'the resolved snapshot was rebuilt behind the caller')
+            self.assertEqual([bytes(dgram.payload) for dgram in held.packet], [b'first'])
+
+            # a fresh read does see it, because trace() cleared the submit cache
+            trace.finish()
+            final, = trace.index
+            self.assertEqual([bytes(dgram.payload) for dgram in final.packet],
+                             [b'firstsecond'])
 
     def test_the_application_layer_is_reassembled_only_on_first_read(self) -> None:
         """``Index.packet`` holds a :class:`Deferred` until somebody reads it.
