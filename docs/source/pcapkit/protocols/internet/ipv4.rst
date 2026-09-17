@@ -82,6 +82,9 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_opt_rtralt
    .. automethod:: _make_opt_qs
 
+   .. autoattribute:: __option__
+      :no-value:
+
    .. automethod:: __index__
 
 Header Schemas
