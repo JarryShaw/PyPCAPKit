@@ -46,7 +46,6 @@ Data Models
    :members:
    :show-inheritance:
 
-
 Type Variables
 --------------
 

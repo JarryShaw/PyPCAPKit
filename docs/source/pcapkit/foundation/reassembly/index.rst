@@ -53,7 +53,9 @@ Auxiliary Data
    :members:
    :show-inheritance:
 
+.. module:: pcapkit.foundation.reassembly.data
 .. module:: pcapkit.foundation.reassembly.data.data
+.. currentmodule:: pcapkit.foundation.reassembly
 
 .. autoclass:: pcapkit.foundation.reassembly.data.data.ReassemblyData
    :members:
