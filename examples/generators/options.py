@@ -327,14 +327,15 @@ def _named_registry(owner: 'type', enum: 'Any', prefix: 'str',
                     attribute: 'str') -> 'Any':
     """A protocol's dispatch registry, or a stand-in derived from its handlers.
 
-    ``IPv4`` and ``HIP`` are the two protocols that still dispatch their options
-    and parameters by attribute name rather than through a registry, so for them
-    there is nothing to enumerate. The equivalent source of truth is the
+    ``IPv4`` and ``HIP`` were the last two protocols to dispatch their options
+    and parameters by attribute name rather than through a registry, and for
+    those there was nothing to enumerate. The equivalent source of truth is the
     enumeration crossed with the presence of the handler, which is what this
     builds when the registry is absent.
 
-    The real registry is preferred whenever it exists, so that the migration
-    landing is a no-op here rather than something to come back and finish. Both
+    GitHub pull request #434 gave both of them a real registry, so the fallback
+    is no longer taken for either -- it is kept because it costs nothing and is
+    the only thing that would notice a protocol added tomorrow without one. Both
     shapes are a :class:`collections.defaultdict`, so :func:`cases` and
     :func:`handler` cannot tell which one they were given -- and in particular
     :meth:`ProtocolBase._lookup_registry
@@ -916,7 +917,7 @@ HIP_COPIES = 2
 def _hip_registry() -> 'Any':
     from pcapkit.const.hip.parameter import Parameter
     from pcapkit.protocols.internet.hip import HIP
-    return _named_registry(HIP, Parameter, '_make_param_', '__param__')
+    return _named_registry(HIP, Parameter, '_make_param_', '__parameter__')
 
 
 def _hip_overrides() -> 'dict[Any, dict[str, Any]]':
