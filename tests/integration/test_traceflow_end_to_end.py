@@ -15,13 +15,15 @@ import unittest
 from tests._support import sample_path
 from tests.integration._helpers import HAS_RUNTIME, EndToEndTestCase, read_json
 
-#: The four directional flows of :file:`tcp.pcap`: two concurrent SSH sessions,
-#: one over IPv4 and one over IPv6, each traced per direction.
+#: The two connections of :file:`tcp.pcap`: concurrent SSH sessions, one over
+#: IPv4 and one over IPv6. Tracing keys a flow on the canonical *pair* of
+#: endpoints, so a connection is one flow rather than one per direction; the
+#: label is that of the direction seen first, and ``forward``/``reverse`` hold
+#: that direction's frames and its peer's. Mapped here as
+#: ``label: (forward, reverse)``.
 TCP_PCAP_FLOWS = {
-    '10.20.30.130_22-10.20.30.131_53406-1500000000.000774': (1, 7),
-    '10.20.30.131_53406-10.20.30.130_22-1500000000.001585': (2, 6),
-    'fe80..a6.87f9.2793.16ee_51774-fe80..1ccd.7c77.bac7.46b7_22-1500000000.002433': (3,),
-    'fe80..1ccd.7c77.bac7.46b7_22-fe80..a6.87f9.2793.16ee_51774-1500000000.003318': (4, 5),
+    '10.20.30.130_22-10.20.30.131_53406-1500000000.000774': ((1, 7), (2, 6)),
+    'fe80..a6.87f9.2793.16ee_51774-fe80..1ccd.7c77.bac7.46b7_22-1500000000.002433': ((3,), (4, 5)),
 }
 
 
@@ -35,20 +37,29 @@ class TraceFlowTests(EndToEndTestCase):
                                  trace_fout=self.out('trace'))
         return extractor.length, extractor.trace.tcp
 
-    def test_every_direction_of_every_connection_becomes_a_flow(self) -> None:
+    def test_both_directions_of_a_connection_become_one_flow(self) -> None:
         length, flows = self.trace()
 
         self.assertEqual(length, 7)
-        self.assertEqual({flow.label: flow.index for flow in flows}, TCP_PCAP_FLOWS)
+        # each connection is a single flow, and both of its halves are still
+        # reported separately -- as ``forward`` and ``reverse`` of that one flow
+        self.assertEqual({flow.label: (flow.forward, flow.reverse) for flow in flows},
+                         TCP_PCAP_FLOWS)
+        # ... and the flow's own index is the two halves in wire order, so no
+        # frame is dropped by the merge and none is counted twice
+        self.assertEqual({flow.label: flow.index for flow in flows},
+                         {label: tuple(sorted(forward + reverse))
+                          for label, (forward, reverse) in TCP_PCAP_FLOWS.items()})
 
     def test_flow_labels_carry_both_address_families(self) -> None:
         _, flows = self.trace()
         labels = {flow.label for flow in flows}
 
         # A label is ``src_port-dst_port-timestamp``, with the dots of an IPv6
-        # address doubled so the label stays usable as a file name.
-        self.assertEqual(sum(1 for label in labels if label.startswith('10.20.30.')), 2)
-        self.assertEqual(sum(1 for label in labels if label.startswith('fe80..')), 2)
+        # address doubled so the label stays usable as a file name. One label per
+        # connection rather than per direction, so one of each family here.
+        self.assertEqual(sum(1 for label in labels if label.startswith('10.20.30.')), 1)
+        self.assertEqual(sum(1 for label in labels if label.startswith('fe80..')), 1)
 
     def test_each_flow_is_dumped_to_its_own_report(self) -> None:
         _, flows = self.trace()
@@ -99,7 +110,11 @@ class TraceFlowScaleTests(EndToEndTestCase):
         flows = extractor.trace.tcp
 
         self.assertEqual(extractor.length, 1117)
-        self.assertEqual(len(flows), 331)
+        # 220 connections, not the 331 directions they are made of: 111 of them
+        # were captured both ways and 109 only one way, and 2 * 111 + 109 == 331,
+        # so the drop is the two halves of a connection meeting in one flow and
+        # not frames going missing -- which is what the index check below pins
+        self.assertEqual(len(flows), 220)
 
         indexed = [number for flow in flows for number in flow.index]
         self.assertEqual(len(indexed), 1117)
@@ -113,9 +128,9 @@ class TraceFlowScaleTests(EndToEndTestCase):
 
         written = {entry.name for entry in self.tmp_path.joinpath('trace').iterdir()}
         self.assertEqual(written, {f'{flow.label}.json' for flow in flows})
-        self.assertEqual(len(written), 331)
+        self.assertEqual(len(written), 220)
 
-        # Spot-check the longest flow rather than re-reading all 331 reports.
+        # Spot-check the longest flow rather than re-reading all 220 reports.
         longest = max(flows, key=lambda flow: len(flow.index))
         report = read_json(longest.fpout)
         self.assertEqual(list(report), [f'Frame {number}' for number in longest.index])

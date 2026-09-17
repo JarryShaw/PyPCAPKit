@@ -14,6 +14,7 @@ TCP flows from a series of packets and connections.
    .. autoproperty:: protocol
 
    .. automethod:: dump
+   .. automethod:: make_bufid
    .. automethod:: trace
    .. automethod:: submit
 
@@ -61,10 +62,23 @@ Terminology
            |       |--> ip.dst      |
            |       |--> tcp.dstport |
            |                        |--> 'fpout' : (dictdumper.dumper.Dumper) output dumper object
-           |                        |--> 'index': (list) list of frame index
+           |                        |--> 'index': (list) list of frame index, both directions
            |                        |              |--> (int) frame index
-           |                        |--> 'label': (str) flow label generated from ``BUFID``
+           |                        |--> 'label': (str) flow label generated from the packet
+           |                        |                   that opened the flow
+           |                        |--> 'origin': (tuple) (address, port) of the endpoint
+           |                        |                      that opened the flow
+           |                        |--> 'forward': (list) frame index sent by ``origin``
+           |                        |--> 'reverse': (list) frame index sent to ``origin``
+           |                        |--> 'fin': (set) endpoints seen to have sent a FIN
            |--> (tuple) BUFID ...
+
+       When tracing bidirectionally -- the default -- ``BUFID`` orders the two
+       endpoints canonically rather than as (source, destination), so both halves
+       of a conversation reduce to the same key. It stays a plain :obj:`tuple`
+       either way, because it is a :obj:`dict` key and an
+       :class:`~pcapkit.corekit.infoclass.Info` cannot be one --
+       :class:`collections.abc.Mapping` sets its ``__hash__`` to :data:`None`.
 
        .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Buffer`
 
@@ -78,10 +92,21 @@ Terminology
           (tuple) index
            |--> (Info) data
            |     |--> 'fpout' : (Optional[str]) output filename if exists
-           |     |--> 'index': (tuple) tuple of frame index
+           |     |--> 'index': (tuple) tuple of frame index, both directions,
+           |     |                     in capture order
            |     |              |--> (int) frame index
-           |     |--> 'label': (str) flow label generated from ``BUFID``
+           |     |--> 'label': (str) flow label generated from the packet that
+           |     |                   opened the flow
+           |     |--> 'forward': (tuple) frame index in the direction that
+           |     |                       opened the flow
+           |     |--> 'reverse': (tuple) frame index the other way; empty when
+           |                            tracing unidirectionally
            |--> (Info) data ...
+
+       ``forward`` and ``reverse`` partition ``index``, so
+       ``frame_number in flow.forward`` answers which way a packet went without
+       taking the label apart. ``forward`` is the direction of the packet that
+       opened the flow, whose endpoints the label names first.
 
        .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Index`
 

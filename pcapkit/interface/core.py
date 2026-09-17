@@ -76,8 +76,10 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
             engine: 'Optional[Engines]' = None, layer: 'Optional[Layers] | Type[Protocol]' = None,                         # extraction settings # pylint: disable=line-too-long
             protocol: 'Optional[Protocols]' = None,                                                                        # extraction settings # pylint: disable=line-too-long
             reassembly: 'bool' = False, reasm_strict: 'bool' = True, reasm_store: 'bool' = True,                           # reassembly settings # pylint: disable=line-too-long
+            reasm_timeout: 'Optional[float]' = None,                                                                       # reassembly settings # pylint: disable=line-too-long
             trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
             trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
+            trace_bidirectional: 'bool' = True,                                                                            # trace settings # pylint: disable=line-too-long
             ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
             buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
             no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
@@ -107,12 +109,17 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
         reassembly: if perform reassembly
         reasm_strict: if set strict flag for reassembly
         reasm_store: if store reassembled datagrams
+        reasm_timeout: reassembly timeout in seconds, on the capture's own
+            clock; :data:`None` selects each protocol's default (60 seconds for
+            IPv4 and IPv6, disabled for TCP)
 
         trace: if trace TCP traffic flows
         trace_fout: path name for flow tracer if necessary
         trace_format: output file format of flow tracer
         trace_byteorder: output file byte order
         trace_nanosecond: output nanosecond-resolution file flag
+        trace_bidirectional: whether both halves of a conversation are traced as
+            one flow, which is the default
 
         ip: if record data for IPv4 & IPv6 reassembly (must be used with ``reassembly=True``)
         ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)
@@ -151,18 +158,23 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                      engine=engine, layer=layer, protocol=protocol,  # type: ignore[arg-type]
                      ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp,
                      reassembly=reassembly, reasm_store=reasm_store, reasm_strict=reasm_strict,
+                     reasm_timeout=reasm_timeout,
                      trace=trace, trace_fout=trace_fout, trace_format=trace_format,
                      trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond,
+                     trace_bidirectional=trace_bidirectional,
                      buffer_size=buffer_size, buffer_path=buffer_path, buffer_save=buffer_save,
                      no_eof=no_eof, context=context)
 
 
-def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False) -> 'Reassembly':
+def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False,
+               timeout: 'Optional[float]' = None) -> 'Reassembly':
     """Reassemble fragmented datagrams.
 
     Arguments:
         protocol: protocol to be reassembled
         strict: if return all datagrams (including those not implemented) when submit
+        timeout: reassembly timeout in seconds, on the capture's own clock;
+            :data:`None` selects the protocol's own default
 
     Returns:
         A :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` object of corresponding protocol.
@@ -175,18 +187,18 @@ def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False) -> 'Rea
         protocol = protocol.id()[0]
 
     if protocol == 'IPv4':
-        return IPv4_Reassembly(strict=strict)
+        return IPv4_Reassembly(strict=strict, timeout=timeout)
     if protocol == 'IPv6':
-        return IPv6_Reassembly(strict=strict)
+        return IPv6_Reassembly(strict=strict, timeout=timeout)
     if protocol == 'TCP':
-        return TCP_Reassembly(strict=strict)
+        return TCP_Reassembly(strict=strict, timeout=timeout)
     raise FormatError(f'Unsupported reassembly protocol: {protocol}')
 
 
 def trace(protocol: 'str | Type[Protocol]', fout: 'Optional[str]',
           format: 'Optional[str]',  # pylint: disable=redefined-builtin
           byteorder: 'Literal["little", "big"]' = sys.byteorder,
-          nanosecond: bool = False) -> 'TraceFlow':
+          nanosecond: bool = False, bidirectional: 'bool' = True) -> 'TraceFlow':
     """Trace flows.
 
     Arguments:
@@ -195,6 +207,8 @@ def trace(protocol: 'str | Type[Protocol]', fout: 'Optional[str]',
         format: output format
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
+        bidirectional: whether both halves of a conversation are traced as one
+            flow, which is the default
 
     Returns:
         A :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` object.
@@ -207,5 +221,6 @@ def trace(protocol: 'str | Type[Protocol]', fout: 'Optional[str]',
         protocol = protocol.id()[0]
 
     if protocol == 'TCP':
-        return TCP_TraceFlow(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond)
+        return TCP_TraceFlow(fout=fout, format=format, byteorder=byteorder,
+                             nanosecond=nanosecond, bidirectional=bidirectional)
     raise FormatError(f'Unsupported flow tracing protocol: {protocol}')

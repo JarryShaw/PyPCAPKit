@@ -73,6 +73,7 @@ def ipv4_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv4Address] | None':
             tl=ipv4_info.len,                        # total length, header includes
             header=ipv4.packet.header,               # raw bytes type header
             payload=bytearray(ipv4.packet.payload),  # raw bytearray type payload
+            timestamp=float(frame_info.timestamp_epoch),  # capture timestamp
         )
         return data
     return None
@@ -137,6 +138,7 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
             tl=hdr_len + len(payload),                      # total length, header includes
             header=ipv6_info.fragment.header[:hdr_len],     # raw bytes type header before IPv6-Frag
             payload=payload,                                # raw bytearray type payload after IPv6-Frag
+            timestamp=float(frame_info.timestamp_epoch),    # capture timestamp
         )
         return data
     return None
@@ -187,6 +189,7 @@ def tcp_reassembly(frame: 'PCAPNG') -> 'TCP_Packet | None':
             first=tcp_info.seq,                     # first sequence number of payload
             last=tcp_info.seq + raw_len - 1,        # last sequence number of payload
             len=raw_len,                            # payload length, header excludes
+            timestamp=float(frame_info.timestamp_epoch),  # capture timestamp
         )
         return data
     return None

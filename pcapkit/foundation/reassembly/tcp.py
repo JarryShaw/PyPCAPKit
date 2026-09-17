@@ -9,10 +9,11 @@
 which reconstructs fragmented TCP packets back to origin.
 
 """
+import math
 import sys
 from typing import TYPE_CHECKING
 
-from pcapkit.foundation.reassembly.data.data import Deferred
+from pcapkit.foundation.reassembly.data.data import Completion, Deferred
 from pcapkit.foundation.reassembly.data.tcp import (Buffer, BufferID, Datagram, DatagramID,
                                                     Fragment, HoleDescriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
@@ -33,6 +34,9 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
+        timeout: reassembly timeout in seconds, on the capture's own clock;
+            :data:`None` selects :attr:`__timeout__`, which for TCP disables
+            expiry
 
     Example:
         >>> from pcapkit.foundation.reassembly import TCP
@@ -74,6 +78,23 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
     #: Protocol of current reassembly object.
     __protocol_type__ = TCP_Protocol
 
+    #: float: Default reassembly timeout -- **disabled**, unlike IPv4 and IPv6.
+    #:
+    #: No specification gives TCP stream reassembly a deadline the way
+    #: :rfc:`1122#section-3.3.2` and :rfc:`8200#section-4.5` give IP
+    #: fragmentation one, and the numbers that look like candidates are not
+    #: reassembly timeouts: the Maximum Segment Lifetime of
+    #: :rfc:`9293#section-3.4.1` bounds how long a *segment* may linger in the
+    #: network, and the user timeout of :rfc:`9293#section-3.8.3` aborts a
+    #: connection whose data goes unacknowledged. Picking either as a default
+    #: would silently discard buffered stream data on captures that are merely
+    #: idle -- a long-lived connection with a two-minute lull is ordinary, while
+    #: a 60-second gap between fragments of one IP datagram is pathological.
+    #:
+    #: So the mechanism is available and the default is off: pass ``timeout`` to
+    #: ask for one, e.g. ``2 * 120`` for 2·MSL if that is the policy wanted.
+    __timeout__ = math.inf
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -95,6 +116,12 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
         FIN = info.fin      # Finish Flag (Termination)
         RST = info.rst      # Reset Connection Flag (Termination)
         SYN = info.syn      # Synchronise Flag (Establishment)
+        TS = info.timestamp  # Capture timestamp, i.e. the only clock we have
+
+        # This segment's arrival is the evidence that capture time has reached
+        # ``TS``. Off by default for TCP -- see ``__timeout__`` -- in which case
+        # this returns immediately.
+        self._dtgram.extend(self.expire(TS))
 
         # Sequence number of the first octet of this segment's payload. A SYN
         # occupies a sequence number of its own (:rfc:`793`), so payload sent
@@ -134,6 +161,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                         raw=info.payload,
                     ),
                 },
+                timestamp=TS,
             )
         else:
             # initialise buffer with ACK
@@ -219,12 +247,16 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID)
             )
 
-    def submit(self, buf: 'Buffer', *, bufid: 'BufferID') -> 'list[Datagram]':  # type: ignore[override] # pylint: disable=arguments-differ
+    def submit(self, buf: 'Buffer', *, bufid: 'BufferID',  # type: ignore[override] # pylint: disable=arguments-differ
+               timeout: 'bool' = False) -> 'list[Datagram]':
         """Submit reassembled payload.
 
         Arguments:
             buf: :term:`buffer <reasm.tcp.buffer>` dict of reassembled packets
             bufid: buffer identifier
+            timeout: whether this buffer is being submitted because
+                :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`
+                abandoned it under the reassembly timeout
 
         Returns:
             Reassembled :term:`packets <reasm.tcp.datagram>`.
@@ -253,6 +285,12 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                 holes.append((max(start, 0), min(stop, length)))
             holes.sort()
 
+            # How completely this buffer came out, and why it stopped. Derived
+            # once per buffer, so the two branches cannot disagree about it.
+            completion = Completion.COMPLETE if not holes else (
+                Completion.TIMEOUT if timeout else Completion.PARTIAL
+            )
+
             # if this buffer is not implemented
             # go through every hole and extract received payload
             if holes and self._flag_s:
@@ -268,7 +306,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     data.append(bytes(byte))
                 if data:    # strip empty buffer
                     packet = Datagram(
-                        completed=False,
+                        completed=completion,
                         id=DatagramID(
                             src=(bufid[0], bufid[1]),
                             dst=(bufid[2], bufid[3]),
@@ -281,13 +319,20 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     )
                     datagram.append(packet)
 
-            # if this buffer is implemented
-            # export payload data & convert into bytes
+            # if this buffer is implemented -- or if it is not, and ``strict``
+            # asked for one contiguous payload rather than the received runs
+            #
+            # NOTE: ``strict=False`` deliberately keeps reporting the whole
+            # payload buffer with its holes zero-filled, which is what
+            # :func:`~pcapkit.interface.misc.follow_tcp_stream` wants of a stream
+            # it is reconstructing best-effort. What changes is only that
+            # ``completed`` now says so: this branch used to report
+            # :attr:`Completion.COMPLETE` for a buffer it knew had holes in it.
             else:
                 payload = buffer.raw
                 if payload:    # strip empty buffer
                     packet = Datagram(
-                        completed=True,
+                        completed=completion,
                         id=DatagramID(
                             src=(bufid[0], bufid[1]),
                             dst=(bufid[2], bufid[3]),

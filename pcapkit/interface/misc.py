@@ -9,6 +9,7 @@ user interface functions, classes, etc., which are
 generally provided per user's requests.
 
 """
+import functools
 import sys
 from typing import TYPE_CHECKING, cast
 
@@ -75,7 +76,8 @@ class Stream(Info):
 def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,              # Extrator options
                       extension: 'bool' = True, engine: 'Optional[Engines]' = None,
                       fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,  # TraceFlow options # pylint: disable=redefined-builtin
-                      byteorder: 'ByteOrder' = sys.byteorder, nanosecond: 'bool' = False) -> 'tuple[Stream, ...]':
+                      byteorder: 'ByteOrder' = sys.byteorder, nanosecond: 'bool' = False,
+                      trace_bidirectional: 'bool' = True) -> 'tuple[Stream, ...]':
     """Follow TCP streams.
 
     Arguments:
@@ -88,6 +90,11 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
         format: output file format of flow tracer
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
+        trace_bidirectional: whether both halves of a conversation are followed
+            as one stream, which is the default -- a stream then holds the
+            frames and the reassembled payload of *both* directions, which is
+            what "following a TCP stream" means elsewhere. :data:`False`
+            restores one stream per direction.
 
     Returns:
         List of extracted TCP streams.
@@ -130,7 +137,8 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
                            store=True, files=False, nofile=True, verbose=verbose, engine=engine,
                            layer=None, protocol=None, ip=False, ipv4=False, ipv6=False, tcp=True,
                            reassembly=False, trace=True, trace_fout=fout, trace_format=format,
-                           trace_byteorder=byteorder, trace_nanosecond=nanosecond)  # type: ignore[var-annotated]
+                           trace_byteorder=byteorder, trace_nanosecond=nanosecond,
+                           trace_bidirectional=trace_bidirectional)  # type: ignore[var-annotated]
 
     # NOTE: ``Extractor.engine`` returns the running engine *instance* (see
     # :meth:`Extractor.engine <pcapkit.foundation.extraction.Extractor.engine>`),
@@ -157,7 +165,21 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
         tcp_reassembly, pass_count = cast('ReassemblyAdapter', tk_pcapng.tcp_reassembly), False
     elif isinstance(exeng, DPKT_Engine):
         from pcapkit.toolkit import dpkt as tk_dpkt  # isort: skip # pylint: disable=import-outside-toplevel
-        tcp_reassembly = cast('ReassemblyAdapter', tk_dpkt.tcp_reassembly)
+        # NOTE: DPKT is the one adapter that cannot read a frame's capture
+        # timestamp off the frame -- DPKT hands ``(timestamp, bytes)`` back from
+        # its reader and keeps the two apart, and
+        # :class:`~pcapkit.foundation.engines.dpkt.DPKT` stores only the packet --
+        # so the reassembly adapter takes it as an argument. Nothing here has one
+        # to give: the frames were stored during an extraction that has already
+        # finished. Binding zero is safe rather than merely convenient, because
+        # the reassembler below is constructed here and TCP reassembly has no
+        # timeout by default (see
+        # :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.TCP.__timeout__>`),
+        # so no deadline is computed from it. Enabling one for this call would
+        # first mean having the DPKT engine record each frame's timestamp beside
+        # the frame.
+        tcp_reassembly = cast('ReassemblyAdapter',
+                              functools.partial(tk_dpkt.tcp_reassembly, timestamp=0.0))
     elif isinstance(exeng, Scapy_Engine):
         from pcapkit.toolkit import scapy as tk_scapy  # isort: skip # pylint: disable=import-outside-toplevel
         tcp_reassembly = cast('ReassemblyAdapter', tk_scapy.tcp_reassembly)

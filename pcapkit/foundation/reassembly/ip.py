@@ -16,6 +16,7 @@ however, this implement still used the elder one.
 """
 from typing import TYPE_CHECKING, Generic
 
+from pcapkit.foundation.reassembly.data.data import Completion
 from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                    Deferred, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
@@ -38,6 +39,8 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
+        timeout: reassembly timeout in seconds, on the capture's own clock;
+            :data:`None` selects the protocol's :attr:`__timeout__` default
 
     Important:
         This class is not intended to be instantiated directly,
@@ -87,6 +90,13 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         IHL = info.ihl      # Internet Header Length
         MF = info.mf        # More Fragments flag
         TL = info.tl        # Total Length
+        TS = info.timestamp  # Capture timestamp, i.e. the only clock we have
+
+        # This fragment's arrival is the evidence that capture time has reached
+        # ``TS``, so it is the moment to abandon whatever the deadline has now
+        # passed for -- including, deliberately, buffers this fragment does not
+        # belong to.
+        self._dtgram.extend(self.expire(TS))
 
         # when non-fragmented (possibly discarded) packet received
         if not FO and not MF:
@@ -107,6 +117,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 index=[],                           # index record
                 header=header,                      # header buffer
                 datagram=bytearray(65535),          # data buffer
+                timestamp=TS,                       # first-arriving fragment's clock reading
             )
         else:
             # put header into header buffer
@@ -141,13 +152,20 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
             )
 
     def submit(self, buf: 'Buffer[_AT]', *, bufid: 'tuple[_AT, _AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
-               checked: 'bool' = False) -> 'list[Datagram[_AT]]':
+               checked: 'bool' = False, timeout: 'bool' = False) -> 'list[Datagram[_AT]]':
         """Submit reassembled payload.
 
         Arguments:
             buf: buffer dict of reassembled packets
             bufid: buffer identifier
             checked: buffer consistency checked flag
+            timeout: whether this buffer is being submitted because
+                :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`
+                abandoned it under the reassembly timeout, which is what
+                separates
+                :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`
+                from
+                :attr:`Completion.PARTIAL <pcapkit.foundation.reassembly.data.data.Completion.PARTIAL>`
 
         Returns:
             Reassembled packets.
@@ -163,6 +181,12 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         stop = (TDL + 7) // 8
         flag = checked or (TDL > 0 and all(RCVBT[start:stop]))
         ret = []  # type: list[Datagram[_AT]]
+
+        # How completely this datagram came out, and why it stopped. Derived once,
+        # so the two branches below cannot disagree about it.
+        completion = Completion.COMPLETE if flag else (
+            Completion.TIMEOUT if timeout else Completion.PARTIAL
+        )
 
         # if datagram is not implemented
         if not flag and self._flag_s:
@@ -181,7 +205,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
             # strip empty packets
             if data or header:
                 packet = Datagram(
-                    completed=False,
+                    completed=completion,
                     id=DatagramID(
                         src=bufid[0],
                         dst=bufid[1],
@@ -194,11 +218,21 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                     packet=None,
                 )
                 ret.append(packet)
-        # if datagram is reassembled in whole
+        # if datagram is reassembled in whole -- or if it is not, and ``strict``
+        # asked for one contiguous payload rather than the received runs
         else:
-            payload = bytes(datagram[:TDL])
+            # NOTE: ``max(TDL, 0)``, not ``TDL``. ``TDL`` is still its initial
+            # ``-1`` until the fragment with **MF** clear arrives, so a datagram
+            # whose final fragment never came reached this branch under
+            # ``strict=False`` and sliced ``datagram[:-1]`` -- handing back 65534
+            # octets of the preallocated buffer, almost all of them zeros the
+            # sender never sent, and calling it complete. The length of such a
+            # datagram is simply not known, so there is nothing honest to report
+            # but an empty payload; ``strict=True``, the default, reports the runs
+            # that did arrive instead.
+            payload = bytes(datagram[:max(TDL, 0)])
             packet = Datagram(
-                completed=True,
+                completed=completion,
                 id=DatagramID(
                     src=bufid[0],
                     dst=bufid[1],

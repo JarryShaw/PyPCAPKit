@@ -16,14 +16,14 @@ class IPReassemblyTests(unittest.TestCase):
         purge_modules(['pcapkit'])
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes,
-                header: bytes = b'ip-header'):
+                header: bytes = b'ip-header', timestamp: float = 1000.0):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.reassembly.data.ip import Packet
 
         src = ip_address('192.0.2.1')
         dst = ip_address('198.51.100.2')
         return Packet((src, dst, 42, TransType.UDP), num, fo, 20, mf,
-                      20 + len(payload), header, bytearray(payload))
+                      20 + len(payload), header, bytearray(payload), timestamp)
 
     def test_complete_fragmented_datagram_is_submitted_and_analyzed(self) -> None:
         from pcapkit.const.reg.transtype import TransType
@@ -103,7 +103,7 @@ class IPReassemblyTests(unittest.TestCase):
         dst = ip_address('198.51.100.2')
         self.assertEqual(
             empty.submit(
-                Buffer(-1, bytearray(b'\x00\x00'), [], b'', bytearray(b'')),
+                Buffer(-1, bytearray(b'\x00\x00'), [], b'', bytearray(b''), 1000.0),
                 bufid=(src, dst, 42, TransType.UDP),
             ),
             [],
@@ -148,7 +148,7 @@ class DeferredAnalysisTests(unittest.TestCase):
         dst = ip_address('198.51.100.2')
         reasm = TestIP()
         reasm(Packet((src, dst, 42, TransType.UDP), 1, 0, 20, False, 25,
-                     b'ip-header', bytearray(b'hello')))
+                     b'ip-header', bytearray(b'hello'), 1000.0))
         datagram, = reasm.datagram
         return datagram
 

@@ -710,8 +710,10 @@ class Extractor(Generic[_P]):
                  files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
                  engine: 'Optional[Engines]' = None, layer: 'Optional[Layers]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings # pylint: disable=line-too-long
                  reassembly: 'bool' = False, reasm_strict: 'bool' = True, reasm_store: 'bool' = True,                           # reassembly settings # pylint: disable=line-too-long
+                 reasm_timeout: 'Optional[float]' = None,                                                                       # reassembly settings # pylint: disable=line-too-long
                  trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
                  trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
+                 trace_bidirectional: 'bool' = True,                                                                            # trace settings # pylint: disable=line-too-long
                  ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
                  buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
                  no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
@@ -741,12 +743,22 @@ class Extractor(Generic[_P]):
             reassembly: if perform reassembly
             reasm_strict: if set strict flag for reassembly
             reasm_store: if store reassembled datagrams
+            reasm_timeout: reassembly timeout in seconds, measured on the
+                *capture's* own clock rather than the host's, since an offline
+                parser has no other notion of time passing; :data:`None` selects
+                each protocol's own default -- 60 seconds for IPv4
+                (:rfc:`1122#section-3.3.2`) and IPv6 (:rfc:`8200#section-4.5`),
+                disabled for TCP, which no specification gives a deadline. Pass
+                :data:`math.inf` to disable it everywhere
 
             trace: if trace TCP traffic flows
             trace_fout: path name for flow tracer if necessary
             trace_format: output file format of flow tracer
             trace_byteorder: output file byte order
             trace_nanosecond: output nanosecond-resolution file flag
+            trace_bidirectional: whether both halves of a conversation are
+                traced as one flow, which is the default; :data:`False` restores
+                the older behaviour of a flow per direction
 
             ip: if record data for IPv4 & IPv6 reassembly (must be used with ``reassembly=True``)
             ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)
@@ -841,7 +853,8 @@ class Extractor(Generic[_P]):
                 if isinstance(reasm_cls_ipv4, ModuleDescriptor):
                     reasm_cls_ipv4 = reasm_cls_ipv4.klass
                     self.__reassembly__['ipv4'] = reasm_cls_ipv4  # update mapping upon import
-                reasm_obj_ipv4 = cast('IPv4_Reassembly', reasm_cls_ipv4(strict=reasm_strict, store=reasm_store))
+                reasm_obj_ipv4 = cast('IPv4_Reassembly', reasm_cls_ipv4(strict=reasm_strict, store=reasm_store,
+                                                                       timeout=reasm_timeout))
             if self._ipv6:
                 logger.debug('IPv6 reassembly enabled')
 
@@ -849,7 +862,8 @@ class Extractor(Generic[_P]):
                 if isinstance(reasm_cls_ipv6, ModuleDescriptor):
                     reasm_cls_ipv6 = reasm_cls_ipv6.klass
                     self.__reassembly__['ipv6'] = reasm_cls_ipv6  # update mapping upon import
-                reasm_obj_ipv6 = cast('IPv6_Reassembly', reasm_cls_ipv6(strict=reasm_strict, store=reasm_store))
+                reasm_obj_ipv6 = cast('IPv6_Reassembly', reasm_cls_ipv6(strict=reasm_strict, store=reasm_store,
+                                                                       timeout=reasm_timeout))
             if self._tcp:
                 logger.debug('TCP reassembly enabled')
 
@@ -857,7 +871,8 @@ class Extractor(Generic[_P]):
                 if isinstance(reasm_cls_tcp, ModuleDescriptor):
                     reasm_cls_tcp = reasm_cls_tcp.klass
                     self.__reassembly__['tcp'] = reasm_cls_tcp  # update mapping upon import
-                reasm_obj_tcp = cast('TCP_Reassembly', reasm_cls_tcp(strict=reasm_strict, store=reasm_store))
+                reasm_obj_tcp = cast('TCP_Reassembly', reasm_cls_tcp(strict=reasm_strict, store=reasm_store,
+                                                                    timeout=reasm_timeout))
 
             self._reasm = ReassemblyManager(
                 ipv4=reasm_obj_ipv4,
@@ -903,7 +918,8 @@ class Extractor(Generic[_P]):
                     trace_cls_tcp = trace_cls_tcp.klass
                     self.__traceflow__['tcp'] = trace_cls_tcp  # update mapping upon import
                 trace_obj_tcp = cast('TCP_TraceFlow', trace_cls_tcp(fout=trace_fout, format=trace_format,
-                                                                    byteorder=trace_byteorder, nanosecond=trace_nanosecond))
+                                                                    byteorder=trace_byteorder, nanosecond=trace_nanosecond,
+                                                                    bidirectional=trace_bidirectional))
 
             self._trace = TraceFlowManager(
                 tcp=trace_obj_tcp,

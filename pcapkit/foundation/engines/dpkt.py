@@ -175,15 +175,15 @@ class DPKT(Engine['DPKTPacket']):
         # record fragments
         if ext._flag_r:
             if ext._ipv4:
-                data_ipv4 = ipv4_reassembly(packet, count=ext._frnum)
+                data_ipv4 = ipv4_reassembly(packet, timestamp, count=ext._frnum)
                 if data_ipv4 is not None:
                     ext._reasm.ipv4(data_ipv4)
             if ext._ipv6:
-                data_ipv6 = ipv6_reassembly(packet, count=ext._frnum)
+                data_ipv6 = ipv6_reassembly(packet, timestamp, count=ext._frnum)
                 if data_ipv6 is not None:
                     ext._reasm.ipv6(data_ipv6)
             if ext._tcp:
-                data_tcp = tcp_reassembly(packet, count=ext._frnum)
+                data_tcp = tcp_reassembly(packet, timestamp, count=ext._frnum)
                 if data_tcp is not None:
                     ext._reasm.tcp(data_tcp)
 

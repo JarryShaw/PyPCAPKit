@@ -90,6 +90,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         format: output format
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
+        bidirectional: trace both halves of a conversation as one flow
 
     Note:
         This class is for internal use only. For customisation, please use
@@ -302,7 +303,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
     def __init__(self, fout: 'Optional[str]', format: 'Optional[str]',  # pylint: disable=redefined-builtin
                  byteorder: 'Literal["little", "big"]' = sys.byteorder,
-                 nanosecond: bool = False) -> 'None':
+                 nanosecond: bool = False, bidirectional: 'bool' = True) -> 'None':
         """Initialise instance.
 
         Arguments:
@@ -310,6 +311,11 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             format: output format
             byteorder: output file byte order
             nanosecond: output nanosecond-resolution file flag
+            bidirectional: whether the two halves of a conversation are one flow.
+                :data:`True` -- the default -- keys a flow on the *pair* of
+                endpoints rather than on (source, destination), so a connection
+                is traced as the one thing it is; pass :data:`False` for the
+                older per-direction behaviour.
 
         """
         if fout is None:
@@ -329,6 +335,10 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         self._endian = byteorder
         #: bool: Output nanosecond-resolution file flag.
         self._nnsecd = nanosecond
+        #: bool: Bidirectional tracing flag. If set to :data:`True`, both halves
+        #: of a conversation share one buffer entry, one label and one output
+        #: file; otherwise each direction is a flow of its own.
+        self._bidir = bidirectional
 
         # dump I/O object
         fio, ext = self.make_fout(fout, format)
@@ -338,7 +348,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         self._fdpext = ext
 
         logger.debug('%s flow tracing initialised (root=%s, format=%s, byteorder=%s, '
-                     'nanosecond=%s)', self.name, fout, format, byteorder, nanosecond)
+                     'nanosecond=%s, bidirectional=%s)', self.name, fout, format,
+                     byteorder, nanosecond, bidirectional)
 
     def __call__(self, packet: '_PT') -> 'None':
         """Dump frame to output files.
@@ -379,6 +390,7 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
         format: output format
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
+        bidirectional: trace both halves of a conversation as one flow
 
     """
 

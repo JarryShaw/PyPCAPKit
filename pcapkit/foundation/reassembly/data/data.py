@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """shared data models for reassembly"""
 
+import enum
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info, info_final
 
-__all__ = ['ReassemblyData', 'Deferred', 'DeferredPacket']
+__all__ = ['ReassemblyData', 'Completion', 'Deferred', 'DeferredPacket']
 
 if TYPE_CHECKING:
     from typing import Callable, Optional
@@ -16,6 +17,58 @@ if TYPE_CHECKING:
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
+
+
+class Completion(enum.Enum):
+    """How completely a datagram was reassembled, and why it stopped.
+
+    This is the value of
+    :attr:`Datagram.completed <pcapkit.foundation.reassembly.data.ip.Datagram.completed>`.
+    That field used to be a plain :obj:`bool`, and this enumeration is a widening
+    of it rather than a second channel beside it: reassembly now has *three*
+    outcomes to report, not two, since a buffer abandoned under the :rfc:`791` /
+    :rfc:`8200` reassembly timeout is a different event from one that simply had
+    not finished when the capture did. Telling them apart is the whole point of
+    having a timeout at all -- an expired datagram says "these fragments are
+    gone", a partial one says "these fragments had not arrived yet".
+
+    Truthiness is preserved, so ``if datagram.completed:`` reads exactly as it
+    did while ``completed`` was a :obj:`bool`: :attr:`COMPLETE` is the only
+    truthy member. Equality against :obj:`True` and :obj:`False` is *not*
+    preserved -- ``datagram.completed == True`` is now :data:`False` even for a
+    complete datagram -- so a caller comparing against a boolean has to compare
+    against a member instead.
+
+    """
+
+    #: Reassembled in whole: every octet of the datagram was received.
+    COMPLETE = 'complete'
+
+    #: Fragments were still outstanding when the buffer was flushed -- at the end
+    #: of the capture, or when the session was torn down (a TCP FIN/RST, or an
+    #: IPv4 datagram whose identifier was reused by an unfragmented packet).
+    #: The missing octets may simply not have been captured.
+    PARTIAL = 'partial'
+
+    #: Reassembly was **abandoned** under the reassembly timeout, i.e. the
+    #: capture clock advanced past the deadline of
+    #: :attr:`Reassembly.timeout <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.timeout>`
+    #: seconds after the first-arriving fragment while the datagram was still
+    #: incomplete. :rfc:`8200#section-4.5` requires the held fragments be
+    #: discarded, so no further fragment will ever be added to this datagram.
+    TIMEOUT = 'timeout'
+
+    def __bool__(self) -> 'bool':
+        """Whether the datagram was reassembled in whole.
+
+        Only :attr:`COMPLETE` is truthy; both :attr:`PARTIAL` and
+        :attr:`TIMEOUT` describe an incomplete datagram.
+
+        """
+        return self is Completion.COMPLETE
+
+    def __str__(self) -> 'str':
+        return self.value
 
 
 class Deferred:

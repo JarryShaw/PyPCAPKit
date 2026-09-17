@@ -55,6 +55,8 @@ which is an abstract base class for all flow tracing classes.
       :no-value:
    .. autoattribute:: _stream
       :no-value:
+   .. autoattribute:: _bidir
+      :no-value:
 
    .. automethod:: __call__
    .. automethod:: __init_subclass__

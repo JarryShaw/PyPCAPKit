@@ -109,11 +109,15 @@ def packet2dict(packet: 'Packet', timestamp: 'float', *,
     }
 
 
-def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
+def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
+                    count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
     Args:
         packet: DPKT packet.
+        timestamp: Capture timestamp of the packet, which drives the reassembly
+            timeout. DPKT hands it back beside the packet rather than on it, so
+            it has to be passed in -- as :func:`tcp_traceflow` already does.
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -154,16 +158,20 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
             tl=ipv4.len,                                        # total length, header includes
             header=ipv4.pack()[:ihl],                           # raw bytes type header
             payload=bytearray(ipv4.pack()[ihl:]),               # raw bytearray type payload
+            timestamp=timestamp,                                # capture timestamp
         )
         return data
     return None
 
 
-def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Address] | None':
+def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
+                    count: 'int' = -1) -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
     Args:
         packet: DPKT packet.
+        timestamp: Capture timestamp of the packet, which drives the reassembly
+            timeout.
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -217,16 +225,20 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
             tl=hdr_len + len(payload),                           # total length, header includes
             header=ipv6.pack()[:hdr_len],                        # raw bytes type header before IPv6-Frag
             payload=bytearray(payload),                          # raw bytearray type payload after IPv6-Frag
+            timestamp=timestamp,                                 # capture timestamp
         )
         return data
     return None
 
 
-def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None':
+def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
+                   count: 'int' = -1) -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
     Args:
         packet: DPKT packet.
+        timestamp: Capture timestamp of the packet, which drives the reassembly
+            timeout.
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -273,6 +285,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
             first=tcp.seq,                                      # first sequence number of payload
             last=tcp.seq + raw_len - 1,                         # last sequence number of payload
             len=raw_len,                                        # payload length, header excludes
+            timestamp=timestamp,                                # capture timestamp
         )
         return data
     return None

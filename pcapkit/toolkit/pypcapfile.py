@@ -329,6 +329,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         tl=ipv4.len,                                # total length, header includes
         header=header,                              # raw bytes type header
         payload=bytearray(ipv4.payload),            # raw bytearray type payload
+        timestamp=packet2timestamp(packet),         # capture timestamp
     )
 
 
@@ -403,6 +404,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         first=tcp.seqnum,                     # this sequence number
         last=tcp.seqnum + len(payload),       # next (wanted) sequence number
         len=len(payload),                     # payload length, header excludes
+        timestamp=packet2timestamp(packet),   # capture timestamp
     )
 
 

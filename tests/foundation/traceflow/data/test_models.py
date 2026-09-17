@@ -30,13 +30,21 @@ class TraceFlowDataModelTests(unittest.TestCase):
         self.assertEqual(packet.frame, frame)
 
         dumper = object()
-        buffer = Buffer(dumper, [1, 2], '2001_db8_1-12345_2001_db8_2-443')
+        origin = (src, 12345)
+        buffer = Buffer(dumper, [1, 2], '2001_db8_1-12345_2001_db8_2-443',
+                        origin, [1], [2], {origin})
         self.assertIsInstance(buffer, TCP_Buffer)
         self.assertEqual(buffer.fpout, dumper)
+        self.assertEqual(buffer.origin, origin)
+        self.assertEqual((buffer.forward, buffer.reverse), ([1], [2]))
+        self.assertEqual(buffer.fin, {origin})
 
-        index = Index('/tmp/flow.json', (1, 2), buffer.label)
+        index = Index('/tmp/flow.json', (1, 2), buffer.label, (1,), (2,))
         self.assertIsInstance(index, TCP_Index)
         self.assertEqual(index.index, (1, 2))
+        # each direction stays recoverable, so a caller can still ask which way a
+        # given frame went without taking the label apart
+        self.assertEqual((index.forward, index.reverse), ((1,), (2,)))
 
         storage = TraceFlowData((index,))
         self.assertEqual(storage.tcp, (index,))
