@@ -675,7 +675,7 @@ class MH(Internet[Data_MH, Schema_MH],
             length = len(self)
         schema = self.__header__
 
-        name = self.__message__[schema.type]
+        name = self._lookup_registry(self.__message__, schema.type)
         if isinstance(name, str):
             meth_name = f'_read_msg_{name}'
             meth = cast('PacketParser',
@@ -729,7 +729,7 @@ class MH(Internet[Data_MH, Schema_MH],
         if isinstance(data, bytes):
             data_val = data  # type: bytes | Schema_Packet
         elif isinstance(data, (dict, Data_MH)):
-            name = self.__message__[type_val]
+            name = self._lookup_registry(self.__message__, type_val)
             if isinstance(name, str):
                 meth_name = f'_make_msg_{name}'
                 meth = cast('PacketConstructor',
@@ -1533,7 +1533,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         for schema in options_schema:
             type = schema.type
-            name = self.__option__[type]
+            name = self._lookup_registry(self.__option__, type)
 
             if isinstance(name, str):
                 meth_name = f'_read_opt_{name}'
@@ -2337,7 +2337,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         for schema in extensions_schema:
             type = schema.type
-            name = self.__extension__[type]
+            name = self._lookup_registry(self.__extension__, type)
 
             if isinstance(name, str):
                 meth_name = f'_read_ext_{name}'
@@ -3111,7 +3111,7 @@ class MH(Internet[Data_MH, Schema_MH],
                     data = schema
                 else:
                     code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
-                    name = self.__option__[code]
+                    name = self._lookup_registry(self.__option__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_opt_{name}'
                         meth = cast('OptionConstructor',
@@ -3125,7 +3125,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         options_list = []
         for code, option in options.items(multi=True):
-            name = self.__option__[code]
+            name = self._lookup_registry(self.__option__, code)
             if isinstance(name, str):
                 meth_name = f'_make_opt_{name}'
                 meth = cast('OptionConstructor',
@@ -3780,7 +3780,7 @@ class MH(Internet[Data_MH, Schema_MH],
                     data_len = len(schema.pack())
                 else:
                     code, args = cast('tuple[Enum_CGAExtension, dict[str, Any]]', schema)
-                    name = self.__extension__[code]
+                    name = self._lookup_registry(self.__extension__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_ext_{name}'
                         meth = cast('ExtensionConstructor',
@@ -3797,7 +3797,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         extensions_list = []
         for code, extension in extensions.items(multi=True):
-            name = self.__extension__[code]
+            name = self._lookup_registry(self.__extension__, code)
             if isinstance(name, str):
                 meth_name = f'_make_ext_{name}'
                 meth = cast('ExtensionConstructor',

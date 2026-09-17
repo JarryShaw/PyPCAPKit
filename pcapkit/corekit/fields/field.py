@@ -61,9 +61,17 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
 
     if TYPE_CHECKING:
         _name: 'str'
-        _default: '_T | NoValueType'
         _template: 'str'
         _callback: 'Callable[[Self, dict[str, Any]], None]'
+
+    # NOTE: Declared on the class, not only assigned in :meth:`__init__`, so that
+    # :attr:`default` is answerable for every field. A field class is free to
+    # replace :meth:`__init__` without chaining to this one -- as
+    # :class:`~pcapkit.corekit.fields.collections.ListField` does, since a list of
+    # fields takes no default value of its own -- and reading :attr:`default` off
+    # one of those raised :exc:`AttributeError` for a private attribute rather
+    # than reporting that the field declares no default. See #422.
+    _default: '_T | NoValueType' = NoValue
 
     @property
     def name(self) -> 'str':

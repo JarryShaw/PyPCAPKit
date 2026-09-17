@@ -666,7 +666,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         for schema in self.__header__.options:
             kind = schema.kind
-            name = self.__option__[kind]
+            name = self._lookup_registry(self.__option__, kind)
 
             if isinstance(name, str):
                 meth_name = f'_read_mode_{name}'
@@ -1403,7 +1403,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         """
         subtype = schema.subtype
-        name = self.__mp_option__[subtype]
+        name = self._lookup_registry(self.__mp_option__, subtype)
 
         if isinstance(name, str):
             meth_name = f'_read_mptcp_{name}'
@@ -1945,7 +1945,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                     if code in (Enum_Option.No_Operation, Enum_Option.End_of_Option_List):  # ignore padding options by default
                         continue
 
-                    name = self.__option__[code]
+                    name = self._lookup_registry(self.__option__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_mode_{name}'
                         meth = cast('OptionConstructor',
@@ -1976,7 +1976,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             if code in (Enum_Option.No_Operation, Enum_Option.End_of_Option_List):
                 continue
 
-            name = self.__option__[code]
+            name = self._lookup_registry(self.__option__, code)
             if isinstance(name, str):
                 meth_name = f'_make_mode_{name}'
                 meth = cast('OptionConstructor',
@@ -2572,7 +2572,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                                            reversed=subtype_reversed, pack=False)
             subtype_val = Enum_MPTCPOption.get(subtype_val)
 
-        name = self.__mp_option__[subtype_val]
+        name = self._lookup_registry(self.__mp_option__, subtype_val)
         if isinstance(name, str):
             meth_name = f'_make_mptcp_{name}'
             meth = cast('MPOptionConstructor',

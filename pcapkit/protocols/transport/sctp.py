@@ -834,7 +834,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         for schema in self.__header__.chunks:
             code = schema.type
-            name = self.__chunk__[code]
+            name = self._lookup_registry(self.__chunk__, code)
 
             if isinstance(name, str):
                 meth_name = f'_read_chunk_{name}'
@@ -894,7 +894,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Constructed chunk schema.
 
         """
-        name = self.__chunk__[code]
+        name = self._lookup_registry(self.__chunk__, code)
         if isinstance(name, str):
             meth_name = f'_make_chunk_{name}'
             meth = cast('ChunkConstructor',
@@ -917,7 +917,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         for schema in schemas:
             code = schema.type
-            name = self.__parameter__[code]
+            name = self._lookup_registry(self.__parameter__, code)
 
             if isinstance(name, str):
                 meth_name = f'_read_param_{name}'
@@ -966,7 +966,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Constructed parameter schema.
 
         """
-        name = self.__parameter__[code]
+        name = self._lookup_registry(self.__parameter__, code)
         if isinstance(name, str):
             meth_name = f'_make_param_{name}'
             meth = cast('ParameterConstructor',
@@ -989,7 +989,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         for schema in schemas:
             code = schema.code
-            name = self.__cause__[code]
+            name = self._lookup_registry(self.__cause__, code)
 
             if isinstance(name, str):
                 meth_name = f'_read_cause_{name}'
@@ -1038,7 +1038,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Constructed error cause schema.
 
         """
-        name = self.__cause__[code]
+        name = self._lookup_registry(self.__cause__, code)
         if isinstance(name, str):
             meth_name = f'_make_cause_{name}'
             meth = cast('CauseConstructor',
