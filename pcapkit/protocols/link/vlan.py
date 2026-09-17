@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """VLAN - 802.1Q/802.1ad VLAN Tag Types
-=========================================
+==========================================
 
 .. module:: pcapkit.protocols.link.vlan
 

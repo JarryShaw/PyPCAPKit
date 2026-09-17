@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """S_Tag - 802.1ad Service VLAN Tag Type
-=========================================
+===========================================
 
 .. module:: pcapkit.protocols.link.s_tag
 

@@ -270,13 +270,6 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
         Returns:
             Numeral registry index of the protocol in `IANA`_.
 
-        Note:
-            This raised :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`
-            while the protocol was reachable from no registry at all. It is now
-            dispatched from :attr:`Internet.__proto__
-            <pcapkit.protocols.internet.internet.Internet.__proto__>` at
-            protocol number 89, so it has an index to report.
-
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """

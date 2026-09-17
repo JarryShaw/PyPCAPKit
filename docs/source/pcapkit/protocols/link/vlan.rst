@@ -44,10 +44,10 @@ tags appear in one frame:
 
 .. code-block:: text
 
-   ethernet.type          = 0x88A8
-   ethernet.s_tag.tci.vid = 100        <- service tag,  802.1ad
-   ethernet.s_tag.type    = 0x8100
-   ethernet.s_tag.c_tag.tci.vid = 200  <- customer tag, 802.1Q
+   ethernet.type                = 0x88A8
+   ethernet.s_tag.tci.vid       = 100     <- service tag,  802.1ad
+   ethernet.s_tag.type          = 0x8100
+   ethernet.s_tag.c_tag.tci.vid = 200     <- customer tag, 802.1Q
    ethernet.s_tag.c_tag.type    = 0x0800
 
 :attr:`~pcapkit.protocols.protocol.ProtocolBase.info_name` -- ``s_tag`` against

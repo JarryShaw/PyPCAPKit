@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """L2TPv2 - Layer Two Tunnelling Protocol version 2
-=====================================================
+======================================================
 
 .. module:: pcapkit.protocols.link.l2tpv2
 
