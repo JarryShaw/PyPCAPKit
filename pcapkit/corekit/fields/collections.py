@@ -170,9 +170,15 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
 
                 end = file.tell()
                 if end <= offset:
+                    # NOTE: ``len(temp)`` counts the items already parsed, so it
+                    # names the failing one as a count rather than as an ordinal --
+                    # "after 2 item(s)" rather than "item 2", which would read as
+                    # the second item when it is the third. The ``OptionField``
+                    # message below names the option code in this slot and so has
+                    # no index to be read either way.
                     raise FieldValueError(
                         f'Field {self.name} has an item that consumed no data: '
-                        f'item {len(temp)} at offset {offset - start} of '
+                        f'after {len(temp)} item(s), at offset {offset - start} of '
                         f'{self._length}, with {length} octet(s) of the field '
                         f'left to parse'
                     )

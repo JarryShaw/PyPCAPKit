@@ -474,6 +474,10 @@ class SchemaUnitTests(unittest.TestCase):
         the field on its own, and pins the offset as a count into the field rather
         than into the stream -- the same reading as its ``OptionField`` subclass.
 
+        Two items parse off the two octets below and the third finds the stream
+        exhausted, so the diagnostic's ``after 2 item(s)`` is a count of what was
+        parsed rather than an ordinal naming the second item.
+
         """
         from pcapkit.corekit.fields.collections import ListField
         from pcapkit.corekit.fields.misc import SchemaField
@@ -498,7 +502,7 @@ class SchemaUnitTests(unittest.TestCase):
         stream = io.BytesIO(b'\xde\xad' + b'\x01\x02')
         stream.seek(2)
 
-        with self.assertRaisesRegex(FieldValueError, r'item 2 at offset 2 of 8\b'):
+        with self.assertRaisesRegex(FieldValueError, r'after 2 item\(s\), at offset 2 of 8\b'):
             with time_limit(5):
                 field.unpack(stream, {})
 
