@@ -1066,6 +1066,10 @@
                 <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
+                <span class="c1"># NOTE: a forward match consumes nothing, so it contributes no</span>
+                <span class="c1"># octets to ``bytes(self)``/``len(self)`` either. :meth:`unpack`</span>
+                <span class="c1"># mirrors this for the same reason -- see the ``ForwardMatchField``</span>
+                <span class="c1"># branch there. See #446.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                 <span class="k">continue</span>
 
@@ -1193,7 +1197,23 @@
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
+                <span class="c1"># NOTE: a forward match reads ``length`` octets so a later field</span>
+                <span class="c1"># can size itself from them, but consumes neither the stream</span>
+                <span class="c1"># (the rewind below) nor ``__length__`` (no decrement in this</span>
+                <span class="c1"># branch). ``self.__buffer__[field.name]`` above still holds the</span>
+                <span class="c1"># octets just read, though, and until here nothing undid that:</span>
+                <span class="c1"># ``__bytes__``/``__len__`` concatenate every slot in</span>
+                <span class="c1"># ``__buffer__``, so the schema over-reported its length by</span>
+                <span class="c1"># exactly the forward match's width -- the same octets are read</span>
+                <span class="c1"># again, for real, by whichever field actually needs them, so</span>
+                <span class="c1"># nothing is lost by dropping the duplicate here. ``pack()``</span>
+                <span class="c1"># above already zeroes this slot for the same field type;</span>
+                <span class="c1"># zeroing it here as well is what makes a declared area checked</span>
+                <span class="c1"># against ``len(self)`` -- :class:`~pcapkit.corekit.fields.collections.OptionField`</span>
+                <span class="c1"># and :class:`~pcapkit.corekit.fields.collections.ListField` both</span>
+                <span class="c1"># do this -- see the octets actually consumed. See #446.</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">OptionField</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># the option list ended before the declared field length was</span>
                 <span class="c1"># exhausted; give the unconsumed remainder back to ``data``</span>

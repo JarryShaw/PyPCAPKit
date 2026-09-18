@@ -736,6 +736,55 @@
 
 
 
+<div class="viewcode-block" id="calipso_pad_len">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.calipso_pad_len">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calipso_pad_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return CALIPSO option padding length.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: CALIPSO option unpacked schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        CALIPSO option padding length.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold</span>
+<span class="sd">            the fixed header and the compartment bitmap declared by</span>
+<span class="sd">            ``cmpt_len``, which would otherwise underflow the padding length</span>
+<span class="sd">            below zero.</span>
+
+<span class="sd">    """</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">8</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'cmpt_len'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HOPOPT: invalid CALIPSO option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">length</span></div>
+
+
+
+<div class="viewcode-block" id="mpl_opt_pad_len">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.mpl_opt_pad_len">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mpl_opt_pad_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return MPL option padding length.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: MPL option unpacked schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        MPL option padding length.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold</span>
+<span class="sd">            the fixed header and the Seed-ID declared by ``flags.type``, which</span>
+<span class="sd">            would otherwise underflow the padding length below zero.</span>
+
+<span class="sd">    """</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HOPOPT: invalid MPL option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">length</span></div>
+
+
+
 <div class="viewcode-block" id="Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.Option">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Option</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_Option</span><span class="p">]):</span>
@@ -857,7 +906,7 @@
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'cmpt_len'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">pad</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">8</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'cmpt_len'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">pad</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">calipso_pad_len</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cmpt_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
@@ -1157,9 +1206,7 @@
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Reserved data (padding).</span>
-    <span class="n">pad</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="p">(</span>
-        <span class="mi">0</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
-    <span class="p">))</span>
+    <span class="n">pad</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">mpl_opt_pad_len</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MPLOption.post_process">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process">[docs]</a>

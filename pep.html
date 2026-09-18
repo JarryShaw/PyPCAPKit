@@ -549,41 +549,98 @@ rather than when a packet is read, so nothing decodes wrongly in the meantime.</
 </section>
 <section id="mobility-header">
 <h3>Mobility Header<a class="headerlink" href="#mobility-header" title="Link to this heading">¶</a></h3>
-<p><strong>Partly done</strong>, and still the section of this page with the most work left in
-it. <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> has the FMIPv6 fast-handover
-messages [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>] – Handover Initiate, Handover Acknowledge, FBU, FBack
-and FNA – along with the options they need. What remains is the rest of the
-registry:</p>
-<ul class="simple">
-<li><p><strong>10 of the 24 registered message data types</strong>, namely Home Agent Switch,
-Heartbeat, Binding Revocation, Localized Routing Initiation and
-Acknowledgment, Update Notification and its Acknowledgement, Flow Binding,
-Subscription Query and Subscription Response.</p></li>
-<li><p><strong>51 of the 71 registered options</strong> – most of the PMIPv6 and flow-binding
-block, including Home Network Prefix, Handoff Indicator, Access Technology
-Type, Timestamp, GRE Key, Binding Identifier and the QoS options, together
-with DNS-UPDATE-TYPE, Vendor Specific and Service Selection, which belong to
-none of those groups.</p></li>
-<li><p><strong>3 of the 4 CGA extensions</strong>; only Multi-Prefix is implemented.</p></li>
-</ul>
-<p>Each of those falls through to a generic handler, so nothing breaks – the
-fields simply are not decoded. Read and construction are symmetric throughout,
-so every gap above is a gap in both directions: a message type needs a
-<code class="docutils literal notranslate"><span class="pre">_read_msg_</span></code> and a <code class="docutils literal notranslate"><span class="pre">_make_msg_</span></code> handler, an option a <code class="docutils literal notranslate"><span class="pre">_read_opt_</span></code> and a
-<code class="docutils literal notranslate"><span class="pre">_make_opt_</span></code>, and each has to be named in the matching dispatch table –
+<p><strong>Done, bar one option that was already broken.</strong>
+<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> now decodes and constructs the whole
+registry: <strong>all 24 registered message data types</strong>, <strong>all 4 CGA extensions</strong>, and
+<strong>70 of the 71 registered options</strong>. Every one of them is registered in
 <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__message__" title="pcapkit.protocols.internet.mh.MH.__message__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__message__</span></code></a>,
 <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__option__" title="pcapkit.protocols.internet.mh.MH.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__option__</span></code></a> or
-<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__extension__" title="pcapkit.protocols.internet.mh.MH.__extension__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__extension__</span></code></a>. The six <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">TODO</span></code>
-markers in <code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/internet/mh.py</span></code> sit at the end of each handler
-block rather than at the tables, so both places need editing; the file documents
-the shape each handler takes.</p>
-<p>Less of this is groundwork than the numbers suggest. The sub-registries the
-missing options and messages need – binding revocation types and triggers,
-handoff indicators, access network identifier sub-options, flow identification
-and flow binding sub-options, LMA-controlled MAG parameters, DNS update status,
-traffic selector formats, QoS attributes – are already generated in full under
-<a class="reference internal" href="pcapkit/const/mh.html"><span class="doc">MH Constant Enumerations</span></a>, and <code class="docutils literal notranslate"><span class="pre">mh.py</span></code> already imports 32 of them without using
-them. What is missing is the handlers, not the enumerations.</p>
+<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__extension__" title="pcapkit.protocols.internet.mh.MH.__extension__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__extension__</span></code></a> with both a <code class="docutils literal notranslate"><span class="pre">_read_</span></code>
+and a <code class="docutils literal notranslate"><span class="pre">_make_</span></code> handler.</p>
+<p>Every message type and every one of those options round-trips byte-for-byte
+through the public API – <code class="docutils literal notranslate"><span class="pre">make</span></code> then <code class="docutils literal notranslate"><span class="pre">read</span></code> then <code class="docutils literal notranslate"><span class="pre">make</span></code> again reproduces
+the same octets, which
+<code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_option_roundtrip_unit.py</span></code> checks for the whole
+registry. The <strong>four CGA extensions are the exception, and not because of their
+own handlers</strong>: those round-trip when driven directly, but the CGA Parameters
+option is the only thing that can carry a CGA extension on the wire, and that
+option cannot be parsed at all for the reasons below. So all four are recorded
+in that test’s <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> as <code class="docutils literal notranslate"><span class="pre">PARSE</span></code> failures against
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/445">#445</a> rather than claimed
+as working end to end.</p>
+<p>The sub-registries turned out to be the easy half, as predicted: binding
+revocation types and triggers, handoff indicators, access network identifier
+sub-options, flow identification and flow binding sub-options, LMA-controlled MAG
+parameters, DNS update status, traffic selector formats and QoS attributes were
+already generated in full under <a class="reference internal" href="pcapkit/const/mh.html"><span class="doc">MH Constant Enumerations</span></a>, and <strong>no new
+enumeration or vendor crawler was needed</strong>. Two value sets did have to be added
+to <code class="docutils literal notranslate"><span class="pre">mh.py</span></code> itself rather than to <a class="reference internal" href="pcapkit/const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>, because IANA
+registers neither: the localized routing acknowledgment status codes of
+<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6705.html#section-10.2"><strong>RFC 6705 Section 10.2</strong></a>
+(<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LocalizedRoutingStatus" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code></a>) and the local
+mobility anchor address option codes of <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.2"><strong>RFC 5949 Section 6.2.2</strong></a>
+(<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LMAAddressCode" title="pcapkit.protocols.internet.mh.LMAAddressCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LMAAddressCode</span></code></a>), alongside the two
+<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> sets that were already there.</p>
+<p>What is left, and why:</p>
+<ul>
+<li><p><strong>The CGA Parameters option</strong> (type 12) is the one option still on the generic
+handler, and it is unreachable rather than unimplemented. Two faults in shared
+field machinery stand in the way, both outside the mobility header and both now
+tracked as defects rather than described here:
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/445">#445</a>, a nested schema
+cannot reach the enclosing packet’s fields by name, and
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/446">#446</a>, a
+<a class="reference internal" href="pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.ForwardMatchField" title="pcapkit.corekit.fields.misc.ForwardMatchField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardMatchField</span></code></a>’s non-consuming bytes
+count towards the schema’s length. Both have to be fixed for this option to
+parse, which is why the half-fix was reverted rather than shipped;
+<code class="docutils literal notranslate"><span class="pre">test_mh_cga_parameters_option_is_unparsable_upstream</span></code> pins the current
+behaviour so the day it starts working is visible. This option is also what
+makes the whole <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__extension__" title="pcapkit.protocols.internet.mh.MH.__extension__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__extension__</span></code></a>
+registry unreachable, since it is the only carrier a CGA extension has –
+fixing it turns four <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> entries green at once.</p></li>
+<li><p><strong>Payloads that belong to another protocol</strong> are carried opaquely for now. The
+multicast options (54, 56, 57, 60 and 61) embed <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3810.html"><strong>RFC 3810</strong></a> MLD or <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a>
+IGMP address records, and the traffic selectors of <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>
+embed the flag-driven range lists of <span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a>. Each is a separate registry
+with its own dissector’s worth of structure; the mobility options around them
+are fully decoded, and each records which format its payload is in.</p>
+<p>What is wanted is to carry these as <a class="reference internal" href="pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
+rather than as bare <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, dispatched through a <strong>per-payload registry</strong>
+in the style of <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__option__" title="pcapkit.protocols.internet.mh.MH.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MH.__option__</span></code></a>,
+keyed on the field that already names the format –
+<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption.ts_format" title="pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption.ts_format"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ts_format</span></code></a>
+for the traffic selectors, and the mode flag for MLD against IGMP on the
+multicast options. <code class="docutils literal notranslate"><span class="pre">Raw</span></code> is already what an unregistered dispatch falls back
+to everywhere else in the package, so this makes the mobility header consistent
+with the rest rather than inventing a convention; and once a dissector for one
+of these formats exists, registering it needs no change at the option site.</p>
+<p>It wants a registry of its own rather than
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>, which is
+only ever called at a layer boundary and appends to the frame’s protocol chain.
+An MLD address record inside a mobility option did not follow MH on the wire,
+so putting it in that chain would make <code class="docutils literal notranslate"><span class="pre">layer=</span></code> and <code class="docutils literal notranslate"><span class="pre">protocol=</span></code> limits
+behave wrongly. Changing the parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <code class="docutils literal notranslate"><span class="pre">Raw</span></code> also
+changes what existing captures dump to, so it is its own change.</p>
+</li>
+<li><p><strong>The MN-ID option’s constructor mis-sizes a non-address identifier</strong>, tracked
+as <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/448">#448</a>. Pre-existing
+and outside the registry-completion work, so it is filed rather than fixed here.</p></li>
+</ul>
+<p>Two wire-format traps are worth knowing before touching this code, since both
+look like ordinary fields and are not:</p>
+<ul class="simple">
+<li><p><span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7411.html"><strong>RFC 7411</strong></a>’s two multicast options measure their length field in <strong>32-bit
+words</strong>, and exclude the option-code and status octets as well as the type and
+length ones – so the option occupies <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">4</span></code> octets, not
+<code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">+</span> <span class="pre">2</span></code>.</p></li>
+<li><p><span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5213.html#section-8.8"><strong>RFC 5213 Section 8.8</strong></a>’s timestamp is <strong>not</strong> an <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a> NTP timestamp,
+though the mobility header carries both. It counts from the UNIX epoch in a
+48/16 fixed-point split, where NTP counts from 1900 in a 32/32 one, so reading
+one as the other is wrong in the epoch and in both field widths. They have
+separate types for that reason:
+<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.PMIPv6Timestamp" title="pcapkit.protocols.internet.mh.PMIPv6Timestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">PMIPv6Timestamp</span></code></a> and
+<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.NTPTimestamp" title="pcapkit.protocols.internet.mh.NTPTimestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">NTPTimestamp</span></code></a>.</p></li>
+</ul>
 </section>
 <section id="dtls">
 <h3>DTLS<a class="headerlink" href="#dtls" title="Link to this heading">¶</a></h3>
@@ -680,15 +737,15 @@ family word skipped first, and <code class="docutils literal notranslate"><span 
 <p>Three follow-ups the above deliberately left alone:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">TransType</span></code> 115 (<code class="docutils literal notranslate"><span class="pre">L2TP</span></code>) stays unbound, and the reason is now structural
-rather than incidental: it references <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. L2TPv3 over IP, and
+rather than incidental: it references <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. L2TPv3 over IP, and
 <strong>there is no</strong> <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> <strong>class for it to point at</strong>. What exists is
-<a class="reference internal" href="pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, the <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> v2 framing,
+<a class="reference internal" href="pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, the <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> v2 framing,
 reached over UDP 1701. So the binding waits on a v3 dissector, which is also
 the first member of the family to carry an
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code> of its own – 115
 being that index. <a class="reference internal" href="pcapkit/protocols/link/l2tp.html#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a> records what v3 needs, and
 what <code class="docutils literal notranslate"><span class="pre">L2F</span></code> needs alongside it: the version nibble reading <code class="docutils literal notranslate"><span class="pre">1</span></code> selects L2F
-[<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2341.html"><strong>RFC 2341</strong></a>], a separate protocol, not an earlier L2TP.</p></li>
+[<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2341.html"><strong>RFC 2341</strong></a>], a separate protocol, not an earlier L2TP.</p></li>
 <li><p><a class="reference internal" href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF" title="pcapkit.protocols.link.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> and the
 <a class="reference internal" href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> family both live under
 <a class="reference internal" href="pcapkit/protocols/link/index.html#module-pcapkit.protocols.link" title="pcapkit.protocols.link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link</span></code></a> and so report <code class="docutils literal notranslate"><span class="pre">layer</span> <span class="pre">==</span> <span class="pre">'Link'</span></code>, although one
@@ -779,7 +836,7 @@ through its own child obtained from
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code>;</p></li>
 <li><p><strong>library-safe defaults</strong> – importing <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> attaches only a
 <a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.NullHandler" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.NullHandler</span></code></a> and sets no level, leaving the destination and
-verbosity to the application. <span class="target" id="index-15"></span><a class="reference internal" href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> still bootstraps the
+verbosity to the application. <span class="target" id="index-25"></span><a class="reference internal" href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> still bootstraps the
 historical <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> handler at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>;</p></li>
 <li><p>a <strong>runtime configuration API</strong> –
 <a class="reference internal" href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.configure" title="pcapkit.utilities.logging.configure"><code class="xref py py-func docutils literal notranslate"><span class="pre">configure()</span></code></a>,
@@ -925,7 +982,7 @@ Anyone wanting to run the tests wants the repository, which is where they are.</
 <h2>Reassembly Beyond IP and TCP<a class="headerlink" href="#reassembly-beyond-ip-and-tcp" title="Link to this heading">¶</a></h2>
 <p><strong>Still open</strong>, and newer than the rest of this page –
 <a class="reference internal" href="pcapkit/foundation/reassembly/index.html"><span class="doc">Packets Reassembly</span></a> covers three protocols and no more.
-IPv4 and IPv6 share the <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, and TCP uses the <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
+IPv4 and IPv6 share the <span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, and TCP uses the <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA chunks is never put
 back together, and <code class="docutils literal notranslate"><span class="pre">sctp</span></code> appears nowhere in <a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> at all.</p>
@@ -937,7 +994,7 @@ reassembler needs, on
 those two bits outside the construction path. So each fragment is dispatched on
 its own PPID as though it were a whole PDU, and a registered upper layer is
 handed half a message. Two related holes compound it: only the <em>first</em> DATA
-chunk of a bundle is dispatched at all, and I-DATA [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8260.html"><strong>RFC 8260</strong></a>], chunk type 64,
+chunk of a bundle is dispatched at all, and I-DATA [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8260.html"><strong>RFC 8260</strong></a>], chunk type 64,
 is not dissected – so the MID and FSN fields that exist precisely to make
 interleaved reassembly tractable are never parsed, and an I-DATA-only packet
 yields no payload whatsoever. FORWARD TSN (192) and I-FORWARD-TSN (194) are
@@ -982,7 +1039,7 @@ per-direction behaviour.</p>
 <p>What ends a bidirectional flow is worth stating, because the obvious answer is
 wrong. A teardown – a FIN from each endpoint, or a RST from either – is
 <em>recorded</em> but does not finalise the flow: the four-way close of
-<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the final acknowledgement
+<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the final acknowledgement
 arrives after the second FIN, and finalising on that FIN drops the ACK from the
 flow and lets it open a fresh buffer under the same canonical buffer ID – which
 a later connection reusing those endpoints then merges into. Duplicates of that
@@ -1003,7 +1060,7 @@ tracer <strong>delegates to</strong>
 <a class="reference internal" href="pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than growing a
 per-direction payload buffer of its own. A buffer that concatenated payloads in
 capture order would be silently wrong on the first retransmission or reordered
-segment, where the <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
+segment, where the <span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
 reassembler is not – so
 <a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> carries the four segment
 fields (<code class="docutils literal notranslate"><span class="pre">seq</span></code>, <code class="docutils literal notranslate"><span class="pre">ack</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code>, <code class="docutils literal notranslate"><span class="pre">payload</span></code>) that reassembler needs, and
@@ -1043,18 +1100,18 @@ than
 the honest answer, since the capture never shows the deadline passing; feeding
 every frame’s timestamp to every enabled reassembler would close the gap and
 is worth doing on its own account.</p>
-<p>On the numbers: the 15 seconds this page used to attribute to <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> is
+<p>On the numbers: the 15 seconds this page used to attribute to <span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> is
 that RFC’s <em>initial</em> timer setting, a lower bound which
 <code class="docutils literal notranslate"><span class="pre">TIMER</span> <span class="pre">&lt;-</span> <span class="pre">MAX(TIMER,TTL)</span></code> then raises toward the 4.25-minute TTL ceiling –
-not a deadline. <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> supersedes the scheme outright
+not a deadline. <span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> supersedes the scheme outright
 (“The reassembly timeout value SHOULD be a fixed value, not set from the
 remaining TTL… between 60 seconds and 120 seconds”), so IPv4 uses 60
-seconds, agreeing with the 60 <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6.
+seconds, agreeing with the 60 <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6.
 <strong>TCP is left with no timeout at all</strong>, since no specification gives stream
 reassembly a deadline and an idle connection is ordinary rather than
 pathological; <code class="docutils literal notranslate"><span class="pre">timeout</span></code> enables one on request.</p>
-<p>Two related things are <em>not</em> done. <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> and
-<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> both want an ICMP Time Exceeded sent on expiry when
+<p>Two related things are <em>not</em> done. <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> and
+<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> both want an ICMP Time Exceeded sent on expiry when
 the offset-zero fragment has been received; a parser sends nothing, so the
 condition is only reported in the log record. And the memory motive is
 narrowed rather than removed – an in-flight IP datagram identifier still
@@ -1067,6 +1124,53 @@ worth of capture time rather than for the life of the
 is worth knowing before benchmarking against them: <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>, <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and
 <code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code> disable it entirely, and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> disables the IPv6 half of it.
 <a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> tabulates that.</p>
+</section>
+<section id="delivery-sequence">
+<h2>Delivery Sequence<a class="headerlink" href="#delivery-sequence" title="Link to this heading">¶</a></h2>
+<p>The items above are ordered by subject rather than by when anyone intends to do
+them. This section records the intended <strong>order</strong>, so that a contributor can see
+what is being worked on, what is queued behind it, and — more usefully — which
+items are queued because they <em>depend</em> on something rather than merely because
+nobody has started them.</p>
+<p>It is a sequencing note, not a commitment: nothing here is claimed, and an item
+being in a later wave is not a reason to leave it alone if you want it now. Say
+so in the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a> and it moves.</p>
+<p><strong>Wave 1 — done or in flight.</strong> The Mobility Header registry completion, the
+protocol bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
+<a class="reference internal" href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> C-Tag/S-Tag split, the option
+round-trip coverage harness, and reassembly’s <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> timeout with
+bidirectional flow tracing. What remains of wave 1 is defect work, tracked in
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a> rather than
+here.</p>
+<p><strong>Wave 2 — the protocol pairs that want a shared abstract base</strong>, per <a class="reference internal" href="#more-protocols-more">More
+Protocols, More!!!</a> above: <strong>ICMP with ICMPv6</strong>, <strong>TLS/SSL with DTLS</strong>, and
+<code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> with <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code>, plus <strong>IGMP</strong> on its own. These are grouped
+because the shared-base question is the design work and doing either half of a
+pair alone would answer it twice. <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> matters out of proportion to its
+size: every <code class="docutils literal notranslate"><span class="pre">tcpdump</span> <span class="pre">-i</span> <span class="pre">any</span></code> capture uses it, and neither variant has even a
+stub.</p>
+<p><strong>Wave 3 — the remaining protocols</strong> from the same list, taken three or four at a
+time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
+new transport and wants that settled first, the other three because a capture in
+the wild is rare enough that the work buys little until the commoner protocols
+are in.</p>
+<p><strong>Queued behind wave 2 — the Mobility Header sub-layer registry.</strong> Several
+mobility options carry a payload belonging to another protocol, and those
+payloads want carrying as <a class="reference internal" href="pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> through a
+per-payload registry rather than as bare <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> — see <a class="reference internal" href="#mobility-header">Mobility Header</a>
+above, which describes the payloads in question and why a registry of their own
+is wanted instead of
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>. It is
+sequenced <em>after</em> wave 2 rather than by preference: the multicast options embed
+<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3810.html"><strong>RFC 3810</strong></a> MLD, which rides in <strong>ICMPv6</strong>, and <span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a> <strong>IGMP</strong> records —
+both wave 2 deliverables. Landing the registry first would give a dispatch table
+with nothing but <code class="docutils literal notranslate"><span class="pre">Raw</span></code> to register. The counter-argument is real though, and
+worth weighing rather than dismissing: changing the parsed shape from
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <code class="docutils literal notranslate"><span class="pre">Raw</span></code> is the disruptive half, since it changes what existing
+captures dump to, so there is a case for taking that churn early and registering
+dissectors later. The third format, the <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic selectors of
+<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, has no wave at all — it is a registry of its own and
+nobody has claimed it.</p>
 </section>
 </section>
 
@@ -1132,6 +1236,7 @@ is worth knowing before benchmarking against them: <code class="docutils literal
 <li><a class="reference internal" href="#new-engines">New Engines</a></li>
 <li><a class="reference internal" href="#test-cases">Test Cases</a></li>
 <li><a class="reference internal" href="#reassembly-beyond-ip-and-tcp">Reassembly Beyond IP and TCP</a></li>
+<li><a class="reference internal" href="#delivery-sequence">Delivery Sequence</a></li>
 </ul>
 </li>
 </ul>

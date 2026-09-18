@@ -5629,6 +5629,32 @@ remainder of the parameter.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.reg_info_list_len">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hip.</span></span><span class="sig-name descname"><span class="pre">reg_info_list_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hip.html#reg_info_list_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.reg_info_list_len" title="Link to this definition">¶</a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">REG_INFO</span></code> registration type list length.</p>
+<p>Used by the <code class="docutils literal notranslate"><span class="pre">reg_info</span></code> field of <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.RegInfoParameter" title="pcapkit.protocols.schema.internet.hip.RegInfoParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegInfoParameter</span></code></a>, which follows
+a pair of <code class="docutils literal notranslate"><span class="pre">min_lifetime</span></code> and <code class="docutils literal notranslate"><span class="pre">max_lifetime</span></code> octets with a list of
+registration type octets sized by the remainder of the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Parameter unpacked schema.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Registration type list length.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If the parameter’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> on the wire is too
+    short to hold the <code class="docutils literal notranslate"><span class="pre">min_lifetime</span></code> and <code class="docutils literal notranslate"><span class="pre">max_lifetime</span></code> octets
+    already read, which would otherwise underflow the list length
+    below zero.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 <section id="module-pcapkit.protocols.data.internet.hip">
