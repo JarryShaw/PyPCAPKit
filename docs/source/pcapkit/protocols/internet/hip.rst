@@ -426,6 +426,8 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.schema.internet.hip.host_id_hi_selector
 .. autofunction:: pcapkit.protocols.schema.internet.hip.registration_type_list_len
 .. autofunction:: pcapkit.protocols.schema.internet.hip.reg_info_list_len
+.. autofunction:: pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len
+.. autofunction:: pcapkit.protocols.schema.internet.hip.transport_format_list_len
 
 Data Models
 -----------

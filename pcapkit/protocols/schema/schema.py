@@ -6,7 +6,6 @@ import collections
 import collections.abc
 import io
 import itertools
-import sys
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast, final
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
@@ -16,7 +15,7 @@ from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.corekit.infoclass import FinalisedState
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.decorators import prepare
-from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, stacklevel
+from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, SchemaError, stacklevel
 from pcapkit.utilities.warnings import SchemaWarning, UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
@@ -210,7 +209,55 @@ class SchemaMeta(abc.ABCMeta):
                 fields.update(base.__fields__)
         return collections.OrderedDict(__fields__=fields)
 
-    def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', **kwargs: 'Any') -> 'Type[Schema]':
+    #: Class keywords that collide with a parameter this class does not
+    #: control, so a schema class declared with one fails with an opaque
+    #: ``TypeError`` from several frames away instead of a clear message here.
+    #: Two different collisions, both reserved:
+    #:
+    #: ``mcls``, ``name``, ``bases``, ``namespace`` collide with
+    #: :meth:`abc.ABCMeta.__new__` -- a *different* function from this one, one
+    #: level up the ``super().__new__(...)`` call below. Before Python 3.11
+    #: those four are positional-or-keyword there (from 3.11 they are
+    #: positional-only, ``def __new__(mcls, name, bases, namespace, /,
+    #: **kwargs)``), so a class keyword spelled the same as any of them binds
+    #: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple
+    #: values for argument '...'``. That is GitHub issue #439's root cause --
+    #: ``namespace`` collided this way, which is why
+    #: :mod:`pcapkit.protocols.schema.misc.pcapng`'s ``Option`` subclasses
+    #: spell it ``ns=`` instead.
+    #:
+    #: ``cls`` collides one level *later*: every ``__init_subclass__`` is an
+    #: implicit classmethod, so ``cls`` is always bound as its first argument,
+    #: and a class keyword also spelled ``cls`` binds it twice there --
+    #: ``TypeError: Generic.__init_subclass__() got multiple values for
+    #: argument 'cls'`` for a :class:`Schema` subclass (:class:`Schema`
+    #: inherits :class:`typing.Generic`), or the equivalent from whichever
+    #: class in the MRO defines ``__init_subclass__`` first. This one is not
+    #: specific to ``abc.ABCMeta`` or to this metaclass at all -- it holds for
+    #: *any* Python class with any ``__init_subclass__`` in its MRO -- but it
+    #: is reserved here anyway since it is exactly the class of mistake this
+    #: guard exists to catch early and legibly.
+    #:
+    #: Listed explicitly rather than derived from
+    #: :func:`inspect.signature(abc.ABCMeta.__new__) <inspect.signature>` at
+    #: import time: the signature's positional-only marker differs across
+    #: Python versions, introspecting a CPython internal's exact shape to
+    #: guard against a CPython internal's exact shape is circular, and five
+    #: names that will not change are cheaper to read than the machinery to
+    #: recompute them.
+    #:
+    #: ``name``, ``bases`` and ``attrs`` -- *this* method's own parameters --
+    #: collide the same way one level earlier than ``ABCMeta.__new__``, on
+    #: every Python version, and are not in this set for that reason alone:
+    #: they are made positional-only below instead (the same fix CPython gave
+    #: ``ABCMeta.__new__`` in 3.11), which removes the collision rather than
+    #: merely naming it. ``name`` and ``bases`` stay in this set regardless,
+    #: because they still collide with ``ABCMeta.__new__``'s parameters of the
+    #: same name one level up; ``attrs`` does not appear anywhere downstream
+    #: and so needs no entry once it is positional-only here.
+    _RESERVED_CLASS_KWARGS = frozenset({'mcls', 'name', 'bases', 'namespace', 'cls'})
+
+    def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', /, **kwargs: 'Any') -> 'Type[Schema]':
         """Create the schema class.
 
         Args:
@@ -223,7 +270,22 @@ class SchemaMeta(abc.ABCMeta):
         :attr:`~Schema.__excluded__` fields from the base classes, as well as
         populating both fields from the subclass attributes.
 
+        Raises:
+            SchemaError: If a class keyword in ``**kwargs`` collides with a
+                parameter of :meth:`abc.ABCMeta.__new__` or of
+                ``__init_subclass__`` -- see :attr:`_RESERVED_CLASS_KWARGS`.
+
         """
+        if clash := cls._RESERVED_CLASS_KWARGS.intersection(kwargs):
+            raise SchemaError(
+                f'{name}: class keyword(s) {sorted(clash)!r} are reserved -- '
+                f'each collides with a same-named parameter of either '
+                f'abc.ABCMeta.__new__ or the implicit __init_subclass__ '
+                f'classmethod binding, and cannot be used as a class keyword '
+                f'on a Schema subclass; rename to a different spelling (see '
+                f'GitHub issue #439)'
+            )
+
         if '__additional__' not in attrs:
             attrs['__additional__'] = []
         if '__excluded__' not in attrs:
@@ -235,10 +297,17 @@ class SchemaMeta(abc.ABCMeta):
             if hasattr(base, '__excluded__'):
                 attrs['__excluded__'].extend(name for name in base.__excluded__ if name not in attrs['__excluded__'])
 
-        # NOTE: for unknown reason, the following code will cause an error
-        # for duplicated keyword arguments in class definition.
-        if sys.version_info < (3, 11):
-            return type.__new__(cls, name, bases, attrs, **kwargs)
+        # See #439: this used to branch on ``sys.version_info < (3, 11)`` and
+        # call ``type.__new__`` directly below that, to dodge the ``namespace``
+        # collision described above. That branch skipped ``ABCMeta.__new__``'s
+        # call to ``abc._abc_init(cls)``, so no :class:`Schema` subclass ever
+        # got its own ``_abc_impl``, and every one of them fell through the
+        # MRO to :class:`collections.abc.Mapping`'s -- corrupting
+        # ``isinstance`` against *any* of them for as long as the process ran.
+        # The actual fix was renaming the one colliding class keyword that was
+        # actually in use, which means this can now call ``ABCMeta.__new__``
+        # unconditionally, on every supported version, like any other
+        # metaclass would.
         return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
 
 

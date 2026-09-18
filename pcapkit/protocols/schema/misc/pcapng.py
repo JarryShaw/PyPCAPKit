@@ -399,14 +399,19 @@ class Option(EnumSchema[Enum_OptionType]):
     )
 
     def __init_subclass__(cls, /, code: 'Optional[Enum_OptionType | Iterable[Enum_OptionType]]' = None,
-                          namespace: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+                          ns: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Register option type to :attr:`__enum__` mapping.
 
         Args:
             code: Option type code. It can be either a single option type enumeration
                 or a list of option type enumerations.
-            namespace: Namespace of option type enumeration. If not given, the value
-                will be inferred from the option type code.
+            ns: Namespace of option type enumeration. If not given, the value
+                will be inferred from the option type code. Spelled ``ns`` rather
+                than ``namespace`` because :meth:`abc.ABCMeta.__new__` names its
+                own fourth parameter ``namespace``, and before Python 3.11 that
+                parameter is positional-or-keyword rather than positional-only --
+                so a class keyword literally called ``namespace`` bound it twice.
+                See GitHub issue #439.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
@@ -421,25 +426,25 @@ class Option(EnumSchema[Enum_OptionType]):
                from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
                from pcapkit.protocols.schema.misc.pcapng improt Option
 
-               class NewOption(Option, namespace='opt', code=Enum_OptionType.opt_new):
+               class NewOption(Option, ns='opt', code=Enum_OptionType.opt_new):
                    ...
 
         See Also:
             - :class:`pcapkit.const.pcapng.option_type.OptionType`
 
         """
-        if namespace is not None:
-            cls.__namespace__ = namespace
+        if ns is not None:
+            cls.__namespace__ = ns
 
         if code is not None:
-            if namespace is None:
-                namespace = cast('Optional[str]', cls.__namespace__)
+            if ns is None:
+                ns = cast('Optional[str]', cls.__namespace__)
 
             if not isinstance(code, Enum_OptionType):
                 for _code in code:
-                    Option.register(_code, cls, namespace)
+                    Option.register(_code, cls, ns)
             else:
-                Option.register(code, cls, namespace)
+                Option.register(code, cls, ns)
         super().__init_subclass__()
 
     @staticmethod
@@ -472,7 +477,7 @@ class Option(EnumSchema[Enum_OptionType]):
         length: 'int'
 
 
-class _OPT_Option(Option, namespace='opt'):
+class _OPT_Option(Option, ns='opt'):
     """Header schema for ``opt_*`` options."""
 
     #: Option type.
@@ -623,7 +628,7 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
                      length2: 'int') -> 'None': ...
 
 
-class _IF_Option(Option, namespace='if'):
+class _IF_Option(Option, ns='if'):
     """Header schema for ``if_*`` options."""
 
     #: Option type.
@@ -892,7 +897,7 @@ class InterfaceDescriptionBlock(BlockType, code=Enum_BlockType.Interface_Descrip
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
-class _EPB_Option(Option, namespace='epb'):
+class _EPB_Option(Option, ns='epb'):
     """Header schema for ``epb_*`` options."""
 
     #: Option type.
@@ -1159,7 +1164,7 @@ class IPv6Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv6):
         def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv6Address | str | bytes | int', resol: 'str') -> 'None': ...
 
 
-class _NS_Option(Option, namespace='ns'):
+class _NS_Option(Option, ns='ns'):
     """Header schema for ``ns_*`` options."""
 
     #: Option type.
@@ -1266,7 +1271,7 @@ class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
-class _ISB_Option(Option, namespace='isb'):
+class _ISB_Option(Option, ns='isb'):
     """Header schema for ``isb_*`` options."""
 
     #: Option type.
@@ -1570,7 +1575,7 @@ class ZigBeeAPSKey(DSBSecrets, code=Enum_SecretsType.ZigBee_APS_Key):
         def __init__(self, key: 'bytes', panid: 'int', addr_low: 'int', addr_high: 'int') -> 'None': ...
 
 
-class _DSB_Option(Option, namespace='dsb'):
+class _DSB_Option(Option, ns='dsb'):
     """Header schema for ``dsb_*`` options."""
 
     #: Option type.
@@ -1643,7 +1648,7 @@ class CustomBlock(BlockType, code=[Enum_BlockType.Custom_Block_that_rewriters_ca
         def __init__(self, length: 'int', pen: 'int', data: 'bytes', length2: 'int') -> 'None': ...
 
 
-class _PACK_Option(Option, namespace='pack'):
+class _PACK_Option(Option, ns='pack'):
     """Header schema for ``pack_*`` options."""
 
     #: Option type.

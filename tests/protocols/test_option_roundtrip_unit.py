@@ -23,25 +23,6 @@ What this module adds is the *judgement*: :data:`EXPECTED_FAILURES` records, cas
 by case, which cycles do not close today and which defect stops each one. A case
 absent from that table has to come back ``'OK'``.
 
-When the outcome depends on the interpreter, not the code
----------------------------------------------------------
-
-One recorded expectation per case assumes the outcome is a property of the
-library. Seven PCAP-NG name-resolution cases show it can be a property of the
-*interpreter*: they round-trip from Python 3.11 on and fail to construct on 3.10
-and earlier, because :class:`~pcapkit.protocols.schema.schema.Schema` subclasses
-share one ``_abc_impl`` there and an ``isinstance`` against a schema class
-therefore answers by cache order rather than by type (GitHub issue #439).
-
-Those seven live in :data:`INTERPRETER_GAPS` rather than in
-:data:`EXPECTED_FAILURES`, and the separation is deliberate. Behaving differently
-on two supported Pythons is a defect and not a variant, so the mechanism is
-asserted directly by
-:meth:`OptionRoundTripTests.test_schema_isinstance_is_interpreter_dependent`:
-the record is evidence about a named library bug, not an exemption keyed on a
-version number. On a modern interpreter the seven are held to ``'OK'`` like
-anything else, and fixing #439 turns 3.10 red.
-
 Why the table is asserted in both directions
 --------------------------------------------
 
@@ -344,6 +325,21 @@ EXPECTED_FAILURES = {
     # tuple, which ``_make_param_*`` passes straight back to a ``ListField``
     # that accepts only a list. This is the class of defect the reconstruct step
     # exists to find: each one constructs and parses perfectly.
+    #
+    # TRANSPORT_FORMAT_LIST briefly left this group during #466's review: an
+    # early revision reused NAT_TRAVERSAL_MODE/ESP_TRANSFORM/HIP_TRANSPORT_MODE's
+    # shared ``two_octet_prefix_list_len`` guard for this parameter's ``formats``
+    # field too, on the mistaken premise that its ``pkt['len'] - 2`` was
+    # byte-identical *for the same reason*. It is not: :rfc:`7401` Section
+    # 5.2.11 defines this parameter's ``Length`` as literally "2x number of TF
+    # types", with nothing between ``Length`` and the list to subtract -- unlike
+    # the other three, which each genuinely read a two-octet ``reserved``/
+    # ``port`` field first. That reuse turned the parameter's own legitimate
+    # empty-list encoding (``Length = 0``) into a raise, and separately
+    # under-read every non-empty list by two octets on parse -- both fixed by
+    # ``transport_format_list_len`` in pcapkit/protocols/schema/internet/hip.py,
+    # which sizes the list at ``Length`` exactly. With that corrected, this case
+    # is back to failing the same way its fifteen siblings do.
     **{
         f'hip-parameter/{name}': Gap(
             'RECONSTRUCT', "unsupported type <class 'tuple'>",
@@ -495,93 +491,6 @@ EXPECTED_FAILURES = {
 }
 
 
-#: Whether this interpreter gives every :class:`Schema` subclass its own
-#: ``_abc_impl``, and therefore answers ``isinstance`` against schema classes
-#: correctly.
-#:
-#: On CPython 3.10 and earlier they all share :class:`Schema`'s, which is GitHub
-#: issue #439. Measured on 3.10.20 and 3.14.7:
-#: ``EndRecord._abc_impl is IPv4Record._abc_impl`` is :data:`True` on 3.10 and
-#: :data:`False` on 3.14, for the schema classes in
-#: :mod:`pcapkit.protocols.schema.misc.pcapng`. Note that the *data* models
-#: (:class:`~pcapkit.corekit.infoclass.Info` subclasses) are **not** affected on
-#: either: ``Data_EndRecord._abc_impl is Info._abc_impl`` is :data:`False` on
-#: both, so it is specifically the schema hierarchy.
-SCHEMA_ABC_IS_PER_CLASS = sys.version_info >= (3, 11)
-
-#: Cases whose outcome is a property of the *interpreter* rather than of the
-#: option, applying only where :data:`SCHEMA_ABC_IS_PER_CLASS` is false.
-#:
-#: This table exists reluctantly, and it is worth being explicit about why it is
-#: not the same thing as :data:`EXPECTED_FAILURES`.
-#:
-#: A case that behaves differently on two supported Pythons is a defect, not a
-#: variant, and the honest thing is to surface it rather than to encode it as a
-#: shrug. So it is surfaced twice over: the entries below name the library defect
-#: and the ``file:line`` that causes it, exactly as the main table does, and
-#: :meth:`OptionRoundTripTests.test_schema_isinstance_is_interpreter_dependent`
-#: pins the *mechanism* directly so the record is evidence and not an assertion
-#: about a version number. What the table does not do is let the cases pass
-#: quietly: on a modern interpreter they are held to ``'OK'`` by the main table's
-#: absence of an entry, and on an old one they are held to failing in exactly the
-#: recorded way. Fixing #439 turns this red on 3.10, which is the point.
-#:
-#: An entry here **overrides** :data:`EXPECTED_FAILURES` for the same label
-#: rather than being disjoint from it, and three of the seven need that. The
-#: ``ns_dns*`` options fail on every interpreter, but for different reasons: from
-#: 3.11 on it is the shared ``self._opt`` counter rejecting the option the same
-#: instance just built, and on 3.10 the block never gets that far because
-#: ``post_process`` dies first. Same status, different cause, so both are recorded
-#: and the interpreter decides which one is checked. The remaining four have no
-#: entry in the main table at all, because they round-trip cleanly from 3.11.
-#:
-#: All seven are PCAP-NG name resolution, and they share one cause on 3.10.
-#: ``NameResolutionBlock.post_process`` asks
-#: ``isinstance(record, (IPv4Record, IPv6Record))`` at
-#: :file:`pcapkit/protocols/schema/misc/pcapng.py:1248` and then reads
-#: ``record.names``. Because every schema class shares one ``_abc_impl`` on 3.10,
-#: that question returns :data:`True` for the block's terminating ``EndRecord``
-#: -- measured in the real path, with ``type(record) is EndRecord`` :data:`True`
-#: and ``isinstance(record, (IPv4Record, IPv6Record))`` also :data:`True` in the
-#: same breath -- so ``post_process`` reads ``names`` off a record that has none.
-#: Every NRB carries a terminating ``EndRecord``, which is why the block, its
-#: three ``ns_dns*`` options and its three records all go together.
-INTERPRETER_GAPS = {
-    label: Gap(
-        'CONSTRUCT', "'EndRecord' object has no attribute 'names'",
-        'pcapkit/protocols/schema/misc/pcapng.py:1248 -- isinstance against '
-        'schema classes, which share one _abc_impl on CPython <= 3.10 (#439), so '
-        'the terminating EndRecord tests True as an IPv4Record/IPv6Record')
-    for label in (
-        'pcapng-block/Name_Resolution_Block',
-        'pcapng-option/ns_dnsname_2',
-        'pcapng-option/ns_dnsIP4addr_3',
-        'pcapng-option/ns_dnsIP6addr_4',
-        'pcapng-record/nrb_record_end',
-        'pcapng-record/nrb_record_ipv4',
-        'pcapng-record/nrb_record_ipv6',
-    )
-}
-
-
-def _abc_impl(cls: 'type') -> 'Any':
-    """The ABC implementation object a class dispatches ``isinstance`` through.
-
-    ``_abc_impl`` is a CPython internal and is not in the type stubs, so it is
-    read by name. Present on both the C ``_abc`` and the pure-python ``_py_abc``
-    backends; :func:`tests._support._reset_abc_caches` relies on the same
-    attribute.
-
-    Args:
-        cls: The class to inspect.
-
-    Returns:
-        The class's ``_abc_impl``, or :data:`None` if it has none.
-
-    """
-    return getattr(cls, '_abc_impl', None)
-
-
 def _gap_for(label: 'str') -> 'Optional[Gap]':
     """The recorded expectation for ``label``, or :data:`None` if it should pass.
 
@@ -593,13 +502,6 @@ def _gap_for(label: 'str') -> 'Optional[Gap]':
         round-trip on this interpreter.
 
     """
-    # The interpreter-conditional record wins where there is one, because on an
-    # affected interpreter the case fails there before it can reach whatever the
-    # main table describes.
-    if not SCHEMA_ABC_IS_PER_CLASS:
-        gap = INTERPRETER_GAPS.get(label)
-        if gap is not None:
-            return gap
     return EXPECTED_FAILURES.get(label)
 
 
@@ -738,73 +640,11 @@ class OptionRoundTripTests(unittest.TestCase):
 
         """
         labels = {case.label for case in self.options.cases()}
-        for name, table in (('EXPECTED_FAILURES', EXPECTED_FAILURES),
-                            ('INTERPRETER_GAPS', INTERPRETER_GAPS)):
-            with self.subTest(table=name):
-                stale = sorted(set(table) - labels)
-                self.assertEqual(
-                    stale, [],
-                    f'these entries of {name} name cases that no longer exist; '
-                    f'delete them, or fix the label'
-                )
-
-        # An override that records the same thing as the entry it overrides is
-        # noise, and would quietly outlive the reason it was added.
-        for label in sorted(set(EXPECTED_FAILURES) & set(INTERPRETER_GAPS)):
-            with self.subTest(overridden=label):
-                general, specific = EXPECTED_FAILURES[label], INTERPRETER_GAPS[label]
-                self.assertNotEqual(
-                    (general.status, general.fragment),
-                    (specific.status, specific.fragment),
-                    f'{label} records the same status and fragment in both tables, '
-                    f'so the interpreter-conditional entry adds nothing; delete it'
-                )
-
-    def test_schema_isinstance_is_interpreter_dependent(self) -> None:
-        """Pin the mechanism behind :data:`INTERPRETER_GAPS`, so it is evidence.
-
-        The seven cases in that table are excused on old interpreters, and an
-        excuse resting on a version comparison would be indistinguishable from
-        giving up. So the *cause* is asserted here directly: every
-        :class:`~pcapkit.protocols.schema.schema.Schema` subclass shares one
-        ``_abc_impl`` on CPython 3.10 and earlier, and has its own from 3.11 --
-        which is what makes ``isinstance`` against a schema class answer by cache
-        order rather than by type.
-
-        This is GitHub issue #439 and belongs to ``SchemaMeta``, not here. When it
-        is fixed this test fails on 3.10, which is the prompt to delete both it
-        and :data:`INTERPRETER_GAPS`.
-
-        The data models are checked too, and asserted *unaffected* on both
-        interpreters -- that is the boundary of the defect, and getting it wrong
-        in either direction would send the next reader down the wrong path.
-
-        """
-        from pcapkit.corekit.infoclass import Info
-        from pcapkit.protocols.data.misc.pcapng import EndRecord as Data_EndRecord
-        from pcapkit.protocols.schema.misc.pcapng import EndRecord, IPv4Record
-        from pcapkit.protocols.schema.schema import Schema
-
-        shared = _abc_impl(EndRecord) is _abc_impl(IPv4Record)
+        stale = sorted(set(EXPECTED_FAILURES) - labels)
         self.assertEqual(
-            shared, not SCHEMA_ABC_IS_PER_CLASS,
-            f'on Python {sys.version_info[0]}.{sys.version_info[1]}, schema '
-            f'classes sharing one _abc_impl is {shared}; INTERPRETER_GAPS assumes '
-            f'{not SCHEMA_ABC_IS_PER_CLASS}. If #439 is fixed, delete that table '
-            f'and this test.'
-        )
-        if shared:
-            self.assertIs(
-                _abc_impl(EndRecord), _abc_impl(Schema),
-                "the shared _abc_impl should be Schema's own"
-            )
-
-        # The boundary: Info subclasses are unaffected on every interpreter, so
-        # nothing that dispatches on a *data* model is implicated in #439.
-        self.assertIsNot(
-            _abc_impl(Data_EndRecord), _abc_impl(Info),
-            'the data models were unaffected by #439 on both 3.10 and 3.14; if '
-            'that has changed, the scope of the defect is wider than recorded'
+            stale, [],
+            f'these entries of EXPECTED_FAILURES name cases that no longer '
+            f'exist; delete them, or fix the label'
         )
 
     def test_round_trip_is_identity_or_a_recorded_gap(self) -> None:
@@ -900,8 +740,6 @@ class OptionRoundTripTests(unittest.TestCase):
         """
         total = len(self.options.cases())
         recorded = len(EXPECTED_FAILURES)
-        if not SCHEMA_ABC_IS_PER_CLASS:
-            recorded += len(INTERPRETER_GAPS)
         self.assertLess(
             recorded, total // 2,
             f'{recorded} of {total} cases are recorded as failing; that is more '
